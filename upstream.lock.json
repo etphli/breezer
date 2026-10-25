@@ -1,0 +1,18 @@
+{
+  "release": "0.20.1.1",
+  "helium_macos": {
+    "repository": "https://github.com/imputnet/helium-macos.git",
+    "commit": "9aa975a56de8c2376d7c22f71da564b9426cda5f",
+    "path": "upstream/helium-macos"
+  },
+  "helium": {
+    "repository": "https://github.com/imputnet/helium.git",
+    "commit": "f29a25968e483f8bb85e47829ccd487bbe229199",
+    "path": "upstream/helium-macos/helium-chromium"
+  },
+  "macos_download": {
+    "architecture": "arm64",
+    "url": "https://github.com/imputnet/helium-macos/releases/download/0.20.1.1/helium_0.20.1.1_arm64-macos.dmg",
+    "sha256": "5a11718ea2237a1e59f2c84facf2166abdb80773399085d6cd7845d73f1d739a"
+  }
+}
