@@ -1,0 +1,17 @@
+{
+  "source_pull_request": "https://github.com/imputnet/helium/pull/471",
+  "source_head": "6df45b23f38807d9f3660f840d48ba520395e63f",
+  "source_author": "Jinwoo Lee",
+  "source_patch": "patches/helium/core/omnibox-suggestions.patch",
+  "source_patch_sha256": "83c116e19ab5c8e116c5bbcb62bd133df5cb79b71a2dde29728ac458ed48be59",
+  "chromium_version": "156.0.8078.47",
+  "helium_commit": "f29a25968e483f8bb85e47829ccd487bbe229199",
+  "helium_macos_commit": "9aa975a56de8c2376d7c22f71da564b9426cda5f",
+  "license": "GPL-3.0-only; underlying Chromium files retain their BSD notices",
+  "adaptations": [
+    "Current Lit Settings components and pref-key bindings",
+    "Per-query history preference check preserving exact URL navigation and off/on behavior",
+    "Existing provider test-fixture preference registration and new native/WebUI regression tests",
+    "Independent overlay; imported upstream files and tests remain unchanged"
+  ]
+}

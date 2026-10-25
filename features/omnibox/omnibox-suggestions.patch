@@ -1,0 +1,552 @@
+--- a/chrome/app/settings_strings.grdp
++++ b/chrome/app/settings_strings.grdp
+@@ -2386,6 +2386,18 @@
+     </message>
+     <message name="IDS_SETTINGS_SEARCH_MANAGE_SEARCH_ENGINES_AND_SITE_SEARCH" desc="Label for the Manage Search Engines and Site Search button.">
+       Manage search engines and site search
++    </message>
++    <message name="IDS_SETTINGS_ADDRESS_BAR" desc="Title of the settings page section which holds the address bar suggestion options.">
++      Address bar
++    </message>
++    <message name="IDS_SETTINGS_LOCAL_SUGGESTIONS" desc="Title of the subsection holding the options for suggestions that are generated locally.">
++      Local suggestions
++    </message>
++    <message name="IDS_SETTINGS_LOCAL_SUGGESTIONS_SHOW_HISTORY" desc="Label for the option to include browsing history in the locally generated address bar suggestions.">
++      Show browsing history
++    </message>
++    <message name="IDS_SETTINGS_LOCAL_SUGGESTIONS_SHOW_BOOKMARKS" desc="Label for the option to include bookmarks in the locally generated address bar suggestions.">
++      Show bookmarks
+     </message>
+     <message name="IDS_SETTINGS_SEARCH_SITE_SEARCH" desc="Label for 'Shortcuts for sites and search engines' section">
+       Shortcuts for sites and search engines
+--- a/chrome/browser/autocomplete/search_provider_unittest.cc
++++ b/chrome/browser/autocomplete/search_provider_unittest.cc
+@@ -61,6 +61,7 @@
+ #include "components/omnibox/browser/geolocation_header_service.h"
+ #include "components/omnibox/browser/history_url_provider.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_pref_names.h"
+ #include "components/omnibox/browser/omnibox_triggered_feature_service.h"
+ #include "components/omnibox/browser/remote_suggestions_service.h"
+ #include "components/omnibox/browser/zero_suggest_provider.h"
+@@ -934,6 +935,26 @@
+     EXPECT_TRUE(test_url_loader_factory_.IsPending(base::StrCat(
+         {"http://suggest_keyword/", base::EscapePath(test_case.input)})));
+   }
++}
++
++TEST_F(SearchProviderTest, BreezerHistorySuggestionsCanBeReenabled) {
++  const GURL history_url =
++      AddSearchToHistory(default_t_url_, u"breezer history query", 3);
++  profile_->BlockUntilHistoryProcessesPendingRequests();
++  AutocompleteMatch what_you_typed;
++  AutocompleteMatch history_match;
++  ASSERT_NO_FATAL_FAILURE(
++      QueryForInputAndSetWYTMatch(u"breezer", &what_you_typed));
++  ASSERT_TRUE(FindMatchWithDestination(history_url, &history_match));
++  profile_->GetPrefs()->SetBoolean(omnibox::kAutocompleteHistoryEnabled, false);
++  ASSERT_NO_FATAL_FAILURE(
++      QueryForInputAndSetWYTMatch(u"breezer history", &what_you_typed));
++  EXPECT_FALSE(FindMatchWithDestination(history_url, &history_match));
++  EXPECT_TRUE(what_you_typed.allowed_to_be_default_match);
++  profile_->GetPrefs()->SetBoolean(omnibox::kAutocompleteHistoryEnabled, true);
++  ASSERT_NO_FATAL_FAILURE(
++      QueryForInputAndSetWYTMatch(u"breezer", &what_you_typed));
++  EXPECT_TRUE(FindMatchWithDestination(history_url, &history_match));
+ }
+ 
+ TEST_F(SearchProviderTest, DontAutocompleteURLLikeTerms) {
+--- a/chrome/browser/extensions/api/settings_private/prefs_util.cc
++++ b/chrome/browser/extensions/api/settings_private/prefs_util.cc
+@@ -623,6 +623,10 @@
+       settings_api::PrefType::kDictionary;
+   (*s_allowlist)[::omnibox::kKeywordSpaceTriggeringEnabled] =
+       settings_api::PrefType::kBoolean;
++  (*s_allowlist)[::omnibox::kAutocompleteHistoryEnabled] =
++      settings_api::PrefType::kBoolean;
++  (*s_allowlist)[::omnibox::kAutocompleteBookmarkEnabled] =
++      settings_api::PrefType::kBoolean;
+   (*s_allowlist)[omnibox_everywhere::prefs::kOmniboxEverywhereEnabled] =
+       settings_api::PrefType::kBoolean;
+   (*s_allowlist)[omnibox_everywhere::prefs::kOmniboxEverywhereHotkey] =
+--- a/chrome/browser/resources/settings/search_page/search_page.css
++++ b/chrome/browser/resources/settings/search_page/search_page.css
+@@ -29,3 +29,11 @@
+ .search-engine-name {
+   margin-inline-end: auto;
+ }
++
++.indented-toggles {
++  padding-inline-end: 0;
++}
++
++.indented-toggles settings-toggle-button {
++  padding-inline-start: 0;
++}
+--- a/chrome/browser/resources/settings/search_page/search_page.html.ts
++++ b/chrome/browser/resources/settings/search_page/search_page.html.ts
+@@ -44,13 +44,6 @@
+         <div>${this.confirmationToastLabel_}</div>
+       </cr-toast>
+     </div>
+-    <settings-toggle-button id="searchSuggestToggle"
+-        class="hr"
+-        pref-key="search.suggest_enabled"
+-        label="$i18n{searchSuggestPref}"
+-        sub-label="$i18n{searchSuggestPrefDesc}">
+-    </settings-toggle-button>
+-
+     ${this.defaultSearchProviderDataPref_?.extensionId ? html`
+       ${this.searchSettingsUpdateEnabled_ ? html`
+         <div class="cr-row">
+@@ -88,5 +81,26 @@
+     ` : ''}
+   </div>
+ </settings-section>
++<settings-section page-title="$i18n{addressBarPageTitle}">
++  <settings-toggle-button id="searchSuggestToggle"
++      pref-key="search.suggest_enabled"
++      label="$i18n{searchSuggestPref}"
++      sub-label="$i18n{searchSuggestPrefDesc}">
++  </settings-toggle-button>
++  <div class="cr-row" id="localSuggestionsLabel">
++    $i18n{localSuggestions}
++  </div>
++  <div class="list-frame indented-toggles" role="group"
++      aria-labelledby="localSuggestionsLabel">
++    <settings-toggle-button id="localSuggestionsHistoryToggle"
++        pref-key="helium.omnibox.autocomplete.history_enabled"
++        label="$i18n{showLocalSuggestionsHistory}">
++    </settings-toggle-button>
++    <settings-toggle-button id="localSuggestionsBookmarksToggle" class="hr"
++        pref-key="helium.omnibox.autocomplete.bookmark_enabled"
++        label="$i18n{showLocalSuggestionsBookmarks}">
++    </settings-toggle-button>
++  </div>
++</settings-section>
+ <!--_html_template_end_-->`;
+ }
+--- a/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
++++ b/chrome/browser/ui/webui/settings/settings_localized_strings_provider.cc
+@@ -3301,6 +3301,12 @@
+       {"searchEnginesCancelButton", IDS_CANCEL},
+       {"searchEnginesConfirmationToastLabel",
+        IDS_SEARCH_ENGINE_CHOICE_SETTINGS_CONFIRMATION_TOAST_LABEL},
++      {"addressBarPageTitle", IDS_SETTINGS_ADDRESS_BAR},
++      {"localSuggestions", IDS_SETTINGS_LOCAL_SUGGESTIONS},
++      {"showLocalSuggestionsHistory",
++       IDS_SETTINGS_LOCAL_SUGGESTIONS_SHOW_HISTORY},
++      {"showLocalSuggestionsBookmarks",
++       IDS_SETTINGS_LOCAL_SUGGESTIONS_SHOW_BOOKMARKS},
+       {"defaultSearch", IDS_SETTINGS_DEFAULT_SEARCH},
+       {"searchActivate", IDS_SETTINGS_SEARCH_ACTIVATE},
+       {"searchDeactivate", IDS_SETTINGS_SEARCH_DEACTIVATE},
+--- a/chrome/test/data/webui/settings/search_page_test.ts
++++ b/chrome/test/data/webui/settings/search_page_test.ts
+@@ -22,6 +22,21 @@
+       key: 'default_search_provider_data.template_url_data',
+       type: chrome.settingsPrivate.PrefType.DICTIONARY,
+       value: {},
++    },
++    {
++      key: 'search.suggest_enabled',
++      type: chrome.settingsPrivate.PrefType.BOOLEAN,
++      value: true,
++    },
++    {
++      key: 'helium.omnibox.autocomplete.history_enabled',
++      type: chrome.settingsPrivate.PrefType.BOOLEAN,
++      value: true,
++    },
++    {
++      key: 'helium.omnibox.autocomplete.bookmark_enabled',
++      type: chrome.settingsPrivate.PrefType.BOOLEAN,
++      value: true,
+     },
+   ];
+ }
+@@ -102,6 +117,40 @@
+     page.remove();
+   });
+ 
++  test('BreezerLocalSuggestionPreferencesAreIndependent', async function() {
++    const historyToggle = page.shadowRoot.querySelector<HTMLElement>(
++        '#localSuggestionsHistoryToggle');
++    const bookmarkToggle = page.shadowRoot.querySelector<HTMLElement>(
++        '#localSuggestionsBookmarksToggle');
++    const searchToggle = page.shadowRoot.querySelector<HTMLElement>(
++        '#searchSuggestToggle');
++    if (!historyToggle || !bookmarkToggle || !searchToggle) {
++      throw new Error('An address-bar suggestion control is missing');
++    }
++    assertEquals('helium.omnibox.autocomplete.history_enabled',
++        historyToggle.getAttribute('pref-key'));
++    assertEquals('helium.omnibox.autocomplete.bookmark_enabled',
++        bookmarkToggle.getAttribute('pref-key'));
++    assertEquals('search.suggest_enabled', searchToggle.getAttribute('pref-key'));
++    historyToggle.click();
++    assertDeepEquals({
++      key: 'helium.omnibox.autocomplete.history_enabled',
++      value: false,
++    }, await prefsBrowserProxy.fakeApi.whenCalled('setPref'));
++    assertTrue((await prefsBrowserProxy.getPref(
++        'helium.omnibox.autocomplete.bookmark_enabled')).value);
++    assertTrue((await prefsBrowserProxy.getPref('search.suggest_enabled')).value);
++    prefsBrowserProxy.fakeApi.resetResolver('setPref');
++    bookmarkToggle.click();
++    assertDeepEquals({
++      key: 'helium.omnibox.autocomplete.bookmark_enabled',
++      value: false,
++    }, await prefsBrowserProxy.fakeApi.whenCalled('setPref'));
++    assertFalse((await prefsBrowserProxy.getPref(
++        'helium.omnibox.autocomplete.history_enabled')).value);
++    assertTrue((await prefsBrowserProxy.getPref('search.suggest_enabled')).value);
++  });
++
+   // Tests that the page is querying and displaying search engine info on
+   // startup.
+   test('Initialization', async function() {
+--- a/components/omnibox/browser/BUILD.gn
++++ b/components/omnibox/browser/BUILD.gn
+@@ -847,6 +847,7 @@
+     "//components/history_embeddings/core",
+     "//components/optimization_guide/core",
+     "//components/optimization_guide/proto:optimization_guide_proto",
++    "//components/pref_registry",
+     "//components/prefs:test_support",
+     "//components/resources",
+     "//components/saved_tab_groups/test_support",
+@@ -1000,6 +1001,7 @@
+     "//components/os_crypt/browser",
+     "//components/passage_embeddings/core",
+     "//components/passage_embeddings/core:test_support",
++    "//components/pref_registry",
+     "//components/prefs:test_support",
+     "//components/query_parser",
+     "//components/safe_browsing/core/common",
+--- a/components/omnibox/browser/autocomplete_provider_unittest.cc
++++ b/components/omnibox/browser/autocomplete_provider_unittest.cc
+@@ -364,13 +364,6 @@
+     base::flat_set<omnibox::SuggestSubtype> subtypes;
+   };
+ 
+-  void SetUp() override {
+-    omnibox::RegisterProfilePrefs(
+-        static_cast<sync_preferences::TestingPrefServiceSyncable*>(
+-            client_->GetPrefs())
+-            ->registry());
+-  }
+-
+   // Registers a test TemplateURL under the given keyword.
+   void RegisterTemplateURL(const std::u16string& keyword,
+                            const std::string& template_url,
+--- a/components/omnibox/browser/bookmark_provider.cc
++++ b/components/omnibox/browser/bookmark_provider.cc
+@@ -20,6 +20,7 @@
+ #include "components/omnibox/browser/keyword_provider.h"
+ #include "components/omnibox/browser/match_compare.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/omnibox_triggered_feature_service.h"
+ #include "components/omnibox/browser/page_classification_functions.h"
+ #include "components/omnibox/browser/scoring_functor.h"
+@@ -45,6 +46,10 @@
+                              bool minimal_changes) {
+   TRACE_EVENT0("omnibox", "BookmarkProvider::Start");
+   matches_.clear();
++
++  if (!client()->GetPrefs()->GetBoolean(omnibox::kAutocompleteBookmarkEnabled)) {
++    return;
++  }
+ 
+   // Tab search does not support bookmark suggestions.
+   if (input.current_page_classification() ==
+--- a/components/omnibox/browser/bookmark_provider_unittest.cc
++++ b/components/omnibox/browser/bookmark_provider_unittest.cc
+@@ -23,14 +23,17 @@
+ #include "components/bookmarks/test/test_bookmark_client.h"
+ #include "components/omnibox/browser/mock_autocomplete_provider_client.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_pref_names.h"
+ #include "components/omnibox/browser/test_scheme_classifier.h"
+ #include "components/omnibox/browser/titled_url_match_utils.h"
+ #include "components/omnibox/common/omnibox_features.h"
++#include "components/pref_registry/pref_registry_syncable.h"
+ #include "components/query_parser/query_parser.h"
+ #include "components/search_engines/search_engines_test_environment.h"
+ #include "components/search_engines/template_url.h"
+ #include "components/search_engines/template_url_service.h"
+ #include "components/search_engines/template_url_starter_pack_data.h"
++#include "components/sync_preferences/testing_pref_service_syncable.h"
+ #include "testing/gmock/include/gmock/gmock.h"
+ #include "testing/gtest/include/gtest/gtest.h"
+ #include "third_party/metrics_proto/omnibox_event.pb.h"
+@@ -201,6 +204,11 @@
+ 
+ void BookmarkProviderTest::SetUp() {
+   provider_client_ = std::make_unique<MockAutocompleteProviderClient>();
++  auto& prefs = search_engines_test_environment_.pref_service();
++  prefs.registry()->RegisterBooleanPref(omnibox::kAutocompleteBookmarkEnabled,
++                                      true);
++  ON_CALL(*provider_client_, GetPrefs())
++      .WillByDefault(testing::Return(&prefs));
+   ON_CALL(*provider_client_, GetBookmarkModel())
+       .WillByDefault(testing::Return(local_or_syncable_model_.get()));
+   ON_CALL(*provider_client_, GetSchemeClassifier())
+@@ -230,6 +238,16 @@
+                           TestSchemeClassifier());
+   provider_->Start(input, /*minimal_changes=*/false);
+   return provider_->matches().size();
++}
++
++TEST_F(BookmarkProviderTest, BreezerBookmarkSuggestionsCanBeReenabled) {
++  const size_t original_matches = GetNumMatches("abc");
++  ASSERT_GT(original_matches, 0u);
++  auto& prefs = search_engines_test_environment_.pref_service();
++  prefs.SetBoolean(omnibox::kAutocompleteBookmarkEnabled, false);
++  EXPECT_EQ(0u, GetNumMatches("abc"));
++  prefs.SetBoolean(omnibox::kAutocompleteBookmarkEnabled, true);
++  EXPECT_EQ(original_matches, GetNumMatches("abc"));
+ }
+ 
+ TEST_F(BookmarkProviderTest, Positions) {
+--- a/components/omnibox/browser/fake_autocomplete_controller.cc
++++ b/components/omnibox/browser/fake_autocomplete_controller.cc
+@@ -41,12 +41,6 @@
+     : AutocompleteController(std::make_unique<FakeAutocompleteProviderClient>(),
+                              AutocompleteControllerConfig{}),
+       task_environment_(task_environment) {
+-  omnibox::RegisterProfilePrefs(static_cast<PrefRegistrySimple*>(
+-      static_cast<FakeAutocompleteProviderClient*>(
+-          autocomplete_provider_client())
+-          ->GetPrefs()
+-          ->DeprecatedGetPrefRegistry()));
+-
+   providers_.push_back(base::MakeRefCounted<FakeAutocompleteProvider>(
+       AutocompleteProvider::Type::kBookmark));
+   providers_.push_back(base::MakeRefCounted<FakeAutocompleteProvider>(
+--- a/components/omnibox/browser/fake_autocomplete_provider_client.cc
++++ b/components/omnibox/browser/fake_autocomplete_provider_client.cc
+@@ -14,9 +14,13 @@
+ #include "components/history/core/browser/history_service.h"
+ #include "components/history/core/test/history_service_test_util.h"
+ #include "components/omnibox/browser/in_memory_url_index.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/shortcuts_backend.h"
++#include "components/pref_registry/pref_registry_syncable.h"
+ 
+ FakeAutocompleteProviderClient::FakeAutocompleteProviderClient() {
++  omnibox::RegisterProfilePrefs(
++      search_engines_test_enviroment_.pref_service().registry());
+   set_template_url_service(
+       search_engines_test_enviroment_.template_url_service());
+   document_suggestions_service_ =
+--- a/components/omnibox/browser/featured_search_provider_unittest.cc
++++ b/components/omnibox/browser/featured_search_provider_unittest.cc
+@@ -97,10 +97,6 @@
+     client_ = std::make_unique<FakeAutocompleteProviderClient>();
+     provider_ =
+         new FeaturedSearchProvider(client_.get(), /*show_iph_matches=*/true);
+-    omnibox::RegisterProfilePrefs(
+-        static_cast<sync_preferences::TestingPrefServiceSyncable*>(
+-            client_->GetPrefs())
+-            ->registry());
+   }
+   void TearDown() override { provider_ = nullptr; }
+ 
+--- a/components/omnibox/browser/history_fuzzy_provider.cc
++++ b/components/omnibox/browser/history_fuzzy_provider.cc
+@@ -35,7 +35,9 @@
+ #include "components/omnibox/browser/bookmark_provider.h"
+ #include "components/omnibox/browser/history_quick_provider.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/omnibox_triggered_feature_service.h"
++#include "components/prefs/pref_service.h"
+ #include "components/url_formatter/elide_url.h"
+ #include "third_party/metrics_proto/omnibox_event.pb.h"
+ #include "third_party/metrics_proto/omnibox_focus_type.pb.h"
+@@ -496,6 +498,10 @@
+                                  bool minimal_changes) {
+   TRACE_EVENT0("omnibox", "HistoryFuzzyProvider::Start");
+   matches_.clear();
++
++  if (!client()->GetPrefs()->GetBoolean(omnibox::kAutocompleteHistoryEnabled)) {
++    return;
++  }
+   if (input.IsZeroSuggest() ||
+       input.type() == metrics::OmniboxInputType::EMPTY) {
+     return;
+--- a/components/omnibox/browser/history_quick_provider.cc
++++ b/components/omnibox/browser/history_quick_provider.cc
+@@ -33,6 +33,7 @@
+ #include "components/omnibox/browser/keyword_provider.h"
+ #include "components/omnibox/browser/match_compare.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/omnibox_triggered_feature_service.h"
+ #include "components/omnibox/browser/page_classification_functions.h"
+ #include "components/omnibox/browser/url_prefix.h"
+@@ -62,6 +63,10 @@
+                                  bool minimal_changes) {
+   TRACE_EVENT0("omnibox", "HistoryQuickProvider::Start");
+   matches_.clear();
++
++  if (!client()->GetPrefs()->GetBoolean(omnibox::kAutocompleteHistoryEnabled)) {
++    return;
++  }
+   if (disabled_ || input.IsZeroSuggest() ||
+       input.type() == metrics::OmniboxInputType::EMPTY) {
+     return;
+--- a/components/omnibox/browser/history_url_provider.cc
++++ b/components/omnibox/browser/history_url_provider.cc
+@@ -38,6 +38,7 @@
+ #include "components/omnibox/browser/in_memory_url_index_types.h"
+ #include "components/omnibox/browser/keyword_provider.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/url_prefix.h"
+ #include "components/omnibox/browser/verbatim_match.h"
+ #include "components/prefs/pref_service.h"
+@@ -489,6 +490,12 @@
+ 
+   if (base::CommandLine::ForCurrentProcess()->HasSwitch("omnibox-autocomplete-filtering"))
+     return;
++
++  // Keep exact URL navigation available without querying browsing history.
++  // Read the preference for each query; the experiment flag is immutable.
++  if (!client()->GetPrefs()->GetBoolean(omnibox::kAutocompleteHistoryEnabled)) {
++    return;
++  }
+ 
+   // We'll need the history service to run both passes, so try to obtain it.
+   history::HistoryService* const history_service =
+--- a/components/omnibox/browser/history_url_provider_unittest.cc
++++ b/components/omnibox/browser/history_url_provider_unittest.cc
+@@ -35,6 +35,7 @@
+ #include "components/omnibox/browser/autocomplete_result.h"
+ #include "components/omnibox/browser/fake_autocomplete_provider_client.h"
+ #include "components/omnibox/browser/history_quick_provider.h"
++#include "components/omnibox/browser/omnibox_pref_names.h"
+ #include "components/omnibox/browser/verbatim_match.h"
+ #include "components/omnibox/common/omnibox_features.h"
+ #include "components/prefs/pref_service.h"
+@@ -428,6 +429,25 @@
+     EXPECT_EQ(ACMatchClassification::URL, classification_it->style);
+     EXPECT_EQ(post_match_offset, classification_it->offset);
+   }
++}
++
++TEST_F(HistoryURLProviderTest, BreezerHistorySuggestionsCanBeReenabled) {
++  const UrlAndLegalDefault expected[] = {
++      {"http://slashdot.org/favorite_page.html", false},
++      {"http://slashdot.org/", false}};
++  ASSERT_NO_FATAL_FAILURE(RunTest(u"slash", std::string(), true, expected));
++  client_->GetPrefs()->SetBoolean(omnibox::kAutocompleteHistoryEnabled, false);
++  const UrlAndLegalDefault fallback[] = {{"http://slash/", false}};
++  ASSERT_NO_FATAL_FAILURE(RunTest(u"slash", std::string(), true, fallback));
++  client_->GetPrefs()->SetBoolean(omnibox::kAutocompleteHistoryEnabled, true);
++  ASSERT_NO_FATAL_FAILURE(RunTest(u"slash", std::string(), true, expected));
++}
++
++TEST_F(HistoryURLProviderTest, BreezerHistoryOffPreservesExactUrlNavigation) {
++  client_->GetPrefs()->SetBoolean(omnibox::kAutocompleteHistoryEnabled, false);
++  const UrlAndLegalDefault expected[] = {{"https://example.com/path", true}};
++  ASSERT_NO_FATAL_FAILURE(
++      RunTest(u"https://example.com/path", std::string(), false, expected));
+ }
+ 
+ TEST_F(HistoryURLProviderTest, PromoteShorterURLs) {
+--- a/components/omnibox/browser/local_history_zero_suggest_provider.cc
++++ b/components/omnibox/browser/local_history_zero_suggest_provider.cc
+@@ -42,6 +42,7 @@
+ #include "components/omnibox/browser/zero_suggest_provider.h"
+ #include "components/omnibox/common/omnibox_feature_configs.h"
+ #include "components/omnibox/common/omnibox_features.h"
++#include "components/prefs/pref_service.h"
+ #include "components/search/search.h"
+ #include "components/search_engines/template_url_service.h"
+ #include "third_party/metrics_proto/omnibox_focus_type.pb.h"
+@@ -118,6 +119,10 @@
+                                             bool minimal_changes) {
+   TRACE_EVENT0("omnibox", "LocalHistoryZeroSuggestProvider::Start");
+   Stop(AutocompleteStopReason::kClobbered);
++
++  if (!client_->GetPrefs()->GetBoolean(omnibox::kAutocompleteHistoryEnabled)) {
++    return;
++  }
+   if (!AllowLocalHistoryZeroSuggestSuggestions(client_, input)) {
+     return;
+   }
+--- a/components/omnibox/browser/omnibox_pref_names.h
++++ b/components/omnibox/browser/omnibox_pref_names.h
+@@ -86,6 +86,15 @@
+ // omnibox.
+ inline constexpr char kShowSearchTools[] = "omnibox.show_search_tools";
+ 
++// Boolean that specifies whether browsing history suggestions are shown in the
++// omnibox.
++inline constexpr char kAutocompleteHistoryEnabled[] =
++    "helium.omnibox.autocomplete.history_enabled";
++
++// Boolean that specifies whether bookmark suggestions are shown in the omnibox.
++inline constexpr char kAutocompleteBookmarkEnabled[] =
++    "helium.omnibox.autocomplete.bookmark_enabled";
++
+ // How many times the various IPH suggestions were shown.
+ inline constexpr char kShownCountEnterpriseSearchAggregatorIph[] =
+     "omnibox.shown_count_enterprise_search_aggregator_iph";
+--- a/components/omnibox/browser/omnibox_prefs.cc
++++ b/components/omnibox/browser/omnibox_prefs.cc
+@@ -31,6 +31,9 @@
+       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
+   registry->RegisterBooleanPref(
+       kShowSearchTools, true, user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
++
++  registry->RegisterBooleanPref(omnibox::kAutocompleteHistoryEnabled, true);
++  registry->RegisterBooleanPref(omnibox::kAutocompleteBookmarkEnabled, true);
+ 
+   registry->RegisterBooleanPref(omnibox::kDismissedGeminiIph, false);
+   registry->RegisterBooleanPref(
+--- a/components/omnibox/browser/search_provider.cc
++++ b/components/omnibox/browser/search_provider.cc
+@@ -44,6 +44,7 @@
+ #include "components/omnibox/browser/autocomplete_result.h"
+ #include "components/omnibox/browser/keyword_provider.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/omnibox_triggered_feature_service.h"
+ #include "components/omnibox/browser/page_classification_functions.h"
+ #include "components/omnibox/browser/remote_suggestions_service.h"
+@@ -684,6 +685,10 @@
+ void SearchProvider::DoHistoryQuery(bool minimal_changes) {
+   if (base::CommandLine::ForCurrentProcess()->HasSwitch("omnibox-autocomplete-filtering"))
+     return;
++
++  if (!client()->GetPrefs()->GetBoolean(omnibox::kAutocompleteHistoryEnabled)) {
++    return;
++  }
+ 
+   // The history query results are synchronous, so if minimal_changes is true,
+   // we still have the last results and don't need to do anything.
+--- a/components/omnibox/browser/shortcuts_provider.cc
++++ b/components/omnibox/browser/shortcuts_provider.cc
+@@ -36,6 +36,7 @@
+ #include "components/omnibox/browser/history_cluster_provider.h"
+ #include "components/omnibox/browser/history_url_provider.h"
+ #include "components/omnibox/browser/omnibox_field_trial.h"
++#include "components/omnibox/browser/omnibox_prefs.h"
+ #include "components/omnibox/browser/omnibox_triggered_feature_service.h"
+ #include "components/omnibox/browser/url_prefix.h"
+ #include "components/omnibox/common/omnibox_feature_configs.h"
+@@ -216,6 +217,10 @@
+                               bool minimal_changes) {
+   TRACE_EVENT0("omnibox", "ShortcutsProvider::Start");
+   matches_.clear();
++
++  if (!client_->GetPrefs()->GetBoolean(omnibox::kAutocompleteHistoryEnabled)) {
++    return;
++  }
+ 
+   if (input.IsZeroSuggest() ||
+       input.type() == metrics::OmniboxInputType::EMPTY ||
