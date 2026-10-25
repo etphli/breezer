@@ -29,6 +29,14 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Fingerprint source before tests create generated files
+        id: inputs
+        env:
+          NATIVE_INPUT_HASH: ${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}
+          EXTENSION_INPUT_HASH: ${{ hashFiles('features/ai/extension/**') }}
+        run: |
+          echo "native=$NATIVE_INPUT_HASH" >> "$GITHUB_OUTPUT"
+          echo "extension=$EXTENSION_INPUT_HASH" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
@@ -58,12 +66,10 @@ jobs:
           path: |
             build/helium-macos/build/src
             build/helium-macos/build/.breezer-prepared
-          key: breezer-macos-resources-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ hashFiles('features/ai/extension/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: breezer-macos-resources-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.extension }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            breezer-macos-resources-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ hashFiles('features/ai/extension/**') }}-
-            breezer-macos-resources-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
-            breezer-macos-ai-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/extension/**', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
-            breezer-macos-dev-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
+            breezer-macos-resources-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.extension }}-
+            breezer-macos-resources-${{ steps.inputs.outputs.native }}-
             ${{ inputs.checkpoint_cache_key }}
       - name: Compile Breezer from source
         id: compile

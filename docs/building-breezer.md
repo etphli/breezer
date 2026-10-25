@@ -12,7 +12,7 @@ Run the workflow from GitHub Actions. It verifies the source, prepares the brows
 
 The workflow saves compilation progress before GitHub's job time limit. If the run reports a saved checkpoint, rerun the workflow to resume. A full Chromium build can need several runs. The hosted environment has passed its Xcode and resource checks; a complete Breezer browser build is still unverified.
 
-Hosted builds use a development configuration with profile-guided optimization and debug symbols disabled. They compile the same browser source and retain the tests. They are not notarized public releases.
+Hosted builds use a development configuration with profile-guided optimization, debug symbols, and precompiled headers disabled. The pinned compiler treats the precompiled-header command's module name as a C++ module interface and fails on Chromium's header. Compiling those headers normally avoids that toolchain failure. These builds compile the same browser source and retain the tests. They are not notarized public releases.
 
 ## Prepare the build Mac
 

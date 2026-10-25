@@ -108,6 +108,7 @@ if [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 ]]; then
 is_official_build = false
 chrome_pgo_phase = 0
 symbol_level = 0
+enable_precompiled_headers = false
 GN
 fi
 gn_gen
