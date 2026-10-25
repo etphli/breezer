@@ -1,0 +1,106 @@
+name: Build Breezer for Apple Silicon
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: breezer-macos-arm64
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 360
+    env:
+      BREEZER_BUILD_JOBS: '2'
+      BREEZER_DEVELOPMENT_BUILD: '1'
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: upstream/helium-macos/helium-chromium/.python-version
+      - name: Prepare build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          xcodebuild -checkFirstLaunchStatus
+          brew install coreutils wget zstd readline
+          python -m venv .venv
+          .venv/bin/python -m pip install -r upstream/helium-macos/helium-chromium/.requirements.txt
+          if ! xcrun --find metal >/dev/null 2>&1; then
+            xcodebuild -downloadComponent MetalToolchain
+          fi
+          ./script/build_and_run.sh --check
+          df -h .
+      - name: Verify imported source and tests
+        run: |
+          .venv/bin/python script/verify_upstream.py
+          .venv/bin/python -m pytest -c upstream/helium-macos/helium-chromium/devutils/pytest.ini upstream/helium-macos/helium-chromium/devutils/tests
+      - name: Restore compilation progress
+        id: restore
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            build/helium-macos/build/src
+            build/helium-macos/build/.breezer-prepared
+          key: breezer-macos-dev-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            breezer-macos-dev-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
+      - name: Compile Breezer from source
+        id: compile
+        shell: bash
+        run: |
+          set +e
+          gtimeout --signal=INT --kill-after=60s 270m ./script/build_and_run.sh --build-only
+          result=$?
+          echo "exit_code=$result" >> "$GITHUB_OUTPUT"
+          if [[ "$result" -ne 0 && "$result" -ne 124 ]]; then
+            exit "$result"
+          fi
+      - name: Save compilation progress
+        if: always() && hashFiles('build/helium-macos/build/.breezer-prepared') != ''
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            build/helium-macos/build/src
+            build/helium-macos/build/.breezer-prepared
+          key: ${{ steps.restore.outputs.cache-primary-key }}
+      - name: Smoke-test the compiled browser
+        if: steps.compile.outputs.exit_code == '0'
+        shell: bash
+        run: |
+          set -euo pipefail
+          browser=build/helium-macos/build/src/out/Default/Breezer.app/Contents/MacOS/Breezer
+          gtimeout 60s "$browser" --headless --disable-gpu --no-first-run \
+            --user-data-dir="$RUNNER_TEMP/breezer-smoke" --dump-dom \
+            'data:text/html,<title>Breezer smoke test</title><p>Breezer browser is running</p>' \
+            > "$RUNNER_TEMP/breezer-smoke.html"
+          grep -F 'Breezer browser is running' "$RUNNER_TEMP/breezer-smoke.html"
+      - name: Package the source-built app
+        if: steps.compile.outputs.exit_code == '0'
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/helium-macos/build/src/out/Default/Breezer.app dist/Breezer-arm64.zip
+          shasum -a 256 dist/Breezer-arm64.zip > dist/Breezer-arm64.zip.sha256
+      - name: Upload Breezer app
+        if: steps.compile.outputs.exit_code == '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Breezer-arm64
+          path: dist/Breezer-arm64.zip*
+          retention-days: 1
+          compression-level: 0
+      - name: Report saved checkpoint
+        if: steps.compile.outputs.exit_code == '124'
+        run: |
+          echo 'The build reached its time limit. Rerun this workflow to resume saved compilation progress.'
+          exit 1
