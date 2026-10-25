@@ -10,6 +10,14 @@
     "commit": "f29a25968e483f8bb85e47829ccd487bbe229199",
     "path": "upstream/helium-macos/helium-chromium"
   },
+  "documentation_overrides": {
+    "upstream/helium-macos/README.md": "docs/upstream-originals/macos.md",
+    "upstream/helium-macos/helium-chromium/README.md": "docs/upstream-originals/shared-browser.md",
+    "upstream/helium-macos/helium-chromium/devutils/README.md": "docs/upstream-originals/development-tools.md",
+    "upstream/helium-macos/helium-chromium/devutils/third_party/README.md": "docs/upstream-originals/development-dependencies.md",
+    "upstream/helium-macos/helium-chromium/i18n/README.md": "docs/upstream-originals/translations.md",
+    "upstream/helium-macos/helium-chromium/utils/third_party/README.md": "docs/upstream-originals/build-dependencies.md"
+  },
   "macos_download": {
     "architecture": "arm64",
     "url": "https://github.com/imputnet/helium-macos/releases/download/0.20.1.1/helium_0.20.1.1_arm64-macos.dmg",

@@ -1,36 +1,21 @@
-# helium-macos
-macOS packaging & development tooling for the
-[Helium Browser](https://github.com/imputnet/helium).
+# Breezer for macOS
 
-## Building and development
-macOS is our primary development platform, so it's the recommended environment
-for developing new Helium features.
+The macOS build foundation for [Breezer](../../README.md), Ethan's personal browser.
 
-[> See docs/building.md](docs/building.md)
+This directory contains platform build scripts, packaging resources, and macOS patches. Shared browser source is embedded in [helium-chromium](helium-chromium). That internal directory name keeps the inherited build tools compatible.
 
-## Contributing
-Before contributing to this repo, please read the guidelines in the main repo's
-[CONTRIBUTING.md](https://github.com/imputnet/helium/blob/main/CONTRIBUTING.md).
+## Build and test
 
-## Credits
+Start with the [Breezer build guide](../../docs/building-breezer.md). A full Xcode 26 installation is required. The installed Breezer app must come from Breezer's source build.
 
-### Depot
-Big thank you to [Depot](https://depot.dev/) for sponsoring our runners,
-which handle the macOS builds of Helium. Their high-performance infrastructure
-lets us compile, package, and release new builds of Helium within hours,
-not days.
+From the repository root, run the complete inherited test suite:
 
-### ungoogled-chromium-macos
-This repo is based on
-[ungoogled-chromium-macos](https://github.com/ungoogled-software/ungoogled-chromium-macos),
-but heavily modified for Helium. Special thanks to everyone behind
-ungoogled-chromium, they made working with Chromium infinitely easier.
+```sh
+.venv/bin/python script/check_helium.py
+```
 
-## License
-All code, patches, modified portions of imported code or patches, and
-any other content that is unique to Helium and not imported from other
-repositories is licensed under GPL-3.0. See [LICENSE](LICENSE).
+## Foundation and licensing
 
-Any content imported from other projects retains its original license (for
-example, any original unmodified code imported from ungoogled-chromium remains
-licensed under their [BSD 3-Clause license](LICENSE.ungoogled_chromium)).
+This foundation comes from [Helium for macOS](https://github.com/imputnet/helium-macos), which builds on ungoogled-chromium-macos and Chromium. The existing tests, build tools, and licence notices are retained.
+
+Helium-authored code is GPL-3.0. Imported third-party code retains its original licences. See [LICENSE](LICENSE) and [LICENSE.ungoogled_chromium](LICENSE.ungoogled_chromium). The [original upstream overview](../../docs/upstream-originals/macos.md) remains available for reference.

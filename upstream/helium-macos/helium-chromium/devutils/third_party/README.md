@@ -1,6 +1,7 @@
-This directory contains third-party libraries used by devutils.
+# Third-party libraries for Breezer development tools
 
-Contents:
+These dependencies support Breezer's inherited development tools:
 
-* [python-unidiff](https://github.com/matiasb/python-unidiff)
-    * For parsing and modifying unified diffs.
+- [python-unidiff](https://github.com/matiasb/python-unidiff) parses and modifies unified diffs.
+
+The libraries belong to their respective authors and retain their original licence and copyright notices. Inclusion in Breezer does not change their ownership or licence.
