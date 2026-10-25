@@ -17,7 +17,6 @@ import tempfile
 import xml.etree.ElementTree as xml
 
 import apply_breezer_ai as ai
-import apply_breezer_branding as branding
 import apply_breezer_omnibox as omnibox
 import check_ai_overlay as ai_check
 
@@ -127,6 +126,8 @@ def check(tree, grit_directory):
     paths = omnibox.sections()
     assert not set(paths).intersection(ai.PATCHED_FILES), "Coordinate any shared AI targets before porting"
     if grit_directory:
+        import apply_breezer_branding as branding
+
         (tree / "tools").mkdir(exist_ok=True)
         (tree / "tools/grit").symlink_to(grit_directory, target_is_directory=True)
         branding.brand_strings(tree)
