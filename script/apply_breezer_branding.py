@@ -7,9 +7,10 @@ import json
 from pathlib import Path
 import re
 import shutil
-import struct
 import subprocess
 import sys
+
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -134,6 +135,28 @@ def scale(logo, size, target):
     )
 
 
+def brand_resource_png(logo, target):
+    with Image.open(target) as original:
+        width, height = original.size
+    with Image.open(logo) as source:
+        icon = ImageOps.contain(source.convert("RGBA"), (height, height), Image.Resampling.LANCZOS)
+    canvas = Image.new("RGBA", (width, height))
+    if width == height:
+        canvas.alpha_composite(icon, ((width - icon.width) // 2, (height - icon.height) // 2))
+    else:
+        # These inherited slots contain a wide product wordmark, not an app icon.
+        font = ImageFont.load_default(size=max(10, round(height * 0.62)))
+        draw = ImageDraw.Draw(canvas)
+        bounds = draw.textbbox((0, 0), "Breezer", font=font)
+        text_width, text_height = bounds[2] - bounds[0], bounds[3] - bounds[1]
+        gap = max(3, height // 5)
+        left = max(0, (width - icon.width - gap - text_width) // 2)
+        canvas.alpha_composite(icon, (left, (height - icon.height) // 2))
+        color = "white" if "white" in target.name else "#182c31"
+        draw.text((left + icon.width + gap, (height - text_height) // 2 - bounds[1]), "Breezer", font=font, fill=color)
+    canvas.save(target)
+
+
 def brand_icons(tree):
     logo = ROOT / "assets/branding/breezer-logo.png"
     output = ROOT / "build/branding"
@@ -170,10 +193,7 @@ def brand_icons(tree):
         header = target.read_bytes()[:24]
         if header[:8] != b"\x89PNG\r\n\x1a\n":
             raise ValueError(f"Expected a PNG branding target: {target}")
-        width, height = struct.unpack(">II", header[16:24])
-        if width != height:
-            raise ValueError(f"Expected a square branding target: {target}")
-        scale(logo, width, target)
+        brand_resource_png(logo, target)
 
 
 def main():

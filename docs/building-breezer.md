@@ -42,11 +42,13 @@ Run from the Breezer repository root:
 ./script/build_and_run.sh --build-only
 ```
 
-The command verifies the source snapshot and creates a build copy under `build/helium-macos`. It uses the inherited tools to download Chromium, apply patches, and prepare resources. Breezer branding is applied to that prepared source before compilation, including the product name, bundle identifier, profile directory, Keychain names, translated interface strings, and app icons.
+The command verifies the source snapshot and creates a build copy under `build/helium-macos`. It uses the inherited tools to download Chromium, apply patches, and prepare resources. Breezer branding is applied to that prepared source before compilation, including the product name, bundle identifier, profile directory, Keychain names, translated interface strings, and app icons. The AI overlay then adds the built-in side panel, native Command K binding, resources, and private native-host lookup. Its resource PAK is checked with the pinned Chromium GRIT tools.
 
-Retries reuse a fully prepared source tree and its compiled output when the inputs match. Set `BREEZER_BUILD_DIR` to use another build directory. Set `BREEZER_BUILD_JOBS` to change the default limit of two compiler jobs.
+Retries reuse a fully prepared source tree and its compiled output when the inputs match. A matching prepared browser from before the AI overlay can receive that overlay while retaining its compiled objects. Other changed preparation inputs require a separate `BREEZER_BUILD_DIR`. Set `BREEZER_BUILD_JOBS` to change the default limit of two compiler jobs.
 
 The output is `build/helium-macos/build/src/out/Default/Breezer.app`. The upstream source and tests in the repository stay intact. Helium services and upstream attribution keep their real names.
+
+Before signing, the build packages the AI host and a checksum-pinned Node runtime, including its licence, inside the framework resources. The resulting app does not need a system Node installation. Using AI requires an installed, signed-in Codex or Claude CLI. Provider credentials remain with those CLIs. See the [sidebar guide](ai-sidebar.md) for configuration and verification.
 
 The local build uses an ad hoc signature. It is not a notarized public release. Public distribution requires Breezer's own Apple signing identity and a verified packaging and notarization process.
 

@@ -53,8 +53,9 @@ jobs:
           path: |
             build/helium-macos/build/src
             build/helium-macos/build/.breezer-prepared
-          key: breezer-macos-dev-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: breezer-macos-ai-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/extension/**', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            breezer-macos-ai-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/extension/**', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
             breezer-macos-dev-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
       - name: Compile Breezer from source
         id: compile

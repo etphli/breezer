@@ -20,13 +20,44 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version-file: upstream/helium-macos/helium-chromium/.python-version
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24.22.1'
       - name: Verify complete upstream import
         run: python script/verify_upstream.py
       - name: Check build script syntax
         run: |
           bash -n script/build_and_run.sh
-          python -m py_compile script/apply_breezer_branding.py script/check_branding.py
+          bash -n features/ai/host/launch.sh
+          python -m py_compile script/apply_breezer_branding.py script/check_branding.py script/apply_breezer_ai.py script/package_breezer_ai.py
+      - name: Verify AI packaging boundaries
+        run: |
+          python script/check_ai_packaging.py
+          python tests/ai/overlay_test.py
+      - name: Test AI browser controls and CLI protocol
+        run: node --test tests/ai/*.test.mjs
+      - name: Verify native AI source integration
+        run: python script/check_ai_overlay.py
       - name: Install upstream test dependencies
         run: python -m pip install -r upstream/helium-macos/helium-chromium/.requirements.txt
       - name: Run all imported tests and configuration checks
         run: python script/check_helium.py
+      - name: Install browser verification dependencies
+        working-directory: tests/ai
+        run: |
+          npm ci --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Verify sidebar and visible browser control
+        env:
+          BREEZER_AI_EVIDENCE: ${{ runner.temp }}/breezer-ai-evidence
+        run: |
+          node tests/ai/panel-browser.mjs
+          node tests/ai/browser-page.mjs
+      - name: Upload AI verification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: breezer-ai-ui-verification
+          path: ${{ runner.temp }}/breezer-ai-evidence/*.png
+          if-no-files-found: ignore
+          retention-days: 7

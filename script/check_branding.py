@@ -8,6 +8,8 @@ import sys
 import tempfile
 import xml.etree.ElementTree as xml
 
+from PIL import Image
+
 import apply_breezer_branding as branding
 
 
@@ -69,7 +71,20 @@ def main():
         assert (onboarding / "public/breezer-logo.png").read_bytes() == (
             branding.ROOT / "assets/branding/breezer-logo.png"
         ).read_bytes()
-    print("PASS: product strings, translated fingerprints, service credits, setup artwork, and repeatability.")
+        for name in ("product_logo.png", "product_logo_white.png", "product_logo_200.png"):
+            source = branding.CORE / "resources/branding" / name
+            target = tree / name
+            target.write_bytes(source.read_bytes())
+            with Image.open(source) as original:
+                original_size = original.size
+            branding.brand_resource_png(branding.ROOT / "assets/branding/breezer-logo.png", target)
+            with Image.open(target) as result:
+                assert result.size == original_size, "Wide wordmark dimensions must stay unchanged."
+                assert result.getbbox(), "The product wordmark must contain visible artwork."
+            before = target.read_bytes()
+            branding.brand_resource_png(branding.ROOT / "assets/branding/breezer-logo.png", target)
+            assert before == target.read_bytes(), "PNG branding is not repeatable."
+    print("PASS: product strings, translated fingerprints, service credits, setup artwork, wide wordmarks, and repeatability.")
 
 
 if __name__ == "__main__":

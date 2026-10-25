@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Breezer assistant</title>
+  <link rel="stylesheet" href="panel.css">
+</head>
+<body>
+  <div class="panel">
+    <header class="toolbar">
+      <div class="brand"><img src="icon128.png" width="26" height="26" alt=""><span>Breezer</span></div>
+      <div class="toolbar-actions">
+        <button id="new-chat" class="icon-button" title="New conversation" aria-label="New conversation"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button id="open-profile" class="profile-button" title="Your context" aria-label="Edit your personal context">E</button>
+      </div>
+    </header>
+
+    <main id="conversation" class="conversation" tabindex="-1" aria-label="Conversation">
+      <section id="welcome" class="welcome">
+        <div class="welcome-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M12 25c0-8 7-14 16-14M12 25c0 8 6 13 13 13 8 0 13-6 13-13 0-6-4-10-10-10-5 0-9 4-9 9 0 4 3 7 7 7"/></svg></div>
+        <h1>What are we working on,<br><span id="greeting-name">Ethan</span>?</h1>
+        <p class="welcome-note">A question, a closer look, or a little help getting something done.</p>
+        <div class="suggestions">
+          <button data-prompt="Summarize this page. What should I take away from it?"><svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h8"/></svg><span>Summarize this page</span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+          <button data-prompt="Help me find an answer on this page: "><svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg><span>Find an answer here</span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+          <button data-prompt="Help me with this page. I want to " data-control="true"><svg viewBox="0 0 24 24"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Help me do something</span><span class="suggestion-arrow" aria-hidden="true">↗</span></button>
+        </div>
+      </section>
+      <div id="messages" class="messages" role="log" aria-label="Messages" aria-live="polite" aria-relevant="additions"></div>
+    </main>
+
+    <div id="activity" class="activity" role="status" hidden><span class="activity-dot"></span><span id="activity-label">Thinking</span><button id="activity-stop">Stop</button></div>
+    <div id="notice" class="notice" role="status" hidden><span id="notice-text"></span><button id="dismiss-notice" aria-label="Dismiss message">×</button></div>
+
+    <footer class="compose-area">
+      <div class="context-row">
+        <button id="context-toggle" class="context-chip" aria-pressed="true" title="Include the current page and a screenshot with your message">
+          <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
+          <span id="context-title">Current page</span><span id="context-check" aria-hidden="true">✓</span>
+        </button>
+        <span id="context-hint" class="context-hint">Page + screenshot</span>
+      </div>
+      <form id="composer" class="composer">
+        <label for="prompt" class="sr-only">Message Breezer</label>
+        <textarea id="prompt" rows="2" maxlength="24000" placeholder="Ask about this page…" autocomplete="off" spellcheck="true"></textarea>
+        <div class="composer-tools">
+          <button type="button" id="control-toggle" class="control-toggle" aria-pressed="false" title="Allow actions in this tab during the next reply"><svg viewBox="0 0 24 24"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Browser control</span><span class="switch" aria-hidden="true"></span></button>
+          <button type="submit" id="send" class="send-button" aria-label="Send message" title="Send message" disabled><svg id="send-arrow" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></svg><span id="send-stop" hidden></span></button>
+        </div>
+      </form>
+      <div class="bottom-row">
+        <button id="model-button" class="model-button" aria-haspopup="dialog" aria-expanded="false"><span id="provider-dot" class="provider-dot"></span><span id="model-label">Connecting your accounts</span><svg viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></button>
+        <span class="shortcut" aria-label="Command K toggles the assistant">⌘ K</span>
+      </div>
+      <section id="model-menu" class="model-menu" role="dialog" aria-label="Choose a model" hidden>
+        <div class="menu-heading"><span>Your models</span><button id="refresh-models" class="text-button">Refresh</button></div>
+        <div id="model-options"></div>
+        <p class="menu-note">Uses your signed-in Codex or Claude account.</p>
+      </section>
+    </footer>
+  </div>
+
+  <dialog id="profile-dialog" aria-labelledby="profile-title">
+    <form id="profile-form">
+      <div class="dialog-heading"><h2 id="profile-title">A little about you</h2><button type="button" id="close-profile" class="icon-button" aria-label="Close personal context">×</button></div>
+      <p>Give Breezer the context you'd like it to remember.</p>
+      <label for="profile-name">Your name</label>
+      <input id="profile-name" maxlength="80" autocomplete="given-name">
+      <label for="profile-context">What should Breezer know?</label>
+      <textarea id="profile-context" rows="6" maxlength="6000" placeholder="Your work, preferences, or how you like things explained…"></textarea>
+      <p class="privacy-note">Saved in this browser. Included with your messages to the provider you choose.</p>
+      <button type="submit" class="save-button">Save context</button>
+    </form>
+  </dialog>
+  <script type="module" src="panel.js"></script>
+</body>
+</html>

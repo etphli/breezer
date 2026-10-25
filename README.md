@@ -14,7 +14,9 @@ Breezer aims to reduce startup time, memory use, and energy use while making eve
 
 ## Current status
 
-The browser foundation and logo are in place. A proper Breezer app must be compiled from this repository with its own product identity. A renamed upstream download is not a Breezer release.
+The browser foundation, logo, and first AI sidebar implementation are in place. The sidebar connects your signed-in Codex or Claude CLI, shows current-page context and screenshots, remembers your saved personal context, and provides visible browser control. Its default is GPT-6.1 Sol when your Codex account reports that model. Read the [AI sidebar guide](docs/ai-sidebar.md).
+
+The sidebar UI, browser-control code, and both CLI tool loops have been checked separately. Native component loading and Command K still need verification in a compiled Breezer app.
 
 Source builds can run on a Mac with full Xcode or through the configured GitHub-hosted Mac workflow. No compiled Breezer release is available yet.
 

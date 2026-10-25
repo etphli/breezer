@@ -1,0 +1,9 @@
+{
+  "name": "breezer-ai-browser-checks",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "playwright": "1.64.1",
+    "pngjs": "7.0.0"
+  }
+}
