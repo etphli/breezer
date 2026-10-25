@@ -34,6 +34,9 @@ BREEZER_PYTHON="${BREEZER_PYTHON:-$BREEZER_ROOT/.venv/bin/python}"
 if [[ ! -x "$BREEZER_PYTHON" ]]; then
   echo "Create the .venv environment described in docs/building-breezer.md." >&2
   BREEZER_MISSING=1
+elif ! "$BREEZER_PYTHON" -c 'from enum import StrEnum' 2>/dev/null; then
+  echo "Chromium's build tools require Python 3.11 or newer. Recreate the build environment with Python 3.11." >&2
+  BREEZER_MISSING=1
 elif ! "$BREEZER_PYTHON" -c 'import requests; import PIL' 2>/dev/null; then
   echo "Install the upstream Python dependencies into .venv." >&2
   BREEZER_MISSING=1

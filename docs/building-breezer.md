@@ -22,11 +22,13 @@ Install the inherited build dependencies:
 
 ```sh
 brew install coreutils wget zstd readline
-python3.10 -m venv .venv
+python3.11 -m venv .venv
 .venv/bin/python -m pip install -r upstream/helium-macos/helium-chromium/.requirements.txt
 ```
 
 Install the Metal toolchain if Xcode requests it. The [upstream build reference](../upstream/helium-macos/docs/building.md) lists the full toolchain requirements. Browser source downloads and compilation need substantial disk space and time.
+
+Use Python 3.11 for the native build. The pinned Chromium build tools use `enum.StrEnum`, which is unavailable in the imported project's older Python 3.10 test environment.
 
 Check the available tools before downloading Chromium:
 
@@ -54,15 +56,35 @@ The local build uses an ad hoc signature. It is not a notarized public release. 
 
 ## Install and launch
 
-After prerequisites are available, build and install the source-built app:
+To install a completed hosted build, install [GitHub CLI](https://cli.github.com/) and sign in with `gh auth login`. Supply the successful workflow run ID and its full commit SHA:
+
+```sh
+python3 script/install_breezer.py --run-id RUN_ID --commit FULL_40_CHARACTER_COMMIT_SHA
+```
+
+The installer requires an Apple Silicon Mac. It checks that the run succeeded in `etphli/breezer`, used `build-breezer-macos.yml`, and compiled exactly the supplied commit. A run that is still compiling, failed, or only saved a checkpoint cannot be installed. The run must contain one unexpired `Breezer-arm64` artifact. Use this repository's matching runtime pin when installing an older build.
+
+Before replacement, the installer verifies the browser ZIP's SHA-256, rejects unsafe ZIP paths and symlinks, and extracts with macOS `ditto`. It checks Breezer's bundle identity, native Apple Silicon browser and framework executables, private AI host and manifest, bundled Node runtime lock and licence, and strict deep code signature. These development builds use ad hoc signing and are not notarized releases. The installer does not alter quarantine attributes or bypass macOS launch checks.
+
+The default destination is `~/Applications/Breezer.app`. Quit an existing Breezer before replacing it. The installer retains the previous app under `~/Applications/.Breezer-backups/` with a unique name and restores it if replacement validation or receipt creation fails. To restore a backup later, quit Breezer and move the retained app back to `~/Applications/Breezer.app`. Profiles stay in `~/Library/Application Support/io.github.etphli.breezer` and are not modified by installation.
+
+An installation receipt records the run, commit, artifact, archive checksum, and backup path in `~/Library/Application Support/io.github.etphli.breezer-installer/receipts/`, outside the signed app. The default command launches Breezer and checks for its browser process. Use `--no-launch` to install without opening it, or `--destination /path/to/Breezer.app` for another location. If macOS blocks launch or no process is observed, the validated app and receipt remain installed and the command reports launch verification failure.
+
+After local build prerequisites are available, build and install the source-built app:
 
 ```sh
 ./script/build_and_run.sh --install
 ```
 
-The destination is `~/Applications/Breezer.app`. An existing app at that path is backed up before replacement. Breezer uses its own profile directory, `~/Library/Application Support/io.github.etphli.breezer`.
+The local build command uses `~/Applications/Breezer.app` and backs up an existing app before replacement. Its default mode builds and launches without installing. `--verify` also checks that the Breezer process starts. `--debug` opens the debugger, and `--logs` streams runtime logs.
 
-The default command builds and launches without installing. `--verify` also checks that the Breezer process starts. `--debug` opens the debugger, and `--logs` streams runtime logs.
+Run the installer's synthetic unit checks without downloading or installing a browser:
+
+```sh
+python3 script/check_breezer_installer.py
+```
+
+Those checks cover run and artifact refusals, checksum and ZIP safety, bundle validation calls, replacement rollback, and concurrent installation. They do not establish that a compiled Breezer app launches or that a real app signature passes.
 
 ## Tests
 
