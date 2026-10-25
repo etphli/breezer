@@ -37,6 +37,7 @@ def main():
         (tree / "messages.xtb").write_text(xml.tostring(translations, encoding="unicode"))
 
         branding.brand_strings(tree)
+        assert not (tree / "messages.grdp").read_text().startswith("<?xml"), "GRDP fragments must retain their original header format."
         messages = xml.parse(tree / "messages.grdp").getroot()
         translated = xml.parse(tree / "messages.xtb").getroot()
         assert messages[0].text == "Meet Breezer"

@@ -89,8 +89,11 @@ def brand_strings(tree):
         utility.add_grit_to_path(tree)
         results = []
         for path in substitution.get_substitutable_files(tree, ["grd", "grdp"]):
+            fragment_without_declaration = path.suffix == ".grdp" and not path.read_text().lstrip().startswith("<?xml")
             result = substitution.substitute_grit_file((path, tree, False, False))
             if result is not None:
+                if fragment_without_declaration:
+                    path.write_text(re.sub(r"^<\?xml[^>]*\?>\s*", "", path.read_text(), count=1))
                 results.append(result)
         fingerprints = utility.merge_fp_maps(results)
         for path in substitution.get_substitutable_files(tree, ["xtb"]):
