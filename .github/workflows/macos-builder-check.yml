@@ -1,0 +1,28 @@
+name: Check Breezer hosted Mac builder
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/macos-builder-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: macos-26
+    timeout-minutes: 10
+    steps:
+      - name: Inspect Xcode and available build resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          uname -m
+          xcodebuild -version
+          xcodebuild -checkFirstLaunchStatus
+          xcrun --find actool
+          df -h .
+          sysctl -n hw.memsize
+          xcode-select -p
+          ls -d /Applications/Xcode*.app
