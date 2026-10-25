@@ -2,6 +2,11 @@ name: Build Breezer for Apple Silicon
 
 on:
   workflow_dispatch:
+    inputs:
+      checkpoint_cache_key:
+        description: 'Optional older checkpoint key; build inputs are verified before reuse'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -53,10 +58,13 @@ jobs:
           path: |
             build/helium-macos/build/src
             build/helium-macos/build/.breezer-prepared
-          key: breezer-macos-ai-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/extension/**', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: breezer-macos-resources-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ hashFiles('features/ai/extension/**') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            breezer-macos-resources-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-${{ hashFiles('features/ai/extension/**') }}-
+            breezer-macos-resources-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
             breezer-macos-ai-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/extension/**', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
             breezer-macos-dev-${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}-
+            ${{ inputs.checkpoint_cache_key }}
       - name: Compile Breezer from source
         id: compile
         shell: bash

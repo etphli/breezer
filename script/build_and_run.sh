@@ -66,34 +66,30 @@ BREEZER_BASE_PREPARATION_ID="$(
     shasum -a 256 script/apply_breezer_branding.py assets/branding/breezer-logo.png upstream.lock.json
   } | shasum -a 256 | awk '{print $1}'
 )"
-BREEZER_AI_SOURCE_ID="$("$BREEZER_PYTHON" - "$BREEZER_ROOT" <<'PY'
-import hashlib
-from pathlib import Path
-import sys
-root = Path(sys.argv[1])
-files = [root / 'script/apply_breezer_ai.py']
-for directory in ('features/ai/extension', 'features/ai/integration'):
-    files.extend(path for path in (root / directory).rglob('*') if path.is_file())
-digest = hashlib.sha256()
-for path in sorted(files):
-    digest.update(path.relative_to(root).as_posix().encode() + b'\0')
-    digest.update(hashlib.sha256(path.read_bytes()).digest())
-print(digest.hexdigest())
-PY
-)"
-BREEZER_PREPARATION_ID="$(printf '%s\n%s\n' "$BREEZER_BASE_PREPARATION_ID" "$BREEZER_AI_SOURCE_ID" | shasum -a 256 | awk '{print $1}')"
+BREEZER_PREPARATION_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_preparation.py" --base-id "$BREEZER_BASE_PREPARATION_ID")"
 if [[ -f "$BREEZER_PREPARED" ]]; then
   BREEZER_PREVIOUS_PREPARATION="$(cat "$BREEZER_PREPARED")"
-  if [[ "$BREEZER_PREVIOUS_PREPARATION" == "$BREEZER_BASE_PREPARATION_ID" ]]; then
-    echo "Adding Breezer AI to the matching prepared browser; preserving compiled output."
+  BREEZER_REFRESH_AI=false
+  if [[ "$BREEZER_PREVIOUS_PREPARATION" == "$BREEZER_PREPARATION_ID" ]]; then
+    :
+  elif [[ "$BREEZER_PREVIOUS_PREPARATION" == "$BREEZER_BASE_PREPARATION_ID" ]]; then
+    BREEZER_REFRESH_AI=true
+  elif [[ -d "$_src_dir/components/breezer_ai" ]] &&
+       BREEZER_RECONSTRUCTED_PREPARATION="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_preparation.py" \
+         --base-id "$BREEZER_BASE_PREPARATION_ID" --prepared-extension "$_src_dir/components/breezer_ai")" &&
+       [[ "$BREEZER_PREVIOUS_PREPARATION" == "$BREEZER_RECONSTRUCTED_PREPARATION" ]]; then
+    BREEZER_REFRESH_AI=true
+  else
+    echo "Build inputs changed. The existing source and compiled output have been preserved in $BREEZER_STAGE." >&2
+    echo "Set BREEZER_BUILD_DIR to a separate directory before preparing the changed source." >&2
+    exit 1
+  fi
+  if [[ "$BREEZER_REFRESH_AI" == true ]]; then
+    echo "Updating Breezer AI resources with verified matching native inputs; preserving compiled output."
     "$BREEZER_PYTHON" "$BREEZER_ROOT/script/check_ai_overlay.py" --grit-directory "$_src_dir/tools/grit"
     "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_ai.py" "$_src_dir"
     printf '%s\n' "$BREEZER_PREPARATION_ID" > "$BREEZER_PREPARED.tmp"
     mv "$BREEZER_PREPARED.tmp" "$BREEZER_PREPARED"
-  elif [[ "$BREEZER_PREVIOUS_PREPARATION" != "$BREEZER_PREPARATION_ID" ]]; then
-    echo "Build inputs changed. The existing source and compiled output have been preserved in $BREEZER_STAGE." >&2
-    echo "Set BREEZER_BUILD_DIR to a separate directory before preparing the changed source." >&2
-    exit 1
   fi
   test -f "$_src_dir/chrome/app/theme/chromium/BRANDING"
   echo "Reusing prepared Breezer source and compiled output."
