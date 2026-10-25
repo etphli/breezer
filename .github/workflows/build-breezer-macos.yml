@@ -44,7 +44,8 @@ jobs:
       - name: Verify imported source and tests
         run: |
           .venv/bin/python script/verify_upstream.py
-          .venv/bin/python -m pytest -c upstream/helium-macos/helium-chromium/devutils/pytest.ini upstream/helium-macos/helium-chromium/devutils/tests
+          cd upstream/helium-macos/helium-chromium/devutils
+          "$GITHUB_WORKSPACE/.venv/bin/python" -m pytest -c pytest.ini
       - name: Restore compilation progress
         id: restore
         uses: actions/cache/restore@v5
