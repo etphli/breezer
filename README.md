@@ -16,7 +16,7 @@ Breezer aims to reduce startup time, memory use, and energy use while making eve
 
 The browser foundation and logo are in place. A proper Breezer app must be compiled from this repository with its own product identity. A renamed upstream download is not a Breezer release.
 
-The first source build is waiting for full Xcode 26 on the build Mac. No compiled Breezer release is available yet.
+Source builds can run on a Mac with full Xcode or through the configured GitHub-hosted Mac workflow. No compiled Breezer release is available yet.
 
 ## Source and tests
 

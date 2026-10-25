@@ -2,7 +2,17 @@
 
 This build compiles the pinned Chromium source with the imported browser patches and Breezer's product identity. The output must be a real `Breezer.app` with bundle identifier `io.github.etphli.breezer`.
 
-The build command is prepared but has not completed a browser build yet. Full Xcode is missing on the initial build Mac.
+The build command has not completed a browser build yet. The initial Mac still needs Xcode's first-run setup before local compilation.
+
+## Build without local Xcode
+
+Use the [Build Breezer for Apple Silicon workflow](https://github.com/etphli/breezer/actions/workflows/build-breezer-macos.yml) to compile on a GitHub-hosted Mac. Xcode is required on the build machine; it is not needed to run the resulting app on your Mac.
+
+Run the workflow from GitHub Actions. It verifies the source, prepares the browser, applies Breezer branding, and attempts compilation. A successful build also runs a headless browser smoke test and uploads `Breezer-arm64.zip`. Download the `Breezer-arm64` artifact from the successful run within one day.
+
+The workflow saves compilation progress before GitHub's job time limit. If the run reports a saved checkpoint, rerun the workflow to resume. A full Chromium build can need several runs. The hosted environment has passed its Xcode and resource checks; a complete Breezer browser build is still unverified.
+
+Hosted builds use a development configuration with profile-guided optimization and debug symbols disabled. They compile the same browser source and retain the tests. They are not notarized public releases.
 
 ## Prepare the build Mac
 
@@ -33,6 +43,8 @@ Run from the Breezer repository root:
 ```
 
 The command verifies the source snapshot and creates a build copy under `build/helium-macos`. It uses the inherited tools to download Chromium, apply patches, and prepare resources. Breezer branding is applied to that prepared source before compilation, including the product name, bundle identifier, profile directory, Keychain names, translated interface strings, and app icons.
+
+Retries reuse a fully prepared source tree and its compiled output when the inputs match. Set `BREEZER_BUILD_DIR` to use another build directory. Set `BREEZER_BUILD_JOBS` to change the default limit of two compiler jobs.
 
 The output is `build/helium-macos/build/src/out/Default/Breezer.app`. The upstream source and tests in the repository stay intact. Helium services and upstream attribution keep their real names.
 

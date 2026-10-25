@@ -63,18 +63,64 @@ def brand_strings(tree):
     sys.path.insert(0, str(CORE / "utils"))
     substitution = importlib.import_module("name_substitution")
     utility = importlib.import_module("name_substitution_utils")
-    utility.REPLACEMENT_REGEXES = [
-        (re.compile(r"\bHelium\b(?!\s+(?:services|servers|Authors)\b)"), "Breezer"),
-    ]
-    utility.add_grit_to_path(tree)
-    results = []
-    for path in substitution.get_substitutable_files(tree, ["grd", "grdp"]):
-        result = substitution.substitute_grit_file((path, tree, False, False))
-        if result is not None:
-            results.append(result)
-    fingerprints = utility.merge_fp_maps(results)
-    for path in substitution.get_substitutable_files(tree, ["xtb"]):
-        substitution.substitute_xtb_file((path, tree, fingerprints, False, False))
+    original_regexes = utility.REPLACEMENT_REGEXES
+    original_message = utility.replace_grit_message
+    original_translation = utility.replace_xtb_translation
+    protected_fingerprints = set()
+
+    def replace_message(message):
+        name = message.get("name", "")
+        if any(word in name for word in ("PARTNER", "LICENSE", "CREDITS", "LEGAL", "WELCOME_TERMS")):
+            protected_fingerprints.add(str(utility.compute_fp(message)))
+            return False
+        return original_message(message)
+
+    def replace_translation(message, fingerprints):
+        if message.get("id") in protected_fingerprints:
+            return False
+        return original_translation(message, fingerprints)
+
+    try:
+        utility.REPLACEMENT_REGEXES = [
+            (re.compile(r"\bHelium\b(?!\s+(?:services|servers|Authors|[Pp]artners?)\b)"), "Breezer"),
+        ]
+        utility.replace_grit_message = replace_message
+        utility.replace_xtb_translation = replace_translation
+        utility.add_grit_to_path(tree)
+        results = []
+        for path in substitution.get_substitutable_files(tree, ["grd", "grdp"]):
+            result = substitution.substitute_grit_file((path, tree, False, False))
+            if result is not None:
+                results.append(result)
+        fingerprints = utility.merge_fp_maps(results)
+        for path in substitution.get_substitutable_files(tree, ["xtb"]):
+            substitution.substitute_xtb_file((path, tree, fingerprints, False, False))
+    finally:
+        utility.REPLACEMENT_REGEXES = original_regexes
+        utility.replace_grit_message = original_message
+        utility.replace_xtb_translation = original_translation
+
+
+def brand_onboarding(tree):
+    onboarding = tree / "components/helium_onboarding"
+    replace_file(onboarding / "index.html", {
+        "<title>Helium Setup</title>": "<title>Breezer Setup</title>",
+    })
+    for page in ("Welcome.svelte", "Finish.svelte"):
+        path = onboarding / "src/pages" / page
+        text = path.read_text()
+        text, count = re.subn(
+            r'<HeliumLogo height="(\d+)px"\s*/>',
+            r'<img src="/breezer-logo.png" alt="Breezer" height="\1" width="\1" />',
+            text,
+        )
+        if not count and 'alt="Breezer"' not in text:
+            raise ValueError(f"The onboarding logo input changed: {path}")
+        text = re.sub(r"^[ \t]*HeliumLogo,\r?\n", "", text, flags=re.MULTILINE)
+        path.write_text(text)
+    logo = ROOT / "assets/branding/breezer-logo.png"
+    shutil.copyfile(logo, onboarding / "public/breezer-logo.png")
+    scale(logo, 32, onboarding / "public/favicon.png")
 
 
 def scale(logo, size, target):
@@ -136,6 +182,7 @@ def main():
         parser.error("Use the prepared Chromium source tree, after applying upstream patches.")
     brand_product(tree)
     brand_strings(tree)
+    brand_onboarding(tree)
     brand_icons(tree)
     print("Breezer product identity, profile directory, Keychain names, UI strings, and app icons prepared.")
 

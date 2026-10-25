@@ -25,7 +25,7 @@ jobs:
       - name: Check build script syntax
         run: |
           bash -n script/build_and_run.sh
-          python -m py_compile script/apply_breezer_branding.py
+          python -m py_compile script/apply_breezer_branding.py script/check_branding.py
       - name: Install upstream test dependencies
         run: python -m pip install -r upstream/helium-macos/helium-chromium/.requirements.txt
       - name: Run all imported tests and configuration checks

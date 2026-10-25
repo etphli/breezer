@@ -73,6 +73,7 @@ if [[ -f "$BREEZER_PREPARED" ]]; then
   echo "Reusing prepared Breezer source and compiled output."
 else
   prepare_sources true
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/check_branding.py" "$_src_dir/tools/grit"
   "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_branding.py" "$_src_dir"
   printf '%s\n' "$BREEZER_PREPARATION_ID" > "$BREEZER_PREPARED.tmp"
   mv "$BREEZER_PREPARED.tmp" "$BREEZER_PREPARED"
