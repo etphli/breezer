@@ -40,6 +40,8 @@ jobs:
         run: node --test tests/ai/*.test.mjs
       - name: Verify native AI source integration
         run: python script/check_ai_overlay.py
+      - name: Verify omnibox source overlay
+        run: python script/check_breezer_omnibox.py
       - name: Install upstream test dependencies
         run: python -m pip install -r upstream/helium-macos/helium-chromium/.requirements.txt
       - name: Run all imported tests and configuration checks

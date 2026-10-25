@@ -59,6 +59,14 @@ git archive HEAD:upstream/helium-macos | tar -x -C "$BREEZER_STAGE"
 _root_dir="$BREEZER_STAGE"
 source "$_root_dir/devutils/shared.sh"
 BREEZER_PREPARED="$_root_dir/build/.breezer-prepared"
+BREEZER_OMNIBOX_PREPARED="$_src_dir/.breezer-omnibox-prepared"
+BREEZER_OMNIBOX_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --fingerprint)"
+if [[ -e "$BREEZER_OMNIBOX_PREPARED" ]] &&
+   [[ "$(cat "$BREEZER_OMNIBOX_PREPARED")" != "$BREEZER_OMNIBOX_ID" ]]; then
+  echo "Omnibox overlay inputs changed. Existing source and compiled output are preserved in $BREEZER_STAGE." >&2
+  echo "Set BREEZER_BUILD_DIR to a separate directory; changed overlays require fresh base preparation." >&2
+  exit 1
+fi
 BREEZER_SOURCE_TREE="$(git rev-parse HEAD:upstream/helium-macos)"
 BREEZER_BASE_PREPARATION_ID="$(
   {
@@ -102,6 +110,12 @@ else
   printf '%s\n' "$BREEZER_PREPARATION_ID" > "$BREEZER_PREPARED.tmp"
   mv "$BREEZER_PREPARED.tmp" "$BREEZER_PREPARED"
 fi
+if [[ ! -f "$BREEZER_OMNIBOX_PREPARED" ]]; then
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" "$_src_dir"
+fi
+"$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check "$_src_dir"
+printf '%s\n' "$BREEZER_OMNIBOX_ID" > "$BREEZER_OMNIBOX_PREPARED.tmp"
+mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"
 write_gn_args "$_arch" release
 if [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 ]]; then
   cat >> "$_out_dir/args.gn" <<'GN'
