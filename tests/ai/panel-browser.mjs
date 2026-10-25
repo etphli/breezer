@@ -31,15 +31,25 @@ page.on('pageerror', (error) => errors.push(error.message));
 page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
 try {
   await page.addInitScript(() => {
-    const storage = { local: {}, session: {} };
+    const storage = { local: JSON.parse(localStorage.getItem('breezer-fixture-local') || '{}'), session: {} };
     const callbacks = [];
     window.sent = [];
     window.emit = (message) => callbacks.forEach((callback) => callback(message));
     const area = (name) => ({
       get: async (keys) => Object.fromEntries((Array.isArray(keys) ? keys : [keys]).filter((key) => key in storage[name]).map((key) => [key, storage[name][key]])),
-      set: async (items) => { Object.assign(storage[name], items); },
+      set: async (items) => {
+        Object.assign(storage[name], items);
+        if (name === 'local') localStorage.setItem('breezer-fixture-local', JSON.stringify(storage.local));
+      },
     });
     window.testStorage = storage;
+    window.testProviders = [
+      { id: 'codex', available: true, authenticated: true, defaultModel: 'gpt-6.1-sol', models: [
+        { id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol', reasoningEfforts: ['low', 'medium', 'high', 'xhigh'], defaultReasoningEffort: 'low', speeds: ['standard', 'fast'] },
+        { id: 'gpt-6-luna', label: 'GPT-6 Luna', reasoningEfforts: ['low', 'medium'], defaultReasoningEffort: 'low', speeds: ['standard'] },
+      ] },
+      { id: 'claude', available: true, authenticated: false, models: [], error: 'Sign in with claude auth login, then refresh.' },
+    ];
     window.chrome = {
       storage: { local: area('local'), session: area('session') },
       windows: { getCurrent: async () => ({ id: 7 }) },
@@ -49,10 +59,7 @@ try {
           onDisconnect: { addListener: () => {} },
           postMessage: (message) => {
             window.sent.push(message);
-            if (message.type === 'init') setTimeout(() => window.emit({ type: 'status', providers: [
-              { id: 'codex', available: true, authenticated: true, defaultModel: 'gpt-6.1-sol', models: [{ id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol' }, { id: 'gpt-6-luna', label: 'GPT-6 Luna' }] },
-              { id: 'claude', available: true, authenticated: false, models: [], error: 'Sign in with claude auth login, then refresh.' },
-            ] }), 10);
+            if (message.type === 'init') setTimeout(() => window.emit({ type: 'status', providers: window.testProviders }), 10);
             if (message.type === 'context') setTimeout(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design' } }), 10);
           },
         }),
@@ -66,6 +73,8 @@ try {
   assert.equal(await page.locator('#greeting-name').innerText(), 'Ethan');
   assert.equal(await page.locator('#context-title').innerText(), 'Designing a calmer browser');
   assert.equal(await page.locator('#send').isDisabled(), true);
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
+  assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
   await page.screenshot({ path: `${evidence}/sidebar-welcome.png` });
 
   await page.getByRole('button', { name: 'Edit your personal context' }).click();
@@ -75,21 +84,78 @@ try {
   assert.equal(await page.locator('dialog').isVisible(), false);
   assert.equal(await page.evaluate(() => window.testStorage.local.breezerProfile.context), 'I build thoughtful software. Keep explanations clear and concise.');
 
+  await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
+  await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
+  assert.match(await page.locator('#notice-text').innerText(), /more of your Codex allowance/);
+  await page.locator('#dismiss-notice').click();
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6 Luna', exact: true }).click();
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6 Luna');
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
+  assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
+  assert.equal(await page.locator('#speed-select option[value="fast"]').evaluate(option => option.disabled), true);
   await page.locator('#model-button').click();
   assert.match(await page.locator('#model-menu').innerText(), /Sign in required/);
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
+  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  await page.reload();
+  await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
+  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.deepEqual(await page.evaluate(() => window.testStorage.local.breezerModelPreferences['codex:gpt-6.1-sol']), { reasoning: 'medium', speed: 'fast' });
+
+  await page.evaluate(() => {
+    window.testProviders[1] = { id: 'claude', available: true, authenticated: true, models: [
+      { id: 'opus', label: 'Claude Opus', reasoningEfforts: ['low', 'medium', 'high'], defaultReasoningEffort: null },
+      { id: 'haiku', label: 'Claude Haiku', reasoningEfforts: [], defaultReasoningEffort: null },
+    ] };
+    window.emit({ type: 'status', providers: window.testProviders });
+  });
+  await page.locator('#model-button').click();
+  await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
+  assert.equal(await page.locator('#speed-setting').isVisible(), false);
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
+  await page.locator('#reasoning-select').selectOption('low');
+  await page.getByLabel('Message Breezer').fill('A Claude settings check');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const claudeChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.equal(claudeChat.reasoning, 'low');
+  assert.equal(Object.hasOwn(claudeChat, 'speed'), false);
+  await page.getByRole('button', { name: 'Stop response', exact: true }).click();
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.locator('#model-button').click();
+  await page.getByRole('button', { name: 'Claude Haiku', exact: true }).click();
+  assert.equal(await page.locator('#reasoning-select').isDisabled(), true);
+  assert.equal(await page.locator('#reasoning-select').inputValue(), '');
+  await page.getByLabel('Message Breezer').fill('Use the CLI default');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const defaultChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.equal(Object.hasOwn(defaultChat, 'reasoning'), false);
+  assert.equal(Object.hasOwn(defaultChat, 'speed'), false);
+  await page.getByRole('button', { name: 'Stop response', exact: true }).click();
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.locator('#model-button').click();
+  await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
+  await page.locator('#model-button').click();
+  await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
+  assert.equal(await page.locator('#speed-setting').isVisible(), true);
+  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  await page.locator('#reasoning-select').selectOption('xhigh');
+  await page.screenshot({ path: `${evidence}/sidebar-settings.png` });
 
   await page.getByRole('button', { name: 'Summarize this page' }).click();
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
-  const firstChat = await page.evaluate(() => window.sent.find((message) => message.type === 'chat'));
+  const firstChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
   assert.equal(firstChat.provider, 'codex');
   assert.equal(firstChat.model, 'gpt-6.1-sol');
   assert.equal(firstChat.includeContext, true);
   assert.equal(firstChat.control, false);
   assert.equal(firstChat.profile.name, 'Ethan');
+  assert.equal(firstChat.reasoning, 'xhigh');
+  assert.equal(firstChat.speed, 'fast');
+  for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), true);
   await page.evaluate((id) => {
     window.emit({ type: 'delta', id, text: 'The page makes a simple point: **a browser should give you room to think**.\n\n- Keep the page at the centre.\n- Make useful actions easy to find.\n- Let people stay in control.\n\nThe strongest idea is to show the assistant only when you need a hand.' });
     window.emit({ type: 'complete', id });
@@ -97,6 +163,7 @@ try {
   await page.locator('.assistant .message-body strong').waitFor();
   assert.equal(await page.locator('.assistant .message-body li').count(), 3);
   assert.equal(await page.getByRole('button', { name: 'Send message', exact: true }).isVisible(), true);
+  for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), false);
   await page.screenshot({ path: `${evidence}/sidebar-conversation.png` });
 
   await page.getByRole('button', { name: 'Browser control', exact: true }).click();
@@ -134,13 +201,17 @@ try {
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 400, height: 850 });
+  await page.reload();
+  await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await page.locator('#reasoning-select').inputValue(), 'xhigh');
+  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
   await page.screenshot({ path: `${evidence}/sidebar-dark.png` });
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'New tab', url: 'chrome://newtab/' } }));
   assert.equal(await page.locator('#context-toggle').isDisabled(), true);
   assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Ask anything…');
   assert.equal(await page.locator('#context-hint').innerText(), 'Page not shared');
   assert.deepEqual(errors, []);
-  console.log('PASS: real-browser sidebar rendering, profile, model selection, chat context, streaming Markdown, control/cancel, injection safety, narrow and dark layouts.');
+  console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, control/cancel, injection safety, narrow and dark layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {
   await browser.close();

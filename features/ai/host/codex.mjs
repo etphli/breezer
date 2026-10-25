@@ -3,7 +3,39 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
 import { JsonLineProcess, cliEnvironment, findCli, runCli } from './cli.mjs';
-import { allowedTools, contextParts, promptText, systemPrompt } from './protocol.mjs';
+import { allowedTools, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
+
+export function codexModelMetadata(model) {
+  const reasoningEfforts = (model.supportedReasoningEfforts ?? []).map((entry) => entry.reasoningEffort);
+  const fastTier = (model.serviceTiers ?? []).find((tier) => ['priority', 'fast'].includes(tier.id));
+  return { id: model.model, label: model.displayName || model.model, isDefault: model.isDefault === true,
+    inputModalities: model.inputModalities ?? ['text', 'image'], reasoningEfforts,
+    defaultReasoningEffort: reasoningEfforts.includes(model.defaultReasoningEffort) ? model.defaultReasoningEffort : null,
+    speeds: ['standard'], defaultSpeed: 'standard',
+    fastMode: { supported: false, eligibility: 'unknown', ...(fastTier ? { serviceTier: fastTier.id, description: fastTier.description } : { reason: 'This model does not advertise Fast mode. Choose Standard.' }) },
+  };
+}
+
+export function codexTurnOptions(chat, model) {
+  const effort = selectedReasoning(chat, model);
+  const speed = chat.speed ?? 'standard';
+  if (!['standard', 'fast'].includes(speed)) throw new Error('Choose Standard or Fast.');
+  if (speed === 'fast' && !model.fastMode?.supported) throw new Error(model.fastMode?.reason || 'Fast mode is unavailable for this model or CLI. Choose Standard or update Codex and refresh models.');
+  return { ...(effort !== undefined ? { effort } : {}), serviceTier: speed === 'fast' ? model.fastMode.serviceTier : 'default' };
+}
+
+export function expectedCodexApiEffort(catalog, model, effort) {
+  if (effort !== 'ultra') return effort;
+  const metadata = catalog.models.find((entry) => entry.slug === model);
+  const levels = (metadata?.supported_reasoning_levels ?? []).map((entry) => entry.effort);
+  const reported = metadata?.multi_agent_reasoning_effort;
+  if (reported !== 'ultra' && levels.includes(reported)) return reported;
+  return levels.includes('max') ? 'max' : levels.findLast((level) => level !== 'ultra') ?? effort;
+}
+
+function fastRequestError(error, speed) {
+  return speed === 'fast' ? new Error(`Fast request failed. Account eligibility and capacity are controlled by Codex. Choose Standard to retry. ${error.message}`) : error;
+}
 
 export function restrictedCatalog(catalog) {
   if (!Array.isArray(catalog.models) || !catalog.models.length) throw new Error('Codex did not return a model catalog.');
@@ -41,13 +73,25 @@ export class CodexProvider {
           const page = await rpc.request('model/list', { limit: 100, includeHidden: false, ...(cursor ? { cursor } : {}) });
           models.push(...page.data); cursor = page.nextCursor;
         } while (cursor && models.length < 500);
-        this.models = models.filter((model) => this.catalog.models.some((entry) => entry.slug === model.model)).map((model) => ({ id: model.model, label: model.displayName || model.model, isDefault: model.isDefault === true, inputModalities: model.inputModalities ?? ['text', 'image'], reasoningEfforts: (model.supportedReasoningEfforts ?? []).map((entry) => entry.reasoningEffort) }));
+        this.models = models.filter((model) => this.catalog.models.some((entry) => entry.slug === model.model)).map(codexModelMetadata);
         this.defaultModel = this.models.some((model) => model.id === 'gpt-6.1-sol') ? 'gpt-6.1-sol' : this.models.find((model) => model.isDefault)?.id ?? this.models[0]?.id;
         this.authenticated = !!account.account;
         if (!this.defaultModel) throw new Error('No usable Codex models were returned by model/list.');
         // This sends a turn exclusively to a loopback HTTP server, without provider credentials.
         // It inspects the CLI's actual tool registry before any paid inference is permitted.
-        await this.preflight(isolation, this.defaultModel, allowedTools({ control: true }));
+        const selected = this.models.find((model) => model.id === this.defaultModel);
+        await this.preflight(isolation, this.defaultModel, allowedTools({ control: true }), codexTurnOptions({}, selected));
+        const fastModel = this.models.find((model) => model.fastMode.serviceTier);
+        if (fastModel && this.features.includes('fast_mode')) {
+          let fastIsolation;
+          try {
+            fastIsolation = await this.isolate({ fast: true });
+            await this.preflight(fastIsolation, fastModel.id, allowedTools({ control: true }), { ...codexTurnOptions({}, fastModel), serviceTier: fastModel.fastMode.serviceTier });
+            for (const model of this.models.filter((entry) => entry.fastMode.serviceTier)) { model.speeds.push('fast'); model.fastMode.supported = true; }
+          } catch {
+            for (const model of this.models.filter((entry) => entry.fastMode.serviceTier)) model.fastMode.reason = 'The installed Codex CLI could not request Fast mode. Choose Standard, or update Codex and refresh models.';
+          } finally { await fastIsolation?.cleanup(); }
+        }
         this.status = { id: this.id, available: true, authenticated: this.authenticated, models: this.models, defaultModel: this.defaultModel, version: this.version, isolation: 'verified-browser-tools', ...(this.defaultModel !== 'gpt-6.1-sol' ? { notice: 'GPT-6.1 Sol was not reported by this CLI. Showing its available models.' } : {}) };
       } finally { await rpc?.close(); await isolation.cleanup(); }
     } catch (error) {
@@ -55,7 +99,7 @@ export class CodexProvider {
     }
     return this.status;
   }
-  async isolate() {
+  async isolate({ fast = false } = {}) {
     const directory = await mkdtemp(join(tmpdir(), 'breezer-codex-'));
     const codexHome = join(directory, 'config');
     const { mkdir } = await import('node:fs/promises');
@@ -64,7 +108,7 @@ export class CodexProvider {
     await symlink(authSource, join(codexHome, 'auth.json'));
     const catalogPath = join(directory, 'models.json');
     await writeFile(catalogPath, JSON.stringify(this.catalog), { mode: 0o600 });
-    const config = `model_catalog_json = ${JSON.stringify(catalogPath)}\napproval_policy = "never"\nsandbox_mode = "read-only"\nweb_search = "disabled"\nagents.enabled = false\n[tools.update_plan]\nenabled = false\n[tools.experimental_request_user_input]\nenabled = false\n[features]\n${this.features.map((name) => `${JSON.stringify(name)} = false`).join('\n')}\n`;
+    const config = `model_catalog_json = ${JSON.stringify(catalogPath)}\napproval_policy = "never"\nsandbox_mode = "read-only"\nweb_search = "disabled"\nagents.enabled = false\n[tools.update_plan]\nenabled = false\n[tools.experimental_request_user_input]\nenabled = false\n[features]\n${this.features.map((name) => `${JSON.stringify(name)} = ${name === 'fast_mode' && fast}`).join('\n')}\n`;
     await writeFile(join(codexHome, 'config.toml'), config, { mode: 0o600 });
     return { directory, env: cliEnvironment({ CODEX_HOME: codexHome }), cleanup: () => rm(directory, { recursive: true, force: true }) };
   }
@@ -78,9 +122,10 @@ export class CodexProvider {
   threadParams(model, tools) {
     return { model, modelProvider: 'openai', ephemeral: true, approvalPolicy: 'never', sandbox: 'read-only', environments: [], baseInstructions: systemPrompt, developerInstructions: systemPrompt, dynamicTools: tools.map((tool) => ({ ...tool, deferLoading: false })), config: { web_search: 'disabled' } };
   }
-  async preflight(isolation, model, tools) {
+  async preflight(isolation, model, tools, options = {}) {
     let receive;
     const received = new Promise((resolve, reject) => { receive = { resolve, reject }; });
+    received.catch(() => {});
     const server = createServer((request, response) => {
       let body = '';
       request.on('data', (chunk) => { body += chunk; if (body.length > 5_000_000) request.destroy(); });
@@ -89,8 +134,12 @@ export class CodexProvider {
           if (!request.url?.endsWith('/responses')) { response.writeHead(404); response.end(); return; }
           const input = JSON.parse(body);
           verifyCodexTools(input, tools);
+          const expectedEffort = expectedCodexApiEffort(this.catalog, model, options.effort);
+          if (expectedEffort !== undefined && input.reasoning?.effort !== expectedEffort) throw new Error('Codex could not verify the selected reasoning level under browser-only restrictions. Choose another level, or update Codex and refresh models.');
+          const serviceTier = input.service_tier ?? 'default';
+          if (options.serviceTier !== undefined && serviceTier !== options.serviceTier) throw new Error('Codex did not apply the selected speed. Choose Standard, or update Codex and refresh models.');
           if (request.headers.authorization) throw new Error('Codex isolation probe unexpectedly included credentials.');
-          receive.resolve();
+          receive.resolve({ effort: input.reasoning?.effort, serviceTier });
           response.writeHead(200, { 'Content-Type': 'text/event-stream' });
           response.end('event: response.completed\ndata: {"type":"response.completed","response":{"id":"breezer-probe","status":"completed","output":[],"usage":{"input_tokens":0,"output_tokens":0,"total_tokens":0}}}\n\n');
         } catch (error) { receive.reject(error); response.writeHead(400); response.end(); }
@@ -102,19 +151,21 @@ export class CodexProvider {
     try {
       rpc = await this.start(isolation, ['-c', 'model_provider="breezer_probe"', '-c', `model_providers.breezer_probe={name="Breezer isolation probe",base_url="http://127.0.0.1:${address.port}/v1",wire_api="responses",requires_openai_auth=false}`]);
       const started = await rpc.request('thread/start', { ...this.threadParams(model, tools), modelProvider: 'breezer_probe' });
-      await rpc.request('turn/start', { threadId: started.thread.id, input: [{ type: 'text', text: 'Tool isolation probe. Do not call tools.' }] });
-      await Promise.race([received, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Could not verify Codex browser-only tool isolation.')), 15_000); })]);
+      await rpc.request('turn/start', { threadId: started.thread.id, input: [{ type: 'text', text: 'Tool isolation probe. Do not call tools.' }], ...options });
+      return await Promise.race([received, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Could not verify Codex browser-only tool isolation.')), 15_000); })]);
     } finally { clearTimeout(timer); await rpc?.close(); server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); }
   }
   async chat(chat, { signal, emit, callTool }) {
     const model = chat.model || this.defaultModel;
     if (!this.status?.available || !this.authenticated) throw new Error('Codex is unavailable. Sign in with codex login, then reconnect.');
-    if (!this.models.some((entry) => entry.id === model)) throw new Error('This model was not reported by Codex model/list.');
+    const selected = this.models.find((entry) => entry.id === model);
+    if (!selected) throw new Error('This model was not reported by Codex model/list.');
+    const options = codexTurnOptions(chat, selected);
     const tools = allowedTools(chat);
-    const isolation = await this.isolate();
+    const isolation = await this.isolate({ fast: chat.speed === 'fast' });
     let rpc;
     try {
-      await this.preflight(isolation, model, tools);
+      await this.preflight(isolation, model, tools, options);
       if (signal.aborted) throw new Error('Cancelled.');
       rpc = await this.start(isolation);
       const abort = () => rpc.close(new Error('Cancelled.'));
@@ -126,7 +177,11 @@ export class CodexProvider {
             if (message.method === 'item/agentMessage/delta') emit({ type: 'delta', text: message.params.delta });
             if (message.method === 'turn/completed') {
               const turn = message.params.turn;
-              if (turn.status === 'completed') resolve(); else reject(new Error(turn.error?.message || (turn.status === 'interrupted' ? 'Cancelled.' : 'Codex turn failed.')));
+              if (turn.status === 'completed') resolve();
+              else {
+                const error = turn.error?.message || (turn.status === 'interrupted' ? 'Cancelled.' : 'Codex turn failed.');
+                reject(turn.status === 'interrupted' ? new Error(error) : fastRequestError(new Error(error), chat.speed));
+              }
             }
             if (message.id !== undefined && message.method) {
               if (message.method !== 'item/tool/call') {
@@ -145,8 +200,9 @@ export class CodexProvider {
         done.catch(() => {});
         const started = await rpc.request('thread/start', this.threadParams(model, tools));
         const input = [{ type: 'text', text: promptText(chat) }, ...(chat.includeContext === true ? contextParts(chat.context) : [])];
-        const selected = this.models.find((entry) => entry.id === model);
-        await rpc.request('turn/start', { threadId: started.thread.id, input: input.map((part) => part.type === 'image' ? { type: 'image', url: part.image } : part), ...(selected.reasoningEfforts.includes('high') ? { effort: 'high' } : {}) });
+        try {
+          await rpc.request('turn/start', { threadId: started.thread.id, input: input.map((part) => part.type === 'image' ? { type: 'image', url: part.image } : part), ...options });
+        } catch (error) { throw fastRequestError(error, chat.speed); }
         await done;
       } finally { signal.removeEventListener('abort', abort); }
     } finally { await rpc?.close(); await isolation.cleanup(); }

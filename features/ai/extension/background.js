@@ -104,7 +104,14 @@ export function installBackground(api) {
       }
       const native = connectNative(panel);
       ensureActive(run);
-      native.postMessage({ type: 'chat', id: run.id, provider: message.provider, model: message.model, message: message.message, history: Array.isArray(message.history) ? message.history.slice(-40) : [], profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) }, context, includeContext: message.includeContext === true || run.control, control: run.control });
+      native.postMessage({
+        type: 'chat', id: run.id, provider: message.provider, model: message.model,
+        ...(message.reasoning !== undefined ? { reasoning: message.reasoning } : {}),
+        ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
+        message: message.message, history: Array.isArray(message.history) ? message.history.slice(-40) : [],
+        profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
+        context, includeContext: message.includeContext === true || run.control, control: run.control,
+      });
     } catch (error) {
       if (!run.cancelled) { post(panel.port, { type: 'error', id: run.id, error: error.message }); await cancel(run); }
     }

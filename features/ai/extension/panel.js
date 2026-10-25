@@ -6,6 +6,7 @@ const state = {
   providers: [],
   discoveryPending: true,
   selection: null,
+  preferences: {},
   messages: [],
   includeContext: true,
   control: false,
@@ -41,6 +42,54 @@ function selectedModel() {
   return provider?.available && provider?.authenticated && model ? { provider, model } : null;
 }
 
+function selectedSettings(selected = selectedModel()) {
+  if (!selected) return { reasoning: '', speed: 'standard' };
+  const { provider, model } = selected;
+  const saved = state.preferences[`${provider.id}:${model.id}`];
+  const levels = model.reasoningEfforts || [];
+  const fallback = levels.includes('high') ? 'high' : levels.includes(model.defaultReasoningEffort) ? model.defaultReasoningEffort : '';
+  return {
+    reasoning: saved?.reasoning === '' || levels.includes(saved?.reasoning) ? saved.reasoning : fallback,
+    speed: model.speeds?.includes('fast') && saved?.speed === 'fast' ? 'fast' : 'standard',
+  };
+}
+
+function renderSettings(selected, running) {
+  const settings = selectedSettings(selected);
+  const levels = selected?.model.reasoningEfforts || [];
+  const reasoning = $('reasoning-select');
+  reasoning.replaceChildren(new Option('Default', ''));
+  for (const level of levels) {
+    const label = ({ xhigh: 'Extra high' })[level] || level.charAt(0).toUpperCase() + level.slice(1);
+    reasoning.add(new Option(label, level));
+  }
+  reasoning.value = settings.reasoning;
+  reasoning.disabled = running || !levels.length;
+  reasoning.parentElement.title = levels.length ? 'Reasoning effort' : 'This model does not report adjustable reasoning effort';
+  const codex = selected?.provider.id === 'codex';
+  $('speed-setting').hidden = !codex;
+  const speed = $('speed-select');
+  speed.replaceChildren(new Option('Standard', 'standard'));
+  const fast = new Option('Fast', 'fast');
+  fast.title = 'Higher usage; account eligibility is checked when you send';
+  fast.disabled = !selected?.model.speeds?.includes('fast');
+  speed.add(fast);
+  speed.value = settings.speed;
+  speed.disabled = running || !codex;
+  $('speed-setting').title = fast.disabled ? 'Fast is not available for this model and CLI' : 'Fast uses more of your Codex allowance. Account eligibility is checked when you send.';
+}
+
+function saveSettings() {
+  const selected = selectedModel();
+  if (!selected || state.running) return;
+  state.preferences[`${selected.provider.id}:${selected.model.id}`] = {
+    reasoning: $('reasoning-select').value,
+    ...(selected.provider.id === 'codex' ? { speed: $('speed-select').value } : {}),
+  };
+  chrome.storage.local.set({ breezerModelPreferences: state.preferences }).catch(() => notify('Your model preferences could not be saved.'));
+  updateControls();
+}
+
 function updateControls() {
   const running = Boolean(state.running);
   $('send').disabled = !running && (!selectedModel() || !$('prompt').value.trim());
@@ -60,6 +109,8 @@ function updateControls() {
   $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
   $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
+  $('model-button').disabled = running;
+  renderSettings(selected, running);
 }
 
 function providerLabel(id) {
@@ -91,7 +142,7 @@ function renderModels() {
       button.className = 'model-option';
       const isSelected = state.selection?.provider === provider.id && state.selection?.model === model.id;
       button.classList.toggle('selected', isSelected);
-      button.disabled = !provider.available || !provider.authenticated;
+      button.disabled = Boolean(state.running) || !provider.available || !provider.authenticated;
       button.setAttribute('aria-pressed', String(isSelected));
       const label = document.createElement('span');
       label.textContent = model.label || model.id;
@@ -250,6 +301,7 @@ async function send() {
   const text = $('prompt').value.trim();
   const selected = selectedModel();
   if (!text || !selected) return;
+  const settings = selectedSettings(selected);
   setModelMenu(false);
   notify('');
   const id = crypto.randomUUID();
@@ -269,6 +321,8 @@ async function send() {
   scrollToBottom();
   const sent = post({
     type: 'chat', id, provider: selected.provider.id, model: selected.model.id,
+    ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
+    ...(selected.provider.id === 'codex' ? { speed: settings.speed } : {}),
     message: text, history, profile: state.profile,
     includeContext: state.includeContext, control: state.control,
   });
@@ -348,6 +402,11 @@ $('new-chat').addEventListener('click', () => {
   $('prompt').focus();
 });
 $('model-button').addEventListener('click', () => setModelMenu($('model-menu').hidden));
+$('reasoning-select').addEventListener('change', saveSettings);
+$('speed-select').addEventListener('change', () => {
+  saveSettings();
+  notify($('speed-select').value === 'fast' ? 'Fast uses more of your Codex allowance. Availability depends on your account.' : '');
+});
 $('refresh-models').addEventListener('click', () => {
   state.discoveryPending = true;
   updateControls();
@@ -386,11 +445,12 @@ $('profile-form').addEventListener('submit', async (event) => {
 async function initialize() {
   try {
     const [saved, currentWindow] = await Promise.all([
-      chrome.storage.local.get(['breezerProfile', 'breezerModel']),
+      chrome.storage.local.get(['breezerProfile', 'breezerModel', 'breezerModelPreferences']),
       chrome.windows.getCurrent(),
     ]);
     if (saved.breezerProfile && typeof saved.breezerProfile.name === 'string' && typeof saved.breezerProfile.context === 'string') state.profile = saved.breezerProfile;
     state.selection = saved.breezerModel || null;
+    if (saved.breezerModelPreferences && typeof saved.breezerModelPreferences === 'object' && !Array.isArray(saved.breezerModelPreferences)) state.preferences = saved.breezerModelPreferences;
     state.windowId = currentWindow.id;
     state.sessionKey = `breezer-conversation-${currentWindow.id}`;
     const session = await chrome.storage.session.get(state.sessionKey);

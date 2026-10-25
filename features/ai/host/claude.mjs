@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { JsonLineProcess, cliEnvironment, findCli, runCli } from './cli.mjs';
-import { allowedTools, contextParts, promptText, systemPrompt } from './protocol.mjs';
+import { allowedTools, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
 
 export const claudeSafeArgs = ['--safe-mode', '--restricted', '--setting-sources', '', '--settings', '{"disableAllHooks":true,"autoUpdatesChannel":"stable"}', '--tools', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--disable-slash-commands', '--no-chrome', '--no-session-persistence', '--permission-mode', 'dontAsk', '--permission-prompts', 'none', '--print', '--input-format', 'stream-json', '--output-format', 'stream-json', '--include-partial-messages', '--verbose'];
 
@@ -49,7 +49,7 @@ export class ClaudeProvider {
     try {
       this.binary = await this.find('claude');
       const [help, auth, version] = await Promise.all([this.run(this.binary, ['--help']), this.run(this.binary, ['auth', 'status']), this.run(this.binary, ['--version'])]);
-      for (const option of ['--safe-mode', '--restricted', '--tools', '--strict-mcp-config', '--setting-sources', '--json-schema', '--disable-slash-commands', '--permission-prompts']) if (!help.stdout.includes(option)) throw new Error('Update Claude Code to use its browser-only mode.');
+      for (const option of ['--safe-mode', '--restricted', '--tools', '--strict-mcp-config', '--setting-sources', '--json-schema', '--disable-slash-commands', '--permission-prompts', '--effort']) if (!help.stdout.includes(option)) throw new Error('Update Claude Code to use its browser-only mode.');
       let account; try { account = JSON.parse(auth.stdout); } catch { throw new Error('Claude Code did not report its authentication status.'); }
       this.authenticated = account.loggedIn === true;
       directory = await mkdtemp(join(tmpdir(), 'breezer-claude-'));
@@ -60,7 +60,9 @@ export class ClaudeProvider {
         if (!model.resolvedModel) continue;
         const existing = this.models.find((entry) => entry.id === model.resolvedModel);
         if (existing) { if (model.value !== 'default') existing.label = model.displayName || model.resolvedModel; continue; }
-        this.models.push({ id: model.resolvedModel, label: model.value === 'default' ? model.resolvedModel : model.displayName || model.resolvedModel, isDefault: model.value === 'default', reasoningEfforts: model.supportedEffortLevels ?? [] });
+        const reasoningEfforts = model.supportedEffortLevels ?? [];
+        this.models.push({ id: model.resolvedModel, label: model.value === 'default' ? model.resolvedModel : model.displayName || model.resolvedModel, isDefault: model.value === 'default', reasoningEfforts,
+          defaultReasoningEffort: reasoningEfforts.includes(model.defaultReasoningEffort) ? model.defaultReasoningEffort : null });
       }
       this.defaultModel = this.models.find((model) => model.isDefault)?.id ?? this.models[0]?.id;
       if (!this.defaultModel) throw new Error('Claude Code did not return its model catalog.');
@@ -72,14 +74,17 @@ export class ClaudeProvider {
   async chat(chat, { signal, emit, callTool }) {
     if (!this.status?.available || !this.authenticated) throw new Error('Claude Code is unavailable. Sign in with claude auth login, then reconnect.');
     const model = chat.model || this.defaultModel;
-    if (!this.models.some((entry) => entry.id === model)) throw new Error('This model was not reported by Claude Code.');
+    const selected = this.models.find((entry) => entry.id === model);
+    if (!selected) throw new Error('This model was not reported by Claude Code.');
+    if (chat.speed !== undefined) throw new Error('Speed selection is only supported for Codex.');
+    const effort = selectedReasoning(chat, selected);
     const tools = allowedTools(chat);
     const schema = responseSchema(tools);
     const instructions = `${systemPrompt}\nRespond through StructuredOutput using the JSON schema. text is the user-facing answer or a short progress update. action is null when finished, otherwise one browser action to perform now. Wait for that action result in the next user input before claiming success. Available browser actions:\n${JSON.stringify(tools)}`;
     const directory = await mkdtemp(join(tmpdir(), 'breezer-claude-'));
     let rpc;
     try {
-      rpc = this.createProcess(this.binary, [...claudeSafeArgs, '--model', model, '--system-prompt', instructions, '--json-schema', JSON.stringify(schema)], { cwd: directory, env: cliEnvironment({ CLAUDE_CODE_SAFE_MODE: '1' }) });
+      rpc = this.createProcess(this.binary, [...claudeSafeArgs, '--model', model, ...(effort !== undefined ? ['--effort', effort] : []), '--system-prompt', instructions, '--json-schema', JSON.stringify(schema)], { cwd: directory, env: cliEnvironment({ CLAUDE_CODE_SAFE_MODE: '1' }) });
       const abort = () => rpc.close(new Error('Cancelled.'));
       signal.addEventListener('abort', abort, { once: true });
       try {

@@ -301,6 +301,25 @@ test('worker toggles the panel and forwards context only on an opted-in chat', a
   assert.ok(fake.calls.some(call => call[0] === 'close'));
 });
 
+test('worker forwards reasoning and only Codex speed to the native host', async () => {
+  const fake = fakeChrome();
+  installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init' });
+  await tick();
+  port.onMessage.emit({ type: 'chat', id: 'codex-settings', provider: 'codex', model: 'gpt-6.1-sol', message: 'Hello', reasoning: 'xhigh', speed: 'fast' });
+  await tick();
+  const codex = fake.native.sent.find(value => value.type === 'chat' && value.id === 'codex-settings');
+  assert.equal(codex.reasoning, 'xhigh');
+  assert.equal(codex.speed, 'fast');
+  port.onMessage.emit({ type: 'chat', id: 'claude-settings', provider: 'claude', model: 'opus', message: 'Hello', reasoning: 'medium', speed: 'fast' });
+  await tick();
+  const claude = fake.native.sent.find(value => value.type === 'chat' && value.id === 'claude-settings');
+  assert.equal(claude.reasoning, 'medium');
+  assert.equal(Object.hasOwn(claude, 'speed'), false);
+});
+
 test('worker rejects tools without control and cancels on disconnect and tab switches', async () => {
   const fake = fakeChrome();
   installBackground(fake.api);

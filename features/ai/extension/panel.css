@@ -603,7 +603,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   margin: 10px 3px 0;
   min-width: 0;
 }
@@ -616,7 +616,7 @@ h1 {
   color: var(--muted);
   padding: 5px 0;
   min-width: 0;
-  max-width: 90%;
+  flex: 1;
 }
 
 .model-button>svg {
@@ -642,10 +642,53 @@ h1 {
   overflow: hidden;
 }
 
-.shortcut {
-  font-size: 10px;
+.setting-select {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex-shrink: 0;
+  font-size: 11px;
   color: var(--muted);
-  white-space: nowrap;
+}
+
+.setting-select select {
+  appearance: none;
+  field-sizing: content;
+  max-width: 88px;
+  padding: 5px 16px 5px 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.setting-select select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.setting-select select:disabled,
+.model-button:disabled {
+  opacity: .55;
+  cursor: default;
+}
+
+.setting-select select option {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.setting-select svg {
+  position: absolute;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  pointer-events: none;
 }
 
 .model-menu {

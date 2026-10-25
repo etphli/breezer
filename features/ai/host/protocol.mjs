@@ -42,10 +42,18 @@ export function validateChat(message) {
   if (!['codex', 'claude'].includes(message.provider)) throw new Error('Choose Codex or Claude.');
   if (typeof message.message !== 'string' || !message.message.trim() || message.message.length > 100_000) throw new Error('Invalid chat text.');
   if (message.model !== undefined && (typeof message.model !== 'string' || message.model.length > 150)) throw new Error('Invalid model.');
+  if (message.reasoning !== undefined && (typeof message.reasoning !== 'string' || !/^[a-z][a-z0-9_-]{0,31}$/.test(message.reasoning))) throw new Error('Invalid reasoning level.');
+  if (message.speed !== undefined && (message.provider !== 'codex' || !['standard', 'fast'].includes(message.speed))) throw new Error('Speed selection is only supported for Codex. Choose Standard or Fast.');
   if (message.history !== undefined && (!Array.isArray(message.history) || message.history.length > 100 || message.history.some((item) => !object(item) || !['user', 'assistant'].includes(item.role) || typeof item.content !== 'string' || item.content.length > 100_000))) throw new Error('Invalid chat history.');
   if (message.profile !== undefined && (!object(message.profile) || typeof message.profile.context !== 'string' || message.profile.context.length > 50_000 || (message.profile.name !== undefined && (typeof message.profile.name !== 'string' || message.profile.name.length > 100)))) throw new Error('Invalid profile.');
   if (message.context !== undefined && !object(message.context)) throw new Error('Invalid page context.');
   return message;
+}
+
+export function selectedReasoning(chat, model) {
+  const effort = chat.reasoning ?? model.defaultReasoningEffort ?? undefined;
+  if (effort !== undefined && !model.reasoningEfforts.includes(effort)) throw new Error('This reasoning level was not reported for the selected model. Refresh models and choose an available level.');
+  return effort;
 }
 
 export const browserTools = [
