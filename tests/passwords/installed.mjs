@@ -9,6 +9,8 @@ import { chromium } from '../ai/node_modules/playwright/index.mjs';
 const [app, ...extra] = process.argv.slice(2);
 assert.ok(app?.startsWith('/') && app.endsWith('/Breezer.app') && !extra.length);
 const profile = await mkdtemp(join(tmpdir(), 'breezer-password-runtime-'));
+await mkdir(join(profile, 'Default'), { recursive: true });
+await writeFile(join(profile, 'Default/Preferences'), '{}');
 const evidence = resolve(process.env.BREEZER_PASSWORD_EVIDENCE || 'build/polish-20261027/password-native');
 await mkdir(evidence, { recursive: true });
 const report = { app, status: 'running', checks: {}, limitations: ['CSV file picker and OS authentication require separate UI acceptance.', 'This checks metadata edits, persistence and deletion through the native WebUI API; it never requests plaintext passwords.'] };
@@ -30,6 +32,7 @@ async function openManager() {
   });
   const page = context.pages()[0] || await context.newPage();
   await page.goto('chrome://password-manager/passwords');
+  await page.bringToFront();
   await page.locator('password-manager-app').waitFor();
   await page.waitForFunction(() => Boolean(chrome.passwordsPrivate?.getSavedPasswordList));
   return page;
@@ -78,6 +81,7 @@ try {
   await waitFor('dummy deletion', async () => (await usernames(page)).length === 0);
   report.checks.localDelete = true;
   await page.goto('chrome://password-manager/settings');
+  await page.bringToFront();
   await page.locator('password-manager-app').waitFor();
   await page.screenshot({ path: join(evidence, 'native-password-settings.png'), fullPage: true });
   report.checks.nativeSettingsRoute = true;

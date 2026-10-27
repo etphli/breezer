@@ -25,6 +25,7 @@ class OverlayBoundaryTest(unittest.TestCase):
             'components/password_manager/core/browser/password_suggestion_generator.cc',
             'chrome/browser/ui/browser_actions.cc',
             'chrome/browser/ui/web_applications/app_browser_controller.cc',
+            'components/password_manager/core/browser/password_manager.cc',
         })
 
     def test_missing_source_refused(self):
@@ -120,9 +121,12 @@ class PinnedSourceTest(unittest.TestCase):
         self.assertIn('profile.services_supported &= ~(user_data_importer::PASSWORDS', profiles)
 
     def test_apply_check_and_retry_on_source_copy_only(self):
-        self.assertEqual(overlay.apply(self.tree), 4)
+        self.assertEqual(overlay.apply(self.tree), 5)
         self.assertEqual(overlay.apply(self.tree), 0)
         self.assertEqual(overlay.apply(self.tree, check=True), 0)
+        defaults = (self.tree / 'components/password_manager/core/browser/password_manager.cc').read_text()
+        self.assertIn('prefs::kCredentialsEnableService, true,', defaults)
+        self.assertIn('prefs::kCredentialsEnableAutosignin, false,', defaults)
         policy = (self.tree / 'chrome/browser/policy/configuration_policy_handler_list_factory.cc').read_text()
         self.assertNotIn('prefs->SetBoolean(password_manager::prefs::kCredentialsEnableService,', policy)
         self.assertIn('prefs->SetBoolean(password_manager::prefs::kCredentialsEnablePasskeys,', policy)
@@ -148,7 +152,7 @@ class PinnedSourceTest(unittest.TestCase):
     def test_interrupted_apply_converges_and_symlink_refused(self):
         name, section = next(iter(overlay.sections().items()))
         self.assertEqual(overlay.patch(self.tree, section).returncode, 0)
-        self.assertEqual(overlay.apply(self.tree), 3)
+        self.assertEqual(overlay.apply(self.tree), 4)
         self.assertEqual(overlay.apply(self.tree, check=True), 0)
         target = self.tree / name
         other = self.tree / 'redirected.cc'

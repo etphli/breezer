@@ -3,6 +3,7 @@
   "helium_commit": "f29a25968e483f8bb85e47829ccd487bbe229199",
   "helium_macos_commit": "9aa975a56de8c2376d7c22f71da564b9426cda5f",
   "restores": [
+    "native password saving default on; explicit user choices and enterprise policy still apply",
     "native password saving preference instead of Helium forced-off policy; preserves passkey policy",
     "native password bubble action and web app password icon",
     "native manage-passwords footer in autofill suggestions"
@@ -22,6 +23,7 @@
     "chrome/browser/importer/importer_list.cc": "f7c3d93175e020bea3f084492d2ca1f01478a438d0892614dd125628ba35431d",
     "chrome/utility/importer/chrome_importer.cc": "7a6f26559d8f474e759150234466b66b4bf26197e1183038d711bd34d819802c",
     "components/password_manager/core/browser/features/password_manager_features_util.cc": "1f94e66ae6f050cc866a43b3edb109ad4375b38c159311566b57543e046082ff",
-    "components/os_crypt/common/keychain_password_mac.mm": "b762afe19a49726736622da39266d7f39a1792aa0267418cdecab8f6153c886c"
+    "components/os_crypt/common/keychain_password_mac.mm": "b762afe19a49726736622da39266d7f39a1792aa0267418cdecab8f6153c886c",
+    "components/password_manager/core/browser/password_manager.cc": "c528968215f7a1445392cd0737c460d47b562b0623fd0e68c1f310122af6b0aa"
   }
 }

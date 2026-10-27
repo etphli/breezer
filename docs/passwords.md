@@ -55,10 +55,11 @@ python3 features/passwords/native-ui/apply.py --fingerprint
 
 `script/build_and_run.sh` checks the separate `src/.breezer-passwords-prepared` fingerprint before refreshing resources. A matching marker still runs `--check`; a different marker refuses before changing source. The hosted cache fingerprint includes every native password input. Existing compiled output is retained on first application.
 
-The applicator stages all four files before writing. It accepts either the pinned Helium state or its already-applied state, refuses missing, ambiguous, drifted, or symlinked targets, and uses file-level atomic replacement. A retry after a partial application converges. `--check` never writes. Its implementation follows the existing omnibox applicator's staging rules; its wider patch context also prevents duplicate insertion of the restored native action.
+The applicator stages all five files before writing. It accepts either the pinned Helium state or its already-applied state, refuses missing, ambiguous, drifted, or symlinked targets, and uses file-level atomic replacement. A retry after a partial application converges. `--check` never writes. Its implementation follows the existing omnibox applicator's staging rules; its wider patch context also prevents duplicate insertion of the restored native action.
 
 The patch restores only password functionality removed by Helium:
 
+- Restores the native password-saving default to on, preserving explicit saved choices. Automatic sign-in stays off.
 - Removes the forced-false `kCredentialsEnableService` assignment. Chromium's password-saving preference and enterprise policy apply normally. Helium's passkey policy remains disabled.
 - Restores Chromium's native password action, so the password page-action controller and save/update bubble have their normal action item. It also restores the password icon in app windows.
 - Restores the native manage-passwords footer in autofill suggestions.

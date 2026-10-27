@@ -120,6 +120,16 @@ try {
   assert.equal(await worker.evaluate(() => chrome.runtime.getManifest().name), 'Breezer AI');
   const workerCall = async (name, ...callArgs) => worker.evaluate(settle(privateCall(name, ...callArgs)));
 
+  // Hidden native views have no compositor frame to capture. Record the fresh
+  // visibility default, then pin this disposable profile for the UI checks.
+  const freshDefaults = freshProfile ? await workerCall('getAppearance') : null;
+  if (freshProfile) {
+    assert.equal(freshDefaults.ok, true);
+    assert.equal(freshDefaults.value.alwaysShowSidebar, false);
+    const pinned = await workerCall('setAppearance', { alwaysShowSidebar: true });
+    assert.equal(pinned.ok, true);
+  }
+
   const browserCdp = await context.browser().newBrowserCDPSession();
   await browserCdp.send('Target.setDiscoverTargets', { discover: true });
   const pending = new Map();
@@ -366,7 +376,8 @@ try {
   for (const field of ['centeredAddressBar', 'minimalUrl', 'showLoadProgress', 'frameless', 'alwaysShowTopBar']) {
     assert.equal(initialAppearance[field], freshProfile, `${field} must respect the profile's saved choice`);
   }
-  assert.equal(initialAppearance.alwaysShowSidebar, !freshProfile);
+  assert.equal(initialAppearance.alwaysShowSidebar, true);
+  if (freshProfile) observe('freshDefaultsBeforePinning', freshDefaults.value);
   observe('seededOldPreferences', oldPreferences);
   pass('profileDefaults', freshProfile ? 'fresh profile received requested appearance defaults' : 'v2 migration preserved explicit v1 choices');
   await settings.screenshot({ path: join(evidence, 'workspace-settings.png'), fullPage: true });
@@ -563,6 +574,13 @@ try {
   await waitFor('window B host released', async () => !(await hostTargets()).some(host => host.windowId === windowB));
   await hostsByWindow('after closing B');
   pass('hostLifetime', `closing window ${windowB} destroyed its host; window ${windowA} keeps one`);
+
+  if (freshProfile) {
+    const restored = await workerCall('setAppearance', { alwaysShowSidebar: false });
+    assert.equal(restored.ok, true);
+    assert.equal(restored.value.alwaysShowSidebar, false);
+    pass('freshVisibilityDefault', 'sidebar was hidden by default, pinned for UI checks, then restored to hidden');
+  }
 
   report.status = 'passed';
 } catch (error) {
