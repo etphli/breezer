@@ -103,7 +103,7 @@ class CDP {
   send(method, params = {}, sessionId) {
     const id = ++this.next;
     return new Promise((resolveResult, reject) => {
-      const timer = setTimeout(() => { this.pending.delete(id); reject(new Error(`CDP timeout: ${method}`)); }, 30000);
+      const timer = setTimeout(() => { this.pending.delete(id); reject(new Error(`CDP timeout: ${method}${method === 'Runtime.evaluate' ? ` expression=${String(params.expression).slice(0, 180)}` : ''}`)); }, 30000);
       this.pending.set(id, { resolve: resolveResult, reject, timer });
       this.socket.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
     });
@@ -291,6 +291,7 @@ async function exercise(instance, fixtureUrl, options) {
   // Both products quit with the same single fixture tab, so relaunches do not
   // compare a restored multi-tab session against a single-tab session.
   for (const id of result.multiTabs) await cdp.send('Target.closeTarget', { targetId: id });
+  await cdp.send('Target.activateTarget', { targetId });
   await cdp.send('Page.navigate', { url: fixtureUrl }, session);
   await pageReady(cdp, session, fixtureUrl);
   result.preRelaunchPageInventory = await pageInventory(cdp);
