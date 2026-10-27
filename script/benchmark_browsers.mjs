@@ -30,6 +30,16 @@ export function processTree(rows, pid) {
   } while (count !== owned.size);
   return rows.filter(row => owned.has(row.pid));
 }
+export function processRole(command) {
+  return command.match(/(?:^|\s)--type=([^\s]+)/)?.[1] || 'browser';
+}
+export function parseProcessLoad(text) {
+  return text.trim().split('\n').filter(Boolean).map(line => {
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+(\S+)\s+(.+)$/);
+    if (!match) throw new Error(`Cannot parse process load row: ${line}`);
+    return { pid: Number(match[1]), ppid: Number(match[2]), rssKiB: Number(match[3]), cpuPercent: Number(match[4]), cpuTime: match[5], command: match[6], role: processRole(match[6]) };
+  });
+}
 const sidebarPrefix = 'chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/workspace.html#/sidebar?w=';
 export function accountPageTargets(targets, evidence = {}) {
   const contentPages = [];
@@ -62,7 +72,8 @@ export function summarize(values) {
   };
   return { count: sorted.length, median: percentile(0.5), min: sorted[0], max: sorted.at(-1), p25: percentile(0.25), p75: percentile(0.75) };
 }
-const ps = () => parseProcesses(execFileSync('/bin/ps', ['-axo', 'pid=,ppid=,rss=,command='], { encoding: 'utf8' }));
+const ps = () => parseProcesses(execFileSync('/bin/ps', ['-axo', 'pid=,ppid=,rss=,command='], { encoding: 'utf8', timeout: 2000 }));
+const processLoad = pid => processTree(parseProcessLoad(execFileSync('/bin/ps', ['-axo', 'pid=,ppid=,rss=,%cpu=,time=,command='], { encoding: 'utf8', timeout: 2000 })), pid);
 const command = (file, args = []) => {
   try { return execFileSync(file, args, { encoding: 'utf8', timeout: 20000 }).trim(); }
   catch (error) { return { error: error.message }; }
@@ -100,17 +111,17 @@ class CDP {
     await new Promise((done, reject) => { socket.addEventListener('open', done, { once: true }); socket.addEventListener('error', reject, { once: true }); });
     return new CDP(socket);
   }
-  send(method, params = {}, sessionId) {
+  send(method, params = {}, sessionId, timeoutMs = 30000) {
     const id = ++this.next;
     return new Promise((resolveResult, reject) => {
-      const timer = setTimeout(() => { this.pending.delete(id); reject(new Error(`CDP timeout: ${method}${method === 'Runtime.evaluate' ? ` expression=${String(params.expression).slice(0, 180)}` : ''}`)); }, 30000);
+      const timer = setTimeout(() => { this.pending.delete(id); reject(new Error(`CDP timeout: ${method}${method === 'Runtime.evaluate' ? ` expression=${String(params.expression).slice(0, 180)}` : ''}`)); }, timeoutMs);
       this.pending.set(id, { resolve: resolveResult, reject, timer });
       this.socket.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
     });
   }
   async attach(targetId) { return (await this.send('Target.attachToTarget', { targetId, flatten: true })).sessionId; }
-  async evaluate(session, expression) {
-    const response = await this.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, session);
+  async evaluate(session, expression, timeoutMs = 30000) {
+    const response = await this.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, session, timeoutMs);
     if (response.exceptionDetails) throw new Error(JSON.stringify(response.exceptionDetails));
     return response.result?.value;
   }
@@ -118,7 +129,19 @@ class CDP {
 
 const windowProbeSource = `import CoreGraphics
 import Foundation
+import AppKit
 let pid = Int32(CommandLine.arguments[1])!
+if CommandLine.arguments.contains("--snapshot") {
+  let windows = CGWindowListCopyWindowInfo([.optionAll, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+  let owned = windows.filter { ($0[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value == pid }.map { window in
+    return ["number": window[kCGWindowNumber as String] ?? NSNull(), "layer": window[kCGWindowLayer as String] ?? NSNull(), "onScreen": window[kCGWindowIsOnscreen as String] ?? false, "bounds": window[kCGWindowBounds as String] ?? NSNull(), "alpha": window[kCGWindowAlpha as String] ?? NSNull()]
+  }
+  let app = NSRunningApplication(processIdentifier: pid)
+  let state: [String: Any] = ["pid": pid, "active": app?.isActive ?? false, "hidden": app?.isHidden ?? false, "terminated": app?.isTerminated ?? true, "frontmostPid": NSWorkspace.shared.frontmostApplication?.processIdentifier ?? -1, "windows": owned]
+  let data = try! JSONSerialization.data(withJSONObject: state, options: [.sortedKeys])
+  print(String(data: data, encoding: .utf8)!)
+  exit(0)
+}
 let deadline = ProcessInfo.processInfo.systemUptime + 35
 while ProcessInfo.processInfo.systemUptime < deadline {
   let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
@@ -141,9 +164,37 @@ function fixtureHtml() {
 <style>body{margin:32px;font:16px system-ui;background:#fafafa;color:#172126}main{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}article{border:1px solid #cdd4d8;background:white;padding:16px;border-radius:8px}svg{width:100%;height:54px}</style>
 <h1>Identical local browser benchmark</h1><p>No external requests. 128 deterministic cards.</p><main>${Array.from({ length: 128 }, (_, i) => `<article><h2>Card ${i + 1}</h2><svg viewBox="0 0 100 30"><path d="M0 25L20 ${i % 20}L40 16L70 4L100 11" fill="none" stroke="#327a8e" stroke-width="2"/></svg><p>Rendering, layout and local navigation fixture ${i + 1}.</p></article>`).join('')}</main><script>window.fixtureReady=true</script>`;
 }
-async function pageReady(cdp, session, expectedUrl, productNewTab = false) {
-  await until('usable document', () => cdp.evaluate(session, `Boolean(document.readyState === 'complete' && document.body && document.body.getBoundingClientRect().width > 0 ${expectedUrl ? `&& location.href === ${JSON.stringify(expectedUrl)}` : ''} ${productNewTab ? `&& location.href !== 'about:blank'` : ''})`));
-  await cdp.evaluate(session, 'new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
+export async function pageReady(cdp, session, expectedUrl, productNewTab = false) {
+  const started = performance.now();
+  let stage = 'document';
+  let documentReadyMs;
+  try {
+    await until('usable document', () => cdp.evaluate(session, `Boolean(document.readyState === 'complete' && document.body && document.body.getBoundingClientRect().width > 0 ${expectedUrl ? `&& location.href === ${JSON.stringify(expectedUrl)}` : ''} ${productNewTab ? `&& location.href !== 'about:blank'` : ''})`));
+    documentReadyMs = performance.now() - started;
+    stage = 'double-animation-frame';
+    await cdp.evaluate(session, 'new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))');
+    return { documentReadyMs, animationFramesMs: performance.now() - started - documentReadyMs };
+  } catch (error) {
+    error.readiness = { stage, session, expectedUrl, productNewTab, documentReadyMs, elapsedMs: performance.now() - started };
+    throw error;
+  }
+}
+const pageStateExpression = `({url:location.href,visibilityState:document.visibilityState,hidden:document.hidden,hasFocus:document.hasFocus(),readyState:document.readyState,bodyWidth:document.body?.getBoundingClientRect().width,viewport:{width:innerWidth,height:innerHeight},navigationTiming:performance.getEntriesByType('navigation')[0]?.toJSON()})`;
+export async function captureFailureState(instance, error) {
+  const operation = { ...instance.operation, benchmarkStage: instance.operation.stage, ...error.readiness };
+  const state = { at: new Date().toISOString(), error: error.stack || error.message, operation };
+  const probes = {
+    page: () => instance.cdp.evaluate(operation.session, pageStateExpression, 1500),
+    targets: () => instance.cdp.send('Target.getTargets', {}, undefined, 1500),
+    window: () => instance.cdp.send('Browser.getWindowForTarget', { targetId: operation.targetId }, undefined, 1500),
+    browserProcesses: () => instance.cdp.send('SystemInfo.getProcessInfo', {}, undefined, 1500),
+    nativeWindow: () => instance.nativeWindowSnapshot(),
+    processes: () => instance.captureLoad(),
+  };
+  await Promise.all(Object.entries(probes).map(async ([key, probe]) => {
+    try { state[key] = await probe(); } catch (failure) { state[key] = { error: failure.message }; }
+  }));
+  return state;
 }
 async function metadata(app) {
   const plist = JSON.parse(execFileSync('/usr/bin/plutil', ['-convert', 'json', '-o', '-', join(app, 'Contents/Info.plist')], { encoding: 'utf8' }));
@@ -183,6 +234,18 @@ async function launch(browser, profile, url, output, label, probeExecutable) {
     for (const row of tree) owned.set(row.pid, row.command);
     return tree;
   };
+  const instance = { result, captureOwned, captureLoad: () => {
+    const tree = processLoad(proc.pid);
+    for (const row of tree) owned.set(row.pid, row.command);
+    return tree;
+  },
+    nativeWindowSnapshot: () => JSON.parse(execFileSync(probeExecutable, [String(proc.pid), '--snapshot'], { encoding: 'utf8', timeout: 2000 })),
+    operation: { stage: 'launch', expectedUrl: url } };
+  instance.captureFailure = async error => {
+    result.failure = await captureFailureState(instance, error);
+    try { await writeFile(join(output, `${label}.failure.json`), `${JSON.stringify(result, null, 2)}\n`); }
+    catch (failure) { result.failure.artifactWriteError = failure.message; }
+  };
   const cleanup = async () => {
     captureOwned();
     if (cdp) await Promise.race([cdp.send('Browser.close').catch(() => {}), sleep(1500)]);
@@ -219,10 +282,12 @@ async function launch(browser, profile, url, output, label, probeExecutable) {
       return content[0] && content[1] ? content : false;
     });
     cdp = await CDP.connect(`ws://127.0.0.1:${port[0]}${port[1]}`);
+    instance.cdp = cdp;
     const target = await until('initial fixture tab', async () => (await cdp.send('Target.getTargets')).targetInfos.find(item => item.type === 'page' && item.url === url));
     const session = await cdp.attach(target.targetId);
+    instance.operation = { stage: 'startup', targetId: target.targetId, session, expectedUrl: url };
     await cdp.send('Target.activateTarget', { targetId: target.targetId });
-    await pageReady(cdp, session, url);
+    result.startupReadiness = await pageReady(cdp, session, url);
     result.startupPageReadyMs = performance.now() - started;
     result.startupNativeWindowMs = await windowResult;
     result.startupUsableMs = Math.max(result.startupPageReadyMs, result.startupNativeWindowMs);
@@ -231,8 +296,10 @@ async function launch(browser, profile, url, output, label, probeExecutable) {
     result.initialPageInventory = await pageInventory(cdp);
     assert.equal(result.initialPageInventory.contentPageCount, 1, 'Startup must have exactly one content tab for a comparable launch');
     captureOwned();
-    return { result, cdp, session, targetId: target.targetId, cleanup, captureOwned };
+    return Object.assign(instance, { cdp, session, targetId: target.targetId, cleanup });
   } catch (error) {
+    await instance.captureFailure(error);
+    error.launchResult = result;
     await cleanup();
     throw error;
   }
@@ -241,10 +308,10 @@ async function memorySample(instance, seconds, samples) {
   await sleep(seconds * 1000);
   const rows = [];
   for (let index = 0; index < samples; index++) {
-    const tree = instance.captureOwned();
+    const tree = instance.captureLoad();
     assert.ok(tree.length, 'Owned browser process tree disappeared');
     rows.push({ at: new Date().toISOString(), rssMiB: tree.reduce((sum, row) => sum + row.rssKiB, 0) / 1024,
-      processes: tree.map(({ pid, ppid, rssKiB, command: cmd }) => ({ pid, ppid, rssKiB, executable: cmd.split(' --')[0] })) });
+      processes: tree.map(({ pid, ppid, rssKiB, cpuPercent, cpuTime, role, command: cmd }) => ({ pid, ppid, rssKiB, cpuPercent, cpuTime, role, executable: cmd.split(' --')[0] })) });
     if (index + 1 < samples) await sleep(1000);
   }
   return { rssMiB: summarize(rows.map(row => row.rssMiB)), samples: rows };
@@ -255,11 +322,13 @@ async function exercise(instance, fixtureUrl, options) {
   for (const tabUrl of ['about:blank', 'chrome://newtab/']) {
     for (let repeat = 0; repeat < options.repetitions; repeat++) {
       const started = performance.now();
+      instance.operation = { stage: 'new-tab', requestedUrl: tabUrl, repeat };
       const { targetId: id } = await cdp.send('Target.createTarget', { url: tabUrl });
       const tabSession = await cdp.attach(id);
+      Object.assign(instance.operation, { targetId: id, session: tabSession });
       await cdp.send('Target.activateTarget', { targetId: id });
-      await pageReady(cdp, tabSession, tabUrl === 'about:blank' ? tabUrl : undefined, tabUrl !== 'about:blank');
-      result.newTabs.push({ targetId: id, requestedUrl: tabUrl, resolvedUrl: await cdp.evaluate(tabSession, 'location.href'), usableMs: performance.now() - started });
+      const readiness = await pageReady(cdp, tabSession, tabUrl === 'about:blank' ? tabUrl : undefined, tabUrl !== 'about:blank');
+      result.newTabs.push({ targetId: id, requestedUrl: tabUrl, resolvedUrl: await cdp.evaluate(tabSession, 'location.href'), usableMs: performance.now() - started, readiness });
       await cdp.send('Target.closeTarget', { targetId: id });
     }
   }
@@ -267,23 +336,30 @@ async function exercise(instance, fixtureUrl, options) {
   result.navigations = [];
   for (let repeat = 0; repeat < options.repetitions; repeat++) {
     const url = `${fixtureUrl}?navigation=${repeat}`;
+    instance.operation = { stage: 'navigation', targetId, session, expectedUrl: url, repeat };
     const started = performance.now();
-    await cdp.send('Page.navigate', { url }, session);
-    await pageReady(cdp, session, url);
+    const navigateResult = await cdp.send('Page.navigate', { url }, session);
+    const navigateAckMs = performance.now() - started;
+    const readiness = await pageReady(cdp, session, url);
     result.navigations.push({ usableMs: performance.now() - started,
+      navigateAckMs, navigateResult, readiness,
       navigationTiming: await cdp.evaluate(session, 'performance.getEntriesByType("navigation")[0].toJSON()') });
   }
+  instance.operation = { stage: 'one-tab-memory', targetId, session };
   result.memoryOneTab = await memorySample(instance, options.settleSeconds, options.memorySamples);
   result.multiTabs = [];
   for (let index = 1; index < options.tabs; index++) {
     const url = `${fixtureUrl}?tab=${index}`;
+    instance.operation = { stage: 'memory-tab-creation', expectedUrl: url, index };
     const { targetId: id } = await cdp.send('Target.createTarget', { url });
     const tabSession = await cdp.attach(id);
+    Object.assign(instance.operation, { targetId: id, session: tabSession });
     await cdp.send('Target.activateTarget', { targetId: id });
     await pageReady(cdp, tabSession, url);
     result.multiTabs.push(id);
   }
   await cdp.send('Target.activateTarget', { targetId });
+  instance.operation = { stage: 'multi-tab-memory', targetId, session };
   result.multiTabPageInventory = await pageInventory(cdp);
   result.actualPageTabCount = result.multiTabPageInventory.contentPageCount;
   assert.equal(result.actualPageTabCount, options.tabs, 'Unexpected tabs would bias memory comparison');
@@ -291,6 +367,7 @@ async function exercise(instance, fixtureUrl, options) {
   // Both products quit with the same single fixture tab, so relaunches do not
   // compare a restored multi-tab session against a single-tab session.
   for (const id of result.multiTabs) await cdp.send('Target.closeTarget', { targetId: id });
+  instance.operation = { stage: 'pre-relaunch', targetId, session, expectedUrl: fixtureUrl };
   await cdp.send('Target.activateTarget', { targetId });
   await cdp.send('Page.navigate', { url: fixtureUrl }, session);
   await pageReady(cdp, session, fixtureUrl);
@@ -342,7 +419,7 @@ export async function main(argv = process.argv.slice(2)) {
   const probeExecutable = join(options.output, 'native-window-probe');
   await writeFile(probeSource, windowProbeSource);
   execFileSync('/usr/bin/xcrun', ['swiftc', probeSource, '-o', probeExecutable], { stdio: 'pipe', timeout: 120000 });
-  const report = { status: options.mode === 'prepare' ? 'prepared' : 'running', options, browsers, flags: commonFlags, environmentBefore: environment(), trials: [] };
+  const report = { protocol: 'installed-browser-v2-diagnostics', status: options.mode === 'prepare' ? 'prepared' : 'running', options, browsers, flags: commonFlags, environmentBefore: environment(), trials: [] };
   const save = () => writeFile(join(options.output, 'results.json'), `${JSON.stringify(report, null, 2)}\n`);
   await save();
   if (options.mode === 'prepare') { console.log(`Prepared without launching browsers: ${options.output}`); return; }
@@ -402,6 +479,8 @@ export async function main(argv = process.argv.slice(2)) {
   } catch (error) {
     report.status = 'failed';
     report.error = error.stack;
+    if (active) await active.captureFailure(error);
+    if (error.launchResult) report.failedLaunch = error.launchResult;
     process.exitCode = 1;
     console.error(error.stack);
   } finally {
