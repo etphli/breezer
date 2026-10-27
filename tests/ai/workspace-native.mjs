@@ -102,7 +102,7 @@ try {
   context = await chromium.launchPersistentContext(profile, {
     executablePath: `${app}/Contents/MacOS/Breezer`,
     headless: false,
-    ignoreDefaultArgs: ['--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox', '--enable-features=CDPScreenshotNewSurface'],
+    ignoreDefaultArgs: ['--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox'],
     args: ['--no-first-run', '--no-default-browser-check'],
     // No viewport emulation: geometry checks compare real native view sizes.
     viewport: null,
