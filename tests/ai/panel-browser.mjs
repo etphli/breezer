@@ -53,6 +53,8 @@ try {
     window.chrome = {
       storage: { local: area('local'), session: area('session') },
       windows: { getCurrent: async () => ({ id: 7 }) },
+      breezerPrivate: { authorizeCurrentPage: async () => true },
+      sidePanel: { close: async (options) => { window.closedPanel = options; } },
       runtime: {
         connect: () => ({
           onMessage: { addListener: (fn) => callbacks.push(fn) },
@@ -199,6 +201,28 @@ try {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.screenshot({ path: `${evidence}/sidebar-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await page.evaluate(() => {
+    window.testProviders[0].models.push(
+      { id: 'gpt-6-sol', label: 'GPT-6 Sol' },
+      { id: 'gpt-5.6-terra', label: 'GPT-5.6 Terra' },
+      { id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra', reasoningEfforts: ['low', 'high'], speeds: ['standard'] },
+    );
+    window.emit({ type: 'status', providers: window.testProviders });
+  });
+  await page.locator('#model-button').click();
+  assert.equal(await page.getByRole('button', { name: 'GPT-6 Sol', exact: true }).count(), 0);
+  assert.equal(await page.getByRole('button', { name: 'GPT-5.6 Terra', exact: true }).count(), 0);
+  await page.getByRole('button', { name: 'GPT-6.1 Terra', exact: true }).click();
+  await page.getByLabel('Message Breezer').fill('Exercise the error path');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const failedChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.equal(failedChat.model, 'gpt-6.1-terra');
+  await page.evaluate(id => window.emit({ type: 'error', id, error: 'CLI test rejection' }), failedChat.id);
+  assert.match(await page.locator('.assistant .message-body').last().innerText(), /CLI test rejection/);
+  await page.getByRole('button', { name: 'Close assistant', exact: true }).click();
+  assert.deepEqual(await page.evaluate(() => window.closedPanel), { windowId: 7 });
+  await page.locator('#model-button').click();
+  await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
   await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 400, height: 850 });
   await page.reload();

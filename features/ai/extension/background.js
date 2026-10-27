@@ -164,7 +164,19 @@ export function installBackground(api) {
       void api.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
     }
   };
-  api.commands.onCommand.addListener((command, tab) => { if (command === 'toggle-breezer-ai') toggle(tab); });
+  api.commands.onCommand.addListener((command, tab) => {
+    if (command === 'toggle-breezer-ai') { toggle(tab); return; }
+    const space = /^space-([1-4])$/.exec(command);
+    if (!space) return;
+    void (async () => {
+      const current = tab?.windowId !== undefined ? tab
+        : (await api.tabs.query({ active: true, currentWindow: true }))[0];
+      if (current?.windowId === undefined) return;
+      await api.runtime.sendMessage({
+        type: 'breezer.workspace.space', windowId: current.windowId, index: Number(space[1]) - 1,
+      });
+    })().catch(() => {});
+  });
   api.action.onClicked.addListener(toggle);
   api.sidePanel.onClosed?.addListener(info => {
     for (const panel of panels) if (panel.windowId === info.windowId) {

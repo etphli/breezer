@@ -67,6 +67,22 @@ if [[ -e "$BREEZER_OMNIBOX_PREPARED" ]] &&
   echo "Set BREEZER_BUILD_DIR to a separate directory; changed overlays require fresh base preparation." >&2
   exit 1
 fi
+BREEZER_WORKSPACE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_workspace.py" --fingerprint)"
+BREEZER_AI_UI_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_ai_ui.py" --fingerprint)"
+for BREEZER_OVERLAY in workspace ai-ui; do
+  if [[ "$BREEZER_OVERLAY" == workspace ]]; then
+    BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
+  else
+    BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  fi
+  BREEZER_OVERLAY_MARKER="$_src_dir/.breezer-$BREEZER_OVERLAY-prepared"
+  if [[ -e "$BREEZER_OVERLAY_MARKER" ]] &&
+     [[ "$(cat "$BREEZER_OVERLAY_MARKER")" != "$BREEZER_OVERLAY_ID" ]]; then
+    echo "$BREEZER_OVERLAY native overlay changed. Source and compiled output are preserved in $BREEZER_STAGE." >&2
+    echo "Use a separate build directory or a separately verified overlay migration." >&2
+    exit 1
+  fi
+done
 BREEZER_SOURCE_TREE="$(git rev-parse HEAD:upstream/helium-macos)"
 BREEZER_BASE_PREPARATION_ID="$(
   {
@@ -116,6 +132,22 @@ fi
 "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check "$_src_dir"
 printf '%s\n' "$BREEZER_OMNIBOX_ID" > "$BREEZER_OMNIBOX_PREPARED.tmp"
 mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"
+for BREEZER_OVERLAY in workspace ai-ui; do
+  if [[ "$BREEZER_OVERLAY" == workspace ]]; then
+    BREEZER_OVERLAY_SCRIPT=apply_breezer_workspace.py
+    BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
+  else
+    BREEZER_OVERLAY_SCRIPT=apply_breezer_ai_ui.py
+    BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  fi
+  BREEZER_OVERLAY_MARKER="$_src_dir/.breezer-$BREEZER_OVERLAY-prepared"
+  if [[ ! -f "$BREEZER_OVERLAY_MARKER" ]]; then
+    "$BREEZER_PYTHON" "$BREEZER_ROOT/script/$BREEZER_OVERLAY_SCRIPT" "$_src_dir"
+  fi
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/$BREEZER_OVERLAY_SCRIPT" --check "$_src_dir"
+  printf '%s\n' "$BREEZER_OVERLAY_ID" > "$BREEZER_OVERLAY_MARKER.tmp"
+  mv "$BREEZER_OVERLAY_MARKER.tmp" "$BREEZER_OVERLAY_MARKER"
+done
 write_gn_args "$_arch" release
 if [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 ]]; then
   cat >> "$_out_dir/args.gn" <<'GN'

@@ -1,0 +1,35 @@
+# Copyright 2026 The Breezer Authors
+# This file is governed by the same license as the Breezer project.
+
+import("//extensions/buildflags/buildflags.gni")
+
+assert(enable_extensions)
+
+source_set("breezer_private") {
+  sources = [
+    "breezer_private_api.cc",
+    "breezer_private_api.h",
+  ]
+
+  public_deps = [ "//extensions/browser" ]
+
+  deps = [
+    "//base",
+    "//chrome/browser/extensions",
+    "//chrome/browser/profiles:profile",
+    "//chrome/browser/themes",
+    "//chrome/browser/ui/browser_window",
+    "//chrome/browser/ui/helium:helium_layout_state_controller",
+    "//chrome/browser/ui/tabs:tab_strip",
+    "//chrome/browser/ui/tabs:tabs",
+    "//chrome/common:constants",
+    "//components/bookmarks/common",
+    "//components/prefs",
+    "//content/public/browser",
+    "//extensions/common",
+    "//extensions/common:mojom",
+    "//skia",
+    "//ui/base/mojom",
+    "//url",
+  ]
+}

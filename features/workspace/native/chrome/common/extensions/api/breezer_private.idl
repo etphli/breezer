@@ -1,0 +1,55 @@
+// Copyright 2026 The Breezer Authors
+// This file is governed by the same license as the Breezer project.
+
+namespace breezerPrivate {
+  enum Layout {
+    sidebar,
+    top
+  };
+
+  enum Theme {
+    mint,
+    tide,
+    dusk,
+    rose,
+    pollen,
+    graphite
+  };
+
+  enum ColorMode {
+    system,
+    light,
+    dark
+  };
+
+  dictionary Appearance {
+    Layout layout;
+    Theme theme;
+    ColorMode colorMode;
+    boolean showBookmarks;
+    long sidebarWidth;
+  };
+
+  dictionary AppearancePatch {
+    Layout? layout;
+    Theme? theme;
+    ColorMode? colorMode;
+    boolean? showBookmarks;
+    long? sidebarWidth;
+  };
+
+  callback AppearanceCallback = void(Appearance appearance);
+  callback BooleanCallback = void(boolean allowed);
+  callback VoidCallback = void();
+
+  interface Functions {
+    static void getAppearance(AppearanceCallback callback);
+    static void setAppearance(
+        AppearancePatch patch,
+        AppearanceCallback callback);
+    static void setSidebarCollapsed(
+        boolean collapsed,
+        optional VoidCallback callback);
+    static void authorizeCurrentPage(BooleanCallback callback);
+  };
+};

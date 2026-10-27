@@ -255,7 +255,7 @@
    TRACE_EVENT0("omnibox", "BookmarkProvider::Start");
    matches_.clear();
 +
-+  if (!client()->GetPrefs()->GetBoolean(omnibox::kAutocompleteBookmarkEnabled)) {
++  if (!client_->GetPrefs()->GetBoolean(omnibox::kAutocompleteBookmarkEnabled)) {
 +    return;
 +  }
  

@@ -51,8 +51,8 @@ def upstream_series():
                 yield patches / line
 
 
-def prepare(tree, offline=False):
-    wanted = set(ai.PATCHED_FILES)
+def prepare(tree, offline=False, wanted_paths=None):
+    wanted = set(ai.PATCHED_FILES if wanted_paths is None else wanted_paths)
     new_files = set()
     sections = []
     for patch in upstream_series():

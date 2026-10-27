@@ -1,0 +1,593 @@
+#!/usr/bin/env python3
+"""Apply or verify Breezer's bounded native workspace integration.
+
+Run after Chromium and Helium source preparation. The overlay replaces only
+known anchors in native source and adds files from features/workspace/native.
+Every anchor and added file is validated before anything is written. It never
+changes build output or removes source files.
+"""
+
+import argparse
+import hashlib
+import os
+from pathlib import Path
+import shutil
+import tempfile
+
+
+ROOT = Path(__file__).resolve().parent.parent
+NATIVE = ROOT / "features/workspace/native"
+COMPONENT_ID = "namgcidocfgliiedlkdafcmifpdfiakj"
+# SHA-1 of COMPONENT_ID, as used by feature allowlists.
+COMPONENT_ID_HASH = "C856DA2FDA3086658F6BF5FDAE63C5D4686C8E68"
+
+REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
+LAYOUT_CONTROLLER = "chrome/browser/ui/helium/helium_layout_state_controller.cc"
+VERTICAL_CONTROLLER = "chrome/browser/ui/tabs/vertical_tab_strip_state_controller_impl.cc"
+WINDOW_FEATURES = "chrome/browser/ui/browser_window/internal/browser_window_features.cc"
+
+
+def _region_replacements():
+    return [
+        (
+            '#include "chrome/browser/ui/views/frame/base_tab_strip_region_view.h"\n',
+            '#include "chrome/browser/ui/views/frame/base_tab_strip_region_view.h"\n'
+            '#include "extensions/buildflags/buildflags.h"\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '#include "chrome/browser/ui/views/frame/breezer_workspace_view.h"\n'
+            '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n',
+        ),
+        (
+            'constexpr int kDefaultWidthSnapDistance = 6;\n',
+            'constexpr int kDefaultWidthSnapDistance = 6;\n'
+            '\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '// Breezer\'s sidebar document, when this region hosts one.\n'
+            'BreezerWorkspaceView* FindBreezerWorkspace(views::View* region) {\n'
+            '  return views::AsViewClass<BreezerWorkspaceView>(\n'
+            '      region->GetViewByID(BreezerWorkspaceView::kViewId));\n'
+            '}\n'
+            '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n',
+        ),
+        (
+            'views::View* VerticalTabStripRegionView::GetDefaultFocusableChild() {\n'
+            '  tabs::TabInterface* active_tab = tab_strip_model()->GetActiveTab();\n',
+            'views::View* VerticalTabStripRegionView::GetDefaultFocusableChild() {\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  if (BreezerWorkspaceView* const workspace = FindBreezerWorkspace(this);\n'
+            '      workspace && workspace->is_available()) {\n'
+            '    return workspace->GetFocusableView();\n'
+            '  }\n'
+            '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  tabs::TabInterface* active_tab = tab_strip_model()->GetActiveTab();\n',
+        ),
+        (
+            '  resize_area_width_ = collapsed ? kCollapsedResizeAreaWidth : kResizeAreaWidth;\n',
+            '  resize_area_width_ = collapsed ? kCollapsedResizeAreaWidth : kResizeAreaWidth;\n'
+            '\n'
+            '  // Follow width changes made outside a drag (Breezer settings apply the\n'
+            '  // sidebar width through the state controller).\n'
+            '  if (!starting_width_on_resize_.has_value() &&\n'
+            '      target_collapse_state_.uncollapsed_width !=\n'
+            '          state_controller_->GetUncollapsedWidth()) {\n'
+            '    target_collapse_state_.uncollapsed_width =\n'
+            '        state_controller_->GetUncollapsedWidth();\n'
+            '    InvalidateLayout();\n'
+            '  }\n',
+        ),
+        (
+            '  content_parent->AddChildViewAt(std::move(view),\n'
+            '                                 bottom_container_index.value());\n'
+            '\n'
+            '  // Pre-set the animation values to the appropriate state.\n',
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  views::View* const native_tab_strip = view.get();\n'
+            '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  content_parent->AddChildViewAt(std::move(view),\n'
+            '                                 bottom_container_index.value());\n'
+            '\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  // Breezer shows its own sidebar document in place of the native tab rows.\n'
+            '  // The native tab strip stays attached (hidden) so its controllers, tab\n'
+            '  // anchors and drag targets keep working, and it is shown again whenever\n'
+            '  // the document is unavailable.\n'
+            '  auto workspace = std::make_unique<BreezerWorkspaceView>(\n'
+            '      *browser_view()->browser(),\n'
+            '      base::BindRepeating(\n'
+            '          [](VerticalTabStripRegionView* region, bool available) {\n'
+            '            if (views::View* const tab_strip = region->tab_strip_view()) {\n'
+            '              tab_strip->SetVisible(!available);\n'
+            '            }\n'
+            '            region->bottom_button_container_->SetVisible(!available);\n'
+            '            region->InvalidateLayout();\n'
+            '          },\n'
+            '          base::Unretained(this)));\n'
+            '  workspace->SetProperty(\n'
+            '      views::kFlexBehaviorKey,\n'
+            '      views::FlexSpecification(views::MinimumFlexSizeRule::kScaleToZero,\n'
+            '                               views::MaximumFlexSizeRule::kUnbounded));\n'
+            '  const bool workspace_available = workspace->is_available();\n'
+            '  content_parent->AddChildViewAt(\n'
+            '      std::move(workspace), *content_parent->GetIndexOf(native_tab_strip));\n'
+            '  native_tab_strip->SetVisible(!workspace_available);\n'
+            '  bottom_button_container_->SetVisible(!workspace_available);\n'
+            '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '\n'
+            '  // Pre-set the animation values to the appropriate state.\n',
+        ),
+        (
+            '  omnibox_tab_helper_observation_.Reset();\n'
+            '  ResetExpandOnHoverTimers();\n'
+            '  is_expanded_on_hover_ = false;\n'
+            '  return BaseTabStripRegionView::RemoveTabStripView(view);\n',
+            '  omnibox_tab_helper_observation_.Reset();\n'
+            '  ResetExpandOnHoverTimers();\n'
+            '  is_expanded_on_hover_ = false;\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  if (BreezerWorkspaceView* const workspace = FindBreezerWorkspace(this)) {\n'
+            '    // A layout change can be requested from inside the document, so its\n'
+            '    // host is released in a later task before this view is destroyed.\n'
+            '    workspace->ReleaseExtensionContentSoon();\n'
+            '    workspace->parent()->RemoveChildViewT(workspace).reset();\n'
+            '  }\n'
+            '  view->SetVisible(true);\n'
+            '  bottom_button_container_->SetVisible(true);\n'
+            '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  return BaseTabStripRegionView::RemoveTabStripView(view);\n',
+        ),
+    ]
+
+
+def _layout_controller_replacements():
+    return [
+        (
+            '#include "chrome/browser/ui/browser_window/public/browser_window_interface.h"\n'
+            '#include "chrome/common/pref_names.h"\n'
+            '#include "components/prefs/pref_service.h"\n',
+            '#include "base/containers/flat_set.h"\n'
+            '#include "base/no_destructor.h"\n'
+            '#include "chrome/browser/profiles/profile.h"\n'
+            '#include "chrome/browser/themes/theme_service.h"\n'
+            '#include "chrome/browser/themes/theme_service_factory.h"\n'
+            '#include "chrome/browser/ui/browser_window/public/browser_window_interface.h"\n'
+            '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
+            '#include "chrome/common/pref_names.h"\n'
+            '#include "components/bookmarks/common/bookmark_pref_names.h"\n'
+            '#include "components/prefs/pref_service.h"\n'
+            '#include "ui/base/mojom/themes.mojom.h"\n',
+        ),
+        (
+            'DEFINE_USER_DATA(HeliumLayoutStateController);\n',
+            'DEFINE_USER_DATA(HeliumLayoutStateController);\n'
+            '\n'
+            'namespace {\n'
+            '\n'
+            '// Breezer keeps private windows on the classic layout. They share the\n'
+            '// regular profile\'s layout preference, so their controllers are tracked\n'
+            '// here rather than in the widely included header.\n'
+            'base::flat_set<const HeliumLayoutStateController*>&\n'
+            'OffTheRecordControllers() {\n'
+            '  static base::NoDestructor<\n'
+            '      base::flat_set<const HeliumLayoutStateController*>>\n'
+            '      controllers;\n'
+            '  return *controllers;\n'
+            '}\n'
+            '\n'
+            'bool IsUserModifiable(PrefService* prefs, std::string_view path) {\n'
+            '  const PrefService::Preference* const pref = prefs->FindPreference(path);\n'
+            '  return pref && pref->IsUserModifiable();\n'
+            '}\n'
+            '\n'
+            '// Applies Breezer\'s defaults once per regular profile, including profiles\n'
+            '// created by Helium or earlier Breezer builds: sidebar layout on the left,\n'
+            '// bookmarks bar shown, default sidebar width, and the Mint frame tone when\n'
+            '// the profile still uses the plain default theme. Managed values and\n'
+            '// installed, policy or custom themes are left alone, and later user choices\n'
+            '// are never overwritten.\n'
+            'void MaybeInitializeBreezerWorkspace(Profile* profile, PrefService* prefs) {\n'
+            '  if (!IsUserModifiable(prefs, breezer_workspace::prefs::kInitialized) ||\n'
+            '      prefs->GetBoolean(breezer_workspace::prefs::kInitialized)) {\n'
+            '    return;\n'
+            '  }\n'
+            '  if (IsUserModifiable(prefs, prefs::kHeliumLayout)) {\n'
+            '    prefs->SetInteger(prefs::kHeliumLayout,\n'
+            '                      std::to_underlying(HeliumLayoutType::kVertical));\n'
+            '  }\n'
+            '  if (IsUserModifiable(prefs, prefs::kHeliumVerticalRightAligned)) {\n'
+            '    prefs->SetBoolean(prefs::kHeliumVerticalRightAligned, false);\n'
+            '  }\n'
+            '  if (IsUserModifiable(prefs, bookmarks::prefs::kShowBookmarkBar)) {\n'
+            '    prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar, true);\n'
+            '  }\n'
+            '  if (IsUserModifiable(prefs, prefs::kVerticalTabsUncollapsedWidth)) {\n'
+            '    prefs->SetInteger(prefs::kVerticalTabsUncollapsedWidth,\n'
+            '                      breezer_workspace::kDefaultSidebarWidth);\n'
+            '  }\n'
+            '\n'
+            '  static_assert(breezer_workspace::kThemes[0].name ==\n'
+            '                breezer_workspace::kDefaultTheme);\n'
+            '  ThemeService* const theme_service =\n'
+            '      ThemeServiceFactory::GetForProfile(profile);\n'
+            '  const PrefService::Preference* const theme_id =\n'
+            '      prefs->FindPreference(prefs::kCurrentThemeID);\n'
+            '  const PrefService::Preference* const user_color =\n'
+            '      prefs->FindPreference(prefs::kUserColor);\n'
+            '  if (theme_service && !theme_service->UsingPolicyTheme() &&\n'
+            '      !theme_service->GetIsGrayscale() && theme_id &&\n'
+            '      theme_id->IsDefaultValue() && user_color &&\n'
+            '      user_color->IsDefaultValue() && user_color->IsUserModifiable()) {\n'
+            '    theme_service->SetUserColorAndBrowserColorVariant(\n'
+            '        breezer_workspace::kThemes[0].seed,\n'
+            '        ui::mojom::BrowserColorVariant::kTonalSpot);\n'
+            '  }\n'
+            '  prefs->SetBoolean(breezer_workspace::prefs::kInitialized, true);\n'
+            '}\n'
+            '\n'
+            '}  // namespace\n',
+        ),
+        (
+            '                                *this) {\n'
+            '  pref_change_registrar_.Init(pref_service_);\n',
+            '                                *this) {\n'
+            '  // Runs before any observer is registered, so the one-time defaults do\n'
+            '  // not notify half-built windows.\n'
+            '  Profile* const profile = browser_window->GetProfile();\n'
+            '  if (profile->IsOffTheRecord()) {\n'
+            '    OffTheRecordControllers().insert(this);\n'
+            '  } else {\n'
+            '    MaybeInitializeBreezerWorkspace(profile, pref_service_);\n'
+            '  }\n'
+            '  pref_change_registrar_.Init(pref_service_);\n',
+        ),
+        (
+            'HeliumLayoutStateController::~HeliumLayoutStateController() = default;\n',
+            'HeliumLayoutStateController::~HeliumLayoutStateController() {\n'
+            '  OffTheRecordControllers().erase(this);\n'
+            '}\n',
+        ),
+        (
+            'void HeliumLayoutStateController::SetBrowserLayout(HeliumLayoutType layout) {\n'
+            '  pref_service_->SetInteger(prefs::kHeliumLayout, std::to_underlying(layout));\n',
+            'void HeliumLayoutStateController::SetBrowserLayout(HeliumLayoutType layout) {\n'
+            '  if (OffTheRecordControllers().contains(this)) {\n'
+            '    return;\n'
+            '  }\n'
+            '  pref_service_->SetInteger(prefs::kHeliumLayout, std::to_underlying(layout));\n',
+        ),
+        (
+            'HeliumLayoutType HeliumLayoutStateController::GetBrowserLayout() const {\n'
+            '  int layout_value = pref_service_->GetInteger(prefs::kHeliumLayout);\n',
+            'HeliumLayoutType HeliumLayoutStateController::GetBrowserLayout() const {\n'
+            '  if (OffTheRecordControllers().contains(this)) {\n'
+            '    return HeliumLayoutType::kClassic;\n'
+            '  }\n'
+            '  int layout_value = pref_service_->GetInteger(prefs::kHeliumLayout);\n',
+        ),
+    ]
+
+
+def _vertical_controller_replacements():
+    vertical_check = (
+        "pref_service_->GetInteger(prefs::kHeliumLayout) ==\n"
+        "{indent}std::to_underlying(HeliumLayoutType::kVertical);\n"
+    )
+    return [
+        (
+            "namespace tabs {\n"
+            "\n"
+            "VerticalTabStripStateControllerImpl::VerticalTabStripStateControllerImpl(\n",
+            "namespace tabs {\n"
+            "\n"
+            "namespace {\n"
+            "\n"
+            "// Breezer keeps private windows on the classic layout without reading or\n"
+            "// changing the regular profile's layout choice for them.\n"
+            "bool IsVerticalLayoutForWindow(BrowserWindowInterface& browser_window,\n"
+            "                               PrefService* pref_service) {\n"
+            "  return !browser_window.GetProfile()->IsOffTheRecord() &&\n"
+            "         pref_service->GetInteger(prefs::kHeliumLayout) ==\n"
+            "             std::to_underlying(HeliumLayoutType::kVertical);\n"
+            "}\n"
+            "\n"
+            "}  // namespace\n"
+            "\n"
+            "VerticalTabStripStateControllerImpl::VerticalTabStripStateControllerImpl(\n",
+        ),
+        (
+            "  is_vertical_tabs_enabled_ =\n      "
+            + vertical_check.format(indent="      ")
+            + "\n  pref_change_registrar_.AddMultiple(\n",
+            "  is_vertical_tabs_enabled_ =\n"
+            "      IsVerticalLayoutForWindow(browser_window, pref_service_);\n"
+            "\n  pref_change_registrar_.AddMultiple(\n",
+        ),
+        (
+            "void VerticalTabStripStateControllerImpl::SetVerticalTabsEnabled(bool enabled) {\n",
+            "void VerticalTabStripStateControllerImpl::SetVerticalTabsEnabled(bool enabled) {\n"
+            "  // Private windows stay classic and must not change the regular profile.\n"
+            "  if (browser_window_->GetProfile()->IsOffTheRecord()) {\n"
+            "    return;\n"
+            "  }\n",
+        ),
+        (
+            "void VerticalTabStripStateControllerImpl::OnModeChanged() {\n"
+            "  const bool new_enabled =\n      "
+            + vertical_check.format(indent="      "),
+            "void VerticalTabStripStateControllerImpl::OnModeChanged() {\n"
+            "  const bool new_enabled =\n"
+            "      IsVerticalLayoutForWindow(*browser_window_, pref_service_);\n",
+        ),
+        (
+            "    is_vertical_tabs_enabled_ =\n        "
+            + vertical_check.format(indent="        ")
+            + "    NotifyModeChanged();\n",
+            "    is_vertical_tabs_enabled_ =\n"
+            "        IsVerticalLayoutForWindow(*browser_window_, pref_service_);\n"
+            "    NotifyModeChanged();\n",
+        ),
+    ]
+
+
+def _window_features_replacements():
+    creation = (
+        "    helium_layout_state_controller_ =\n"
+        "        GetUserDataFactory().CreateInstance<HeliumLayoutStateController>(\n"
+        "            *browser, browser, profile->GetPrefs());\n"
+    )
+    restored = (
+        "    std::optional<bool> restored_state_collapsed =\n"
+        "        BrowserInitState::From(browser)->is_vertical_tabs_initially_collapsed();\n"
+    )
+    width_read = (
+        "      restored_state_uncollapsed_width =\n"
+        "          profile->GetPrefs()->GetInteger(prefs::kVerticalTabsUncollapsedWidth);\n"
+        "    }\n"
+        "\n"
+    )
+    return [
+        # Create the layout controller (which applies Breezer's one-time profile
+        # defaults) before the default sidebar width is read for this window.
+        (
+            restored,
+            "    // Breezer: created first so its one-time profile defaults apply before\n"
+            "    // the default sidebar width below is read.\n"
+            + creation + "\n" + restored,
+        ),
+        (width_read + creation + "\n", width_read),
+    ]
+
+
+def replacements():
+    return {
+        REGION: _region_replacements(),
+        LAYOUT_CONTROLLER: _layout_controller_replacements(),
+        VERTICAL_CONTROLLER: _vertical_controller_replacements(),
+        WINDOW_FEATURES: _window_features_replacements(),
+        "chrome/browser/ui/helium/BUILD.gn": [
+            (
+                '    "helium_layout_state_controller.cc",\n'
+                '    "helium_layout_state_controller.h",\n'
+                '  ]\n',
+                '    "breezer_workspace_prefs.h",\n'
+                '    "helium_layout_state_controller.cc",\n'
+                '    "helium_layout_state_controller.h",\n'
+                '  ]\n',
+            ),
+            (
+                '  deps = [\n'
+                '    "//chrome/browser/ui/browser_window",\n'
+                '    "//chrome/common:constants",\n'
+                '  ]\n',
+                '  deps = [\n'
+                '    "//chrome/browser/profiles:profile",\n'
+                '    "//chrome/browser/themes",\n'
+                '    "//chrome/browser/ui/browser_window",\n'
+                '    "//chrome/common:constants",\n'
+                '    "//components/bookmarks/common",\n'
+                '    "//ui/base/mojom",\n'
+                '  ]\n',
+            ),
+        ],
+        "chrome/browser/ui/tabs/tab_strip_prefs.cc": [
+            (
+                '#include "chrome/browser/ui/helium/helium_layout_state_controller.h"\n',
+                '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
+                '#include "chrome/browser/ui/helium/helium_layout_state_controller.h"\n',
+            ),
+            (
+                "  registry->RegisterBooleanPref(prefs::kHeliumZenModeTopChromePinned, false);\n",
+                "  registry->RegisterBooleanPref(prefs::kHeliumZenModeTopChromePinned, false);\n"
+                "  registry->RegisterStringPref(breezer_workspace::prefs::kTheme,\n"
+                "                               breezer_workspace::kDefaultTheme);\n"
+                "  registry->RegisterBooleanPref(breezer_workspace::prefs::kInitialized,\n"
+                "                                false);\n",
+            ),
+        ],
+        "chrome/browser/ui/BUILD.gn": [
+            (
+                '  if (enable_extensions) {\n'
+                '    public_deps +=\n'
+                '        [ "//chrome/browser/ui/views/extensions:extension_view_views" ]\n'
+                '    deps += [\n',
+                '  if (enable_extensions) {\n'
+                '    sources += [\n'
+                '      "views/frame/breezer_workspace_view.cc",\n'
+                '      "views/frame/breezer_workspace_view.h",\n'
+                '    ]\n'
+                '    public_deps +=\n'
+                '        [ "//chrome/browser/ui/views/extensions:extension_view_views" ]\n'
+                '    deps += [\n',
+            ),
+        ],
+        "chrome/common/extensions/api/api_sources.gni": [
+            (
+                '    "settings_private.idl",\n',
+                '    "settings_private.idl",\n'
+                '    "breezer_private.idl",\n',
+            ),
+        ],
+        "chrome/common/extensions/api/_api_features.json": [
+            (
+                '  "search": {\n',
+                '  "breezerPrivate": {\n'
+                f'    "allowlist": ["{COMPONENT_ID_HASH}"],  // Breezer AI\n'
+                '    "channel": "stable",\n'
+                '    "contexts": ["privileged_extension"],\n'
+                '    "extension_types": ["extension"],\n'
+                '    "location": "component"\n'
+                '  },\n'
+                '  "search": {\n',
+            ),
+        ],
+        "chrome/browser/extensions/api/BUILD.gn": [
+            (
+                '      "//chrome/browser/extensions/api/autofill_private",\n',
+                '      "//chrome/browser/extensions/api/autofill_private",\n'
+                '      "//chrome/browser/extensions/api/breezer_private",\n',
+            ),
+        ],
+    }
+
+
+def added_files():
+    files = {}
+    for source in sorted(path for path in NATIVE.rglob("*") if path.is_file()):
+        relative = source.relative_to(NATIVE).as_posix()
+        files[relative] = source
+    if not files:
+        raise ValueError("Native workspace overlay has no files")
+    return files
+
+
+def fingerprint():
+    digest = hashlib.sha256()
+    inputs = [ROOT / "script/apply_breezer_workspace.py"]
+    inputs.extend(sorted(path for path in NATIVE.rglob("*") if path.is_file()))
+    for path in inputs:
+        name = path.relative_to(ROOT).as_posix()
+        digest.update(name.encode() + b"\0")
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def _reject_symlinks(tree, name):
+    path = tree / name
+    current = path
+    while True:
+        if current.is_symlink():
+            raise ValueError(f"Overlay target must not use symlinks: {name}")
+        if current == tree or current.parent == current:
+            return path
+        current = current.parent
+
+
+def source_file(tree, name):
+    path = _reject_symlinks(tree, name)
+    if not path.is_file():
+        raise ValueError(f"Missing prepared source file: {name}")
+    return path
+
+
+def transform(name, content):
+    text = content.decode("utf-8")
+    for before, after in replacements()[name]:
+        # A removal's shorter result can already occur inside its original.
+        # Recognize the full original first, rather than skipping the removal.
+        if after in before and text.count(before) == 1:
+            text = text.replace(before, after, 1)
+            continue
+        if text.count(after) == 1:
+            continue
+        if text.count(before) != 1:
+            raise ValueError(f"Native workspace anchor changed in {name}: {before[:100]!r}")
+        text = text.replace(before, after, 1)
+    for _, after in replacements()[name]:
+        if text.count(after) != 1:
+            raise ValueError(f"Native workspace change is not unique in {name}: {after[:100]!r}")
+    return text.encode("utf-8")
+
+
+def apply(tree, check=False):
+    tree = Path(tree).resolve()
+    if not tree.is_dir():
+        raise ValueError(f"Source tree does not exist: {tree}")
+    changes = replacements()
+
+    # Validate every anchor and every added file before writing anything.
+    originals = {name: source_file(tree, name).read_bytes() for name in changes}
+    replacements_to_write = {}
+    for name, original in originals.items():
+        transformed = transform(name, original)
+        if transformed != original:
+            if check:
+                raise ValueError(f"Native workspace overlay is missing from {name}")
+            replacements_to_write[name] = transformed
+
+    new_files_to_write = {}
+    for relative, source in added_files().items():
+        if relative in changes:
+            raise ValueError(f"Added file collides with a patched file: {relative}")
+        destination = _reject_symlinks(tree, relative)
+        expected = source.read_bytes()
+        if destination.is_file():
+            if destination.read_bytes() != expected:
+                raise ValueError(f"Native workspace file differs from overlay: {relative}")
+        elif destination.exists():
+            raise ValueError(f"Native workspace target is not a file: {relative}")
+        elif check:
+            raise ValueError(f"Native workspace file is missing: {relative}")
+        else:
+            new_files_to_write[relative] = expected
+
+    for name, original in originals.items():
+        if source_file(tree, name).read_bytes() != original:
+            raise ValueError(f"Source changed during preparation: {name}")
+
+    staged = {}
+    try:
+        for name, content in {**replacements_to_write, **new_files_to_write}.items():
+            target = tree / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.NamedTemporaryFile(
+                dir=target.parent, prefix=".breezer-workspace-", delete=False
+            ) as output:
+                temporary = Path(output.name)
+                output.write(content)
+            if target.exists():
+                shutil.copymode(target, temporary)
+            else:
+                os.chmod(temporary, 0o644)
+            staged[name] = temporary
+        for name, temporary in staged.items():
+            os.replace(temporary, tree / name)
+    finally:
+        for temporary in staged.values():
+            temporary.unlink(missing_ok=True)
+    return len(replacements_to_write) + len(new_files_to_write)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("source_tree", nargs="?", type=Path)
+    parser.add_argument("--check", action="store_true", help="Verify without writing")
+    parser.add_argument("--fingerprint", action="store_true")
+    args = parser.parse_args()
+    try:
+        if args.fingerprint:
+            if args.source_tree is not None or args.check:
+                parser.error("--fingerprint does not take a source tree or --check")
+            print(fingerprint())
+            return
+        if args.source_tree is None:
+            parser.error("Provide the prepared Chromium source tree")
+        changed = apply(args.source_tree, check=args.check)
+        if args.check:
+            print("Breezer workspace overlay verified.")
+        else:
+            print(f"Breezer workspace overlay applied; {changed} files updated.")
+    except (OSError, ValueError) as error:
+        parser.exit(1, f"Cannot prepare Breezer workspace: {error}\n")
+
+
+if __name__ == "__main__":
+    main()

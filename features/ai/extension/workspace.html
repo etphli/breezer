@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" data-tone="mint" data-scheme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Breezer</title>
+  <link rel="stylesheet" href="workspace.css">
+</head>
+<body>
+  <div id="sidebar" class="sidebar" hidden>
+    <div id="favorites" class="favorites" role="toolbar" aria-label="Favorites"></div>
+
+    <div id="space-pane" class="space-pane">
+      <div class="space-head">
+        <span id="space-glyph" class="space-glyph" aria-hidden="true"></span>
+        <h1 id="space-name" class="space-name">Space</h1>
+        <button id="space-menu" class="icon-button quiet" aria-label="Space options" aria-haspopup="menu" title="Space options"><svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.1"/><circle cx="8" cy="8" r="1.1"/><circle cx="12.5" cy="8" r="1.1"/></svg></button>
+      </div>
+
+      <div id="pinned" class="tree pinned" role="tree" aria-label="Pinned tabs"></div>
+
+      <div class="divider-row">
+        <span class="rule" aria-hidden="true"></span>
+        <button id="clear-today" class="meta-button" title="Close every unpinned tab in this space">Clear</button>
+      </div>
+
+      <button id="new-tab" class="new-tab" title="New tab (⌘T)"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span>New tab</span></button>
+      <div id="today" class="tree today" role="tree" aria-label="Tabs"></div>
+      <div id="empty-hit" class="empty-hit" aria-hidden="true"></div>
+    </div>
+
+    <footer class="dock">
+      <button id="collapse" class="icon-button" aria-label="Hide sidebar" title="Hide sidebar" hidden><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="2.2"/><path d="M6.2 3v10"/></svg></button>
+      <div id="spaces" class="space-dots" role="tablist" aria-label="Spaces"></div>
+      <button id="add-space" class="icon-button" aria-label="New space" title="New space"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg></button>
+      <button id="open-settings" class="icon-button" aria-label="Sidebar and theme settings" title="Sidebar and theme settings"><svg viewBox="0 0 16 16"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></button>
+    </footer>
+
+    <div id="menu" class="menu" role="menu" hidden></div>
+    <div id="drag-line" class="drag-line" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden><span id="toast-text"></span><button id="toast-action" class="toast-action" hidden></button></div>
+  </div>
+
+  <main id="settings" class="settings" hidden>
+    <div class="settings-column">
+      <header class="settings-head">
+        <img src="icon128.png" width="40" height="40" alt="">
+        <div>
+          <h1>Sidebar and themes</h1>
+          <p>Changes apply to every Breezer window as you make them.</p>
+        </div>
+      </header>
+
+      <p id="bridge-note" class="bridge-note" role="status" hidden></p>
+
+      <section class="settings-section" aria-labelledby="layout-heading">
+        <h2 id="layout-heading">Layout</h2>
+        <div class="setting-row">
+          <div class="setting-label"><span id="layout-label">Tabs</span><small>Where your tabs live.</small></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="layout-label" data-field="layout">
+            <button role="radio" data-value="sidebar">Sidebar</button>
+            <button role="radio" data-value="top">Top</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><label for="sidebar-width">Sidebar width</label><small id="sidebar-width-value">240 px</small></div>
+          <input id="sidebar-width" type="range" min="200" max="360" step="4" value="240" data-field="sidebarWidth">
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="bookmarks-label">Bookmarks bar</span><small>Shown across the top of the window.</small></div>
+          <button id="show-bookmarks" class="switch" role="switch" aria-checked="true" aria-labelledby="bookmarks-label" data-field="showBookmarks"><span aria-hidden="true"></span></button>
+        </div>
+        <p id="layout-error" class="field-error" role="alert" hidden></p>
+      </section>
+
+      <section class="settings-section" aria-labelledby="theme-heading">
+        <h2 id="theme-heading">Theme</h2>
+        <p class="section-note">Choosing a Breezer theme replaces your current browser theme.</p>
+        <div id="theme-swatches" class="swatches" role="radiogroup" aria-labelledby="theme-heading"></div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="mode-label">Appearance</span><small>System follows your Mac.</small></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-field="colorMode">
+            <button role="radio" data-value="system">System</button>
+            <button role="radio" data-value="light">Light</button>
+            <button role="radio" data-value="dark">Dark</button>
+          </div>
+        </div>
+        <p id="theme-error" class="field-error" role="alert" hidden></p>
+      </section>
+
+      <section class="settings-section" aria-labelledby="spaces-heading">
+        <h2 id="spaces-heading">Spaces</h2>
+        <p class="section-note">Each space keeps its own pinned tabs and open tabs. Deleting a space moves its tabs to the first space.</p>
+        <ol id="space-list" class="space-list"></ol>
+        <button id="settings-add-space" class="text-button"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg>Add space</button>
+        <p id="spaces-error" class="field-error" role="alert" hidden></p>
+      </section>
+
+      <section class="settings-section" aria-labelledby="tabs-heading">
+        <h2 id="tabs-heading">Tabs</h2>
+        <div class="setting-row">
+          <div class="setting-label"><span id="position-label">New tabs open</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="position-label" data-pref="newTabPosition">
+            <button role="radio" data-value="top">At top</button>
+            <button role="radio" data-value="bottom">At bottom</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="close-label">Close button</span></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="close-label" data-pref="closeButton">
+            <button role="radio" data-value="hover">On hover</button>
+            <button role="radio" data-value="always">Always</button>
+          </div>
+        </div>
+        <p id="tabs-error" class="field-error" role="alert" hidden></p>
+      </section>
+
+      <section class="settings-section" aria-labelledby="browser-heading">
+        <h2 id="browser-heading">Browser settings</h2>
+        <ul class="link-list">
+          <li><button data-url="chrome://settings/appearance">Fonts and page zoom</button></li>
+          <li><button data-url="chrome://settings/search">Search engine</button></li>
+          <li><button data-url="chrome://settings/onStartup">On startup</button></li>
+          <li><button data-url="chrome://settings/privacy">Privacy and security</button></li>
+          <li><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button></li>
+          <li><button data-url="chrome://bookmarks">Bookmarks</button></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="workspace.js"></script>
+</body>
+</html>

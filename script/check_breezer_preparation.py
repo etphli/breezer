@@ -4,6 +4,9 @@
 import hashlib
 from pathlib import Path
 import shutil
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -137,6 +140,55 @@ class PreparationTests(unittest.TestCase):
         for base_id in ("", "a" * 63, "A" * 64, "a" * 64 + "\n", "g" * 64):
             with self.subTest(base_id=base_id), self.assertRaises(ValueError):
                 preparation_id(base_id, self.root)
+
+
+class NativeOverlayHookTests(unittest.TestCase):
+    def test_first_apply_reuse_mismatch_and_failed_check_preserve_output(self):
+        source = (Path(__file__).parent / 'build_and_run.sh').read_text()
+        preflight = 'BREEZER_WORKSPACE_ID=' + source.split('BREEZER_WORKSPACE_ID=', 1)[1].split('BREEZER_SOURCE_TREE=', 1)[0]
+        hooks = source.split('mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"\n', 1)[1].split('write_gn_args ', 1)[0]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scripts = root / 'script'
+            scripts.mkdir()
+            tree = root / 'src'
+            (tree / 'out').mkdir(parents=True)
+            sentinel = tree / 'out/compiled-object'
+            sentinel.write_bytes(b'precious compiled output')
+            fake = '''import os,sys
+from pathlib import Path
+if '--fingerprint' in sys.argv:
+ print('a'*64);sys.exit(0)
+tree=Path(sys.argv[-1])
+with (tree/'calls').open('a') as out:out.write(Path(__file__).stem+(' check\\n' if '--check' in sys.argv else ' apply\\n'))
+if '--check' in sys.argv and os.environ.get('FAIL_CHECK'):sys.exit(1)
+'''
+            for name in ('workspace', 'ai_ui'):
+                (scripts / f'apply_breezer_{name}.py').write_text(fake)
+            env = {**os.environ, 'BREEZER_ROOT': str(root), 'BREEZER_PYTHON': sys.executable,
+                   '_src_dir': str(tree), 'BREEZER_STAGE': str(root)}
+            shell = 'set -euo pipefail\n' + preflight + '\nprintf refreshed >> "$_src_dir/refresh"\n' + hooks
+            def run(extra=None):
+                return subprocess.run(['bash', '-c', shell], env={**env, **(extra or {})}, capture_output=True)
+            self.assertEqual(run().returncode, 0)
+            for name in ('workspace', 'ai-ui'):
+                self.assertEqual((tree / f'.breezer-{name}-prepared').read_text().strip(), 'a' * 64)
+            self.assertEqual((tree / 'calls').read_text().count(' apply'), 2)
+            self.assertEqual(run().returncode, 0)
+            self.assertEqual((tree / 'calls').read_text().count(' apply'), 2)
+            previous_refresh = (tree / 'refresh').read_bytes()
+            marker = tree / '.breezer-workspace-prepared'
+            marker.write_text('b' * 64)
+            self.assertNotEqual(run().returncode, 0)
+            self.assertEqual((tree / 'refresh').read_bytes(), previous_refresh)
+            self.assertEqual(marker.read_text(), 'b' * 64)
+            marker.write_text('a' * 64 + '\n')
+            self.assertNotEqual(run({'FAIL_CHECK': '1'}).returncode, 0)
+            self.assertEqual(marker.read_text(), 'a' * 64 + '\n')
+            marker.unlink()
+            self.assertNotEqual(run({'FAIL_CHECK': '1'}).returncode, 0)
+            self.assertFalse(marker.exists())
+            self.assertEqual(sentinel.read_bytes(), b'precious compiled output')
 
 
 if __name__ == "__main__":

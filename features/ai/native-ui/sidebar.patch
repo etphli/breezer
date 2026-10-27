@@ -1,0 +1,147 @@
+--- a/chrome/browser/ui/extensions/extension_side_panel_coordinator.cc
++++ b/chrome/browser/ui/extensions/extension_side_panel_coordinator.cc
+@@ -17,6 +17,8 @@
+ #include "content/public/browser/web_contents.h"
+ #include "extensions/browser/extension_icon_placeholder.h"
+ #include "extensions/browser/extension_registry.h"
++#include "extensions/browser/permissions/active_tab_permission_granter.h"
++#include "chrome/browser/ui/tabs/tab_strip_model.h"
+ #include "extensions/common/constants.h"
+ #include "extensions/common/extension.h"
+ #include "extensions/common/manifest_handlers/icons_handler.h"
+@@ -251,7 +253,10 @@
+   // `ScopedObservation` to watch the entry, which lets us track when the panel
+   // is shown or hidden in order to manage state and dispatch events.
+   auto entry = std::make_unique<SidePanelEntry>(
+-      GetPanelType(), GetEntryKey(),
++      extension_->id() == "namgcidocfgliiedlkdafcmifpdfiakj"
++          ? SidePanelType::kToolbar
++          : GetPanelType(),
++      GetEntryKey(),
+       base::BindRepeating(
+           [](base::WeakPtr<ExtensionSidePanelCoordinator> coordinator,
+              SidePanelEntryScope& scope) -> SidePanelNativeView {
+@@ -263,6 +268,9 @@
+           weak_factory_.GetWeakPtr()),
+       /*default_content_width_callback=*/base::NullCallback());
+ 
++  if (extension_->id() == "namgcidocfgliiedlkdafcmifpdfiakj") {
++    entry->set_should_show_header(false);
++  }
+   scoped_entry_observation_.Observe(entry.get());
+   // This is only called when no entry is registered for this key, so the
+   // reference acquired above always pairs with a registered entry.
+@@ -297,6 +305,29 @@
+ void ExtensionSidePanelCoordinator::OnEntryShown(SidePanelEntry* entry) {
+   if (entry->key() != GetEntryKey()) {
+     return;
++  }
++
++  // A deliberate AI open grants activeTab on this page. Automatic tab changes
++  // do not grant access to another page or origin.
++  const auto trigger = entry->last_open_trigger();
++  const bool deliberate_open =
++      trigger == SidePanelOpenTrigger::kToolbarButton ||
++      trigger == SidePanelOpenTrigger::kPinnedEntryToolbarButton ||
++      trigger == SidePanelOpenTrigger::kAppMenu ||
++      trigger == SidePanelOpenTrigger::kOverflowMenu ||
++      trigger == SidePanelOpenTrigger::kComboboxSelected ||
++      trigger == SidePanelOpenTrigger::kExtension;
++  if (extension_->id() == "namgcidocfgliiedlkdafcmifpdfiakj" &&
++      deliberate_open) {
++    auto* window = GetBrowser();
++    auto* contents = window && window->GetTabStripModel()
++                         ? window->GetTabStripModel()->GetActiveWebContents()
++                         : nullptr;
++    if (contents) {
++      if (auto* granter = ActiveTabPermissionGranter::FromWebContents(contents)) {
++        granter->GrantIfRequested(extension_);
++      }
++    }
+   }
+ 
+   // Set `is_panel_active_` to true to track the panel’s current state for this
+--- a/chrome/browser/ui/views/side_panel/side_panel_coordinator.cc
++++ b/chrome/browser/ui/views/side_panel/side_panel_coordinator.cc
+@@ -268,6 +268,10 @@
+   SidePanel* side_panel = GetSidePanel();
+   CHECK(side_panel);
+ 
++  // Reserve the final width once; resizing every animation frame is costly
++  // for both the page and the assistant renderer. Other entries keep animation.
++  suppress_animations |= entry->key() == SidePanelEntryKey(
++      SidePanelEntryId::kExtension, "namgcidocfgliiedlkdafcmifpdfiakj");
+   side_panel->SetCurrentEntryType(entry->type());
+ 
+   entry->set_last_open_trigger(open_trigger);
+--- a/chrome/browser/ui/views/side_panel/side_panel.cc
++++ b/chrome/browser/ui/views/side_panel/side_panel.cc
+@@ -732,6 +732,12 @@
+ }
+ 
+ bool SidePanel::ShouldShowAnimation() const {
++  const auto* panel_ui = SidePanelUI::From(browser_view_->browser());
++  if (panel_ui && panel_ui->IsSidePanelEntryShowing(SidePanelEntryKey(
++                      SidePanelEntryId::kExtension,
++                      "namgcidocfgliiedlkdafcmifpdfiakj"))) {
++    return false;
++  }
+   bool should_show_animations =
+       gfx::Animation::ShouldRenderRichAnimation() && !animations_disabled_;
+   return should_show_animations;
+--- a/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
++++ b/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc
+@@ -24,6 +24,7 @@
+ #include "chrome/browser/ui/helium/helium_layout_state_controller.h"
+ #include "chrome/browser/ui/immersive/immersive_mode_controller.h"
+ #include "chrome/browser/ui/layout_constants.h"
++#include "chrome/browser/ui/side_panel/side_panel_ui.h"
+ #include "chrome/browser/ui/tabs/organizer/organizer_panel_controller.h"
+ #include "chrome/browser/ui/tabs/tab_strip_model.h"
+ #include "chrome/browser/ui/ui_features.h"
+@@ -484,6 +485,18 @@
+   layout.force_top_container_to_top =
+       layout_data_->tab_strip_type != TabStripType::kHorizontal;
+ 
++  const auto* breezer_browser_view =
++      views::AsViewClass<BrowserView>(views().browser_view.get());
++  const auto* breezer_panel_ui = breezer_browser_view
++      ? SidePanelUI::From(breezer_browser_view->browser())
++      : nullptr;
++  if (breezer_panel_ui &&
++      breezer_panel_ui->IsSidePanelEntryShowing(SidePanelEntryKey(
++          SidePanelEntryId::kExtension,
++          "namgcidocfgliiedlkdafcmifpdfiakj"))) {
++    layout.force_top_container_to_top = false;
++  }
++
+   layout.is_split_view = delegate().IsActiveTabSplit();
+ 
+   if (IsDynamicTabStrip(layout_data_->tab_strip_type)) {
+--- a/chrome/browser/ui/browser_command_controller.cc
++++ b/chrome/browser/ui/browser_command_controller.cc
+@@ -1364,9 +1364,21 @@
+       ShowSettingsSubPage(webui::GetBrowserForOpeningWebUi(browser_),
+                           chrome::kPerformanceSubPage);
+       break;
+-    case IDC_OPTIONS:
+-      ShowSettings(webui::GetBrowserForOpeningWebUi(browser_));
+-      break;
++    case IDC_OPTIONS: {
++      auto* settings_browser = webui::GetBrowserForOpeningWebUi(browser_);
++      auto* registry = extensions::ExtensionRegistry::Get(
++          settings_browser->GetProfile());
++      if (!settings_browser->GetProfile()->IsOffTheRecord() && registry &&
++          registry->enabled_extensions().GetByID(
++              "namgcidocfgliiedlkdafcmifpdfiakj")) {
++        ShowSingletonTab(settings_browser,
++                         GURL("chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/"
++                              "workspace.html#/settings"));
++      } else {
++        ShowSettings(settings_browser);
++      }
++      break;
++    }
+     case IDC_EDIT_SEARCH_ENGINES:
+       ShowSearchEngineSettings(webui::GetBrowserForOpeningWebUi(browser_));
+       break;

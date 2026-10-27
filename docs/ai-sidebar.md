@@ -18,7 +18,7 @@ Control is limited to one active tab in one browser window. Switching tabs or wi
 
 An opted-in control task can follow links across HTTP and HTTPS sites in that tab. The debugger connection ends with the task. If it moved to a different site, reopen the sidebar with Command K before asking a new page question so Chromium can grant access to that site.
 
-Normal page questions use Chromium's `activeTab` permission granted by Command K or the toolbar action. Internal browser pages and private browsing are excluded. Password and recognisable secret fields are omitted from text context and covered during screenshot capture. The rest of the visible page is sent to the selected provider when page context is enabled.
+Normal page questions use Chromium's `activeTab` permission granted by explicitly opening the assistant or sending a message with page context. Automatic tab changes do not grant access. Internal browser pages and private browsing are excluded. Password and recognisable secret fields are omitted from text context and covered during screenshot capture. The rest of the visible page is sent to the selected provider when page context is enabled.
 
 ## Implementation
 

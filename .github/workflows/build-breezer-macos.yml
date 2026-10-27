@@ -34,11 +34,13 @@ jobs:
         env:
           NATIVE_INPUT_HASH: ${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}
           EXTENSION_INPUT_HASH: ${{ hashFiles('features/ai/extension/**') }}
+          WORKSPACE_INPUT_HASH: ${{ hashFiles('script/apply_breezer_workspace.py', 'features/workspace/native/**', 'script/apply_breezer_ai_ui.py', 'features/ai/native-ui/**') }}
           OMNIBOX_INPUT_HASH: ${{ hashFiles('script/apply_breezer_omnibox.py', 'features/omnibox/omnibox-suggestions.patch', 'features/omnibox/upstream.json') }}
         run: |
           echo "native=$NATIVE_INPUT_HASH" >> "$GITHUB_OUTPUT"
           echo "extension=$EXTENSION_INPUT_HASH" >> "$GITHUB_OUTPUT"
           echo "omnibox=$OMNIBOX_INPUT_HASH" >> "$GITHUB_OUTPUT"
+          echo "workspace=$WORKSPACE_INPUT_HASH" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
@@ -68,10 +70,10 @@ jobs:
           path: |
             build/helium-macos/build/src
             build/helium-macos/build/.breezer-prepared
-          key: breezer-macos-omnibox-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.omnibox }}-${{ steps.inputs.outputs.extension }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: breezer-macos-workspace-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.omnibox }}-${{ steps.inputs.outputs.workspace }}-${{ steps.inputs.outputs.extension }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            breezer-macos-omnibox-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.omnibox }}-${{ steps.inputs.outputs.extension }}-
-            breezer-macos-omnibox-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.omnibox }}-
+            breezer-macos-workspace-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.omnibox }}-${{ steps.inputs.outputs.workspace }}-${{ steps.inputs.outputs.extension }}-
+            breezer-macos-workspace-${{ steps.inputs.outputs.native }}-${{ steps.inputs.outputs.omnibox }}-${{ steps.inputs.outputs.workspace }}-
             ${{ inputs.checkpoint_cache_key }}
       - name: Compile Breezer from source
         id: compile

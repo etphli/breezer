@@ -1,4 +1,6 @@
 import { renderMessage } from './render-message.js';
+import { latestModels } from './model-catalog.js';
+import { startPanelTheme } from './panel-theme.js';
 
 const $ = (id) => document.getElementById(id);
 const state = {
@@ -175,7 +177,9 @@ function renderModels() {
 
 function acceptProviders(providers) {
   state.discoveryPending = false;
-  state.providers = Array.isArray(providers) ? providers : [];
+  state.providers = Array.isArray(providers)
+    ? providers.map((provider) => ({ ...provider, models: latestModels(provider.models) }))
+    : [];
   if (!selectedModel()) {
     const codex = state.providers.find((item) => item.id === 'codex' && item.available && item.authenticated);
     const provider = codex || state.providers.find((item) => item.available && item.authenticated && item.models?.length);
@@ -296,6 +300,14 @@ function stop() {
   finish('Stopped.');
 }
 
+function revealPanel() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelector('.panel').animate(
+    [{ opacity: 0, transform: 'translateX(6px)' }, { opacity: 1, transform: 'translateX(0)' }],
+    { duration: 120, easing: 'ease-out' },
+  );
+}
+
 async function send() {
   if (state.running) return stop();
   const text = $('prompt').value.trim();
@@ -319,6 +331,18 @@ async function send() {
   $('activity-label').textContent = state.control ? 'Getting ready to help' : 'Thinking';
   updateControls();
   scrollToBottom();
+  if (state.includeContext || state.control) {
+    try {
+      const allowed = await chrome.breezerPrivate.authorizeCurrentPage();
+      if (!allowed) throw new Error('Page access is only available on ordinary HTTP or HTTPS web pages.');
+      if (state.running?.id !== id) return;
+    } catch (error) {
+      if (state.running?.id !== id) return;
+      notify(error.message);
+      finish(`Could not access this page. ${error.message}`);
+      return;
+    }
+  }
   const sent = post({
     type: 'chat', id, provider: selected.provider.id, model: selected.model.id,
     ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
@@ -335,8 +359,9 @@ function receive(message) {
   if (message.id && message.id !== state.running?.id) return;
   if (message.type === 'error') {
     state.discoveryPending = false;
-    notify(typeof message.error === 'string' ? message.error : 'Something went wrong. Try again.');
-    finish('Could not finish this response.');
+    const reason = typeof message.error === 'string' ? message.error : 'Something went wrong. Try again.';
+    notify(reason);
+    finish(`Could not finish this response. ${reason}`);
   } else if (message.type === 'delta' && state.running) {
     const reply = state.messages.find((item) => item.id === state.running.assistantId);
     reply.text += message.text || '';
@@ -363,6 +388,11 @@ $('prompt').addEventListener('keydown', (event) => {
   }
 });
 $('activity-stop').addEventListener('click', stop);
+$('close-panel').addEventListener('click', async () => {
+  stop();
+  try { await chrome.sidePanel.close({ windowId: state.windowId }); }
+  catch (error) { notify(error.message); }
+});
 $('dismiss-notice').addEventListener('click', () => notify(''));
 $('context-toggle').addEventListener('click', () => {
   state.includeContext = !state.includeContext;
@@ -424,7 +454,7 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('visibilitychange', () => {
   if (state.port) post({ type: 'visibility', visible: !document.hidden });
   if (document.hidden) stop();
-  else if (state.port) post({ type: 'context' });
+  else if (state.port) { revealPanel(); post({ type: 'context' }); }
 });
 $('open-profile').addEventListener('click', () => {
   $('profile-name').value = state.profile.name;
@@ -471,10 +501,12 @@ async function initialize() {
     post({ type: 'context' });
     updateControls();
     scrollToBottom();
+    revealPanel();
     $('prompt').focus();
   } catch (error) {
     notify(`Could not open the assistant: ${error.message}`);
   }
 }
 
+void startPanelTheme();
 initialize();

@@ -47,6 +47,22 @@ export function restrictedCatalog(catalog) {
   })) };
 }
 
+function parseCatalogResult(result) {
+  if (!result || result.code !== 0 || typeof result.stdout !== 'string') return null;
+  try {
+    const catalog = JSON.parse(result.stdout);
+    return Array.isArray(catalog.models) && catalog.models.length ? catalog : null;
+  } catch { return null; }
+}
+
+export function selectCodexCatalog(refreshedResult, bundledResult) {
+  for (const [source, result] of [['refreshed', refreshedResult], ['bundled', bundledResult]]) {
+    const catalog = parseCatalogResult(result);
+    if (catalog) return { source, catalog: restrictedCatalog(catalog) };
+  }
+  throw new Error('Codex did not return a model catalog.');
+}
+
 export class CodexProvider {
   id = 'codex';
   constructor({ find = findCli, run = runCli, createProcess = (...args) => new JsonLineProcess(...args) } = {}) {
@@ -55,12 +71,18 @@ export class CodexProvider {
   async discover() {
     try {
       this.binary = await this.find('codex');
-      const [version, features, raw] = await Promise.all([
-        this.run(this.binary, ['--version']), this.run(this.binary, ['features', 'list']), this.run(this.binary, ['debug', 'models', '--bundled']),
+      const [version, features, refreshed] = await Promise.all([
+        this.run(this.binary, ['--version']), this.run(this.binary, ['features', 'list']), this.run(this.binary, ['debug', 'models']).catch(() => null),
       ]);
-      if (version.code || features.code || raw.code) throw new Error('Codex CLI discovery failed.');
+      if (version.code || features.code) throw new Error('Codex CLI discovery failed.');
       this.version = version.stdout.trim();
-      this.catalog = restrictedCatalog(JSON.parse(raw.stdout));
+      let selectedCatalog;
+      try { selectedCatalog = selectCodexCatalog(refreshed); }
+      catch {
+        const bundled = await this.run(this.binary, ['debug', 'models', '--bundled']);
+        selectedCatalog = selectCodexCatalog(refreshed, bundled);
+      }
+      this.catalog = selectedCatalog.catalog;
       this.features = features.stdout.split('\n').map((line) => line.trim().split(/\s+/)[0]).filter((name) => /^[a-z][a-z0-9_.]*$/.test(name));
       if (!this.features.includes('shell_tool') || !this.features.includes('plugins') || !this.features.includes('view_image')) throw new Error('This Codex CLI cannot enforce browser-only tools. Update Codex.');
       const isolation = await this.isolate();
