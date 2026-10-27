@@ -34,7 +34,7 @@
       <button id="collapse" class="icon-button" aria-label="Hide sidebar" title="Hide sidebar" hidden><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="2.2"/><path d="M6.2 3v10"/></svg></button>
       <div id="spaces" class="space-dots" role="tablist" aria-label="Spaces"></div>
       <button id="add-space" class="icon-button" aria-label="New space" title="New space"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg></button>
-      <button id="open-settings" class="icon-button" aria-label="Sidebar and theme settings" title="Sidebar and theme settings"><svg viewBox="0 0 16 16"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></button>
+      <button id="open-settings" class="icon-button" aria-label="Settings" title="Settings"><svg viewBox="0 0 16 16"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></button>
     </footer>
 
     <div id="menu" class="menu" role="menu" hidden></div>
@@ -47,8 +47,8 @@
       <header class="settings-head">
         <img src="icon128.png" width="40" height="40" alt="">
         <div>
-          <h1>Sidebar and themes</h1>
-          <p>Changes apply to every Breezer window as you make them.</p>
+          <h1>Settings</h1>
+          <p>Customize Breezer and open browser settings by category.</p>
         </div>
       </header>
 
@@ -57,14 +57,14 @@
       <section class="settings-section" aria-labelledby="layout-heading">
         <h2 id="layout-heading">Layout</h2>
         <div class="setting-row">
-          <div class="setting-label"><span id="layout-label">Tabs</span><small>Where your tabs live.</small></div>
+          <div class="setting-label"><span id="layout-label">Tabs</span><small>Vertical tabs use the left sidebar by default.</small></div>
           <div class="segmented" role="radiogroup" aria-labelledby="layout-label" data-field="layout">
             <button role="radio" data-value="sidebar">Sidebar</button>
             <button role="radio" data-value="top">Top</button>
           </div>
         </div>
         <div class="setting-row">
-          <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Auto-hide reveals tabs when you hover at the left edge.</small></div>
+          <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Auto-hide reveals tabs at the sidebar edge. This also controls auto-expand on hover.</small></div>
           <div class="segmented" role="radiogroup" aria-labelledby="sidebar-mode-label" data-field="sidebarMode">
             <button role="radio" data-value="expanded">Expanded</button>
             <button role="radio" data-value="compact">Compact</button>
@@ -79,7 +79,41 @@
           <div class="setting-label"><span id="bookmarks-label">Bookmarks bar</span><small>Shown across the top of the window.</small></div>
           <button id="show-bookmarks" class="switch" role="switch" aria-checked="true" aria-labelledby="bookmarks-label" data-field="showBookmarks"><span aria-hidden="true"></span></button>
         </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="centered-address-bar-label">Centered address bar</span><small>Keep the address field centered in the top bar.</small></div>
+          <button id="centered-address-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="centered-address-bar-label" data-field="centeredAddressBar"><span aria-hidden="true"></span></button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="minimal-url-label">Minimal URL in the address bar</span><small>Show a shorter address when you are not editing it.</small></div>
+          <button id="minimal-url" class="switch" role="switch" aria-checked="true" aria-labelledby="minimal-url-label" data-field="minimalUrl"><span aria-hidden="true"></span></button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="show-load-progress-label">Show loading progress in the address bar</span><small>Display page loading progress behind the address.</small></div>
+          <button id="show-load-progress" class="switch" role="switch" aria-checked="true" aria-labelledby="show-load-progress-label" data-field="showLoadProgress"><span aria-hidden="true"></span></button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="frameless-label">Frameless mode</span><small>Hide unpinned browser UI until you hover the window edge.</small></div>
+          <button id="frameless" class="switch" role="switch" aria-checked="true" aria-labelledby="frameless-label" data-field="frameless"><span aria-hidden="true"></span></button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="always-show-sidebar-label">Always show the sidebar</span><small>Keep the sidebar visible in frameless mode.</small></div>
+          <button id="always-show-sidebar" class="switch" role="switch" aria-checked="false" aria-labelledby="always-show-sidebar-label" data-field="alwaysShowSidebar"><span aria-hidden="true"></span></button>
+        </div>
+        <div class="setting-row">
+          <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span><small>Keep the top bar visible in frameless mode.</small></div>
+          <button id="always-show-top-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="always-show-top-bar-label" data-field="alwaysShowTopBar"><span aria-hidden="true"></span></button>
+        </div>
         <p id="layout-error" class="field-error" role="alert" hidden></p>
+      </section>
+
+      <section class="settings-section" aria-labelledby="typography-heading">
+        <h2 id="typography-heading">Typography</h2>
+        <div class="setting-row">
+          <div class="setting-label"><label for="sidebar-font-size">Sidebar font size</label><small id="sidebar-font-size-value">15 px</small></div>
+          <input id="sidebar-font-size" type="range" min="12" max="20" step="1" value="15" data-field="sidebarFontSize" aria-describedby="sidebar-font-note">
+        </div>
+        <p id="sidebar-font-note" class="section-note">Changes tab titles and labels in the sidebar. Page fonts have their own browser setting below.</p>
+        <p id="typography-error" class="field-error" role="alert" hidden></p>
       </section>
 
       <section class="settings-section" aria-labelledby="theme-heading">
@@ -125,12 +159,22 @@
       </section>
 
       <section class="settings-section" aria-labelledby="browser-heading">
-        <h2 id="browser-heading">Browser settings</h2>
+        <h2 id="browser-heading">More browser settings</h2>
+        <p class="section-note">These categories open native browser settings in a new tab.</p>
         <ul class="link-list">
-          <li><button data-url="chrome://settings/appearance">Fonts and page zoom</button></li>
+          <li><button data-url="chrome://settings/appearance">Native appearance, page fonts and zoom</button></li>
           <li><button data-url="chrome://settings/search">Search engine</button></li>
           <li><button data-url="chrome://settings/onStartup">On startup</button></li>
           <li><button data-url="chrome://settings/privacy">Privacy and security</button></li>
+          <li><button data-url="chrome://settings/content">Site permissions</button></li>
+          <li><button data-url="chrome://settings/autofill">Autofill and passwords</button></li>
+          <li><button data-url="chrome://settings/downloads">Downloads</button></li>
+          <li><button data-url="chrome://settings/languages">Languages</button></li>
+          <li><button data-url="chrome://settings/accessibility">Accessibility</button></li>
+          <li><button data-url="chrome://settings/system">System</button></li>
+          <li><button data-url="chrome://settings/reset">Reset settings</button></li>
+          <li><button data-url="chrome://settings/help">About Breezer</button></li>
+          <li><button data-url="chrome://settings/">All native browser settings</button></li>
           <li><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button></li>
           <li><button data-url="chrome://bookmarks">Bookmarks</button></li>
         </ul>

@@ -37,10 +37,17 @@ const evidence = process.env.BREEZER_AI_EVIDENCE
   || join(repo, 'build/arc-redesign/workspace-native-evidence', new Date().toISOString().replace(/[:.]/g, '-'));
 await mkdir(evidence, { recursive: true });
 const profile = await mkdtemp(join(tmpdir(), 'breezer-workspace-native-profile-'));
-// Match the explicit layout/bookmark values in an earlier Breezer profile.
-// Defaults alone would leave that profile on its old layout.
-const oldPreferences = {
-  helium: { browser: { layout: 3, vertical_right_aligned: true } },
+// Default run checks saved choices from v1. Set BREEZER_TEST_FRESH_PROFILE=1
+// to run the same checks against fresh defaults. Neither mode uses a real profile.
+const freshProfile = process.env.BREEZER_TEST_FRESH_PROFILE === '1';
+const oldPreferences = freshProfile ? {} : {
+  breezer: { workspace: { initialized: true } },
+  helium: { browser: {
+    layout: 2, vertical_right_aligned: false,
+    centered_location_bar: false, minimal_location_bar: false,
+    show_progress_bar: false, zen_mode: false,
+    zen_mode_sidebar_pinned: true, zen_mode_top_chrome_pinned: false,
+  } },
   bookmark_bar: { show_on_all_tabs: false },
   vertical_tabs: { uncollapsed_width: 300 },
 };
@@ -345,18 +352,23 @@ try {
   await settings.locator('#theme-swatches [data-value="dusk"]').waitFor();
   await waitFor('settings controls enabled', () => settings.evaluate(() => document.querySelector('#theme-swatches [data-value="dusk"]').getAttribute('aria-disabled') === 'false'));
   assert.equal(await settings.locator('#bridge-note').isHidden(), true, 'Settings reports the native bridge as unavailable.');
-  pass('settingsTab', `Sidebar and theme settings opened as ordinary tab ${settingsTab.id} in window ${windowA}`);
+  pass('settingsTab', `Settings opened as ordinary tab ${settingsTab.id} in window ${windowA}`);
 
   const settingsCall = (name, ...callArgs) => settings.evaluate(settle(privateCall(name, ...callArgs)));
   const appearance = async () => { const result = await settingsCall('getAppearance'); assert.ok(result.ok, result.error); return result.value; };
   const initialAppearance = await appearance();
   observe('initialAppearance', initialAppearance);
-  assert.deepEqual(Object.keys(initialAppearance).sort(), ['colorMode', 'layout', 'showBookmarks', 'sidebarMode', 'sidebarWidth', 'theme']);
-  assert.equal(initialAppearance.layout, 'sidebar', 'An earlier Breezer profile should migrate to the sidebar layout.');
-  assert.equal(initialAppearance.showBookmarks, true, 'Existing profiles should gain the requested top bookmarks bar.');
-  assert.equal(initialAppearance.sidebarWidth, 240, 'Existing profiles should gain the initial workspace width.');
+  assert.deepEqual(Object.keys(initialAppearance).sort(), ['alwaysShowSidebar', 'alwaysShowTopBar', 'centeredAddressBar', 'colorMode', 'frameless', 'layout', 'minimalUrl', 'showBookmarks', 'showLoadProgress', 'sidebarFontSize', 'sidebarMode', 'sidebarWidth', 'theme']);
+  assert.equal(initialAppearance.layout, 'sidebar');
+  assert.equal(initialAppearance.showBookmarks, freshProfile);
+  assert.equal(initialAppearance.sidebarWidth, freshProfile ? 240 : 300);
+  assert.equal(initialAppearance.sidebarFontSize, 15);
+  for (const field of ['centeredAddressBar', 'minimalUrl', 'showLoadProgress', 'frameless', 'alwaysShowTopBar']) {
+    assert.equal(initialAppearance[field], freshProfile, `${field} must respect the profile's saved choice`);
+  }
+  assert.equal(initialAppearance.alwaysShowSidebar, !freshProfile);
   observe('seededOldPreferences', oldPreferences);
-  pass('existingProfileMigration', 'explicit old layout, hidden bookmarks and 300 px width migrated to sidebar, shown bookmarks and 240 px width');
+  pass('profileDefaults', freshProfile ? 'fresh profile received requested appearance defaults' : 'v2 migration preserved explicit v1 choices');
   await settings.screenshot({ path: join(evidence, 'workspace-settings.png'), fullPage: true });
   report.screenshots.push(join(evidence, 'workspace-settings.png'));
 
@@ -366,6 +378,11 @@ try {
     badTheme: await settingsCall('setAppearance', { theme: 'neon' }),
     badLayout: await settingsCall('setAppearance', { layout: 'floating' }),
     empty: await settingsCall('setAppearance', {}),
+    smallFont: await settingsCall('setAppearance', { theme: 'rose', sidebarFontSize: 11 }),
+    largeFont: await settingsCall('setAppearance', { theme: 'rose', sidebarFontSize: 21 }),
+    fractionalFont: await settingsCall('setAppearance', { theme: 'rose', sidebarFontSize: 15.5 }),
+    stringFont: await settingsCall('setAppearance', { theme: 'rose', sidebarFontSize: '15' }),
+    invalidFrameless: await settingsCall('setAppearance', { sidebarFontSize: 18, frameless: 1 }),
   };
   observe('boundedRejections', rejections);
   for (const [name, result] of Object.entries(rejections)) assert.equal(result.ok, false, `setAppearance accepted ${name}`);
@@ -391,6 +408,12 @@ try {
   observe('hostPrefersDarkAfterLight', await hostA.evaluate(`matchMedia('(prefers-color-scheme: dark)').matches`));
   await choose(`.segmented[data-field="colorMode"] [data-value="system"]`, 'colorMode', 'system');
   pass('colorModeRoundTrip', 'dark, light and system round-trip through native ThemeService and both hosted sidebars');
+
+  for (const value of [12, 20, 15]) {
+    await settings.locator('#sidebar-font-size').fill(String(value));
+    await waitFor(`sidebarFontSize=${value}`, async () => (await appearance()).sidebarFontSize === value);
+  }
+  pass('sidebarFontSize', '12, 20 and 15 px round-trip through the native appearance API');
 
   // Bookmark bar: cross-check the native pref through chrome://settings.
   const prefsPage = await context.newPage();

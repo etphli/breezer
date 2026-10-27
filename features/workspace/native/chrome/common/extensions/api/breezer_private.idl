@@ -35,6 +35,14 @@ namespace breezerPrivate {
     ColorMode colorMode;
     boolean showBookmarks;
     long sidebarWidth;
+    // Integer pixels, 12..20 inclusive, default 15.
+    long sidebarFontSize;
+    boolean centeredAddressBar;
+    boolean minimalUrl;
+    boolean showLoadProgress;
+    boolean frameless;
+    boolean alwaysShowSidebar;
+    boolean alwaysShowTopBar;
   };
 
   dictionary AppearancePatch {
@@ -44,6 +52,14 @@ namespace breezerPrivate {
     ColorMode? colorMode;
     boolean? showBookmarks;
     long? sidebarWidth;
+    // Integer pixels, 12..20 inclusive, default 15.
+    long? sidebarFontSize;
+    boolean? centeredAddressBar;
+    boolean? minimalUrl;
+    boolean? showLoadProgress;
+    boolean? frameless;
+    boolean? alwaysShowSidebar;
+    boolean? alwaysShowTopBar;
   };
 
   callback AppearanceCallback = void(Appearance appearance);

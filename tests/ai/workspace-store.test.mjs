@@ -92,15 +92,37 @@ test('routes parse the explicit native window id', () => {
 });
 
 test('appearance defaults and validation match the native contract', () => {
-  assert.deepEqual(DEFAULT_APPEARANCE, { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 });
+  assert.deepEqual(DEFAULT_APPEARANCE, { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true });
   assert.deepEqual(normalizeAppearance(undefined), DEFAULT_APPEARANCE);
   assert.deepEqual(normalizeAppearance({ layout: 'top', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 999 }),
-    { layout: 'top', sidebarMode: 'expanded', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 360 });
+    { ...DEFAULT_APPEARANCE, layout: 'top', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 360 });
   assert.equal(normalizeAppearance({ theme: 'neon' }).theme, 'mint');
   assert.deepEqual(validateAppearancePatch({ theme: 'rose' }), { theme: 'rose' });
   for (const bad of [{}, null, [], { sidebarMode: 'hidden' }, { colour: 'x' }, { theme: 'neon' }, { sidebarWidth: 199 }, { sidebarWidth: 361 }, { sidebarWidth: 240.5 }, { showBookmarks: 'yes' }, { layout: 'left' }]) {
     assert.throws(() => validateAppearancePatch(bad), Error, JSON.stringify(bad));
   }
+});
+
+test('appearance font bounds and native booleans reject an entire invalid patch', () => {
+  for (const sidebarFontSize of [12, 15, 20]) {
+    const patch = { sidebarFontSize, theme: 'rose' };
+    assert.deepEqual(validateAppearancePatch(patch), patch);
+    assert.equal(normalizeAppearance(patch).sidebarFontSize, sidebarFontSize);
+  }
+  for (const sidebarFontSize of [11, 21, 15.5, '15', null, NaN, Infinity]) {
+    assert.throws(() => validateAppearancePatch({ theme: 'rose', sidebarFontSize }), /sidebarFontSize/);
+    assert.equal(normalizeAppearance({ sidebarFontSize }).sidebarFontSize, 15);
+  }
+  for (const field of ['centeredAddressBar', 'minimalUrl', 'showLoadProgress', 'frameless', 'alwaysShowSidebar', 'alwaysShowTopBar']) {
+    for (const value of [true, false]) assert.deepEqual(validateAppearancePatch({ [field]: value }), { [field]: value });
+    assert.throws(() => validateAppearancePatch({ sidebarFontSize: 16, [field]: 1 }), new RegExp(field));
+  }
+  for (const field of ['constructor', 'toString', '__proto__']) {
+    assert.throws(() => validateAppearancePatch(JSON.parse(`{"${field}":true}`)), /Unknown appearance/);
+  }
+  const oldAppearance = { sidebarMode: 'autoHide', sidebarWidth: 280 };
+  assert.equal(normalizeAppearance(oldAppearance).sidebarMode, 'autoHide');
+  assert.equal(normalizeAppearance(oldAppearance).sidebarWidth, 280);
 });
 
 test('store normalization survives corrupt data and keeps at least one space', () => {

@@ -12,8 +12,14 @@ export const TONE_NAMES = { mint: 'Mint', tide: 'Tide', dusk: 'Dusk', rose: 'Ros
 export const MAX_FAVORITES = 12;
 export const MAX_SPACES = 9;
 export const DEFAULT_PREFS = Object.freeze({ newTabPosition: 'bottom', closeButton: 'hover' });
-export const DEFAULT_APPEARANCE = Object.freeze({ layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 });
+export const DEFAULT_APPEARANCE = Object.freeze({
+  layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system',
+  showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15,
+  centeredAddressBar: true, minimalUrl: true, showLoadProgress: true,
+  frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true,
+});
 export const SIDEBAR_WIDTH = Object.freeze({ min: 200, max: 360 });
+export const SIDEBAR_FONT_SIZE = Object.freeze({ min: 12, max: 20 });
 
 export const windowStateKey = (windowId) => `workspace.window.${windowId}`;
 
@@ -23,6 +29,13 @@ const APPEARANCE_FIELDS = {
   theme: (value) => TONES.includes(value),
   colorMode: (value) => value === 'system' || value === 'light' || value === 'dark',
   showBookmarks: (value) => typeof value === 'boolean',
+  sidebarFontSize: (value) => Number.isInteger(value) && value >= SIDEBAR_FONT_SIZE.min && value <= SIDEBAR_FONT_SIZE.max,
+  centeredAddressBar: (value) => typeof value === 'boolean',
+  minimalUrl: (value) => typeof value === 'boolean',
+  showLoadProgress: (value) => typeof value === 'boolean',
+  frameless: (value) => typeof value === 'boolean',
+  alwaysShowSidebar: (value) => typeof value === 'boolean',
+  alwaysShowTopBar: (value) => typeof value === 'boolean',
   sidebarWidth: (value) => Number.isInteger(value) && value >= SIDEBAR_WIDTH.min && value <= SIDEBAR_WIDTH.max,
 };
 
@@ -103,7 +116,7 @@ export function validateAppearancePatch(patch) {
   const keys = Object.keys(patch);
   if (!keys.length) throw new Error('Appearance change is empty.');
   for (const key of keys) {
-    if (!(key in APPEARANCE_FIELDS)) throw new Error(`Unknown appearance setting "${key}".`);
+    if (!Object.hasOwn(APPEARANCE_FIELDS, key)) throw new Error(`Unknown appearance setting "${key}".`);
     if (!APPEARANCE_FIELDS[key](patch[key])) throw new Error(`Invalid value for ${key}.`);
   }
   return { ...patch };

@@ -47,6 +47,32 @@ struct Appearance {
   std::string color_mode;  // "system" | "light" | "dark"
   bool show_bookmarks = true;
   int sidebar_width = breezer_workspace::kDefaultSidebarWidth;
+  int sidebar_font_size = breezer_workspace::kDefaultSidebarFontSize;
+  bool centered_address_bar = true;
+  bool minimal_url = true;
+  bool show_load_progress = true;
+  bool frameless = true;
+  bool always_show_sidebar = false;
+  bool always_show_top_bar = true;
+};
+
+// Fixed mapping only. Callers cannot supply preference names.
+struct BooleanAppearancePref {
+  std::string_view key;
+  std::string_view pref;
+  bool Appearance::*member;
+};
+constexpr BooleanAppearancePref kBooleanAppearancePrefs[] = {
+    {"centeredAddressBar", prefs::kHeliumCenteredLocationBar,
+     &Appearance::centered_address_bar},
+    {"minimalUrl", prefs::kHeliumMinimalLocationBar, &Appearance::minimal_url},
+    {"showLoadProgress", prefs::kHeliumShowProgressBar,
+     &Appearance::show_load_progress},
+    {"frameless", prefs::kHeliumZenMode, &Appearance::frameless},
+    {"alwaysShowSidebar", prefs::kHeliumZenModeSidebarPinned,
+     &Appearance::always_show_sidebar},
+    {"alwaysShowTopBar", prefs::kHeliumZenModeTopChromePinned,
+     &Appearance::always_show_top_bar},
 };
 
 const breezer_workspace::Theme* FindTheme(std::string_view name) {
@@ -59,8 +85,14 @@ const breezer_workspace::Theme* FindTheme(std::string_view name) {
 }
 
 bool IsKnownAppearanceKey(std::string_view key) {
-  return key == "layout" || key == "sidebarMode" || key == "theme" || key == "colorMode" ||
-         key == "showBookmarks" || key == "sidebarWidth";
+  for (const auto& setting : kBooleanAppearancePrefs) {
+    if (key == setting.key) {
+      return true;
+    }
+  }
+  return key == "layout" || key == "sidebarMode" || key == "theme" ||
+         key == "colorMode" || key == "showBookmarks" || key == "sidebarWidth" ||
+         key == "sidebarFontSize";
 }
 
 bool IsUserModifiable(PrefService* prefs, std::string_view path) {
@@ -103,6 +135,14 @@ Appearance ReadAppearance(Profile* profile) {
                  breezer_workspace::kMinSidebarWidth,
                  breezer_workspace::kMaxSidebarWidth);
 
+  result.sidebar_font_size =
+      std::clamp(prefs->GetInteger(breezer_workspace::prefs::kSidebarFontSize),
+                 breezer_workspace::kMinSidebarFontSize,
+                 breezer_workspace::kMaxSidebarFontSize);
+  for (const auto& setting : kBooleanAppearancePrefs) {
+    result.*(setting.member) = prefs->GetBoolean(setting.pref);
+  }
+
   result.color_mode = "system";
   if (theme_service) {
     switch (theme_service->GetBrowserColorScheme()) {
@@ -127,6 +167,10 @@ base::DictValue AppearanceToValue(const Appearance& appearance) {
   result.Set("colorMode", appearance.color_mode);
   result.Set("showBookmarks", appearance.show_bookmarks);
   result.Set("sidebarWidth", appearance.sidebar_width);
+  result.Set("sidebarFontSize", appearance.sidebar_font_size);
+  for (const auto& setting : kBooleanAppearancePrefs) {
+    result.Set(setting.key, appearance.*(setting.member));
+  }
   return result;
 }
 
@@ -144,6 +188,24 @@ bool ParseAppearancePatch(const base::DictValue& patch,
       *error = "Unknown appearance setting: " + entry.first;
       return false;
     }
+  }
+  for (const auto& setting : kBooleanAppearancePrefs) {
+    if (const base::Value* value = patch.Find(setting.key)) {
+      if (!value->is_bool()) {
+        *error = "Invalid value for " + std::string(setting.key) + ".";
+        return false;
+      }
+      appearance->*(setting.member) = value->GetBool();
+    }
+  }
+  if (const base::Value* value = patch.Find("sidebarFontSize")) {
+    if (!value->is_int() ||
+        value->GetInt() < breezer_workspace::kMinSidebarFontSize ||
+        value->GetInt() > breezer_workspace::kMaxSidebarFontSize) {
+      *error = "Invalid value for sidebarFontSize.";
+      return false;
+    }
+    appearance->sidebar_font_size = value->GetInt();
   }
   if (const base::Value* value = patch.Find("layout")) {
     const std::string* layout = value->GetIfString();
@@ -211,6 +273,18 @@ bool CheckAppearanceWritable(Profile* profile,
     *error = "Browser appearance is unavailable.";
     return false;
   }
+  for (const auto& setting : kBooleanAppearancePrefs) {
+    if (patch.contains(setting.key) && !IsUserModifiable(prefs, setting.pref)) {
+      *error = "The " + std::string(setting.key) +
+               " setting is managed by your organization.";
+      return false;
+    }
+  }
+  if (patch.contains("sidebarFontSize") &&
+      !IsUserModifiable(prefs, breezer_workspace::prefs::kSidebarFontSize)) {
+    *error = "The sidebar font size is managed by your organization.";
+    return false;
+  }
   if (patch.contains("sidebarMode") &&
       (!IsUserModifiable(prefs, breezer_workspace::prefs::kSidebarMode) ||
        !IsUserModifiable(prefs, prefs::kVerticalTabsExpandOnHoverEnabled))) {
@@ -263,6 +337,15 @@ void ApplyAppearance(Profile* profile,
                      const Appearance& appearance,
                      const base::DictValue& patch) {
   PrefService* const prefs = profile->GetPrefs();
+  for (const auto& setting : kBooleanAppearancePrefs) {
+    if (patch.contains(setting.key)) {
+      prefs->SetBoolean(setting.pref, appearance.*(setting.member));
+    }
+  }
+  if (patch.contains("sidebarFontSize")) {
+    prefs->SetInteger(breezer_workspace::prefs::kSidebarFontSize,
+                      appearance.sidebar_font_size);
+  }
   if (patch.contains("layout")) {
     prefs->SetInteger(prefs::kHeliumLayout,
                       std::to_underlying(appearance.layout == "sidebar"

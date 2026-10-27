@@ -117,6 +117,38 @@ def check_overlay(tree, originals):
     require("native_tab_strip->SetVisible(!workspace_available)" in replacement_text,
             "Native visible tab rows are not hidden while the extension host is active")
 
+    # These source checks supplement, but do not replace, compiled API tests.
+    require('long sidebarFontSize;' in idl and 'long? sidebarFontSize;' in idl,
+            "Sidebar font size is missing from the bounded schema")
+    for bound, value in (("Default", 15), ("Min", 12), ("Max", 20)):
+        require(f'k{bound}SidebarFontSize = {value};' in constants,
+                f"Incorrect {bound.lower()} sidebar font size")
+    setter = api.split('BreezerPrivateSetAppearanceFunction::RunFunction()', 1)[1].split(
+        'BreezerPrivateSetSidebarCollapsedFunction', 1)[0]
+    require(setter.index('ParseAppearancePatch') < setter.index('ApplyAppearance') and
+            setter.index('CheckAppearanceWritable') < setter.index('ApplyAppearance'),
+            "Appearance writes must follow whole-patch validation and policy checks")
+    require('!IsUserModifiable(prefs, breezer_workspace::prefs::kSidebarFontSize)' in api and
+            'value->GetInt() < breezer_workspace::kMinSidebarFontSize' in api and
+            'value->GetInt() > breezer_workspace::kMaxSidebarFontSize' in api,
+            "Font size is missing native bounds or policy checks")
+    controller = (tree / workspace.LAYOUT_CONTROLLER).read_text()
+    require('!prefs->GetUserPrefValue(path)' in controller and
+            'pref->IsUserModifiable() && pref->IsDefaultValue()' in controller and
+            'kAppearanceDefaultsVersion) >=' in controller,
+            "Versioned migration must preserve explicit and managed choices")
+    require('SetBoolean(prefs::kVerticalTabsExpandOnHoverEnabled' not in controller,
+            "Defaults migration must not interpret the disabled auto-expand switch")
+    pages = (tree / 'chrome/browser/ui/chrome_pages.cc').read_text()
+    root_settings = pages.split('void ShowSettings(BrowserWindowInterface* browser)', 1)[1].split(
+        'void ShowSettingsSubPage(', 1)[0]
+    require('workspace.html#/settings' in root_settings and
+            'IsOffTheRecord()' in root_settings and 'enabled_extensions()' in root_settings and
+            'ShowSettingsSubPage(browser, std::string());' in root_settings,
+            "Default settings entry must use the hub with a native fallback")
+    require('ShowSingletonTabIgnorePathOverwriteNTP(browser, GetSettingsUrl(sub_page));' in pages,
+            "Native settings category navigation changed")
+
     fingerprint = workspace.fingerprint()
     require(re.fullmatch(r"[0-9a-f]{64}", fingerprint) is not None,
             "Workspace fingerprint is not lowercase SHA-256")
@@ -124,12 +156,19 @@ def check_overlay(tree, originals):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--offline", action="store_true",
-                        help="Use only the prepared pinned-source cache")
+    downloads = parser.add_mutually_exclusive_group()
+    downloads.add_argument("--offline", action="store_true",
+                           help="Use only the prepared pinned-source cache")
+    downloads.add_argument("--no-cache", action="store_true",
+                           help="Fetch the pinned fixture into temporary storage only")
     args = parser.parse_args()
 
     with tempfile.TemporaryDirectory(prefix="breezer-workspace-overlay-") as directory:
-        tree = Path(directory).resolve()
+        temporary = Path(directory).resolve()
+        tree = temporary / "source"
+        tree.mkdir()
+        if args.no_cache:
+            source_fixture.CACHE = temporary / "pristine"
         originals = source_fixture.prepare(
             tree, offline=args.offline, wanted_paths=tuple(workspace.replacements())
         )

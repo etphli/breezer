@@ -229,49 +229,73 @@ def _layout_controller_replacements():
             '  return pref && pref->IsUserModifiable();\n'
             '}\n'
             '\n'
-            '// Applies Breezer\'s defaults once per regular profile, including profiles\n'
-            '// created by Helium or earlier Breezer builds: sidebar layout on the left,\n'
-            '// bookmarks bar shown, default sidebar width, and the Mint frame tone when\n'
-            '// the profile still uses the plain default theme. Managed values and\n'
-            '// installed, policy or custom themes are left alone, and later user choices\n'
-            '// are never overwritten.\n'
+            '// Explicit saved choices, managed prefs and extension-controlled prefs win.\n'
+            'bool CanInitializePref(PrefService* prefs, std::string_view path) {\n'
+            '  const auto* pref = prefs->FindPreference(path);\n'
+            '  return pref && pref->IsUserModifiable() && pref->IsDefaultValue() &&\n'
+            '         !prefs->GetUserPrefValue(path);\n'
+            '}\n'
+            '\n'
             'void MaybeInitializeBreezerWorkspace(Profile* profile, PrefService* prefs) {\n'
-            '  if (!IsUserModifiable(prefs, breezer_workspace::prefs::kInitialized) ||\n'
-            '      prefs->GetBoolean(breezer_workspace::prefs::kInitialized)) {\n'
+            '  if (!IsUserModifiable(prefs,\n'
+            '                        breezer_workspace::prefs::kAppearanceDefaultsVersion) ||\n'
+            '      prefs->GetInteger(breezer_workspace::prefs::kAppearanceDefaultsVersion) >=\n'
+            '          breezer_workspace::kAppearanceDefaultsVersion) {\n'
             '    return;\n'
             '  }\n'
-            '  if (IsUserModifiable(prefs, prefs::kHeliumLayout)) {\n'
-            '    prefs->SetInteger(prefs::kHeliumLayout,\n'
-            '                      std::to_underlying(HeliumLayoutType::kVertical));\n'
+            '  // v1 wrote layout, width, bookmarks and theme once. Preserve those profiles.\n'
+            '  // Profiles predating v1 only receive defaults for prefs with no saved choice.\n'
+            '  if (!prefs->GetBoolean(breezer_workspace::prefs::kInitialized)) {\n'
+            '    if (CanInitializePref(prefs, prefs::kHeliumLayout)) {\n'
+            '      prefs->SetInteger(prefs::kHeliumLayout,\n'
+            '                        std::to_underlying(HeliumLayoutType::kVertical));\n'
+            '    }\n'
+            '    if (CanInitializePref(prefs, prefs::kHeliumVerticalRightAligned)) {\n'
+            '      prefs->SetBoolean(prefs::kHeliumVerticalRightAligned, false);\n'
+            '    }\n'
+            '    if (CanInitializePref(prefs, bookmarks::prefs::kShowBookmarkBar)) {\n'
+            '      prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar, true);\n'
+            '    }\n'
+            '    if (CanInitializePref(prefs, prefs::kVerticalTabsUncollapsedWidth)) {\n'
+            '      prefs->SetInteger(prefs::kVerticalTabsUncollapsedWidth,\n'
+            '                        breezer_workspace::kDefaultSidebarWidth);\n'
+            '    }\n'
+            '    static_assert(breezer_workspace::kThemes[0].name ==\n'
+            '                  breezer_workspace::kDefaultTheme);\n'
+            '    ThemeService* const theme_service =\n'
+            '        ThemeServiceFactory::GetForProfile(profile);\n'
+            '    if (theme_service && !theme_service->UsingPolicyTheme() &&\n'
+            '        !theme_service->GetIsGrayscale() &&\n'
+            '        CanInitializePref(prefs, prefs::kCurrentThemeID) &&\n'
+            '        CanInitializePref(prefs, prefs::kUserColor)) {\n'
+            '      theme_service->SetUserColorAndBrowserColorVariant(\n'
+            '          breezer_workspace::kThemes[0].seed,\n'
+            '          ui::mojom::BrowserColorVariant::kTonalSpot);\n'
+            '    }\n'
+            '    if (IsUserModifiable(prefs, breezer_workspace::prefs::kInitialized)) {\n'
+            '      prefs->SetBoolean(breezer_workspace::prefs::kInitialized, true);\n'
+            '    }\n'
             '  }\n'
-            '  if (IsUserModifiable(prefs, prefs::kHeliumVerticalRightAligned)) {\n'
-            '    prefs->SetBoolean(prefs::kHeliumVerticalRightAligned, false);\n'
+            '  // v2 adopts the requested frameless/address bar defaults without interpreting\n'
+            "  // the disabled native auto-expand switch or changing Breezer's autoHide mode.\n"
+            '  const struct {\n'
+            '    std::string_view path;\n'
+            '    bool value;\n'
+            '  } defaults[] = {\n'
+            '      {prefs::kHeliumCenteredLocationBar, true},\n'
+            '      {prefs::kHeliumMinimalLocationBar, true},\n'
+            '      {prefs::kHeliumShowProgressBar, true},\n'
+            '      {prefs::kHeliumZenMode, true},\n'
+            '      {prefs::kHeliumZenModeSidebarPinned, false},\n'
+            '      {prefs::kHeliumZenModeTopChromePinned, true},\n'
+            '  };\n'
+            '  for (const auto& setting : defaults) {\n'
+            '    if (CanInitializePref(prefs, setting.path)) {\n'
+            '      prefs->SetBoolean(setting.path, setting.value);\n'
+            '    }\n'
             '  }\n'
-            '  if (IsUserModifiable(prefs, bookmarks::prefs::kShowBookmarkBar)) {\n'
-            '    prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar, true);\n'
-            '  }\n'
-            '  if (IsUserModifiable(prefs, prefs::kVerticalTabsUncollapsedWidth)) {\n'
-            '    prefs->SetInteger(prefs::kVerticalTabsUncollapsedWidth,\n'
-            '                      breezer_workspace::kDefaultSidebarWidth);\n'
-            '  }\n'
-            '\n'
-            '  static_assert(breezer_workspace::kThemes[0].name ==\n'
-            '                breezer_workspace::kDefaultTheme);\n'
-            '  ThemeService* const theme_service =\n'
-            '      ThemeServiceFactory::GetForProfile(profile);\n'
-            '  const PrefService::Preference* const theme_id =\n'
-            '      prefs->FindPreference(prefs::kCurrentThemeID);\n'
-            '  const PrefService::Preference* const user_color =\n'
-            '      prefs->FindPreference(prefs::kUserColor);\n'
-            '  if (theme_service && !theme_service->UsingPolicyTheme() &&\n'
-            '      !theme_service->GetIsGrayscale() && theme_id &&\n'
-            '      theme_id->IsDefaultValue() && user_color &&\n'
-            '      user_color->IsDefaultValue() && user_color->IsUserModifiable()) {\n'
-            '    theme_service->SetUserColorAndBrowserColorVariant(\n'
-            '        breezer_workspace::kThemes[0].seed,\n'
-            '        ui::mojom::BrowserColorVariant::kTonalSpot);\n'
-            '  }\n'
-            '  prefs->SetBoolean(breezer_workspace::prefs::kInitialized, true);\n'
+            '  prefs->SetInteger(breezer_workspace::prefs::kAppearanceDefaultsVersion,\n'
+            '                    breezer_workspace::kAppearanceDefaultsVersion);\n'
             '}\n'
             '\n'
             '}  // namespace\n',
@@ -429,6 +453,44 @@ def replacements():
         LAYOUT_CONTROLLER: _layout_controller_replacements(),
         VERTICAL_CONTROLLER: _vertical_controller_replacements(),
         WINDOW_FEATURES: _window_features_replacements(),
+        "chrome/browser/ui/chrome_pages.cc": [
+            (
+                '#include "extensions/browser/extension_prefs.h"\n',
+                '#include "extensions/browser/extension_prefs.h"\n'
+                '#include "extensions/buildflags/buildflags.h"\n'
+                '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+                '#include "extensions/browser/extension_registry.h"\n'
+                '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
+                '#endif\n',
+            ),
+            (
+                'void ShowSettings(BrowserWindowInterface* browser) {\n'
+                '  ShowSettingsSubPage(browser, std::string());\n',
+                'void ShowSettings(BrowserWindowInterface* browser) {\n'
+                '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+                '  auto* registry = extensions::ExtensionRegistry::Get(browser->GetProfile());\n'
+                '  if (!browser->GetProfile()->IsOffTheRecord() && registry &&\n'
+                '      registry->enabled_extensions().GetByID(breezer_workspace::kExtensionId)) {\n'
+                '    FocusWebContents(browser);\n'
+                '    ShowSingletonTab(browser,\n'
+                '                     GURL("chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/"\n'
+                '                          "workspace.html#/settings"));\n'
+                '    return;\n'
+                '  }\n'
+                '#endif\n'
+                '  ShowSettingsSubPage(browser, std::string());\n',
+            ),
+        ],
+        "chrome/browser/ui/browser_ui_prefs.cc": [
+            (
+                '  registry->RegisterBooleanPref(prefs::kHeliumCenteredLocationBar, false);\n',
+                '  registry->RegisterBooleanPref(prefs::kHeliumCenteredLocationBar, true);\n',
+            ),
+            (
+                '  registry->RegisterBooleanPref(prefs::kHeliumMinimalLocationBar, false);\n',
+                '  registry->RegisterBooleanPref(prefs::kHeliumMinimalLocationBar, true);\n',
+            ),
+        ],
         "chrome/browser/ui/helium/BUILD.gn": [
             (
                 '    "helium_layout_state_controller.cc",\n'
@@ -456,18 +518,26 @@ def replacements():
         ],
         "chrome/browser/ui/tabs/tab_strip_prefs.cc": [
             (
+                "  registry->RegisterBooleanPref(prefs::kHeliumZenMode, false);\n",
+                "  registry->RegisterBooleanPref(prefs::kHeliumZenMode, true);\n",
+            ),
+            (
                 '#include "chrome/browser/ui/helium/helium_layout_state_controller.h"\n',
                 '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
                 '#include "chrome/browser/ui/helium/helium_layout_state_controller.h"\n',
             ),
             (
                 "  registry->RegisterBooleanPref(prefs::kHeliumZenModeTopChromePinned, false);\n",
-                "  registry->RegisterBooleanPref(prefs::kHeliumZenModeTopChromePinned, false);\n"
+                "  registry->RegisterBooleanPref(prefs::kHeliumZenModeTopChromePinned, true);\n"
                 "  registry->RegisterStringPref(breezer_workspace::prefs::kTheme,\n"
                 "                               breezer_workspace::kDefaultTheme);\n"
                 "  registry->RegisterBooleanPref(breezer_workspace::prefs::kInitialized,\n"
                 "                                false);\n"
-                '  registry->RegisterStringPref(breezer_workspace::prefs::kSidebarMode, "expanded");\n',
+                '  registry->RegisterStringPref(breezer_workspace::prefs::kSidebarMode, "expanded");\n'
+                '  registry->RegisterIntegerPref(breezer_workspace::prefs::kSidebarFontSize,\n'
+                '                                breezer_workspace::kDefaultSidebarFontSize);\n'
+                '  registry->RegisterIntegerPref(\n'
+                '      breezer_workspace::prefs::kAppearanceDefaultsVersion, 0);\n',
             ),
         ],
         "chrome/browser/ui/BUILD.gn": [

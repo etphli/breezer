@@ -11,6 +11,11 @@ namespace breezer_workspace {
 
 inline constexpr char kExtensionId[] = "namgcidocfgliiedlkdafcmifpdfiakj";
 
+inline constexpr int kDefaultSidebarFontSize = 15;
+inline constexpr int kMinSidebarFontSize = 12;
+inline constexpr int kMaxSidebarFontSize = 20;
+inline constexpr int kAppearanceDefaultsVersion = 2;
+
 inline constexpr int kDefaultSidebarWidth = 240;
 inline constexpr int kMinSidebarWidth = 200;
 inline constexpr int kMaxSidebarWidth = 360;
@@ -32,10 +37,12 @@ namespace prefs {
 // Last Breezer theme the user picked. Reported when the browser color does
 // not match one of kThemes exactly.
 inline constexpr char kTheme[] = "breezer.workspace.theme";
-// Set once the one-time layout, bookmarks bar, width and theme defaults have
-// been applied to a profile. Later user choices are never overwritten.
+// Legacy v1 initialization marker. Retained so upgraded profiles keep their choices.
 inline constexpr char kInitialized[] = "breezer.workspace.initialized";
 inline constexpr char kSidebarMode[] = "breezer.workspace.sidebar_mode";
+inline constexpr char kSidebarFontSize[] = "breezer.workspace.sidebar_font_size";
+inline constexpr char kAppearanceDefaultsVersion[] =
+    "breezer.workspace.appearance_defaults_version";
 
 }  // namespace prefs
 }  // namespace breezer_workspace

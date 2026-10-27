@@ -68,7 +68,7 @@ function installFixture({ seed, bridge, bridgeFails }) {
     tabs: load(localStorage, 'fx-tabs', seed.tabs),
     local: load(localStorage, 'fx-local', seed.local),
     session: load(sessionStorage, 'fx-session', seed.session),
-    appearance: load(localStorage, 'fx-appearance', { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 }),
+    appearance: load(localStorage, 'fx-appearance', { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true }),
     calls: [],
     listeners: {},
   };
@@ -187,6 +187,8 @@ function installFixture({ seed, bridge, bridgeFails }) {
       sidebarMode: (v) => ['expanded', 'compact', 'autoHide'].includes(v),
       colorMode: (v) => ['system', 'light', 'dark'].includes(v), showBookmarks: (v) => typeof v === 'boolean',
       sidebarWidth: (v) => Number.isInteger(v) && v >= 200 && v <= 360,
+      sidebarFontSize: (v) => Number.isInteger(v) && v >= 12 && v <= 20,
+      ...Object.fromEntries(['centeredAddressBar', 'minimalUrl', 'showLoadProgress', 'frameless', 'alwaysShowSidebar', 'alwaysShowTopBar'].map(key => [key, v => typeof v === 'boolean'])),
     };
     window.chrome.breezerPrivate = {
       async getAppearance() { return copy(fx.appearance); },
@@ -343,11 +345,30 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     // ---------------------------------------------------------- settings
     const settings = await newPage({ bridge: true }, { width: 1000, height: 1400 });
     await settings.goto(`${base}/workspace.html#/settings`);
-    await settings.getByRole('heading', { name: 'Sidebar and themes' }).waitFor();
+    await settings.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
     assert.equal(await settings.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.getByRole('radio', { name: 'Sidebar' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.getByRole('switch', { name: 'Bookmarks bar' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('#sidebar-width').inputValue(), '240');
+    assert.equal(await settings.title(), 'Settings');
+    assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
+    for (const value of [12, 20, 15]) {
+      await settings.getByRole('slider', { name: 'Sidebar font size' }).fill(String(value));
+      await settings.waitForFunction(v => window.fx.appearance.sidebarFontSize === v, value);
+      assert.equal(await settings.locator('#sidebar-font-size-value').innerText(), `${value} px`);
+    }
+    for (const [id, initial] of [['centered-address-bar', true], ['minimal-url', true], ['show-load-progress', true], ['frameless', true], ['always-show-sidebar', false], ['always-show-top-bar', true]]) {
+      const control = settings.locator(`#${id}`);
+      assert.equal(await control.getAttribute('aria-checked'), String(initial));
+      await control.click();
+      await settings.waitForFunction(({ id, value }) => document.getElementById(id).getAttribute('aria-checked') === String(value), { id, value: !initial });
+      await control.click();
+      await settings.waitForFunction(({ id, value }) => document.getElementById(id).getAttribute('aria-checked') === String(value), { id, value: initial });
+    }
+    await settings.getByRole('button', { name: 'Privacy and security', exact: true }).click();
+    await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/privacy'));
+    await settings.getByRole('button', { name: 'All native browser settings', exact: true }).click();
+    await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/'));
     for (const [label, mode] of [['Compact', 'compact'], ['Auto-hide', 'autoHide'], ['Expanded', 'expanded']]) {
       await settings.getByRole('radio', { name: label, exact: true }).click();
       await settings.waitForFunction(value => window.fx.appearance.sidebarMode === value, mode);
@@ -370,6 +391,19 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].spaces.length === 3);
     await settings.getByRole('radio', { name: 'Mint' }).click();
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'mint');
+    await settings.getByRole('slider', { name: 'Sidebar font size' }).fill('18');
+    await settings.waitForFunction(() => window.fx.appearance.sidebarFontSize === 18);
+    await settings.locator('#centered-address-bar').click();
+    await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === false);
+    await settings.reload();
+    await settings.getByRole('slider', { name: 'Sidebar font size' }).waitFor();
+    assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '18');
+    assert.equal(await settings.locator('#centered-address-bar').getAttribute('aria-checked'), 'false');
+    assert.equal(await settings.locator('#frameless').getAttribute('aria-checked'), 'true');
+    await settings.getByRole('slider', { name: 'Sidebar font size' }).fill('15');
+    await settings.waitForFunction(() => window.fx.appearance.sidebarFontSize === 15);
+    await settings.locator('#centered-address-bar').click();
+    await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === true);
     await settings.screenshot({ path: `${evidence}/workspace-settings.png`, fullPage: true });
     await settings.emulateMedia({ colorScheme: 'dark' });
     await settings.screenshot({ path: `${evidence}/workspace-settings-dark.png`, fullPage: true });
@@ -381,6 +415,12 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await failing.getByText(/Couldn’t change the theme\. Rejected by the browser\./).waitFor();
     assert.equal(await failing.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
     assert.equal(await failing.evaluate(() => document.documentElement.dataset.tone), 'mint');
+    await failing.getByRole('slider', { name: 'Sidebar font size' }).fill('18');
+    await failing.locator('#typography-error').getByText(/Rejected by the browser/).waitFor();
+    assert.equal(await failing.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
+    await failing.locator('#frameless').click();
+    await failing.locator('#layout-error').getByText(/Rejected by the browser/).waitFor();
+    assert.equal(await failing.locator('#frameless').getAttribute('aria-checked'), 'true');
 
     // Without the native bridge nothing pretends to apply.
     const missing = await newPage({ bridge: false }, { width: 900, height: 900 });
@@ -388,6 +428,8 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await missing.getByText(/this build doesn’t include/).waitFor();
     assert.equal(await missing.getByRole('radio', { name: 'Top', exact: true }).getAttribute('aria-disabled'), 'true');
     assert.equal(await missing.locator('#sidebar-width').isDisabled(), true);
+    assert.equal(await missing.locator('#sidebar-font-size').isDisabled(), true);
+    assert.equal(await missing.locator('#frameless').getAttribute('aria-disabled'), 'true');
     await missing.getByRole('radio', { name: 'Dusk' }).click({ force: true });
     assert.equal(await missing.evaluate(() => document.documentElement.dataset.tone), 'mint');
     assert.equal(await missing.getByRole('radio', { name: 'At bottom' }).getAttribute('aria-disabled'), null, 'store-backed tab settings still work');

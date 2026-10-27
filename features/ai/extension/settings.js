@@ -7,9 +7,22 @@ import {
 } from './workspace-store.js';
 
 const $ = (id) => document.getElementById(id);
-const FIELD_LABELS = { layout: 'tab layout', sidebarMode: 'sidebar behavior', theme: 'theme', colorMode: 'appearance', showBookmarks: 'bookmarks bar', sidebarWidth: 'sidebar width' };
-const FIELD_ERRORS = { layout: 'layout-error', sidebarMode: 'layout-error', sidebarWidth: 'layout-error', showBookmarks: 'layout-error', theme: 'theme-error', colorMode: 'theme-error' };
-const VALUE_LABELS = { sidebar: 'Sidebar', top: 'Top', expanded: 'Expanded', compact: 'Compact', autoHide: 'Auto-hide', system: 'System', light: 'Light', dark: 'Dark', ...TONE_NAMES };
+const FIELD_LABELS = {
+  layout: 'tab layout', sidebarMode: 'sidebar behavior', theme: 'theme',
+  colorMode: 'appearance', showBookmarks: 'bookmarks bar', sidebarWidth: 'sidebar width',
+  sidebarFontSize: 'sidebar font size', centeredAddressBar: 'centered address bar',
+  minimalUrl: 'minimal URL', showLoadProgress: 'loading progress',
+  frameless: 'frameless mode', alwaysShowSidebar: 'sidebar visibility',
+  alwaysShowTopBar: 'top bar visibility',
+};
+const FIELD_ERRORS = {
+  layout: 'layout-error', sidebarMode: 'layout-error', sidebarWidth: 'layout-error',
+  showBookmarks: 'layout-error', theme: 'theme-error', colorMode: 'theme-error',
+  sidebarFontSize: 'typography-error', centeredAddressBar: 'layout-error',
+  minimalUrl: 'layout-error', showLoadProgress: 'layout-error', frameless: 'layout-error',
+  alwaysShowSidebar: 'layout-error', alwaysShowTopBar: 'layout-error',
+};
+const VALUE_LABELS = { sidebar: 'Sidebar', top: 'Top', expanded: 'Expanded', compact: 'Compact', autoHide: 'Auto-hide', system: 'System', light: 'Light', dark: 'Dark', true: 'On', false: 'Off', ...TONE_NAMES };
 
 function el(tag, className, attrs = {}) {
   const node = document.createElement(tag);
@@ -55,7 +68,7 @@ function setRadioValue(group, value) {
 
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
-  document.title = 'Sidebar and themes';
+  document.title = 'Settings';
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
   const busy = new Set();
@@ -78,27 +91,30 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   const groups = [...document.querySelectorAll('.segmented[data-field]')];
   const width = $('sidebar-width');
-  const bookmarks = $('show-bookmarks');
-  const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, width, bookmarks];
+  const switches = [...document.querySelectorAll('.switch[data-field]')];
+  const ranges = [...document.querySelectorAll('input[type="range"][data-field]')];
+  const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, ...ranges, ...switches];
 
   function renderAppearance() {
     applyAppearance(appearance);
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
-    if (!busy.has('sidebarWidth')) width.value = String(appearance.sidebarWidth);
-    $('sidebar-width-value').textContent = `${width.value} px`;
-    bookmarks.setAttribute('aria-checked', String(appearance.showBookmarks));
+    for (const range of ranges) {
+      if (!busy.has(range.dataset.field)) range.value = String(appearance[range.dataset.field]);
+      $(`${range.id}-value`).textContent = `${range.value} px`;
+    }
+    for (const control of switches) control.setAttribute('aria-checked', String(appearance[control.dataset.field]));
     width.closest('.setting-row').classList.toggle('muted-row', appearance.layout === 'top');
     for (const control of appearanceControls) {
       const disabled = !available || busy.size > 0;
-      if (control.tagName === 'INPUT') control.disabled = !available;
+      if (control.tagName === 'INPUT') control.disabled = disabled;
       else control.setAttribute('aria-disabled', String(disabled));
     }
     const note = $('bridge-note');
     if (!available) {
       note.textContent = error
-        ? `Couldn’t read layout and theme settings: ${error} Reopen this page to try again.`
-        : 'Layout and theme need Breezer’s browser integration, which this build doesn’t include. Defaults are shown and can’t be changed here.';
+        ? `Couldn’t read browser appearance settings: ${error} Reopen this page to try again.`
+        : 'Browser appearance settings need Breezer’s browser integration, which this build doesn’t include. Defaults are shown and can’t be changed here.';
       note.hidden = false;
     } else {
       note.hidden = true;
@@ -133,14 +149,18 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     if (value !== appearance[group.dataset.field]) void apply(group.dataset.field, value);
   });
   wireRadioGroup(swatches, (value) => { if (value !== appearance.theme) void apply('theme', value); });
-  bookmarks.addEventListener('click', () => {
-    if (bookmarks.getAttribute('aria-disabled') !== 'true') void apply('showBookmarks', !appearance.showBookmarks);
-  });
-  width.addEventListener('input', () => { $('sidebar-width-value').textContent = `${width.value} px`; });
-  width.addEventListener('change', () => {
-    const value = Number(width.value);
-    if (value !== appearance.sidebarWidth) void apply('sidebarWidth', value);
-  });
+  for (const control of switches) {
+    control.addEventListener('click', () => {
+      if (control.getAttribute('aria-disabled') !== 'true') void apply(control.dataset.field, !appearance[control.dataset.field]);
+    });
+  }
+  for (const range of ranges) {
+    range.addEventListener('input', () => { $(`${range.id}-value`).textContent = `${range.value} px`; });
+    range.addEventListener('change', () => {
+      const value = Number(range.value);
+      if (value !== appearance[range.dataset.field]) void apply(range.dataset.field, value);
+    });
+  }
 
   const refreshAppearance = async () => {
     if (busy.size) return;
