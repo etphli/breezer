@@ -68,7 +68,7 @@ function installFixture({ seed, bridge, bridgeFails }) {
     tabs: load(localStorage, 'fx-tabs', seed.tabs),
     local: load(localStorage, 'fx-local', seed.local),
     session: load(sessionStorage, 'fx-session', seed.session),
-    appearance: load(localStorage, 'fx-appearance', { layout: 'sidebar', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 }),
+    appearance: load(localStorage, 'fx-appearance', { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 }),
     calls: [],
     listeners: {},
   };
@@ -184,6 +184,7 @@ function installFixture({ seed, bridge, bridgeFails }) {
   if (bridge) {
     const fields = {
       layout: (v) => ['sidebar', 'top'].includes(v), theme: (v) => ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite'].includes(v),
+      sidebarMode: (v) => ['expanded', 'compact', 'autoHide'].includes(v),
       colorMode: (v) => ['system', 'light', 'dark'].includes(v), showBookmarks: (v) => typeof v === 'boolean',
       sidebarWidth: (v) => Number.isInteger(v) && v >= 200 && v <= 360,
     };

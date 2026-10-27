@@ -83,6 +83,7 @@ export async function loadAppearance() {
 export function applyAppearance(appearance) {
   const root = document.documentElement;
   root.dataset.tone = appearance.theme;
+  root.dataset.sidebarMode = appearance.sidebarMode;
   const scheme = appearance.colorMode === 'system' ? (darkQuery.matches ? 'dark' : 'light') : appearance.colorMode;
   root.dataset.scheme = scheme;
   root.style.colorScheme = scheme;
@@ -1406,7 +1407,12 @@ function bindSidebar() {
   if (typeof api.breezerPrivate?.setSidebarCollapsed === 'function') {
     $('collapse').hidden = false;
     $('collapse').addEventListener('click', () => {
-      void callBridge('setSidebarCollapsed', true).catch((error) => showToast(`Couldn’t hide the sidebar. ${errorText(error)}`));
+      const sidebarMode = state.appearance.sidebarMode === 'compact' ? 'expanded' : state.appearance.sidebarMode === 'autoHide' ? 'expanded' : 'compact';
+      void callBridge('setAppearance', { sidebarMode }).then(async (result) => {
+        state.appearance = normalizeAppearance(result);
+        applyAppearance(state.appearance);
+        await api.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() });
+      }).catch((error) => showToast(`Couldn’t change the sidebar. ${errorText(error)}`));
     });
   }
   document.addEventListener('keydown', (event) => {

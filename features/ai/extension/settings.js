@@ -7,9 +7,9 @@ import {
 } from './workspace-store.js';
 
 const $ = (id) => document.getElementById(id);
-const FIELD_LABELS = { layout: 'tab layout', theme: 'theme', colorMode: 'appearance', showBookmarks: 'bookmarks bar', sidebarWidth: 'sidebar width' };
-const FIELD_ERRORS = { layout: 'layout-error', sidebarWidth: 'layout-error', showBookmarks: 'layout-error', theme: 'theme-error', colorMode: 'theme-error' };
-const VALUE_LABELS = { sidebar: 'Sidebar', top: 'Top', system: 'System', light: 'Light', dark: 'Dark', ...TONE_NAMES };
+const FIELD_LABELS = { layout: 'tab layout', sidebarMode: 'sidebar behavior', theme: 'theme', colorMode: 'appearance', showBookmarks: 'bookmarks bar', sidebarWidth: 'sidebar width' };
+const FIELD_ERRORS = { layout: 'layout-error', sidebarMode: 'layout-error', sidebarWidth: 'layout-error', showBookmarks: 'layout-error', theme: 'theme-error', colorMode: 'theme-error' };
+const VALUE_LABELS = { sidebar: 'Sidebar', top: 'Top', expanded: 'Expanded', compact: 'Compact', autoHide: 'Auto-hide', system: 'System', light: 'Light', dark: 'Dark', ...TONE_NAMES };
 
 function el(tag, className, attrs = {}) {
   const node = document.createElement(tag);

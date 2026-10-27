@@ -12,13 +12,14 @@ export const TONE_NAMES = { mint: 'Mint', tide: 'Tide', dusk: 'Dusk', rose: 'Ros
 export const MAX_FAVORITES = 12;
 export const MAX_SPACES = 9;
 export const DEFAULT_PREFS = Object.freeze({ newTabPosition: 'bottom', closeButton: 'hover' });
-export const DEFAULT_APPEARANCE = Object.freeze({ layout: 'sidebar', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 });
+export const DEFAULT_APPEARANCE = Object.freeze({ layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 });
 export const SIDEBAR_WIDTH = Object.freeze({ min: 200, max: 360 });
 
 export const windowStateKey = (windowId) => `workspace.window.${windowId}`;
 
 const APPEARANCE_FIELDS = {
   layout: (value) => value === 'sidebar' || value === 'top',
+  sidebarMode: (value) => ['expanded', 'compact', 'autoHide'].includes(value),
   theme: (value) => TONES.includes(value),
   colorMode: (value) => value === 'system' || value === 'light' || value === 'dark',
   showBookmarks: (value) => typeof value === 'boolean',

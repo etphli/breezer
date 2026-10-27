@@ -7,6 +7,12 @@ namespace breezerPrivate {
     top
   };
 
+  enum SidebarMode {
+    expanded,
+    compact,
+    autoHide
+  };
+
   enum Theme {
     mint,
     tide,
@@ -24,6 +30,7 @@ namespace breezerPrivate {
 
   dictionary Appearance {
     Layout layout;
+    SidebarMode sidebarMode;
     Theme theme;
     ColorMode colorMode;
     boolean showBookmarks;
@@ -32,6 +39,7 @@ namespace breezerPrivate {
 
   dictionary AppearancePatch {
     Layout? layout;
+    SidebarMode? sidebarMode;
     Theme? theme;
     ColorMode? colorMode;
     boolean? showBookmarks;

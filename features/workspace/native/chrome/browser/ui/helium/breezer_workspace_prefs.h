@@ -35,6 +35,7 @@ inline constexpr char kTheme[] = "breezer.workspace.theme";
 // Set once the one-time layout, bookmarks bar, width and theme defaults have
 // been applied to a profile. Later user choices are never overwritten.
 inline constexpr char kInitialized[] = "breezer.workspace.initialized";
+inline constexpr char kSidebarMode[] = "breezer.workspace.sidebar_mode";
 
 }  // namespace prefs
 }  // namespace breezer_workspace

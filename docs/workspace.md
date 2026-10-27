@@ -11,6 +11,7 @@ Use the dots at the bottom to switch spaces. Control 1 through Control 4 selects
 Open **Sidebar and theme settings** from the sidebar footer, choose **Settings** from the browser menu, or press Command comma. The full-page settings screen provides:
 
 - Sidebar or top tabs.
+- Expanded sidebar, compact icons, or auto-hide with reveal from the left edge.
 - Mint, Tide, Dusk, Rose, Pollen, and Graphite themes.
 - System, light, or dark appearance.
 - Bookmark bar visibility and sidebar width.

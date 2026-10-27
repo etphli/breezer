@@ -64,6 +64,14 @@
           </div>
         </div>
         <div class="setting-row">
+          <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Auto-hide reveals tabs when you hover at the left edge.</small></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="sidebar-mode-label" data-field="sidebarMode">
+            <button role="radio" data-value="expanded">Expanded</button>
+            <button role="radio" data-value="compact">Compact</button>
+            <button role="radio" data-value="autoHide">Auto-hide</button>
+          </div>
+        </div>
+        <div class="setting-row">
           <div class="setting-label"><label for="sidebar-width">Sidebar width</label><small id="sidebar-width-value">240 px</small></div>
           <input id="sidebar-width" type="range" min="200" max="360" step="4" value="240" data-field="sidebarWidth">
         </div>

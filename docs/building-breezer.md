@@ -2,7 +2,7 @@
 
 This build compiles the pinned Chromium source with the imported browser patches and Breezer's product identity. The output must be a real `Breezer.app` with bundle identifier `io.github.etphli.breezer`.
 
-The build command has not completed a browser build yet. The initial Mac still needs Xcode's first-run setup before local compilation.
+A source-built base app has been installed on the local Mac. Runtime checks for the current Breezer redesign are still in progress.
 
 ## Build without local Xcode
 
@@ -10,13 +10,13 @@ Use the [Build Breezer for Apple Silicon workflow](https://github.com/etphli/bre
 
 Run the workflow from GitHub Actions. It verifies the source, prepares the browser, applies Breezer branding, and attempts compilation. A successful build also runs a headless browser smoke test and uploads `Breezer-arm64.zip`. Download the `Breezer-arm64` artifact from the successful run within one day.
 
-The workflow saves compilation progress before GitHub's job time limit. If the run reports a saved checkpoint, rerun the workflow to resume. A full Chromium build can need several runs. The hosted environment has passed its Xcode and resource checks; a complete Breezer browser build is still unverified.
+The workflow saves compilation progress before GitHub's job time limit. If the run reports a saved checkpoint, rerun the workflow to resume. A full Chromium build can need several runs. The hosted environment has passed its Xcode and resource checks; a successful hosted Breezer artifact has not yet been verified.
 
 Hosted builds use a development configuration with profile-guided optimization, debug symbols, and precompiled headers disabled. The pinned compiler treats the precompiled-header command's module name as a C++ module interface and fails on Chromium's header. Compiling those headers normally avoids that toolchain failure. These builds compile the same browser source and retain the tests. They are not notarized public releases.
 
-## Prepare the build Mac
+## Prepare another build Mac
 
-Install full Xcode 26 or newer and finish its first-run setup. Select that Xcode's Developer directory. Command Line Tools alone do not include the required Xcode build environment.
+The local Mac has completed Xcode's first-run setup. To prepare another build machine, install full Xcode 26 or newer and finish its first-run setup. Select that Xcode's Developer directory. Command Line Tools alone do not include the required Xcode build environment.
 
 Install the inherited build dependencies:
 
@@ -74,13 +74,25 @@ The default destination is `~/Applications/Breezer.app`. Quit an existing Breeze
 
 An installation receipt records the run, commit, artifact, archive checksum, and backup path in `~/Library/Application Support/io.github.etphli.breezer-installer/receipts/`, outside the signed app. The default command launches Breezer and checks for its browser process. Use `--no-launch` to install without opening it, or `--destination /path/to/Breezer.app` for another location. If macOS blocks launch or no process is observed, the validated app and receipt remain installed and the command reports launch verification failure.
 
-After local build prerequisites are available, build and install the source-built app:
+Build and install the source-built app locally with:
 
 ```sh
 ./script/build_and_run.sh --install
 ```
 
 The local build command uses `~/Applications/Breezer.app` and backs up an existing app before replacement. Its default mode builds and launches without installing. `--verify` also checks that the Breezer process starts. `--debug` opens the debugger, and `--logs` streams runtime logs.
+
+## Package a Breezer app as a DMG
+
+The packager accepts an existing `Breezer.app`. It checks the bundle and signature, copies the app with `ditto`, adds an Applications shortcut, creates a compressed read-only DMG, verifies the image, and writes a SHA-256 sidecar. The output directory must already exist, and the command refuses to replace either output file.
+
+```sh
+mkdir -p dist
+python3 script/package_breezer_dmg.py "$HOME/Applications/Breezer.app" dist/Breezer.dmg
+shasum -a 256 -c dist/Breezer.dmg.sha256
+```
+
+These apps use an ad hoc signature. The DMG is not notarized for public release.
 
 Run the installer's synthetic unit checks without downloading or installing a browser:
 

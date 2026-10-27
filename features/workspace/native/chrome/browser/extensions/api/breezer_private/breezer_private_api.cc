@@ -42,6 +42,7 @@ constexpr char kPanelPath[] = "/panel.html";
 // Mirrors breezerPrivate.Appearance in breezer_private.idl.
 struct Appearance {
   std::string layout;      // "sidebar" | "top"
+  std::string sidebar_mode = "expanded";
   std::string theme;       // one of breezer_workspace::kThemes
   std::string color_mode;  // "system" | "light" | "dark"
   bool show_bookmarks = true;
@@ -58,7 +59,7 @@ const breezer_workspace::Theme* FindTheme(std::string_view name) {
 }
 
 bool IsKnownAppearanceKey(std::string_view key) {
-  return key == "layout" || key == "theme" || key == "colorMode" ||
+  return key == "layout" || key == "sidebarMode" || key == "theme" || key == "colorMode" ||
          key == "showBookmarks" || key == "sidebarWidth";
 }
 
@@ -76,6 +77,8 @@ Appearance ReadAppearance(Profile* profile) {
                           std::to_underlying(HeliumLayoutType::kVertical)
                       ? "sidebar"
                       : "top";
+
+  result.sidebar_mode = prefs->GetString(breezer_workspace::prefs::kSidebarMode);
 
   // Report the theme the frame actually uses when it is one of Breezer's
   // seeds; otherwise keep the last Breezer choice so the contract stays fixed.
@@ -119,6 +122,7 @@ Appearance ReadAppearance(Profile* profile) {
 base::DictValue AppearanceToValue(const Appearance& appearance) {
   base::DictValue result;
   result.Set("layout", appearance.layout);
+  result.Set("sidebarMode", appearance.sidebar_mode);
   result.Set("theme", appearance.theme);
   result.Set("colorMode", appearance.color_mode);
   result.Set("showBookmarks", appearance.show_bookmarks);
@@ -148,6 +152,14 @@ bool ParseAppearancePatch(const base::DictValue& patch,
       return false;
     }
     appearance->layout = *layout;
+  }
+  if (const base::Value* value = patch.Find("sidebarMode")) {
+    const std::string* mode = value->GetIfString();
+    if (!mode || (*mode != "expanded" && *mode != "compact" && *mode != "autoHide")) {
+      *error = "Invalid value for sidebarMode.";
+      return false;
+    }
+    appearance->sidebar_mode = *mode;
   }
   if (const base::Value* value = patch.Find("theme")) {
     const std::string* theme = value->GetIfString();
@@ -197,6 +209,12 @@ bool CheckAppearanceWritable(Profile* profile,
       ThemeServiceFactory::GetForProfile(profile);
   if ((changes_theme || changes_color_mode) && !theme_service) {
     *error = "Browser appearance is unavailable.";
+    return false;
+  }
+  if (patch.contains("sidebarMode") &&
+      (!IsUserModifiable(prefs, breezer_workspace::prefs::kSidebarMode) ||
+       !IsUserModifiable(prefs, prefs::kVerticalTabsExpandOnHoverEnabled))) {
+    *error = "The sidebar behavior is managed by your organization.";
     return false;
   }
   if (patch.contains("layout") &&
@@ -250,6 +268,20 @@ void ApplyAppearance(Profile* profile,
                       std::to_underlying(appearance.layout == "sidebar"
                                              ? HeliumLayoutType::kVertical
                                              : HeliumLayoutType::kClassic));
+  }
+  if (patch.contains("sidebarMode")) {
+    prefs->SetString(breezer_workspace::prefs::kSidebarMode, appearance.sidebar_mode);
+    prefs->SetBoolean(prefs::kVerticalTabsExpandOnHoverEnabled,
+                      appearance.sidebar_mode == "autoHide");
+    GlobalBrowserCollection::GetInstance()->ForEach(
+        [&](BrowserWindowInterface* browser) {
+          if (browser->GetProfile() == profile) {
+            if (auto* state = tabs::VerticalTabStripStateController::From(browser)) {
+              state->RequestCollapse(appearance.sidebar_mode != "expanded");
+            }
+          }
+          return true;
+        });
   }
   if (patch.contains("showBookmarks")) {
     prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar,

@@ -92,13 +92,13 @@ test('routes parse the explicit native window id', () => {
 });
 
 test('appearance defaults and validation match the native contract', () => {
-  assert.deepEqual(DEFAULT_APPEARANCE, { layout: 'sidebar', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 });
+  assert.deepEqual(DEFAULT_APPEARANCE, { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240 });
   assert.deepEqual(normalizeAppearance(undefined), DEFAULT_APPEARANCE);
   assert.deepEqual(normalizeAppearance({ layout: 'top', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 999 }),
-    { layout: 'top', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 360 });
+    { layout: 'top', sidebarMode: 'expanded', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 360 });
   assert.equal(normalizeAppearance({ theme: 'neon' }).theme, 'mint');
   assert.deepEqual(validateAppearancePatch({ theme: 'rose' }), { theme: 'rose' });
-  for (const bad of [{}, null, [], { colour: 'x' }, { theme: 'neon' }, { sidebarWidth: 199 }, { sidebarWidth: 361 }, { sidebarWidth: 240.5 }, { showBookmarks: 'yes' }, { layout: 'left' }]) {
+  for (const bad of [{}, null, [], { sidebarMode: 'hidden' }, { colour: 'x' }, { theme: 'neon' }, { sidebarWidth: 199 }, { sidebarWidth: 361 }, { sidebarWidth: 240.5 }, { showBookmarks: 'yes' }, { layout: 'left' }]) {
     assert.throws(() => validateAppearancePatch(bad), Error, JSON.stringify(bad));
   }
 });

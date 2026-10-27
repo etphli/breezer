@@ -135,6 +135,57 @@ def _region_replacements():
             '#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n'
             '  return BaseTabStripRegionView::RemoveTabStripView(view);\n',
         ),
+    ] + _sidebar_mode_replacements()
+
+
+def _sidebar_mode_replacements():
+    return [
+        (
+            '#include "chrome/browser/ui/color/chrome_color_id.h"\n',
+            '#include "chrome/browser/ui/color/chrome_color_id.h"\n'
+            '#include "chrome/browser/profiles/profile.h"\n'
+            '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
+            '#include "components/prefs/pref_service.h"\n',
+        ),
+        (
+            'constexpr int kResizeAreaWidth = 5;\n',
+            'constexpr int kResizeAreaWidth = 5;\n'
+            '\n'
+            'int BreezerCollapsedWidth(BrowserWindowInterface* browser) {\n'
+            '  return browser->GetProfile()->GetPrefs()->GetString(\n'
+            '             breezer_workspace::prefs::kSidebarMode) == "autoHide"\n'
+            '             ? 6\n'
+            '             : VerticalTabStripRegionView::kCollapsedWidth;\n'
+            '}\n',
+        ),
+        (
+            '                         ? kCollapsedWidth\n',
+            '                         ? BreezerCollapsedWidth(browser_view()->browser())\n',
+        ),
+        (
+            '  const int expand_amount =\n'
+            '      std::max(0, target_collapse_state_.uncollapsed_width - kCollapsedWidth);\n',
+            '  const int collapsed_width = BreezerCollapsedWidth(browser_view()->browser());\n'
+            '  const int expand_amount =\n'
+            '      std::max(0, target_collapse_state_.uncollapsed_width - collapsed_width);\n',
+        ),
+        ('  size.set_width(kCollapsedWidth +\n', '  size.set_width(collapsed_width +\n'),
+    ]
+
+
+def _freezer_replacements():
+    return [
+        ('#include "content/public/browser/web_contents.h"\n',
+         '#include "content/public/browser/web_contents.h"\n#include "url/gurl.h"\n'),
+        ('  // A visible page should not be frozen.\n',
+         '  // Breezer workspace and assistant documents are browser UI, not idle tabs.\n'
+         '  // Freezing a native UI host also freezes its shared extension renderer.\n'
+         '  const GURL& url = page_node->GetMainFrameUrl();\n'
+         '  if (url.SchemeIs("chrome-extension") &&\n'
+         '      url.host_piece() == "namgcidocfgliiedlkdafcmifpdfiakj") {\n'
+         '    return;\n'
+         '  }\n\n'
+         '  // A visible page should not be frozen.\n'),
     ]
 
 
@@ -273,6 +324,11 @@ def _vertical_controller_replacements():
     )
     return [
         (
+            "  if (IsVerticalTabsExpandOnHoverFeatureEnabled()) {\n",
+            "  if (IsVerticalTabsExpandOnHoverFeatureEnabled() ||\n"
+            "      !browser_window.GetProfile()->IsOffTheRecord()) {\n",
+        ),
+        (
             "namespace tabs {\n"
             "\n"
             "VerticalTabStripStateControllerImpl::VerticalTabStripStateControllerImpl(\n",
@@ -345,13 +401,22 @@ def _window_features_replacements():
         "\n"
     )
     return [
+        (
+            '#include "chrome/browser/ui/helium/helium_layout_state_controller.h"\n',
+            '#include "chrome/browser/ui/helium/helium_layout_state_controller.h"\n'
+            '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n',
+        ),
         # Create the layout controller (which applies Breezer's one-time profile
         # defaults) before the default sidebar width is read for this window.
         (
             restored,
             "    // Breezer: created first so its one-time profile defaults apply before\n"
             "    // the default sidebar width below is read.\n"
-            + creation + "\n" + restored,
+            + creation + "\n" + restored +
+            '    if (profile->GetPrefs()->GetString(breezer_workspace::prefs::kSidebarMode) !=\n'
+            '        "expanded") {\n'
+            '      restored_state_collapsed = true;\n'
+            '    }\n',
         ),
         (width_read + creation + "\n", width_read),
     ]
@@ -360,6 +425,7 @@ def _window_features_replacements():
 def replacements():
     return {
         REGION: _region_replacements(),
+        "components/performance_manager/freezing/freezer.cc": _freezer_replacements(),
         LAYOUT_CONTROLLER: _layout_controller_replacements(),
         VERTICAL_CONTROLLER: _vertical_controller_replacements(),
         WINDOW_FEATURES: _window_features_replacements(),
@@ -400,7 +466,8 @@ def replacements():
                 "  registry->RegisterStringPref(breezer_workspace::prefs::kTheme,\n"
                 "                               breezer_workspace::kDefaultTheme);\n"
                 "  registry->RegisterBooleanPref(breezer_workspace::prefs::kInitialized,\n"
-                "                                false);\n",
+                "                                false);\n"
+                '  registry->RegisterStringPref(breezer_workspace::prefs::kSidebarMode, "expanded");\n',
             ),
         ],
         "chrome/browser/ui/BUILD.gn": [

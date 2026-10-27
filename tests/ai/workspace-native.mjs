@@ -102,7 +102,7 @@ try {
   context = await chromium.launchPersistentContext(profile, {
     executablePath: `${app}/Contents/MacOS/Breezer`,
     headless: false,
-    ignoreDefaultArgs: ['--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox'],
+    ignoreDefaultArgs: ['--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox', '--enable-features=CDPScreenshotNewSurface'],
     args: ['--no-first-run', '--no-default-browser-check'],
     // No viewport emulation: geometry checks compare real native view sizes.
     viewport: null,
@@ -351,7 +351,7 @@ try {
   const appearance = async () => { const result = await settingsCall('getAppearance'); assert.ok(result.ok, result.error); return result.value; };
   const initialAppearance = await appearance();
   observe('initialAppearance', initialAppearance);
-  assert.deepEqual(Object.keys(initialAppearance).sort(), ['colorMode', 'layout', 'showBookmarks', 'sidebarWidth', 'theme']);
+  assert.deepEqual(Object.keys(initialAppearance).sort(), ['colorMode', 'layout', 'showBookmarks', 'sidebarMode', 'sidebarWidth', 'theme']);
   assert.equal(initialAppearance.layout, 'sidebar', 'An earlier Breezer profile should migrate to the sidebar layout.');
   assert.equal(initialAppearance.showBookmarks, true, 'Existing profiles should gain the requested top bookmarks bar.');
   assert.equal(initialAppearance.sidebarWidth, 240, 'Existing profiles should gain the initial workspace width.');
@@ -516,6 +516,22 @@ try {
   await waitFor('content narrows again', async () => (await webPage.evaluate(() => innerWidth)) < topPageWidth - 100);
   await hostA.screenshot('host-window-a-after-layout-roundtrip.png');
   pass('layoutReturn', 'returning to sidebar restored exactly one correctly scoped host per window');
+
+  // Compact and auto-hide are separate native choices, with different geometry.
+  await settings.bringToFront();
+  await choose('.segmented[data-field="sidebarMode"] [data-value="compact"]', 'sidebarMode', 'compact');
+  const compactWidth = await waitFor('compact icon rail width', async () => {
+    const width = await hostA.evaluate('innerWidth');
+    return width >= 30 && width <= 60 && width;
+  });
+  await choose('.segmented[data-field="sidebarMode"] [data-value="autoHide"]', 'sidebarMode', 'autoHide');
+  const hiddenWidth = await waitFor('auto-hide edge width', async () => {
+    const width = await hostA.evaluate('innerWidth');
+    return width > 0 && width <= 10 && width;
+  });
+  await choose('.segmented[data-field="sidebarMode"] [data-value="expanded"]', 'sidebarMode', 'expanded');
+  await waitFor('expanded width restored', async () => (await hostA.evaluate('innerWidth')) >= 200);
+  pass('sidebarBehaviorSettings', `compact rail ${compactWidth}px, auto-hide edge ${hiddenWidth}px, expanded restored; pointer-driven native reveal is a separate check`);
 
   // ---------------------------------------------------------------- window close releases its host
   await worker.evaluate(id => chrome.windows.remove(id), windowB);
