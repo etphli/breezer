@@ -98,7 +98,7 @@ For a real DOM check, from the repo root:
 python3 -m http.server 8765 --bind 127.0.0.1
 ```
 
-Open `http://127.0.0.1:8765/tests/passwords/component.html`. Its self-running dummy tabs API checks guide expansion/focus, exact URLs, pending/duplicate clicks, failure/retry, unavailable API, callbacks, and disposal including completion after disposal. `document.documentElement.dataset.result` must equal `pass`. This exercises the shipped component, not native import. The standalone page can be inspected at `/features/ai/extension/passwords.html#import`; outside the extension it must show the unavailable-integration message.
+Open `http://127.0.0.1:8765/tests/passwords/component.html`. Its self-running dummy tabs API checks guide expansion/focus, exact URLs, pending/duplicate clicks, failure/retry, unavailable API, callbacks, and disposal including completion after disposal. `document.documentElement.dataset.result` must equal `pass`. This exercises the shipped component, not native import.
 
 Verified on this branch:
 
@@ -106,9 +106,9 @@ Verified on this branch:
 - Eight Python tests passed against the pinned prepared source. Only temporary copies were patched.
 - Browser component checks passed at 1280 px and 360 px. No horizontal overflow; keyboard focus and expandable guide checked. Light and dark rendering inspected.
 
-## Native runtime acceptance pending Main
+## Native runtime acceptance
 
-No compiled app was built or installed for this request. Source assertions do not prove native import, authentication prompts, persistent storage, edit/delete, save/update bubbles, or autofill at runtime. Main must first integrate the settings mount and native preparation fingerprint, then verify the compiled Breezer app using a disposable profile and the committed dummy fixture only.
+Source assertions do not prove native import, authentication prompts, persistent storage, edit/delete, save/update bubbles, or autofill at runtime. Verify the compiled app using a disposable profile and the committed dummy fixture only.
 
 1. Launch the compiled Breezer with a new temporary `--user-data-dir`. Do not use an existing Breezer or Chrome profile. The browser may create/access its Breezer Keychain item, so Main should run on its isolated test account if existing Keychain identity must also be isolated.
 2. Open the settings Passwords entry. Check the guide, then cancel the native CSV file picker once. No successful-import message should appear in the component.

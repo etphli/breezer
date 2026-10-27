@@ -39,7 +39,7 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   section.setAttribute('aria-label', 'Passwords');
   section.append(
     node('h2', 'Passwords'),
-    node('p', 'Save and autofill passwords in this Breezer profile. Imported passwords are stored locally using the browser\'s encrypted password store.', 'section-note'),
+    node('p', 'Save, autofill, and manage passwords in Breezer. Passwords are encrypted and stored on this Mac.', 'section-note'),
     node('p', 'Chrome and Breezer use separate profiles. Import copies passwords once; it does not sync later changes.', 'section-note'),
   );
 
@@ -84,13 +84,13 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   }
 
   section.append(button('Open password manager', 'manager'));
-  section.append(node('p', 'View, edit, or delete saved passwords in the native manager. Breezer uses your Mac\'s authentication when the manager requires it. Set password saving, automatic sign-in, and authentication before filling in its Settings.', 'section-note'));
+  section.append(node('p', 'View, edit, or delete saved passwords. Your Mac may ask you to authenticate before showing them.', 'section-note'));
   section.append(button('Password settings', 'settings'));
 
   const guide = node('details');
   guide.dataset.passwordImportGuide = '';
   guide.append(node('summary', 'Import passwords from Chrome'));
-  guide.append(node('p', 'This build cannot import passwords directly from Chrome\'s Keychain. Use Chrome\'s CSV export and Breezer\'s native importer.'));
+  guide.append(node('p', 'Export your passwords from Chrome, then import the CSV into Breezer.'));
   const steps = node('ol');
   for (const step of [
     'In Chrome, open the menu, then Passwords and autofill, Google Password Manager, and Settings.',

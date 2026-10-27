@@ -655,6 +655,12 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 .text-button svg { width: 16px; height: 16px; }
 .text-button:hover { background: var(--hover); }
 
+[data-passwords] details { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+[data-passwords] summary { cursor: pointer; font-weight: 500; padding: 4px 0; }
+[data-passwords] details p, [data-passwords] details li { line-height: 1.5; }
+[data-passwords] details li + li { margin-top: 6px; }
+[data-passwords] a { color: var(--accent); text-underline-offset: 3px; }
+
 .field-error { margin: 10px 0 0; color: var(--danger); max-width: 64ch; }
 
 .link-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
