@@ -58,6 +58,52 @@ Before signing, the build packages the AI host and a checksum-pinned Node runtim
 
 The local build uses an ad hoc signature. It is not a notarized public release. Public distribution requires Breezer's own Apple signing identity and a verified packaging and notarization process.
 
+## Build profiles and separate outputs
+
+`BREEZER_BUILD_PROFILE` selects GN overrides after the inherited release configuration:
+
+- `upstream` is the default. It retains the inherited official build and PGO phase 2 settings and uses `out/Default`.
+- `development` retains the existing `BREEZER_DEVELOPMENT_BUILD=1` behavior. It sets `is_official_build=false`, `chrome_pgo_phase=0`, `symbol_level=0`, and `enable_precompiled_headers=false`, and uses `out/Default`. The legacy environment variable remains supported. Do not combine it with a different explicit profile.
+- `release-performance` uses the same four development overrides and adds `is_debug=false`, `dcheck_always_on=false`, and `enable_expensive_dchecks=false`. Its default output is `out/ReleasePerformance`. It is a release-performance experiment without PGO or ThinLTO, not an official distribution build.
+
+Chromium's pinned `build/config/dcheck_always_on.gni` defaults DCHECKs on for non-official Chromium builds, even with `is_debug=false`. Expensive DCHECKs follow that setting. `v8/BUILD.gn` derives debug code, write-barrier verification, heap-accounting checks, and test-only hooks from it; `v8/gni/v8.gni` also enables cppgc API checks. The previously compiled development output therefore had `-DDCHECK_ALWAYS_ON=1`, `V8_ENABLE_DEBUG_CODE`, and `CPPGC_ENABLE_API_CHECKS`, despite already using `-O2`.
+
+The performance profile lets these developer checks follow Chromium's release defaults. This also removes debug-only PartitionAlloc cookies and extra protection for pointers annotated as unprotected in release, as defined in `base/allocator/partition_allocator/partition_alloc.gni`. CHECK failures remain fatal. The profile does not override sandboxing, site isolation, V8 pointer compression, BackupRefPtr support, libc++ hardening, stack initialization, sanitizers, or CFI settings. Do not substitute compiler flags that disable those protections. The pinned macOS configuration defaults `is_cfi=false`; this profile preserves that default rather than disabling CFI.
+
+Inspect the proposed overrides without preparing source or running GN:
+
+```sh
+python3 script/breezer_build_profile.py --profile release-performance
+```
+
+When ready to compile, use the existing prepared source and a separate output:
+
+```sh
+env -u BREEZER_DEVELOPMENT_BUILD BREEZER_BUILD_PROFILE=release-performance \
+  ./script/build_and_run.sh --build-only
+```
+
+`BREEZER_BUILD_DIR` continues to select the complete staging tree, including downloaded and prepared source. `BREEZER_OUT_DIR` selects a GN output inside that source tree's `out` directory. It can be source-relative, such as `out/PerfCandidate`, or an absolute path inside the same `out` directory. The wrapper applies it after upstream `env.sh` sets `_out_dir`. The performance profile refuses `out/Default` and its descendants, including symlink aliases. The example produces `build/helium-macos/build/src/out/ReleasePerformance/Breezer.app`. Install and launch remain separate command modes.
+
+Existing source fingerprints must still match. A profile change does not authorize rewriting overlay markers or preparing changed native inputs in place. If the prepared-source marker is missing and any output exists, the wrapper refuses preparation because the inherited preparation step deletes `src/out`. Verify the marker or use a separate staging tree. No profile selection deletes old objects, downloads, or output directories.
+
+Disabling DCHECK changes the global compiler defines and generated headers. Expect a substantial native rebuild and new V8 snapshots, not a relink. Isolated GN generation on the inspected M1 took 8.5 seconds and wrote about 426 MiB of build metadata. Its `chrome` and `chromedriver` dependency graph contains 46,861 clang compile commands. The previous graph had 46,863 commands carrying `DCHECK_ALWAYS_ON`; the new graph has none. This is close to a full native recompile. These counts describe planned commands, not completed compilation.
+
+A fresh output has no local objects to reuse; a configured compiler cache may supply matching objects, but developer-check objects are not interchangeable with release objects. Keep `out/Default` for rollback and incremental development. On the inspected M1 with 8 GiB RAM it occupied about 9.1 GiB. Budget another browser output of similar order, plus temporary link space. There is no measured full-build duration for the new profile; plan for hours and possibly an overnight build at two jobs, then revise that estimate from actual progress. GN generation alone does not measure compile time or runtime performance.
+
+On APFS, the build owner can first clone the completed `out/Default` to a new, absent `out/ReleasePerformance` with macOS `cp -cR`. This initially shares storage while keeping writes independent. Regenerate GN in the cloned output before building. Matching objects may be reusable; changed defines still force the affected objects to rebuild and consume additional storage. Do not use hard links. The wrapper accepts such an independently cloned output and does not delete its objects.
+
+The inherited official profile is a separate, more expensive experiment. `build/config/compiler/compiler.gni` enables ThinLTO for official Apple builds using LLD; `build/config/compiler/BUILD.gn` enables its optimization passes. PGO phase 2 adds profile-use flags to native compilation and requires the exact pinned profile named by `chrome/build/mac-arm.pgo.txt` or `mac.pgo.txt`. The inspected source already contains those profiles. Official mode also changes CHECK logging and other release settings. These changes invalidate native objects again and increase link work and memory demand. They may improve code layout, startup, or execution, but the size and direction of the benefit require measurement. Keep the precompiled-header workaround when evaluating that configuration. Start with the smaller DCHECK-only experiment before committing this Mac to official, PGO, and ThinLTO builds.
+
+Before accepting a performance build, inspect its generated compile commands for the absence of `DCHECK_ALWAYS_ON`, `V8_ENABLE_DEBUG_CODE`, and `CPPGC_ENABLE_API_CHECKS`, and verify that existing hardening flags remain. `gn args --list` shows declared defaults; V8's empty-string defaults are resolved later, so use the generated commands or the built output's `v8_build_config.json` to verify their effective values. Repeat the same paired browser benchmark and report every metric and timeout. This profile alone establishes no speedup or advantage over Chrome.
+
+Run the focused profile and output-preservation checks without Chromium compilation:
+
+```sh
+python3 script/check_breezer_build_profile.py
+bash -n script/build_and_run.sh
+```
+
 ## Install and launch
 
 To install a completed hosted build, install [GitHub CLI](https://cli.github.com/) and sign in with `gh auth login`. Supply the successful workflow run ID and its full commit SHA:

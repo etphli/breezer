@@ -8,6 +8,16 @@ case "$BREEZER_MODE" in
   *) echo "Usage: $0 [--check|--build-only|--install|--verify|--debug|--logs|--telemetry]" >&2; exit 2 ;;
 esac
 
+if [[ -z "${BREEZER_BUILD_PROFILE:-}" ]]; then
+  BREEZER_BUILD_PROFILE=upstream
+  if [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 ]]; then
+    BREEZER_BUILD_PROFILE=development
+  fi
+elif [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 && "$BREEZER_BUILD_PROFILE" != development ]]; then
+  echo "Use BREEZER_BUILD_PROFILE alone, or select development with BREEZER_DEVELOPMENT_BUILD=1." >&2
+  exit 2
+fi
+
 if [[ "$(uname -s)" != Darwin ]]; then
   echo "A Mac with full Xcode 26 or newer is required to build Breezer." >&2
   exit 1
@@ -44,6 +54,7 @@ fi
 if [[ "$BREEZER_MISSING" -ne 0 ]]; then
   exit 1
 fi
+BREEZER_PROFILE_ARGS="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_build_profile.py" --profile "$BREEZER_BUILD_PROFILE")"
 if [[ "$BREEZER_MODE" == --check ]]; then
   echo "Breezer build prerequisites are available."
   exit 0
@@ -58,7 +69,16 @@ git archive HEAD:upstream/helium-macos | tar -x -C "$BREEZER_STAGE"
 
 _root_dir="$BREEZER_STAGE"
 source "$_root_dir/devutils/shared.sh"
+_out_dir="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_build_profile.py" \
+  --profile "$BREEZER_BUILD_PROFILE" --source-dir "$_src_dir" --out-dir "${BREEZER_OUT_DIR:-}")"
 BREEZER_PREPARED="$_root_dir/build/.breezer-prepared"
+if [[ ! -f "$BREEZER_PREPARED" && -d "$_src_dir/out" ]] &&
+   [[ -n "$(find "$_src_dir/out" -mindepth 1 -print -quit)" ]]; then
+  echo "Prepared-source marker is missing. Existing output is preserved in $_src_dir/out." >&2
+  echo "Use a separate BREEZER_BUILD_DIR or verify the preparation marker before rebuilding." >&2
+  exit 1
+fi
+echo "Breezer build profile: $BREEZER_BUILD_PROFILE; output: $_out_dir"
 BREEZER_OMNIBOX_PREPARED="$_src_dir/.breezer-omnibox-prepared"
 BREEZER_OMNIBOX_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --fingerprint)"
 if [[ -e "$BREEZER_OMNIBOX_PREPARED" ]] &&
@@ -155,13 +175,8 @@ for BREEZER_OVERLAY in workspace ai-ui passwords; do
   mv "$BREEZER_OVERLAY_MARKER.tmp" "$BREEZER_OVERLAY_MARKER"
 done
 write_gn_args "$_arch" release
-if [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 ]]; then
-  cat >> "$_out_dir/args.gn" <<'GN'
-is_official_build = false
-chrome_pgo_phase = 0
-symbol_level = 0
-enable_precompiled_headers = false
-GN
+if [[ -n "$BREEZER_PROFILE_ARGS" ]]; then
+  printf '%s\n' "$BREEZER_PROFILE_ARGS" >> "$_out_dir/args.gn"
 fi
 gn_gen
 helium_build -j "${BREEZER_BUILD_JOBS:-2}"
