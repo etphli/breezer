@@ -92,13 +92,16 @@ try {
   assert.equal(openResult.exceptionDetails, undefined, openResult.exceptionDetails?.text);
   const deadline = Date.now() + 30000;
   const panelContexts = () => worker.evaluate(filter => chrome.runtime.getContexts(filter), {
-    contextTypes: ['SIDE_PANEL'], documentUrls: [panelUrl], tabIds: [-1], windowIds: [windowId],
+    // Native hosts report windowId -1 here. The renderer's current window is
+    // checked below, independently of this context metadata.
+    contextTypes: ['SIDE_PANEL'], documentUrls: [panelUrl], tabIds: [-1],
   });
   while (!(await panelContexts()).length) {
     assert.ok(Date.now() < deadline, 'The real side panel did not open.');
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   assert.equal((await panelContexts()).length, 1, 'Expected one native SIDE_PANEL context in the fixture window.');
+  assert.ok((await panelContexts()).every(item => item.windowId === -1 || item.windowId === windowId));
   await extensionPage.close();
 
   const browserCdp = await context.browser().newBrowserCDPSession();
