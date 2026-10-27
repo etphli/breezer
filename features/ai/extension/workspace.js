@@ -84,6 +84,12 @@ export function applyAppearance(appearance) {
   const root = document.documentElement;
   root.dataset.tone = appearance.theme;
   root.dataset.sidebarMode = appearance.sidebarMode;
+  const collapse = $('collapse');
+  if (collapse) {
+    const label = appearance.sidebarMode === 'expanded' ? 'Compact sidebar' : 'Expand sidebar';
+    collapse.setAttribute('aria-label', label);
+    collapse.title = label;
+  }
   const scheme = appearance.colorMode === 'system' ? (darkQuery.matches ? 'dark' : 'light') : appearance.colorMode;
   root.dataset.scheme = scheme;
   root.style.colorScheme = scheme;
@@ -1407,7 +1413,7 @@ function bindSidebar() {
   if (typeof api.breezerPrivate?.setSidebarCollapsed === 'function') {
     $('collapse').hidden = false;
     $('collapse').addEventListener('click', () => {
-      const sidebarMode = state.appearance.sidebarMode === 'compact' ? 'expanded' : state.appearance.sidebarMode === 'autoHide' ? 'expanded' : 'compact';
+      const sidebarMode = state.appearance.sidebarMode === 'expanded' ? 'compact' : 'expanded';
       void callBridge('setAppearance', { sidebarMode }).then(async (result) => {
         state.appearance = normalizeAppearance(result);
         applyAppearance(state.appearance);

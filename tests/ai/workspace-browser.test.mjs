@@ -331,8 +331,8 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     assert.equal(await tree.getByRole('treeitem', { name: /Miso/ }).count(), 0, 'Personal tabs stay out of Work');
 
     // Collapse calls the native bridge.
-    await page.getByRole('button', { name: 'Hide sidebar' }).click();
-    await page.waitForFunction(() => window.fx.calls.some(([name]) => name === 'setSidebarCollapsed'));
+    await page.getByRole('button', { name: 'Compact sidebar' }).click();
+    await page.waitForFunction(() => window.fx.calls.some(([name, patch]) => name === 'setAppearance' && patch.sidebarMode === 'compact'));
 
     // Dark scheme.
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -348,6 +348,11 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     assert.equal(await settings.getByRole('radio', { name: 'Sidebar' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.getByRole('switch', { name: 'Bookmarks bar' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('#sidebar-width').inputValue(), '240');
+    for (const [label, mode] of [['Compact', 'compact'], ['Auto-hide', 'autoHide'], ['Expanded', 'expanded']]) {
+      await settings.getByRole('radio', { name: label, exact: true }).click();
+      await settings.waitForFunction(value => window.fx.appearance.sidebarMode === value, mode);
+      assert.equal(await settings.getByRole('radio', { name: label, exact: true }).getAttribute('aria-checked'), 'true');
+    }
     await settings.getByRole('radio', { name: 'Dusk' }).click();
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'dusk');
     assert.deepEqual((await calls(settings)).at(-1), ['setAppearance', { theme: 'dusk' }]);

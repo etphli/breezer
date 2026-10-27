@@ -2,7 +2,7 @@
 
 This build compiles the pinned Chromium source with the imported browser patches and Breezer's product identity. The output must be a real `Breezer.app` with bundle identifier `io.github.etphli.breezer`.
 
-A source-built base app has been installed on the local Mac. Runtime checks for the current Breezer redesign are still in progress.
+Breezer supports local incremental builds. Keep the prepared source and compiled output to reuse completed work when rebuilding changes.
 
 ## Build without local Xcode
 
@@ -16,7 +16,7 @@ Hosted builds use a development configuration with profile-guided optimization, 
 
 ## Prepare another build Mac
 
-The local Mac has completed Xcode's first-run setup. To prepare another build machine, install full Xcode 26 or newer and finish its first-run setup. Select that Xcode's Developer directory. Command Line Tools alone do not include the required Xcode build environment.
+Existing build machines can reuse their configured toolchain. To prepare another build machine, install full Xcode 26 or newer and finish its first-run setup. Select that Xcode's Developer directory. Command Line Tools alone do not include the required Xcode build environment.
 
 Install the inherited build dependencies:
 
@@ -89,7 +89,8 @@ The packager accepts an existing `Breezer.app`. It checks the bundle and signatu
 ```sh
 mkdir -p dist
 python3 script/package_breezer_dmg.py "$HOME/Applications/Breezer.app" dist/Breezer.dmg
-shasum -a 256 -c dist/Breezer.dmg.sha256
+cd dist
+shasum -a 256 -c Breezer.dmg.sha256
 ```
 
 These apps use an ad hoc signature. The DMG is not notarized for public release.
