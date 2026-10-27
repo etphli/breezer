@@ -165,17 +165,20 @@ if '--check' in sys.argv and os.environ.get('FAIL_CHECK'):sys.exit(1)
 '''
             for name in ('workspace', 'ai_ui'):
                 (scripts / f'apply_breezer_{name}.py').write_text(fake)
+            password_script = root / 'features/passwords/native-ui/apply.py'
+            password_script.parent.mkdir(parents=True)
+            password_script.write_text(fake)
             env = {**os.environ, 'BREEZER_ROOT': str(root), 'BREEZER_PYTHON': sys.executable,
                    '_src_dir': str(tree), 'BREEZER_STAGE': str(root)}
             shell = 'set -euo pipefail\n' + preflight + '\nprintf refreshed >> "$_src_dir/refresh"\n' + hooks
             def run(extra=None):
                 return subprocess.run(['bash', '-c', shell], env={**env, **(extra or {})}, capture_output=True)
             self.assertEqual(run().returncode, 0)
-            for name in ('workspace', 'ai-ui'):
+            for name in ('workspace', 'ai-ui', 'passwords'):
                 self.assertEqual((tree / f'.breezer-{name}-prepared').read_text().strip(), 'a' * 64)
-            self.assertEqual((tree / 'calls').read_text().count(' apply'), 2)
+            self.assertEqual((tree / 'calls').read_text().count(' apply'), 3)
             self.assertEqual(run().returncode, 0)
-            self.assertEqual((tree / 'calls').read_text().count(' apply'), 2)
+            self.assertEqual((tree / 'calls').read_text().count(' apply'), 3)
             previous_refresh = (tree / 'refresh').read_bytes()
             marker = tree / '.breezer-workspace-prepared'
             marker.write_text('b' * 64)

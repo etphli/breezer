@@ -5,6 +5,7 @@ import {
   addSpace, moveSpace, normalizeAppearance, normalizeStore, removeSpace, renameSpace, setPrefs, setSpaceTone,
   validateAppearancePatch,
 } from './workspace-store.js';
+import { mountPasswords } from './passwords.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -69,6 +70,7 @@ function setRadioValue(group, value) {
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
+  mountPasswords({ container: $('password-settings'), api });
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
   const busy = new Set();

@@ -69,11 +69,14 @@ if [[ -e "$BREEZER_OMNIBOX_PREPARED" ]] &&
 fi
 BREEZER_WORKSPACE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_workspace.py" --fingerprint)"
 BREEZER_AI_UI_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_ai_ui.py" --fingerprint)"
-for BREEZER_OVERLAY in workspace ai-ui; do
+BREEZER_PASSWORDS_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/features/passwords/native-ui/apply.py" --fingerprint)"
+for BREEZER_OVERLAY in workspace ai-ui passwords; do
   if [[ "$BREEZER_OVERLAY" == workspace ]]; then
     BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
-  else
+  elif [[ "$BREEZER_OVERLAY" == ai-ui ]]; then
     BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  else
+    BREEZER_OVERLAY_ID="$BREEZER_PASSWORDS_ID"
   fi
   BREEZER_OVERLAY_MARKER="$_src_dir/.breezer-$BREEZER_OVERLAY-prepared"
   if [[ -e "$BREEZER_OVERLAY_MARKER" ]] &&
@@ -132,19 +135,22 @@ fi
 "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check "$_src_dir"
 printf '%s\n' "$BREEZER_OMNIBOX_ID" > "$BREEZER_OMNIBOX_PREPARED.tmp"
 mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"
-for BREEZER_OVERLAY in workspace ai-ui; do
+for BREEZER_OVERLAY in workspace ai-ui passwords; do
   if [[ "$BREEZER_OVERLAY" == workspace ]]; then
-    BREEZER_OVERLAY_SCRIPT=apply_breezer_workspace.py
+    BREEZER_OVERLAY_SCRIPT=script/apply_breezer_workspace.py
     BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
-  else
-    BREEZER_OVERLAY_SCRIPT=apply_breezer_ai_ui.py
+  elif [[ "$BREEZER_OVERLAY" == ai-ui ]]; then
+    BREEZER_OVERLAY_SCRIPT=script/apply_breezer_ai_ui.py
     BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  else
+    BREEZER_OVERLAY_SCRIPT=features/passwords/native-ui/apply.py
+    BREEZER_OVERLAY_ID="$BREEZER_PASSWORDS_ID"
   fi
   BREEZER_OVERLAY_MARKER="$_src_dir/.breezer-$BREEZER_OVERLAY-prepared"
   if [[ ! -f "$BREEZER_OVERLAY_MARKER" ]]; then
-    "$BREEZER_PYTHON" "$BREEZER_ROOT/script/$BREEZER_OVERLAY_SCRIPT" "$_src_dir"
+    "$BREEZER_PYTHON" "$BREEZER_ROOT/$BREEZER_OVERLAY_SCRIPT" "$_src_dir"
   fi
-  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/$BREEZER_OVERLAY_SCRIPT" --check "$_src_dir"
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/$BREEZER_OVERLAY_SCRIPT" --check "$_src_dir"
   printf '%s\n' "$BREEZER_OVERLAY_ID" > "$BREEZER_OVERLAY_MARKER.tmp"
   mv "$BREEZER_OVERLAY_MARKER.tmp" "$BREEZER_OVERLAY_MARKER"
 done

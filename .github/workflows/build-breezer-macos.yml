@@ -34,7 +34,7 @@ jobs:
         env:
           NATIVE_INPUT_HASH: ${{ hashFiles('upstream/**', 'script/apply_breezer_branding.py', 'script/apply_breezer_ai.py', 'features/ai/integration/**', 'assets/branding/breezer-logo.png', 'upstream.lock.json') }}
           EXTENSION_INPUT_HASH: ${{ hashFiles('features/ai/extension/**') }}
-          WORKSPACE_INPUT_HASH: ${{ hashFiles('script/apply_breezer_workspace.py', 'features/workspace/native/**', 'script/apply_breezer_ai_ui.py', 'features/ai/native-ui/**') }}
+          WORKSPACE_INPUT_HASH: ${{ hashFiles('script/apply_breezer_workspace.py', 'features/workspace/native/**', 'script/apply_breezer_ai_ui.py', 'features/ai/native-ui/**', 'features/passwords/native-ui/**') }}
           OMNIBOX_INPUT_HASH: ${{ hashFiles('script/apply_breezer_omnibox.py', 'features/omnibox/omnibox-suggestions.patch', 'features/omnibox/upstream.json') }}
         run: |
           echo "native=$NATIVE_INPUT_HASH" >> "$GITHUB_OUTPUT"

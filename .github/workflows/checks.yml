@@ -48,6 +48,8 @@ jobs:
         run: |
           python script/check_breezer_workspace.py
           python script/check_breezer_ai_ui.py
+          python script/check_breezer_passwords.py
+          python tests/passwords_native_test.py
       - name: Run all imported tests and configuration checks
         run: python script/check_helium.py
       - name: Install browser verification dependencies

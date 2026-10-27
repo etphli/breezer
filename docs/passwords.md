@@ -1,6 +1,6 @@
 # Password import and management
 
-Request 3 adds an isolated password settings component and a native overlay. Main must connect both hooks below before shipping. No shared settings, workspace, private API, IDL, build wrapper, or cache file is changed by this work.
+Settings includes password management and a Chrome CSV import guide. The build applies a separate native overlay to restore password saving and its native entry points.
 
 Chrome and Breezer use separate profiles and Keychain identities. Import copies passwords into Breezer once. It does not keep Chrome and Breezer in sync. The extension never reads a password database, CSV, username, password, or native manager result. It only opens fixed browser routes through `chrome.tabs.create`.
 
@@ -41,9 +41,9 @@ passwords.dispose();
 
 `createPasswordActions({api}).open(destination)` exposes the same fixed routes without rendering. It rejects unknown destinations. `browserImport` is available to a general browser-data import component, but is deliberately not presented as password import.
 
-For a standalone entry, open `chrome.runtime.getURL('passwords.html')`, or append `#import` to expand the guide. Main should add a visible Passwords entry in settings and may use this page for onboarding. The page is packaged automatically by the existing extension resource walker. This branch does not modify the other agent's navigation files.
+The main Settings page mounts this component in its Passwords section. It does not create another settings page.
 
-## Native preparation integration for Main
+## Native preparation
 
 Apply the separate overlay after Helium patches and Breezer branding, before GN/resource generation:
 
@@ -53,7 +53,7 @@ python3 features/passwords/native-ui/apply.py "$PREPARED_SOURCE" --check
 python3 features/passwords/native-ui/apply.py --fingerprint
 ```
 
-Main must include the returned fingerprint in native preparation/reuse checks and CI inputs. A changed native fingerprint needs the build pipeline's normal fresh-preparation decision. The applicator does not own markers or cache policy. No existing cache has been modified or migrated here.
+`script/build_and_run.sh` checks the separate `src/.breezer-passwords-prepared` fingerprint before refreshing resources. A matching marker still runs `--check`; a different marker refuses before changing source. The hosted cache fingerprint includes every native password input. Existing compiled output is retained on first application.
 
 The applicator stages all four files before writing. It accepts either the pinned Helium state or its already-applied state, refuses missing, ambiguous, drifted, or symlinked targets, and uses file-level atomic replacement. A retry after a partial application converges. `--check` never writes. Its implementation follows the existing omnibox applicator's staging rules; its wider patch context also prevents duplicate insertion of the restored native action.
 
