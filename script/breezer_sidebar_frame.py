@@ -20,8 +20,8 @@ the vertical tab strip region after the workspace replacements have run.
   region's own right edge rather than in its parent's coordinates.
 
 Zen mode with an auto-hiding top bar, a hidden floating sidebar, fullscreen,
-a collapsed or right-aligned sidebar, and windows that show Chromium's own tab
-rows keep the upstream layout.
+a collapsed rail, a hidden autoHide sidebar, a right-aligned sidebar, and
+windows that show Chromium's own tab rows keep the upstream layout.
 """
 
 REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
@@ -41,6 +41,7 @@ def _region_header_replacements():
             "\n"
             "  // Breezer: whether this region shows the Breezer sidebar document.\n"
             "  bool HostsBreezerWorkspace() const;\n"
+            "  bool IsBreezerAutoHideSidebar() const;\n"
             "  // Breezer: the window title bar band drawn over the top of the\n"
             "  // document, with the window controls covering `controls_width` at the\n"
             "  // leading edge. Zero height when the region starts below the toolbar.\n"
@@ -118,6 +119,11 @@ def _region_replacements():
             "#else\n"
             "  return false;\n"
             "#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n"
+            "}\n"
+            "\n"
+            "bool VerticalTabStripRegionView::IsBreezerAutoHideSidebar() const {\n"
+            "  return browser_view()->browser()->GetProfile()->GetPrefs()->GetString(\n"
+            "             breezer_workspace::prefs::kSidebarMode) == \"autoHide\";\n"
             "}\n"
             "\n"
             "void VerticalTabStripRegionView::SetBreezerTitlebarForLayout(\n"
@@ -203,8 +209,10 @@ def _layout_replacements():
             "  // Breezer: the sidebar document runs the full window height. The window\n"
             "  // controls are drawn over its top and the toolbar sits beside it. In zen\n"
             "  // mode this needs a pinned top bar and a shown sidebar. An auto-hiding\n"
-            "  // top bar, fullscreen, a collapsed or right-aligned sidebar, and\n"
+            "  // top bar, fullscreen, a collapsed rail or right-aligned sidebar, and\n"
             "  // Chromium's own tab rows keep the upstream layout.\n"
+            "  // Hover expansion leaves the controller collapsed. Keep autoHide\n"
+            "  // full height through its reveal and closing animation.\n"
             "  const bool breezer_full_height_sidebar =\n"
             "      layout_data_->tab_strip_type == TabStripType::kVertical &&\n"
             "      (!zen.enabled || (delegate().IsZenModeTopChromePinned() &&\n"
@@ -212,13 +220,17 @@ def _layout_replacements():
             "      zen.ShouldLayoutVerticalTabStrip() && !vertical_right_aligned &&\n"
             "      !base::i18n::IsRTL() && !is_fullscreen(layout_data_->window_state) &&\n"
             "      delegate().IsToolbarVisible() &&\n"
-            "      !delegate().IsVerticalTabStripCollapsed() &&\n"
             "      IsParentedTo(views().top_container, views().browser_view) &&\n"
             "      IsParentedTo(views().vertical_tab_strip_region_view,\n"
             "                   views().browser_view) &&\n"
+            "      (!delegate().IsVerticalTabStripCollapsed() ||\n"
+            "       (views().vertical_tab_strip_region_view->IsBreezerAutoHideSidebar() &&\n"
+            "        (views().vertical_tab_strip_region_view->is_expanded_on_hover() ||\n"
+            "         layout_data_->vertical_tab_strip_animation.expand_on_hover_width >\n"
+            "             0.0))) &&\n"
             "      views().vertical_tab_strip_region_view->HostsBreezerWorkspace();\n"
-            "  // Where the top bar starts beside a floating (zen mode) full-height\n"
-            "  // sidebar, which overlays the page but not the top bar. Zero otherwise.\n"
+            "  // Where the top bar starts beside a full-height sidebar, including\n"
+            "  // hover expansion over the page and a floating zen sidebar.\n"
             "  int breezer_sidebar_edge = 0;\n"
             "\n"
             "  if (IsParentedTo(views().organizer_tray, views().browser_view)) {\n",
@@ -246,14 +258,14 @@ def _layout_replacements():
             "        vertical_tab_strip_bounds = SlideBoundsFromSide(\n"
             "            vertical_tab_strip_bounds, params.visual_client_area,\n"
             "            zen.side_chrome_ratio, vertical_right_aligned);\n"
-            "        // The top bar slides aside with the sidebar, keeping the same gap\n"
-            "        // as the sidebar keeps from the window edge.\n"
-            "        if (breezer_full_height_sidebar) {\n"
-            "          breezer_sidebar_edge =\n"
-            "              vertical_tab_strip_bounds.right() +\n"
-            "              ScaleExtent(zen.vertical_tab_strip_padding,\n"
-            "                          zen.side_chrome_ratio);\n"
-            "        }\n"
+            "      }\n"
+            "      // The toolbar clears the visible width, including hover expansion\n"
+            "      // which overlaps the page without changing the content inset.\n"
+            "      if (breezer_full_height_sidebar) {\n"
+            "        breezer_sidebar_edge =\n"
+            "            vertical_tab_strip_bounds.right() +\n"
+            "            ScaleExtent(zen.vertical_tab_strip_padding,\n"
+            "                        zen.side_chrome_ratio);\n"
             "      }\n",
         ),
         # The top container is laid out beside the sidebar, in the area left

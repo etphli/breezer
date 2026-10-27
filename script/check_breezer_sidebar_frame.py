@@ -51,6 +51,10 @@ FULL_HEIGHT_INPUTS = {
     "is_fullscreen(layout_data_->window_state)": "fullscreen",
     "delegate().IsToolbarVisible()": "toolbar",
     "delegate().IsVerticalTabStripCollapsed()": "collapsed",
+    "views().vertical_tab_strip_region_view->IsBreezerAutoHideSidebar()": "auto_hide",
+    "views().vertical_tab_strip_region_view->is_expanded_on_hover()": "hover_expanded",
+    "layout_data_->vertical_tab_strip_animation.expand_on_hover_width >\n"
+    "             0.0": "hover_visible",
     "IsParentedTo(views().top_container, views().browser_view)": "parented",
     "IsParentedTo(views().vertical_tab_strip_region_view,\n                   "
     "views().browser_view)": "parented",
@@ -60,11 +64,14 @@ FULL_HEIGHT_INPUTS = {
 # Normal window, sidebar shown and expanded, Breezer document loaded.
 NORMAL = dict(vertical=True, zen=False, top_pinned=False, top_shown=True,
               sidebar_shown=True, right=False, rtl=False, fullscreen=False,
-              toolbar=True, collapsed=False, parented=True, document=True)
+              toolbar=True, collapsed=False, parented=True, document=True,
+              auto_hide=False, hover_expanded=False, hover_visible=False)
 # The requested defaults: frameless on, always show top bar on, always show
 # sidebar off (floating, here revealed), vertical tabs on the left. Pinning the
 # sidebar changes only how it is placed, not whether it runs full height.
 REQUESTED = dict(NORMAL, zen=True, top_pinned=True)
+AUTO_HIDE = dict(NORMAL, collapsed=True, auto_hide=True, hover_expanded=True,
+                 hover_visible=True)
 
 FULL_HEIGHT_CASES = (
     ("normal window", NORMAL, True),
@@ -74,6 +81,14 @@ FULL_HEIGHT_CASES = (
     ("frameless, top bar sliding while pinning", dict(REQUESTED, top_shown=False), False),
     ("collapsed sidebar", dict(NORMAL, collapsed=True), False),
     ("frameless, collapsed sidebar", dict(REQUESTED, collapsed=True), False),
+    ("autoHide sidebar revealed", AUTO_HIDE, True),
+    ("autoHide reveal begins", dict(AUTO_HIDE, hover_visible=False), True),
+    ("autoHide sidebar closing", dict(AUTO_HIDE, hover_expanded=False), True),
+    ("autoHide sidebar hidden", dict(AUTO_HIDE, hover_expanded=False, hover_visible=False), False),
+    ("frameless autoHide revealed", dict(AUTO_HIDE, zen=True, top_pinned=True), True),
+    ("compact rail hover-expanded", dict(AUTO_HIDE, auto_hide=False), False),
+    ("autoHide fullscreen", dict(AUTO_HIDE, fullscreen=True), False),
+    ("autoHide right-aligned", dict(AUTO_HIDE, right=True), False),
     ("fullscreen", dict(NORMAL, fullscreen=True), False),
     ("frameless fullscreen", dict(REQUESTED, fullscreen=True), False),
     ("right-aligned sidebar", dict(NORMAL, right=True), False),
@@ -132,12 +147,14 @@ def check_order(tree, ai_first):
 
     # Frameless with an unpinned sidebar: the sidebar floats over the page, so
     # the top bar is moved aside explicitly, in both top container passes.
-    floating = layout.split("      if (zen.floating_vertical_tab_strip) {\n"
-                            "        vertical_tab_strip_bounds = SlideBoundsFromSide(", 1)[1]
-    floating = floating.split("\n      }\n", 1)[0]
-    require("if (breezer_full_height_sidebar) {\n          breezer_sidebar_edge =\n"
-            "              vertical_tab_strip_bounds.right()" in floating,
-            "Floating sidebar does not move the top bar aside")
+    visible_edge = layout.split("        vertical_tab_strip_bounds = SlideBoundsFromSide(", 1)[1]
+    visible_edge = visible_edge.split("      if (layout_data_->window_state", 1)[0]
+    require("if (breezer_full_height_sidebar) {\n        breezer_sidebar_edge =\n"
+            "            vertical_tab_strip_bounds.right()" in visible_edge,
+            "Visible sidebar width does not move the top bar aside")
+    require(visible_edge.index("\n      }\n") <
+            visible_edge.index("if (breezer_full_height_sidebar)"),
+            "Hover-expanded sidebar must move the toolbar even outside zen mode")
     require(layout.count("BesideBreezerSidebar(params, breezer_sidebar_edge)") == 2,
             "Both top container passes must sit beside a floating sidebar")
     require("BesideBreezerSidebar(params, breezer_sidebar_edge);\n"
@@ -153,8 +170,13 @@ def check_order(tree, ai_first):
             band.endswith("-\n            tabstrip_bounds->x())"),
             "Title bar band is not the toolbar row in the sidebar's coordinates")
     for declaration in ("bool HostsBreezerWorkspace() const;",
+                        "bool IsBreezerAutoHideSidebar() const;",
                         "void SetBreezerTitlebarForLayout(int height, int controls_width);"):
         require(header.count(declaration) == 1, f"Region header lacks {declaration}")
+    auto_hide = region.split("bool VerticalTabStripRegionView::IsBreezerAutoHideSidebar() const {", 1)[1]
+    require('breezer_workspace::prefs::kSidebarMode) == "autoHide"' in
+            auto_hide.split("\n}", 1)[0],
+            "AutoHide exception must not change compact-rail behavior")
     caption = region.split("bool VerticalTabStripRegionView::IsPositionInWindowCaption(", 1)[1]
     caption = caption.split("\n}\n", 1)[0]
     require(caption.index("IsHitInView(resize_area_, point)") < caption.index("IsPointInTitlebar("),
