@@ -116,8 +116,8 @@ Appearance ReadAppearance(Profile* profile) {
   return result;
 }
 
-base::Value::Dict AppearanceToValue(const Appearance& appearance) {
-  base::Value::Dict result;
+base::DictValue AppearanceToValue(const Appearance& appearance) {
+  base::DictValue result;
   result.Set("layout", appearance.layout);
   result.Set("theme", appearance.theme);
   result.Set("colorMode", appearance.color_mode);
@@ -128,7 +128,7 @@ base::Value::Dict AppearanceToValue(const Appearance& appearance) {
 
 // Parses the whole patch into `appearance` without side effects. Any unknown
 // key or invalid value rejects the patch.
-bool ParseAppearancePatch(const base::Value::Dict& patch,
+bool ParseAppearancePatch(const base::DictValue& patch,
                           Appearance* appearance,
                           std::string* error) {
   if (patch.empty()) {
@@ -188,7 +188,7 @@ bool ParseAppearancePatch(const base::Value::Dict& patch,
 // Rejects the patch before any write if a requested field is controlled by
 // policy, an extension or another source the user cannot override.
 bool CheckAppearanceWritable(Profile* profile,
-                             const base::Value::Dict& patch,
+                             const base::DictValue& patch,
                              std::string* error) {
   PrefService* const prefs = profile->GetPrefs();
   const bool changes_theme = patch.contains("theme");
@@ -243,7 +243,7 @@ ThemeService::BrowserColorScheme ColorSchemeFor(std::string_view color_mode) {
 // changes never touch the theme.
 void ApplyAppearance(Profile* profile,
                      const Appearance& appearance,
-                     const base::Value::Dict& patch) {
+                     const base::DictValue& patch) {
   PrefService* const prefs = profile->GetPrefs();
   if (patch.contains("layout")) {
     prefs->SetInteger(prefs::kHeliumLayout,
@@ -333,7 +333,7 @@ BreezerPrivateSetAppearanceFunction::RunFunction() {
   if (args().size() != 1 || !args()[0].is_dict()) {
     return RespondNow(Error("Appearance changes must be an object."));
   }
-  const base::Value::Dict& patch = args()[0].GetDict();
+  const base::DictValue& patch = args()[0].GetDict();
   Appearance appearance = ReadAppearance(GetProfile());
   std::string error;
   if (!ParseAppearancePatch(patch, &appearance, &error) ||

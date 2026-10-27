@@ -37,6 +37,15 @@ const evidence = process.env.BREEZER_AI_EVIDENCE
   || join(repo, 'build/arc-redesign/workspace-native-evidence', new Date().toISOString().replace(/[:.]/g, '-'));
 await mkdir(evidence, { recursive: true });
 const profile = await mkdtemp(join(tmpdir(), 'breezer-workspace-native-profile-'));
+// Match the explicit layout/bookmark values in an earlier Breezer profile.
+// Defaults alone would leave that profile on its old layout.
+const oldPreferences = {
+  helium: { browser: { layout: 3, vertical_right_aligned: true } },
+  bookmark_bar: { show_on_all_tabs: false },
+  vertical_tabs: { uncollapsed_width: 300 },
+};
+await mkdir(join(profile, 'Default'), { recursive: true });
+await writeFile(join(profile, 'Default/Preferences'), JSON.stringify(oldPreferences));
 
 const titles = { alpha: 'Workspace fixture Alpha', beta: 'Workspace fixture Beta', gamma: 'Workspace fixture Gamma' };
 const server = createServer((request, response) => {
@@ -343,7 +352,11 @@ try {
   const initialAppearance = await appearance();
   observe('initialAppearance', initialAppearance);
   assert.deepEqual(Object.keys(initialAppearance).sort(), ['colorMode', 'layout', 'showBookmarks', 'sidebarWidth', 'theme']);
-  assert.equal(initialAppearance.layout, 'sidebar', 'A new profile should start in the sidebar layout.');
+  assert.equal(initialAppearance.layout, 'sidebar', 'An earlier Breezer profile should migrate to the sidebar layout.');
+  assert.equal(initialAppearance.showBookmarks, true, 'Existing profiles should gain the requested top bookmarks bar.');
+  assert.equal(initialAppearance.sidebarWidth, 240, 'Existing profiles should gain the initial workspace width.');
+  observe('seededOldPreferences', oldPreferences);
+  pass('existingProfileMigration', 'explicit old layout, hidden bookmarks and 300 px width migrated to sidebar, shown bookmarks and 240 px width');
 
   // Bounded: unknown keys and values are rejected by native code.
   const rejections = {

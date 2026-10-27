@@ -137,6 +137,33 @@ try {
   assert.equal(model.contextEnabled, true, 'The synthetic HTTP page was not attached to the panel.');
   assert.equal(model.control, 'false', 'Browser control must remain off for this test.');
 
+  // Inspect the real discovered menu, then restore the default before inference.
+  await panelTarget.evaluate(`document.querySelector('#model-button').click()`);
+  const modelMenu = await panelTarget.evaluate(`Array.from(document.querySelectorAll('.provider-group'), group => ({
+    provider: group.querySelector('.provider-heading span')?.textContent,
+    models: Array.from(group.querySelectorAll('.model-option'), button => button.querySelector('span')?.textContent),
+  }))`);
+  const codexMenu = modelMenu.find(group => group.provider === 'Codex');
+  assert.ok(codexMenu?.models.some(label => /6\.1.*terra/i.test(label)), 'GPT-6.1 Terra is missing from the actual discovered model menu.');
+  assert.ok(codexMenu.models.every(label => !/gpt[- ]?(?:5|6\.0)(?:[ .-]|$)/i.test(label)), 'An older GPT generation remains in the actual model menu.');
+  await panelTarget.evaluate(`document.querySelector('#model-button').click()`);
+  const preferences = await panelTarget.evaluate(`(async () => {
+    const reasoning = document.querySelector('#reasoning-select');
+    const previous = reasoning.value;
+    const value = Array.from(reasoning.options).find(option => option.value && option.value !== previous)?.value;
+    if (value) {
+      reasoning.value = value;
+      reasoning.dispatchEvent(new Event('change', { bubbles: true }));
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    const stored = await chrome.storage.local.get('breezerModelPreferences');
+    reasoning.value = previous;
+    reasoning.dispatchEvent(new Event('change', { bubbles: true }));
+    return { tested: value || null, stored: stored.breezerModelPreferences || {}, speedVisible: !document.querySelector('#speed-setting').hidden };
+  })()`);
+  if (preferences.tested) assert.ok(Object.values(preferences.stored).some(item => item.reasoning === preferences.tested), 'Reasoning selection was not persisted.');
+  assert.equal(preferences.speedVisible, true, 'The default Codex model must show its speed selector.');
+
   // The page-aware send exercises the real background port and BrowserTools.snapshot.
   // Its actual click also carries the transient user gesture needed by Breezer's
   // private activeTab-grant API.
@@ -207,12 +234,15 @@ try {
     app,
     page: pageInfo,
     model: model.label,
+    modelMenu,
+    preferences,
     control: model.control,
     pageAware,
     controlSnapshot,
     assistantMessages,
     screenshotPath,
   };
+  await writeFile(join(evidence, 'result.json'), `${JSON.stringify(report, null, 2)}\n`);
   process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   assert.ok(assistantMessages.length >= 1);
 } finally {
