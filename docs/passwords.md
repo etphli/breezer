@@ -88,9 +88,12 @@ Run the action tests and source checks without installing dependencies or buildi
 node --test tests/passwords.test.mjs
 python3 tests/passwords_native_test.py
 BREEZER_PASSWORD_SOURCE=/path/to/prepared/chromium/src python3 tests/passwords_native_test.py
+node tests/passwords/installed.mjs /absolute/path/Breezer.app
 ```
 
 Without `BREEZER_PASSWORD_SOURCE`, the six native-source tests explicitly skip. With it, the checks read only named source files. They apply the overlay to temporary copies, verify idempotence, interrupted retries, drift/symlink refusal, preserved passkey policy, restored native entry points, routes, profile encryption wiring, native authentication, and unsupported direct import. They also compare the inspected source hashes. They never open a profile or password database.
+
+The installed-app test uses a temporary profile with the native Mac password backend. It checks that saving is enabled, then adds one dummy local credential, changes its username, restarts the profile to check persistence, and deletes it. It never requests plaintext. CSV import, autofill selection, and OS authentication need the separate UI acceptance below. The pre-fix installed app fails this test because saving is enforced off.
 
 For a real DOM check, from the repo root:
 
