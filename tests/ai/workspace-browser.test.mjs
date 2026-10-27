@@ -241,6 +241,102 @@ async function startServer() {
   return server;
 }
 
+test('empty Settings-created spaces and sidebar controls respond to held clicks', { skip }, async () => {
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const initial = seed();
+    initial.tabs = initial.tabs.filter(tab => [3, 4, 5].includes(tab.id)).map((tab, index) => ({ ...tab, index }));
+    initial.local['workspace.v1'].favorites = [];
+    initial.local['workspace.v1'].spaces.forEach(space => { space.pinned = []; });
+    initial.local['workspace.v1'].spaces.push({ id: 'space-research', name: 'Research', tone: 'tide', pinned: [] });
+    initial.local['workspace.members.v1'].tabs = Object.fromEntries(Object.entries(initial.local['workspace.members.v1'].tabs).filter(([id]) => initial.tabs.some(tab => tab.id === Number(id))));
+    const context = await browser.newContext({ viewport: { width: 300, height: 820 } });
+    await context.addInitScript(installFixture, { seed: initial, bridge: true });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(`${base}/workspace.html#/sidebar?w=7`);
+    await page.locator('#today [data-key="t:3"]').waitFor();
+    assert.equal(await page.locator('#spaces [role="tab"]').count(), 3);
+    for (const [id, name] of [['space-personal', 'Personal'], ['space-research', 'Research'], ['space-work', 'Work']]) {
+      await page.locator(`#spaces [data-key="s:${id}"]`).click({ delay: 120 });
+      await page.waitForFunction(({ id, name }) => document.querySelector('#space-name').textContent === name && document.querySelector(`#spaces [data-key="s:${id}"]`).getAttribute('aria-selected') === 'true', { id, name });
+      await page.waitForFunction(id => window.fx.session['workspace.window.7']?.activeSpaceId === id, id);
+      await page.waitForFunction(() => document.querySelector('#today .row.active'));
+    }
+    assert.equal((await page.evaluate(() => window.fx.calls)).filter(([name]) => name === 'tabs.create').length, 2, 'Each empty space gets one real tab');
+    await page.locator('#today [data-key="t:4"]').click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.id === 4);
+    await page.locator('#today [data-key="t:4"]').click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Pin tab', exact: true }).click();
+    await page.locator('#pinned [data-key^="e:"]').waitFor();
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.id === 4)?.pinned);
+    await page.getByRole('button', { name: 'Compact sidebar' }).click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.appearance.sidebarMode === 'compact');
+    await page.getByRole('button', { name: 'Expand sidebar' }).click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.appearance.sidebarMode === 'expanded');
+    await page.getByRole('button', { name: 'New space', exact: true }).click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces.length === 4);
+    await page.keyboard.press('Enter');
+    await page.getByRole('button', { name: 'Settings', exact: true }).click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.calls.some(([name, props]) => name === 'tabs.create' && props.url?.endsWith('/workspace.html#/settings')));
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
+  }
+});
+
+test('dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const initial = seed();
+    initial.tabs = initial.tabs.filter(tab => [3, 4, 5].includes(tab.id)).map((tab, index) => ({ ...tab, index }));
+    initial.local['workspace.v1'].favorites = [];
+    initial.local['workspace.v1'].spaces.forEach(space => { space.pinned = []; });
+    const context = await browser.newContext({ viewport: { width: 300, height: 820 } });
+    await context.addInitScript(installFixture, { seed: initial, bridge: true });
+    const page = await context.newPage();
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const row = id => page.locator(`#today [data-key="t:${id}"]`);
+    await row(4).waitFor();
+    const source = await row(4).boundingBox();
+    const target = await row(3).boundingBox();
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2 - 6);
+    await page.locator('#sidebar.dragging').waitFor();
+    assert.deepEqual(await row(3).boundingBox(), target, 'Starting a drag must keep the intended drop row under the pointer');
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: `${evidence}/workspace-empty-favorites-drag.png` });
+    await page.mouse.move(target.x + target.width / 2, target.y + 3, { steps: 12 });
+    await page.mouse.up();
+    await page.waitForFunction(() => window.fx.calls.some(([name, id]) => name === 'tabs.move' && id === 4));
+    await page.waitForFunction(() => document.querySelector('#today .row')?.dataset.key === 't:4');
+    assert.equal(await page.evaluate(() => window.fx.tabs.find(tab => tab.id === 4).pinned), false, 'Reordering must not pin the tab');
+    await page.locator('#favorites').waitFor({ state: 'hidden' });
+
+    // The floating empty Favorites target remains usable without moving tabs.
+    const favoriteSource = await row(5).boundingBox();
+    await page.mouse.move(favoriteSource.x + favoriteSource.width / 2, favoriteSource.y + favoriteSource.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(favoriteSource.x + favoriteSource.width / 2, favoriteSource.y + favoriteSource.height / 2 - 6);
+    await page.locator('#sidebar.dragging').waitFor();
+    const favoriteTarget = await page.locator('#favorites').boundingBox();
+    await page.mouse.move(favoriteTarget.x + favoriteTarget.width / 2, favoriteTarget.y + favoriteTarget.height / 2, { steps: 12 });
+    await page.mouse.up();
+    await page.waitForFunction(() => window.fx.local['workspace.v1'].favorites.some(entry => entry.url === 'https://mail.example.com/inbox'));
+    await page.locator('#favorites .tile').waitFor();
+    assert.equal(await page.evaluate(() => window.fx.tabs.find(tab => tab.id === 5).pinned), true);
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
+  }
+});
+
 test('Arc-style sidebar and settings work against the chrome.* fixture', { skip }, async () => {
   await mkdir(evidence, { recursive: true });
   const server = await startServer();

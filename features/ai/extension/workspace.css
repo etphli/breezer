@@ -133,7 +133,14 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .tile .favicon { width: 20px; height: 20px; font-size: 12px; border-radius: 6px; }
 .tile .favicon img { width: 20px; height: 20px; }
 .tile:not(.live) .favicon { opacity: 0.72; }
+/* The temporary drop target must not move tab rows beneath a held pointer. */
 .favorites.empty {
+  position: absolute;
+  top: var(--titlebar-h);
+  left: 0;
+  right: 0;
+  z-index: 5;
+  background: var(--air);
   display: block;
   min-height: 44px;
   margin: 10px 10px 4px;

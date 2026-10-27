@@ -168,19 +168,26 @@ try {
         return response.result?.value;
       },
       // Real renderer input: produces trusted events and a transient user activation.
-      async click(finder, { button = 'left', hover = false } = {}) {
-        const box = await this.evaluate(`(() => {
-          const node = ${finder};
-          if (!node) return null;
-          node.scrollIntoView({ block: 'nearest' });
-          const r = node.getBoundingClientRect();
-          return { x: r.x + r.width / 2, y: r.y + r.height / 2, width: r.width, height: r.height };
-        })()`);
+      async click(finder, { button = 'left', hover = false, holdMs = 0 } = {}) {
+        let previousBox;
+        const box = await waitFor(`stable renderer click target: ${finder}`, async () => {
+          const current = await this.evaluate(`(() => {
+            const node = ${finder};
+            if (!node) return null;
+            node.scrollIntoView({ block: 'nearest' });
+            const r = node.getBoundingClientRect();
+            return { x: r.x + r.width / 2, y: r.y + r.height / 2, width: r.width, height: r.height };
+          })()`);
+          const stable = current?.width > 0 && current.height > 0 && JSON.stringify(current) === JSON.stringify(previousBox);
+          previousBox = current;
+          return stable && current;
+        });
         assert.ok(box && box.width > 0 && box.height > 0, `Element not visible in ${targetId}: ${finder}`);
         await this.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: box.x, y: box.y });
         if (hover) return box;
         const buttons = { left: 1, right: 2, middle: 4 }[button];
         await this.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button, buttons, clickCount: 1 });
+        if (holdMs) await sleep(holdMs);
         await this.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: box.x, y: box.y, button, buttons: 0, clickCount: 1 });
         return box;
       },
@@ -324,6 +331,36 @@ try {
   await assertScoped(hostA, windowA, 'after switch');
   assert.ok((await worker.evaluate(id => chrome.tabs.get(id), alphaB)).active, 'Switching in A changed B.');
   pass('switchTabViaUi', `clicking the row activated tab ${alphaA}; window B's active tab unchanged`);
+
+  // Real component document and Chromium tabs, with trusted renderer input.
+  // This does not exercise macOS's physical-pointer hit-testing path.
+  const tabBox = id => hostA.evaluate(`(() => {
+    const r = document.querySelector('#today [data-key="t:${id}"]').getBoundingClientRect();
+    return { x: r.x, y: r.y, width: r.width, height: r.height };
+  })()`);
+  assert.equal(await hostA.evaluate(`document.querySelector('#favorites').hidden`), true);
+  const dragSource = await tabBox(betaA);
+  const dragTarget = await tabBox(alphaA);
+  const dragX = dragSource.x + dragSource.width / 2;
+  const dragY = dragSource.y + dragSource.height / 2;
+  await hostA.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: dragX, y: dragY });
+  await hostA.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: dragX, y: dragY, button: 'left', buttons: 1, clickCount: 1 });
+  await hostA.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: dragX, y: dragY - 6, buttons: 1 });
+  await waitFor('drag started in native host', () => hostA.evaluate(`document.querySelector('#sidebar').classList.contains('dragging')`));
+  assert.deepEqual(await tabBox(alphaA), dragTarget, 'Empty Favorites must not move native hosted rows during a drag');
+  const dropX = dragTarget.x + dragTarget.width / 2;
+  const dropY = dragTarget.y + 3;
+  for (let step = 1; step <= 12; step++) {
+    await hostA.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: dragX + (dropX - dragX) * step / 12, y: dragY - 6 + (dropY - dragY + 6) * step / 12, buttons: 1 });
+  }
+  await hostA.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: dropX, y: dropY, button: 'left', buttons: 0, clickCount: 1 });
+  await waitFor('Chromium tab reordered by drag', async () => {
+    const tabs = await windowTabs(windowA);
+    return tabs.find(tab => tab.id === betaA).index < tabs.find(tab => tab.id === alphaA).index;
+  });
+  assert.equal((await worker.evaluate(id => chrome.tabs.get(id), betaA)).pinned, false);
+  await assertScoped(hostA, windowA, 'after drag reorder');
+  pass('dragReorderViaRenderer', 'held pointer drag kept row geometry stable and reordered the actual Chromium tab without pinning it; physical macOS pointer routing is unverified');
 
   await hostA.click(`document.querySelector('#today [data-key="t:${betaA}"]')`, { button: 'right' });
   await waitFor('row context menu', () => hostA.evaluate(`!document.getElementById('menu').hidden`));
@@ -568,6 +605,40 @@ try {
   await choose('.segmented[data-field="sidebarMode"] [data-value="expanded"]', 'sidebarMode', 'expanded');
   await waitFor('expanded width restored', async () => (await hostA.evaluate('innerWidth')) >= 200);
   pass('sidebarBehaviorSettings', `compact rail ${compactWidth}px, auto-hide edge ${hiddenWidth}px, expanded restored; pointer-driven native reveal is a separate check`);
+
+  // Settings-created empty spaces and the footer controls in the real host.
+  const spaceIds = () => hostA.evaluate(`[...document.querySelectorAll('#spaces .space-dot')].map(node => node.dataset.key.slice(2))`);
+  const originalSpaces = await spaceIds();
+  for (let added = 1; added <= 2; added++) {
+    await settings.locator('#settings-add-space').click();
+    await waitFor('Settings space added to native dock', async () => (await spaceIds()).length === originalSpaces.length + added);
+  }
+  const addedSpaces = (await spaceIds()).filter(id => !originalSpaces.includes(id));
+  for (const id of [...addedSpaces, originalSpaces[0]]) {
+    await hostA.click(`document.querySelector('#spaces [data-key="s:${id}"]')`, { holdMs: 120 });
+    await waitFor('native space dot selected', () => hostA.evaluate(`document.querySelector('#spaces [data-key="s:${id}"]').getAttribute('aria-selected') === 'true'`));
+    await waitFor('native selected space has an active Chromium tab', async () => {
+      const [shown, tabs] = await Promise.all([hostA.evaluate(snapshotExpression), windowTabs(windowA)]);
+      const active = tabs.find(tab => tab.active)?.id;
+      return shown.today.some(row => row.id === active && row.active);
+    });
+    const saved = await worker.evaluate(key => chrome.storage.session.get(key).then(values => values[key]), `workspace.window.${windowA}`);
+    assert.equal(saved.activeSpaceId, id);
+  }
+  pass('emptySpaceDotsViaRenderer', 'held clicks selected both Settings-created empty spaces, opened real tabs, and returned to the original space; physical macOS pointer routing is unverified');
+  await hostA.click(`document.getElementById('collapse')`, { holdMs: 120 });
+  await waitFor('footer compact control persisted', async () => (await appearance()).sidebarMode === 'compact');
+  // The preference changes before the animated native rail finishes resizing.
+  await waitFor('footer compact geometry', () => hostA.evaluate(`innerWidth >= 30 && innerWidth <= 60 && document.querySelector('#collapse').getAttribute('aria-label') === 'Expand sidebar'`));
+  await hostA.click(`document.getElementById('collapse')`, { holdMs: 120 });
+  await waitFor('footer expanded control persisted', async () => (await appearance()).sidebarMode === 'expanded');
+  await waitFor('footer expanded geometry', () => hostA.evaluate(`innerWidth >= 200 && document.querySelector('#collapse').getAttribute('aria-label') === 'Compact sidebar'`));
+  await hostA.click(`document.getElementById('add-space')`, { holdMs: 120 });
+  await waitFor('footer plus created a space', async () => (await spaceIds()).length === originalSpaces.length + 3);
+  await waitFor('footer plus begins space rename', () => hostA.evaluate(`Boolean(document.querySelector('#space-name input'))`));
+  await hostA.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  await hostA.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  pass('footerControlsViaRenderer', 'compact/expand persisted through the native API and plus created a space; Settings was exercised earlier');
 
   // ---------------------------------------------------------------- window close releases its host
   await worker.evaluate(id => chrome.windows.remove(id), windowB);
