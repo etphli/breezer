@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" data-tone="mint" data-scheme="light">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Password component verification</title>
+<link rel="stylesheet" href="../../features/ai/extension/workspace.css">
+<body class="route-settings">
+<main class="settings"><div class="settings-column">
+  <h1>Password component verification</h1>
+  <p id="result" role="status">Running dummy API checks...</p>
+  <div id="passwords"></div>
+</div></main>
+<script type="module">
+import { mountPasswords, PASSWORD_ROUTES } from '../../features/ai/extension/passwords.js';
+const container = document.getElementById('passwords');
+const result = document.getElementById('result');
+const calls = [];
+const opened = [];
+let reject = false;
+let release;
+const api = { tabs: { async create(options) {
+  calls.push(options);
+  if (reject) throw new Error('Dummy failure; no user data');
+  if (release === 'hold') await new Promise(resolve => { release = resolve; });
+  return { id: 7 };
+} } };
+const check = (value, message) => { if (!value) throw new Error(message); };
+const settle = () => new Promise(resolve => setTimeout(resolve, 0));
+const click = key => container.querySelector(`[data-password-action="${key}"]`).click();
+try {
+  let view = mountPasswords({ container, api, onOpened: key => opened.push(key) });
+  check(container.textContent.includes('does not sync'), 'one-time import claim missing');
+  check(!container.querySelector('input'), 'extension must not collect credentials or CSVs');
+  view.showImport();
+  check(container.querySelector('details').open, 'import guide did not expand');
+  check(document.activeElement.tagName === 'SUMMARY', 'guide focus was not set');
+  release = 'hold';
+  click('import');
+  check([...container.querySelectorAll('button')].every(button => button.disabled), 'pending actions must be disabled');
+  click('import');
+  check(calls.length === 1, 'duplicate open while pending');
+  release();
+  release = null;
+  await settle();
+  check(calls[0].url === PASSWORD_ROUTES.import, 'wrong native CSV route');
+  check(opened.join() === 'import', 'open callback is not a destination key');
+  check(container.querySelector('[role="status"]').textContent.includes('check the import result there'), 'opening a tab must not claim success');
+  reject = true;
+  click('manager');
+  await settle();
+  const error = container.querySelector('[role="alert"]');
+  check(!error.hidden && error.textContent.includes(PASSWORD_ROUTES.manager), 'failure needs a usable fallback route');
+  check(!error.textContent.includes('Dummy failure'), 'raw errors should not leak into UI');
+  check(opened.length === 1, 'failed opens must not notify the host');
+  reject = false;
+  click('manager');
+  await settle();
+  check(error.hidden && calls.at(-1).url === PASSWORD_ROUTES.manager, 'retry failed');
+  click('settings');
+  await settle();
+  check(calls.at(-1).url === PASSWORD_ROUTES.settings, 'wrong manager settings route');
+  const detached = container.querySelector('button');
+  view.dispose();
+  detached.click();
+  check(!container.children.length && calls.length === 4, 'dispose left a listener or mounted content');
+  view = mountPasswords({ container, api: null });
+  check([...container.querySelectorAll('button')].every(button => button.disabled), 'ordinary browsers must not simulate native availability');
+  view.dispose();
+  release = 'hold';
+  view = mountPasswords({ container, api, onOpened: key => opened.push(key) });
+  click('import');
+  view.dispose();
+  release();
+  release = null;
+  await settle();
+  check(!container.children.length && opened.length === 3, 'disposed view updated after await');
+  view = mountPasswords({ container, api });
+  view.showImport();
+  result.textContent = 'PASS: guide, routes, pending state, errors, retry, missing API, callback and disposal. Dummy tab API only; native import is not exercised.';
+  document.documentElement.dataset.result = 'pass';
+} catch (error) {
+  result.textContent = `FAIL: ${error.message}`;
+  document.documentElement.dataset.result = 'fail';
+  throw error;
+}
+</script>
+</body>
+</html>

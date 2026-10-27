@@ -1,0 +1,27 @@
+{
+  "chromium_version": "156.0.8078.47",
+  "helium_commit": "f29a25968e483f8bb85e47829ccd487bbe229199",
+  "helium_macos_commit": "9aa975a56de8c2376d7c22f71da564b9426cda5f",
+  "restores": [
+    "native password saving preference instead of Helium forced-off policy; preserves passkey policy",
+    "native password bubble action and web app password icon",
+    "native manage-passwords footer in autofill suggestions"
+  ],
+  "direct_chrome_password_import": false,
+  "csv_import_route": "chrome://password-manager/settings?import=true",
+  "chrome_export_help": "https://support.google.com/chrome/answer/13068232?hl=en",
+  "source_evidence_sha256": {
+    "chrome/browser/ui/webui/chrome_web_ui_configs.cc": "8defc1da5453536e213f29150a95464e9fa7e2a7fdbb5ee188282ac9089f1b94",
+    "chrome/browser/resources/password_manager/router.ts": "de718faeeba71624974390c0ae6bc31c698c41500619b13d08a84a4aeb8a6a24",
+    "chrome/browser/resources/password_manager/settings_section.ts": "8002721142f57b22ac2b402b78befd72c7579317fe05af925b1e60980b55b055",
+    "chrome/browser/resources/password_manager/passwords_importer.ts": "be7797ebc66eb35dc1260626f7df5cc214718c8a627430c7207b2314fa9cbe1e",
+    "chrome/browser/resources/password_manager/credential_details/password_details_card.ts": "0f114ce7dba9187d5bdf729ae1849b674701b7c6961d2d3df278e1d65106ead1",
+    "chrome/browser/extensions/api/passwords_private/passwords_private_delegate_impl.cc": "0d0d563140544bb175968a9c2e5b597730e8c852ec137b739a04473996c1c823",
+    "chrome/browser/password_manager/factories/profile_password_store_factory.cc": "ade620e99596c844c8262e945b015f078c526b91c963bea178b82877681ae2ec",
+    "components/password_manager/core/browser/password_store/login_database.cc": "3f5ec601991ffa0d01fea4903df34d8a667337fae44a4f5f9df4961365136b30",
+    "chrome/browser/importer/importer_list.cc": "f7c3d93175e020bea3f084492d2ca1f01478a438d0892614dd125628ba35431d",
+    "chrome/utility/importer/chrome_importer.cc": "7a6f26559d8f474e759150234466b66b4bf26197e1183038d711bd34d819802c",
+    "components/password_manager/core/browser/features/password_manager_features_util.cc": "1f94e66ae6f050cc866a43b3edb109ad4375b38c159311566b57543e046082ff",
+    "components/os_crypt/common/keychain_password_mac.mm": "b762afe19a49726736622da39266d7f39a1792aa0267418cdecab8f6153c886c"
+  }
+}

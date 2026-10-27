@@ -1,0 +1,2 @@
+name,url,username,password,note
+Breezer dummy,http://localhost:8765/passwords-fixture,dummy@example.test,Breezer-test-only-123!,Disposable test fixture only
