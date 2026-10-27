@@ -43,7 +43,13 @@ BreezerWorkspaceView::BreezerWorkspaceView(
             extensions::ExtensionHostRegistry::Get(profile)) {
       host_registry_observation_.Observe(host_registry);
     }
-    CreateExtensionContent();
+    // The tab region is built before BrowserWindowFeatures creates the
+    // extension window controller. Start the document after window setup has
+    // returned to the UI event loop, when its window-scoped APIs are ready.
+    base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
+        FROM_HERE,
+        base::BindOnce(&BreezerWorkspaceView::CreateExtensionContent,
+                       weak_factory_.GetWeakPtr()));
   }
   was_available_ = is_available();
   SetVisible(was_available_);
@@ -102,6 +108,7 @@ void BreezerWorkspaceView::CreateExtensionContent() {
   extension_view->Init();
   extension_view_ = AddChildView(std::move(extension_view));
   view_observation_.Observe(extension_view_);
+  UpdateAvailability();
 }
 
 void BreezerWorkspaceView::ResetExtensionContent() {
@@ -188,8 +195,10 @@ void BreezerWorkspaceView::OnExtensionLoaded(
   if (extension->id() != breezer_workspace::kExtensionId) {
     return;
   }
-  CreateExtensionContent();
-  UpdateAvailability();
+  base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
+      FROM_HERE,
+      base::BindOnce(&BreezerWorkspaceView::CreateExtensionContent,
+                     weak_factory_.GetWeakPtr()));
 }
 
 void BreezerWorkspaceView::OnExtensionUnloaded(
