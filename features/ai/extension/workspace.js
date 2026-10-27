@@ -80,10 +80,21 @@ export async function loadAppearance() {
   }
 }
 
+// Native range for appearance.sidebarFontSize, in CSS pixels.
+const SIDEBAR_FONT_SIZE = Object.freeze({ min: 12, max: 20, fallback: 15 });
+
+export function sidebarFontSize(appearance) {
+  const value = appearance?.sidebarFontSize;
+  return Number.isInteger(value) && value >= SIDEBAR_FONT_SIZE.min && value <= SIDEBAR_FONT_SIZE.max
+    ? value
+    : SIDEBAR_FONT_SIZE.fallback;
+}
+
 export function applyAppearance(appearance) {
   const root = document.documentElement;
   root.dataset.tone = appearance.theme;
   root.dataset.sidebarMode = appearance.sidebarMode;
+  root.style.setProperty('--sidebar-font-size', `${sidebarFontSize(appearance)}px`);
   const collapse = $('collapse');
   if (collapse) {
     const label = appearance.sidebarMode === 'expanded' ? 'Compact sidebar' : 'Expand sidebar';

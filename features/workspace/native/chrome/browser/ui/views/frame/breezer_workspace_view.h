@@ -16,6 +16,7 @@
 #include "extensions/browser/extension_registry.h"
 #include "extensions/browser/extension_registry_observer.h"
 #include "ui/base/metadata/metadata_header_macros.h"
+#include "ui/gfx/geometry/rounded_corners_f.h"
 #include "ui/views/view.h"
 
 class BrowserWindowInterface;
@@ -31,6 +32,12 @@ class ExtensionViewHost;
 // shows it again whenever the document cannot run (extension unloaded,
 // renderer gone, or the page closed itself). The document is recreated when
 // the extension loads again.
+//
+// When the region runs the full window height, the window controls are drawn
+// over the top of the document. That band is reported to the document as the
+// CSS titlebar-area-* environment variables (the same values an installed web
+// app gets with Window Controls Overlay) and drags the window like the rest of
+// the title bar.
 class BreezerWorkspaceView final
     : public views::View,
       public ExtensionViewViews::Observer,
@@ -53,6 +60,18 @@ class BreezerWorkspaceView final
   bool is_available() const;
   views::View* GetFocusableView() const;
 
+  // Sets the title bar band drawn over the top of the document: `height` from
+  // the top edge, with the window controls covering `controls_width` at the
+  // leading edge. A zero height means no band.
+  void SetTitlebar(int height, int controls_width);
+  // True for points, in this view's coordinates, inside the title bar band.
+  bool IsPointInTitlebar(const gfx::Point& point) const;
+  // Clips the document to the region's floating shape.
+  void SetCornerRadii(const gfx::RoundedCornersF& radii);
+
+  // views::View:
+  void OnBoundsChanged(const gfx::Rect& previous_bounds) override;
+
   // Call before removing this view while code inside the document may still be
   // running (for example a layout change requested by the document). The host
   // is destroyed in a later task; destroying this view afterwards is safe.
@@ -66,6 +85,9 @@ class BreezerWorkspaceView final
   // host itself (or its WebContents) may still be on the call stack.
   void DetachExtensionContentSoon();
   void UpdateAvailability();
+  // Push the current band and corners to the document.
+  void UpdateTitlebarArea();
+  void UpdateCornerRadii();
   void HandleCloseExtensionHost(extensions::ExtensionHost* host);
 
   // ExtensionViewViews::Observer:
@@ -89,6 +111,9 @@ class BreezerWorkspaceView final
   const raw_ref<BrowserWindowInterface> browser_;
   AvailabilityChangedCallback availability_changed_;
   bool was_available_ = false;
+  int titlebar_height_ = 0;
+  int titlebar_controls_width_ = 0;
+  gfx::RoundedCornersF corner_radii_;
 
   base::ScopedObservation<extensions::ExtensionRegistry,
                           extensions::ExtensionRegistryObserver>

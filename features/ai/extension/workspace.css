@@ -21,6 +21,7 @@
   --radius-row: 8px;
   --radius-card: 10px;
   --row-h: 32px;
+  --sidebar-font-size: 15px;
   --line: color-mix(in srgb, var(--ink) 11%, transparent);
   --hover: color-mix(in srgb, var(--ink) 7%, transparent);
   --press: color-mix(in srgb, var(--ink) 11%, transparent);
@@ -72,11 +73,22 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 /* ------------------------------------------------------------------ sidebar */
 
 .sidebar {
+  /* Text follows the sidebar font size setting (12–20 px); rows and icons keep pace. */
+  --fs: var(--sidebar-font-size);
+  --fs-small: max(11px, calc(var(--fs) - 3px));
+  --row-h: calc(var(--fs) * 2 + 4px);
+  --favicon: clamp(16px, calc(var(--fs) + 1px), 20px);
   container: sidebar / inline-size;
   position: relative;
   height: 100dvh;
   display: flex;
   flex-direction: column;
+  /* When the sidebar runs the full window height, the window controls sit in
+     this band and the browser drags the window from it. Zero otherwise. */
+  --titlebar-h: env(titlebar-area-height, 0px);
+  padding-top: var(--titlebar-h);
+  font-size: var(--fs);
+  line-height: calc(var(--fs) * 1.35);
   color: var(--ink);
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--air) 92%, var(--card)) 0%, var(--air) 38%, color-mix(in srgb, var(--air) 82%, var(--air-deep)) 100%);
@@ -134,8 +146,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   display: block;
   padding: 13px 12px;
   color: var(--muted);
-  font-size: 11px;
-  line-height: 14px;
+  font-size: var(--fs-small);
+  line-height: 1.3;
   text-align: center;
 }
 .favorites.drop-into { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-card); }
@@ -165,15 +177,15 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   margin-bottom: 2px;
 }
 .space-glyph {
-  width: 18px;
-  height: 18px;
+  width: calc(var(--favicon) + 2px);
+  height: calc(var(--favicon) + 2px);
   flex: none;
   display: grid;
   place-items: center;
   border-radius: 6px;
   background: var(--accent);
   color: var(--air);
-  font-size: 10px;
+  font-size: calc(var(--favicon) * 0.6);
   font-weight: 700;
   line-height: 1;
 }
@@ -181,8 +193,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 13px;
-  line-height: 18px;
+  font-size: calc(var(--fs) + 1px);
+  line-height: 1.3;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -218,22 +230,22 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .row.loading .favicon { opacity: 0.5; }
 
 .favicon {
-  width: 16px;
-  height: 16px;
+  width: var(--favicon);
+  height: var(--favicon);
   flex: none;
   display: grid;
   place-items: center;
   border-radius: 4px;
   background: color-mix(in srgb, var(--accent) 20%, transparent);
   color: var(--ink);
-  font-size: 9.5px;
+  font-size: calc(var(--favicon) * 0.6);
   font-weight: 700;
   line-height: 1;
   overflow: hidden;
 }
 .favicon:has(img) { background: none; }
 .favicon.blank { background: none; box-shadow: inset 0 0 0 1.2px color-mix(in srgb, var(--muted) 55%, transparent); }
-.favicon img { width: 16px; height: 16px; display: block; }
+.favicon img { width: var(--favicon); height: var(--favicon); display: block; }
 
 .title {
   flex: 1;
@@ -265,7 +277,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 .rename {
   width: 100%;
-  height: 24px;
+  height: calc(var(--fs) + 10px);
   margin: 0 0 0 -4px;
   padding: 0 4px;
   border: 0;
@@ -286,8 +298,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .folder-row .chevron svg { width: 12px; height: 12px; stroke-width: 1.8; }
 .folder[aria-expanded="true"] > .folder-row .chevron { transform: rotate(90deg); }
 .folder-glyph { background: none; color: var(--muted); margin-right: 4px; }
-.folder-glyph svg { width: 16px; height: 16px; }
-.folder-row .count { padding: 0 8px; color: var(--muted); font-size: 11px; line-height: 14px; font-weight: 500; }
+.folder-glyph svg { width: var(--favicon); height: var(--favicon); }
+.folder-row .count { padding: 0 8px; color: var(--muted); font-size: var(--fs-small); line-height: 1.3; font-weight: 500; }
 .folder-row.contains-active { background: color-mix(in srgb, var(--card) 55%, transparent); }
 .folder-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; padding-left: 14px; }
 .folder.drop-into > .folder-row { background: color-mix(in srgb, var(--focus) 14%, transparent); box-shadow: inset 0 0 0 1.5px var(--focus); }
@@ -305,8 +317,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   padding: 2px 6px;
   border-radius: 5px;
   color: var(--muted);
-  font-size: 11px;
-  line-height: 14px;
+  font-size: var(--fs-small);
+  line-height: 1.3;
   font-weight: 500;
 }
 .meta-button:hover { background: var(--hover); color: var(--ink); }
@@ -322,7 +334,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   text-align: left;
   margin-bottom: 2px;
 }
-.new-tab svg { width: 16px; height: 16px; flex: none; }
+.new-tab svg { width: var(--favicon); height: var(--favicon); flex: none; }
 .new-tab:hover { background: var(--hover); color: var(--ink); }
 
 .empty-hit { flex: 1; min-height: 48px; }
@@ -403,7 +415,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 }
 .menu-item {
   width: 100%;
-  min-height: 28px;
+  min-height: calc(var(--fs) * 2);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -417,7 +429,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .menu-item.danger { color: var(--danger); }
 .menu-item[aria-disabled="true"] { opacity: 0.45; }
 .menu-item[aria-checked="true"]::after { content: "✓"; color: var(--muted); }
-.menu-heading { padding: 6px 8px 2px; color: var(--muted); font-size: 11px; line-height: 14px; font-weight: 500; }
+.menu-heading { padding: 6px 8px 2px; color: var(--muted); font-size: var(--fs-small); line-height: 1.3; font-weight: 500; }
 .menu-separator { height: 1px; margin: 4px 6px; background: var(--line); }
 .menu-swatch, .space-swatch {
   width: 10px; height: 10px; flex: none; border-radius: 50%;
@@ -438,8 +450,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   border-radius: var(--radius-card);
   background: var(--ink);
   color: var(--air);
-  font-size: 12px;
-  line-height: 16px;
+  font-size: calc(var(--fs) - 1px);
+  line-height: 1.35;
   box-shadow: 0 8px 28px color-mix(in srgb, var(--ink) 25%, transparent);
 }
 .toast span { flex: 1; min-width: 0; }

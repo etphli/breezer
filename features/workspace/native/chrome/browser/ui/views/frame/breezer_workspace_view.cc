@@ -3,6 +3,7 @@
 
 #include "chrome/browser/ui/views/frame/breezer_workspace_view.h"
 
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -17,10 +18,14 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
 #include "chrome/browser/ui/helium/breezer_workspace_prefs.h"
+#include "content/public/browser/web_contents.h"
 #include "extensions/browser/extension_host.h"
 #include "extensions/browser/unloaded_extension_reason.h"
 #include "extensions/common/extension.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
+#include "ui/gfx/geometry/point.h"
+#include "ui/gfx/geometry/rect.h"
+#include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/layout/fill_layout.h"
 #include "url/gurl.h"
 
@@ -67,6 +72,60 @@ views::View* BreezerWorkspaceView::GetFocusableView() const {
   return extension_view_;
 }
 
+void BreezerWorkspaceView::SetTitlebar(int height, int controls_width) {
+  height = std::max(0, height);
+  controls_width = std::max(0, controls_width);
+  if (titlebar_height_ == height && titlebar_controls_width_ == controls_width) {
+    return;
+  }
+  titlebar_height_ = height;
+  titlebar_controls_width_ = controls_width;
+  UpdateTitlebarArea();
+}
+
+bool BreezerWorkspaceView::IsPointInTitlebar(const gfx::Point& point) const {
+  return is_available() && titlebar_height_ > 0 && point.y() >= 0 &&
+         point.y() < titlebar_height_ && point.x() >= 0 && point.x() < width();
+}
+
+void BreezerWorkspaceView::SetCornerRadii(const gfx::RoundedCornersF& radii) {
+  if (corner_radii_ == radii) {
+    return;
+  }
+  corner_radii_ = radii;
+  UpdateCornerRadii();
+}
+
+void BreezerWorkspaceView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
+  views::View::OnBoundsChanged(previous_bounds);
+  if (previous_bounds.width() != width()) {
+    UpdateTitlebarArea();
+  }
+}
+
+void BreezerWorkspaceView::UpdateTitlebarArea() {
+  if (!extension_host_ || !extension_host_->host_contents()) {
+    return;
+  }
+  // titlebar-area-* describes the free part of the title bar beside the
+  // window controls. It stays non-empty while there is a band, so the
+  // document always learns the band height even under the controls.
+  gfx::Rect area;
+  if (titlebar_height_ > 0 && width() > 0) {
+    const int x = std::min(titlebar_controls_width_, width() - 1);
+    area = gfx::Rect(x, 0, width() - x, titlebar_height_);
+  }
+  extension_host_->host_contents()->UpdateWindowControlsOverlay(area);
+}
+
+void BreezerWorkspaceView::UpdateCornerRadii() {
+  // A no-op until the WebView has attached its native view; content creation
+  // applies the stored radii again.
+  if (extension_view_) {
+    extension_view_->holder()->SetNativeViewCornerRadii(corner_radii_);
+  }
+}
+
 void BreezerWorkspaceView::ReleaseExtensionContentSoon() {
   DetachExtensionContentSoon();
   UpdateAvailability();
@@ -108,6 +167,8 @@ void BreezerWorkspaceView::CreateExtensionContent() {
   extension_view->Init();
   extension_view_ = AddChildView(std::move(extension_view));
   view_observation_.Observe(extension_view_);
+  UpdateTitlebarArea();
+  UpdateCornerRadii();
   UpdateAvailability();
 }
 
