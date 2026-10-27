@@ -37,7 +37,7 @@ jobs:
           python script/check_breezer_installer.py
           python script/check_breezer_preparation.py
       - name: Test AI browser controls and CLI protocol
-        run: node --test tests/ai/*.test.mjs
+        run: node --test tests/*.test.mjs tests/ai/*.test.mjs
       - name: Verify native AI source integration
         run: python script/check_ai_overlay.py
       - name: Install upstream test dependencies
