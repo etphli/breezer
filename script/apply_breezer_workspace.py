@@ -182,7 +182,7 @@ def _freezer_replacements():
          '  // Freezing a native UI host also freezes its shared extension renderer.\n'
          '  const GURL& url = page_node->GetMainFrameUrl();\n'
          '  if (url.SchemeIs("chrome-extension") &&\n'
-         '      url.host_piece() == "namgcidocfgliiedlkdafcmifpdfiakj") {\n'
+         '      url.GetHost() == "namgcidocfgliiedlkdafcmifpdfiakj") {\n'
          '    return;\n'
          '  }\n\n'
          '  // A visible page should not be frozen.\n'),
