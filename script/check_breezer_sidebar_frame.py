@@ -39,6 +39,66 @@ def use_merged_replacements():
     workspace.replacements = lambda: sidebar_frame.merge(base())
 
 
+# Inputs to the full-height condition, as the requested settings produce them.
+FULL_HEIGHT_INPUTS = {
+    "layout_data_->tab_strip_type == TabStripType::kVertical": "vertical",
+    "zen.enabled": "zen",
+    "delegate().IsZenModeTopChromePinned()": "top_pinned",
+    "zen.top_chrome_ratio >= 1.0f": "top_shown",
+    "zen.ShouldLayoutVerticalTabStrip()": "sidebar_shown",
+    "vertical_right_aligned": "right",
+    "base::i18n::IsRTL()": "rtl",
+    "is_fullscreen(layout_data_->window_state)": "fullscreen",
+    "delegate().IsToolbarVisible()": "toolbar",
+    "delegate().IsVerticalTabStripCollapsed()": "collapsed",
+    "IsParentedTo(views().top_container, views().browser_view)": "parented",
+    "IsParentedTo(views().vertical_tab_strip_region_view,\n                   "
+    "views().browser_view)": "parented",
+    "views().vertical_tab_strip_region_view->HostsBreezerWorkspace()": "document",
+}
+
+# Normal window, sidebar shown and expanded, Breezer document loaded.
+NORMAL = dict(vertical=True, zen=False, top_pinned=False, top_shown=True,
+              sidebar_shown=True, right=False, rtl=False, fullscreen=False,
+              toolbar=True, collapsed=False, parented=True, document=True)
+# The requested defaults: frameless on, always show top bar on, always show
+# sidebar off (floating, here revealed), vertical tabs on the left. Pinning the
+# sidebar changes only how it is placed, not whether it runs full height.
+REQUESTED = dict(NORMAL, zen=True, top_pinned=True)
+
+FULL_HEIGHT_CASES = (
+    ("normal window", NORMAL, True),
+    ("requested frameless, floating sidebar revealed", REQUESTED, True),
+    ("frameless, floating sidebar hidden", dict(REQUESTED, sidebar_shown=False), False),
+    ("frameless, top bar auto-hides", dict(REQUESTED, top_pinned=False, top_shown=False), False),
+    ("frameless, top bar sliding while pinning", dict(REQUESTED, top_shown=False), False),
+    ("collapsed sidebar", dict(NORMAL, collapsed=True), False),
+    ("frameless, collapsed sidebar", dict(REQUESTED, collapsed=True), False),
+    ("fullscreen", dict(NORMAL, fullscreen=True), False),
+    ("frameless fullscreen", dict(REQUESTED, fullscreen=True), False),
+    ("right-aligned sidebar", dict(NORMAL, right=True), False),
+    ("right-to-left UI", dict(REQUESTED, rtl=True), False),
+    ("toolbar hidden", dict(REQUESTED, toolbar=False), False),
+    ("native tab strip fallback", dict(REQUESTED, document=False), False),
+    ("horizontal tabs", dict(REQUESTED, vertical=False), False),
+)
+
+
+def check_full_height_cases(expression):
+    """Evaluates the C++ full-height condition for the requested setting combinations."""
+    python = expression
+    for term, name in sorted(FULL_HEIGHT_INPUTS.items(), key=lambda item: -len(item[0])):
+        require(term in python, f"Full-height condition lost: {term.split()[0]}")
+        python = python.replace(term, f" {name} ")
+    python = "(" + python.replace("&&", " and ").replace("||", " or ").replace("!", " not ") + ")"
+    require(re.fullmatch(r"[\sa-z_()]+", python) is not None,
+            f"Full-height condition has unmodelled terms: {python}")
+    for label, inputs, expected in FULL_HEIGHT_CASES:
+        actual = eval(python, {"__builtins__": {}}, dict(inputs))  # noqa: S307 - fixed vocabulary
+        require(actual == expected,
+                f"Full-height sidebar for {label}: expected {expected}, got {actual}")
+
+
 def ai_layout_section():
     return ai_ui.sections()[sidebar_frame.LAYOUT]
 
@@ -62,18 +122,36 @@ def check_order(tree, ai_first):
     region = (tree / sidebar_frame.REGION).read_text()
     header = (tree / sidebar_frame.REGION_HEADER).read_text()
     full_height = layout.split("const bool breezer_full_height_sidebar =", 1)[1].split(";", 1)[0]
-    for condition in ("!zen.enabled", "!vertical_right_aligned", "!is_fullscreen(",
-                      "!delegate().IsVerticalTabStripCollapsed()",
-                      "IsToolbarVisible()", "HostsBreezerWorkspace()"):
-        require(condition in full_height, f"Full-height condition lost: {condition}")
+    check_full_height_cases(full_height)
     require(layout.index("const bool breezer_full_height_sidebar") <
             layout.index("if (breezer_full_height_sidebar) {\n        top_offset = 0;"),
             "Sidebar top is not raised to the window top")
-    require("!breezer_full_height_sidebar\n            ? top_container_parent_params" in layout,
+    require("!breezer_full_height_sidebar\n            ? top_container_parent_params\n"
+            "            : breezer_beside_sidebar_params;" in layout,
             "Top container is not laid out beside the full-height sidebar")
-    require("SetBreezerTitlebarForLayout(" in layout and
-            "breezer_full_height_sidebar ? vertical_tab_strip_animation.top_offset" in layout,
-            "Title bar band does not follow the toolbar row")
+
+    # Frameless with an unpinned sidebar: the sidebar floats over the page, so
+    # the top bar is moved aside explicitly, in both top container passes.
+    floating = layout.split("      if (zen.floating_vertical_tab_strip) {\n"
+                            "        vertical_tab_strip_bounds = SlideBoundsFromSide(", 1)[1]
+    floating = floating.split("\n      }\n", 1)[0]
+    require("if (breezer_full_height_sidebar) {\n          breezer_sidebar_edge =\n"
+            "              vertical_tab_strip_bounds.right()" in floating,
+            "Floating sidebar does not move the top bar aside")
+    require(layout.count("BesideBreezerSidebar(params, breezer_sidebar_edge)") == 2,
+            "Both top container passes must sit beside a floating sidebar")
+    require("BesideBreezerSidebar(params, breezer_sidebar_edge);\n"
+            "    const gfx::Rect top_container_local_bounds = CalculateTopContainerLayout(\n"
+            "        top_container_layout,\n        top_container_params.InLocalCoordinates(" in layout,
+            "Assistant-panel top container pass ignores the floating sidebar")
+    require("if (zen.floating_vertical_tab_strip && zen.TopChromeVisible() &&\n"
+            "        !breezer_full_height_sidebar &&" in layout,
+            "Floating full-height sidebar is still pushed below the top bar")
+    band = layout.split("SetBreezerTitlebarForLayout(", 1)[1].split(";", 1)[0]
+    require("breezer_full_height_sidebar\n            ? vertical_tab_strip_animation.top_offset -\n"
+            "                  zen.vertical_tab_strip_top_padding\n            : 0" in band and
+            band.endswith("-\n            tabstrip_bounds->x())"),
+            "Title bar band is not the toolbar row in the sidebar's coordinates")
     for declaration in ("bool HostsBreezerWorkspace() const;",
                         "void SetBreezerTitlebarForLayout(int height, int controls_width);"):
         require(header.count(declaration) == 1, f"Region header lacks {declaration}")

@@ -5,17 +5,23 @@ Imported by apply_breezer_workspace.py, which merges these replacements after
 its own and validates them the same way. The region view anchors below match
 the vertical tab strip region after the workspace replacements have run.
 
-- A normal, expanded, left-aligned sidebar that shows the Breezer document runs
-  the full window height. The toolbar and bookmarks bar sit beside it and the
+- An expanded, left-aligned sidebar that shows the Breezer document runs the
+  full window height. The toolbar and bookmarks bar sit beside it and the
   window controls are drawn over the document's top band. That band drags the
   window and is reported to the document as CSS titlebar-area-* variables.
+- Zen mode (frameless) does the same while its top bar is pinned. A pinned
+  sidebar sits beside the toolbar as in a normal window. An unpinned
+  (floating) sidebar still overlays the page while it is revealed, but the top
+  bar moves aside with it, so the back, forward, and address controls stay
+  usable beside it.
 - The document fills the region edge to edge, so no frame-colored bands show
   above or below it, and it takes the region's rounded floating shape.
 - The detached (zen mode) sidebar keeps its native resize edge, placed at the
   region's own right edge rather than in its parent's coordinates.
 
-Zen mode, fullscreen, a collapsed or right-aligned sidebar, and windows that
-show Chromium's own tab rows keep the upstream layout.
+Zen mode with an auto-hiding top bar, a hidden floating sidebar, fullscreen,
+a collapsed or right-aligned sidebar, and windows that show Chromium's own tab
+rows keep the upstream layout.
 """
 
 REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
@@ -168,26 +174,52 @@ def _region_replacements():
 def _layout_replacements():
     return [
         (
+            "void InsetHorizontal(gfx::Rect& rect, int amount, bool leading) {\n"
+            "  rect.Inset(\n"
+            "      gfx::Insets::TLBR(0, leading ? amount : 0, 0, !leading ? amount : 0));\n"
+            "}\n",
+            "void InsetHorizontal(gfx::Rect& rect, int amount, bool leading) {\n"
+            "  rect.Inset(\n"
+            "      gfx::Insets::TLBR(0, leading ? amount : 0, 0, !leading ? amount : 0));\n"
+            "}\n"
+            "\n"
+            "// Breezer: `params` narrowed to start at `leading_edge`. Unchanged when the\n"
+            "// edge is at or before the client area's leading edge.\n"
+            "BrowserLayoutParams BesideBreezerSidebar(BrowserLayoutParams params,\n"
+            "                                         int leading_edge) {\n"
+            "  params.InsetHorizontal(\n"
+            "      std::max(0, leading_edge - params.visual_client_area.x()),\n"
+            "      /*leading=*/true);\n"
+            "  return params;\n"
+            "}\n",
+        ),
+        (
             "  const bool vertical_right_aligned =\n"
             "      delegate().IsVerticalTabStripRightAligned();\n"
             "\n"
             "  if (IsParentedTo(views().organizer_tray, views().browser_view)) {\n",
             "  const bool vertical_right_aligned =\n"
             "      delegate().IsVerticalTabStripRightAligned();\n"
-            "  // Breezer: the sidebar document runs the full height of a normal window.\n"
-            "  // The window controls are drawn over its top and the toolbar sits\n"
-            "  // beside it. Zen mode, fullscreen, a collapsed or right-aligned sidebar,\n"
-            "  // and Chromium's own tab rows keep the upstream layout.\n"
+            "  // Breezer: the sidebar document runs the full window height. The window\n"
+            "  // controls are drawn over its top and the toolbar sits beside it. In zen\n"
+            "  // mode this needs a pinned top bar and a shown sidebar. An auto-hiding\n"
+            "  // top bar, fullscreen, a collapsed or right-aligned sidebar, and\n"
+            "  // Chromium's own tab rows keep the upstream layout.\n"
             "  const bool breezer_full_height_sidebar =\n"
             "      layout_data_->tab_strip_type == TabStripType::kVertical &&\n"
-            "      !zen.enabled && !vertical_right_aligned && !base::i18n::IsRTL() &&\n"
-            "      !is_fullscreen(layout_data_->window_state) &&\n"
+            "      (!zen.enabled || (delegate().IsZenModeTopChromePinned() &&\n"
+            "                        zen.top_chrome_ratio >= 1.0f)) &&\n"
+            "      zen.ShouldLayoutVerticalTabStrip() && !vertical_right_aligned &&\n"
+            "      !base::i18n::IsRTL() && !is_fullscreen(layout_data_->window_state) &&\n"
             "      delegate().IsToolbarVisible() &&\n"
             "      !delegate().IsVerticalTabStripCollapsed() &&\n"
             "      IsParentedTo(views().top_container, views().browser_view) &&\n"
             "      IsParentedTo(views().vertical_tab_strip_region_view,\n"
             "                   views().browser_view) &&\n"
             "      views().vertical_tab_strip_region_view->HostsBreezerWorkspace();\n"
+            "  // Where the top bar starts beside a floating (zen mode) full-height\n"
+            "  // sidebar, which overlays the page but not the top bar. Zero otherwise.\n"
+            "  int breezer_sidebar_edge = 0;\n"
             "\n"
             "  if (IsParentedTo(views().organizer_tray, views().browser_view)) {\n",
         ),
@@ -204,16 +236,42 @@ def _layout_replacements():
             "        top_offset = 0;\n"
             "      }\n",
         ),
+        (
+            "      if (zen.floating_vertical_tab_strip) {\n"
+            "        vertical_tab_strip_bounds = SlideBoundsFromSide(\n"
+            "            vertical_tab_strip_bounds, params.visual_client_area,\n"
+            "            zen.side_chrome_ratio, vertical_right_aligned);\n"
+            "      }\n",
+            "      if (zen.floating_vertical_tab_strip) {\n"
+            "        vertical_tab_strip_bounds = SlideBoundsFromSide(\n"
+            "            vertical_tab_strip_bounds, params.visual_client_area,\n"
+            "            zen.side_chrome_ratio, vertical_right_aligned);\n"
+            "        // The top bar slides aside with the sidebar, keeping the same gap\n"
+            "        // as the sidebar keeps from the window edge.\n"
+            "        if (breezer_full_height_sidebar) {\n"
+            "          breezer_sidebar_edge =\n"
+            "              vertical_tab_strip_bounds.right() +\n"
+            "              ScaleExtent(zen.vertical_tab_strip_padding,\n"
+            "                          zen.side_chrome_ratio);\n"
+            "        }\n"
+            "      }\n",
+        ),
         # The top container is laid out beside the sidebar, in the area left
         # after the sidebar's inset, so it needs no bookmarks or separator shift.
         (
+            "    // Calculate the params for laying out the top container.\n"
+            "    const BrowserLayoutParams& parent_params =\n"
             "        layout_data_->tab_strip_type == TabStripType::kVertical\n"
             "            ? top_container_parent_params\n"
             "            : params;\n",
+            "    // Calculate the params for laying out the top container.\n"
+            "    const BrowserLayoutParams breezer_beside_sidebar_params =\n"
+            "        BesideBreezerSidebar(params, breezer_sidebar_edge);\n"
+            "    const BrowserLayoutParams& parent_params =\n"
             "        layout_data_->tab_strip_type == TabStripType::kVertical &&\n"
             "                !breezer_full_height_sidebar\n"
             "            ? top_container_parent_params\n"
-            "            : params;\n",
+            "            : breezer_beside_sidebar_params;\n",
         ),
         (
             "    if (layout_data_->tab_strip_type == TabStripType::kVertical &&\n"
@@ -228,12 +286,44 @@ def _layout_replacements():
             "        has_leading_exclusion);\n",
             "    views().vertical_tab_strip_region_view->SetHasLeadingExclusionForLayout(\n"
             "        has_leading_exclusion);\n"
-            "    // The band matches the toolbar row beside the sidebar.\n"
+            "    // The band matches the toolbar row beside the sidebar, in the sidebar's\n"
+            "    // coordinates; a floating sidebar is inset from the window's top and\n"
+            "    // leading edges.\n"
             "    views().vertical_tab_strip_region_view->SetBreezerTitlebarForLayout(\n"
-            "        breezer_full_height_sidebar ? vertical_tab_strip_animation.top_offset\n"
-            "                                    : 0,\n"
+            "        breezer_full_height_sidebar\n"
+            "            ? vertical_tab_strip_animation.top_offset -\n"
+            "                  zen.vertical_tab_strip_top_padding\n"
+            "            : 0,\n"
             "        base::ClampCeil(\n"
-            "            browser_params.leading_exclusion.ContentWithPadding().width()));\n",
+            "            browser_params.leading_exclusion.ContentWithPadding().width()) -\n"
+            "            tabstrip_bounds->x());\n",
+        ),
+        # A full-height floating sidebar starts at the window top, beside the
+        # top bar rather than below it.
+        (
+            "    if (zen.floating_vertical_tab_strip && zen.TopChromeVisible() &&\n"
+            "        top_container_layout.bounds.height() > 0) {\n",
+            "    if (zen.floating_vertical_tab_strip && zen.TopChromeVisible() &&\n"
+            "        !breezer_full_height_sidebar &&\n"
+            "        top_container_layout.bounds.height() > 0) {\n",
+        ),
+        # The top container is laid out here instead while the assistant panel
+        # shares the toolbar row.
+        (
+            "    const gfx::Rect top_container_local_bounds = CalculateTopContainerLayout(\n"
+            "        top_container_layout,\n"
+            "        params.InLocalCoordinates(params.visual_client_area), needs_exclusion);\n"
+            "    top_container_layout.bounds =\n"
+            "        GetTopContainerBoundsInParent(top_container_local_bounds, params);\n",
+            "    const BrowserLayoutParams top_container_params =\n"
+            "        BesideBreezerSidebar(params, breezer_sidebar_edge);\n"
+            "    const gfx::Rect top_container_local_bounds = CalculateTopContainerLayout(\n"
+            "        top_container_layout,\n"
+            "        top_container_params.InLocalCoordinates(\n"
+            "            top_container_params.visual_client_area),\n"
+            "        needs_exclusion);\n"
+            "    top_container_layout.bounds = GetTopContainerBoundsInParent(\n"
+            "        top_container_local_bounds, top_container_params);\n",
         ),
     ]
 
