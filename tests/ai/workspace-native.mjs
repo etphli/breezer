@@ -357,6 +357,8 @@ try {
   assert.equal(initialAppearance.sidebarWidth, 240, 'Existing profiles should gain the initial workspace width.');
   observe('seededOldPreferences', oldPreferences);
   pass('existingProfileMigration', 'explicit old layout, hidden bookmarks and 300 px width migrated to sidebar, shown bookmarks and 240 px width');
+  await settings.screenshot({ path: join(evidence, 'workspace-settings.png'), fullPage: true });
+  report.screenshots.push(join(evidence, 'workspace-settings.png'));
 
   // Bounded: unknown keys and values are rejected by native code.
   const rejections = {

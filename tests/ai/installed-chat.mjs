@@ -143,6 +143,9 @@ try {
     provider: group.querySelector('.provider-heading span')?.textContent,
     models: Array.from(group.querySelectorAll('.model-option'), button => button.querySelector('span')?.textContent),
   }))`);
+  const menuScreenshot = await panelTarget.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  const menuScreenshotPath = join(evidence, 'installed-model-menu.png');
+  await writeFile(menuScreenshotPath, Buffer.from(menuScreenshot.data, 'base64'));
   const codexMenu = modelMenu.find(group => group.provider === 'Codex');
   assert.ok(codexMenu?.models.some(label => /6\.1.*terra/i.test(label)), 'GPT-6.1 Terra is missing from the actual discovered model menu.');
   assert.ok(codexMenu.models.every(label => !/gpt[- ]?(?:5|6\.0)(?:[ .-]|$)/i.test(label)), 'An older GPT generation remains in the actual model menu.');
@@ -235,6 +238,7 @@ try {
     page: pageInfo,
     model: model.label,
     modelMenu,
+    menuScreenshotPath,
     preferences,
     control: model.control,
     pageAware,
