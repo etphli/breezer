@@ -29,8 +29,9 @@ export function installBackground(api) {
   const publishMetadata = async (windowId, expectedTabId) => {
     for (const panel of panels) {
       if (panel.closed || !panel.visible || panel.windowId === undefined || (windowId !== undefined && panel.windowId !== windowId)) continue;
+      const revision = ++panel.metadataRevision;
       const [tab] = await api.tabs.query({ active: true, windowId: panel.windowId });
-      if (!tab || panel.closed || !panel.visible || (expectedTabId !== undefined && tab.id !== expectedTabId)) continue;
+      if (!tab || panel.closed || !panel.visible || panel.metadataRevision !== revision || (expectedTabId !== undefined && tab.id !== expectedTabId)) continue;
       post(panel.port, { type: 'context', context: { url: tab.url || '', title: tab.title || '', tabId: tab.id } });
     }
   };
@@ -118,7 +119,7 @@ export function installBackground(api) {
   };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
-    const panel = { port, native: null, closed: false, visible: true, windowId: undefined, ready: Promise.resolve() };
+    const panel = { port, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
     panels.add(panel);
     port.onMessage.addListener(message => {
       void (async () => {
@@ -134,6 +135,7 @@ export function installBackground(api) {
           await panel.ready;
         } else if (message.type === 'chat') { await panel.ready; await sendChat(panel, message); }
         else if (message.type === 'visibility') {
+          panel.metadataRevision++;
           panel.visible = message.visible === true;
           if (!panel.visible && activeRun?.panel === panel) await cancel(activeRun);
         }
@@ -180,6 +182,7 @@ export function installBackground(api) {
   api.action.onClicked.addListener(toggle);
   api.sidePanel.onClosed?.addListener(info => {
     for (const panel of panels) if (panel.windowId === info.windowId) {
+      panel.metadataRevision++;
       panel.visible = false;
       if (activeRun?.panel === panel) void cancel(activeRun);
     }
@@ -200,7 +203,7 @@ export function installBackground(api) {
     if (activeRun?.session?.tab.id === tabId) void cancel(activeRun, 'Browser control stopped because the tab closed.');
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
-    if (change.url || change.title || change.status === 'complete') void publishMetadata(tab?.windowId, tabId).catch(() => {});
+    if (tab?.active !== false && (change.url || change.title || change.status === 'complete')) void publishMetadata(tab?.windowId, tabId).catch(() => {});
     if (change.url && tools.grants.has(tabId)) {
       try { if (tools.grants.get(tabId) !== new URL(change.url).origin) tools.grants.delete(tabId); } catch { tools.grants.delete(tabId); }
     }

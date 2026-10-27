@@ -301,6 +301,65 @@ test('worker toggles the panel and forwards context only on an opted-in chat', a
   assert.ok(fake.calls.some(call => call[0] === 'close'));
 });
 
+test('inactive tab updates do not query the active page or start the native host', async () => {
+  const fake = fakeChrome();
+  installBackground(fake.api);
+  for (let id = 10; id < 110; id++) {
+    fake.api.tabs.onUpdated.emit(id, { title: 'Loading', status: 'complete' }, { ...fake.tab, id, active: false });
+  }
+  await tick();
+  assert.equal(fake.calls.length, 0, 'ordinary browsing leaves AI idle');
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init' });
+  await tick();
+  fake.calls.length = 0;
+  for (let id = 10; id < 110; id++) {
+    fake.api.tabs.onUpdated.emit(id, { title: 'Loaded', status: 'complete' }, { ...fake.tab, id, active: false });
+  }
+  await tick();
+  assert.equal(fake.calls.filter(call => call[0] === 'query').length, 0);
+  fake.api.tabs.onUpdated.emit(7, { title: 'Active page' }, { ...fake.tab, active: true });
+  await tick();
+  assert.equal(fake.calls.filter(call => call[0] === 'query').length, 1);
+  assert.equal(port.sent.filter(message => message.type === 'context').length, 1);
+});
+
+test('a delayed metadata query cannot overwrite a newer active page', async () => {
+  const fake = fakeChrome();
+  installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init' });
+  await tick();
+  const queries = [];
+  fake.api.tabs.query = () => new Promise(resolve => queries.push(resolve));
+  fake.api.tabs.onActivated.emit({ tabId: 7, windowId: 3 });
+  fake.api.tabs.onActivated.emit({ tabId: 8, windowId: 3 });
+  queries[1]([{ ...fake.tab, id: 8, title: 'New page' }]);
+  await tick();
+  queries[0]([{ ...fake.tab, id: 7, title: 'Old page' }]);
+  await tick();
+  assert.deepEqual(port.sent.filter(message => message.type === 'context').map(message => message.context.tabId), [8]);
+});
+
+test('hiding and reopening a cached panel discards pending metadata', async () => {
+  const fake = fakeChrome();
+  installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init' });
+  await tick();
+  let resolveQuery;
+  fake.api.tabs.query = () => new Promise(resolve => { resolveQuery = resolve; });
+  fake.api.tabs.onActivated.emit({ tabId: 7, windowId: 3 });
+  port.onMessage.emit({ type: 'visibility', visible: false });
+  port.onMessage.emit({ type: 'visibility', visible: true });
+  resolveQuery([fake.tab]);
+  await tick();
+  assert.equal(port.sent.filter(message => message.type === 'context').length, 0);
+});
+
 test('worker forwards reasoning and only Codex speed to the native host', async () => {
   const fake = fakeChrome();
   installBackground(fake.api);
