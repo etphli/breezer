@@ -30,6 +30,8 @@ jobs:
           bash -n script/build_and_run.sh
           bash -n features/ai/host/launch.sh
           python -m py_compile script/apply_breezer_branding.py script/check_branding.py script/apply_breezer_ai.py script/package_breezer_ai.py
+      - name: Verify isolated build profiles
+        run: python script/check_breezer_build_profile.py
       - name: Verify AI packaging boundaries
         run: |
           python script/check_ai_packaging.py
