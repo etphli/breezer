@@ -62,7 +62,7 @@ try {
           postMessage: (message) => {
             window.sent.push(message);
             if (message.type === 'init') setTimeout(() => window.emit({ type: 'status', providers: window.testProviders }), 10);
-            if (message.type === 'context') setTimeout(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design' } }), 10);
+            if (message.type === 'context') setTimeout(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }), 10);
           },
         }),
       },
@@ -168,12 +168,34 @@ try {
   for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), false);
   await page.screenshot({ path: `${evidence}/sidebar-conversation.png` });
 
-  await page.getByRole('button', { name: 'Browser control', exact: true }).click();
+  const controlToggle = page.getByRole('button', { name: 'Browser control', exact: true });
+  await controlToggle.click();
+  assert.match(await page.locator('#notice-text').innerText(), /until you turn this off.*cannot use other tabs or apps/);
+  await page.getByLabel('Message Breezer').fill('Type my name into the form.');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const firstControlChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
+  assert.equal(firstControlChat.control, true);
+  await page.evaluate((id) => { window.emit({ type: 'delta', id, text: 'Typed it.' }); window.emit({ type: 'complete', id }); }, firstControlChat.id);
+  // A completed reply keeps consent for the same tab, so a follow-up can still act.
+  assert.equal(await controlToggle.getAttribute('aria-pressed'), 'true');
+  await page.getByLabel('Message Breezer').fill('Now click Save.');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const followUpChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
+  assert.equal(followUpChat.control, true);
+  assert.equal(followUpChat.includeContext, true);
+  await page.evaluate((id) => { window.emit({ type: 'delta', id, text: 'Saved.' }); window.emit({ type: 'complete', id }); }, followUpChat.id);
+  // Consent never follows the user to another tab.
+  await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Another tab', url: 'https://example.org/', tabId: 12 } }));
+  assert.equal(await controlToggle.getAttribute('aria-pressed'), 'false');
+  assert.match(await page.locator('#notice-text').innerText(), /active tab changed/);
+  await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
+  assert.equal(await controlToggle.getAttribute('aria-pressed'), 'false');
+  await controlToggle.click();
   await page.getByLabel('Message Breezer').fill('Scroll down to the next section.');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const controlChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
   assert.equal(controlChat.control, true);
-  assert.equal(controlChat.history.length, 2);
+  assert.equal(controlChat.history.length, 6);
   await page.evaluate((id) => window.emit({ type: 'activity', id, active: true, label: 'Scrolling this page' }), controlChat.id);
   assert.equal(await page.locator('#activity-label').innerText(), 'Scrolling this page');
   assert.equal(await page.locator('#send-arrow').isVisible(), false);
@@ -181,6 +203,7 @@ try {
   await page.getByRole('button', { name: 'Stop response', exact: true }).click();
   assert.equal(await page.evaluate((id) => window.sent.some((message) => message.type === 'cancel' && message.id === id), controlChat.id), true);
   assert.equal(await page.locator('#activity').isVisible(), false);
+  assert.equal(await controlToggle.getAttribute('aria-pressed'), 'false', 'Stop ends browser-control consent');
 
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.locator('#context-toggle').click();
@@ -235,7 +258,7 @@ try {
   assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Ask anything…');
   assert.equal(await page.locator('#context-hint').innerText(), 'Page not shared');
   assert.deepEqual(errors, []);
-  console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, control/cancel, injection safety, narrow and dark layouts.');
+  console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, per-tab control consent across replies, control/cancel, injection safety, narrow and dark layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {
   await browser.close();

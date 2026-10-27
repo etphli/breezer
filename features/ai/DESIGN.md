@@ -21,4 +21,4 @@ The palette is pearl `#f5f7f9`, paper `#ffffff`, ink `#182c31`, muted slate `#73
  [provider / model ⌄]                 ⌘ K
 ```
 
-The distinctive detail is the connection between the page and composer: a small mint page attachment becomes an explicit blue control status while the assistant acts. There are no decorative metrics, dashboard cards, or artificial sample conversations. Disconnected accounts and unavailable models remain visible as such. During control the page itself shows a blue edge, an AI pointer, and Stop.
+The distinctive detail is the connection between the page and composer: a small mint page attachment becomes an explicit blue control status while the assistant acts. There are no decorative metrics, dashboard cards, or artificial sample conversations. Disconnected accounts and unavailable models remain visible as such. During control the page itself is framed by a slow blue wave that flows clockwise around the edges, with a Breezer pointer at each action and a Stop control. The wave is pre-rendered and moves only by compositor transform and opacity, ignores input, and holds still when reduced motion is requested.

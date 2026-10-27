@@ -57,7 +57,37 @@ export function pageContext(operation, args = {}) {
     host.dataset.breezerAi = 'control';
     host.style.cssText = 'position:fixed;inset:0;z-index:2147483647;pointer-events:none';
     const shadow = host.attachShadow({ mode: 'closed' });
-    shadow.innerHTML = `<style>:host{all:initial} .edge{position:fixed;inset:0;border:3px solid #48a7ff;box-shadow:inset 0 0 24px #268cff9c,0 0 20px #268cff;pointer-events:none}.status{position:fixed;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:16px;align-items:center;padding:10px 14px;border-radius:12px;background:#092549;color:white;font:13px system-ui;box-shadow:0 4px 20px #0005;pointer-events:auto}button{background:#fff;color:#092549;border:0;border-radius:7px;padding:6px 12px;font:600 12px system-ui;cursor:pointer}.pointer{position:fixed;top:64px;left:24px;color:#fff;background:#087dff;padding:6px 9px;border:2px solid white;border-radius:3px 12px 12px 12px;box-shadow:0 2px 8px #0005;font:600 12px system-ui;pointer-events:none;transition:left .12s,top .12s}@media(prefers-reduced-motion:reduce){.pointer{transition:none}}</style><div class="edge"></div><div class="status" role="status"><span>Taking action · Esc to stop</span><button type="button">Stop</button></div><div class="pointer">↖ AI</div>`;
+    // The wave is pre-rendered SVG tiles. Only transform and opacity animate, so the
+    // compositor moves the layers without page layout or repaint. Every layer ignores input.
+    const band = 22;
+    const tile = 480;
+    const svg = (sides, crest, light, deep) => sides.map(([name, width, height, transform]) => `.${name}>.${crest}{background-image:url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="${band}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${deep}" stop-opacity=".9"/><stop offset="1" stop-color="${light}" stop-opacity="0"/></linearGradient></defs><path transform="${transform}" fill="url(#g)" d="${crest === 'a' ? `M0 0H${tile}V7C${tile * .75} 7 ${tile * .75} 19 ${tile / 2} 19S${tile / 4} 7 0 7Z` : `M0 0H${tile}V13C${tile * .75} 13 ${tile * .75} 5 ${tile / 2} 5S${tile / 4} 13 0 13Z`}"/></svg>`)}")}`).join('');
+    const sides = [['top', tile, band, ''], ['right', band, tile, `translate(${band} 0) rotate(90)`], ['bottom', tile, band, `translate(0 ${band}) scale(1 -1)`], ['left', band, tile, 'matrix(0 1 1 0 0 0)']];
+    shadow.innerHTML = `<style>:host{all:initial}
+      .frame{position:fixed;inset:0;pointer-events:none;animation:enter .32s ease-out both}
+      .rim{position:fixed;inset:0;border:2px solid #2f8bff;pointer-events:none}
+      .waves{position:fixed;inset:0;pointer-events:none;animation:breathe 3.6s ease-in-out infinite alternate}
+      .side{position:fixed;overflow:hidden;pointer-events:none}
+      .top{top:0;left:0;right:0;height:${band}px}.bottom{bottom:0;left:0;right:0;height:${band}px}
+      .left{top:0;bottom:0;left:0;width:${band}px}.right{top:0;bottom:0;right:0;width:${band}px}
+      .flow{position:absolute;will-change:transform;animation:var(--motion) var(--speed) linear infinite}
+      .top>.flow,.bottom>.flow{top:0;bottom:0;left:-${tile}px;width:calc(100% + ${tile * 2}px);background-repeat:repeat-x}
+      .left>.flow,.right>.flow{left:0;right:0;top:-${tile}px;height:calc(100% + ${tile * 2}px);background-repeat:repeat-y}
+      .top>.flow{--motion:east}.right>.flow{--motion:south}.bottom>.flow{--motion:west}.left>.flow{--motion:north}
+      .a{--speed:7s}.b{--speed:11s;opacity:.7}
+      ${svg(sides, 'a', '#7cc8ff', '#1f6fff')}${svg(sides, 'b', '#a6dcff', '#48a7ff')}
+      @keyframes east{to{transform:translateX(${tile}px)}}@keyframes west{to{transform:translateX(-${tile}px)}}
+      @keyframes south{to{transform:translateY(${tile}px)}}@keyframes north{to{transform:translateY(-${tile}px)}}
+      @keyframes breathe{from{opacity:.72}to{opacity:1}}@keyframes enter{from{opacity:0}}
+      .status{position:fixed;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;padding:8px 8px 8px 14px;border-radius:12px;background:#0b2a52;color:#fff;font:13px system-ui;box-shadow:0 4px 20px #0005;pointer-events:auto}
+      kbd{font:600 11px system-ui;padding:2px 6px;border-radius:5px;background:#ffffff26}
+      button{background:#fff;color:#0b2a52;border:0;border-radius:7px;padding:6px 12px;font:600 12px system-ui;cursor:pointer}
+      button:focus-visible{outline:2px solid #7cc8ff;outline-offset:2px}
+      .pointer{position:fixed;left:0;top:0;display:flex;align-items:flex-start;gap:1px;pointer-events:none;transform:translate(24px,64px);transition:transform .22s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 2px 4px #0006)}
+      .pointer svg{width:22px;height:22px;flex:none}.pointer path{fill:#1f6fff;stroke:#fff;stroke-width:1.6;stroke-linejoin:round}
+      .pointer span{margin:14px 0 0 -5px;padding:3px 8px;border-radius:9px;background:#1f6fff;color:#fff;font:600 11px system-ui;border:1.5px solid #fff}
+      @media(prefers-reduced-motion:reduce){.frame,.waves,.flow{animation:none}.pointer{transition:none}}
+      </style><div class="frame"><div class="waves">${sides.map(([name]) => `<div class="side ${name}"><i class="flow b"></i><i class="flow a"></i></div>`).join('')}</div><div class="rim"></div></div><div class="status" role="status"><span>Breezer is controlling this tab</span><kbd>Esc</kbd><button type="button">Stop</button></div><div class="pointer"><svg viewBox="0 0 22 22" aria-hidden="true"><path d="M3 2 18 12.5l-6.6 1.2-3.5 6.3Z"/></svg><span>Breezer</span></div>`;
     const stop = () => {
       const sessionId = state.sessionId;
       removeOverlay();
@@ -77,8 +107,8 @@ export function pageContext(operation, args = {}) {
   }
   if (operation === 'pointer') {
     if (state.sessionId !== args.sessionId || !state.pointer || !state.overlay?.isConnected || !visible(state.overlay)) throw new Error('The browser control indicator was removed. Browser control stopped.');
-    state.pointer.style.left = `${args.x + 8}px`;
-    state.pointer.style.top = `${args.y + 8}px`;
+    // The arrow tip sits at (3, 2) in its 22px icon.
+    state.pointer.style.transform = `translate(${Math.round(args.x - 3)}px,${Math.round(args.y - 2)}px)`;
     return { ok: true };
   }
   if (operation === 'control-check') {

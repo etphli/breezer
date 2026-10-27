@@ -31,7 +31,7 @@ export function installBackground(api) {
       if (panel.closed || !panel.visible || panel.windowId === undefined || (windowId !== undefined && panel.windowId !== windowId)) continue;
       const [tab] = await api.tabs.query({ active: true, windowId: panel.windowId });
       if (!tab || panel.closed || !panel.visible || (expectedTabId !== undefined && tab.id !== expectedTabId)) continue;
-      post(panel.port, { type: 'context', context: { url: tab.url || '', title: tab.title || '' } });
+      post(panel.port, { type: 'context', context: { url: tab.url || '', title: tab.title || '', tabId: tab.id } });
     }
   };
   const connectNative = panel => {
@@ -212,6 +212,9 @@ export function installBackground(api) {
     else if (change.status === 'complete') void tools.navigationComplete(run.session);
   });
   api.windows?.onFocusChanged?.addListener(windowId => {
+    // WINDOW_ID_NONE means another app has focus. Input still goes only to the controlled
+    // tab, so watching from another app does not end control; another Breezer window does.
+    if (windowId === (api.windows.WINDOW_ID_NONE ?? -1)) return;
     if (activeRun?.session && activeRun.session.tab.windowId !== windowId) void cancel(activeRun, 'Browser control stopped because the active window changed.');
   });
   api.debugger.onDetach.addListener(source => {

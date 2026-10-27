@@ -4,7 +4,7 @@ import { EventEmitter, once } from 'node:events';
 import { PassThrough, Writable } from 'node:stream';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { NativeDecoder, encodeMessage, MAX_MESSAGE_BYTES, allowedTools, browserTools, validateTool, validateChat, validOrigin, contextParts, promptText, selectedReasoning } from '../../features/ai/host/protocol.mjs';
+import { NativeDecoder, encodeMessage, MAX_MESSAGE_BYTES, allowedTools, browserTools, validateTool, validateChat, validOrigin, contextParts, promptText, browserAccess, selectedReasoning } from '../../features/ai/host/protocol.mjs';
 import { JsonLineProcess, cliEnvironment } from '../../features/ai/host/cli.mjs';
 import { HostController } from '../../features/ai/host/controller.mjs';
 import { restrictedCatalog, verifyCodexTools, CodexProvider, codexModelMetadata, codexTurnOptions, expectedCodexApiEffort } from '../../features/ai/host/codex.mjs';
@@ -110,6 +110,10 @@ test('CLI environment removes inherited executable injection settings', () => {
 
 test('profile name reaches the model even when profile context is empty', () => {
   assert.match(promptText({ ...chat, profile: { name: 'Ethan', context: '' } }), /User's name: Ethan/);
+  assert.match(promptText(chat), /Browser control is on for the current tab only/);
+  assert.match(browserAccess({ includeContext: true, control: false }), /Browser control is off.*turn on the Browser control switch/);
+  assert.match(browserAccess({}), /No page is shared/);
+  for (const access of [browserAccess(chat), browserAccess({ includeContext: true }), browserAccess({})]) assert.match(access, /cannot see or control other tabs, other apps, the desktop, or the operating system/);
   assert.throws(() => validateChat({ ...chat, profile: { name: 'x'.repeat(101), context: '' } }), /Invalid profile/);
 });
 

@@ -24,7 +24,7 @@ const server = createServer((request, response) => {
   response.setHeader('Content-Type', 'text/html');
   response.end(`<!doctype html><html><head><title>Breezer control fixture</title><style>
     body{font:16px system-ui;background:#f5f7fa;color:#17304c;padding:90px 100px;margin:0}main{max-width:700px;background:white;border:1px solid #dbe2ea;border-radius:18px;padding:36px}h1{margin-top:0;font-size:28px}label{display:block;margin-top:22px;font-weight:600}input{display:block;box-sizing:border-box;width:100%;padding:13px;margin-top:8px;border:1px solid #b7c5d7;border-radius:8px;font:16px system-ui}button{margin-top:24px;padding:12px 18px;background:#163e6c;color:white;border:0;border-radius:8px;font:15px system-ui}p{line-height:1.6;color:#64748b}
-    </style></head><body><main><h1>A visible, scoped browser assistant</h1><p>Breezer can work with this page while the blue border and AI pointer are visible. Press Escape or Stop to end control.</p>
+    </style></head><body><main><h1>A visible, scoped browser assistant</h1><p>Breezer can work with this page while the blue wave and AI pointer are visible. Press Escape or Stop to end control.</p>
     <label for="destination">Destination</label><input id="destination" value="UNSHARED-INPUT-VALUE">
     <label for="password">Password</label><input id="password" type="password" value="DUMMY-PASSWORD-SECRET">
     <label for="api-token">API token</label><input id="api-token" name="api_token" value="DUMMY-TOKEN-SECRET">
@@ -111,6 +111,20 @@ try {
   assert.equal(await tools.verifyGrant(tab), true);
   let session = await tools.start('test-control', tab);
   assert.equal(await page.locator('[data-breezer-ai="control"]').count(), 1);
+  // The wave animates compositor-only properties and never takes page input.
+  const waveAnimations = () => evaluate(`__breezerAIContext.pointer.getRootNode().getAnimations().filter(animation => animation.playState === 'running').map(animation => [...new Set(animation.effect.getKeyframes().flatMap(frame => Object.keys(frame).filter(key => !['offset', 'computedOffset', 'easing', 'composite'].includes(key))))])`);
+  const animated = await waveAnimations();
+  assert.ok(animated.length >= 8, 'the four edges each run layered flow animations');
+  assert.deepEqual([...new Set(animated.flat())].sort(), ['opacity', 'transform']);
+  for (const [x, y] of [[4, 400], [550, 4], [1096, 400], [550, 846]]) {
+    assert.equal(await page.evaluate(([x, y]) => document.elementFromPoint(x, y)?.closest('[data-breezer-ai]') ?? null, [x, y]), null, `the wave at ${x},${y} must not block input`);
+  }
+  await new Promise(resolve => setTimeout(resolve, 400));
+  await page.screenshot({ path: `${evidence}/browser-control-wave.png` });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  assert.deepEqual(await waveAnimations(), [], 'reduced motion stops the wave');
+  await page.screenshot({ path: `${evidence}/browser-control-wave-reduced-motion.png` });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
   let snapshot = await tools.snapshot(tab, session);
   assert.match(snapshot.screenshot, /^data:image\/jpeg;base64,/);
   assert.equal(snapshot.elements.some(element => ['password', 'api-token'].includes(element.label.toLowerCase())), false);
@@ -127,8 +141,11 @@ try {
   snapshot = await tools.execute(session, 'browser_click', { elementId: save.id });
   assert.equal(await page.locator('#result').innerText(), 'Note saved');
   assert.ok((await page.evaluate(() => events)).some(event => event.type === 'click' && event.trusted));
-  assert.equal(await evaluate(`__breezerAIContext.pointer.textContent`), '↖ AI');
-  assert.notEqual(await evaluate(`__breezerAIContext.pointer.style.left`), '24px');
+  assert.equal(await evaluate(`__breezerAIContext.pointer.textContent`), 'Breezer');
+  const saveBox = await page.locator('#save').boundingBox();
+  await new Promise(resolve => setTimeout(resolve, 300));
+  const tip = await evaluate(`(() => { const box = __breezerAIContext.pointer.querySelector('svg').getBoundingClientRect(); return { x: box.x + 3, y: box.y + 2 }; })()`);
+  assert.ok(Math.abs(tip.x - (saveBox.x + saveBox.width / 2)) < 2 && Math.abs(tip.y - (saveBox.y + saveBox.height / 2)) < 2, `the visible pointer tip lands on the clicked element: ${JSON.stringify({ tip, saveBox })}`);
   await assert.rejects(tools.execute(session, 'browser_click', { elementId: save.id }), /changed/);
   await page.locator('#password').focus();
   await assert.rejects(tools.execute(session, 'browser_key', { key: 'Enter' }), /passwords/);
@@ -171,9 +188,10 @@ try {
   assert.equal(session.stopped, true);
   assert.equal(attached, false);
   assert.equal(await page.locator('[data-breezer-ai="control"]').count(), 0);
+  assert.equal(await page.evaluate(() => document.getAnimations().length), 0, 'cancellation leaves no running wave animations');
   assert.ok(redactionChecks >= 10);
   assert.deepEqual(errors, []);
-  console.log('PASS: real Chromium isolated-world snapshots, secret exclusion and pixel redaction, blue control overlay and AI pointer, trusted replacement/click, cross-origin tool and link navigation, stale-target/password refusal, Escape/Stop cancellation including a loading page.');
+  console.log('PASS: real Chromium isolated-world snapshots, secret exclusion and pixel redaction, flowing blue wave (transform/opacity only, input pass-through, reduced motion, clean removal) and visible AI pointer, trusted replacement/click, cross-origin tool and link navigation, stale-target/password refusal, Escape/Stop cancellation including a loading page.');
   console.log(`Evidence: ${evidence}/browser-control.png`);
 } finally {
   await tools?.stop();

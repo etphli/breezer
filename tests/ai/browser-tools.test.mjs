@@ -404,7 +404,7 @@ test('context preview reads metadata without page text or screenshot', async () 
   port.onMessage.emit({ type: 'context' });
   await tick();
   const preview = port.sent.find(message => message.type === 'context');
-  assert.deepEqual(preview.context, { url: fake.tab.url, title: '' });
+  assert.deepEqual(preview.context, { url: fake.tab.url, title: '', tabId: 7 });
   assert.equal(fake.calls.filter(call => call[0] === 'script' || call[0] === 'capture').length, 0);
 });
 
@@ -436,7 +436,7 @@ test('visible context chips follow active-tab metadata without granting page acc
   fake.setTab({ id: 8, url: 'https://other.test/first', title: 'Other page' });
   fake.api.tabs.onActivated.emit({ tabId: 8, windowId: 3 });
   await tick();
-  assert.deepEqual(port.sent.filter(message => message.type === 'context').at(-1).context, { url: 'https://other.test/first', title: 'Other page' });
+  assert.deepEqual(port.sent.filter(message => message.type === 'context').at(-1).context, { url: 'https://other.test/first', title: 'Other page', tabId: 8 });
   assert.equal(worker.tools.grants.has(8), false);
   fake.setTab({ url: 'https://other.test/next', title: 'Next page' });
   fake.api.tabs.onUpdated.emit(8, { status: 'complete' }, fake.tab);
@@ -487,6 +487,27 @@ test('hiding a cached panel cancels control and the toolbar can reopen it', asyn
   assert.ok(fake.native.sent.some(message => message.type === 'cancel' && message.id === 'hidden'));
   fake.api.action.onClicked.emit(fake.tab);
   assert.ok(fake.calls.some(call => call[0] === 'open'));
+});
+
+test('control survives focus moving to another app but stops for another browser window', async () => {
+  const fake = fakeChrome();
+  fake.api.windows = { WINDOW_ID_NONE: -1, onFocusChanged: event() };
+  const worker = installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init', windowId: 3 });
+  await tick();
+  port.onMessage.emit({ type: 'chat', id: 'watch', provider: 'codex', model: 'auto', message: 'Act', control: true });
+  for (let i = 0; i < 20 && !fake.native.sent.some(message => message.type === 'chat'); i++) await tick();
+  assert.ok(worker.tools.session);
+  fake.api.windows.onFocusChanged.emit(-1);
+  await tick();
+  assert.ok(worker.tools.session, 'focusing another app keeps control of the Breezer tab');
+  assert.equal(fake.native.sent.some(message => message.type === 'cancel'), false);
+  fake.api.windows.onFocusChanged.emit(4);
+  await tick();
+  assert.equal(worker.tools.session, null);
+  assert.ok(port.sent.some(message => message.type === 'error' && /active window changed/.test(message.error)));
 });
 
 test('isolated page targets exclude secret fields and reject covered or stale elements', () => {

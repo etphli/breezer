@@ -12,9 +12,13 @@ The profile button edits your name and personal context. These are saved in this
 
 ## Browser control
 
-Enable Browser control before sending a task. The assistant can inspect the page, click visible elements, type into ordinary fields, scroll, press navigation keys, and navigate the controlled tab. During control, a blue outline surrounds the page, an AI pointer identifies actions, and a Stop button stays visible. Stop in the sidebar, Stop on the page, or Escape ends control. The toggle resets after the reply.
+Turn on Browser control before asking Breezer to act. The assistant can inspect the page, click visible elements, type into ordinary fields, scroll, press navigation keys, and navigate the controlled tab. While it works, a flowing blue wave frames the page, a Breezer pointer moves to each element before it is clicked or typed into, and a Stop button stays visible. Stop in the sidebar, Stop on the page, or Escape ends the reply.
 
-Control is limited to one active tab in one browser window. Switching tabs or windows, closing the panel, or losing the debugger connection stops it. Browser control cannot execute arbitrary JavaScript, shell commands, or operating system actions. It does not type into password, payment, token, or one-time-code fields. New tabs, embedded frames, and closed shadow roots are outside this first version's action scope.
+The switch is consent for the tab it was turned on in. It stays on across follow-up messages in that tab, so "now click Save" works after an earlier step. It turns off when you turn it off, press Stop or Escape, start a new conversation, switch to another tab, or when control fails. With the switch off, the assistant is told it has read-only access and asks you to turn the switch on rather than attempting an action.
+
+Control is limited to one active tab in one browser window. Switching tabs or Breezer windows, closing the panel, or losing the debugger connection stops it. Moving focus to another app does not: input is delivered only to the controlled tab, so you can watch from elsewhere.
+
+Browser control is not screen or computer control. Breezer cannot see or operate the desktop, other apps, other tabs, browser settings, or file dialogs; requests for those are declined. Its only transport is the Chromium debugger attached to the one controlled tab. Browser control cannot execute arbitrary JavaScript, shell commands, or operating system actions. It does not type into password, payment, token, or one-time-code fields. New tabs, embedded frames, and closed shadow roots are outside this first version's action scope.
 
 An opted-in control task can follow links across HTTP and HTTPS sites in that tab. The debugger connection ends with the task. If it moved to a different site, reopen the sidebar with Command K before asking a new page question so Chromium can grant access to that site.
 
@@ -88,7 +92,22 @@ node tests/ai/host-live.mjs --run-live codex
 node tests/ai/host-live.mjs --run-live claude
 ```
 
-Both live checks passed during implementation: GPT-6.1 Sol and Claude Opus 5.5 streamed replies, requested a snapshot, waited for the returned result, and completed. Native Command K, component loading, app-bundle host discovery, and browser signing still require validation in a compiled Breezer build. Local native compilation was blocked by Xcode's outstanding licence acceptance.
+Add `--control-off` to ask for a click while only read access is granted. The reply must tell the user to turn on Browser control.
+
+An installed-app check drives the real side panel, extension, native host, and provider in a temporary profile against a loopback fixture. It asserts trusted typing, clicking, scrolling, the on-page indicator, and cleanup. `--follow-up` first sends a snapshot-only request, then the action request without touching the switch again:
+
+```sh
+node tests/ai/installed-control.mjs --run-live ~/Applications/Breezer.app
+node tests/ai/installed-control.mjs --run-live ~/Applications/Breezer.app --follow-up
+```
+
+The check identifies the native side panel in the fixture's window and rejects ordinary `panel.html` tabs, regardless of their width. Set `BREEZER_PLAYWRIGHT_MODULE` to an existing Playwright module's absolute path to reuse dependencies without installing them.
+
+The extension is compiled into the app's resources, so this checks the extension as last built and installed. Source browser fixtures do not prove that the installed app contains these changes.
+
+Earlier live host checks passed with GPT-6.1 Sol and Claude Opus 5.5. The frozen request 4 handoff also records an installed-app reproduction: an explicitly enabled first request could type, click, and scroll, but completing that reply silently turned control off, so a follow-up could not act. The handoff records a passing actual-CLI comparison of the old and corrected control-off host instructions. These are prior results, not a new installed-app verification of this patch.
+
+Xcode is available; licence acceptance is no longer a compilation blocker. Main owns the pending native compile and release verification. The corrected consent persistence, wave, pointer, and installed-control target lookup still need validation in the newly compiled app, including the `--follow-up` check. No build, install, or live inference is performed as part of this source-only handoff.
 
 ## References
 

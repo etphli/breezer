@@ -3,9 +3,12 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { NativeDecoder, encodeMessage } from '../../features/ai/host/protocol.mjs';
 
-const [gate, providerId] = process.argv.slice(2);
-if (gate !== '--run-live' || !['codex', 'claude'].includes(providerId) || process.argv.length !== 4) {
-  process.stderr.write('Usage: node tests/ai/host-live.mjs --run-live codex|claude\nThis sends one small synthetic chat through the selected authenticated CLI.\n');
+const [gate, providerId, scenario] = process.argv.slice(2);
+// --control-off asks for a page action while only read access is granted. The reply must
+// name the Browser control switch instead of claiming a general inability to act.
+const controlOff = scenario === '--control-off';
+if (gate !== '--run-live' || !['codex', 'claude'].includes(providerId) || process.argv.length !== (controlOff ? 5 : 4)) {
+  process.stderr.write('Usage: node tests/ai/host-live.mjs --run-live codex|claude [--control-off]\nThis sends one small synthetic chat through the selected authenticated CLI.\n');
   process.exit(2);
 }
 
@@ -36,7 +39,7 @@ child.stdout.on('data', (chunk) => {
         selectedModel = provider.defaultModel;
         sentChat = true;
         send({ type: 'chat', id, provider: providerId, model: selectedModel, includeContext: true, control: false,
-          message: 'Call browser_snapshot exactly once. Then answer only with the test page title returned by that tool. Do not call other tools.',
+          message: controlOff ? 'Call browser_snapshot exactly once, then click the Save note button on this page.' : 'Call browser_snapshot exactly once. Then answer only with the test page title returned by that tool. Do not call other tools.',
           history: [], profile: { name: '', context: '' },
           context: { url: 'https://example.invalid/breezer-test', title, text: 'Synthetic browser integration fixture. No private information.', viewport: { width: 800, height: 600 }, elements: [] },
         });
@@ -60,7 +63,8 @@ child.stdout.on('data', (chunk) => {
       } else if (message.id === id && message.type === 'complete') {
         assert.equal(message.cancelled, undefined); assert.equal(toolCalls, 1); assert.equal(answeredTool, true);
         assert.ok(deltaEvents > 0, 'No streamed assistant text was received.');
-        assert.ok(reply.includes(title), 'The assistant did not report the synthetic page title.');
+        if (controlOff) assert.match(reply, /browser control/i, 'The read-only reply did not tell the user to turn on Browser control.');
+        else assert.ok(reply.includes(title), 'The assistant did not report the synthetic page title.');
         complete = true; clearTimeout(timeout); child.stdin.end();
       }
     }
@@ -74,4 +78,4 @@ const code = await new Promise((resolve) => child.on('close', resolve));
 clearTimeout(timeout); clearTimeout(pendingTool);
 if (failure) throw failure;
 decoder.finish(); assert.equal(code, 0); assert.equal(complete, true);
-console.log(JSON.stringify({ provider: providerId, model: selectedModel, toolCalls, deltaEvents, waitedForToolResult: answeredTool, completed: complete, reply: reply.slice(0, 400) }, null, 2));
+console.log(JSON.stringify({ provider: providerId, scenario: controlOff ? 'control-off' : 'snapshot', model: selectedModel, toolCalls, deltaEvents, waitedForToolResult: answeredTool, completed: complete, reply: reply.slice(0, 400) }, null, 2));

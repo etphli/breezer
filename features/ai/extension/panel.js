@@ -12,6 +12,7 @@ const state = {
   messages: [],
   includeContext: true,
   control: false,
+  controlTabId: null,
   running: null,
   page: null,
   port: null,
@@ -201,7 +202,10 @@ function setPage(page) {
   state.page = page?.url && /^https?:\/\//i.test(page.url) ? page : null;
   if (!state.page) {
     state.includeContext = false;
-    state.control = false;
+    setControl(false);
+  } else if (state.control && page.tabId !== state.controlTabId) {
+    setControl(false);
+    notify('Browser control turned off because the active tab changed. Turn it on again to let Breezer act in this tab.');
   }
   let label = 'No page attached';
   if (state.page) {
@@ -210,6 +214,14 @@ function setPage(page) {
   $('context-title').textContent = label;
   $('context-toggle').title = state.page ? `${page.url}\nInclude this page and a screenshot with your message` : 'Include the current page and a screenshot with your message';
   updateControls();
+}
+
+// Consent belongs to one tab. It lasts across replies until the user turns it off,
+// stops a reply, switches tabs, starts a new conversation, or control fails.
+function setControl(on) {
+  state.control = on && Boolean(state.page);
+  state.controlTabId = state.control ? state.page.tabId : null;
+  if (state.control) state.includeContext = true;
 }
 
 function applyProfile() {
@@ -279,7 +291,7 @@ function renderDelta() {
   });
 }
 
-function finish(label) {
+function finish(label, keepControl = false) {
   if (state.running) {
     const message = state.messages.find((item) => item.id === state.running.assistantId);
     if (message && !message.text) {
@@ -288,7 +300,7 @@ function finish(label) {
     } else if (message) renderMessage(messageNodes.get(message.id), message.text);
   }
   state.running = null;
-  state.control = false;
+  if (!keepControl) setControl(false);
   $('activity').hidden = true;
   updateControls();
   saveConversation();
@@ -366,7 +378,7 @@ function receive(message) {
     const reply = state.messages.find((item) => item.id === state.running.assistantId);
     reply.text += message.text || '';
     renderDelta();
-  } else if (message.type === 'complete') finish();
+  } else if (message.type === 'complete') finish(undefined, !message.cancelled);
   else if (message.type === 'activity' && state.running) {
     $('activity').hidden = !message.active;
     $('activity-label').textContent = message.label || 'Working in this tab';
@@ -396,24 +408,20 @@ $('close-panel').addEventListener('click', async () => {
 $('dismiss-notice').addEventListener('click', () => notify(''));
 $('context-toggle').addEventListener('click', () => {
   state.includeContext = !state.includeContext;
-  if (!state.includeContext) state.control = false;
+  if (!state.includeContext) setControl(false);
   if (state.includeContext) post({ type: 'context' });
   updateControls();
 });
 $('control-toggle').addEventListener('click', () => {
-  state.control = !state.control;
-  if (state.control) {
-    state.includeContext = true;
-    notify('Breezer can click, type, and scroll in this tab during your next request. Press Stop or Escape to take over.');
-  } else notify('');
+  setControl(!state.control);
+  notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
 });
 document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => {
   $('prompt').value = button.dataset.prompt;
-  if (button.dataset.control) {
-    state.control = true;
-    state.includeContext = true;
-    notify('Browser control is on for your next request. Describe the task, then send.');
+  if (button.dataset.control && state.page) {
+    setControl(true);
+    notify('Browser control is on for this tab. Describe the task, then send.');
   }
   resizePrompt();
   $('prompt').focus();
@@ -424,7 +432,7 @@ $('new-chat').addEventListener('click', () => {
   messageNodes.clear();
   $('messages').replaceChildren();
   $('welcome').hidden = false;
-  state.control = false;
+  setControl(false);
   notify('');
   updateControls();
   saveConversation();
