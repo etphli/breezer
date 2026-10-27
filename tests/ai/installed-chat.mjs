@@ -33,7 +33,7 @@ try {
     viewport: { width: 1280, height: 850 },
   });
 
-  const web = context.pages()[0] || await context.newPage();
+  const web = await context.newPage();
   await web.goto(`http://127.0.0.1:${server.address().port}`);
   assert.equal(await web.title(), fixtureTitle);
 

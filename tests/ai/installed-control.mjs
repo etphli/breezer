@@ -55,7 +55,8 @@ try {
     args: ['--no-first-run', '--no-default-browser-check'],
     viewport: { width: 1280, height: 850 },
   });
-  const web = context.pages()[0] || await context.newPage();
+  // A native sidebar is also a CDP page target; it is not a content tab.
+  const web = await context.newPage();
   await web.goto(`${origin}/`);
   assert.equal(await web.title(), fixtureTitle);
 

@@ -30,7 +30,8 @@ async function openManager() {
     ignoreDefaultArgs: ['--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox', '--password-store=basic', '--use-mock-keychain'],
     args: ['--no-first-run', '--no-default-browser-check'], viewport: null,
   });
-  const page = context.pages()[0] || await context.newPage();
+  // Native sidebars are also CDP page targets. Create a real content tab.
+  const page = await context.newPage();
   await page.goto('chrome://password-manager/passwords');
   await page.bringToFront();
   await page.locator('password-manager-app').waitFor();
