@@ -14,6 +14,8 @@ from pathlib import Path
 import shutil
 import tempfile
 
+import breezer_sidebar_frame as sidebar_frame
+
 
 ROOT = Path(__file__).resolve().parent.parent
 NATIVE = ROOT / "features/workspace/native"
@@ -447,7 +449,7 @@ def _window_features_replacements():
 
 
 def replacements():
-    return {
+    return sidebar_frame.merge({
         REGION: _region_replacements(),
         "components/performance_manager/freezing/freezer.cc": _freezer_replacements(),
         LAYOUT_CONTROLLER: _layout_controller_replacements(),
@@ -583,7 +585,7 @@ def replacements():
                 '      "//chrome/browser/extensions/api/breezer_private",\n',
             ),
         ],
-    }
+    })
 
 
 def added_files():
@@ -598,7 +600,8 @@ def added_files():
 
 def fingerprint():
     digest = hashlib.sha256()
-    inputs = [ROOT / "script/apply_breezer_workspace.py"]
+    inputs = [ROOT / "script/apply_breezer_workspace.py",
+              ROOT / "script/breezer_sidebar_frame.py"]
     inputs.extend(sorted(path for path in NATIVE.rglob("*") if path.is_file()))
     for path in inputs:
         name = path.relative_to(ROOT).as_posix()

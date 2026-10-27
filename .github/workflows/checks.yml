@@ -47,6 +47,7 @@ jobs:
       - name: Verify workspace and full-height assistant overlays
         run: |
           python script/check_breezer_workspace.py
+          python script/check_breezer_sidebar_frame.py
           python script/check_breezer_ai_ui.py
           python script/check_breezer_passwords.py
           python tests/passwords_native_test.py
