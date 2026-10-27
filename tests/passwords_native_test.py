@@ -39,7 +39,25 @@ class PinnedSourceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.source = Path(SOURCE)
-        cls.originals = {name: (cls.source / name).read_bytes() for name in overlay.sections()}
+        cls.observed = {name: (cls.source / name).read_bytes() for name in overlay.sections()}
+        # Normalize only a temporary copy so this suite accepts source before or
+        # after preparation, while always exercising the first-apply boundary.
+        with tempfile.TemporaryDirectory(prefix='breezer-passwords-baseline-') as directory:
+            baseline = Path(directory)
+            for name, data in cls.observed.items():
+                target = baseline / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+            for name, section in overlay.sections().items():
+                forward = overlay.patch(baseline, section, dry_run=True).returncode == 0
+                reverse = overlay.patch(baseline, section, reverse=True, dry_run=True).returncode == 0
+                if forward == reverse:
+                    raise AssertionError(f'Unrecognized or ambiguous password source: {name}')
+                if reverse:
+                    result = overlay.patch(baseline, section, reverse=True)
+                    if result.returncode:
+                        raise AssertionError(result.stdout + result.stderr)
+            cls.originals = {name: (baseline / name).read_bytes() for name in cls.observed}
 
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory(prefix='breezer-passwords-test-')
@@ -51,6 +69,8 @@ class PinnedSourceTest(unittest.TestCase):
             target.write_bytes(data)
 
     def read(self, name):
+        if name in self.originals:
+            return self.originals[name].decode()
         return (self.source / name).read_text()
 
     def test_pinned_routes_and_storage_authentication_contract(self):
@@ -112,7 +132,7 @@ class PinnedSourceTest(unittest.TestCase):
         self.assertIn('chrome::ShowPasswordManager(bwi)', actions)
         footer = (self.tree / 'components/password_manager/core/browser/password_suggestion_generator.cc').read_text()
         self.assertNotIn('if ((true))', footer)
-        for name, data in self.originals.items():
+        for name, data in self.observed.items():
             self.assertEqual((self.source / name).read_bytes(), data, 'original source must stay untouched')
 
     def test_missing_overlay_and_drift_refused_without_partial_writes(self):
@@ -140,7 +160,8 @@ class PinnedSourceTest(unittest.TestCase):
     def test_recorded_source_evidence(self):
         manifest = json.loads((NATIVE / 'upstream.json').read_text())
         for name, expected in manifest['source_evidence_sha256'].items():
-            self.assertEqual(hashlib.sha256((self.source / name).read_bytes()).hexdigest(), expected, name)
+            data = self.originals[name] if name in self.originals else (self.source / name).read_bytes()
+            self.assertEqual(hashlib.sha256(data).hexdigest(), expected, name)
 
 
 if __name__ == '__main__':
