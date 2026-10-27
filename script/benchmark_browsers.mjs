@@ -35,10 +35,63 @@ export function processRole(command) {
 }
 export function parseProcessLoad(text) {
   return text.trim().split('\n').filter(Boolean).map(line => {
-    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+(\S+)\s+(.+)$/);
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+([\d.]+)\s+(\S+)\s+(\w{3}\s+\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})\s+(.+)$/);
     if (!match) throw new Error(`Cannot parse process load row: ${line}`);
-    return { pid: Number(match[1]), ppid: Number(match[2]), rssKiB: Number(match[3]), cpuPercent: Number(match[4]), cpuTime: match[5], command: match[6], role: processRole(match[6]) };
+    const started = Date.parse(match[6]);
+    return { pid: Number(match[1]), ppid: Number(match[2]), rssKiB: Number(match[3]), cpuPercent: Number(match[4]), cpuTime: match[5], startedAt: Number.isFinite(started) ? new Date(started).toISOString() : null, command: match[7], role: processRole(match[7]) };
   });
+}
+export function cpuTimeCentiseconds(value) {
+  const match = typeof value === 'string' && value.match(/^(\d+):([0-5]\d)\.(\d{2})$/);
+  if (!match) return null;
+  const total = Number(match[1]) * 6000 + Number(match[2]) * 100 + Number(match[3]);
+  return Number.isSafeInteger(total) ? total : null;
+}
+export function observedCpuWindow(samples, rootPid) {
+  const coverage = 'Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.';
+  const counterResolutionSeconds = 0.01;
+  const unavailable = reason => ({ status: 'unavailable', reason, coverage, counterResolutionSeconds });
+  if (samples.length < 2) return unavailable('At least two samples are required');
+  for (let index = 0; index < samples.length; index++) {
+    const sample = samples[index];
+    if (!Number.isFinite(sample.monotonicStartedMs) || !Number.isFinite(sample.monotonicEndedMs) || sample.monotonicEndedMs < sample.monotonicStartedMs ||
+        (index && sample.monotonicStartedMs <= samples[index - 1].monotonicEndedMs)) return unavailable('Missing or non-increasing monotonic capture timestamps');
+    if (!sample.processes?.length || !sample.processes.some(row => row.pid === rootPid) || new Set(sample.processes.map(row => row.pid)).size !== sample.processes.length) return unavailable('Missing browser root, empty tree, or duplicate PID');
+  }
+  const first = samples[0];
+  const captureStartedAt = Date.parse(first.captureStartedAt);
+  if (!Number.isFinite(captureStartedAt)) return unavailable('Missing capture wall time for process identity checks');
+  let observedCentiseconds = 0;
+  let lowerBoundCentiseconds = 0;
+  for (const process of first.processes) {
+    const started = Date.parse(process.startedAt);
+    // lstart has one-second resolution. Reject identities that could have been
+    // born during the first listing, including same-second PID reuse.
+    if (!Number.isFinite(started) || captureStartedAt - started <= 1000) return unavailable('Missing or too-recent process start time');
+    let previous;
+    let initial;
+    for (const sample of samples) {
+      if (sample.processes.length !== first.processes.length) return unavailable('Observed process tree changed during the window');
+      const row = sample.processes.find(row => row.pid === process.pid);
+      if (!row || row.startedAt !== process.startedAt || row.ppid !== process.ppid || row.executable !== process.executable || row.role !== process.role) return unavailable('Process identity or tree membership changed during the window');
+      const current = cpuTimeCentiseconds(row.cpuTime);
+      if (current === null || (previous !== undefined && current < previous)) return unavailable('Missing, unsupported, or reset CPU counter');
+      initial ??= current;
+      previous = current;
+    }
+    const delta = previous - initial;
+    observedCentiseconds += delta;
+    // Allow one displayed centisecond of error at each endpoint per process.
+    lowerBoundCentiseconds += Math.max(0, delta - 2);
+  }
+  const elapsedSeconds = (samples.at(-1).monotonicEndedMs - first.monotonicStartedMs) / 1000;
+  const counterUncertaintyCpuSeconds = first.processes.length * 2 / 100;
+  const observation = { sampledProcessCount: first.processes.length, sampleCount: samples.length, elapsedSeconds, counterResolutionSeconds,
+    counterUncertaintyCpuSeconds, counterUncertaintyCpuSecondsPerElapsedSecond: counterUncertaintyCpuSeconds / elapsedSeconds };
+  if (observedCentiseconds <= first.processes.length * 2) return { ...unavailable('Observed CPU does not exceed aggregate counter uncertainty'), ...observation };
+  const cpuSecondsLowerBound = lowerBoundCentiseconds / 100;
+  return { status: 'observed-lower-bound', coverage, ...observation, observedCpuSeconds: observedCentiseconds / 100, cpuSecondsLowerBound,
+    cpuSecondsPerElapsedSecondLowerBound: cpuSecondsLowerBound / elapsedSeconds };
 }
 const sidebarPrefix = 'chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/workspace.html#/sidebar?w=';
 export function accountPageTargets(targets, evidence = {}) {
@@ -73,7 +126,7 @@ export function summarize(values) {
   return { count: sorted.length, median: percentile(0.5), min: sorted[0], max: sorted.at(-1), p25: percentile(0.25), p75: percentile(0.75) };
 }
 const ps = () => parseProcesses(execFileSync('/bin/ps', ['-axo', 'pid=,ppid=,rss=,command='], { encoding: 'utf8', timeout: 2000 }));
-const processLoad = pid => processTree(parseProcessLoad(execFileSync('/bin/ps', ['-axo', 'pid=,ppid=,rss=,%cpu=,time=,command='], { encoding: 'utf8', timeout: 2000 })), pid);
+const processLoad = pid => processTree(parseProcessLoad(execFileSync('/bin/ps', ['-axo', 'pid=,ppid=,rss=,%cpu=,time=,lstart=,command='], { encoding: 'utf8', timeout: 2000, env: { ...process.env, LC_ALL: 'C' } })), pid);
 const command = (file, args = []) => {
   try { return execFileSync(file, args, { encoding: 'utf8', timeout: 20000 }).trim(); }
   catch (error) { return { error: error.message }; }
@@ -308,13 +361,16 @@ async function memorySample(instance, seconds, samples) {
   await sleep(seconds * 1000);
   const rows = [];
   for (let index = 0; index < samples; index++) {
+    const captureStartedAt = new Date().toISOString();
+    const monotonicStartedMs = performance.now();
     const tree = instance.captureLoad();
+    const monotonicEndedMs = performance.now();
     assert.ok(tree.length, 'Owned browser process tree disappeared');
-    rows.push({ at: new Date().toISOString(), rssMiB: tree.reduce((sum, row) => sum + row.rssKiB, 0) / 1024,
-      processes: tree.map(({ pid, ppid, rssKiB, cpuPercent, cpuTime, role, command: cmd }) => ({ pid, ppid, rssKiB, cpuPercent, cpuTime, role, executable: cmd.split(' --')[0] })) });
+    rows.push({ at: new Date().toISOString(), captureStartedAt, monotonicStartedMs, monotonicEndedMs, rssMiB: tree.reduce((sum, row) => sum + row.rssKiB, 0) / 1024,
+      processes: tree.map(({ pid, ppid, rssKiB, cpuPercent, cpuTime, startedAt, role, command: cmd }) => ({ pid, ppid, rssKiB, cpuPercent, cpuTime, startedAt, role, executable: cmd.split(' --')[0] })) });
     if (index + 1 < samples) await sleep(1000);
   }
-  return { rssMiB: summarize(rows.map(row => row.rssMiB)), samples: rows };
+  return { rssMiB: summarize(rows.map(row => row.rssMiB)), cpu: observedCpuWindow(rows, instance.result.pid), samples: rows };
 }
 async function exercise(instance, fixtureUrl, options) {
   const { cdp, session, targetId, result } = instance;
@@ -419,7 +475,7 @@ export async function main(argv = process.argv.slice(2)) {
   const probeExecutable = join(options.output, 'native-window-probe');
   await writeFile(probeSource, windowProbeSource);
   execFileSync('/usr/bin/xcrun', ['swiftc', probeSource, '-o', probeExecutable], { stdio: 'pipe', timeout: 120000 });
-  const report = { protocol: 'installed-browser-v2-diagnostics', status: options.mode === 'prepare' ? 'prepared' : 'running', options, browsers, flags: commonFlags, environmentBefore: environment(), trials: [] };
+  const report = { protocol: 'installed-browser-v3-observed-cpu', status: options.mode === 'prepare' ? 'prepared' : 'running', options, browsers, flags: commonFlags, environmentBefore: environment(), trials: [] };
   const save = () => writeFile(join(options.output, 'results.json'), `${JSON.stringify(report, null, 2)}\n`);
   await save();
   if (options.mode === 'prepare') { console.log(`Prepared without launching browsers: ${options.output}`); return; }
