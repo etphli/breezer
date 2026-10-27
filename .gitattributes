@@ -1,0 +1,2 @@
+# Unified patches contain required context prefixes on otherwise empty lines.
+features/ai/native-ui/*.patch whitespace=-blank-at-eol
