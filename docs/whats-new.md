@@ -31,7 +31,9 @@ Only bump published version metadata as part of preparing an actual release. Pag
 
 Each patch has a `.patch-lead` row for its main illustration and related notes, then a `.patch-pair` with two `.patch-group` blocks. Each group has a `.plate.patch-plate` figure, decorative `svg.art`, a heading and a `.notes` list. Both layouts stack at 720px. Artwork colors come from the page palette through the `.art` rules in `whats-new.css`.
 
-The 1.1.1 drawings explain new-tab changes, Chrome import and AI error recovery. The 1.1.2 drawings explain Peek, favourite tile states and equal-width shortcuts. Keep the descriptions beside the art so the meaning remains available to screen readers.
+A patch may add a second `.patch-pair` and end with a `.patch-limit` block that states what keeps its normal behavior or what the change cannot promise.
+
+The 1.1.1 drawings explain new-tab changes, Chrome import and AI error recovery. The 1.1.2 drawings explain Peek, favourite tile states and equal-width shortcuts. The 1.1.3 drawings explain same-site Peek, the opacity-only fade, menu shadows with icon fallback, the sidebar info button and startup tabs. The 1.1.4 drawings explain the worker handoff, failed-start reporting and the retained safety checks. The Organato feature plate shows one Upcoming list beside To-dos. Keep the descriptions beside the art so the meaning remains available to screen readers.
 
 ## Page contract
 

@@ -258,10 +258,10 @@ body {
 }
 .plate i.short { width: 58%; }
 
-/* Organato: the new tab's three lanes. */
+/* Organato: one Upcoming list for exams and assignments, To-dos beside it. */
 .mini-tab {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1.7fr 1fr;
   gap: 8px;
   width: 100%;
   padding: 12px;
@@ -272,9 +272,9 @@ body {
 .mini-lane {
   display: grid;
   align-content: start;
-  gap: 7px;
+  gap: 8px;
   min-height: 100px;
-  padding: 9px 7px;
+  padding: 9px 8px;
   border-radius: 8px;
   background: var(--plate);
 }
@@ -285,7 +285,27 @@ body {
   color: var(--accent);
   white-space: nowrap;
 }
-.mini-lane:first-child i:first-of-type { background: color-mix(in srgb, var(--accent) 55%, transparent); }
+.mini-item {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+.mini-item b {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.mini-item b.soft { background: var(--mint); }
+.mini-item.todo b {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #fffdf8;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 40%, transparent) inset;
+}
+.mini-item.todo.done b { background: var(--accent); box-shadow: none; }
 
 /* Theme: a chosen swatch tints a tiny browser window. */
 .plate-theme { align-content: center; gap: 16px; }
@@ -558,6 +578,14 @@ body {
 .art .scrim { fill: var(--ink); opacity: 0.34; }
 .art .asleep { fill: color-mix(in srgb, var(--ink) 16%, var(--plate)); }
 .art .cursor { fill: var(--ink); stroke: #fffdf8; stroke-width: 1; stroke-linejoin: round; }
+.art .paper { fill: var(--paper); stroke: var(--plate-edge); stroke-width: 1; }
+.art .frame { fill: none; stroke: color-mix(in srgb, var(--ink) 24%, transparent); stroke-width: 1.2; stroke-dasharray: 4 3; }
+.art .letter-tile { fill: color-mix(in srgb, var(--accent) 18%, var(--plate)); }
+.art .letter { font-size: 9px; font-weight: 700; fill: var(--accent); }
+.art .fade-1 { opacity: 0.3; }
+.art .fade-2 { opacity: 0.65; }
+/* 1.1.3 menus: a tight, darker contact shadow rather than a pale halo. */
+.art .menu-shadow { filter: drop-shadow(0 1px 1px rgb(20 30 30 / 0.22)) drop-shadow(0 4px 6px rgb(20 30 30 / 0.2)); }
 .art .lift { filter: drop-shadow(0 6px 10px rgb(92 70 30 / 0.16)); }
 .art .lift-strong { filter: drop-shadow(0 14px 18px rgb(20 30 30 / 0.35)); }
 .art .on-accent { fill: #fbf7ee; }
@@ -566,6 +594,9 @@ body {
 .art .ellipsis { font-size: 13px; font-weight: 700; }
 .art .label { fill: var(--accent); }
 .art .lane { fill: var(--accent); font-size: 9px; }
+.art .target { fill: none; stroke: var(--accent); stroke-width: 1.4; }
+.art .axis, .art .lifeline { fill: none; stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: 1.2; stroke-linecap: round; }
+.art .lifeline { stroke-dasharray: 3 4; }
 .art .tick, .art .stroke-accent, .art .stroke-quiet, .art .stroke-ink, .art .stroke-mint, .art .swirl, .art .measure, .art .guide {
   fill: none;
   stroke-linecap: round;
@@ -585,6 +616,27 @@ body {
 .art .s3 { fill: #7d93c9; }
 .art .s4 { fill: #c8a2b4; }
 .art .s5 { fill: #9a9a8c; }
+
+/* What a patch leaves unchanged or can't promise, kept beside its notes. */
+.patch-limit {
+  margin-top: clamp(32px, 4.5vw, 48px);
+  padding: 18px 22px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--plate) 70%, var(--paper));
+  box-shadow: 0 0 0 1px var(--plate-edge) inset;
+}
+.patch-limit h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.patch-limit p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--muted);
+  text-wrap: pretty;
+}
 
 @media (max-width: 720px) {
   .patch-lead, .patch-pair { grid-template-columns: 1fr; }

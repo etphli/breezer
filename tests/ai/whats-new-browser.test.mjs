@@ -98,7 +98,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
         ['Organato on your new tab', 'Your own theme color', 'Password suggestions that stay put', 'Updates from Settings']);
       // Cream, even though the OS asks for dark.
       assert.equal(await page.$eval('body', (body) => getComputedStyle(body).backgroundColor), 'rgb(243, 235, 218)');
-      for (const selector of ['h1', '.lede', '.feature-copy p', '.pending p', '.button.primary', '.button.secondary']) {
+      for (const selector of ['h1', '.lede', '.feature-copy p', '.notes li', '.patch-limit p', '.pending p', '.button.primary', '.button.secondary']) {
         const ratio = await contrast(page, selector);
         assert.ok(ratio >= 4.5, `${selector} contrast ${ratio.toFixed(2)}`);
       }

@@ -36,9 +36,18 @@
       <article class="feature" aria-labelledby="f-organato">
         <figure class="plate plate-organato" aria-hidden="true">
           <div class="mini-tab">
-            <div class="mini-lane"><span class="mini-label">Exams</span><i></i><i class="short"></i></div>
-            <div class="mini-lane"><span class="mini-label">Assignments</span><i></i><i></i><i class="short"></i></div>
-            <div class="mini-lane"><span class="mini-label">To-dos</span><i class="short"></i><i></i></div>
+            <div class="mini-lane">
+              <span class="mini-label">Upcoming</span>
+              <span class="mini-item"><b></b><i></i></span>
+              <span class="mini-item"><b class="soft"></b><i class="short"></i></span>
+              <span class="mini-item"><b></b><i></i></span>
+              <span class="mini-item"><b class="soft"></b><i class="short"></i></span>
+            </div>
+            <div class="mini-lane">
+              <span class="mini-label">To-dos</span>
+              <span class="mini-item todo done"><b></b><i></i></span>
+              <span class="mini-item todo"><b></b><i class="short"></i></span>
+            </div>
           </div>
         </figure>
         <div class="feature-copy">
@@ -319,21 +328,317 @@
     <section class="patch-notes" aria-labelledby="patch-113-title">
       <p class="release">Update 1.1.3</p>
       <h2 id="patch-113-title">Keep your favourites at home</h2>
-      <ul class="notes">
-        <li>Peek also opens different pages on the same site, including document and subject links, and supports user-triggered script navigation and initially blank new-tab windows. Form submissions and same-document app routes keep their normal behavior.</li>
-        <li>A short fade introduces Peek without moving its click targets. Reduce Motion skips the animation.</li>
-        <li>Sidebar menus use a tighter dark shadow instead of a pale halo. Failed tab icons show a letter fallback and recover when a valid icon arrives.</li>
-        <li>The sidebar info button beside Settings opens this updates page. Tabs opened while the sidebar starts are included in its first refresh.</li>
-      </ul>
+
+      <div class="patch-lead">
+        <figure class="plate patch-plate" aria-hidden="true">
+          <svg class="art" viewBox="0 0 360 240" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="359" height="239" rx="14"/>
+            <circle class="bar" cx="16" cy="14" r="3.5"/><circle class="bar" cx="28" cy="14" r="3.5"/><circle class="bar" cx="40" cy="14" r="3.5"/>
+            <rect class="well" x="8" y="26" width="76" height="206" rx="10"/>
+            <rect class="card" x="48" y="34" width="30" height="30" rx="8"/><circle class="s2" cx="63" cy="49" r="7"/>
+            <rect class="card" x="14" y="68" width="30" height="30" rx="8"/><circle class="s3" cx="29" cy="83" r="7"/>
+            <rect class="card" x="48" y="68" width="30" height="30" rx="8"/><circle class="s4" cx="63" cy="83" r="7"/>
+            <circle class="bar" cx="20" cy="114" r="3"/><rect class="bar" x="28" y="112" width="46" height="4" rx="2"/>
+            <circle class="bar" cx="20" cy="128" r="3"/><rect class="bar" x="28" y="126" width="38" height="4" rx="2"/>
+            <rect class="bar strong" x="100" y="36" width="92" height="8" rx="4"/>
+            <rect class="bar" x="100" y="52" width="140" height="4" rx="2"/>
+            <g>
+              <rect class="well" x="100" y="68" width="112" height="24" rx="6"/>
+              <path class="stroke-quiet" d="M108 73.5 h6 l3 3 v10 h-9 Z"/><rect class="bar" x="124" y="78" width="70" height="4" rx="2"/>
+              <rect class="mint-soft" x="100" y="98" width="112" height="24" rx="6"/>
+              <path class="stroke-accent" d="M108 103.5 h6 l3 3 v10 h-9 Z"/><rect class="bar strong" x="124" y="108" width="58" height="4" rx="2"/>
+              <rect class="well" x="100" y="128" width="112" height="24" rx="6"/>
+              <path class="stroke-quiet" d="M108 133.5 h6 l3 3 v10 h-9 Z"/><rect class="bar" x="124" y="138" width="64" height="4" rx="2"/>
+              <rect class="well" x="100" y="158" width="112" height="24" rx="6"/>
+              <path class="stroke-quiet" d="M108 163.5 h6 l3 3 v10 h-9 Z"/><rect class="bar" x="124" y="168" width="52" height="4" rx="2"/>
+            </g>
+            <rect class="scrim" x="0.5" y="0.5" width="359" height="239" rx="14"/>
+            <rect class="card ring-accent" x="14" y="34" width="30" height="30" rx="8"/><circle class="s1" cx="29" cy="49" r="7"/>
+            <path class="cursor" d="M176 108 v13 l3.5 -3.2 l2.5 5.2 l2 -1 l-2.4 -5 h4.4 Z"/>
+            <path class="stroke-mint dash" d="M190 104 C 206 92, 214 84, 226 76"/>
+            <g class="lift-strong">
+              <rect class="card hairline" x="196" y="40" width="152" height="180" rx="10"/>
+              <circle class="s1" cx="209" cy="53" r="4.5"/>
+              <rect class="bar" x="218" y="51" width="44" height="4" rx="2"/>
+              <rect class="mint-soft" x="306" y="45" width="16" height="16" rx="5"/>
+              <path class="stroke-ink" d="M315.5 48.5 H319.5 V52.5 M319.5 48.5 L315.5 52.5 M308.5 53.5 V57.5 H312.5 M308.5 57.5 L312.5 53.5"/>
+              <path class="stroke-ink" d="M330.5 49.5 L337.5 56.5 M337.5 49.5 L330.5 56.5"/>
+              <line class="rule" x1="196" y1="66.5" x2="348" y2="66.5"/>
+              <rect class="well" x="214" y="78" width="116" height="130" rx="4"/>
+              <rect class="card" x="222" y="86" width="100" height="114" rx="2"/>
+              <rect class="bar strong" x="232" y="98" width="62" height="6" rx="3"/>
+              <rect class="bar" x="232" y="112" width="80" height="4" rx="2"/><rect class="bar" x="232" y="121" width="72" height="4" rx="2"/>
+              <rect class="bar" x="232" y="130" width="78" height="4" rx="2"/><rect class="bar" x="232" y="139" width="50" height="4" rx="2"/>
+              <rect class="bar" x="232" y="154" width="80" height="4" rx="2"/><rect class="bar" x="232" y="163" width="66" height="4" rx="2"/>
+              <rect class="bar" x="232" y="172" width="74" height="4" rx="2"/>
+            </g>
+            <g class="lift">
+              <rect class="card" x="100" y="196" width="84" height="22" rx="11"/>
+              <circle class="s1" cx="113" cy="207" r="4"/>
+              <text class="label" x="122" y="210.5">Same site</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="patch-copy">
+          <h3>Documents and subjects open in Peek</h3>
+          <ul class="notes">
+            <li>In a favourite, a link to a different page on the same site now opens in Peek. Open a document, a subject or an assignment from a course site and the favourite stays on the list you came from.</li>
+            <li>Peek also catches pages a site opens with a script after you click, including windows that start blank and are filled in a moment later.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="patch-pair">
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 180" focusable="false">
+              <path class="guide" d="M20 56 H300"/>
+              <g class="fade-1">
+                <rect class="card hairline" x="16" y="16" width="84" height="66" rx="8"/>
+                <rect class="bar" x="24" y="24" width="34" height="4" rx="2"/><rect class="mint-soft" x="24" y="34" width="68" height="16" rx="4"/>
+              </g>
+              <g class="fade-2">
+                <rect class="card hairline" x="118" y="16" width="84" height="66" rx="8"/>
+                <rect class="bar" x="126" y="24" width="34" height="4" rx="2"/><rect class="mint-soft" x="126" y="34" width="68" height="16" rx="4"/>
+              </g>
+              <g class="lift">
+                <rect class="card hairline" x="220" y="16" width="84" height="66" rx="8"/>
+                <rect class="bar" x="228" y="24" width="34" height="4" rx="2"/><rect class="mint-soft" x="228" y="34" width="68" height="16" rx="4"/>
+              </g>
+              <circle class="target" cx="74" cy="66" r="6"/><circle class="accent" cx="74" cy="66" r="1.8"/>
+              <circle class="target" cx="176" cy="66" r="6"/><circle class="accent" cx="176" cy="66" r="1.8"/>
+              <circle class="target" cx="278" cy="66" r="6"/><circle class="accent" cx="278" cy="66" r="1.8"/>
+              <path class="axis" d="M58 100 H262 M58 96 V104 M160 96 V104 M262 96 V104"/>
+              <text class="quiet" x="58" y="117" text-anchor="middle">0 ms</text>
+              <text class="quiet" x="262" y="117" text-anchor="middle">about 200 ms</text>
+              <rect class="card edge" x="16" y="134" width="288" height="32" rx="16"/>
+              <rect class="accent" x="26" y="142" width="28" height="16" rx="8"/><circle class="card" cx="46" cy="150" r="6"/>
+              <text x="62" y="153.5">Reduce Motion</text>
+              <path class="stroke-accent" d="M144 150 H222 M216 145 L222 150 L216 155"/>
+              <rect class="card ring" x="234" y="141" width="58" height="18" rx="5"/>
+              <rect class="mint-soft" x="240" y="146" width="46" height="8" rx="3"/>
+            </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>A short fade, nothing that moves</h3>
+            <ul class="notes">
+              <li>The tinted background and then the Peek card fade in over about 200 ms. Only their opacity changes, so a click lands where the page is drawn from the first frame. With Reduce Motion on in macOS, Peek appears at once.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 180" focusable="false">
+              <g class="menu-shadow">
+                <rect class="card" x="18" y="22" width="128" height="104" rx="10"/>
+              </g>
+              <rect class="bar" x="30" y="36" width="72" height="4" rx="2"/>
+              <rect class="mint-soft" x="24" y="48" width="116" height="22" rx="6"/><rect class="bar strong" x="34" y="57" width="64" height="4" rx="2"/>
+              <rect class="bar" x="30" y="82" width="86" height="4" rx="2"/>
+              <line class="rule" x1="24" y1="96.5" x2="140" y2="96.5"/>
+              <rect class="bar" x="30" y="108" width="58" height="4" rx="2"/>
+              <rect class="card lift" x="168.5" y="18.5" width="135" height="143" rx="12"/>
+              <rect class="well" x="178" y="30" width="116" height="28" rx="7"/>
+              <rect class="card" x="185" y="36" width="16" height="16" rx="4"/><circle class="s3" cx="193" cy="44" r="4.5"/>
+              <rect class="bar" x="209" y="42" width="60" height="4" rx="2"/>
+              <rect class="well" x="178" y="66" width="116" height="28" rx="7"/>
+              <rect class="letter-tile" x="185" y="72" width="16" height="16" rx="4"/>
+              <text class="letter" x="193" y="83.5" text-anchor="middle">K</text>
+              <rect class="bar" x="209" y="78" width="48" height="4" rx="2"/>
+              <path class="stroke-accent dash" d="M193 94 C 193 106, 193 106, 193 112"/>
+              <path class="stroke-accent" d="M189 108 L193 113 L197 108"/>
+              <rect class="mint-soft" x="178" y="118" width="116" height="28" rx="7"/>
+              <rect class="card" x="185" y="124" width="16" height="16" rx="4"/><circle class="s2" cx="193" cy="132" r="4.5"/>
+              <rect class="bar strong" x="209" y="130" width="48" height="4" rx="2"/>
+            </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>Crisper menus and steadier icons</h3>
+            <ul class="notes">
+              <li>Sidebar menus sit on a tight, darker shadow instead of a pale halo, so their edges read clearly on light themes.</li>
+              <li>When a tab's icon fails to load, it shows the site's first letter. The real icon replaces it as soon as a valid one arrives.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-pair">
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 180" focusable="false">
+              <rect class="card lift" x="16.5" y="12.5" width="105" height="155" rx="12"/>
+              <rect class="card ring-accent" x="26" y="24" width="24" height="24" rx="6"/><circle class="s1" cx="38" cy="36" r="5.5"/>
+              <rect class="well" x="56" y="24" width="24" height="24" rx="6"/><circle class="s2" cx="68" cy="36" r="5.5"/>
+              <rect class="well" x="86" y="24" width="24" height="24" rx="6"/><circle class="s4" cx="98" cy="36" r="5.5"/>
+              <circle class="bar" cx="32" cy="66" r="3"/><rect class="bar" x="40" y="64" width="58" height="4" rx="2"/>
+              <circle class="bar" cx="32" cy="80" r="3"/><rect class="bar" x="40" y="78" width="46" height="4" rx="2"/>
+              <circle class="bar" cx="32" cy="94" r="3"/><rect class="bar" x="40" y="92" width="52" height="4" rx="2"/>
+              <line class="rule" x1="26" y1="132.5" x2="112" y2="132.5"/>
+              <circle class="stroke-quiet" cx="36" cy="150" r="5"/><path class="stroke-quiet" d="M36 142 v2 M36 156 v2 M28 150 h2 M42 150 h2"/>
+              <circle class="mint-soft" cx="58" cy="150" r="10"/>
+              <circle class="stroke-accent" cx="58" cy="150" r="6"/><path class="stroke-accent" d="M58 149 v4 M58 146.6 v0.1"/>
+              <path class="stroke-accent dash" d="M70 146 C 120 140, 140 110, 164 96"/>
+              <path class="stroke-accent" d="M156 95 L164 96 L161 103.5"/>
+              <rect class="paper lift" x="170.5" y="18.5" width="133" height="143" rx="10"/>
+              <rect class="bar strong" x="184" y="34" width="70" height="7" rx="3.5"/>
+              <rect class="bar strong" x="184" y="46" width="52" height="7" rx="3.5"/>
+              <path class="swirl" d="M184 66 C 204 56, 220 74, 242 64 S 276 56, 288 64"/>
+              <rect class="mint-soft" x="184" y="80" width="40" height="28" rx="5"/><rect class="bar" x="230" y="84" width="58" height="4" rx="2"/><rect class="bar" x="230" y="93" width="44" height="4" rx="2"/>
+              <rect class="mint-soft" x="184" y="114" width="40" height="28" rx="5"/><rect class="bar" x="230" y="118" width="54" height="4" rx="2"/><rect class="bar" x="230" y="127" width="40" height="4" rx="2"/>
+              <rect class="accent" x="184" y="148" width="44" height="8" rx="4"/>
+            </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>This page, one click away</h3>
+            <ul class="notes">
+              <li>The info button beside Settings at the bottom of the sidebar opens this updates page whenever you want to look back at what changed.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 180" focusable="false">
+              <g class="lift">
+                <path class="card edge" d="M20 70 h44 a6 6 0 0 1 6 6 v18 h-56 v-18 a6 6 0 0 1 6 -6 Z"/>
+              </g>
+              <path class="stroke-accent" d="M42 82 h12 M48 76 v12"/>
+              <path class="stroke-accent dash" d="M72 86 C 100 86, 112 120, 140 122"/>
+              <path class="stroke-accent" d="M133 117.5 L140 122 L133 126.5"/>
+              <rect class="card lift" x="150.5" y="12.5" width="145" height="155" rx="12"/>
+              <circle class="bar" cx="166" cy="34" r="3.5"/><rect class="bar" x="176" y="32" width="70" height="4" rx="2"/>
+              <circle class="bar" cx="166" cy="58" r="3.5"/><rect class="bar" x="176" y="56" width="56" height="4" rx="2"/>
+              <circle class="bar" cx="166" cy="82" r="3.5"/><rect class="bar" x="176" y="80" width="64" height="4" rx="2"/>
+              <rect class="mint-soft" x="158" y="108" width="128" height="28" rx="7"/>
+              <circle class="accent" cx="168" cy="122" r="3.5"/><rect class="bar strong" x="178" y="120" width="60" height="4" rx="2"/>
+              <circle class="stroke-accent" cx="272" cy="152" r="7"/><path class="stroke-accent" d="M277.5 147.5 v3.5 h-3.5"/>
+            </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>Tabs opened during startup</h3>
+            <ul class="notes">
+              <li>Tabs that open while the sidebar is still starting now appear in its first refresh, instead of staying missing until the next change.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-limit">
+        <h3>What keeps its normal behavior</h3>
+        <p>Form submissions, app routes that change within the same page, links to another part of the same page, background-tab clicks and private windows behave as before. Peek was checked with test pages; signed-in Google Docs and Canvas haven't been tested yet.</p>
+      </div>
     </section>
 
     <section class="patch-notes" aria-labelledby="patch-114-title">
       <p class="release">Update 1.1.4</p>
       <h2 id="patch-114-title">A steadier update handoff</h2>
-      <ul class="notes">
-        <li>The updater reuses its existing runtime instead of creating a new executable copy that macOS could quarantine. It waits for the update worker to confirm startup and reports a failure if the worker cannot start.</li>
-        <li>This fixes the copied-helper problem. Breezer is still locally signed, so macOS may require approval for downloaded builds. An older updater may need a one-time manual update to receive this fix.</li>
-      </ul>
+
+      <div class="patch-lead">
+        <figure class="plate patch-plate" aria-hidden="true">
+          <svg class="art" viewBox="0 0 360 240" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="359" height="239" rx="14"/>
+            <rect class="card ring" x="16" y="16" width="120" height="56" rx="10"/>
+            <text x="28" y="34">Breezer</text>
+            <rect class="mint-soft" x="26" y="42" width="100" height="20" rx="6"/>
+            <path class="stroke-accent" d="M33 52 l3 3 l6 -6"/>
+            <text class="label" x="48" y="55.5">Installed runtime</text>
+            <rect class="card ring" x="224" y="16" width="120" height="56" rx="10"/>
+            <text x="236" y="34">Update worker</text>
+            <rect class="bar" x="236" y="46" width="80" height="4" rx="2"/><rect class="bar" x="236" y="55" width="56" height="4" rx="2"/>
+            <rect class="ghost" x="156.5" y="22.5" width="48" height="44" rx="8"/>
+            <rect class="well" x="170" y="34" width="21" height="21" rx="5"/>
+            <path class="stroke-quiet" d="M175 41 l3.5 3.5 l-3.5 3.5 M181 48.5 h5"/>
+            <path class="stroke-quiet" d="M154 70 L207 19"/>
+            <path class="lifeline" d="M76 72 V228 M284 72 V228"/>
+            <text class="quiet" x="180" y="96" text-anchor="middle">Start, with the update request</text>
+            <path class="stroke-accent" d="M80 104 H278 M271 99.5 L278 104 L271 108.5"/>
+            <rect class="accent" x="152" y="124" width="56" height="20" rx="10"/>
+            <text class="on-accent" x="180" y="137.5" text-anchor="middle">Ready</text>
+            <path class="stroke-accent" d="M280 134 H212 M148 134 H82 M89 129.5 L82 134 L89 138.5"/>
+            <rect class="well" x="20" y="160" width="112" height="30" rx="8"/>
+            <rect class="strong-well" x="30" y="178" width="92" height="5" rx="2.5"/><rect class="accent" x="30" y="178" width="38" height="5" rx="2.5"/>
+            <text class="quiet" x="30" y="173">Progress shown</text>
+            <rect class="well" x="228" y="160" width="112" height="30" rx="8"/>
+            <text class="quiet" x="284" y="179" text-anchor="middle">Download and check</text>
+            <rect class="well" x="228" y="198" width="112" height="30" rx="8"/>
+            <text class="quiet" x="284" y="217" text-anchor="middle">Replace and restart</text>
+          </svg>
+        </figure>
+        <div class="patch-copy">
+          <h3>Started by the runtime you already have</h3>
+          <ul class="notes">
+            <li>The updater now starts its worker with Breezer's installed runtime. Earlier versions copied that program into a temporary folder first, and macOS could quarantine the new copy and refuse to run it.</li>
+            <li>Breezer shows update progress only after the worker confirms it has started. Previously, a worker that never ran could still look like an update in progress.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="patch-pair">
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 180" focusable="false">
+              <rect class="card ring" x="16" y="16" width="96" height="40" rx="9"/>
+              <text x="28" y="40">Breezer</text>
+              <rect class="ghost" x="208.5" y="16.5" width="95" height="39" rx="9"/>
+              <text class="quiet" x="222" y="40">Worker</text>
+              <path class="stroke-quiet" d="M280 30 l10 10 M290 30 l-10 10"/>
+              <path class="stroke-accent dash" d="M116 36 H200"/>
+              <circle class="card edge" cx="158" cy="72" r="11"/>
+              <circle class="stroke-quiet" cx="158" cy="72" r="6"/><path class="stroke-quiet" d="M158 68.5 v3.5 l2.5 1.5"/>
+              <text class="quiet" x="158" y="98" text-anchor="middle">No reply</text>
+              <rect class="notice" x="16.5" y="112.5" width="190" height="52" rx="10"/>
+              <circle class="stroke-quiet" cx="34" cy="128" r="6.5"/><path class="stroke-quiet" d="M34 124.5 v4 M34 131.4 v0.1"/>
+              <rect class="bar strong" x="48" y="124" width="110" height="5" rx="2.5"/>
+              <rect class="bar" x="48" y="136" width="140" height="4" rx="2"/><rect class="bar" x="48" y="146" width="96" height="4" rx="2"/>
+              <path class="ghost" d="M232.5 120.5 h18 l6 6 h30 v34 h-54 Z"/>
+              <path class="stroke-quiet" d="M252 136 l14 14 M266 136 l-14 14"/>
+              <text class="quiet" x="259.5" y="175" text-anchor="middle">Cleaned up</text>
+            </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>A failed start is reported</h3>
+            <ul class="notes">
+              <li>If the worker exits early or never confirms, Breezer reports an error instead of showing progress, and removes the temporary folder it prepared for the update.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 180" focusable="false">
+              <rect class="card lift" x="14.5" y="14.5" width="138" height="151" rx="12"/>
+              <rect class="bar strong" x="28" y="28" width="70" height="6" rx="3"/>
+              <circle class="accent" cx="34" cy="58" r="7"/><path class="tick" d="M30.5 58 l2.5 2.5 l4.5 -5"/><text x="48" y="61.5">Checksum</text>
+              <circle class="accent" cx="34" cy="86" r="7"/><path class="tick" d="M30.5 86 l2.5 2.5 l4.5 -5"/><text x="48" y="89.5">App signature</text>
+              <circle class="accent" cx="34" cy="114" r="7"/><path class="tick" d="M30.5 114 l2.5 2.5 l4.5 -5"/><text x="48" y="117.5">Newer source</text>
+              <rect class="bar" x="28" y="140" width="100" height="4" rx="2"/>
+              <rect class="frame" x="168.5" y="14.5" width="137" height="94" rx="12"/>
+              <rect class="card edge" x="180" y="26" width="52" height="56" rx="9"/>
+              <circle class="s1" cx="206" cy="48" r="9"/><rect class="bar" x="192" y="66" width="28" height="4" rx="2"/>
+              <rect class="well" x="242" y="26" width="52" height="56" rx="9"/>
+              <circle class="asleep" cx="268" cy="48" r="9"/><rect class="bar" x="254" y="66" width="28" height="4" rx="2"/>
+              <path class="stroke-accent" d="M262 90 C 252 100, 222 100, 212 90 M218 88.5 L212 90 L213.5 96"/>
+              <rect class="mint-soft" x="168" y="124" width="138" height="42" rx="12"/>
+              <rect class="card" x="178" y="133" width="24" height="24" rx="6"/>
+              <circle class="stroke-accent" cx="190" cy="142" r="3.5"/><path class="stroke-accent" d="M183.5 152.5 c1.5 -4 11.5 -4 13 0"/>
+              <text x="210" y="149">Profile and passwords</text>
+            </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>The same safety checks</h3>
+            <ul class="notes">
+              <li>Before replacing Breezer, the updater still checks the download's checksum, the app's identity and signature, and that the release builds on the version you have.</li>
+              <li>The previous app is kept during replacement so a failed update can roll back. Your profile and passwords live outside the app and stay as they are.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="patch-limit">
+        <h3>What this can't fix</h3>
+        <p>Breezer is signed locally, not notarized by Apple, so macOS may still ask you to approve a downloaded build. If you use 1.1.3 or earlier, its older updater lacks this fix, so a one-time manual install of 1.1.4 may be needed before later updates use the new handoff.</p>
+      </div>
     </section>
 
     <aside class="pending" aria-labelledby="pending-title">

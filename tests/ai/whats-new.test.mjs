@@ -72,25 +72,49 @@ test('keeps minor-release features and appends honest patch improvements', () =>
   assert.match(text, /Previews from favourites/);
   assert.match(text, /icons stay evenly spaced/);
   assert.match(text, /without sending automatically/);
+  assert.match(text, /Update 1.1.3/);
+  assert.match(text, /a link to a different page on the same site now opens in Peek/);
+  assert.match(text, /windows that start blank/);
+  assert.match(text, /Reduce Motion on in macOS, Peek appears at once/);
+  assert.match(text, /shows the site's first letter/);
+  assert.match(text, /info button beside Settings/);
+  assert.match(text, /appear in its first refresh/);
+  assert.match(text, /Update 1.1.4/);
+  assert.match(text, /starts its worker with Breezer's installed runtime/);
+  assert.match(text, /only after the worker confirms it has started/);
+  assert.match(text, /checksum, the app's identity and signature/);
+  assert.match(text, /previous app is kept during replacement so a failed update can roll back/);
   // Touch ID is listed as not done, never as fixed or available.
   assert.match(text, /Not yet: Touch ID passkeys/);
   assert.match(text, /Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements/);
   assert.doesNotMatch(text, /Touch ID (?:now|is now|works|is fixed|support)/i);
+  // Limits stay stated, never promised away.
+  assert.match(text, /Form submissions, app routes that change within the same page/);
+  assert.match(text, /signed-in Google Docs and Canvas haven't been tested yet/);
+  assert.match(text, /signed locally, not notarized by Apple, so macOS may still ask/);
+  assert.match(text, /one-time manual install of 1.1.4 may be needed/);
+  assert.doesNotMatch(text, /notarized (?:by Apple )?(?:now|and)|no (?:more|longer) (?:Gatekeeper|macOS) (?:warnings|prompts)/i);
+  assert.equal([...html.matchAll(/class="patch-limit"/g)].length, 2);
   assert.equal([...html.matchAll(/data-action="continue"/g)].length, 2);
   assert.equal([...html.matchAll(/>Open Settings</g)].length, 2);
 });
 
 test('illustrates each patch group with decorative inline SVG only', () => {
   const groups = [...html.matchAll(/<div class="patch-(?:lead|group)">([\s\S]*?)<\/ul>/g)].map((m) => m[1]);
-  assert.equal(groups.length, 6);
+  assert.equal(groups.length, 14);
   for (const group of groups) {
     assert.match(group, /<figure class="plate patch-plate" aria-hidden="true">\s*<svg class="art" viewBox="[\d ]+" focusable="false">/);
     assert.match(group, /<h3>[^<]+<\/h3>/);
   }
-  // Every patch note is still present as a list item, eight in all.
-  assert.equal(groups.flatMap(group => group.match(/<li>/g)).length, 8);
+  // Every patch note is still present as a list item, twenty in all.
+  assert.equal(groups.flatMap(group => group.match(/<li>/g)).length, 20);
   // Pure vector art: no images, references or embedded links inside it.
   assert.doesNotMatch(html, /<(?:image|use|foreignObject)\b|xlink:|xmlns=/);
+});
+
+test('Organato artwork shows one Upcoming list beside To-dos', () => {
+  const plate = html.match(/<figure class="plate plate-organato"[\s\S]*?<\/figure>/)[0];
+  assert.deepEqual([...plate.matchAll(/class="mini-label">([^<]+)</g)].map((m) => m[1]), ['Upcoming', 'To-dos']);
 });
 
 test('stays light and honours reduced motion', () => {
