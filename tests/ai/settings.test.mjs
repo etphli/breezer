@@ -344,3 +344,14 @@ test('browser settings links open beside the settings tab and report failures', 
   assert.equal(links[1].closest('li').dataset.error, 'true');
   assert.match(links[1].title, /Couldn’t open chrome:\/\/.+ Blocked\./);
 });
+
+test('custom color saves through the native theme field and preset restores normally', async () => {
+  const page = await openSettings();
+  page.$('custom-theme-color').value = '#123abc';
+  userClick(page.$('custom-theme-apply')); await settle();
+  assert.deepEqual(page.sets().at(-1), { theme: '#123abc' });
+  assert.equal(page.bridge.native.theme, '#123abc');
+  userClick(page.document.querySelector('#theme-swatches [data-value="rose"]')); await settle();
+  assert.equal(page.bridge.native.theme, 'rose');
+  for (const value of ['#abc', '#00000000', 'url(evil)', '#12345g']) assert.throws(() => validateAppearancePatch({ theme: value }));
+});

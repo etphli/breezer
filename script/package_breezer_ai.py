@@ -86,6 +86,8 @@ def package(app, architecture, cache):
         shutil.copytree(FEATURE / "host", staged / "host", ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
         shutil.copyfile(FEATURE / "integration/native-host-manifest.json", staged / "io.github.etphli.breezer.ai.json")
         (staged / "host/launch.sh").chmod(0o755)
+        commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        (staged / "host/build-identity.json").write_text(json.dumps({"commit": commit}) + "\n")
         unpack_runtime(archive, staged / "runtime", lock["distributions"][architecture])
         runtime = staged / "runtime/node"
         if platform.system() == "Darwin" and architecture == {"arm64": "arm64", "x86_64": "x64"}.get(platform.machine()):

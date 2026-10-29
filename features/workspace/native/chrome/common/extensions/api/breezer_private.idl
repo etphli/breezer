@@ -13,15 +13,6 @@ namespace breezerPrivate {
     autoHide
   };
 
-  enum Theme {
-    mint,
-    tide,
-    dusk,
-    rose,
-    pollen,
-    graphite
-  };
-
   enum ColorMode {
     system,
     light,
@@ -31,7 +22,7 @@ namespace breezerPrivate {
   dictionary Appearance {
     Layout layout;
     SidebarMode sidebarMode;
-    Theme theme;
+    DOMString theme;
     ColorMode colorMode;
     boolean showBookmarks;
     long sidebarWidth;
@@ -48,7 +39,7 @@ namespace breezerPrivate {
   dictionary AppearancePatch {
     Layout? layout;
     SidebarMode? sidebarMode;
-    Theme? theme;
+    DOMString? theme;
     ColorMode? colorMode;
     boolean? showBookmarks;
     long? sidebarWidth;

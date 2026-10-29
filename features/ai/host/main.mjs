@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { NativeDecoder, encodeMessage, validOrigin } from './protocol.mjs';
 import { ContextHostController as HostController } from './context-controller.mjs';
+import { Organato } from './organato.mjs';
+import { UpdateController } from './updater.mjs';
 import { CodexProvider } from './codex.mjs';
 import { ClaudeProvider } from './claude.mjs';
 
@@ -21,9 +23,21 @@ if (process.argv.length === 3 && process.argv[2] === '--discover') {
     try { process.stdout.write(encodeMessage(message)); }
     catch { process.stderr.write('Breezer AI could not send a native message.\n'); process.exit(1); }
   };
-  const controller = new HostController([new CodexProvider(), new ClaudeProvider()], send);
+  const updater = new UpdateController(send);
+  const organato = new Organato();
+  const controller = new HostController([new CodexProvider(), new ClaudeProvider()], send, { integrationTool: (...args) => organato.tool(...args), prepareChat: async () => { const state = await organato.view(); return state.enabled && state.allowAI && state.connected; } });
+  async function receive(message) {
+    try {
+      if (['update-check', 'update-install', 'update-status'].includes(message.type)) return updater.receive(message);
+      if (['organato-view', 'organato-configure', 'organato-list'].includes(message.type)) {
+        const value = message.type === 'organato-view' ? await organato.view() : message.type === 'organato-configure' ? await organato.configure(message.settings || {}) : await organato.list();
+        send({ type: 'organato-result', id: message.id, ok: true, value }); return;
+      }
+      await controller.receive(message);
+    } catch (error) { send({ type: 'organato-result', id: message.id, ok: false, error: error.message }); }
+  }
   process.stdin.on('data', (chunk) => {
-    try { for (const message of decoder.push(chunk)) void controller.receive(message); }
+    try { for (const message of decoder.push(chunk)) void receive(message); }
     catch { send({ type: 'error', error: 'Invalid native messaging frame.' }); controller.close(); process.exitCode = 1; process.stdin.destroy(); }
   });
   process.stdin.on('end', () => {

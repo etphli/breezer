@@ -9,7 +9,8 @@
     "native manage-passwords footer in autofill suggestions",
     "native password-field context menu fallback, with existing fill eligibility checks",
     "native fill-on-account-select default; no page-load password filling by default",
-    "quiet native save/update suggestion chip, preserving blocklists and dismissal suppression"
+    "quiet native save/update suggestion chip, preserving blocklists and dismissal suppression",
+    "saved-password suggestions stay available after typing; filling still requires selection"
   ],
   "direct_chrome_password_import": false,
   "csv_import_route": "chrome://password-manager/settings?import=true",
@@ -37,6 +38,7 @@
     "components/password_manager/core/browser/password_form_filling.cc": "df7a2981f226d67f9af4ae04676576d9dda4f3ac0df5d65df50169e5998260ae",
     "components/password_manager/core/browser/password_bubble_experiment.cc": "bedeec9100ffbad32fa8d7bccaee5a8d69a7ea5a553e788b7d532c7bd4bdb8cc",
     "chrome/browser/ui/autofill/autofill_context_menu_manager.cc": "ffe5654b5e99aacc641621f7c95c86a875934354f51c07114477b43dfd567460",
-    "chrome/browser/ui/page_action/page_action_controller.h": "00189a69343b55e90f38fe7ed080ef360223ffb6abaa55898e1e398eb097287e"
+    "chrome/browser/ui/page_action/page_action_controller.h": "00189a69343b55e90f38fe7ed080ef360223ffb6abaa55898e1e398eb097287e",
+    "components/autofill/core/browser/foundations/browser_autofill_manager.cc": "a8ca04e81cb488fd5e60f4d778a6bb97645d22443204373fd5c9204d6d34dbd1"
   }
 }

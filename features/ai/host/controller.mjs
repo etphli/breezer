@@ -6,8 +6,8 @@ export class HostController {
   #discovering = false;
   #active;
   #pending = new Map();
-  constructor(providers, send, { toolTimeout = 60_000 } = {}) {
-    this.providers = providers; this.send = send; this.toolTimeout = toolTimeout;
+  constructor(providers, send, { toolTimeout = 60_000, integrationTool, prepareChat } = {}) {
+    this.providers = providers; this.send = send; this.toolTimeout = toolTimeout; this.integrationTool = integrationTool; this.prepareChat = prepareChat;
   }
   async discover(refresh = false) {
     if (refresh && !this.#active && !this.#discovering) this.#discovery = undefined;
@@ -30,9 +30,12 @@ export class HostController {
       if (message.type === 'toolResult') { this.toolResult(message); return; }
       validateChat(message);
       if (this.#active) throw new Error('Another chat is already running. Stop it before starting a new request.');
-      const run = { id: message.id, controller: new AbortController(), tools: allowedTools(message) };
+      const run = { id: message.id, controller: new AbortController(), tools: [] };
       this.#active = run;
       try {
+        message = { ...message, organato: this.prepareChat ? await this.prepareChat() : false };
+        if (run.controller.signal.aborted) return;
+        run.tools = allowedTools(message);
         await this.discover();
         if (run.controller.signal.aborted) return;
         const provider = this.providers.find((entry) => entry.id === message.provider);
@@ -53,6 +56,10 @@ export class HostController {
   callTool(run, name, args) {
     if (this.#active !== run || run.controller.signal.aborted) return Promise.reject(new Error('Cancelled.'));
     validateTool(name, args, run.tools);
+    if (name.startsWith('organato_')) {
+      if (!this.integrationTool) return Promise.reject(new Error('Organato is unavailable.'));
+      return this.integrationTool(name, args, run.controller.signal);
+    }
     const requestId = randomUUID();
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => { this.#pending.delete(requestId); reject(new Error('The browser action timed out.')); }, this.toolTimeout);

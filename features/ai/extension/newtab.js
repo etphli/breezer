@@ -7,7 +7,7 @@
 import { startPanelTheme } from './panel-theme.js';
 
 export const PORT_NAME = 'breezer-newtab';
-export const REQUEST_TIMEOUT_MS = 8000;
+export const REQUEST_TIMEOUT_MS = 65000;
 export const MAX_SITES = 8;
 export const MAX_ITEMS = 6;
 export const SETTINGS_URL = 'workspace.html#/settings';
@@ -328,7 +328,12 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     refreshButton.disabled = true;
     refreshButton.setAttribute('aria-busy', 'true');
     try {
-      view = normalizeView(await requestView(api, { refresh }));
+      const result = await requestView(api, { refresh });
+      if (result.dashboardEnabled === false) {
+        globalThis.location.replace('chrome://new-tab-page/');
+        return;
+      }
+      view = normalizeView(result);
       problem = null;
     } catch (error) {
       problem = text(error?.message, 160) || null;

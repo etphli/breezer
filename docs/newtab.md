@@ -88,7 +88,7 @@ Item = {
 ```
 
 The page closes the port after the first matching answer, on disconnect, or
-after 8 seconds. It sends one request on load and one per Refresh press, with
+after 65 seconds. It sends one request on load and one per Refresh press, with
 at most one in flight; it never polls. At midnight it repaints "Today" and
 "Tomorrow" from the answer it already has.
 

@@ -121,6 +121,11 @@
         <p class="section-note">Choosing a Breezer theme replaces your current browser theme.</p>
         <div id="theme-swatches" class="swatches" role="radiogroup" aria-labelledby="theme-heading"></div>
         <div class="setting-row">
+          <label class="setting-label" for="custom-theme-color">Custom color<small>Create a theme for the browser and sidebar.</small></label>
+          <input id="custom-theme-color" type="color" value="#23866b">
+          <button id="custom-theme-apply" type="button">Apply color</button>
+        </div>
+        <div class="setting-row">
           <div class="setting-label"><span id="mode-label">Appearance</span><small>System follows your Mac.</small></div>
           <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-field="colorMode">
             <button role="radio" data-value="system">System</button>
@@ -160,6 +165,23 @@
 
       <div id="password-settings"></div>
       <div id="context-settings"></div>
+      <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading">
+        <h2 id="organato-heading">New tab and Organato</h2>
+        <p class="section-note">Connect Organato to see deadlines and let Breezer AI manage the items you ask it to. Your API key stays in macOS Keychain.</p>
+        <label><input id="dashboard-enabled" type="checkbox" checked> Use the Breezer new-tab dashboard</label><br>
+        <label><input id="organato-enabled" type="checkbox" checked> Show Organato on the dashboard</label><br>
+        <label><input id="organato-ai" type="checkbox" checked> Allow the AI sidebar to read and update Organato</label>
+        <div class="setting-row"><label for="organato-key">Organato API key</label><input id="organato-key" type="password" autocomplete="off" placeholder="org_…"><button id="organato-connect" type="button">Connect</button><button id="organato-disconnect" type="button">Disconnect</button></div>
+        <p class="section-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A read-only key can display them.</p>
+        <p id="organato-status" role="status" aria-live="polite"></p>
+      </section>
+      <section id="update-settings" class="settings-section" aria-labelledby="update-heading">
+        <h2 id="update-heading">Breezer updates</h2>
+        <p class="section-note">Check for stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</p>
+        <p id="update-status" role="status" aria-live="polite">Ready to check for updates.</p>
+        <button id="update-check" type="button">Check for updates</button>
+        <button id="update-install" type="button" hidden>Update and restart</button>
+      </section>
 
       <section class="settings-section" aria-labelledby="browser-heading">
         <h2 id="browser-heading">More browser settings</h2>

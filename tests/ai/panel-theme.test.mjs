@@ -7,7 +7,7 @@ import { applyTheme, readAppearance, resolveTheme, startPanelTheme } from '../..
 const css = await readFile(new URL('../../features/ai/extension/panel.css', import.meta.url), 'utf8');
 
 function fakeRoot() {
-  return { dataset: {}, style: {} };
+  return { dataset: {}, style: { setProperty(name, value) { this[name] = value; }, removeProperty(name) { delete this[name]; } } };
 }
 
 function fakeQuery(matches) {
@@ -154,4 +154,14 @@ test('panel CSS uses valid focus, disabled, and backdrop selectors', () => {
   assert.match(css, /dialog::backdrop/);
   assert.match(css, /button:focus-visible/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
+});
+
+test('custom colour applies to panels and is cleared when selecting a preset', () => {
+  const root = fakeRoot();
+  applyTheme(root, { tone: '#428abc', scheme: 'light' });
+  assert.equal(root.dataset.tone, 'custom');
+  assert.equal(root.style['--custom-seed'], '#428abc');
+  applyTheme(root, { tone: 'mint', scheme: 'dark' });
+  assert.equal(root.dataset.tone, 'mint');
+  assert.equal(root.style['--custom-seed'], undefined);
 });

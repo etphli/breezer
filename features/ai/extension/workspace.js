@@ -92,7 +92,10 @@ export function sidebarFontSize(appearance) {
 
 export function applyAppearance(appearance) {
   const root = document.documentElement;
-  root.dataset.tone = appearance.theme;
+  const custom = /^#[0-9a-fA-F]{6}$/.test(appearance.theme);
+  root.dataset.tone = custom ? 'custom' : appearance.theme;
+  if (custom) root.style.setProperty('--custom-seed', appearance.theme);
+  else root.style.removeProperty('--custom-seed');
   root.dataset.sidebarMode = appearance.sidebarMode;
   root.style.setProperty('--sidebar-font-size', `${sidebarFontSize(appearance)}px`);
   const collapse = $('collapse');
@@ -548,7 +551,7 @@ function draw() {
   }
   state.items = new Map();
   const sidebar = $('sidebar');
-  sidebar.dataset.tone = model.space.tone;
+  sidebar.dataset.tone = /^#[0-9a-fA-F]{6}$/.test(state.appearance.theme) ? 'custom' : model.space.tone;
   sidebar.dataset.close = model.prefs.closeButton;
   if (state.renaming?.kind !== 'space') $('space-name').textContent = model.space.name;
   $('space-glyph').textContent = (model.space.name[0] || '·').toUpperCase();

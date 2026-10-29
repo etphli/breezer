@@ -50,7 +50,7 @@ def resources(tree):
     target = tree / 'components/breezer_ai'
     target.mkdir(parents=True, exist_ok=True)
     files = sorted(p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file())
-    if len(files) > 20:
+    if len(files) > 50:
         raise ValueError('Breezer AI resources exceed the reserved GRIT allocation')
     for file in files:
         destination = target / file
@@ -122,7 +122,7 @@ def apply(tree):
       '      "//components/extstore_fixups",\n      "//components/breezer_ai",')
     # Like Helium's extstore resources, use an unused ChromeOS allocation on macOS.
     r('tools/gritsettings/resource_ids.spec',
-      '"<(SHARED_INTERMEDIATE_DIR)/chrome/browser/resources/ash/extended_updates/resources.grd"',
+      '"<(SHARED_INTERMEDIATE_DIR)/ash/webui/connectivity_diagnostics/resources/resources.grd"',
       '"<(SHARED_INTERMEDIATE_DIR)/components/breezer_ai/resources.grd"')
     r('chrome/app/chrome_command_ids.h',
       '#endif  // CHROME_APP_CHROME_COMMAND_IDS_H_',

@@ -57,6 +57,14 @@ def evaluate_condition(expression, substitutions):
 
 @unittest.skipUnless(SOURCE, 'Set BREEZER_PASSWORD_SOURCE to read pinned source files')
 class ProactivePasswordSourceTest(unittest.TestCase):
+    def test_typed_password_does_not_suppress_saved_account_suggestions(self):
+        source = (self.tree / 'components/autofill/core/browser/foundations/browser_autofill_manager.cc').read_text()
+        section = body(source, 'void BrowserAutofillManager::OnAskForValuesToFillImpl(')
+        password_branch = section[section.index('if (password_request.has_value()'):section.index('if (base::FeatureList::IsEnabled(')]
+        self.assertIn('password_delegate->ShowSuggestions', password_branch)
+        self.assertNotIn('!field.value().empty()', password_branch)
+        self.assertNotIn('SuggestionHidingReason::kFieldValueChanged', password_branch)
+
     @classmethod
     def setUpClass(cls):
         cls.directory = tempfile.TemporaryDirectory(prefix='breezer-password-opportunities-')

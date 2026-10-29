@@ -718,3 +718,9 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 .context-settings [data-context-summary] { white-space: pre-wrap; overflow-wrap: anywhere; }
 .context-settings input[type="checkbox"] { flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--accent); }
 .context-settings :is(input, textarea, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+:root[data-tone="custom"], :root[data-tone="custom"] #sidebar { --air: color-mix(in srgb, var(--custom-seed) 18%, white); --air-deep: color-mix(in srgb, var(--custom-seed) 30%, white); --card: #fff; --ink: #17202a; --muted: #46515e; --accent: color-mix(in srgb, var(--custom-seed) 45%, #17202a); }
+:root[data-scheme="dark"][data-tone="custom"], :root[data-scheme="dark"][data-tone="custom"] #sidebar { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: #2c3038; --ink: #f1f3f6; --muted: #bcc3ce; --accent: color-mix(in srgb, var(--custom-seed) 40%, white); }
+#update-settings button, #custom-theme-apply { padding: 9px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--ink); cursor: pointer; }
+#update-settings button:disabled { opacity: .55; cursor: wait; }
+#custom-theme-color { width: 52px; height: 36px; border: 1px solid var(--line); border-radius: 6px; padding: 3px; background: var(--card); }

@@ -12,7 +12,10 @@ export function resolveTheme(appearance, systemDark) {
 }
 
 export function applyTheme(root, { tone, scheme }) {
-  root.dataset.tone = tone;
+  const custom = /^#[0-9a-f]{6}$/i.test(tone);
+  root.dataset.tone = custom ? 'custom' : tone;
+  if (custom) root.style.setProperty('--custom-seed', tone);
+  else root.style.removeProperty('--custom-seed');
   root.dataset.scheme = scheme;
   root.style.colorScheme = scheme;
 }

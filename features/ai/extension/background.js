@@ -4,6 +4,65 @@ import { installContextBackground } from './context-background.js';
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
 
 export function installBackground(api) {
+  api.runtime.onConnect.addListener(port => {
+    if (port.name !== 'breezer-updates') return;
+    if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
+    let url;
+    try { url = new URL(port.sender.url); } catch { return; }
+    url.hash = ''; url.search = '';
+    if (url.href !== api.runtime.getURL('workspace.html')) return;
+    const native = api.runtime.connectNative(NATIVE_HOST);
+    native.onMessage.addListener(message => { if (message?.type === 'update-result') { try { port.postMessage(message); } catch {} } });
+    native.onDisconnect.addListener(() => { void api.runtime.lastError; try { port.disconnect(); } catch {} });
+    port.onMessage.addListener(message => {
+      if (['update-check', 'update-install', 'update-status'].includes(message?.type) && typeof message.id === 'string' && message.id.length < 100) native.postMessage({ type: message.type, id: message.id });
+    });
+    port.onDisconnect.addListener(() => { try { native.disconnect(); } catch {} });
+  });
+  api.runtime.onConnect.addListener(port => {
+    if (!['breezer-newtab', 'breezer-organato-settings'].includes(port.name)) return;
+    if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
+    let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
+    const settings = port.name === 'breezer-organato-settings';
+    if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
+    const native = api.runtime.connectNative(NATIVE_HOST), pending = new Map();
+    let serial = 0, closed = false;
+    const ask = (type, values = {}) => new Promise((resolve, reject) => {
+      const id = `organato_${++serial}`;
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); }, 65000);
+      pending.set(id, { resolve, reject, timer }); native.postMessage({ type, id, ...values });
+    });
+    native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
+    native.onDisconnect.addListener(() => { void api.runtime.lastError; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); } pending.clear(); });
+    port.onMessage.addListener(message => {
+      void (async () => {
+        if (closed || typeof message?.id !== 'string' || message.id.length > 100) return;
+        let value;
+        if (settings) {
+          if (!['view', 'configure'].includes(message.type)) throw new Error('Unknown settings action.');
+          value = await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings });
+        } else {
+          if (!['view', 'refresh'].includes(message.type)) throw new Error('Unknown new-tab action.');
+          const config = await ask('organato-view');
+          const topSites = (await api.topSites.get()).slice(0, 8).filter(site => /^https?:\/\//.test(site.url));
+          const organato = { ...config, exams: [], assignments: [], todos: [] };
+          if (config.enabled && config.connected && config.dashboardEnabled) {
+            try {
+              const result = await ask('organato-list');
+              const items = result.items.map(item => ({ ...item, dueAt: item.dueAt || item.dueDateLocal, allDay: !item.dueAt && Boolean(item.dueDateLocal) })).filter(item => !['submitted', 'completed'].includes(item.workingStatus)).sort((a, b) => String(a.dueAt || a.dueDateLocal || '9999').localeCompare(String(b.dueAt || b.dueDateLocal || '9999')));
+              organato.exams = items.filter(item => ['checkpoint', 'both'].includes(item.classification)).slice(0, 6);
+              organato.assignments = items.filter(item => item.kind === 'work' && ['assignment', 'both'].includes(item.classification)).slice(0, 6);
+              organato.todos = items.filter(item => item.kind === 'todo').slice(0, 8);
+              organato.truncated = result.truncated;
+            } catch (error) { organato.error = error.message; }
+          }
+          value = { topSites, organato, dashboardEnabled: config.dashboardEnabled };
+        }
+        if (!closed) port.postMessage(settings ? { id: message.id, ok: true, value } : { type: 'view', id: message.id, ...value });
+      })().catch(error => { if (!closed) { try { port.postMessage(settings ? { id: message.id, ok: false, error: error.message } : { type: 'view', id: message.id, topSites: [], organato: { error: error.message } }); } catch {} } });
+    });
+    port.onDisconnect.addListener(() => { closed = true; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Closed')); } pending.clear(); native.disconnect(); });
+  });
   const panels = new Set();
   let activeRun = null;
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };

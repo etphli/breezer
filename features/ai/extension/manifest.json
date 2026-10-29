@@ -13,7 +13,8 @@
     "nativeMessaging",
     "storage",
     "favicon",
-    "sessions"
+    "sessions",
+    "topSites"
   ],
   "background": {
     "service_worker": "background.js",
@@ -64,5 +65,8 @@
   "incognito": "not_allowed",
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'none'"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
   }
 }

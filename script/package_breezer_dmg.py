@@ -3,6 +3,7 @@
 
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
 import platform
@@ -55,7 +56,7 @@ def sha256(path):
     return digest.hexdigest()
 
 
-def package(app_argument, output_argument, verify_app=install_breezer.verify_app):
+def package(app_argument, output_argument, verify_app=install_breezer.verify_app, update_manifest=None):
     if platform.system() != "Darwin":
         raise ValueError("DMG packaging requires macOS.")
     for executable in ("/usr/bin/ditto", "/usr/bin/hdiutil"):
@@ -64,6 +65,18 @@ def package(app_argument, output_argument, verify_app=install_breezer.verify_app
 
     app, output, checksum = resolve_paths(app_argument, output_argument)
     verify_app(app)
+    identity = None
+    if update_manifest is not None:
+        update_manifest = Path(update_manifest).expanduser().absolute()
+        if update_manifest.exists() or update_manifest.is_symlink():
+            raise ValueError("Refusing to overwrite an update manifest.")
+        identities = list(app.glob("Contents/Frameworks/*/Versions/*/Resources/breezer_ai/host/build-identity.json"))
+        identities = {p.resolve() for p in identities}
+        if len(identities) != 1:
+            raise ValueError("App has no unique bundled build identity.")
+        identity = json.loads(identities.pop().read_text())
+        if len(identity.get("commit", "")) != 40 or any(c not in "0123456789abcdef" for c in identity["commit"]):
+            raise ValueError("Invalid app commit.")
 
     # Keep staging and the image on the output volume so final links are atomic.
     with tempfile.TemporaryDirectory(prefix=".breezer-dmg-", dir=output.parent) as temporary:
@@ -98,6 +111,10 @@ def package(app_argument, output_argument, verify_app=install_breezer.verify_app
                 output.unlink(missing_ok=True)
             raise
 
+    if update_manifest is not None:
+        with update_manifest.open("x") as stream:
+            json.dump({"schema": 1, "platform": "darwin-arm64", "commit": identity["commit"], "asset": output.name, "sha256": sha256(output)}, stream, indent=2)
+            stream.write("\n")
     print(f"Created verified Breezer disk image: {output}")
     print(f"SHA-256 checksum: {checksum}")
     return output, checksum
@@ -107,8 +124,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("app", type=Path, help="Existing real Breezer.app directory")
     parser.add_argument("output", type=Path, help="New .dmg path; the parent directory must exist")
+    parser.add_argument("--update-manifest", type=Path, help="Write breezer-update.json for the GitHub release")
     args = parser.parse_args()
-    package(args.app, args.output)
+    package(args.app, args.output, update_manifest=args.update_manifest)
 
 
 if __name__ == "__main__":

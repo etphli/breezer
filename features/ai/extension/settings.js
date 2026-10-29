@@ -73,6 +73,8 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   document.title = 'Settings';
   mountPasswords({ container: $('password-settings'), api });
   if (typeof api.runtime?.connect === 'function') {
+    mountUpdates(api);
+    mountOrganato(api);
     const contextSettings = mountContextSettings({ container: $('context-settings'), api });
     window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
   }
@@ -99,7 +101,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   const width = $('sidebar-width');
   const switches = [...document.querySelectorAll('.switch[data-field]')];
   const ranges = [...document.querySelectorAll('input[type="range"][data-field]')];
-  const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, ...ranges, ...switches];
+  const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, $('custom-theme-color'), $('custom-theme-apply'), ...ranges, ...switches];
   const rowOf = (selector) => document.querySelector(selector).closest('.setting-row');
   // Rows whose setting is kept but has no visible effect with the current layout or frame.
   const mutedRows = [
@@ -123,6 +125,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     applyAppearance(appearance);
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
+    if (/^#[0-9a-fA-F]{6}$/.test(appearance.theme) && document.activeElement !== $('custom-theme-color')) $('custom-theme-color').value = appearance.theme;
     for (const range of ranges) {
       const field = range.dataset.field;
       if (!drafts.has(field) && !saving(field)) range.value = String(appearance[field]);
@@ -188,6 +191,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   for (const group of groups) wireRadioGroup(group, (value) => request(group.dataset.field, value));
   wireRadioGroup(swatches, (value) => request('theme', value));
+  $('custom-theme-apply').addEventListener('click', () => request('theme', $('custom-theme-color').value));
   for (const control of switches) {
     control.addEventListener('click', () => {
       if (control.getAttribute('aria-disabled') !== 'true') request(control.dataset.field, !wanted(control.dataset.field));
@@ -364,4 +368,62 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   renderAppearance();
   renderSpaces();
+}
+
+export function mountUpdates(api) {
+  const container = $('update-settings');
+  if (!container) return;
+  const port = api.runtime.connect({ name: 'breezer-updates' });
+  const status = $('update-status'), check = $('update-check'), install = $('update-install');
+  let sequence = 0, pending = null, timer, poll;
+  const request = type => {
+    if (pending) return;
+    pending = String(++sequence);
+    check.disabled = true; install.disabled = true;
+    if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
+    timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Try again.'; }, 65_000);
+    port.postMessage({ type, id: pending });
+  };
+  port.onMessage.addListener(message => {
+    if (message.id !== pending) return;
+    clearTimeout(timer); pending = null;
+    check.disabled = false;
+    if (!message.ok) { status.textContent = message.error; return; }
+    const value = message.value;
+    status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
+    if (value.available !== undefined) install.hidden = !value.available;
+    install.disabled = !value.available;
+    if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
+    if (value.installing) { check.disabled = true; install.hidden = true; poll = setInterval(() => request('update-status'), 2000); }
+    if (['installed', 'failed'].includes(value.phase)) { clearInterval(poll); check.disabled = false; }
+  });
+  port.onDisconnect.addListener(() => { clearTimeout(timer); clearInterval(poll); check.disabled = false; install.disabled = true; status.textContent = 'Update helper disconnected. Reopen Settings to retry.'; });
+  check.addEventListener('click', () => request('update-check'));
+  install.addEventListener('click', () => request('update-install'));
+  const dispose = () => { clearTimeout(timer); clearInterval(poll); port.disconnect(); };
+  window.addEventListener('pagehide', dispose, { once: true });
+  request('update-check');
+  return { dispose };
+}
+
+function mountOrganato(api) {
+  const port = api.runtime.connect({ name: 'breezer-organato-settings' });
+  let next = 0;
+  const request = (type, settings) => port.postMessage({ id: String(++next), type, settings });
+  const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
+  port.onMessage.addListener(message => {
+    if (!message.ok) { $('organato-status').textContent = message.error; return; }
+    for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
+    $('organato-status').textContent = message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.';
+    $('organato-key').value = '';
+  });
+  port.onDisconnect.addListener(() => { $('organato-status').textContent = 'Connection closed. Reopen Settings to retry.'; });
+  for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));
+  $('organato-connect').addEventListener('click', () => {
+    const key = $('organato-key').value.trim(); $('organato-key').value = '';
+    $('organato-status').textContent = 'Connecting to Organato…'; request('configure', { key });
+  });
+  $('organato-disconnect').addEventListener('click', () => request('configure', { disconnect: true }));
+  window.addEventListener('pagehide', () => port.disconnect(), { once: true });
+  request('view');
 }

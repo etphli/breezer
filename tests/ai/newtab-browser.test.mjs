@@ -217,7 +217,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.getAttribute('#organato', 'aria-busy'), 'true');
       assert.equal(await page.$$eval('.site.placeholder', (items) => items.length), 8);
       await page.screenshot({ path: `${evidence}/newtab-loading.png` });
-      await page.waitForSelector('html[data-loaded="true"]', { timeout: 12000 });
+      await page.waitForSelector('html[data-loaded="true"]', { timeout: 70000 });
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'unavailable');
       assert.match(await page.textContent('#organato-status'), /too long.*Refresh/);
     });

@@ -326,3 +326,6 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
   .site-icon, .sheet { border: 1px solid CanvasText; }
   .action-link { border: 1px solid ButtonText; }
 }
+
+:root[data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 18%, white); --air-deep: color-mix(in srgb, var(--custom-seed) 30%, white); --card: #fff; --ink: #17202a; --muted: #46515e; --accent: color-mix(in srgb, var(--custom-seed) 45%, #17202a); }
+:root[data-scheme="dark"][data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: #2c3038; --ink: #f1f3f6; --muted: #bcc3ce; --accent: color-mix(in srgb, var(--custom-seed) 40%, white); }

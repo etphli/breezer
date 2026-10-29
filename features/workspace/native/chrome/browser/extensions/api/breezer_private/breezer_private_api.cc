@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "base/values.h"
+#include "base/strings/string_number_conversions.h"
 #include "chrome/browser/extensions/window_controller.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/themes/theme_service.h"
@@ -84,6 +85,21 @@ const breezer_workspace::Theme* FindTheme(std::string_view name) {
   return nullptr;
 }
 
+std::optional<SkColor> ThemeColor(std::string_view name) {
+  if (const auto* theme = FindTheme(name)) {
+    return theme->seed;
+  }
+  uint32_t rgb = 0;
+  if (name.size() == 7 && name[0] == '#' &&
+      std::ranges::all_of(name.substr(1), [](char c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') ||
+               (c >= 'A' && c <= 'F');
+      }) && base::HexStringToUInt(name.substr(1), &rgb)) {
+    return 0xFF000000u | rgb;
+  }
+  return std::nullopt;
+}
+
 bool IsKnownAppearanceKey(std::string_view key) {
   for (const auto& setting : kBooleanAppearancePrefs) {
     if (key == setting.key) {
@@ -115,7 +131,7 @@ Appearance ReadAppearance(Profile* profile) {
   // Report the theme the frame actually uses when it is one of Breezer's
   // seeds; otherwise keep the last Breezer choice so the contract stays fixed.
   result.theme = prefs->GetString(breezer_workspace::prefs::kTheme);
-  if (!FindTheme(result.theme)) {
+  if (!ThemeColor(result.theme)) {
     result.theme = std::string(breezer_workspace::kDefaultTheme);
   }
   if (theme_service) {
@@ -225,7 +241,7 @@ bool ParseAppearancePatch(const base::DictValue& patch,
   }
   if (const base::Value* value = patch.Find("theme")) {
     const std::string* theme = value->GetIfString();
-    if (!theme || !FindTheme(*theme)) {
+    if (!theme || !ThemeColor(*theme)) {
       *error = "Invalid value for theme.";
       return false;
     }
@@ -375,7 +391,7 @@ void ApplyAppearance(Profile* profile,
     // An explicit Breezer theme choice replaces the current browser theme.
     ThemeServiceFactory::GetForProfile(profile)
         ->SetUserColorAndBrowserColorVariant(
-            FindTheme(appearance.theme)->seed,
+            *ThemeColor(appearance.theme),
             ui::mojom::BrowserColorVariant::kTonalSpot);
   }
   if (patch.contains("colorMode")) {

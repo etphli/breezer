@@ -26,7 +26,7 @@ export const windowStateKey = (windowId) => `workspace.window.${windowId}`;
 const APPEARANCE_FIELDS = {
   layout: (value) => value === 'sidebar' || value === 'top',
   sidebarMode: (value) => ['expanded', 'compact', 'autoHide'].includes(value),
-  theme: (value) => TONES.includes(value),
+  theme: (value) => TONES.includes(value) || (typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)),
   colorMode: (value) => value === 'system' || value === 'light' || value === 'dark',
   showBookmarks: (value) => typeof value === 'boolean',
   sidebarFontSize: (value) => Number.isInteger(value) && value >= SIDEBAR_FONT_SIZE.min && value <= SIDEBAR_FONT_SIZE.max,
