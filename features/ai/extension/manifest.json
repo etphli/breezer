@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Breezer AI",
   "description": "Ask about this page and control your browser with your local AI assistant.",
-  "version": "0.2.0",
+  "version": "1.1.0",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsCqa/J/JV+57GOz5koMs4B71fWO/Z5za5wGnJrwRQ1/20Kp1BCNPwW7pCPjapak98e2pT21RIZ8nHiwz4+LBGkxAUCkdyztaIG3nwPck8rxDhyAf4u9cl1DZ0CIV7xBrU1rORsT8GcNBh49p1X0NK9rUbA+YbEo3RnYsgK8EcDjYII1wJA4fNLNv6OI8mML2pijgl7zlSw7jdE6vwDdjpKvT2INHA0AamjmYXEm7PP9bRDASK98rW+FnwsVo4WfpxvK0FJE2YZDj/z2xTi8RQz1rxdtz4lqOLgkETxslY8P0Fbg5s48wzq+ivoQQ6QIGXKvHhOyHXKBMfB94ID8dWQIDAQAB",
   "permissions": [
     "activeTab",

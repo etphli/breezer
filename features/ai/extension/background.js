@@ -1,9 +1,11 @@
+import { installReleaseNotes } from './release-notes.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
 import { installContextBackground } from './context-background.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
 
 export function installBackground(api) {
+  installReleaseNotes(api);
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
