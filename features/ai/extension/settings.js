@@ -73,7 +73,6 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   mountPasswords({ container: $('password-settings'), api });
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
-  const busy = new Set();
 
   // ------------------------------------------------------------ appearance
 
@@ -96,19 +95,38 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   const switches = [...document.querySelectorAll('.switch[data-field]')];
   const ranges = [...document.querySelectorAll('input[type="range"][data-field]')];
   const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, ...ranges, ...switches];
+  const rowOf = (selector) => document.querySelector(selector).closest('.setting-row');
+  // Rows whose setting is kept but has no visible effect with the current layout or frame.
+  const mutedRows = [
+    [rowOf('[data-field="sidebarMode"]'), () => appearance.layout === 'top'],
+    [width.closest('.setting-row'), () => appearance.layout === 'top'],
+    [rowOf('[data-field="sidebarFontSize"]'), () => appearance.layout === 'top'],
+    [rowOf('[data-field="alwaysShowSidebar"]'), () => !appearance.frameless],
+    [rowOf('[data-field="alwaysShowTopBar"]'), () => !appearance.frameless],
+  ];
+
+  // Writes go to the browser one at a time. The newest request per field waits
+  // its turn, so controls stay enabled and keep focus while a write is pending.
+  const queued = new Map();
+  let writing = null;
+  const drafts = new Set();
+  const settled = (field) => (writing?.field === field ? writing.value : appearance[field]);
+  const wanted = (field) => (queued.has(field) ? queued.get(field) : settled(field));
+  const saving = (field) => queued.has(field) || writing?.field === field;
 
   function renderAppearance() {
     applyAppearance(appearance);
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
     for (const range of ranges) {
-      if (!busy.has(range.dataset.field)) range.value = String(appearance[range.dataset.field]);
+      const field = range.dataset.field;
+      if (!drafts.has(field) && !saving(field)) range.value = String(appearance[field]);
       $(`${range.id}-value`).textContent = `${range.value} px`;
     }
     for (const control of switches) control.setAttribute('aria-checked', String(appearance[control.dataset.field]));
-    width.closest('.setting-row').classList.toggle('muted-row', appearance.layout === 'top');
+    for (const [row, muted] of mutedRows) row.classList.toggle('muted-row', muted());
     for (const control of appearanceControls) {
-      const disabled = !available || busy.size > 0;
+      const disabled = !available;
       if (control.tagName === 'INPUT') control.disabled = disabled;
       else control.setAttribute('aria-disabled', String(disabled));
     }
@@ -123,13 +141,30 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     }
   }
 
+  function request(field, value) {
+    if (!available) return;
+    queued.delete(field);
+    if (value !== settled(field)) queued.set(field, value);
+    void drain();
+  }
+
+  async function drain() {
+    if (writing) return;
+    while (queued.size) {
+      const [field, value] = queued.entries().next().value;
+      queued.delete(field);
+      if (value === appearance[field]) continue;
+      writing = { field, value };
+      await write(field, value);
+      writing = null;
+    }
+    renderAppearance();
+  }
+
   // Applies one field through the bridge. The UI only shows the value the browser reports back.
-  async function apply(field, value) {
-    if (!available || busy.size) return;
+  async function write(field, value) {
     const errorId = FIELD_ERRORS[field];
     showError(errorId, '');
-    busy.add(field);
-    renderAppearance();
     try {
       const patch = validateAppearancePatch({ [field]: value });
       let result = await callBridge('setAppearance', patch);
@@ -142,30 +177,31 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     } catch (failure) {
       showError(errorId, `Couldn’t change the ${FIELD_LABELS[field]}. ${errorText(failure)}`);
     } finally {
-      busy.delete(field);
       renderAppearance();
     }
   }
 
-  for (const group of groups) wireRadioGroup(group, (value) => {
-    if (value !== appearance[group.dataset.field]) void apply(group.dataset.field, value);
-  });
-  wireRadioGroup(swatches, (value) => { if (value !== appearance.theme) void apply('theme', value); });
+  for (const group of groups) wireRadioGroup(group, (value) => request(group.dataset.field, value));
+  wireRadioGroup(swatches, (value) => request('theme', value));
   for (const control of switches) {
     control.addEventListener('click', () => {
-      if (control.getAttribute('aria-disabled') !== 'true') void apply(control.dataset.field, !appearance[control.dataset.field]);
+      if (control.getAttribute('aria-disabled') !== 'true') request(control.dataset.field, !wanted(control.dataset.field));
     });
   }
   for (const range of ranges) {
-    range.addEventListener('input', () => { $(`${range.id}-value`).textContent = `${range.value} px`; });
+    range.addEventListener('input', () => {
+      drafts.add(range.dataset.field);
+      $(`${range.id}-value`).textContent = `${range.value} px`;
+    });
     range.addEventListener('change', () => {
-      const value = Number(range.value);
-      if (value !== appearance[range.dataset.field]) void apply(range.dataset.field, value);
+      drafts.delete(range.dataset.field);
+      request(range.dataset.field, Number(range.value));
+      renderAppearance();
     });
   }
 
   const refreshAppearance = async () => {
-    if (busy.size) return;
+    if (writing || queued.size) return;
     ({ appearance, available, error } = await loadAppearance());
     renderAppearance();
   };
@@ -174,18 +210,25 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   // ------------------------------------------------------------ spaces
 
+  // Set when the store changed while a name was being edited; rendered once editing ends.
+  let spacesStale = false;
+
   async function mutateSpaces(fn) {
     showError('spaces-error', '');
     try {
       await workspace.update(fn);
-      store = (await workspace.read()).store;
-      renderSpaces();
     } catch (failure) {
       showError('spaces-error', errorText(failure));
     }
+    // Re-read either way so a rejected edit shows the saved value again.
+    try {
+      store = (await workspace.read()).store;
+      renderSpaces();
+    } catch {}
   }
 
   function renderSpaces() {
+    spacesStale = false;
     const list = $('space-list');
     const focused = document.activeElement?.closest?.('[data-space]');
     const restore = focused ? { id: focused.dataset.space, control: document.activeElement.dataset.control } : null;
@@ -259,6 +302,12 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     for (const group of document.querySelectorAll('.segmented[data-pref]')) setRadioValue(group, store.prefs[group.dataset.pref]);
   }
 
+  $('space-list').addEventListener('focusout', () => {
+    setTimeout(() => {
+      if (spacesStale && !document.activeElement?.matches?.('.space-name-input')) renderSpaces();
+    });
+  });
+
   $('settings-add-space').addEventListener('click', () => {
     const used = new Set(store.spaces.map((space) => space.tone));
     const tone = TONES.find((value) => !used.has(value)) || appearance.theme;
@@ -302,7 +351,8 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     if (area === 'local' && changes[STORE_KEY]) {
       store = normalizeStore(changes[STORE_KEY].newValue);
       const editing = document.activeElement?.matches?.('.space-name-input');
-      if (!editing) renderSpaces();
+      if (editing) spacesStale = true;
+      else renderSpaces();
     }
     if (area === 'session' && changes[APPEARANCE_REV_KEY]) void refreshAppearance();
   });
