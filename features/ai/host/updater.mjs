@@ -1,4 +1,4 @@
-import { readFile, mkdtemp, copyFile, chmod, writeFile } from 'node:fs/promises';
+import { readFile, mkdtemp, copyFile, writeFile, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -36,6 +36,41 @@ export async function checkRelease(current, fetchJSON = githubJSON) {
   return { available: true, candidate };
 }
 
+// Keep only data outside the app. Re-executing its existing runtime avoids
+// creating a fresh quarantined Mach-O executable during an update.
+export async function startUpdateWorker(app, candidate, {
+  runtime = process.execPath, host = HOST, spawnProcess = spawn, startupTimeoutMs = 10000,
+} = {}) {
+  const work = await mkdtemp(join(dirname(app), '.breezer-update-'));
+  let child;
+  try {
+    await copyFile(join(host, 'update-worker.mjs'), join(work, 'worker.mjs'));
+    await writeFile(join(work, 'request.json'), JSON.stringify({ app, candidate }), { mode: 0o600 });
+    child = spawnProcess(runtime, [join(work, 'worker.mjs'), work], {
+      detached: true, stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+    });
+    await new Promise((resolve, reject) => {
+      const finish = (error) => {
+        clearTimeout(timer);
+        child.off('error', onError); child.off('exit', onExit); child.off('message', onMessage);
+        error ? reject(error) : resolve();
+      };
+      const onError = error => finish(error);
+      const onExit = () => finish(new Error('The update helper stopped before starting. macOS may have blocked it.'));
+      const onMessage = value => { if (value?.type === 'update-worker-ready') finish(); };
+      const timer = setTimeout(() => finish(new Error('The update helper did not start. Check for a macOS security prompt.')), startupTimeoutMs);
+      child.once('error', onError); child.once('exit', onExit); child.on('message', onMessage);
+    });
+    if (child.connected) child.disconnect();
+    child.unref();
+    return { work };
+  } catch (error) {
+    if (child?.pid) child.kill();
+    await rm(work, { recursive: true, force: true });
+    throw error;
+  }
+}
+
 export class UpdateController {
   constructor(send) { this.send = send; this.busy = false; this.candidate = null; }
   async receive(message) {
@@ -64,13 +99,7 @@ export class UpdateController {
         if (appEnd < 0) throw new Error('Run the installed Breezer app to update.');
         const app = HOST.slice(0, appEnd + '/Breezer.app'.length);
         if (![join(homedir(), 'Applications/Breezer.app'), '/Applications/Breezer.app'].includes(app)) throw new Error('Move Breezer to Applications before updating.');
-        // Keep the worker and its runtime outside the app that it replaces.
-        const work = await mkdtemp(join(dirname(app), '.breezer-update-'));
-        await copyFile(process.execPath, join(work, 'node')); await chmod(join(work, 'node'), 0o700);
-        await copyFile(join(HOST, 'update-worker.mjs'), join(work, 'worker.mjs'));
-        await writeFile(join(work, 'request.json'), JSON.stringify({ app, candidate: this.candidate }), { mode: 0o600 });
-        const child = spawn(join(work, 'node'), [join(work, 'worker.mjs'), work], { detached: true, stdio: 'ignore' });
-        await new Promise((resolve, reject) => { child.once('spawn', resolve); child.once('error', reject); }); child.unref();
+        await startUpdateWorker(app, this.candidate);
         this.candidate = null;
         this.send({ type: 'update-result', id, ok: true, value: { installing: true, notice: 'Downloading update. Breezer will close and reopen when it is ready. Your tabs and profile are preserved.' } });
       }

@@ -69,6 +69,8 @@ export async function installUpdate(work) {
   let mounted = false;
   try {
     await status('downloading', 'Downloading the verified GitHub release…');
+    // A process spawning is not proof its script survived Gatekeeper/startup.
+    if (process.connected) process.send({ type: 'update-worker-ready' });
     const disk = await statfs(parent);
     if (disk.bavail * disk.bsize < candidate.size * 4 + 2 * 1024 ** 3) throw new Error('Not enough free disk space for this update.');
     const url = new URL(candidate.url);
@@ -94,7 +96,7 @@ export async function installUpdate(work) {
     if ((await lstat(backups)).isSymbolicLink()) throw new Error('Invalid backup directory.');
     const backup = join(backups, `Breezer-update-${Date.now()}.app`);
     await replaceApp(staged, app, backup, path => verifyBundle(path, candidate.commit), path => run('/usr/bin/open', [path, '--args', '--restore-last-session']));
-    await status('installed', `Updated to ${candidate.version}. Previous version kept in .Breezer-backups.`);
+    await status('installed', `Updated to ${candidate.version}. A rollback copy is kept in .Breezer-backups until the updated app is verified.`);
   } catch (error) {
     await status('failed', `Update failed: ${error.message}`);
   } finally {

@@ -63,3 +63,58 @@ test('update settings require an explicit install click and show helper errors',
     assert.match(dom.document.getElementById('update-status').textContent, /Checksum mismatch/);
   } finally { mounted.dispose(); }
 });
+
+test('handoff reuses the existing runtime and waits for the worker to acknowledge startup', async () => {
+  const { startUpdateWorker } = await import('../../features/ai/host/updater.mjs');
+  const { readdir, stat } = await import('node:fs/promises');
+  const { spawn } = await import('node:child_process');
+  const root = await mkdtemp(join(tmpdir(), 'breezer-handoff-'));
+  try {
+    const host = join(root, 'host'); await mkdir(host);
+    await writeFile(join(host, 'update-worker.mjs'), `import {writeFile} from 'node:fs/promises';\nawait writeFile(process.argv[2]+'/runtime.json',JSON.stringify({runtime:process.execPath}));\nprocess.send({type:'update-worker-ready'});\nprocess.on('disconnect',()=>process.exit(0));`);
+    let command;
+    const { work } = await startUpdateWorker(join(root, 'Breezer.app'), manifest, {
+      host, spawnProcess: (runtime, args, options) => { command = runtime; return spawn(runtime, args, options); },
+    });
+    assert.equal(command, process.execPath);
+    assert.equal(JSON.parse(await readFile(join(work, 'runtime.json'), 'utf8')).runtime, process.execPath);
+    assert.equal((await readdir(work)).includes('node'), false, 'no executable copy can acquire a new quarantine flag');
+    assert.equal((await stat(join(work, 'request.json'))).mode & 0o777, 0o600);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+for (const behavior of ['exit', 'silent']) test(`worker ${behavior} cannot be reported as a successful handoff`, async () => {
+  const { startUpdateWorker } = await import('../../features/ai/host/updater.mjs');
+  const { readdir } = await import('node:fs/promises');
+  const root = await mkdtemp(join(tmpdir(), 'breezer-handoff-failure-'));
+  try {
+    const host = join(root, 'host'); await mkdir(host);
+    await writeFile(join(host, 'update-worker.mjs'), behavior === 'exit' ? 'process.exit(23);' : 'setInterval(()=>{},1000);');
+    await assert.rejects(startUpdateWorker(join(root, 'Breezer.app'), manifest, { host, startupTimeoutMs: behavior === 'exit' ? 3000 : 150 }), /helper (?:stopped|did not start)/);
+    assert.deepEqual(await readdir(root), ['host'], 'failed handoff staging is removed');
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test('the running worker survives replacement and deletion of its original runtime path', async () => {
+  const { startUpdateWorker } = await import('../../features/ai/host/updater.mjs');
+  const { copyFile, chmod, rename } = await import('node:fs/promises');
+  // macOS can reject executable copies under its per-user temporary folder.
+  const { fileURLToPath } = await import('node:url');
+  const fixtureRoot = fileURLToPath(new URL('../../build/', import.meta.url)); await mkdir(fixtureRoot, { recursive: true });
+  const root = await mkdtemp(join(fixtureRoot, 'breezer-runtime-lifetime-'));
+  try {
+    const app = join(root, 'runtime-directory'), host = join(root, 'host'), marker = join(root, 'completed');
+    await mkdir(app); await mkdir(host);
+    const runtime = join(app, 'node'); await copyFile(process.execPath, runtime); await chmod(runtime, 0o700);
+    await writeFile(join(host, 'update-worker.mjs'), `import {writeFile} from 'node:fs/promises';\nprocess.on('disconnect',async()=>{await new Promise(r=>setTimeout(r,250));await writeFile(${JSON.stringify(marker)},'alive');});\nprocess.send({type:'update-worker-ready'});`);
+    await startUpdateWorker(app, manifest, { host, runtime });
+    await rename(app, app + '.old'); await mkdir(app); await rm(app + '.old', { recursive: true });
+    const until = Date.now() + 3000;
+    let result;
+    while (Date.now() < until) {
+      try { result = await readFile(marker, 'utf8'); break; } catch {}
+      await new Promise(resolve => setTimeout(resolve, 20));
+    }
+    assert.equal(result, 'alive');
+  } finally { await rm(root, { recursive: true, force: true }); }
+});

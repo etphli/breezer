@@ -13,3 +13,7 @@ The user has opted out of agent-driven local updates. Keep the installed Breezer
 ## Cleanup
 
 After verifying a new release, remove redundant old installers and application backups whose releases remain available on GitHub. Retain a backup only for a concrete recovery purpose. Prepared source, compiled caches and failure evidence have ongoing build or diagnostic purposes; preserve them along with user data and Git history.
+
+## Updater
+
+When changing update download, worker handoff, restart or macOS trust behavior, read [docs/updating.md](docs/updating.md). Preserve checksum, identity and signature checks; exercise startup failure and rollback before publishing.

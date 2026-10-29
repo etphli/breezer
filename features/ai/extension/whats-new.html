@@ -327,6 +327,15 @@
       </ul>
     </section>
 
+    <section class="patch-notes" aria-labelledby="patch-114-title">
+      <p class="release">Update 1.1.4</p>
+      <h2 id="patch-114-title">A steadier update handoff</h2>
+      <ul class="notes">
+        <li>The updater reuses its existing runtime instead of creating a new executable copy that macOS could quarantine. It waits for the update worker to confirm startup and reports a failure if the worker cannot start.</li>
+        <li>This fixes the copied-helper problem. Breezer is still locally signed, so macOS may require approval for downloaded builds. An older updater may need a one-time manual update to receive this fix.</li>
+      </ul>
+    </section>
+
     <aside class="pending" aria-labelledby="pending-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
       <div>
