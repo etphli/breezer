@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3ebda">
+  <title>Download Breezer for Mac</title>
+  <meta name="description" content="Download Breezer 1.1.5 for Macs with Apple Silicon.">
+  <meta property="og:title" content="Download Breezer for Mac">
+  <meta property="og:image" content="https://breezer.vercel.app/shots/newtab-light.jpg">
+  <meta property="og:url" content="https://breezer.vercel.app/download">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/icon128.png">
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="stylesheet" href="/site.css">
+  <script>document.documentElement.classList.add("js")</script>
+  <script src="/site.js" defer></script>
+</head>
+<body class="download-page">
+  <svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.25  0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0.55 0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+  <canvas class="wind" aria-hidden="true"></canvas>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <a class="brand" href="/"><img src="/icon128.png" alt="" width="28" height="28"><span>Breezer</span></a>
+    <nav aria-label="Pages">
+      <a href="/#day">Features</a>
+      <a href="https://github.com/etphli/breezer/releases">Releases</a>
+      <a href="https://github.com/etphli/breezer">Source</a>
+    </nav>
+  </header>
+
+  <main id="main" class="sheet download-sheet">
+    <section class="get" aria-labelledby="get-title">
+      <div class="get-icon tilt" aria-hidden="true">
+        <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
+        <img src="/icon.png" alt="" width="512" height="512">
+      </div>
+      <div class="get-copy">
+        <p class="release reveal"><span>Version 1.1.5</span></p>
+        <h1 id="get-title" class="title split"><span>Breezer</span> <span>for Mac</span></h1>
+        <svg class="breeze" viewBox="0 0 640 120" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="breeze-ink" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#8fd5c4"/>
+              <stop offset="1" stop-color="#1d5458"/>
+            </linearGradient>
+          </defs>
+          <path class="breeze-line" pathLength="1" d="M6 78 C 120 30, 210 112, 330 66 S 520 14, 560 54 C 590 84, 552 112, 526 92 C 506 76, 528 46, 566 50 C 596 54, 618 70, 634 64"/>
+        </svg>
+        <div class="actions reveal">
+          <a class="button primary large magnetic shine" href="https://github.com/etphli/breezer/releases/download/v1.1.5/Breezer-v1.1.5-arm64.dmg" data-download>Download Breezer</a>
+          <a class="button secondary" href="https://github.com/etphli/breezer/releases/tag/v1.1.5">Release notes</a>
+        </div>
+        <p class="download-started" role="status" hidden>Your download has started. The steps below take about a minute.</p>
+        <dl class="specs reveal">
+          <div><dt>Mac</dt><dd>Apple Silicon (M1 or later)</dd></div>
+          <div><dt>Download</dt><dd>230 MB disk image</dd></div>
+          <div><dt>Engine</dt><dd>Chromium 156</dd></div>
+          <div><dt>Price</dt><dd>Free and open source</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="install" aria-labelledby="install-title">
+      <h2 id="install-title" class="section-title split">Install in three steps</h2>
+      <ol class="install-steps">
+        <li class="install-step reveal">
+          <figure class="plate plate-drag" aria-hidden="true">
+            <div class="dmg">
+              <img class="drag-icon" src="/icon128.png" alt="" width="64" height="64">
+              <span class="drag-arrow"></span>
+              <span class="folder"><span class="folder-tab"></span></span>
+            </div>
+          </figure>
+          <h3>Drag Breezer into Applications</h3>
+          <p>Open the downloaded disk image and drag the Breezer icon onto the Applications folder.</p>
+        </li>
+        <li class="install-step reveal">
+          <figure class="plate plate-trust" aria-hidden="true">
+            <div class="mini-settings">
+              <span class="mini-row"><i></i><i class="short"></i></span>
+              <span class="mini-row"><i class="short"></i></span>
+              <span class="mini-open">Open Anyway</span>
+            </div>
+          </figure>
+          <h3>Allow it the first time</h3>
+          <p>Breezer isn't notarized by Apple yet, so macOS stops the first launch. Open System Settings, choose Privacy &amp; Security, then select Open Anyway beside the Breezer message.</p>
+        </li>
+        <li class="install-step reveal">
+          <figure class="plate plate-shot" aria-hidden="true">
+            <img src="/shots/settings.jpg" alt="" width="1800" height="1900" loading="lazy">
+          </figure>
+          <h3>Bring your Chrome data</h3>
+          <p>Breezer opens with a short guide in Settings for importing bookmarks, history and passwords.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="verify" aria-labelledby="verify-title">
+      <div>
+        <h2 id="verify-title">Check the download</h2>
+        <p>Compare this SHA-256 checksum with the output of <code>shasum -a 256</code> on the disk image.</p>
+      </div>
+      <div class="checksum">
+        <code id="sha">55df62b4a48dd27d8356176ecdef6404f548a6b1a2dd6ada0671f08428e36652</code>
+        <button class="button secondary small" type="button" data-copy="sha">Copy</button>
+      </div>
+    </section>
+
+    <section class="notes" aria-labelledby="notes-title">
+      <h2 id="notes-title">Good to know</h2>
+      <ul class="ticks">
+        <li>Intel Macs, Windows and Linux aren't supported yet.</li>
+        <li>Breezer keeps its own profile. Chrome stays exactly as it is.</li>
+        <li>After this, updates install from Breezer's Settings.</li>
+        <li>The assistant uses your own signed-in Codex or Claude command-line tool.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p><img src="/icon128.png" alt="" width="20" height="20"> Breezer is open source under GPL-3.0, built on <a href="https://github.com/imputnet/helium">Helium</a> and Chromium.</p>
+    <p><a href="/">Home</a> <a href="https://github.com/etphli/breezer">Source on GitHub</a> <a href="https://github.com/etphli/breezer/releases">All releases</a></p>
+  </footer>
+</body>
+</html>
