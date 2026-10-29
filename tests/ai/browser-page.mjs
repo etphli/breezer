@@ -100,6 +100,14 @@ try {
     },
   };
   tools = new BrowserTools(api);
+  const execute = tools.execute.bind(tools);
+  tools.execute = async (session, name, args) => {
+    try { return await execute(session, name, args); }
+    catch (error) {
+      error.message = `${name} (loading=${loading}, url=${liveURL}): ${error.message}`;
+      throw error;
+    }
+  };
   for (const method of ['Runtime.executionContextCreated', 'Runtime.executionContextDestroyed', 'Runtime.executionContextsCleared', 'Runtime.bindingCalled', 'Page.frameStartedLoading', 'Page.loadEventFired']) {
     cdp.on(method, params => {
       if (method === 'Page.frameStartedLoading' && params.frameId === tools.session?.mainFrameId) loading = true;
