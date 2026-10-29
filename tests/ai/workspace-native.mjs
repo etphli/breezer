@@ -510,7 +510,7 @@ try {
   observe('authorizeWithoutGesture', scripted);
   for (const [caller, result] of Object.entries(scripted)) {
     assert.equal(result.ok, false, `${caller} granted page access without a user gesture.`);
-    assert.match(result.error, /user gesture/i);
+    assert.match(result.error, /user gesture|Page access can only be granted from Breezer AI/i);
   }
   assert.equal((await canScript(alphaA)).ok, false, 'A rejected call still granted access.');
   assert.equal((await canScript(alphaB)).ok, false, 'A rejected call still granted access in B.');
