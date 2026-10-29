@@ -22,6 +22,7 @@ source_set("breezer_private") {
     "//chrome/browser/ui/helium:helium_layout_state_controller",
     "//chrome/browser/ui/tabs:tab_strip",
     "//chrome/browser/ui/tabs:tabs",
+    "//chrome/browser/ui/views/breezer_peek",
     "//chrome/common:constants",
     "//components/bookmarks/common",
     "//components/prefs",

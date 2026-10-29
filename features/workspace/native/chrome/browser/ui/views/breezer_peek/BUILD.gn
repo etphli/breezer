@@ -1,0 +1,35 @@
+# Copyright 2026 The Breezer Authors
+# This file is governed by the same license as the Breezer project.
+
+assert(!is_android)
+
+# Kept free of //chrome/browser and //chrome/browser/ui dependencies so the
+# browser delegate, the navigation throttles and breezerPrivate can all use it.
+source_set("breezer_peek") {
+  sources = [
+    "breezer_peek.cc",
+    "breezer_peek.h",
+  ]
+
+  public_deps = [ "//ui/base" ]
+
+  deps = [
+    "//base",
+    "//components/input",
+    "//components/tabs:public",
+    "//components/url_formatter",
+    "//components/vector_icons",
+    "//content/public/browser",
+    "//net",
+    "//skia",
+    "//third_party/blink/public/common",
+    "//ui/accessibility",
+    "//ui/color",
+    "//ui/events",
+    "//ui/gfx",
+    "//ui/gfx/geometry",
+    "//ui/views",
+    "//ui/views/controls/webview",
+    "//url",
+  ]
+}

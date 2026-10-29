@@ -74,5 +74,11 @@ namespace breezerPrivate {
         boolean collapsed,
         optional VoidCallback callback);
     static void authorizeCurrentPage(BooleanCallback callback);
+    // Marks the live favourite tabs of the calling sidebar's own window, where
+    // links open in a peek. Every other tab in that window is cleared. Unknown
+    // or closed tab IDs are ignored.
+    static void setPeekSources(
+        long[] tabIds,
+        optional VoidCallback callback);
   };
 };

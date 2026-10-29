@@ -149,9 +149,65 @@ def check_overlay(tree, originals):
     require('ShowSingletonTabIgnorePathOverwriteNTP(browser, GetSettingsUrl(sub_page));' in pages,
             "Native settings category navigation changed")
 
+    check_peek(tree, added, idl, api)
+
     fingerprint = workspace.fingerprint()
     require(re.fullmatch(r"[0-9a-f]{64}", fingerprint) is not None,
             "Workspace fingerprint is not lowercase SHA-256")
+
+
+def check_peek(tree, added, idl, api):
+    """Source contract for favourite-tab Peek. Runtime needs a compiled build."""
+    delegate = (tree / workspace.PEEK_DELEGATE).read_text()
+    add_new = delegate.split("BrowserWebContentsDelegate::AddNewContents(", 1)[1]
+    require(add_new.index("breezer_peek::MaybeShowNewContents(") <
+            add_new.index("FullscreenController* fullscreen_controller"),
+            "New-tab requests must reach Peek before the browser handles them")
+    open_url = delegate.split("BrowserWebContentsDelegate::OpenURLFromTab(", 1)[1]
+    require(open_url.index("breezer_peek::MaybeShowURL(source, params)") <
+            open_url.index("Navigate(popup_delegate->nav_params())"),
+            "Foreground-tab links must reach Peek before Navigate")
+    throttles = (tree / workspace.PEEK_THROTTLES).read_text()
+    require(throttles.index("MetricsNavigationThrottle::CreateAndAdd(registry);") <
+            throttles.index("breezer_peek::MaybeCreateAndAddNavigationThrottle(registry);"),
+            "The Peek throttle must follow the metrics throttle")
+
+    peek = added["chrome/browser/ui/views/breezer_peek/breezer_peek.cc"].read_text()
+    throttle = peek.split("ThrottleCheckResult WillStartRequest()", 1)[1].split("return PROCEED;", 1)[0]
+    for condition in ("ActiveSource(contents)", "IsInPrimaryMainFrame()", "IsRendererInitiated()",
+                      "WasInitiatedByLinkClick()", "HasUserGesture()", "IsPost()", "IsHistory()",
+                      "GetReloadType() != content::ReloadType::NONE", "PAGE_TRANSITION_LINK",
+                      "ShouldPeekSameTabNavigation("):
+        require(condition in throttle, f"Same-tab Peek is missing the {condition} condition")
+    require("SameDomainOrHost(" in peek and "SchemeIsHTTPOrHTTPS()" in peek,
+            "Same-tab Peek must be limited to cross-site http(s) links")
+    show_new = peek.split("content::WebContents* MaybeShowNewContents(", 1)[1]
+    require("disposition != WindowOpenDisposition::NEW_FOREGROUND_TAB" in show_new and
+            "!user_gesture" in show_new,
+            "Only user-initiated foreground tabs may open a peek")
+    require("!peek_source->enabled() || peek_source->forwarding()" in peek and
+            "IsOffTheRecord()" in peek and "tab->IsActivated()" in peek,
+            "Peek must be limited to marked, active, regular-profile tabs")
+    require("IsEscape(event)" in peek.split("PreHandleKeyboardEvent(", 1)[1].split("}", 1)[0],
+            "Escape must close a peek before the focused page sees it")
+    expand = peek.split("  void Expand() {", 1)[1].split("\n  }\n", 1)[0]
+    require("AddNewContents(&source, std::move(contents)" in expand and
+            "LoadURL" not in expand and "Reload" not in expand,
+            "Expand must move the live WebContents without loading it again")
+    detach = peek.split("  void Detach() {", 1)[1].split("\n  }\n", 1)[0]
+    require("InvalidateWeakPtrs()" in detach and "RemoveAllObservations()" in detach and
+            "tab_subscriptions_.clear()" in detach and "SetDelegate(nullptr)" in detach,
+            "A dismissed peek must stop receiving callbacks before it is destroyed")
+    require("iframe" not in peek.lower() and "disable-web-security" not in peek,
+            "Peek must host a real WebContents, not a frame workaround")
+
+    require("static void setPeekSources(" in idl and "long[] tabIds" in idl,
+            "Private API IDL does not declare setPeekSources")
+    setter = api.split("BreezerPrivateSetPeekSourcesFunction::RunFunction()", 1)[1]
+    require("source_url().GetPath() != kWorkspacePath" in setter and
+            "GetCallerBrowser()" in setter and "kMaxPeekSources" in setter and
+            "breezer_peek::SetSource(" in setter,
+            "setPeekSources must be bounded to the calling sidebar's own window")
 
 
 def main():
@@ -182,7 +238,8 @@ def main():
         "PASS: native workspace overlay applies to the pinned Chromium/Helium "
         f"source fixture ({len(originals)} upstream targets), checks idempotently, "
         "converges after interruption, rejects anchor drift without partial writes, "
-        "and exposes the bounded appearance, collapse, and activeTab APIs."
+        "and exposes the bounded appearance, collapse, activeTab, and Peek source APIs "
+        "with the favourite-tab Peek hooks in place."
     )
     print("Native compilation and real window/extension-host behavior still require the full macOS browser build.")
 

@@ -124,6 +124,7 @@ const state = {
   items: new Map(),
   expect: [],
   focus: { pinned: null, today: null, favorites: null },
+  peekKey: null,
   renaming: null,
   press: null,
   drag: null,
@@ -448,6 +449,21 @@ function updateFavicon(holder, tab, url, title) {
   }
 }
 
+export const favoriteTitle = (entry) => entry.customTitle || entry.title || hostLabel(entry.url);
+
+// Tells the browser which tabs in this window are live favourites; links from
+// them open in a peek. Sent only when the set changes.
+function syncPeekSources(model) {
+  if (typeof api.breezerPrivate?.setPeekSources !== 'function') return;
+  const ids = model.favorites.map((item) => item.tab?.id).filter(Number.isInteger).sort((a, b) => a - b);
+  const key = ids.join(',');
+  if (key === state.peekKey) return;
+  state.peekKey = key;
+  void callBridge('setPeekSources', ids).catch(() => {
+    if (state.peekKey === key) state.peekKey = null;
+  });
+}
+
 // Keyed reconcile: reuses nodes so focus, hover and transitions survive re-renders.
 function reconcile(container, items) {
   const existing = new Map();
@@ -569,8 +585,9 @@ function draw() {
         return tile;
       },
       update: (tile) => {
-        const title = displayTitle(item.entry, item.tab);
-        updateFavicon(tile.firstChild, item.tab, item.entry.url, title);
+        // A favourite keeps its saved identity while its live tab browses.
+        const title = favoriteTitle(item.entry);
+        updateFavicon(tile.firstChild, null, item.entry.url, title);
         tile.title = title;
         tile.setAttribute('aria-label', `${title}${item.tab ? '' : ', asleep'}`);
         tile.setAttribute('aria-pressed', String(Boolean(item.tab?.active)));
@@ -580,6 +597,7 @@ function draw() {
     };
   });
   reconcile($('favorites'), favoriteItems);
+  syncPeekSources(model);
   $('favorites').hidden = !favoriteItems.length && !state.drag;
   $('favorites').classList.toggle('empty', !favoriteItems.length);
 
@@ -1242,6 +1260,7 @@ function onActivated({ tabId, windowId }) {
 
 function onAttached(tabId, info) {
   if (!belongsHere(info.newWindowId)) return;
+  state.peekKey = null;
   void api.tabs.get(tabId).then((tab) => {
     state.tabs.set(tabId, tab);
     const record = state.records[tabId];
@@ -1252,6 +1271,7 @@ function onAttached(tabId, info) {
 
 function onDetached(tabId, info) {
   if (!belongsHere(info.oldWindowId)) return;
+  state.peekKey = null;
   state.tabs.delete(tabId);
   // The receiving window rewrites the record; don't race it with a delete.
   dropRecord(tabId, false);

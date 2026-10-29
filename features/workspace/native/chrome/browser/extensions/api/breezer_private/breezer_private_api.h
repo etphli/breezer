@@ -64,6 +64,16 @@ class BreezerPrivateAuthorizeCurrentPageFunction final
   ResponseAction RunFunction() override;
 };
 
+class BreezerPrivateSetPeekSourcesFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.setPeekSources", UNKNOWN)
+
+ private:
+  ~BreezerPrivateSetPeekSourcesFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
 }  // namespace extensions
 
 #endif  // CHROME_BROWSER_EXTENSIONS_API_BREEZER_PRIVATE_BREEZER_PRIVATE_API_H_

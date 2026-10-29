@@ -11,6 +11,8 @@
 
 #include "base/values.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/containers/flat_set.h"
+#include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/extensions/window_controller.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/themes/theme_service.h"
@@ -21,6 +23,7 @@
 #include "chrome/browser/ui/helium/helium_layout_state_controller.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
 #include "chrome/browser/ui/tabs/vertical_tab_strip_state_controller.h"
+#include "chrome/browser/ui/views/breezer_peek/breezer_peek.h"
 #include "chrome/common/pref_names.h"
 #include "components/bookmarks/common/bookmark_pref_names.h"
 #include "components/prefs/pref_service.h"
@@ -39,6 +42,9 @@ namespace {
 
 // Only the side panel document may ask for page access.
 constexpr char kPanelPath[] = "/panel.html";
+constexpr char kWorkspacePath[] = "/workspace.html";
+// Favourites are capped at 12; this only bounds a malformed call.
+constexpr size_t kMaxPeekSources = 64;
 
 // Mirrors breezerPrivate.Appearance in breezer_private.idl.
 struct Appearance {
@@ -545,6 +551,37 @@ BreezerPrivateAuthorizeCurrentPageFunction::RunFunction() {
   }
   granter->GrantIfRequested(extension());
   return RespondNow(WithArguments(true));
+}
+
+ExtensionFunction::ResponseAction
+BreezerPrivateSetPeekSourcesFunction::RunFunction() {
+  if (args().size() != 1 || !args()[0].is_list() ||
+      args()[0].GetList().size() > kMaxPeekSources) {
+    return RespondNow(Error("tabIds must be a short list of tab IDs."));
+  }
+  if (source_url().GetPath() != kWorkspacePath) {
+    return RespondNow(Error("Peek tabs can only be set by the Breezer sidebar."));
+  }
+  base::flat_set<int> tab_ids;
+  for (const base::Value& value : args()[0].GetList()) {
+    if (!value.is_int()) {
+      return RespondNow(Error("tabIds must be a short list of tab IDs."));
+    }
+    tab_ids.insert(value.GetInt());
+  }
+  // Only the calling sidebar's own window; its profile is checked by
+  // GetCallerBrowser() and private profiles are rejected by Run().
+  BrowserWindowInterface* const browser = GetCallerBrowser();
+  if (!browser) {
+    return RespondNow(Error("Unable to resolve the calling browser window."));
+  }
+  TabStripModel* const tab_strip = browser->GetTabStripModel();
+  for (int index = 0; index < tab_strip->count(); ++index) {
+    content::WebContents* const contents = tab_strip->GetWebContentsAt(index);
+    breezer_peek::SetSource(
+        contents, tab_ids.contains(ExtensionTabUtil::GetTabId(contents)));
+  }
+  return RespondNow(NoArguments());
 }
 
 }  // namespace extensions

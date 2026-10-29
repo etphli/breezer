@@ -463,6 +463,80 @@ def _bookmark_bar_replacements():
     )]
 
 
+PEEK_DELEGATE = (
+    "chrome/browser/ui/browser_web_contents_delegate/browser_web_contents_delegate.cc"
+)
+PEEK_THROTTLES = "chrome/browser/chrome_content_browser_client_navigation_throttles.cc"
+
+
+def _peek_replacements():
+    """Route favourite-tab links into chrome/browser/ui/views/breezer_peek."""
+    return {
+        PEEK_DELEGATE: [
+            (
+                '#include "chrome/browser/ui/views/frame/contents_web_view.h"\n',
+                '#include "chrome/browser/ui/views/breezer_peek/breezer_peek.h"\n'
+                '#include "chrome/browser/ui/views/frame/contents_web_view.h"\n',
+            ),
+            (
+                '  // If the source is already split, navigate the other pane instead of\n',
+                '  // Breezer: a foreground-tab link from a favourite\'s tab opens in a peek.\n'
+                '  if (content::WebContents* const peek =\n'
+                '          breezer_peek::MaybeShowURL(source, params)) {\n'
+                '    return peek;\n'
+                '  }\n'
+                '\n'
+                '  // If the source is already split, navigate the other pane instead of\n',
+            ),
+            (
+                '    bool* was_blocked) {\n'
+                '  FullscreenController* fullscreen_controller =\n',
+                '    bool* was_blocked) {\n'
+                '  // Breezer: a new foreground tab from a favourite\'s tab opens in a peek.\n'
+                '  if (content::WebContents* const peek =\n'
+                '          breezer_peek::MaybeShowNewContents(\n'
+                '              source, new_contents, disposition, user_gesture)) {\n'
+                '    return peek;\n'
+                '  }\n'
+                '  FullscreenController* fullscreen_controller =\n',
+            ),
+        ],
+        "chrome/browser/ui/browser_web_contents_delegate/BUILD.gn": [
+            (
+                '      "//chrome/browser/ui/views:status_bubble",\n',
+                '      "//chrome/browser/ui/views:status_bubble",\n'
+                '      "//chrome/browser/ui/views/breezer_peek",\n',
+            ),
+        ],
+        PEEK_THROTTLES: [
+            (
+                '#include "chrome/browser/ui/login/login_navigation_throttle.h"\n',
+                '#include "chrome/browser/ui/login/login_navigation_throttle.h"\n'
+                '#if !BUILDFLAG(IS_ANDROID)\n'
+                '#include "chrome/browser/ui/views/breezer_peek/breezer_peek.h"\n'
+                '#endif  // !BUILDFLAG(IS_ANDROID)\n',
+            ),
+            (
+                '    page_load_metrics::MetricsNavigationThrottle::CreateAndAdd(registry);\n',
+                '    page_load_metrics::MetricsNavigationThrottle::CreateAndAdd(registry);\n'
+                '\n'
+                '#if !BUILDFLAG(IS_ANDROID)\n'
+                "    // Breezer: keeps a favourite's tab on its site; cross-site link\n"
+                '    // clicks open in a peek.\n'
+                '    breezer_peek::MaybeCreateAndAddNavigationThrottle(registry);\n'
+                '#endif  // !BUILDFLAG(IS_ANDROID)\n',
+            ),
+        ],
+        "chrome/browser/BUILD.gn": [
+            (
+                '      ":repost_form_warning_controller",\n',
+                '      ":repost_form_warning_controller",\n'
+                '      "//chrome/browser/ui/views/breezer_peek",\n',
+            ),
+        ],
+    }
+
+
 def replacements():
     return sidebar_frame.merge({
         REGION: _region_replacements(),
@@ -601,6 +675,7 @@ def replacements():
                 '      "//chrome/browser/extensions/api/breezer_private",\n',
             ),
         ],
+        **_peek_replacements(),
     })
 
 
