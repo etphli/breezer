@@ -51,3 +51,8 @@ test('invalid or expired credentials fail before any Keychain write', () => fixt
   await assert.rejects(service.configure({key}),/invalid or expired/);
   assert.equal(writes,0);
 }));
+
+test('dashboard items link directly to their task in Organato', () => fixture(async service => {
+  await service.configure({ key });
+  assert.equal((await service.list()).items[0].url, 'https://organato.vercel.app/items/id1');
+}));

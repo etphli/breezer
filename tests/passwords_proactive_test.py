@@ -57,13 +57,24 @@ def evaluate_condition(expression, substitutions):
 
 @unittest.skipUnless(SOURCE, 'Set BREEZER_PASSWORD_SOURCE to read pinned source files')
 class ProactivePasswordSourceTest(unittest.TestCase):
-    def test_typed_password_does_not_suppress_saved_account_suggestions(self):
+    def test_typed_password_closes_suggestions_so_enter_can_submit(self):
         source = (self.tree / 'components/autofill/core/browser/foundations/browser_autofill_manager.cc').read_text()
         section = body(source, 'void BrowserAutofillManager::OnAskForValuesToFillImpl(')
         password_branch = section[section.index('if (password_request.has_value()'):section.index('if (base::FeatureList::IsEnabled(')]
         self.assertIn('password_delegate->ShowSuggestions', password_branch)
-        self.assertNotIn('!field.value().empty()', password_branch)
-        self.assertNotIn('SuggestionHidingReason::kFieldValueChanged', password_branch)
+        self.assertIn('!field.value().empty()', password_branch)
+        self.assertIn('SuggestionHidingReason::kFieldValueChanged', password_branch)
+        guard = re.search(r'if \((field.form_control_type\(\).*?)\) \{', password_branch, re.S)
+        self.assertIsNotNone(guard)
+        condition = evaluate_condition(guard[1], {
+            'field.form_control_type() == FormControlType::kInputPassword': 'password',
+            'field.value().empty()': 'empty',
+            'field.is_autofilled_according_to_renderer()': 'autofilled',
+        })
+        for password, empty, autofilled in itertools.product((False, True), repeat=3):
+            hides = eval(condition, {'__builtins__': {}}, dict(password=password, empty=empty, autofilled=autofilled))
+            self.assertEqual(hides, password and not empty and not autofilled)
+        self.assertLess(password_branch.index('HideSuggestions('), password_branch.index('password_delegate->ShowSuggestions'))
 
     @classmethod
     def setUpClass(cls):
@@ -73,6 +84,7 @@ class ProactivePasswordSourceTest(unittest.TestCase):
         paths = set(overlay.sections()) | {
             FEATURES, CONTEXT, CLIENT, UI, UI_HEADER, PAGE_ACTION, FILLING,
             BUBBLE_EXPERIMENT, MENU_MANAGER,
+            'components/autofill/core/browser/foundations/browser_autofill_manager.cc',
         }
         cls.observed = {name: (Path(SOURCE) / name).read_bytes() for name in paths}
         for name, data in cls.observed.items():

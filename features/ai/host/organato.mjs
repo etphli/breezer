@@ -91,7 +91,7 @@ export class Organato {
       items.push(...result.items); cursor = result.nextCursor;
       if (!cursor) break;
     }
-    return { items: items.map(item => ({ id: item.id, version: item.version, title: item.displayName, kind: item.kind, classification: item.classification, dueAt: item.dueAt, dueDateLocal: item.dueDateLocal, workingStatus: item.workingStatus, subjectId: item.subjectId })), truncated: !!cursor };
+    return { items: items.map(item => ({ id: item.id, url: typeof item.id === 'string' && item.id ? `https://organato.vercel.app/items/${encodeURIComponent(item.id)}` : null, version: item.version, title: item.displayName, kind: item.kind, classification: item.classification, dueAt: item.dueAt, dueDateLocal: item.dueDateLocal, workingStatus: item.workingStatus, subjectId: item.subjectId })), truncated: !!cursor };
   }
   async tool(name, args, signal) {
     const config = await this.config(); if (!config.enabled || !config.allowAI) throw new Error('Organato AI access is off in Settings.');

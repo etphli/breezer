@@ -1,4 +1,5 @@
-import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY } from './top-sites.js';
+import { installShortcutAdder } from './shortcut-add.js';
+import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY, CUSTOM_SITES_KEY } from './top-sites.js';
 // Breezer new tab: one row of frequently visited sites and what's coming up in
 // Organato: one Upcoming list (exams and assignments together) and To-dos.
 // The page asks the background over a 'breezer-newtab' port once on load and
@@ -211,8 +212,13 @@ function siteTile(api, site) {
 export function renderSites(api, root, sites) {
   const list = root.getElementById('sites');
   list.replaceChildren(...sites.map((site) => siteTile(api, site)));
+  const add = el('li', 'site site-add');
+  const button = el('button', 'site-link site-add-button', { type: 'button', popovertarget: 'shortcut-add', 'aria-haspopup': 'dialog' });
+  const icon = el('span', 'site-icon', { 'aria-hidden': 'true' }); icon.textContent = '+';
+  const label = el('span', 'site-name'); label.textContent = 'Add shortcut';
+  button.append(icon, label); add.append(button); list.append(add);
   list.removeAttribute('aria-busy');
-  list.hidden = !sites.length;
+  list.hidden = false;
   root.getElementById('sites-empty').hidden = Boolean(sites.length);
 }
 
@@ -354,15 +360,17 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
+  const siteLimit = () => globalThis.innerWidth <= 400 ? 2 : globalThis.innerWidth <= 700 ? 3 : globalThis.innerWidth <= 920 ? 5 : MAX_SITES;
   let allSites = [], siteRevision = 0, undoKey;
   const updateSites = async () => {
     const revision = ++siteRevision;
     await shortcuts.load();
-    const sites = await shortcuts.filter(allSites);
+    const sites = await shortcuts.filter(allSites, siteLimit());
     if (revision !== siteRevision || !view) return;
     view.topSites = normalizeView({ topSites: sites }).topSites;
     paint();
   };
+  installShortcutAdder({ api, root, preferences: shortcuts, update: updateSites });
   const disposeShortcuts = installShortcutActions({ root, remove: async site => {
     try { undoKey = await shortcuts.hide(site.url); await updateSites(); status.textContent = 'Shortcut removed.'; undo.hidden = false; undo.focus(); }
     catch { status.textContent = 'Could not save shortcut preferences. Try again.'; }
@@ -376,8 +384,9 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     try { await shortcuts.reset(); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcuts restored.'; }
     catch { status.textContent = 'Could not restore shortcuts. Try again.'; }
   });
-  const changed = (changes, area) => { if (area === 'local' && changes[HIDDEN_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Try Refresh.'; }); };
+  const changed = (changes, area) => { if (area === 'local' && (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY])) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Try Refresh.'; }); };
   api?.storage?.onChanged?.addListener?.(changed);
+  globalThis.addEventListener?.('resize', () => void updateSites().catch(() => {}));
   globalThis.addEventListener?.('pagehide', () => { disposeShortcuts(); api?.storage?.onChanged?.removeListener?.(changed); }, { once: true });
 
   const paint = () => {
@@ -403,7 +412,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
         return;
       }
       allSites = result.topSites || [];
-      view = normalizeView({ ...result, topSites: await shortcuts.filter(allSites) });
+      view = normalizeView({ ...result, topSites: await shortcuts.filter(allSites, siteLimit()) });
       problem = null;
     } catch (error) {
       problem = text(error?.message, 160) || null;

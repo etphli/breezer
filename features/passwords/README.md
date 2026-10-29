@@ -18,6 +18,12 @@ not re-enable unrelated Autofill or AtMemory menu entries. Native eligibility,
 frame security checks, origin matching, and user selection still apply. Existing
 field-focus suggestions on username and password fields remain native.
 
+Typing a non-empty password closes the native suggestions popup, following
+Chromium's default rule. Breezer no longer forces it to stay open, where it can
+consume Enter instead of letting the sign-in form submit. The password-field
+context menu still offers saved passwords. This restores native source behavior;
+the Microsoft password step still needs verification in a rebuilt app.
+
 Chromium's `fill-on-account-select` feature defaults on, so eligible saved logins
 are offered for selection rather than filled on page load. The separate native
 automatic-sign-in default remains off. Existing user preferences are not reset.

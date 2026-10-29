@@ -75,6 +75,7 @@ function installFixture({ view, appearance, delay = 0, hang = false }) {
   const preferences = JSON.parse(localStorage.getItem('shortcut-fixture') || '{}');
   const storageListeners = [];
   window.chrome = {
+    tabs: { query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }] },
     runtime: {
       connect: ({ name }) => port(name),
       getURL: (path) => `${location.origin}/${String(path).replace(/^\//, '')}`,
@@ -145,7 +146,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.deepEqual(await page.evaluate(() => window.fx.requests.map(({ name, type, refresh }) => ({ name, type, refresh }))), [{ name: 'breezer-newtab', type: 'view', refresh: false }]);
 
       // One row, at about the upper third.
-      const tops = await page.$$eval('.site', (items) => items.map((item) => Math.round(item.getBoundingClientRect().top)));
+      const tops = await page.$$eval('.site:not(.site-add)', (items) => items.map((item) => Math.round(item.getBoundingClientRect().top)));
       assert.equal(tops.length, 8);
       assert.equal(new Set(tops).size, 1);
       assert.ok(tops[0] > 900 * 0.18 && tops[0] < 900 * 0.4, `sites row at ${tops[0]}px`);
@@ -323,7 +324,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
     };
     await withPage(browser, base, { view: hostile }, async (page) => {
       await page.waitForSelector('html[data-loaded="true"]');
-      assert.equal(await page.$$eval('.site', (items) => items.length), 1);
+      assert.equal(await page.$$eval('.site:not(.site-add)', (items) => items.length), 1);
       assert.equal(await page.textContent('.site-name'), '<img src=x onerror=alert(1)>');
       assert.equal(await page.$('[data-list="upcoming"] a'), null);
       assert.equal(await page.textContent('[data-list="upcoming"] .item-title'), '<script>alert(1)</script>');
@@ -333,4 +334,37 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
     await browser.close();
     server.close();
   }
+});
+
+
+test('add shortcuts by URL and open tab, persist across reload and keep Add visible on narrow screens', { skip }, async () => {
+ const server = await startServer(); const base = `http://127.0.0.1:${server.address().port}`;
+ const browser = await chromium.launch({ executablePath, headless: true });
+ try { await withPage(browser, base, { view: CONNECTED }, async page => {
+  await page.waitForSelector('html[data-loaded="true"]');
+  await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
+  await page.getByRole('combobox').fill('javascript:alert(1)');
+  await page.getByRole('combobox').press('Enter');
+  await page.waitForSelector('#shortcut-add-input[aria-invalid="true"]');
+  await page.getByRole('combobox').fill('custom.example.com');
+  await page.getByRole('combobox').press('Enter');
+  await page.waitForSelector('.site-link[href="https://custom.example.com/"]');
+  await page.reload(); await page.waitForSelector('.site-link[href="https://custom.example.com/"]');
+  await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
+  await page.getByRole('combobox').fill('Open project');
+  await page.getByRole('option', {name: /Open project/}).waitFor();
+  await page.getByRole('combobox').press('ArrowDown'); await page.getByRole('combobox').press('Enter');
+  await page.waitForSelector('.site-link[href="https://project.example.com/"]');
+  await page.setViewportSize({width:375,height:800});
+  assert.equal(await page.getByRole('button', { name: 'Add shortcut', exact: true }).isVisible(),true);
+  await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
+  await page.getByRole('combobox').press('Escape');
+  assert.equal(await page.locator('#shortcut-add').evaluate(x=>x.matches(':popover-open')), false);
+  await page.setViewportSize({width:1440,height:900});
+  await page.screenshot({path:`${evidence}/newtab-custom-shortcuts.png`});
+  await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
+  await page.getByRole('combobox').fill('project');
+  await page.getByRole('option', {name: /Open project/}).waitFor();
+  await page.screenshot({path:`${evidence}/newtab-add-popover.png`});
+ }); } finally { await browser.close(); await new Promise(done=>server.close(done)); }
 });

@@ -1,5 +1,14 @@
 // Hidden shortcuts are local preferences, never deletions from history/bookmarks.
 export const HIDDEN_SITES_KEY = 'newtab.hiddenSites.v1';
+export const CUSTOM_SITES_KEY = 'newtab.customSites.v1';
+export function shortcutUrl(value) {
+  const input = String(value || '').trim();
+  if (!input || /\s/.test(input)) throw new Error('Enter a web address like example.com.');
+  const hasScheme = /^[a-z][a-z\d+.-]*:/i.test(input) && !/^[^/]+:\d+(?:\/|$)/.test(input);
+  const url = new URL(hasScheme ? input : `https://${input}`);
+  if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password || (!url.hostname.includes('.') && !['localhost', '[::1]'].includes(url.hostname))) throw new Error('Enter a web address like example.com.');
+  return url.href;
+}
 const validKey = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export async function shortcutKey(value) {
   const url = new URL(value);
@@ -8,10 +17,20 @@ export async function shortcutKey(value) {
   return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
 }
 export class ShortcutPreferences {
-  constructor(api) { this.storage = api?.storage?.local; this.hidden = new Set(); this.queue = Promise.resolve(); }
+  constructor(api) { this.storage = api?.storage?.local; this.hidden = new Set(); this.custom = []; this.queue = Promise.resolve(); }
   async load() {
     const values = await this.storage?.get(HIDDEN_SITES_KEY);
     this.hidden = new Set(Array.isArray(values?.[HIDDEN_SITES_KEY]) ? values[HIDDEN_SITES_KEY].filter(validKey).slice(-500) : []);
+    const saved = await this.storage?.get(CUSTOM_SITES_KEY);
+    const seen = new Set();
+    this.custom = (Array.isArray(saved?.[CUSTOM_SITES_KEY]) ? saved[CUSTOM_SITES_KEY] : []).flatMap(site => {
+      try {
+        const url = shortcutUrl(site.url);
+        if (seen.has(url)) return [];
+        seen.add(url);
+        return [{ url, title: typeof site.title === 'string' ? site.title.slice(0, 60) : new URL(url).hostname }];
+      } catch { return []; }
+    }).slice(-100);
     return this;
   }
   change(update) {
@@ -28,11 +47,29 @@ export class ShortcutPreferences {
   async hide(url) { const key = await shortcutKey(url); await this.change(set => set.add(key)); return key; }
   async restore(key) { if (!validKey(key)) throw new Error('Invalid shortcut preference.'); await this.change(set => set.delete(key)); }
   async reset() { await this.change(set => set.clear()); }
-  async filter(sites) {
-    const checked = await Promise.all((Array.isArray(sites) ? sites : []).map(async site => {
+  add(site) {
+    const run = async () => {
+      if (!this.storage?.set) throw new Error('Shortcut preferences are unavailable.');
+      const url = shortcutUrl(site.url), key = await shortcutKey(url);
+      await this.load();
+      if ((await this.filter([])).length >= 8 && !this.custom.some(item => item.url === url)) throw new Error('Remove a saved shortcut before adding another.');
+      this.custom = [...this.custom.filter(item => item.url !== url), { url, title: String(site.title || new URL(url).hostname).slice(0, 60) }].slice(-100);
+      this.hidden.delete(key);
+      await this.storage.set({ [CUSTOM_SITES_KEY]: this.custom, [HIDDEN_SITES_KEY]: [...this.hidden] });
+    };
+    const operation = this.queue.then(() => globalThis.navigator?.locks?.request ? navigator.locks.request('breezer.hidden-shortcuts', run) : run());
+    this.queue = operation.catch(() => {});
+    return operation;
+  }
+  async filter(sites, limit = Infinity) {
+    const customUrls = new Set(this.custom.map(site => site.url));
+    const combined = [...(Array.isArray(sites) ? sites : []).filter(site => !customUrls.has(site.url)), ...this.custom];
+    const checked = await Promise.all(combined.map(async site => {
       try { return this.hidden.has(await shortcutKey(site.url)) ? null : site; } catch { return null; }
     }));
-    return checked.filter(Boolean);
+    const visible = checked.filter(Boolean);
+    const saved = visible.filter(site => customUrls.has(site.url)).slice(-limit);
+    return [...visible.filter(site => !customUrls.has(site.url)).slice(0, Math.max(0, limit - saved.length)), ...saved];
   }
 }
 

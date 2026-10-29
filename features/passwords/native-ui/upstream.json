@@ -10,7 +10,7 @@
     "native password-field context menu fallback, with existing fill eligibility checks",
     "native fill-on-account-select default; no page-load password filling by default",
     "quiet native save/update suggestion chip, preserving blocklists and dismissal suppression",
-    "saved-password suggestions stay available after typing; filling still requires selection"
+    "native dismissal of saved-password suggestions while typing allows Enter to submit"
   ],
   "direct_chrome_password_import": false,
   "csv_import_route": "chrome://password-manager/settings?import=true",

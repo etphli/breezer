@@ -33,6 +33,7 @@ def main():
     with tempfile.TemporaryDirectory(prefix="breezer-passwords-check-") as directory:
         tree = Path(directory)
         evidence = {
+            'components/autofill/core/browser/foundations/browser_autofill_manager.cc',
             'chrome/browser/password_manager/chrome_password_manager_client.cc',
             'components/password_manager/core/browser/password_form_filling.cc',
             'components/password_manager/core/browser/password_bubble_experiment.cc',

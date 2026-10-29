@@ -15,6 +15,17 @@
     <nav class="sites-nav" aria-label="Frequently visited sites">
       <ol id="sites" class="sites" aria-busy="true"></ol>
       <div class="shortcut-feedback"><span id="shortcut-status" role="status" aria-live="polite"></span><button id="shortcut-undo" type="button" hidden>Undo</button><button id="sites-reset" type="button" hidden>Restore shortcuts</button></div>
+      <form id="shortcut-add" class="shortcut-add" popover="auto" role="dialog" aria-labelledby="shortcut-add-title" novalidate>
+        <h2 id="shortcut-add-title">Add shortcut</h2>
+        <input id="shortcut-add-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Type a URL or find an open tab" aria-label="Website address or open tab" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="shortcut-add-tabs" aria-describedby="shortcut-add-error">
+        <p id="shortcut-add-error" role="status" hidden></p>
+        <p class="shortcut-add-group" id="shortcut-add-tabs-label">Open tabs</p>
+        <ul id="shortcut-add-tabs" role="listbox" aria-labelledby="shortcut-add-tabs-label"></ul>
+        <div class="shortcut-add-actions">
+          <button type="button" popovertarget="shortcut-add" popovertargetaction="hide">Cancel</button>
+          <button type="submit" disabled>Add</button>
+        </div>
+      </form>
       <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
     </nav>
   </header>

@@ -5,6 +5,17 @@ with two things: one row of frequently visited sites around the upper third of
 the window, and an Organato section with two lists: Upcoming (exams and
 assignments together, in date order) and To-dos.
 
+## Saved shortcuts and task links
+
+The Add shortcut tile follows the sites row. Its popover accepts a web address
+or an open http(s) tab. Arrow keys select a tab and Enter adds it. Escape and
+clicking outside close the popover. Saved shortcuts persist in extension-local
+storage and use the same remove, Undo and Restore controls as recommendations.
+The row reserves space for saved shortcuts and the Add tile on smaller windows.
+
+The native Organato helper supplies `https://organato.vercel.app/items/<id>`
+links so assignment titles open their task inside Organato.
+
 ## Design
 
 - **Sky and sheet.** The top of the page is the profile's Breezer tone (`--air`)
@@ -50,7 +61,7 @@ Every Settings link is `workspace.html#/settings`.
 
 ## Background contract (`breezer-newtab` port)
 
-The page never makes HTTP requests and never stores anything. Main's background
+The page never makes HTTP requests. It stores shortcut preferences locally. Main's background
 script owns persistence, the Organato API key and every network call.
 
 Request: the page calls `chrome.runtime.connect({ name: 'breezer-newtab' })`
@@ -86,7 +97,7 @@ Item = {
   dueAt: string | null,     // ISO 8601 date-time, or 'YYYY-MM-DD' for an all-day local date
   allDay?: boolean,         // true hides the time (implied by a 'YYYY-MM-DD' dueAt)
   subject?: string | null,  // subject display or short name
-  url?: string | null,      // http(s) only, e.g. canvasHtmlUrl; anything else is dropped
+  url?: string | null,      // http(s) only; the helper supplies the Organato task URL
 }
 ```
 
