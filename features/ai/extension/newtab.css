@@ -113,7 +113,9 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 @media (max-width: 700px) { .site:nth-child(n+5) { display: none; } }
 @media (max-width: 400px) { .site:nth-child(n+4) { display: none; } }
 
-.site { flex: 0 0 104px; }
+/* Fixed slots: min-width 0 stops a long title from widening its slot, so icon
+   centres stay evenly spaced and the name truncates (full title in the tooltip). */
+.site { flex: 0 0 104px; min-width: 0; }
 
 .site-link {
   display: flex;

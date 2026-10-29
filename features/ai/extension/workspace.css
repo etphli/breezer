@@ -109,30 +109,39 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .icon-button:hover { background: var(--hover); color: var(--ink); }
 .icon-button:active { background: var(--press); }
 
-/* Favorites: the Arc-style icon grid shared by every space. */
+/* Favorites: the Arc-style icon grid shared by every space. Always four
+   columns (arrow keys move by four); tiles get a little taller as the
+   sidebar widens so they stay close to the proportions of a key cap. */
 .favorites {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  padding: 10px 10px 4px;
+  padding: 10px 10px 6px;
 }
 
 .tile {
-  height: 44px;
+  height: clamp(40px, calc((100cqi - 44px) / 4 * 0.72), 48px);
   display: grid;
   place-items: center;
   border-radius: var(--radius-card);
-  background: color-mix(in srgb, var(--card) 38%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--air-deep) 90%, transparent);
-  transition: background-color 120ms ease, transform 120ms ease;
+  /* Asleep: a quiet frosted cap with a hairline edge that holds in every tone. */
+  background: color-mix(in srgb, var(--card) 34%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
-.tile:hover { background: color-mix(in srgb, var(--card) 62%, transparent); }
+.tile:hover { background: color-mix(in srgb, var(--card) 58%, transparent); }
 .tile:active { transform: scale(0.97); }
-.tile.live { background: color-mix(in srgb, var(--card) 70%, transparent); box-shadow: none; }
-.tile.active { background: var(--card); box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px color-mix(in srgb, var(--ink) 12%, transparent); }
+.tile.live { background: color-mix(in srgb, var(--card) 72%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent); }
+.tile.live:hover { background: color-mix(in srgb, var(--card) 86%, transparent); }
+.tile.active {
+  background: var(--card);
+  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px color-mix(in srgb, var(--ink) 12%, transparent), 0 4px 12px -6px color-mix(in srgb, var(--ink) 30%, transparent);
+}
+.tile:focus-visible { outline-offset: 2px; }
 .tile .favicon { width: 20px; height: 20px; font-size: 12px; border-radius: 6px; }
 .tile .favicon img { width: 20px; height: 20px; }
-.tile:not(.live) .favicon { opacity: 0.72; }
+/* Asleep favourites stay recognisable: only slightly softened. */
+.tile:not(.live) .favicon { opacity: 0.8; }
 /* The temporary drop target must not move tab rows beneath a held pointer. */
 .favorites.empty {
   position: absolute;
@@ -474,7 +483,9 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Compact rail when the native resize makes the sidebar very narrow. */
 @container sidebar (max-width: 150px) {
-  .favorites { grid-template-columns: 1fr; }
+  /* One centred column of square caps rather than full-width slabs. */
+  .favorites { grid-template-columns: 1fr; justify-items: center; }
+  .tile { width: min(100%, 44px); height: 40px; }
   .space-head .space-name, .space-head .quiet, .title, .row-action, .row-sound, .divider-row .meta-button, .new-tab span, .folder-row .count { display: none; }
   .row, .new-tab { justify-content: center; padding: 0; }
   .folder-children { padding-left: 0; }
