@@ -88,7 +88,7 @@ test('illustrates each patch group with decorative inline SVG only', () => {
     assert.match(group, /<h3>[^<]+<\/h3>/);
   }
   // Every patch note is still present as a list item, eight in all.
-  assert.equal([...html.matchAll(/<ul class="notes">[\s\S]*?<\/ul>/g)].flatMap((m) => m[0].match(/<li>/g)).length, 8);
+  assert.equal(groups.flatMap(group => group.match(/<li>/g)).length, 8);
   // Pure vector art: no images, references or embedded links inside it.
   assert.doesNotMatch(html, /<(?:image|use|foreignObject)\b|xlink:|xmlns=/);
 });
