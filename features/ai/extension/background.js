@@ -1,4 +1,5 @@
 import { BrowserTools, isWebURL } from './browser-tools.js';
+import { installContextBackground } from './context-background.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
 
@@ -9,6 +10,12 @@ export function installBackground(api) {
   const tools = new BrowserTools(api, id => {
     for (const panel of panels) post(panel.port, { type: 'activity', id, active: false, label: '' });
     if (activeRun?.session?.id === id && !activeRun.cancelled) void cancel(activeRun, 'Browser control stopped.');
+  });
+  const contextMemory = installContextBackground(api, {
+    isPermitted(tab) {
+      try { return tab?.incognito === false && tools.grants.get(tab.id) === new URL(tab.url).origin; }
+      catch { return false; }
+    },
   });
   const cancel = async (run, reason) => {
     if (!run || run.cancelled) return;
@@ -24,6 +31,7 @@ export function installBackground(api) {
   const currentPage = async panel => {
     const [tab] = await api.tabs.query({ active: true, ...(panel.windowId === undefined ? { currentWindow: true } : { windowId: panel.windowId }) });
     await tools.verifyGrant(tab);
+    void contextMemory.observeGranted(tab);
     return tools.current(panel.windowId);
   };
   const publishMetadata = async (windowId, expectedTabId) => {
@@ -130,6 +138,7 @@ export function installBackground(api) {
             if (panel.closed) return;
             panel.windowId = tab?.windowId;
             await tools.verifyGrant(tab);
+            void contextMemory.observeGranted(tab);
             if (!panel.closed) connectNative(panel).postMessage({ type: 'init' });
           })();
           await panel.ready;
@@ -157,6 +166,7 @@ export function installBackground(api) {
   const toggle = tab => {
     if (!tab?.id) return;
     tools.authorize(tab);
+    void contextMemory.observeGranted(tab);
     const panel = [...panels].find(item => item.windowId === tab.windowId && !item.closed && item.visible);
     if (panel && api.sidePanel.close) {
       if (activeRun?.panel === panel) void cancel(activeRun);

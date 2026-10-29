@@ -6,7 +6,12 @@ export const tick = () => new Promise(resolve => setImmediate(resolve));
 export function fakeChrome() {
   let tab = { id: 7, windowId: 3, url: 'https://example.test/page' };
   const calls = [];
+  const local = {};
   const api = {
+    storage: { local: {
+      async get(key) { return { [key]: structuredClone(local[key]) }; },
+      async set(values) { Object.assign(local, structuredClone(values)); },
+    } },
     runtime: { onConnect: event(), onMessage: event(), connectNative(name) { calls.push(['native', name]); return native; } },
     commands: { onCommand: event() }, action: { onClicked: event() },
     sidePanel: { open: async value => calls.push(['open', value]), close: async value => calls.push(['close', value]) },

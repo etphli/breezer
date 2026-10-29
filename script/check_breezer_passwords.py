@@ -4,6 +4,9 @@
 import argparse
 import hashlib
 import importlib.util
+import os
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 
@@ -29,7 +32,13 @@ def main():
     paths = overlay.sections()
     with tempfile.TemporaryDirectory(prefix="breezer-passwords-check-") as directory:
         tree = Path(directory)
-        prepare(tree, offline=args.offline, wanted_paths=paths)
+        evidence = {
+            'chrome/browser/password_manager/chrome_password_manager_client.cc',
+            'components/password_manager/core/browser/password_form_filling.cc',
+            'components/password_manager/core/browser/password_bubble_experiment.cc',
+            'chrome/browser/ui/autofill/autofill_context_menu_manager.cc',
+        }
+        prepare(tree, offline=args.offline, wanted_paths=set(paths) | evidence)
         original = hashes(tree, paths)
         try:
             overlay.apply(tree, check=True)
@@ -43,6 +52,9 @@ def main():
         assert overlay.apply(tree, check=True) == 0
         assert overlay.apply(tree) == 0
         assert hashes(tree, paths) == installed
+        subprocess.run([sys.executable, str(ROOT / 'tests/passwords_proactive_test.py'), '-v'],
+                       env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),
+                            'PYTHONDONTWRITEBYTECODE': '1'}, check=True)
         name = next(iter(paths))
         (tree / name).write_text("unrecognized source\n")
         drifted = hashes(tree, paths)

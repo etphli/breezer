@@ -6,6 +6,7 @@ import {
   validateAppearancePatch,
 } from './workspace-store.js';
 import { mountPasswords } from './passwords.js';
+import { mountContextSettings } from './context-settings.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -71,6 +72,10 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   $('settings').hidden = false;
   document.title = 'Settings';
   mountPasswords({ container: $('password-settings'), api });
+  if (typeof api.runtime?.connect === 'function') {
+    const contextSettings = mountContextSettings({ container: $('context-settings'), api });
+    window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
+  }
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
 

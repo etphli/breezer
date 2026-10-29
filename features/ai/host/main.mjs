@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { NativeDecoder, encodeMessage, validOrigin } from './protocol.mjs';
-import { HostController } from './controller.mjs';
+import { ContextHostController as HostController } from './context-controller.mjs';
 import { CodexProvider } from './codex.mjs';
 import { ClaudeProvider } from './claude.mjs';
 
