@@ -10,6 +10,8 @@ Codex also has a Standard / Fast menu. Standard is the initial setting. Fast use
 
 The profile button edits your name and personal context. These are saved in this browser and included with messages to the chosen provider. Conversation history is kept in browser session storage per window. It is not synced or retained after the browser session ends.
 
+Enter sends and Shift+Enter adds a line. The hint beside the page chip says what the next message shares: the page and a screenshot, the page with browser control, nothing, or that the current tab is not a web page. When no model is connected or the tab has no web page, the empty conversation says so and offers the next step. A reply that fails, or is stopped before any text arrives, shows the reason in place with **Edit and resend**. That button only puts the original message back in the composer; it never sends by itself, and browser control stays off until you turn it on again.
+
 ## Browser control
 
 Turn on Browser control before asking Breezer to act. The assistant can inspect the page, click visible elements, type into ordinary fields, scroll, press navigation keys, and navigate the controlled tab. While it works, a flowing blue wave frames the page, a Breezer pointer moves to each element before it is clicked or typed into, and a Stop button stays visible. Stop in the sidebar, Stop on the page, or Escape ends the reply.

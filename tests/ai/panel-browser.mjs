@@ -77,7 +77,41 @@ try {
   assert.equal(await page.locator('#send').isDisabled(), true);
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
   assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
+  assert.equal(await page.locator('#welcome-status').isVisible(), false);
+  assert.equal(await page.locator('#context-hint').innerText(), 'Page + screenshot');
   await page.screenshot({ path: `${evidence}/sidebar-welcome.png` });
+
+  // Keyboard: the model menu opens onto the selected model, arrows move, Escape returns focus.
+  await page.locator('#model-button').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.evaluate(() => document.activeElement.textContent), 'GPT-6.1 Sol✓');
+  await page.keyboard.press('ArrowDown');
+  assert.equal(await page.evaluate(() => document.activeElement.textContent), 'GPT-6 Luna');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#model-menu').isVisible(), false);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
+  assert.equal(await page.locator('#model-label').innerText(), 'GPT-6.1 Sol');
+
+  // Enter sends; Shift+Enter keeps writing.
+  const chatsBefore = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').length);
+  await page.getByLabel('Message Breezer').fill('First line');
+  await page.getByLabel('Message Breezer').press('Shift+Enter');
+  await page.keyboard.type('second line');
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'First line\nsecond line');
+  assert.equal(await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').length), chatsBefore);
+  await page.getByLabel('Message Breezer').press('Enter');
+  const keyboardChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
+  assert.equal(keyboardChat.message, 'First line\nsecond line');
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), '');
+  // Escape cancels a reply that has not started, and the message can be reused without being resent.
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate((id) => window.sent.some((message) => message.type === 'cancel' && message.id === id), keyboardChat.id), true);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'prompt');
+  await page.getByRole('button', { name: 'Edit and resend' }).click();
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'First line\nsecond line');
+  assert.equal(await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').length), chatsBefore + 1, 'Edit and resend never sends by itself');
+  await page.getByLabel('Message Breezer').fill('');
+  await page.getByRole('button', { name: 'New conversation' }).click();
 
   await page.getByRole('button', { name: 'Edit your personal context' }).click();
   await page.getByLabel('Your name', { exact: true }).fill('Ethan');
@@ -171,6 +205,8 @@ try {
   const controlToggle = page.getByRole('button', { name: 'Browser control', exact: true });
   await controlToggle.click();
   assert.match(await page.locator('#notice-text').innerText(), /until you turn this off.*cannot use other tabs or apps/);
+  assert.equal(await page.locator('#context-hint').innerText(), 'Page + browser control');
+  assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Tell Breezer what to do in this tab…');
   await page.getByLabel('Message Breezer').fill('Type my name into the form.');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const firstControlChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
@@ -242,6 +278,32 @@ try {
   assert.equal(failedChat.model, 'gpt-6.1-terra');
   await page.evaluate(id => window.emit({ type: 'error', id, error: 'CLI test rejection' }), failedChat.id);
   assert.match(await page.locator('.assistant .message-body').last().innerText(), /CLI test rejection/);
+  assert.equal(await page.locator('.message.failed').count(), 1);
+  assert.equal(await page.locator('#notice').isVisible(), false, 'The failure is shown once, in the reply');
+  assert.match(await page.locator('#announcer').textContent(), /CLI test rejection/);
+  await page.screenshot({ path: `${evidence}/sidebar-error-narrow.png` });
+  await page.getByRole('button', { name: 'Edit and resend' }).click();
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Exercise the error path');
+  assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1).id), failedChat.id, 'No automatic retry');
+  await page.getByLabel('Message Breezer').fill('A draft I care about');
+  await page.getByRole('button', { name: 'Edit and resend' }).click();
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'A draft I care about', 'Edit and resend keeps an unrelated draft');
+  assert.match(await page.locator('#notice-text').innerText(), /draft is still in the message box/);
+  await page.getByLabel('Message Breezer').fill('');
+
+  // A failed browser-control turn turns control off; reusing the message does not turn it back on.
+  await page.getByRole('button', { name: 'Browser control', exact: true }).click();
+  await page.getByLabel('Message Breezer').fill('Click the second link.');
+  await page.getByLabel('Message Breezer').press('Enter');
+  const failedControl = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.equal(failedControl.control, true);
+  await page.evaluate(id => window.emit({ type: 'error', id, error: 'The page changed before Breezer could click.' }), failedControl.id);
+  assert.equal(await page.locator('#control-toggle').getAttribute('aria-pressed'), 'false');
+  await page.getByRole('button', { name: 'Edit and resend' }).last().click();
+  assert.equal(await page.locator('#control-toggle').getAttribute('aria-pressed'), 'false');
+  assert.match(await page.locator('#notice-text').innerText(), /Browser control is off/);
+  assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1).id), failedControl.id);
+  await page.getByLabel('Message Breezer').fill('');
   await page.getByRole('button', { name: 'Close assistant', exact: true }).click();
   assert.deepEqual(await page.evaluate(() => window.closedPanel), { windowId: 7 });
   await page.locator('#model-button').click();
@@ -256,9 +318,45 @@ try {
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'New tab', url: 'chrome://newtab/' } }));
   assert.equal(await page.locator('#context-toggle').isDisabled(), true);
   assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Ask anything…');
-  assert.equal(await page.locator('#context-hint').innerText(), 'Page not shared');
+  assert.equal(await page.locator('#context-hint').innerText(), 'Only web pages can be shared');
+  assert.equal(await page.locator('#control-toggle').isDisabled(), true);
+  assert.match(await page.locator('#welcome-status').innerText(), /Open a web page/);
+  assert.equal(await page.getByRole('button', { name: 'Summarize this page' }).isDisabled(), true);
+  await page.screenshot({ path: `${evidence}/sidebar-dark-no-page.png` });
+  // Reduced motion: the thinking indicator does not animate.
+  await page.getByLabel('Message Breezer').fill('Plain question');
+  await page.getByLabel('Message Breezer').press('Enter');
+  await page.locator('.thinking').last().waitFor();
+  assert.equal(await page.evaluate(() => document.getAnimations().filter(animation => animation.playState === 'running').length), 0);
+  await page.keyboard.press('Escape');
+
+  // Signed out everywhere: the empty state says how to connect, and Enter opens the model menu instead of failing silently.
+  await page.evaluate(() => {
+    window.testProviders = [
+      { id: 'codex', available: true, authenticated: false, models: [] },
+      { id: 'claude', available: false, authenticated: false, models: [], error: 'Claude Code is not installed.' },
+    ];
+    window.emit({ type: 'status', providers: window.testProviders });
+  });
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
+  assert.match(await page.locator('#welcome-status').innerText(), /Sign in to Codex or Claude/);
+  assert.equal(await page.locator('#model-label').innerText(), 'Choose a connected model');
+  await page.getByLabel('Message Breezer').fill('Hello');
+  await page.getByLabel('Message Breezer').press('Enter');
+  assert.match(await page.locator('#notice-text').innerText(), /Sign in to Codex or Claude to send/);
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Hello');
+  assert.equal(await page.locator('#model-menu').isVisible(), true);
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  await page.screenshot({ path: `${evidence}/sidebar-signed-out-narrow.png` });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
+  await page.getByRole('button', { name: 'Refresh accounts' }).click();
+  assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'init').length), sentInits + 1);
   assert.deepEqual(errors, []);
-  console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, per-tab control consent across replies, control/cancel, injection safety, narrow and dark layouts.');
+  console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {
   await browser.close();

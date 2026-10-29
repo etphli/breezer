@@ -15,6 +15,7 @@ const state = {
   controlTabId: null,
   running: null,
   page: null,
+  pageKnown: false,
   port: null,
   sessionKey: 'breezer-conversation',
   windowId: null,
@@ -34,7 +35,7 @@ function post(message) {
     return true;
   } catch (error) {
     notify(error.message);
-    finish();
+    finish(`Could not reach the assistant. ${error.message}`);
     return false;
   }
 }
@@ -106,14 +107,44 @@ function updateControls() {
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
   $('context-check').hidden = !state.includeContext;
-  $('context-hint').textContent = state.includeContext ? 'Page + screenshot' : 'Page not shared';
-  $('prompt').placeholder = state.includeContext ? 'Ask about this page…' : 'Ask anything…';
+  const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
+  $('context-hint').dataset.state = share;
+  $('context-hint').textContent = ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('control-toggle').title = state.page
+    ? 'Let Breezer click, type, scroll, and navigate in this tab until you turn this off'
+    : 'Browser control works only on ordinary web pages';
+  $('prompt').placeholder = state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
   const selected = selectedModel();
+  renderWelcomeStatus(selected);
   $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
   $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
   $('model-button').disabled = running;
   renderSettings(selected, running);
+}
+
+// The empty state names whatever is stopping the next message, with one way forward.
+function renderWelcomeStatus(selected) {
+  let text = '';
+  let action = '';
+  if (!selected && !state.discoveryPending) {
+    const connected = state.providers.some((item) => item.available && item.authenticated);
+    text = connected ? 'Choose a model to start.' : 'Sign in to Codex or Claude to start. Run codex login or claude auth login in Terminal, then refresh.';
+    action = connected ? 'Choose a model' : 'Refresh accounts';
+  } else if (state.pageKnown && !state.page) {
+    text = 'Open a web page to summarize it or get help with it. You can still ask anything below.';
+  }
+  $('welcome-status').hidden = !text;
+  $('welcome-status-text').textContent = text;
+  $('welcome-action').hidden = !action;
+  $('welcome-action').textContent = action;
+  document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = state.pageKnown && !state.page; });
+}
+
+function refreshModels() {
+  state.discoveryPending = true;
+  updateControls();
+  post({ type: 'init', windowId: state.windowId });
 }
 
 function providerLabel(id) {
@@ -192,13 +223,18 @@ function acceptProviders(providers) {
   updateControls();
 }
 
-function setModelMenu(open) {
+function setModelMenu(open, focus = false) {
   $('model-menu').hidden = !open;
   $('model-button').setAttribute('aria-expanded', String(open));
   if (open) renderModels();
+  if (open && focus) {
+    const options = [...$('model-options').querySelectorAll('.model-option:not(:disabled)')];
+    (options.find((item) => item.classList.contains('selected')) || options[0] || $('refresh-models')).focus();
+  }
 }
 
 function setPage(page) {
+  state.pageKnown = true;
   state.page = page?.url && /^https?:\/\//i.test(page.url) ? page : null;
   if (!state.page) {
     state.includeContext = false;
@@ -207,7 +243,7 @@ function setPage(page) {
     setControl(false);
     notify('Browser control turned off because the active tab changed. Turn it on again to let Breezer act in this tab.');
   }
-  let label = 'No page attached';
+  let label = 'No web page in this tab';
   if (state.page) {
     try { label = page.title || new URL(page.url).hostname; } catch { label = page.title || 'Current page'; }
   }
@@ -291,6 +327,36 @@ function renderDelta() {
   });
 }
 
+// A failed or empty reply can be reused, but only by putting it back in the composer.
+// Nothing is resent, and browser control stays off until the user turns it on again.
+function offerRetry(run) {
+  const body = run && messageNodes.get(run.assistantId);
+  const original = run && state.messages.find((item) => item.id === run.id);
+  if (!body || !original || body.parentElement.querySelector('.retry-button')) return;
+  const article = body.parentElement;
+  article.classList.add('failed');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'retry-button';
+  button.textContent = 'Edit and resend';
+  button.addEventListener('click', () => {
+    if (state.running) return;
+    const prompt = $('prompt');
+    if (prompt.value.trim() && prompt.value.trim() !== original.text) {
+      notify('Your draft is still in the message box. Send or clear it first, then choose Edit and resend.');
+      prompt.focus();
+      return;
+    }
+    prompt.value = original.text;
+    resizePrompt();
+    prompt.focus();
+    prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+    if (run.control && !state.control) notify('Browser control is off. Turn it on again before sending if Breezer should act in this tab.');
+  });
+  article.append(button);
+  button.scrollIntoView({ block: 'nearest' });
+}
+
 function finish(label, keepControl = false) {
   if (state.running) {
     const message = state.messages.find((item) => item.id === state.running.assistantId);
@@ -304,12 +370,26 @@ function finish(label, keepControl = false) {
   $('activity').hidden = true;
   updateControls();
   saveConversation();
+  // The stop button turns into a disabled send button; keep keyboard focus in the composer.
+  if (document.activeElement === $('send') || document.activeElement === $('activity-stop') || document.activeElement === document.body) $('prompt').focus();
 }
 
 function stop() {
   if (!state.running) return;
-  post({ type: 'cancel', id: state.running.id });
+  const run = state.running;
+  const replied = Boolean(state.messages.find((item) => item.id === run.assistantId)?.text);
+  post({ type: 'cancel', id: run.id });
   finish('Stopped.');
+  if (!replied) offerRetry(run);
+}
+
+// The reason is shown in the reply itself, so it is only announced, not repeated in the notice bar.
+function fail(reason, label) {
+  const run = state.running;
+  notify('');
+  $('announcer').textContent = label;
+  finish(label);
+  offerRetry(run);
 }
 
 function revealPanel() {
@@ -324,10 +404,18 @@ async function send() {
   if (state.running) return stop();
   const text = $('prompt').value.trim();
   const selected = selectedModel();
-  if (!text || !selected) return;
+  if (text && !selected) {
+    const connected = state.providers.some((item) => item.available && item.authenticated);
+    notify(state.discoveryPending ? 'Still checking your Codex and Claude accounts. Send again in a moment.'
+      : connected ? 'Choose a connected model to send this message.' : 'Sign in to Codex or Claude to send this message. Your text is still here.');
+    if (!state.discoveryPending) setModelMenu(true, true);
+    return;
+  }
+  if (!text) return;
   const settings = selectedSettings(selected);
   setModelMenu(false);
   notify('');
+  $('announcer').textContent = '';
   const id = crypto.randomUUID();
   const assistantId = `${id}-reply`;
   const history = state.messages.filter((item) => item.text).slice(-30).map(({ role, text: content }) => ({ role, content }));
@@ -336,7 +424,7 @@ async function send() {
   state.messages.push(userMessage, assistantMessage);
   appendMessage(userMessage);
   appendMessage(assistantMessage);
-  state.running = { id, assistantId };
+  state.running = { id, assistantId, control: state.control };
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
@@ -350,8 +438,7 @@ async function send() {
       if (state.running?.id !== id) return;
     } catch (error) {
       if (state.running?.id !== id) return;
-      notify(error.message);
-      finish(`Could not access this page. ${error.message}`);
+      fail(error.message, `Could not access this page. ${error.message}`);
       return;
     }
   }
@@ -362,7 +449,7 @@ async function send() {
     message: text, history, profile: state.profile,
     includeContext: state.includeContext, control: state.control,
   });
-  if (!sent) finish('Could not connect.');
+  if (!sent) offerRetry({ id, assistantId, control: false });
 }
 
 function receive(message) {
@@ -371,9 +458,9 @@ function receive(message) {
   if (message.id && message.id !== state.running?.id) return;
   if (message.type === 'error') {
     state.discoveryPending = false;
-    const reason = typeof message.error === 'string' ? message.error : 'Something went wrong. Try again.';
-    notify(reason);
-    finish(`Could not finish this response. ${reason}`);
+    const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
+    if (!state.running) return notify(reason);
+    fail(reason, `Could not finish this response. ${reason}`);
   } else if (message.type === 'delta' && state.running) {
     const reply = state.messages.find((item) => item.id === state.running.assistantId);
     reply.text += message.text || '';
@@ -439,17 +526,28 @@ $('new-chat').addEventListener('click', () => {
   post({ type: 'context' });
   $('prompt').focus();
 });
-$('model-button').addEventListener('click', () => setModelMenu($('model-menu').hidden));
+$('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
+$('model-menu').addEventListener('keydown', (event) => {
+  if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')];
+  const index = options.indexOf(document.activeElement);
+  if (index < 0) return;
+  event.preventDefault();
+  options[(index + (event.key === 'ArrowDown' ? 1 : options.length - 1)) % options.length].focus();
+});
+$('model-menu').addEventListener('focusout', (event) => {
+  if (event.relatedTarget && !$('model-menu').contains(event.relatedTarget) && event.relatedTarget !== $('model-button')) setModelMenu(false);
+});
+$('welcome-action').addEventListener('click', () => {
+  if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);
+  else refreshModels();
+});
 $('reasoning-select').addEventListener('change', saveSettings);
 $('speed-select').addEventListener('change', () => {
   saveSettings();
   notify($('speed-select').value === 'fast' ? 'Fast uses more of your Codex allowance. Availability depends on your account.' : '');
 });
-$('refresh-models').addEventListener('click', () => {
-  state.discoveryPending = true;
-  updateControls();
-  post({ type: 'init', windowId: state.windowId });
-});
+$('refresh-models').addEventListener('click', refreshModels);
 document.addEventListener('click', (event) => {
   if (!$('model-menu').contains(event.target) && !$('model-button').contains(event.target)) setModelMenu(false);
 });
