@@ -267,8 +267,8 @@ try {
     observe('targetsAtPrecondition', (await targets()).map(({ type, url }) => ({ type, url })));
     throw new Precondition('chrome.breezerPrivate is absent in the Breezer AI service worker; this binary predates the native workspace.');
   }
-  assert.deepEqual(surface.breezerPrivate, ['authorizeCurrentPage', 'getAppearance', 'setAppearance', 'setSidebarCollapsed']);
-  pass('privateApiSurface', 'exactly the 4 IDL methods are exposed to the component extension');
+  assert.deepEqual(surface.breezerPrivate, ['authorizeCurrentPage', 'getAppearance', 'setAppearance', 'setPeekSources', 'setSidebarCollapsed']);
+  pass('privateApiSurface', 'exactly the 5 IDL methods are exposed to the component extension');
 
   const firstHosts = await waitFor('the native workspace host', async () => (await hostTargets()).length > 0 && hostTargets(), 20000)
     .catch(async error => {

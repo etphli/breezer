@@ -183,7 +183,7 @@ def check_peek(tree, added, idl, api):
             "Same-tab Peek must be limited to cross-site http(s) links")
     show_new = peek.split("content::WebContents* MaybeShowNewContents(", 1)[1]
     require("disposition != WindowOpenDisposition::NEW_FOREGROUND_TAB" in show_new and
-            "!user_gesture" in show_new,
+            "!user_gesture" in show_new and "!target_url.SchemeIsHTTPOrHTTPS()" in show_new,
             "Only user-initiated foreground tabs may open a peek")
     require("!peek_source->enabled() || peek_source->forwarding()" in peek and
             "IsOffTheRecord()" in peek and "tab->IsActivated()" in peek,

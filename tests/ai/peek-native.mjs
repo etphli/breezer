@@ -10,9 +10,9 @@
 //
 // Verified here: which links open a peek, that the favourite tab stays on its
 // page, that the peek is a real page target outside the tab strip, and that
-// Escape, window.close() and switching tabs destroy it. Not reachable from
-// renderer input: the native Expand and close buttons and backdrop clicks.
-// Those need physical pointer input and are reported as unverified.
+// Escape, window.close() and switching tabs destroy it. UI DevTools directly
+// exercises native Expand, Close and backdrop handlers in this disposable app.
+// This does not establish physical macOS pointer routing or native hit-testing.
 //
 // Exit codes: 0 all checks passed, 1 a check failed, 2 the build lacks Peek.
 import assert from 'node:assert/strict';
@@ -59,10 +59,22 @@ const server = createServer((request, response) => {
     return;
   }
   const title = path === '/target' ? 'Peek target' : path === '/second' ? 'Peek second page' : 'Peek fixture';
-  response.end(`<title>${title}</title><main>${title} ${request.url}</main>`);
+  response.end(`<title>${title}</title><main>${title} ${request.url}</main><input id="preview-draft">`);
 });
 await new Promise(done => server.listen(0, '127.0.0.1', done));
 const home = `http://127.0.0.1:${server.address().port}/home`;
+const portProbe = createServer();
+await new Promise(done => portProbe.listen(0, '127.0.0.1', done));
+const uiPort = portProbe.address().port;
+await new Promise(done => portProbe.close(done));
+let uiSocket, uiSerial = 0;
+const uiPending = new Map();
+const ui = (method, params = {}) => new Promise((resolve, reject) => {
+  const id = ++uiSerial;
+  const timer = setTimeout(() => { uiPending.delete(id); reject(new Error(`Native UI timed out: ${method}`)); }, 5000);
+  uiPending.set(id, { resolve, reject, timer });
+  uiSocket.send(JSON.stringify({ id, method, params }));
+});
 
 const report = { app, profile, evidence, status: 'running', checks: {}, unverified: [], screenshots: [] };
 const pass = (name, detail) => { report.checks[name] = { status: 'passed', detail }; console.log(`ok   ${name}${detail ? ` — ${detail}` : ''}`); };
@@ -93,6 +105,9 @@ let cleaned = false;
 async function cleanup() {
   if (cleaned) return;
   cleaned = true;
+  for (const request of uiPending.values()) clearTimeout(request.timer);
+  uiPending.clear();
+  uiSocket?.close();
   await Promise.race([context?.close().catch(() => {}), sleep(15000)]);
   spawnSync('/usr/bin/pkill', ['-f', profile]);
   await new Promise(done => server.close(done));
@@ -103,14 +118,39 @@ try {
   context = await chromium.launchPersistentContext(profile, {
     executablePath: `${app}/Contents/MacOS/Breezer`,
     headless: false,
-    ignoreDefaultArgs: ['--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox'],
-    args: ['--no-first-run', '--no-default-browser-check'],
+    ignoreDefaultArgs: ['--enable-automation', '--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox'],
+    args: ['--no-first-run', '--no-default-browser-check', `--enable-ui-devtools=${uiPort}`],
     viewport: null,
   });
   const worker = context.serviceWorkers().find(item => item.url() === `${origin}/background.js`)
     || await context.waitForEvent('serviceworker', { predicate: item => item.url() === `${origin}/background.js`, timeout: 30000 });
   const surface = await worker.evaluate(() => Object.keys(chrome.breezerPrivate || {}).sort());
   if (!surface.includes('setPeekSources')) throw new Precondition(`chrome.breezerPrivate.setPeekSources is missing (surface: ${surface.join(', ')})`);
+  uiSocket = new WebSocket(`ws://127.0.0.1:${uiPort}/0`);
+  await new Promise((resolve, reject) => { uiSocket.onopen = resolve; uiSocket.onerror = reject; });
+  uiSocket.onmessage = event => {
+    const message = JSON.parse(event.data), request = uiPending.get(message.id);
+    if (!request) return;
+    uiPending.delete(message.id); clearTimeout(request.timer);
+    message.error ? request.reject(new Error(message.error.message)) : request.resolve(message.result);
+  };
+  async function nativeControl(className) {
+    const { root } = await ui('DOM.getDocument');
+    const flatten = node => [node, ...(node.children || []).flatMap(flatten)];
+    const widget = flatten(root).find(node => node.attributes?.includes('BreezerPeek'));
+    assert.ok(widget, 'The native Peek widget must exist');
+    const controls = flatten(widget).filter(node => node.attributes?.includes(className));
+    assert.equal(controls.length, 1, `One ${className} in this Peek`);
+    return controls[0];
+  }
+  async function nativeClick(className, x = 8, y = 12) {
+    const node = await nativeControl(className);
+    // The backdrop destroys its node on press, before a release can arrive.
+    const types = className === 'PeekRootView' ? ['mousePressed'] : ['mousePressed', 'mouseReleased'];
+    for (const type of types) {
+      await ui('DOM.dispatchMouseEvent', { nodeId: node.nodeId, event: { type, x, y, button: 'left', wheelDirection: 'none' } });
+    }
+  }
 
   // Flat CDP sessions on any target, including WebContents that are not tabs.
   const cdp = await context.browser().newBrowserCDPSession();
@@ -157,11 +197,11 @@ try {
   const targets = async () => (await cdp.send('Target.getTargets')).targetInfos.filter(target => target.type === 'page');
   const [{ id: windowId }] = await worker.evaluate(() => chrome.windows.getAll({ windowTypes: ['normal'] }));
   const tabs = () => worker.evaluate(id => chrome.tabs.query({ windowId: id }), windowId);
-  const tabUrls = async () => (await tabs()).map(tab => tab.url || tab.pendingUrl);
-  // A peek is a page target whose URL matches and which is not any tab.
+  // Match target identity, since a normal tab and a preview may share a URL.
   const peekTarget = async pattern => {
-    const urls = new Set(await tabUrls());
-    return (await targets()).find(target => pattern.test(target.url) && !urls.has(target.url)) || null;
+    const tabTargets = new Set((await worker.evaluate(() => chrome.debugger.getTargets()))
+      .filter(target => Number.isInteger(target.tabId) && target.tabId >= 0).map(target => target.id));
+    return (await targets()).find(target => pattern.test(target.url) && !tabTargets.has(target.targetId)) || null;
   };
 
   // ------------------------------------------------------------ make a favourite through the sidebar
@@ -176,6 +216,7 @@ try {
   }, home);
   await host.click('#favorites .tile');
   const favourite = await waitFor('favourite tab opened', async () => (await tabs()).find(tab => (tab.url || tab.pendingUrl) === home && tab.pinned));
+  await worker.evaluate(id => chrome.windows.update(id, { width: 1100, height: 820 }), favourite.windowId);
   const favouriteTarget = await waitFor('favourite page target', async () => (await targets()).find(target => target.url === home));
   const page = await attach(favouriteTarget.targetId);
   await waitFor('favourite page loaded', () => page.evaluate(`document.readyState === 'complete' && Boolean(document.getElementById('blank'))`));
@@ -188,14 +229,49 @@ try {
   const blank = await waitFor('peek for target=_blank', () => peekTarget(/\/target\?via=blank$/));
   assert.equal((await tabs()).length, baseline, 'target=_blank from a favourite must not add a tab');
   assert.equal((await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url, home, 'favourite stays on its page');
-  const shot = spawnSync('/usr/sbin/screencapture', ['-x', join(evidence, 'peek-open.png')]);
-  if (shot.status === 0) report.screenshots.push(join(evidence, 'peek-open.png'));
   const blankSession = await attach(blank.targetId);
   await waitFor('peek page loaded', () => blankSession.evaluate(`document.title === 'Peek target'`));
+  await writeFile(join(evidence, 'peek-native-tree.json'), JSON.stringify(await ui('DOM.getDocument'), null, 2));
+  const shot = await blankSession.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  await writeFile(join(evidence, 'peek-page.png'), Buffer.from(shot.data, 'base64'));
+  report.screenshots.push(join(evidence, 'peek-page.png'));
+  const beforeResize = await blankSession.evaluate('({width:innerWidth,height:innerHeight})');
+  await worker.evaluate(id => chrome.windows.update(id, { width: 900, height: 650 }), favourite.windowId);
+  await waitFor('preview follows parent window resize', async () => {
+    const size = await blankSession.evaluate('({width:innerWidth,height:innerHeight})');
+    return size.width > 0 && size.height > 0 && size.height < beforeResize.height;
+  });
+  await worker.evaluate(id => chrome.windows.update(id, { width: 1100, height: 820 }), favourite.windowId);
+  pass('resizeViaNativeAPI', 'preview viewport resized with its parent through chrome.windows; physical window resizing is unverified');
   await blankSession.key('Escape', 'Escape', 27);
   await waitFor('Escape destroys the peek', async () => !(await peekTarget(/\/target\?via=blank$/)));
   assert.equal((await tabs()).length, baseline);
   pass('blankLinkPeek', 'target=_blank opened a non-tab page; Escape from the focused page destroyed it');
+
+  // Native view handlers, without system mouse injection or OS permissions.
+  for (const [control, name] of [['ImageButton', 'closeButton'], ['PeekRootView', 'backdrop']]) {
+    await page.click('#blank');
+    await waitFor(`${name} preview`, () => peekTarget(/\/target\?via=blank$/));
+    await nativeClick(control, control === 'PeekRootView' ? 0 : 8, control === 'PeekRootView' ? 0 : 12);
+    await waitFor(`${name} destroys preview`, async () => !(await peekTarget(/\/target\?via=blank$/)));
+    assert.equal((await tabs()).length, baseline);
+    pass(name, 'native UI DevTools handler dismissed the page; physical pointer routing is unverified');
+  }
+
+  await page.click('#blank');
+  const expanding = await waitFor('preview for Expand', () => peekTarget(/\/target\?via=blank$/));
+  const expandingSession = await attach(expanding.targetId);
+  await waitFor('preview input loaded', () => expandingSession.evaluate('Boolean(document.getElementById("preview-draft"))'));
+  await expandingSession.evaluate(`document.getElementById('preview-draft').value='dummy retained draft';globalThis.peekMarker='dummy live page';`);
+  await nativeClick('MdTextButton');
+  const expandedTab = await waitFor('Expand creates an ordinary tab', async () => (await tabs()).find(tab => /\/target\?via=blank$/.test(tab.url || tab.pendingUrl)));
+  assert.equal((await tabs()).length, baseline + 1);
+  assert.equal((await targets()).find(target => target.targetId === expanding.targetId)?.url, expandedTab.url);
+  assert.deepEqual(await expandingSession.evaluate('({draft:document.getElementById("preview-draft").value,marker:globalThis.peekMarker})'), { draft: 'dummy retained draft', marker: 'dummy live page' });
+  assert.equal((await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url, home);
+  pass('expandKeepsLivePage', 'native Expand handler promoted the same target with its draft and JavaScript state intact; favourite stayed on its page');
+  await worker.evaluate(id => chrome.tabs.remove(id), expandedTab.id);
+  await worker.evaluate(id => chrome.tabs.update(id, { active: true }), favourite.id);
 
   // ------------------------------------------------------------ window.open opens a peek; window.close destroys it
   await page.click('#open');
@@ -269,10 +345,35 @@ try {
   assert.equal(await peekTarget(/via=blank$/), null);
   pass('unfavouriteClearsSource', 'after unfavouriting, target=_blank opened a normal tab');
 
+  // Keep another native window alive while the preview's owner is destroyed.
+  const guard = await worker.evaluate(() => chrome.windows.create({ url: 'about:blank', focused: false }));
+  await worker.evaluate(async url => {
+    const { 'workspace.v1': store } = await chrome.storage.local.get('workspace.v1');
+    store.favorites = [{ kind: 'entry', id: 'v-peek', url, title: 'Peek home (saved)' }];
+    store.rev += 1;
+    await chrome.storage.local.set({ 'workspace.v1': store });
+  }, home);
+  await worker.evaluate(id => chrome.windows.update(id, { focused: true }), windowId);
+  await host.click('#favorites .tile');
+  const closingSource = await waitFor('active favourite for teardown', async () => (await tabs()).find(tab => tab.pinned && tab.active && tab.url === home));
+  const closingTarget = (await worker.evaluate(() => chrome.debugger.getTargets())).find(target => target.tabId === closingSource.id);
+  assert.ok(closingTarget);
+  const closingPage = await attach(closingTarget.id);
+  await waitFor('teardown source loaded', () => closingPage.evaluate('Boolean(document.getElementById("blank"))'));
+  await closingPage.evaluate('document.getElementById("blank").href="/target?via=teardown"');
+  await sleep(500);
+  await closingPage.click('#blank');
+  await waitFor('preview for owner teardown', () => peekTarget(/via=teardown$/));
+  await worker.evaluate(id => chrome.windows.remove(id), windowId);
+  await waitFor('owner window close destroys preview', async () => !(await peekTarget(/via=teardown$/)));
+  await sleep(300);
+  assert.ok((await worker.evaluate(() => chrome.windows.getAll())).some(window => window.id === guard.id));
+  assert.equal(context.browser().isConnected(), true);
+  pass('parentWindowTeardown', 'closing the owner native window destroyed its preview while another browser window remained running');
+
   report.unverified.push(
-    'Expand button: moving the live WebContents into a tab (needs physical pointer on the native button).',
-    'Close button and backdrop click (native views; not reachable by renderer input).',
-    'Window resize while a peek is open, and visual layout beyond the captured screenshot.',
+    'Physical macOS pointer routing and native hit-testing for Expand, Close and backdrop.',
+    'Physical window resizing and full native overlay appearance beyond native-tree geometry and the page capture.',
   );
   report.status = 'passed';
 } catch (error) {

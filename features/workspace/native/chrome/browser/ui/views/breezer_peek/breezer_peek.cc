@@ -14,15 +14,15 @@
 #include "base/functional/callback.h"
 #include "base/location.h"
 #include "base/memory/raw_ptr.h"
-#include "base/memory/raw_ref.h"
 #include "base/memory/weak_ptr.h"
 #include "base/scoped_multi_source_observation.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
 #include "components/input/native_web_keyboard_event.h"
 #include "components/tabs/public/tab_interface.h"
-#include "components/url_formatter/url_formatter.h"
+#include "components/url_formatter/elide_url.h"
 #include "components/vector_icons/vector_icons.h"
+#include "content/public/browser/browser_context.h"
 #include "content/public/browser/invalidate_type.h"
 #include "content/public/browser/keyboard_event_processing_result.h"
 #include "content/public/browser/navigation_controller.h"
@@ -39,6 +39,8 @@
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/accessibility/ax_enums.mojom.h"
 #include "ui/base/accelerators/accelerator.h"
+#include "ui/base/metadata/metadata_header_macros.h"
+#include "ui/base/metadata/metadata_impl_macros.h"
 #include "ui/base/page_transition_types.h"
 #include "ui/base/ui_base_types.h"
 #include "ui/color/color_id.h"
@@ -132,6 +134,8 @@ class PeekSource : public content::WebContentsUserData<PeekSource> {
 
 // The scrim that covers the browser window, with the card on top of it.
 class PeekRootView : public views::View {
+  METADATA_HEADER(PeekRootView, views::View)
+
  public:
   explicit PeekRootView(base::RepeatingClosure dismiss)
       : dismiss_(std::move(dismiss)) {
@@ -170,6 +174,9 @@ class PeekRootView : public views::View {
   raw_ptr<views::View> card_ = nullptr;
 };
 
+BEGIN_METADATA(PeekRootView)
+END_METADATA
+
 class Peek final : public content::WebContentsDelegate,
                    public views::WidgetObserver {
  public:
@@ -177,7 +184,7 @@ class Peek final : public content::WebContentsDelegate,
        content::WebContents& source,
        std::unique_ptr<content::WebContents> contents,
        views::Widget& browser_widget)
-      : owner_(owner), source_(source), contents_(std::move(contents)) {
+      : owner_(&owner), source_(&source), contents_(std::move(contents)) {
     contents_->SetDelegate(this);
 
     widget_ = std::make_unique<views::Widget>();
@@ -291,9 +298,19 @@ class Peek final : public content::WebContentsDelegate,
     if (contents_) {
       contents_->SetDelegate(nullptr);
     }
+    // A parent-driven native close can destroy the view tree before the
+    // deferred Peek deletion runs. Release its WebContents while it is alive.
+    if (web_view_) {
+      web_view_->SetWebContents(nullptr);
+    }
+    web_view_ = nullptr;
+    title_ = nullptr;
+    origin_ = nullptr;
     if (widget_) {
       widget_->Hide();
     }
+    owner_ = nullptr;
+    source_ = nullptr;
   }
 
   // content::WebContentsDelegate:
@@ -424,7 +441,7 @@ class Peek final : public content::WebContentsDelegate,
     }
     const GURL& url = contents_->GetVisibleURL();
     const std::u16string origin = url_formatter::FormatUrlForSecurityDisplay(
-        url, url_formatter::SchemeDisplay::OMIT_HTTP_AND_HTTPS);
+        url, url_formatter::SchemeDisplay::SHOW);
     const std::u16string title = contents_->GetTitle();
     title_->SetText(title.empty() ? origin : title);
     origin_->SetText(origin);
@@ -432,8 +449,8 @@ class Peek final : public content::WebContentsDelegate,
     origin_->SetTooltipText(base::UTF8ToUTF16(url.possibly_invalid_spec()));
   }
 
-  const raw_ref<PeekSource> owner_;
-  const raw_ref<content::WebContents> source_;
+  raw_ptr<PeekSource> owner_;
+  raw_ptr<content::WebContents> source_;
   std::unique_ptr<content::WebContents> contents_;
   std::unique_ptr<views::Widget> widget_;
   raw_ptr<views::WebView> web_view_ = nullptr;
@@ -583,9 +600,10 @@ bool IsSource(content::WebContents* contents) {
 content::WebContents* MaybeShowNewContents(
     content::WebContents* source,
     std::unique_ptr<content::WebContents>& new_contents,
+    const GURL& target_url,
     WindowOpenDisposition disposition,
     bool user_gesture) {
-  if (!new_contents || !user_gesture ||
+  if (!new_contents || !user_gesture || !target_url.SchemeIsHTTPOrHTTPS() ||
       disposition != WindowOpenDisposition::NEW_FOREGROUND_TAB) {
     return nullptr;
   }

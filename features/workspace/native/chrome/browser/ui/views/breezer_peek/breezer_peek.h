@@ -39,6 +39,7 @@ bool IsSource(content::WebContents* contents);
 content::WebContents* MaybeShowNewContents(
     content::WebContents* source,
     std::unique_ptr<content::WebContents>& new_contents,
+    const GURL& target_url,
     WindowOpenDisposition disposition,
     bool user_gesture);
 

@@ -495,7 +495,7 @@ def _peek_replacements():
                 '  // Breezer: a new foreground tab from a favourite\'s tab opens in a peek.\n'
                 '  if (content::WebContents* const peek =\n'
                 '          breezer_peek::MaybeShowNewContents(\n'
-                '              source, new_contents, disposition, user_gesture)) {\n'
+                '              source, new_contents, target_url, disposition, user_gesture)) {\n'
                 '    return peek;\n'
                 '  }\n'
                 '  FullscreenController* fullscreen_controller =\n',
