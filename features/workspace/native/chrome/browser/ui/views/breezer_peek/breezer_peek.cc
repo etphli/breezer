@@ -18,6 +18,7 @@
 #include "base/scoped_multi_source_observation.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
+#include "chrome/app/vector_icons/vector_icons.h"
 #include "components/input/native_web_keyboard_event.h"
 #include "components/tabs/public/tab_interface.h"
 #include "components/url_formatter/elide_url.h"
@@ -52,18 +53,22 @@
 #include "ui/gfx/text_constants.h"
 #include "ui/views/accessibility/view_accessibility.h"
 #include "ui/views/background.h"
+#include "ui/views/border.h"
 #include "ui/views/controls/button/image_button.h"
 #include "ui/views/controls/button/image_button_factory.h"
-#include "ui/views/controls/button/md_text_button.h"
+#include "ui/views/controls/highlight_path_generator.h"
 #include "ui/views/controls/label.h"
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/controls/webview/unhandled_keyboard_event_handler.h"
 #include "ui/views/controls/webview/webview.h"
 #include "ui/views/layout/box_layout.h"
+#include "ui/views/style/typography.h"
 #include "ui/views/view.h"
+#include "ui/views/view_class_properties.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/widget/widget_observer.h"
 #include "url/gurl.h"
+#include "url/url_constants.h"
 
 namespace breezer_peek {
 
@@ -72,9 +77,10 @@ namespace {
 constexpr int kMargin = 32;
 constexpr int kMaxCardSide = 920;
 constexpr int kMinCardSide = 280;
-constexpr int kToolbarHeight = 44;
+constexpr int kToolbarHeight = 36;
+constexpr int kToolbarButtonSize = 28;
 constexpr float kCardRadius = 12;
-constexpr SkColor kScrimColor = SkColorSetA(SK_ColorBLACK, 0x66);
+constexpr SkColor kScrimColor = SkColorSetA(SK_ColorBLACK, 0x4D);
 
 bool IsEscape(const input::NativeWebKeyboardEvent& event) {
   return event.GetType() == input::NativeWebKeyboardEvent::Type::kRawKeyDown &&
@@ -96,6 +102,40 @@ gfx::Rect CardBounds(const gfx::Rect& area) {
 }
 
 class Peek;
+
+// A round icon button in the peek's toolbar. Its object name lets UI DevTools
+// tell Expand and Close apart.
+class PeekToolbarButton : public views::ImageButton {
+  METADATA_HEADER(PeekToolbarButton, views::ImageButton)
+
+ public:
+  PeekToolbarButton(PressedCallback callback,
+                    const gfx::VectorIcon& icon,
+                    int icon_size,
+                    std::string object_name,
+                    const std::u16string& accessible_name,
+                    const std::u16string& tooltip)
+      : views::ImageButton(std::move(callback)),
+        object_name_(std::move(object_name)) {
+    views::ConfigureVectorImageButton(this);
+    // Colour ids, so the icon follows light, dark and custom themes.
+    views::SetImageFromVectorIconWithColor(
+        this, icon, icon_size, {ui::kColorIcon, ui::kColorIconDisabled});
+    views::InstallCircleHighlightPathGenerator(this);
+    SetPreferredSize(gfx::Size(kToolbarButtonSize, kToolbarButtonSize));
+    SetAccessibleName(accessible_name);
+    SetTooltipText(tooltip);
+  }
+
+  // views::View:
+  std::string GetObjectName() const override { return object_name_; }
+
+ private:
+  const std::string object_name_;
+};
+
+BEGIN_METADATA(PeekToolbarButton)
+END_METADATA
 
 // Lives on a tab's WebContents: whether the tab is a favourite's live tab,
 // and the peek it currently shows. Destroying the tab destroys its peek.
@@ -206,49 +246,50 @@ class Peek final : public content::WebContentsDelegate,
     root->SetCard(card);
     card->SetBackground(views::CreateRoundedRectBackground(
         ui::kColorDialogBackground, kCardRadius));
+    // A hairline keeps the card's edge clear when page and scrim are dark.
+    card->SetBorder(
+        views::CreateRoundedRectBorder(1, kCardRadius, ui::kColorBubbleBorder));
     auto* const card_layout =
         card->SetLayoutManager(std::make_unique<views::BoxLayout>(
             views::BoxLayout::Orientation::kVertical));
 
-    // Toolbar: what is loading, then Expand and Close at the top right.
+    // Toolbar: where the page is, then Expand and Close at the top right.
     auto* const toolbar = card->AddChildView(std::make_unique<views::View>());
     toolbar->SetPreferredSize(gfx::Size(0, kToolbarHeight));
     auto* const toolbar_layout =
         toolbar->SetLayoutManager(std::make_unique<views::BoxLayout>(
             views::BoxLayout::Orientation::kHorizontal,
-            gfx::Insets::TLBR(0, 16, 0, 8), 6));
+            gfx::Insets::TLBR(0, 14, 0, 4), 4));
     toolbar_layout->set_cross_axis_alignment(
         views::BoxLayout::CrossAxisAlignment::kCenter);
 
-    title_ = toolbar->AddChildView(std::make_unique<views::Label>());
-    title_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
-    title_->SetElideBehavior(gfx::ELIDE_TAIL);
+    not_secure_ =
+        toolbar->AddChildView(std::make_unique<views::Label>(u"Not secure"));
+    not_secure_->SetTextStyle(views::style::STYLE_BODY_3_MEDIUM);
+    not_secure_->SetEnabledColor(ui::kColorLabelForegroundSecondary);
+    not_secure_->SetProperty(views::kMarginsKey,
+                             gfx::Insets::TLBR(0, 0, 0, 2));
     origin_ = toolbar->AddChildView(std::make_unique<views::Label>());
+    origin_->SetTextStyle(views::style::STYLE_BODY_3);
     origin_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
     origin_->SetElideBehavior(gfx::ELIDE_HEAD);
     origin_->SetEnabledColor(ui::kColorLabelForegroundSecondary);
-    toolbar_layout->SetFlexForView(title_, 2);
     toolbar_layout->SetFlexForView(origin_, 1);
 
-    auto* const expand = toolbar->AddChildView(
-        std::make_unique<views::MdTextButton>(
-            base::BindRepeating(&Peek::Expand, weak_factory_.GetWeakPtr()),
-            u"Expand"));
-    expand->SetStyle(ui::ButtonStyle::kTonal);
-    expand->SetTooltipText(u"Open as a tab");
-
-    auto close = views::CreateVectorImageButtonWithNativeTheme(
+    toolbar->AddChildView(std::make_unique<PeekToolbarButton>(
+        base::BindRepeating(&Peek::Expand, weak_factory_.GetWeakPtr()),
+        kOpenInFullIcon, 14, "BreezerPeekExpand", u"Expand preview",
+        u"Open as a tab"));
+    toolbar->AddChildView(std::make_unique<PeekToolbarButton>(
         base::BindRepeating(&Peek::Dismiss, weak_factory_.GetWeakPtr()),
-        vector_icons::kCloseIcon, 16);
-    close->SetTooltipText(u"Close peek");
-    close->SetAccessibleName(u"Close peek");
-    toolbar->AddChildView(std::move(close));
+        vector_icons::kCloseIcon, 16, "BreezerPeekClose", u"Close peek",
+        u"Close peek"));
 
     web_view_ = card->AddChildView(
         std::make_unique<views::WebView>(contents_->GetBrowserContext()));
     web_view_->SetWebContents(contents_.get());
     web_view_->holder()->SetNativeViewCornerRadii(
-        gfx::RoundedCornersF(0, 0, kCardRadius, kCardRadius));
+        gfx::RoundedCornersF(0, 0, kCardRadius - 1, kCardRadius - 1));
     card_layout->SetFlexForView(web_view_, 1);
     UpdateTitle();
 
@@ -279,7 +320,7 @@ class Peek final : public content::WebContentsDelegate,
       web_view_->SetWebContents(nullptr);
     }
     web_view_ = nullptr;
-    title_ = nullptr;
+    not_secure_ = nullptr;
     origin_ = nullptr;
     widget_.reset();
     if (contents_) {
@@ -304,7 +345,7 @@ class Peek final : public content::WebContentsDelegate,
       web_view_->SetWebContents(nullptr);
     }
     web_view_ = nullptr;
-    title_ = nullptr;
+    not_secure_ = nullptr;
     origin_ = nullptr;
     if (widget_) {
       widget_->Hide();
@@ -436,17 +477,21 @@ class Peek final : public content::WebContentsDelegate,
   }
 
   void UpdateTitle() {
-    if (!title_ || !contents_) {
+    if (!origin_ || !contents_) {
       return;
     }
+    // One line: the page's origin, formatted for security display (IDN-safe).
+    // "https://" is implied; plain http keeps its scheme and a "Not secure"
+    // tag. The title is in the tooltip rather than repeated beside it.
     const GURL& url = contents_->GetVisibleURL();
-    const std::u16string origin = url_formatter::FormatUrlForSecurityDisplay(
-        url, url_formatter::SchemeDisplay::SHOW);
+    const bool not_secure = url.SchemeIs(url::kHttpScheme);
+    not_secure_->SetVisible(not_secure);
+    origin_->SetText(url_formatter::FormatUrlForSecurityDisplay(
+        url, not_secure ? url_formatter::SchemeDisplay::SHOW
+                        : url_formatter::SchemeDisplay::OMIT_CRYPTOGRAPHIC));
     const std::u16string title = contents_->GetTitle();
-    title_->SetText(title.empty() ? origin : title);
-    origin_->SetText(origin);
-    title_->SetTooltipText(title);
-    origin_->SetTooltipText(base::UTF8ToUTF16(url.possibly_invalid_spec()));
+    const std::u16string spec = base::UTF8ToUTF16(url.possibly_invalid_spec());
+    origin_->SetTooltipText(title.empty() ? spec : title + u"\n" + spec);
   }
 
   raw_ptr<PeekSource> owner_;
@@ -454,7 +499,7 @@ class Peek final : public content::WebContentsDelegate,
   std::unique_ptr<content::WebContents> contents_;
   std::unique_ptr<views::Widget> widget_;
   raw_ptr<views::WebView> web_view_ = nullptr;
-  raw_ptr<views::Label> title_ = nullptr;
+  raw_ptr<views::Label> not_secure_ = nullptr;
   raw_ptr<views::Label> origin_ = nullptr;
   views::UnhandledKeyboardEventHandler unhandled_keyboard_event_handler_;
   std::vector<base::CallbackListSubscription> tab_subscriptions_;

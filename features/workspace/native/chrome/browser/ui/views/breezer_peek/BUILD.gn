@@ -15,6 +15,7 @@ source_set("breezer_peek") {
 
   deps = [
     "//base",
+    "//chrome/app/vector_icons",
     "//components/input",
     "//components/tabs:public",
     "//components/url_formatter",
