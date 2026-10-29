@@ -4,7 +4,8 @@ const { installContextBackground } = await import('../../features/ai/extension/c
 const { ContextHostController } = await import('../../features/ai/host/context-controller.mjs').catch(() => ({}));
 const tick = () => new Promise(resolve => setImmediate(resolve));
 async function waitFor(predicate) {
-  for (let i = 0; i < 100; i++) { if (predicate()) return; await tick(); }
+  const deadline = performance.now() + 2000;
+  while (performance.now() < deadline) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 1)); }
   assert.fail('Expected asynchronous test step did not start');
 }
 const event = () => ({ listeners: [], addListener(fn) { this.listeners.push(fn); }, removeListener(fn) { this.listeners = this.listeners.filter(x => x !== fn); }, fire(...args) { for (const fn of this.listeners) fn(...args); } });
@@ -24,7 +25,11 @@ function browser() {
 async function command(p, type, fields = {}) {
   const id = `r${p.messages.length}`;
   p.onMessage.fire({ id, type, ...fields });
-  for (let i = 0; i < 30; i++) { await tick(); const result = p.messages.find(m => m.id === id); if (result) return result; }
+  const deadline = performance.now() + 2000;
+  while (performance.now() < deadline) {
+    const result = p.messages.find(m => m.id === id); if (result) return result;
+    await new Promise(resolve => setTimeout(resolve, 1));
+  }
   throw new Error('Missing command response');
 }
 

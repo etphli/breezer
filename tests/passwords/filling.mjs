@@ -36,7 +36,7 @@ try {
   const classes = []; const walk = node => { if (node.attributes) classes.push(node.attributes); for (const child of node.children || []) walk(child); }; walk(tree.root);
   report.popupClasses = classes.filter(value => /Autofill|Popup|Suggestion/.test(JSON.stringify(value)));
   await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter');
-  await page.waitForFunction(() => document.querySelector('#password').value === 'Dummy-only-123!', { timeout: 5000 });
+  await page.waitForFunction(() => document.querySelector('#password').value === 'Dummy-only-123!', null, { timeout: 5000 });
   report.checks.passwordFieldSelectionFilledDummy = true;
   report.status = 'passed';
 } catch (error) { report.status = 'failed'; report.error = error.message; process.exitCode = 1; }

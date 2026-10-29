@@ -165,3 +165,7 @@ test('custom colour applies to panels and is cleared when selecting a preset', (
   assert.equal(root.dataset.tone, 'mint');
   assert.equal(root.style['--custom-seed'], undefined);
 });
+
+test('custom panel colours drive its actual page and paper surfaces', () => {
+  assert.match(css, /:root\[data-tone="custom"\] \{ --page: var\(--air\); --paper: var\(--card\);/);
+});
