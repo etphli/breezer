@@ -21,6 +21,8 @@ Open **Settings** from the sidebar footer, choose **Settings** from the browser 
 - Space names, colors, and order.
 - New-tab placement and close-button behavior.
 
+On first visit, a **Bring your Chrome data to Breezer** card sits above the settings. **Import bookmarks and history** opens the native import dialog (`chrome://settings/importData`), where an installed Google Chrome can be chosen as the source for bookmarks and history. **Show password steps** expands the Chrome CSV guide in Passwords. The card never reads Chrome files or credentials and never reports that an import succeeded; the user checks results in the native pages. **Hide** stores `{ dismissed: true }` under `settings.onboarding.v1` in `chrome.storage.local`, and open Settings tabs hide the card too. After that, the browser import stays in **More browser settings** and the password guide stays in **Passwords**.
+
 Appearance choices apply to the profile. Space colors identify spaces within the sidebar. The **More browser settings** section opens native categories, including page fonts, search, privacy, site permissions, autofill, downloads, accessibility, and system settings. **All native browser settings** opens `chrome://settings/` directly. The browser menu, Command comma, and general native Settings actions open the workspace hub when its component extension is enabled. Native category routes and the fallback for builds without the extension remain available.
 
 Space membership is restored by matching saved URLs when the match is unambiguous. If identical restored URLs belonged to different spaces, Breezer keeps the pages open in the default space rather than assigning another window's saved membership.

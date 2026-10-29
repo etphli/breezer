@@ -7,6 +7,7 @@ import {
 } from './workspace-store.js';
 import { mountPasswords } from './passwords.js';
 import { mountContextSettings } from './context-settings.js';
+import { mountOnboarding } from './settings-onboarding.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -71,7 +72,9 @@ function setRadioValue(group, value) {
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
-  mountPasswords({ container: $('password-settings'), api });
+  const passwords = mountPasswords({ container: $('password-settings'), api });
+  const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords });
+  addEventListener('pagehide', () => onboarding.dispose(), { once: true });
   if (typeof api.runtime?.connect === 'function') {
     mountUpdates(api);
     mountOrganato(api);

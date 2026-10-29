@@ -47,12 +47,13 @@
       <header class="settings-head">
         <img src="icon128.png" width="40" height="40" alt="">
         <div>
-          <h1>Settings</h1>
+          <h1 id="settings-title" tabindex="-1">Settings</h1>
           <p>Customize Breezer and open browser settings by category.</p>
         </div>
       </header>
 
       <p id="bridge-note" class="bridge-note" role="status" hidden></p>
+      <div id="settings-onboarding"></div>
 
       <section class="settings-section" aria-labelledby="layout-heading">
         <h2 id="layout-heading">Layout</h2>
@@ -123,7 +124,7 @@
         <div class="setting-row">
           <label class="setting-label" for="custom-theme-color">Custom color<small>Create a theme for the browser and sidebar.</small></label>
           <input id="custom-theme-color" type="color" value="#23866b">
-          <button id="custom-theme-apply" type="button">Apply color</button>
+          <button id="custom-theme-apply" class="button" type="button">Apply color</button>
         </div>
         <div class="setting-row">
           <div class="setting-label"><span id="mode-label">Appearance</span><small>System follows your Mac.</small></div>
@@ -168,19 +169,39 @@
       <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading">
         <h2 id="organato-heading">New tab and Organato</h2>
         <p class="section-note">Connect Organato to see deadlines and let Breezer AI manage the items you ask it to. Your API key stays in macOS Keychain.</p>
-        <label><input id="dashboard-enabled" type="checkbox" checked> Use the Breezer new-tab dashboard</label><br>
-        <label><input id="organato-enabled" type="checkbox" checked> Show Organato on the dashboard</label><br>
-        <label><input id="organato-ai" type="checkbox" checked> Allow the AI sidebar to read and update Organato</label>
-        <div class="setting-row"><label for="organato-key">Organato API key</label><input id="organato-key" type="password" autocomplete="off" placeholder="org_…"><button id="organato-connect" type="button">Connect</button><button id="organato-disconnect" type="button">Disconnect</button></div>
-        <p class="section-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A read-only key can display them.</p>
-        <p id="organato-status" role="status" aria-live="polite"></p>
+        <div class="setting-row">
+          <label class="setting-label" for="dashboard-enabled">Breezer new-tab dashboard<small>Open new tabs on Breezer’s dashboard instead of a blank page.</small></label>
+          <input id="dashboard-enabled" class="toggle" type="checkbox" checked>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="organato-enabled">Organato on the dashboard<small>Show upcoming exams, assignments, and to-dos.</small></label>
+          <input id="organato-enabled" class="toggle" type="checkbox" checked>
+        </div>
+        <div class="setting-row">
+          <label class="setting-label" for="organato-ai">Organato in the AI sidebar<small>Let Breezer AI read and update Organato when you ask it to.</small></label>
+          <input id="organato-ai" class="toggle" type="checkbox" checked>
+        </div>
+        <div class="key-field">
+          <label for="organato-key">Organato API key</label>
+          <div class="key-row">
+            <input id="organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="organato-key-note">
+            <button id="organato-connect" class="button primary" type="button">Connect</button>
+            <button id="organato-disconnect" class="button subtle" type="button">Disconnect</button>
+          </div>
+          <p id="organato-key-note" class="field-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A read-only key can display them.</p>
+        </div>
+        <p id="organato-status" class="status-line" role="status" aria-live="polite"></p>
       </section>
       <section id="update-settings" class="settings-section" aria-labelledby="update-heading">
         <h2 id="update-heading">Breezer updates</h2>
         <p class="section-note">Check for stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</p>
-        <p id="update-status" role="status" aria-live="polite">Ready to check for updates.</p>
-        <button id="update-check" type="button">Check for updates</button>
-        <button id="update-install" type="button" hidden>Update and restart</button>
+        <div class="update-row">
+          <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
+          <div class="update-actions">
+            <button id="update-check" class="button" type="button">Check for updates</button>
+            <button id="update-install" class="button primary" type="button" hidden>Update and restart</button>
+          </div>
+        </div>
       </section>
 
       <section class="settings-section" aria-labelledby="browser-heading">
@@ -199,6 +220,7 @@
           <li><button data-url="chrome://settings/system">System</button></li>
           <li><button data-url="chrome://settings/reset">Reset settings</button></li>
           <li><button data-url="chrome://settings/help">About Breezer</button></li>
+          <li><button data-url="chrome://settings/importData">Import bookmarks and history</button></li>
           <li><button data-url="chrome://settings/">All native browser settings</button></li>
           <li><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button></li>
           <li><button data-url="chrome://bookmarks">Bookmarks</button></li>

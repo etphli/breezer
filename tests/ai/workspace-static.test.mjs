@@ -5,7 +5,7 @@ import { TONES } from '../../features/ai/extension/workspace-store.js';
 
 const dir = new URL('../../features/ai/extension/', import.meta.url);
 const read = (name) => readFileSync(new URL(name, dir), 'utf8');
-const files = ['workspace.html', 'workspace.css', 'workspace.js', 'workspace-store.js', 'settings.js'];
+const files = ['workspace.html', 'workspace.css', 'workspace.js', 'workspace-store.js', 'settings.js', 'settings-onboarding.js'];
 
 test('workspace files never parse HTML from strings or load remote resources', () => {
   for (const name of files) {

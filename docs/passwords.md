@@ -41,7 +41,7 @@ passwords.dispose();
 
 `createPasswordActions({api}).open(destination)` exposes the same fixed routes without rendering. It rejects unknown destinations. `browserImport` is available to a general browser-data import component, but is deliberately not presented as password import.
 
-The main Settings page mounts this component in its Passwords section. It does not create another settings page.
+The main Settings page mounts this component in its Passwords section. It does not create another settings page. The first-run card in `settings-onboarding.js` receives the returned handle and calls `showImport()` for **Show password steps**, and uses `createPasswordActions` only for the `browserImport` route, labelled as bookmarks and history.
 
 ## Native preparation
 
