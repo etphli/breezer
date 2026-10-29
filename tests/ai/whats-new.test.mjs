@@ -66,7 +66,8 @@ test('keeps minor-release features and appends honest patch improvements', () =>
   assert.match(text, /Update 1.1.1/);
   assert.match(text, /Bookmarks appear on new and blank tabs by default/);
   assert.match(text, /Organato exams and assignments share one Upcoming list/);
-  assert.match(text, /Double-click a frequently visited shortcut/);
+  assert.match(text, /Remove a frequently visited shortcut with its Remove button or right-click menu/);
+  assert.match(text, /Links open immediately/);
   assert.match(text, /without sending automatically/);
   // Touch ID is listed as not done, never as fixed or available.
   assert.match(text, /Not yet: Touch ID passkeys/);
