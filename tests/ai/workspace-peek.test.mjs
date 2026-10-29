@@ -79,6 +79,7 @@ function installFixture({ seed, withPeekApi }) {
       onCreated: event('tabs.onCreated'), onUpdated: event('tabs.onUpdated'), onRemoved: event('tabs.onRemoved'),
       onActivated: event('tabs.onActivated'), onMoved: event('tabs.onMoved'), onAttached: event('tabs.onAttached'),
       onDetached: event('tabs.onDetached'), onReplaced: event('tabs.onReplaced'),
+      async create(props) { const tab = { id: Math.max(...fx.tabs.map(tab => tab.id)) + 1, windowId: 7, ...copy(props) }; fx.tabs.push(tab); return copy(tab); },
       async query() { return copy(fx.tabs); },
       async get(id) { return copy(fx.tabs.find((tab) => tab.id === id)); },
       async update(id, props) { return copy(Object.assign(fx.tabs.find((tab) => tab.id === id), props)); },
@@ -191,4 +192,30 @@ test('builds without setPeekSources keep the sidebar working', { skip }, async (
     await browser.close();
     server.close();
   }
+});
+
+test('failed tab icons show a fallback and recover when a valid icon arrives', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const { page, errors } = await openSidebar(browser, `http://127.0.0.1:${server.address().port}`);
+    const publish = async value => page.evaluate(favIconUrl => {
+      const tab = window.fx.tabs.find(item => item.id === 2);
+      tab.favIconUrl = favIconUrl;
+      window.fx.fire('tabs.onUpdated', 2, { favIconUrl }, tab);
+    }, value);
+    const icon = page.locator('[data-key="t:2"] .favicon');
+    await publish('data:image/png;base64,invalid');
+    await page.waitForFunction(() => {
+      const icon = document.querySelector('[data-key="t:2"] .favicon');
+      return icon?.textContent === 'G' && !icon.querySelector('img');
+    }, null, { timeout: 3000 });
+    await publish('data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="green"/></svg>'));
+    await icon.locator('img').waitFor();
+    assert.equal(await icon.evaluate(node => node.classList.contains('blank')), false);
+    await page.waitForFunction(() => document.querySelector('[data-key="t:2"] .favicon img')?.naturalWidth > 0);
+    await page.getByRole('button', { name: 'What’s new in Breezer' }).click();
+    await page.waitForFunction(() => window.fx.tabs.some(tab => tab.url.endsWith('/whats-new.html')));
+    assert.deepEqual(errors, []);
+  } finally { await browser.close(); await new Promise(done => server.close(done)); }
 });

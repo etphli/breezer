@@ -175,15 +175,15 @@ def check_peek(tree, added, idl, api):
     peek = added["chrome/browser/ui/views/breezer_peek/breezer_peek.cc"].read_text()
     throttle = peek.split("ThrottleCheckResult WillStartRequest()", 1)[1].split("return PROCEED;", 1)[0]
     for condition in ("ActiveSource(contents)", "IsInPrimaryMainFrame()", "IsRendererInitiated()",
-                      "WasInitiatedByLinkClick()", "HasUserGesture()", "IsPost()", "IsHistory()",
+                      "HasUserGesture()", "IsPost()", "IsHistory()",
                       "GetReloadType() != content::ReloadType::NONE", "PAGE_TRANSITION_LINK",
                       "ShouldPeekSameTabNavigation("):
         require(condition in throttle, f"Same-tab Peek is missing the {condition} condition")
-    require("SameDomainOrHost(" in peek and "SchemeIsHTTPOrHTTPS()" in peek,
-            "Same-tab Peek must be limited to cross-site http(s) links")
+    require("current_url.GetWithoutRef() != destination_url.GetWithoutRef()" in peek and "SchemeIsHTTPOrHTTPS()" in peek,
+            "Same-tab Peek must include same-site pages while excluding fragment-only changes")
     show_new = peek.split("content::WebContents* MaybeShowNewContents(", 1)[1]
     require("disposition != WindowOpenDisposition::NEW_FOREGROUND_TAB" in show_new and
-            "!user_gesture" in show_new and "!target_url.SchemeIsHTTPOrHTTPS()" in show_new,
+            "!user_gesture" in show_new and "target_url.SchemeIsHTTPOrHTTPS()" in show_new and "target_url.IsAboutBlank()" in show_new,
             "Only user-initiated foreground tabs may open a peek")
     require("!peek_source->enabled() || peek_source->forwarding()" in peek and
             "IsOffTheRecord()" in peek and "tab->IsActivated()" in peek,

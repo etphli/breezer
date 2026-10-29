@@ -436,17 +436,28 @@ function faviconFor(tab, url) {
 
 function updateFavicon(holder, tab, url, title) {
   const src = faviconFor(tab, url);
-  let img = holder.querySelector('img');
-  if (src) {
-    holder.textContent = '';
-    if (!img) img = el('img', '', { alt: '', width: '16', height: '16', draggable: 'false' });
-    if (img.getAttribute('src') !== src) img.src = src;
-    holder.append(img);
-  } else {
+  const fallback = () => {
     const page = urlOf(tab) || url || '';
     holder.textContent = /^chrome:\/\/newtab/.test(page) || !page ? '' : (hostLabel(page)[0] || title[0] || '·').toUpperCase();
     holder.classList.toggle('blank', !holder.textContent);
+  };
+  if (!src || holder.dataset.failedIcon === src) {
+    fallback();
+    return;
   }
+  let img = holder.querySelector('img');
+  if (!img) {
+    img = el('img', '', { alt: '', width: '16', height: '16', draggable: 'false' });
+    holder.replaceChildren(img);
+  }
+  holder.classList.remove('blank');
+  img.onerror = () => {
+    if (holder.contains(img) && img.getAttribute('src') === src) {
+      holder.dataset.failedIcon = src;
+      fallback();
+    }
+  };
+  if (img.getAttribute('src') !== src) img.src = src;
 }
 
 export const favoriteTitle = (entry) => entry.customTitle || entry.title || hostLabel(entry.url);
@@ -1433,6 +1444,7 @@ function bindSidebar() {
   $('clear-today').addEventListener('click', () => void clearToday());
   $('space-menu').addEventListener('click', (event) => { event.stopPropagation(); if ($('menu').hidden) openSpaceMenu(); else closeMenu(); });
   $('add-space').addEventListener('click', () => void createSpace());
+  $('open-updates').addEventListener('click', () => void api.tabs.create({ url: api.runtime.getURL('whats-new.html') }));
   $('open-settings').addEventListener('click', () => void openSettings());
   $('spaces').addEventListener('click', (event) => {
     const dot = event.target.closest('.space-dot');

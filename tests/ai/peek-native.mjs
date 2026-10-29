@@ -55,7 +55,9 @@ const server = createServer((request, response) => {
       <a id="blank" href="/target?via=blank" target="_blank">Same-site link in a new tab</a>
       <a id="open" href="#" onclick="window.open('/target?via=open'); return false">window.open()</a>
       <a id="cross" href="http://localhost:${port}/target?via=cross">Cross-site link</a>
-      <a id="same" href="/second">Same-site link</a>`);
+      <a id="same" href="/second">Same-site link</a>
+      <button id="create" onclick="location.assign('/target?via=create')">Create a document</button>
+      <button id="blank-create" onclick="const w=window.open('about:blank'); if(w) w.location='/target?via=blank-create'">Create in a new window</button>`);
     return;
   }
   const title = path === '/target' ? 'Peek target' : path === '/second' ? 'Peek second page' : 'Peek fixture';
@@ -314,15 +316,22 @@ try {
   await worker.evaluate(id => chrome.tabs.remove(id), background.id);
   pass('backgroundClickUnchanged', 'Cmd-click still opened an ordinary background tab');
 
-  // ------------------------------------------------------------ same-site links, back/forward and explicit navigation stay in the tab
+  // Leaving a favourite's home on the same site must also open Peek.
   await page.click('#same');
-  await waitFor('same-site link navigates the favourite', async () => /\/second$/.test((await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url));
-  await waitFor('same-site document committed', () => page.evaluate(`location.pathname === '/second' && document.readyState === 'complete'`));
-  assert.equal(await peekTarget(/\/second$/), null);
-  await writeFile(join(evidence, 'navigation-history-' + Date.now() + '.json'), JSON.stringify(await page.send('Page.getNavigationHistory'), null, 2));
-  await worker.evaluate(id => chrome.tabs.goBack(id), favourite.id);
-  await waitFor('back returns to home', async () => (await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url === home);
-  await waitFor('back home document committed', () => page.evaluate(`location.href === ${JSON.stringify(home)} && document.readyState === 'complete'`));
+  await waitFor('same-site document opens Peek', () => peekTarget(/\/second$/));
+  assert.equal((await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url, home);
+  await nativeClick('BreezerPeekClose');
+  await waitFor('same-site preview closes', async () => !(await peekTarget(/\/second$/)));
+  pass('sameSiteContainment', 'a same-site document link opened Peek and preserved the favourite home');
+  for (const via of ['create', 'blank-create']) {
+    await page.click('#' + via);
+    await waitFor(`scripted ${via} opens Peek`, () => peekTarget(new RegExp(`/target\\?via=${via}$`)));
+    assert.equal((await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url, home);
+    assert.equal((await tabs()).length, baseline);
+    await nativeClick('BreezerPeekClose');
+    await waitFor(`scripted ${via} closes`, async () => !(await peekTarget(new RegExp(`/target\\?via=${via}$`))));
+  }
+  pass('scriptedDocumentCreation', 'gesture-driven document navigation and initially blank new windows opened Peek without moving the favourite');
   const typed = `http://localhost:${server.address().port}/second?typed`;
   // tabs.update is renderer-initiated in Chromium and can mark history entries
   // skippable without activation. Page.navigate exercises browser navigation.
@@ -333,7 +342,7 @@ try {
   await writeFile(join(evidence, 'navigation-history-' + Date.now() + '.json'), JSON.stringify(await page.send('Page.getNavigationHistory'), null, 2));
   await worker.evaluate(id => chrome.tabs.goBack(id), favourite.id);
   await waitFor('back to home again', async () => (await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url === home);
-  pass('ordinaryNavigationUnchanged', 'same-site link, back, and browser-initiated cross-site navigation stayed in the favourite tab');
+  pass('ordinaryNavigationUnchanged', 'browser-initiated navigation and back stayed in the favourite tab');
 
   // ------------------------------------------------------------ saved identity
   const tile = await host.evaluate(`document.querySelector('#favorites .tile')?.getAttribute('title')`);

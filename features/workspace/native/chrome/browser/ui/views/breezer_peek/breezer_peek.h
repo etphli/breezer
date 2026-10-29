@@ -50,7 +50,7 @@ content::WebContents* MaybeShowURL(content::WebContents* source,
                                    const content::OpenURLParams& params);
 
 // Adds the throttle that keeps a marked tab on its site: a user's link click
-// in the tab's main frame to another site opens in a peek instead.
+// in the tab's main frame to a different page opens in a peek instead.
 void MaybeCreateAndAddNavigationThrottle(
     content::NavigationThrottleRegistry& registry);
 

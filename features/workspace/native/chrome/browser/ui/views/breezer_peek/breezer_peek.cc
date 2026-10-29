@@ -35,7 +35,6 @@
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "content/public/browser/web_contents_user_data.h"
-#include "net/base/registry_controlled_domains/registry_controlled_domain.h"
 #include "third_party/blink/public/mojom/window_features/window_features.mojom.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/accessibility/ax_enums.mojom.h"
@@ -585,8 +584,8 @@ content::WebContents* ShowURLInPeek(content::WebContents* source,
   return peek_source->Show(std::move(contents), *widget);
 }
 
-// Keeps a favourite's tab on its site: a link click to another site opens in
-// a peek, and the tab stays where it is.
+// Keeps a favourite at home when a user opens another page, including a
+// document or subject on the same site.
 class PeekNavigationThrottle final : public content::NavigationThrottle {
  public:
   explicit PeekNavigationThrottle(content::NavigationThrottleRegistry& registry)
@@ -596,7 +595,7 @@ class PeekNavigationThrottle final : public content::NavigationThrottle {
     content::NavigationHandle* const handle = navigation_handle();
     content::WebContents* const contents = handle->GetWebContents();
     if (!ActiveSource(contents) || !BrowserWidgetFor(contents) || !handle->IsInPrimaryMainFrame() ||
-        !handle->IsRendererInitiated() || !handle->WasInitiatedByLinkClick() ||
+        !handle->IsRendererInitiated() ||
         !handle->HasUserGesture() || handle->IsPost() ||
         handle->IsHistory() || handle->IsSameDocument() ||
         handle->GetReloadType() != content::ReloadType::NONE ||
@@ -655,7 +654,9 @@ content::WebContents* MaybeShowNewContents(
     const GURL& target_url,
     WindowOpenDisposition disposition,
     bool user_gesture) {
-  if (!new_contents || !user_gesture || !target_url.SchemeIsHTTPOrHTTPS() ||
+  if (!new_contents || !user_gesture ||
+      !(target_url.SchemeIsHTTPOrHTTPS() || target_url.is_empty() ||
+        target_url.IsAboutBlank()) ||
       disposition != WindowOpenDisposition::NEW_FOREGROUND_TAB) {
     return nullptr;
   }
@@ -690,9 +691,7 @@ bool ShouldPeekSameTabNavigation(const GURL& current_url,
                                  const GURL& destination_url) {
   return current_url.SchemeIsHTTPOrHTTPS() &&
          destination_url.SchemeIsHTTPOrHTTPS() &&
-         !net::registry_controlled_domains::SameDomainOrHost(
-             current_url, destination_url,
-             net::registry_controlled_domains::INCLUDE_PRIVATE_REGISTRIES);
+         current_url.GetWithoutRef() != destination_url.GetWithoutRef();
 }
 
 }  // namespace breezer_peek
