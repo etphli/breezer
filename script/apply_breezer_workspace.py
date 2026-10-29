@@ -256,7 +256,11 @@ def _layout_controller_replacements():
             '      prefs->SetBoolean(prefs::kHeliumVerticalRightAligned, false);\n'
             '    }\n'
             '    if (CanInitializePref(prefs, bookmarks::prefs::kShowBookmarkBar)) {\n'
-            '      prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar, true);\n'
+            '      prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar, false);\n'
+            '    }\n'
+            '    if (CanInitializePref(prefs, bookmarks::prefs::kBookmarkBarVisibilityState)) {\n'
+            '      // Persisted Chromium mode: only show on the new-tab page.\n'
+            '      prefs->SetInteger(bookmarks::prefs::kBookmarkBarVisibilityState, 1);\n'
             '    }\n'
             '    if (CanInitializePref(prefs, prefs::kVerticalTabsUncollapsedWidth)) {\n'
             '      prefs->SetInteger(prefs::kVerticalTabsUncollapsedWidth,\n'
@@ -448,9 +452,21 @@ def _window_features_replacements():
     ]
 
 
+def _bookmark_bar_replacements():
+    return [(
+        '  return NewTabUI::IsNewTab(url) || NewTabPageUI::IsNewTabPageOrigin(url) ||\n',
+        '  return url.IsAboutBlank() ||\n'
+        '         (url.SchemeIs("chrome-extension") &&\n'
+        f'          url.host_piece() == "{COMPONENT_ID}" &&\n'
+        '          url.path_piece() == "/newtab.html") ||\n'
+        '         NewTabUI::IsNewTab(url) || NewTabPageUI::IsNewTabPageOrigin(url) ||\n',
+    )]
+
+
 def replacements():
     return sidebar_frame.merge({
         REGION: _region_replacements(),
+        "chrome/browser/ui/bookmarks/bookmark_bar_controller.cc": _bookmark_bar_replacements(),
         "components/performance_manager/freezing/freezer.cc": _freezer_replacements(),
         LAYOUT_CONTROLLER: _layout_controller_replacements(),
         VERTICAL_CONTROLLER: _vertical_controller_replacements(),

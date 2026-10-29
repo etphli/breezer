@@ -95,7 +95,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       assert.equal(await page.title(), 'What\'s new in Breezer 1.1.0');
       assert.equal(await page.textContent('h1'), 'A little more your browser');
       assert.deepEqual(await page.$$eval('.feature h3', (nodes) => nodes.map((node) => node.textContent)),
-        ['Organato on your new tab', 'Your own theme color', 'Password suggestions that stay put', 'Updates from Settings']);
+        ['Bookmarks where you want them', 'A calmer Settings page', 'Bring Chrome along', 'An AI sidebar that helps you recover']);
       // Cream, even though the OS asks for dark.
       assert.equal(await page.$eval('body', (body) => getComputedStyle(body).backgroundColor), 'rgb(243, 235, 218)');
       for (const selector of ['h1', '.lede', '.feature-copy p', '.pending p', '.button.primary', '.button.secondary']) {

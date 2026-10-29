@@ -67,3 +67,5 @@ The workspace documents ship inside the built-in Breezer extension. A native vie
 The private `chrome.breezerPrivate` API exposes bounded appearance choices and explicit current-page authorization. It accepts no arbitrary preference names, scripts, or destination window IDs. The extension retains its existing `activeTab` permission.
 
 The workspace and assistant native overlays have separate preparation fingerprints. A first application keeps `out/`; a matching fingerprint verifies the installed source. A changed fingerprint refuses reuse until an explicit migration has been verified. Imported upstream source and tests remain intact.
+
+The bookmarks bar defaults to **New tabs only**, including Breezer’s new-tab page and `about:blank`. Settings also offers **Always** and **Hidden**. The native bridge uses Chromium’s `bookmark_bar.visibility_state`; its older `showBookmarks` boolean remains a compatibility alias.

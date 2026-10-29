@@ -101,12 +101,14 @@ test('every appearance control maps to a declared bridge field and renders the r
   });
   const fields = new Set([...page.document.querySelectorAll('[data-field]')].map((node) => node.dataset.field));
   fields.add('theme');
+  // showBookmarks is a legacy bridge alias; the UI uses the three-way mode.
+  fields.add('showBookmarks');
   assert.deepEqual([...fields].sort(), Object.keys(DEFAULT_APPEARANCE).sort(), 'every native appearance field has exactly one control');
   for (const [field, value] of [['layout', 'top'], ['sidebarMode', 'autoHide'], ['colorMode', 'dark']]) {
     assert.equal(page.radio(field, value).getAttribute('aria-checked'), 'true', field);
   }
   assert.equal(page.document.querySelector('#theme-swatches [data-value="dusk"]').getAttribute('aria-checked'), 'true');
-  for (const id of ['show-bookmarks', 'centered-address-bar', 'minimal-url', 'show-load-progress', 'frameless', 'always-show-top-bar']) {
+  for (const id of ['centered-address-bar', 'minimal-url', 'show-load-progress', 'frameless', 'always-show-top-bar']) {
     assert.equal(page.$(id).getAttribute('aria-checked'), 'false', id);
   }
   assert.equal(page.$('always-show-sidebar').getAttribute('aria-checked'), 'true');
@@ -118,7 +120,7 @@ test('every appearance control maps to a declared bridge field and renders the r
 
 test('switches, radios and swatches each write one field and persist the reported value', async () => {
   const page = await openSettings();
-  for (const id of ['show-bookmarks', 'centered-address-bar', 'minimal-url', 'show-load-progress', 'frameless', 'always-show-sidebar', 'always-show-top-bar']) {
+  for (const id of ['centered-address-bar', 'minimal-url', 'show-load-progress', 'frameless', 'always-show-sidebar', 'always-show-top-bar']) {
     const control = page.$(id);
     const field = control.dataset.field;
     const before = page.bridge.native[field];
@@ -127,6 +129,9 @@ test('switches, radios and swatches each write one field and persist the reporte
     assert.deepEqual(page.sets().at(-1), { [field]: !before }, id);
     assert.equal(control.getAttribute('aria-checked'), String(!before), id);
   }
+  userClick(page.radio('bookmarkBarMode', 'hidden'));
+  await settle();
+  assert.equal(page.bridge.native.bookmarkBarMode, 'hidden');
   userClick(page.radio('layout', 'top'));
   await settle();
   assert.equal(page.bridge.native.layout, 'top');
@@ -159,7 +164,7 @@ test('keyboard steps on a slider keep focus and are all applied while a save is 
 test('saving one setting does not disable or dim the others', async () => {
   const page = await openSettings();
   page.bridge.hold = true;
-  userClick(page.$('show-bookmarks'));
+  userClick(page.radio('bookmarkBarMode', 'always'));
   await settle();
   assert.equal(page.$('frameless').getAttribute('aria-disabled'), 'false');
   assert.equal(page.radio('layout', 'top').getAttribute('aria-disabled'), 'false');

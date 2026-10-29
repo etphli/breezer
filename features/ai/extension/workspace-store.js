@@ -14,7 +14,7 @@ export const MAX_SPACES = 9;
 export const DEFAULT_PREFS = Object.freeze({ newTabPosition: 'bottom', closeButton: 'hover' });
 export const DEFAULT_APPEARANCE = Object.freeze({
   layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system',
-  showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15,
+  showBookmarks: true, bookmarkBarMode: 'newTab', sidebarWidth: 240, sidebarFontSize: 15,
   centeredAddressBar: true, minimalUrl: true, showLoadProgress: true,
   frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true,
 });
@@ -29,6 +29,7 @@ const APPEARANCE_FIELDS = {
   theme: (value) => TONES.includes(value) || (typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value)),
   colorMode: (value) => value === 'system' || value === 'light' || value === 'dark',
   showBookmarks: (value) => typeof value === 'boolean',
+  bookmarkBarMode: (value) => ['newTab', 'always', 'hidden'].includes(value),
   sidebarFontSize: (value) => Number.isInteger(value) && value >= SIDEBAR_FONT_SIZE.min && value <= SIDEBAR_FONT_SIZE.max,
   centeredAddressBar: (value) => typeof value === 'boolean',
   minimalUrl: (value) => typeof value === 'boolean',

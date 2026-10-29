@@ -13,6 +13,12 @@ namespace breezerPrivate {
     autoHide
   };
 
+  enum BookmarkBarMode {
+    newTab,
+    always,
+    hidden
+  };
+
   enum ColorMode {
     system,
     light,
@@ -25,6 +31,7 @@ namespace breezerPrivate {
     DOMString theme;
     ColorMode colorMode;
     boolean showBookmarks;
+    BookmarkBarMode bookmarkBarMode;
     long sidebarWidth;
     // Integer pixels, 12..20 inclusive, default 15.
     long sidebarFontSize;
@@ -42,6 +49,7 @@ namespace breezerPrivate {
     DOMString? theme;
     ColorMode? colorMode;
     boolean? showBookmarks;
+    BookmarkBarMode? bookmarkBarMode;
     long? sidebarWidth;
     // Integer pixels, 12..20 inclusive, default 15.
     long? sidebarFontSize;

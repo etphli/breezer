@@ -77,8 +77,12 @@
           <input id="sidebar-width" type="range" min="200" max="360" step="4" value="240" data-field="sidebarWidth">
         </div>
         <div class="setting-row">
-          <div class="setting-label"><span id="bookmarks-label">Bookmarks bar</span><small>Shown across the top of the window.</small></div>
-          <button id="show-bookmarks" class="switch" role="switch" aria-checked="true" aria-labelledby="bookmarks-label" data-field="showBookmarks"><span aria-hidden="true"></span></button>
+          <div class="setting-label" id="bookmarks-label">Bookmarks bar<small>Choose when your bookmarks appear.</small></div>
+          <div class="segmented" role="radiogroup" aria-labelledby="bookmarks-label" data-field="bookmarkBarMode">
+            <button type="button" role="radio" aria-checked="true" data-value="newTab" tabindex="0">New tabs only</button>
+            <button type="button" role="radio" aria-checked="false" data-value="always" tabindex="-1">Always</button>
+            <button type="button" role="radio" aria-checked="false" data-value="hidden" tabindex="-1">Hidden</button>
+          </div>
         </div>
         <div class="setting-row">
           <div class="setting-label"><span id="centered-address-bar-label">Centered address bar</span><small>Keep the address field centered in the top bar.</small></div>

@@ -47,6 +47,7 @@ struct Appearance {
   std::string theme;       // one of breezer_workspace::kThemes
   std::string color_mode;  // "system" | "light" | "dark"
   bool show_bookmarks = true;
+  std::string bookmark_bar_mode = "newTab";
   int sidebar_width = breezer_workspace::kDefaultSidebarWidth;
   int sidebar_font_size = breezer_workspace::kDefaultSidebarFontSize;
   bool centered_address_bar = true;
@@ -107,7 +108,8 @@ bool IsKnownAppearanceKey(std::string_view key) {
     }
   }
   return key == "layout" || key == "sidebarMode" || key == "theme" ||
-         key == "colorMode" || key == "showBookmarks" || key == "sidebarWidth" ||
+         key == "colorMode" || key == "showBookmarks" ||
+         key == "bookmarkBarMode" || key == "sidebarWidth" ||
          key == "sidebarFontSize";
 }
 
@@ -145,7 +147,9 @@ Appearance ReadAppearance(Profile* profile) {
     }
   }
 
-  result.show_bookmarks = prefs->GetBoolean(bookmarks::prefs::kShowBookmarkBar);
+  const int bookmark_state = prefs->GetInteger(bookmarks::prefs::kBookmarkBarVisibilityState);
+  result.bookmark_bar_mode = bookmark_state == 0 ? "always" : bookmark_state == 2 ? "hidden" : "newTab";
+  result.show_bookmarks = result.bookmark_bar_mode != "hidden";
   result.sidebar_width =
       std::clamp(prefs->GetInteger(prefs::kVerticalTabsUncollapsedWidth),
                  breezer_workspace::kMinSidebarWidth,
@@ -182,6 +186,7 @@ base::DictValue AppearanceToValue(const Appearance& appearance) {
   result.Set("theme", appearance.theme);
   result.Set("colorMode", appearance.color_mode);
   result.Set("showBookmarks", appearance.show_bookmarks);
+  result.Set("bookmarkBarMode", appearance.bookmark_bar_mode);
   result.Set("sidebarWidth", appearance.sidebar_width);
   result.Set("sidebarFontSize", appearance.sidebar_font_size);
   for (const auto& setting : kBooleanAppearancePrefs) {
@@ -262,6 +267,16 @@ bool ParseAppearancePatch(const base::DictValue& patch,
       return false;
     }
     appearance->show_bookmarks = value->GetBool();
+    appearance->bookmark_bar_mode = appearance->show_bookmarks ? "always" : "hidden";
+  }
+  if (const base::Value* value = patch.Find("bookmarkBarMode")) {
+    const std::string* mode = value->GetIfString();
+    if (!mode || (*mode != "newTab" && *mode != "always" && *mode != "hidden")) {
+      *error = "Invalid value for bookmarkBarMode.";
+      return false;
+    }
+    appearance->bookmark_bar_mode = *mode;
+    appearance->show_bookmarks = *mode != "hidden";
   }
   if (const base::Value* value = patch.Find("sidebarWidth")) {
     if (!value->is_int() ||
@@ -312,8 +327,9 @@ bool CheckAppearanceWritable(Profile* profile,
     *error = "The tab layout is managed by your organization.";
     return false;
   }
-  if (patch.contains("showBookmarks") &&
-      !IsUserModifiable(prefs, bookmarks::prefs::kShowBookmarkBar)) {
+  if ((patch.contains("showBookmarks") || patch.contains("bookmarkBarMode")) &&
+      (!IsUserModifiable(prefs, bookmarks::prefs::kShowBookmarkBar) ||
+       !IsUserModifiable(prefs, bookmarks::prefs::kBookmarkBarVisibilityState))) {
     *error = "The bookmarks bar is managed by your organization.";
     return false;
   }
@@ -382,9 +398,11 @@ void ApplyAppearance(Profile* profile,
           return true;
         });
   }
-  if (patch.contains("showBookmarks")) {
-    prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar,
-                      appearance.show_bookmarks);
+  if (patch.contains("showBookmarks") || patch.contains("bookmarkBarMode")) {
+    const int state = appearance.bookmark_bar_mode == "always" ? 0 :
+                      appearance.bookmark_bar_mode == "hidden" ? 2 : 1;
+    prefs->SetInteger(bookmarks::prefs::kBookmarkBarVisibilityState, state);
+    prefs->SetBoolean(bookmarks::prefs::kShowBookmarkBar, state == 0);
   }
   if (patch.contains("theme")) {
     prefs->SetString(breezer_workspace::prefs::kTheme, appearance.theme);

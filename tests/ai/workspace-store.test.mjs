@@ -92,7 +92,7 @@ test('routes parse the explicit native window id', () => {
 });
 
 test('appearance defaults and validation match the native contract', () => {
-  assert.deepEqual(DEFAULT_APPEARANCE, { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true });
+  assert.deepEqual(DEFAULT_APPEARANCE, { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, bookmarkBarMode: 'newTab', sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true });
   assert.deepEqual(normalizeAppearance(undefined), DEFAULT_APPEARANCE);
   assert.deepEqual(normalizeAppearance({ layout: 'top', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 999 }),
     { ...DEFAULT_APPEARANCE, layout: 'top', theme: 'dusk', colorMode: 'dark', showBookmarks: false, sidebarWidth: 360 });

@@ -185,7 +185,7 @@ function installFixture({ seed, bridge, bridgeFails }) {
     const fields = {
       layout: (v) => ['sidebar', 'top'].includes(v), theme: (v) => ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite'].includes(v),
       sidebarMode: (v) => ['expanded', 'compact', 'autoHide'].includes(v),
-      colorMode: (v) => ['system', 'light', 'dark'].includes(v), showBookmarks: (v) => typeof v === 'boolean',
+      bookmarkBarMode: (v) => ['newTab', 'always', 'hidden'].includes(v), colorMode: (v) => ['system', 'light', 'dark'].includes(v), showBookmarks: (v) => typeof v === 'boolean',
       sidebarWidth: (v) => Number.isInteger(v) && v >= 200 && v <= 360,
       sidebarFontSize: (v) => Number.isInteger(v) && v >= 12 && v <= 20,
       ...Object.fromEntries(['centeredAddressBar', 'minimalUrl', 'showLoadProgress', 'frameless', 'alwaysShowSidebar', 'alwaysShowTopBar'].map(key => [key, v => typeof v === 'boolean'])),
@@ -451,7 +451,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await settings.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
     assert.equal(await settings.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.getByRole('radio', { name: 'Sidebar' }).getAttribute('aria-checked'), 'true');
-    assert.equal(await settings.getByRole('switch', { name: 'Bookmarks bar' }).getAttribute('aria-checked'), 'true');
+    assert.equal(await settings.locator('[data-field="bookmarkBarMode"] [data-value="newTab"]').getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('#sidebar-width').inputValue(), '240');
     assert.equal(await settings.title(), 'Settings');
     assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
@@ -483,8 +483,8 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await settings.getByRole('radio', { name: 'Dusk' }).focus();
     await settings.keyboard.press('ArrowRight');
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'rose');
-    await settings.getByRole('switch', { name: 'Bookmarks bar' }).click();
-    await settings.waitForFunction(() => window.fx.appearance.showBookmarks === false);
+    await settings.locator('[data-field="bookmarkBarMode"] [data-value="hidden"]').click();
+    await settings.waitForFunction(() => window.fx.appearance.bookmarkBarMode === 'hidden');
     await settings.getByRole('radio', { name: 'At top' }).click();
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].prefs.newTabPosition === 'top');
     await settings.getByRole('textbox', { name: 'Name of space 2' }).fill('Home');

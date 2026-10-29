@@ -12,7 +12,7 @@ import { mountOnboarding } from './settings-onboarding.js';
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
   layout: 'tab layout', sidebarMode: 'sidebar behavior', theme: 'theme',
-  colorMode: 'appearance', showBookmarks: 'bookmarks bar', sidebarWidth: 'sidebar width',
+  colorMode: 'appearance', showBookmarks: 'bookmarks bar', bookmarkBarMode: 'bookmarks bar', sidebarWidth: 'sidebar width',
   sidebarFontSize: 'sidebar font size', centeredAddressBar: 'centered address bar',
   minimalUrl: 'minimal URL', showLoadProgress: 'loading progress',
   frameless: 'frameless mode', alwaysShowSidebar: 'sidebar visibility',
@@ -20,7 +20,7 @@ const FIELD_LABELS = {
 };
 const FIELD_ERRORS = {
   layout: 'layout-error', sidebarMode: 'layout-error', sidebarWidth: 'layout-error',
-  showBookmarks: 'layout-error', theme: 'theme-error', colorMode: 'theme-error',
+  showBookmarks: 'layout-error', bookmarkBarMode: 'layout-error', theme: 'theme-error', colorMode: 'theme-error',
   sidebarFontSize: 'typography-error', centeredAddressBar: 'layout-error',
   minimalUrl: 'layout-error', showLoadProgress: 'layout-error', frameless: 'layout-error',
   alwaysShowSidebar: 'layout-error', alwaysShowTopBar: 'layout-error',

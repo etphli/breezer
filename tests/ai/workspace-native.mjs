@@ -405,9 +405,10 @@ try {
   const appearance = async () => { const result = await settingsCall('getAppearance'); assert.ok(result.ok, result.error); return result.value; };
   const initialAppearance = await appearance();
   observe('initialAppearance', initialAppearance);
-  assert.deepEqual(Object.keys(initialAppearance).sort(), ['alwaysShowSidebar', 'alwaysShowTopBar', 'centeredAddressBar', 'colorMode', 'frameless', 'layout', 'minimalUrl', 'showBookmarks', 'showLoadProgress', 'sidebarFontSize', 'sidebarMode', 'sidebarWidth', 'theme']);
+  assert.deepEqual(Object.keys(initialAppearance).sort(), ['alwaysShowSidebar', 'alwaysShowTopBar', 'bookmarkBarMode', 'centeredAddressBar', 'colorMode', 'frameless', 'layout', 'minimalUrl', 'showBookmarks', 'showLoadProgress', 'sidebarFontSize', 'sidebarMode', 'sidebarWidth', 'theme']);
   assert.equal(initialAppearance.layout, 'sidebar');
-  assert.equal(initialAppearance.showBookmarks, freshProfile);
+  assert.equal(initialAppearance.bookmarkBarMode, 'newTab');
+  assert.equal(initialAppearance.showBookmarks, true);
   assert.equal(initialAppearance.sidebarWidth, freshProfile ? 240 : 300);
   assert.equal(initialAppearance.sidebarFontSize, 15);
   for (const field of ['centeredAddressBar', 'minimalUrl', 'showLoadProgress', 'frameless', 'alwaysShowTopBar']) {
@@ -466,17 +467,18 @@ try {
   // Bookmark bar: cross-check the native pref through chrome://settings.
   const prefsPage = await context.newPage();
   await prefsPage.goto('chrome://settings/appearance');
-  const bookmarkPref = () => prefsPage.evaluate(() => new Promise(done => chrome.settingsPrivate.getPref('bookmark_bar.show_on_all_tabs', pref => done(pref.value))));
-  const startBookmarks = (await appearance()).showBookmarks;
-  assert.equal(await bookmarkPref(), startBookmarks);
+  const bookmarkPref = () => prefsPage.evaluate(() => new Promise(done => chrome.settingsPrivate.getPref('bookmark_bar.visibility_state', pref => done(pref.value))));
+  const startMode = (await appearance()).bookmarkBarMode;
   await settings.bringToFront();
-  await settings.locator('#show-bookmarks').click();
-  await waitFor('bookmark toggle via native API', async () => (await appearance()).showBookmarks === !startBookmarks);
-  await waitFor('bookmark pref in chrome://settings', async () => (await bookmarkPref()) === !startBookmarks);
-  await settings.locator('#show-bookmarks').click();
-  await waitFor('bookmark pref restored', async () => (await bookmarkPref()) === startBookmarks && (await appearance()).showBookmarks === startBookmarks);
+  for (const [mode, value] of [['always', 0], ['newTab', 1], ['hidden', 2]]) {
+    await settings.locator(`[data-field="bookmarkBarMode"] [data-value="${mode}"]`).click();
+    await waitFor('bookmark mode via native API', async () => (await appearance()).bookmarkBarMode === mode);
+    await waitFor('bookmark visibility pref', async () => (await bookmarkPref()) === value);
+  }
+  await settings.locator(`[data-field="bookmarkBarMode"] [data-value="${startMode}"]`).click();
+  await waitFor('bookmark mode restored', async () => (await appearance()).bookmarkBarMode === startMode);
   await prefsPage.close();
-  pass('bookmarkPref', `switch toggled bookmark_bar.show_on_all_tabs ${startBookmarks}→${!startBookmarks}→${startBookmarks}, confirmed by chrome.settingsPrivate`);
+  pass('bookmarkPref', 'Always, new tabs only and hidden round-trip through the real native preference');
 
   // Sidebar width: the hosted view should resize by the same delta.
   const widthBefore = (await hostA.evaluate(snapshotExpression)).width;
