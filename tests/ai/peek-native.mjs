@@ -119,7 +119,7 @@ try {
     executablePath: `${app}/Contents/MacOS/Breezer`,
     headless: false,
     ignoreDefaultArgs: ['--enable-automation', '--disable-extensions', '--disable-component-extensions-with-background-pages', '--no-sandbox'],
-    args: ['--no-first-run', '--no-default-browser-check', `--enable-ui-devtools=${uiPort}`],
+    args: ['--no-first-run', '--no-default-browser-check', `--enable-ui-devtools=${uiPort}`, '--enable-features=ui-debug-tools-enable-synthetic-events'],
     viewport: null,
   });
   const worker = context.serviceWorkers().find(item => item.url() === `${origin}/background.js`)
@@ -134,14 +134,18 @@ try {
     uiPending.delete(message.id); clearTimeout(request.timer);
     message.error ? request.reject(new Error(message.error.message)) : request.resolve(message.result);
   };
+  // On macOS DOM.enable subscribes to widgets created after the first tree.
+  await ui('DOM.getDocument');
+  await ui('DOM.enable');
   async function nativeControl(className) {
-    const { root } = await ui('DOM.getDocument');
-    const flatten = node => [node, ...(node.children || []).flatMap(flatten)];
-    const widget = flatten(root).find(node => node.attributes?.includes('BreezerPeek'));
-    assert.ok(widget, 'The native Peek widget must exist');
-    const controls = flatten(widget).filter(node => node.attributes?.includes(className));
-    assert.equal(controls.length, 1, `One ${className} in this Peek`);
-    return controls[0];
+    return waitFor(`one native Peek control: ${className}`, async () => {
+      const { root } = await ui('DOM.getDocument');
+      const flatten = node => [node, ...(node.children || []).flatMap(flatten)];
+      const widget = flatten(root).find(node => node.attributes?.includes('BreezerPeek'));
+      if (!widget) return null;
+      const controls = flatten(widget).filter(node => node.attributes?.includes(className));
+      return controls.length === 1 ? controls[0] : null;
+    });
   }
   async function nativeClick(className, x = 8, y = 12) {
     const node = await nativeControl(className);
@@ -170,8 +174,10 @@ try {
         const timer = setTimeout(() => { pending.delete(`${sessionId}:${id}`); reject(new Error(`Timed out waiting for ${method}.`)); }, 15000);
         pending.set(`${sessionId}:${id}`, value => { clearTimeout(timer); done(value); });
       });
-      await cdp.send('Target.sendMessageToTarget', { sessionId, message: JSON.stringify({ id, method, params }) });
-      const result = await response;
+      const [result] = await Promise.all([
+        response,
+        cdp.send('Target.sendMessageToTarget', { sessionId, message: JSON.stringify({ id, method, params }) }),
+      ]);
       if (result.error) throw new Error(result.error.message);
       return result.result;
     };
@@ -208,6 +214,9 @@ try {
   // ------------------------------------------------------------ make a favourite through the sidebar
   const hostInfo = await waitFor('sidebar host', async () => (await targets()).find(target => target.url.startsWith(hostPrefix)));
   const host = await attach(hostInfo.targetId);
+  // initSidebar binds storage listeners before its first model render. Do not
+  // seed the fixture while initial reconciliation can still overwrite it.
+  await waitFor('sidebar first model render', () => host.evaluate('Boolean(document.querySelector("#today [data-key]"))'));
   await worker.evaluate(async url => {
     const { 'workspace.v1': store } = await chrome.storage.local.get('workspace.v1');
     const next = store || { version: 1, rev: 0, spaces: [{ id: 'space-default', name: 'Personal', tone: 'mint', pinned: [] }], favorites: [], prefs: {} };
@@ -308,13 +317,20 @@ try {
   // ------------------------------------------------------------ same-site links, back/forward and explicit navigation stay in the tab
   await page.click('#same');
   await waitFor('same-site link navigates the favourite', async () => /\/second$/.test((await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url));
+  await waitFor('same-site document committed', () => page.evaluate(`location.pathname === '/second' && document.readyState === 'complete'`));
   assert.equal(await peekTarget(/\/second$/), null);
+  await writeFile(join(evidence, 'navigation-history-' + Date.now() + '.json'), JSON.stringify(await page.send('Page.getNavigationHistory'), null, 2));
   await worker.evaluate(id => chrome.tabs.goBack(id), favourite.id);
   await waitFor('back returns to home', async () => (await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url === home);
+  await waitFor('back home document committed', () => page.evaluate(`location.href === ${JSON.stringify(home)} && document.readyState === 'complete'`));
   const typed = `http://localhost:${server.address().port}/second?typed`;
-  await worker.evaluate(([id, url]) => chrome.tabs.update(id, { url }), [favourite.id, typed]);
+  // tabs.update is renderer-initiated in Chromium and can mark history entries
+  // skippable without activation. Page.navigate exercises browser navigation.
+  await page.send('Page.navigate', { url: typed, transitionType: 'typed' });
   await waitFor('browser-initiated cross-site navigation stays in the tab', async () => (await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url === typed);
+  await waitFor('explicit document committed', () => page.evaluate(`location.href === ${JSON.stringify(typed)} && document.readyState === 'complete'`));
   await stays('explicit navigation must not open a peek', async () => Boolean(await peekTarget(/\?typed$/)), 800);
+  await writeFile(join(evidence, 'navigation-history-' + Date.now() + '.json'), JSON.stringify(await page.send('Page.getNavigationHistory'), null, 2));
   await worker.evaluate(id => chrome.tabs.goBack(id), favourite.id);
   await waitFor('back to home again', async () => (await worker.evaluate(id => chrome.tabs.get(id), favourite.id)).url === home);
   pass('ordinaryNavigationUnchanged', 'same-site link, back, and browser-initiated cross-site navigation stayed in the favourite tab');
