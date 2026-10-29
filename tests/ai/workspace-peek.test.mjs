@@ -80,7 +80,17 @@ function installFixture({ seed, withPeekApi }) {
       onActivated: event('tabs.onActivated'), onMoved: event('tabs.onMoved'), onAttached: event('tabs.onAttached'),
       onDetached: event('tabs.onDetached'), onReplaced: event('tabs.onReplaced'),
       async create(props) { const tab = { id: Math.max(...fx.tabs.map(tab => tab.id)) + 1, windowId: 7, ...copy(props) }; fx.tabs.push(tab); return copy(tab); },
-      async query() { return copy(fx.tabs); },
+      async query() {
+        const snapshot = copy(fx.tabs);
+        if (seed.startupRace) {
+          seed.startupRace = false;
+          fx.tabs.forEach(tab => { tab.active = false; });
+          const tab = { id: 12, windowId: 7, index: fx.tabs.length, url: 'https://example.test/new', title: 'Opened during startup', active: true, pinned: false };
+          fx.tabs.push(tab);
+          (fx.listeners['tabs.onCreated'] || []).forEach(listener => listener(copy(tab)));
+        }
+        return snapshot;
+      },
       async get(id) { return copy(fx.tabs.find((tab) => tab.id === id)); },
       async update(id, props) { return copy(Object.assign(fx.tabs.find((tab) => tab.id === id), props)); },
       async remove(ids) {
@@ -217,5 +227,17 @@ test('failed tab icons show a fallback and recover when a valid icon arrives', {
     await page.getByRole('button', { name: 'What’s new in Breezer' }).click();
     await page.waitForFunction(() => window.fx.tabs.some(tab => tab.url.endsWith('/whats-new.html')));
     assert.deepEqual(errors, []);
+  } finally { await browser.close(); await new Promise(done => server.close(done)); }
+});
+
+
+test('a tab opened between the initial query and event subscription is shown', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.addInitScript(installFixture, { seed: { ...seed(), startupRace: true }, withPeekApi: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    await page.locator('[data-key="t:12"].active').waitFor({ timeout: 3000 });
   } finally { await browser.close(); await new Promise(done => server.close(done)); }
 });

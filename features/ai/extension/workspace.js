@@ -1347,6 +1347,8 @@ async function initSidebar(route) {
     : (active && spaceOfTab(store, state.records, active.id)) || store.spaces[0].id;
   saveWindowState();
   bindSidebar();
+  // Re-read after subscribing: tabs can open while initial reconciliation awaits.
+  await refreshTabs();
   draw();
   if (orphanPinned.length) void adoptPinned(orphanPinned);
 }
