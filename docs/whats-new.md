@@ -27,6 +27,12 @@ For `1.x.1`, `1.x.2` and subsequent patches, append an illustrated patch section
 
 Only bump published version metadata as part of preparing an actual release. Page-artwork work alone does not rewrite an already published DMG or authorize a local installation. The user currently requires an explicit request before changing their installed app.
 
+## Illustrated patch layout
+
+Each patch has a `.patch-lead` row for its main illustration and related notes, then a `.patch-pair` with two `.patch-group` blocks. Each group has a `.plate.patch-plate` figure, decorative `svg.art`, a heading and a `.notes` list. Both layouts stack at 720px. Artwork colors come from the page palette through the `.art` rules in `whats-new.css`.
+
+The 1.1.1 drawings explain new-tab changes, Chrome import and AI error recovery. The 1.1.2 drawings explain Peek, favourite tile states and equal-width shortcuts. Keep the descriptions beside the art so the meaning remains available to screen readers.
+
 ## Page contract
 
 - Load local assets only: system fonts, `icon128.png`, CSS/HTML artwork and inline SVG. No remote fonts, scripts, tracking or requests.

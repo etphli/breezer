@@ -30,7 +30,18 @@ Append a section using the live page's `.patch-notes` structure. Keep previous n
 <section class="patch-notes" aria-labelledby="patch-113-title">
   <p class="release">Update 1.1.3</p>
   <h2 id="patch-113-title">The change users will notice</h2>
-  <!-- Illustrated rows and the actual patch notes belong here. -->
+  <div class="patch-lead">
+    <figure class="plate patch-plate" aria-hidden="true">
+      <svg class="art" viewBox="0 0 320 232" focusable="false">
+        <!-- Original vector shapes explaining this change. -->
+      </svg>
+    </figure>
+    <div class="patch-copy">
+      <h3>Where the change appears</h3>
+      <ul class="notes"><li>Describe the shipped behavior.</li></ul>
+    </div>
+  </div>
+  <!-- Add a .patch-pair with .patch-group blocks for related smaller changes. -->
 </section>
 ```
 
