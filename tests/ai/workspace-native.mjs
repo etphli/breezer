@@ -626,19 +626,19 @@ try {
     assert.equal(saved.activeSpaceId, id);
   }
   pass('emptySpaceDotsViaRenderer', 'held clicks selected both Settings-created empty spaces, opened real tabs, and returned to the original space; physical macOS pointer routing is unverified');
-  await hostA.click(`document.getElementById('collapse')`, { holdMs: 120 });
-  await waitFor('footer compact control persisted', async () => (await appearance()).sidebarMode === 'compact');
-  // The preference changes before the animated native rail finishes resizing.
-  await waitFor('footer compact geometry', () => hostA.evaluate(`innerWidth >= 30 && innerWidth <= 60 && document.querySelector('#collapse').getAttribute('aria-label') === 'Expand sidebar'`));
-  await hostA.click(`document.getElementById('collapse')`, { holdMs: 120 });
-  await waitFor('footer expanded control persisted', async () => (await appearance()).sidebarMode === 'expanded');
-  await waitFor('footer expanded geometry', () => hostA.evaluate(`innerWidth >= 200 && document.querySelector('#collapse').getAttribute('aria-label') === 'Compact sidebar'`));
+  const initiallyPinned = (await appearance()).alwaysShowSidebar;
+  for (const pinned of [!initiallyPinned, initiallyPinned]) {
+    await hostA.click(`document.getElementById('collapse')`, { holdMs: 120 });
+    await waitFor('footer visibility preference persisted', async () => (await appearance()).alwaysShowSidebar === pinned);
+    await waitFor('footer pin state reflected', () => hostA.evaluate(`document.querySelector('#collapse').getAttribute('aria-pressed') === '${pinned}'`));
+    assert.equal((await appearance()).sidebarMode, 'expanded', 'Pin control must not switch to compact mode');
+  }
   await hostA.click(`document.getElementById('add-space')`, { holdMs: 120 });
   await waitFor('footer plus created a space', async () => (await spaceIds()).length === originalSpaces.length + 3);
   await waitFor('footer plus begins space rename', () => hostA.evaluate(`Boolean(document.querySelector('#space-name input'))`));
   await hostA.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
   await hostA.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-  pass('footerControlsViaRenderer', 'compact/expand persisted through the native API and plus created a space; Settings was exercised earlier');
+  pass('footerControlsViaRenderer', 'permanent visibility toggled both ways through the native API without changing sidebar mode; plus created a space; physical pointer routing remains unverified');
 
   // ---------------------------------------------------------------- window close releases its host
   await worker.evaluate(id => chrome.windows.remove(id), windowB);
