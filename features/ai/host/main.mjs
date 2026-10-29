@@ -30,7 +30,7 @@ if (process.argv.length === 3 && process.argv[2] === '--discover') {
     try {
       if (['update-check', 'update-install', 'update-status'].includes(message.type)) return updater.receive(message);
       if (['organato-view', 'organato-configure', 'organato-list'].includes(message.type)) {
-        const value = message.type === 'organato-view' ? await organato.view() : message.type === 'organato-configure' ? await organato.configure(message.settings || {}) : await organato.list();
+        const value = message.type === 'organato-view' ? await organato.view() : message.type === 'organato-configure' ? await organato.configure(message.settings || {}, stage => send({ type: 'organato-progress', id: message.id, stage })) : await organato.list();
         send({ type: 'organato-result', id: message.id, ok: true, value }); return;
       }
       await controller.receive(message);

@@ -406,24 +406,44 @@ export function mountUpdates(api) {
   return { dispose };
 }
 
-function mountOrganato(api) {
+export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
   const port = api.runtime.connect({ name: 'breezer-organato-settings' });
-  let next = 0;
-  const request = (type, settings) => port.postMessage({ id: String(++next), type, settings });
   const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
+  const controls = ['organato-connect', 'organato-disconnect', 'organato-key', ...Object.keys(mappings)];
+  let next = 0, pending, timer, closed = false;
+  const busy = value => { for (const id of controls) $(id).disabled = value; };
+  const finish = text => {
+    clearTimeout(timer); pending = null; busy(false);
+    if (text) $('organato-status').textContent = text;
+  };
+  const request = (type, settings) => {
+    if (closed || pending?.type === 'configure') return;
+    clearTimeout(timer);
+    pending = { id: String(++next), type };
+    busy(type === 'configure');
+    timer = setTimeout(() => finish('Organato connection timed out. Check your connection and try again.'), timeoutMs);
+    try { port.postMessage({ id: pending.id, type, settings }); }
+    catch { finish('Organato helper is unavailable. Reopen Settings to retry.'); }
+  };
   port.onMessage.addListener(message => {
-    if (!message.ok) { $('organato-status').textContent = message.error; return; }
+    if (closed || message.id !== pending?.id) return;
+    if (message.type === 'progress') {
+      $('organato-status').textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…';
+      return;
+    }
+    if (!message.ok) { finish(message.error); return; }
     for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
-    $('organato-status').textContent = message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.';
-    $('organato-key').value = '';
+    finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
   });
-  port.onDisconnect.addListener(() => { $('organato-status').textContent = 'Connection closed. Reopen Settings to retry.'; });
+  port.onDisconnect.addListener(() => { if (!closed) finish('Connection closed. Reopen Settings to retry.'); });
   for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));
   $('organato-connect').addEventListener('click', () => {
     const key = $('organato-key').value.trim(); $('organato-key').value = '';
     $('organato-status').textContent = 'Connecting to Organato…'; request('configure', { key });
   });
   $('organato-disconnect').addEventListener('click', () => request('configure', { disconnect: true }));
-  window.addEventListener('pagehide', () => port.disconnect(), { once: true });
+  const dispose = () => { closed = true; clearTimeout(timer); port.disconnect(); };
+  window.addEventListener('pagehide', dispose, { once: true });
   request('view');
+  return { dispose };
 }

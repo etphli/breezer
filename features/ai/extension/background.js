@@ -29,12 +29,12 @@ export function installBackground(api) {
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
     const native = api.runtime.connectNative(NATIVE_HOST), pending = new Map();
     let serial = 0, closed = false;
-    const ask = (type, values = {}) => new Promise((resolve, reject) => {
+    const ask = (type, values = {}, progress) => new Promise((resolve, reject) => {
       const id = `organato_${++serial}`;
-      const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); }, 65000);
-      pending.set(id, { resolve, reject, timer }); native.postMessage({ type, id, ...values });
+      const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); }, settings ? 90000 : 65000);
+      pending.set(id, { resolve, reject, timer, progress }); native.postMessage({ type, id, ...values });
     });
-    native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
+    native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; if (message.type === 'organato-progress') { request.progress?.(message.stage); return; } pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
     native.onDisconnect.addListener(() => { void api.runtime.lastError; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); } pending.clear(); });
     port.onMessage.addListener(message => {
       void (async () => {
@@ -42,7 +42,7 @@ export function installBackground(api) {
         let value;
         if (settings) {
           if (!['view', 'configure'].includes(message.type)) throw new Error('Unknown settings action.');
-          value = await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings });
+          value = await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); });
         } else {
           if (!['view', 'refresh'].includes(message.type)) throw new Error('Unknown new-tab action.');
           const config = await ask('organato-view');

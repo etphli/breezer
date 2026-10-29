@@ -67,8 +67,8 @@ test('describes the 1.1.0 features honestly', () => {
   assert.match(text, /Nothing is filled until you choose an account/);
   assert.match(text, /Check for updates button.*GitHub/);
   // Touch ID is listed as not done, never as fixed or available.
-  assert.match(text, /Not yet: Touch ID for passwords/);
-  assert.match(text, /Apple entitlement use Touch ID here, and Breezer doesn't have it yet/);
+  assert.match(text, /Not yet: Touch ID passkeys/);
+  assert.match(text, /Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements/);
   assert.doesNotMatch(text, /Touch ID (?:now|is now|works|is fixed|support)/i);
   assert.equal([...html.matchAll(/data-action="continue"/g)].length, 2);
   assert.equal([...html.matchAll(/>Open Settings</g)].length, 2);

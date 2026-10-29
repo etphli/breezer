@@ -24,6 +24,8 @@ export const keychain = {
     if (!keyPattern.test(key)) throw new Error('Enter a valid Organato API key.');
     // Pass the key on stdin, never in process arguments or an on-disk script.
     await security(['-i'], `add-generic-password -U -s ${SERVICE} -a breezer -w ${key}\n`);
+    const saved = await security(['find-generic-password', '-s', SERVICE, '-a', 'breezer', '-w']);
+    if (saved !== key) throw new Error('Organato key could not be saved in macOS Keychain.');
   },
   async remove() { await security(['delete-generic-password', '-s', SERVICE, '-a', 'breezer']).catch(() => {}); },
 };
@@ -45,34 +47,38 @@ export class Organato {
   constructor({ fetcher = fetch, secrets = keychain, configDirectory = CONFIG } = {}) { this.fetcher = fetcher; this.secrets = secrets; this.directory = configDirectory; }
   async config() { try { return { enabled: true, dashboardEnabled: true, allowAI: true, ...JSON.parse(await readFile(join(this.directory, 'organato.json'), 'utf8')) }; } catch { return { enabled: true, dashboardEnabled: true, allowAI: true }; } }
   async view() { return { ...await this.config(), connected: !!await this.secrets.get() }; }
-  configure(input) {
-    const operation = (this.configurationQueue || Promise.resolve()).then(() => this.configureNow(input));
+  configure(input, progress = () => {}) {
+    const operation = (this.configurationQueue || Promise.resolve()).then(() => this.configureNow(input, progress));
     this.configurationQueue = operation.catch(() => {});
     return operation;
   }
-  async configureNow(input) {
+  async configureNow(input, progress) {
+    let connected;
     if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('Invalid Organato settings.');
     for (const name of ['enabled', 'dashboardEnabled', 'allowAI']) {
       if (input[name] !== undefined && typeof input[name] !== 'boolean') throw new Error('Invalid Organato setting.');
     }
     if (input.key !== undefined) {
       if (!keyPattern.test(input.key)) throw new Error('Enter a valid Organato API key.');
+      progress('Checking your Organato key…');
       await this.request('/items?limit=1', 'GET', undefined, undefined, input.key);
+      progress('Saving your key in macOS Keychain. Approve a system prompt if shown.');
       await this.secrets.set(input.key);
+      connected = true;
     }
-    if (input.disconnect === true) await this.secrets.remove();
+    if (input.disconnect === true) { await this.secrets.remove(); connected = false; }
     const config = await this.config();
     for (const name of ['enabled', 'dashboardEnabled', 'allowAI']) if (input[name] !== undefined) { if (typeof input[name] !== 'boolean') throw new Error('Invalid Organato setting.'); config[name] = input[name]; }
     await mkdir(this.directory, { recursive: true, mode: 0o700 });
     const temporary = join(this.directory, `organato-${randomUUID()}.tmp`);
     await writeFile(temporary, JSON.stringify(config), { mode: 0o600 });
     await rename(temporary, join(this.directory, 'organato.json'));
-    return this.view();
+    return { ...config, connected: connected ?? !!await this.secrets.get() };
   }
   async request(path, method = 'GET', body, signal, suppliedKey) {
     const key = suppliedKey || await this.secrets.get();
     if (!key) throw new Error('Connect Organato in Breezer Settings first.');
-    const response = await this.fetcher(BASE + path, { method, redirect: 'error', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(20_000)]) : AbortSignal.timeout(20_000) });
+    const response = await this.fetcher(BASE + path, { method, redirect: 'error', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(10_000)]) : AbortSignal.timeout(10_000) });
     if (!response.ok) throw new Error(({ 401: 'Organato API key is invalid or expired.', 403: 'This Organato key is read-only. Use a read/write key to change items.', 409: 'This item changed in Organato. Read it again before updating.', 429: 'Organato rate limit reached. Try again in a minute.' })[response.status] || `Organato request failed (${response.status}).`);
     const text = await response.text(); if (text.length > 2_000_000) throw new Error('Organato response is too large.'); return JSON.parse(text);
   }
