@@ -31,7 +31,7 @@ Space membership is restored by matching saved URLs when the match is unambiguou
 
 A favorite keeps its saved title and icon while its tab browses. Its tile does not take on the live page's title or icon.
 
-A link from a favorite's live tab that would open a new tab opens in a **peek** instead. The live page shows in a centered, roughly square card above a tinted backdrop. The card's top bar shows the page title and site. **Expand** moves the same live page, with its scroll position, form input, and history, into an ordinary tab. Escape, the close button, a click on the backdrop, the page closing itself, or switching tabs closes the peek and discards the page.
+A link from a favorite's live tab that would open a new tab opens in a **peek** instead. The live page shows in a centered, roughly square card above a tinted backdrop. The card's top bar shows the page title and site. **Expand** moves the same live page, with its scroll position, form input, and history, into an ordinary tab. Escape, the close button, a click on the backdrop, the page closing itself, or switching tabs closes the peek and discards the page. The backdrop and then the card fade in over about 200 ms; the fade is skipped when macOS Reduce motion is on. Only opacity animates, so clicks land on the page where it is drawn from the first frame.
 
 The exact triggers, all only from a favorite's tab while it is the visible tab:
 
@@ -76,7 +76,7 @@ The migration records `breezer.workspace.appearance_defaults_version = 2`. It pr
 
 `node --test tests/ai/workspace-store.test.mjs tests/ai/workspace-static.test.mjs` checks JavaScript bounds and static safety. The existing `tests/ai/workspace-browser.test.mjs` drives the shipped page with a deterministic browser API fixture. `python3 -B script/check_breezer_workspace.py --no-cache` downloads a pinned source fixture into temporary storage and checks overlay application, idempotence, interrupted application, and anchor drift without reading or writing the shared cache.
 
-`tests/ai/workspace-peek.test.mjs` checks peek-source syncing and saved favorite identity in the sidebar fixture. `script/check_breezer_workspace.py` checks the Peek source hooks and trigger conditions. `node tests/ai/peek-native.mjs /path/Breezer.app` drives the compiled app. Its renderer input cannot press the native Expand or close buttons or the backdrop, so those remain manual checks.
+`tests/ai/workspace-peek.test.mjs` checks peek-source syncing and saved favorite identity in the sidebar fixture. `script/check_breezer_workspace.py` checks the Peek source hooks, trigger conditions and the opacity-only, reduced-motion-aware entrance. `node tests/ai/peek-native.mjs /path/Breezer.app` drives the compiled app. Its renderer input cannot press the native Expand or close buttons or the backdrop, so those remain manual checks.
 
 Native behavior requires a compiled Breezer app. `tests/ai/workspace-native.mjs` checks v1 saved choices by default. `BREEZER_TEST_FRESH_PROFILE=1` selects fresh defaults. Its settings checks include font boundaries and rejected mixed patches. Browser fixture and source checks do not prove native compilation, live policy enforcement, or window geometry.
 

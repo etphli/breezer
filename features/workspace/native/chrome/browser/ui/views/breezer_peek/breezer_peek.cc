@@ -18,6 +18,7 @@
 #include "base/scoped_multi_source_observation.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
+#include "base/time/time.h"
 #include "chrome/app/vector_icons/vector_icons.h"
 #include "components/input/native_web_keyboard_event.h"
 #include "components/tabs/public/tab_interface.h"
@@ -44,13 +45,17 @@
 #include "ui/base/page_transition_types.h"
 #include "ui/base/ui_base_types.h"
 #include "ui/color/color_id.h"
+#include "ui/compositor/layer.h"
 #include "ui/events/event.h"
 #include "ui/events/keycodes/keyboard_codes.h"
+#include "ui/gfx/animation/animation.h"
+#include "ui/gfx/animation/tween.h"
 #include "ui/gfx/geometry/insets.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/gfx/geometry/rounded_corners_f.h"
 #include "ui/gfx/text_constants.h"
 #include "ui/views/accessibility/view_accessibility.h"
+#include "ui/views/animation/animation_builder.h"
 #include "ui/views/background.h"
 #include "ui/views/border.h"
 #include "ui/views/controls/button/image_button.h"
@@ -80,6 +85,10 @@ constexpr int kToolbarHeight = 36;
 constexpr int kToolbarButtonSize = 28;
 constexpr float kCardRadius = 12;
 constexpr SkColor kScrimColor = SkColorSetA(SK_ColorBLACK, 0x4D);
+// Entrance: the scrim settles first, then the card fades up over it.
+constexpr base::TimeDelta kScrimFadeIn = base::Milliseconds(120);
+constexpr base::TimeDelta kCardFadeInDelay = base::Milliseconds(40);
+constexpr base::TimeDelta kCardFadeIn = base::Milliseconds(160);
 
 bool IsEscape(const input::NativeWebKeyboardEvent& event) {
   return event.GetType() == input::NativeWebKeyboardEvent::Type::kRawKeyDown &&
@@ -250,6 +259,14 @@ class Peek final : public content::WebContentsDelegate,
             &Peek::Dismiss, weak_factory_.GetWeakPtr())));
     auto* const card = root->AddChildView(std::make_unique<views::View>());
     root->SetCard(card);
+    // Opacity only: the page's native view takes input at its laid-out
+    // bounds, so a scale or slide would put clicks where the page is not.
+    const bool animate = gfx::Animation::ShouldRenderRichAnimation();
+    for (views::View* const view : {static_cast<views::View*>(root), card}) {
+      view->SetPaintToLayer();
+      view->layer()->SetFillsBoundsOpaquely(false);
+      view->layer()->SetOpacity(animate ? 0.f : 1.f);
+    }
     card->SetBackground(views::CreateRoundedRectBackground(
         ui::kColorDialogBackground, kCardRadius));
     // A hairline keeps the card's edge clear when page and scrim are dark.
@@ -314,6 +331,17 @@ class Peek final : public content::WebContentsDelegate,
 
     widget_->Show();
     web_view_->RequestFocus();
+    if (animate) {
+      // The layers own the animation and no callback is bound, so dismissal
+      // at any point simply drops it with the widget.
+      views::AnimationBuilder()
+          .Once()
+          .SetDuration(kScrimFadeIn)
+          .SetOpacity(root, 1.f, gfx::Tween::LINEAR_OUT_SLOW_IN)
+          .At(kCardFadeInDelay)
+          .SetDuration(kCardFadeIn)
+          .SetOpacity(card, 1.f, gfx::Tween::LINEAR_OUT_SLOW_IN);
+    }
   }
 
   Peek(const Peek&) = delete;

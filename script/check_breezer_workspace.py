@@ -200,6 +200,12 @@ def check_peek(tree, added, idl, api):
             "A dismissed peek must stop receiving callbacks before it is destroyed")
     require("iframe" not in peek.lower() and "disable-web-security" not in peek,
             "Peek must host a real WebContents, not a frame workaround")
+    entrance = peek.split("    widget_->Show();", 1)[1].split("\n  }\n", 1)[0]
+    require("gfx::Animation::ShouldRenderRichAnimation()" in peek and "if (animate)" in entrance,
+            "The Peek entrance must be skipped when the system asks for reduced motion")
+    require("SetOpacity(" in entrance and not any(
+                call in entrance for call in ("SetTransform", "SetBounds", "OnEnded", "OnAborted", "Unretained")),
+            "The Peek entrance must fade only, keeping page input where it is drawn, and bind no callbacks")
 
     require("static void setPeekSources(" in idl and "long[] tabIds" in idl,
             "Private API IDL does not declare setPeekSources")

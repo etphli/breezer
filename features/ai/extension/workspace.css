@@ -25,6 +25,9 @@
   --line: color-mix(in srgb, var(--ink) 11%, transparent);
   --hover: color-mix(in srgb, var(--ink) 7%, transparent);
   --press: color-mix(in srgb, var(--ink) 11%, transparent);
+  /* Drop shadows are always dark: --ink turns pale in dark mode and would glow. */
+  --shade-near: rgb(0 0 0 / 0.08);
+  --shade-far: rgb(0 0 0 / 0.14);
   color-scheme: light;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
@@ -36,6 +39,8 @@
 :root[data-scheme="dark"] {
   --focus: #79a6ff;
   --danger: #ff8a80;
+  --shade-near: rgb(0 0 0 / 0.3);
+  --shade-far: rgb(0 0 0 / 0.36);
   color-scheme: dark;
 }
 
@@ -135,7 +140,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .tile.live:hover { background: color-mix(in srgb, var(--card) 86%, transparent); }
 .tile.active {
   background: var(--card);
-  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px color-mix(in srgb, var(--ink) 12%, transparent), 0 4px 12px -6px color-mix(in srgb, var(--ink) 30%, transparent);
+  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px var(--shade-near), 0 4px 10px -6px var(--shade-far);
 }
 .tile:focus-visible { outline-offset: 2px; }
 .tile .favicon { width: 20px; height: 20px; font-size: 12px; border-radius: 6px; }
@@ -237,7 +242,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .row:active { background: var(--press); }
 .row.active {
   background: var(--card);
-  box-shadow: 0 0 0 0.5px var(--line), 0 1px 1.5px color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: 0 0 0 0.5px var(--line), 0 1px 1.5px var(--shade-near);
 }
 .row.active .title { font-weight: 500; }
 .row.asleep { color: var(--muted); }
@@ -403,7 +408,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 /* Drag and drop */
 .sidebar.dragging { cursor: grabbing; }
 .sidebar.dragging .row:hover { background: none; }
-.lifted { background: var(--card) !important; box-shadow: 0 6px 18px color-mix(in srgb, var(--ink) 18%, transparent) !important; opacity: 0.92; }
+.lifted { background: var(--card) !important; box-shadow: 0 1px 2px var(--shade-near), 0 6px 14px -4px var(--shade-far) !important; opacity: 0.92; }
 .drag-line {
   position: absolute;
   left: 12px;
@@ -427,7 +432,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   border-radius: var(--radius-card);
   background: var(--card);
   color: var(--ink);
-  box-shadow: 0 0 0 0.5px var(--line), 0 8px 28px color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px var(--shade-near), 0 6px 14px -4px var(--shade-far);
 }
 .menu-item {
   width: 100%;
@@ -468,7 +473,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   color: var(--air);
   font-size: calc(var(--fs) - 1px);
   line-height: 1.35;
-  box-shadow: 0 8px 28px color-mix(in srgb, var(--ink) 25%, transparent);
+  box-shadow: 0 1px 2px var(--shade-near), 0 6px 14px -4px var(--shade-far);
 }
 .toast span { flex: 1; min-width: 0; }
 .toast-action {
@@ -553,7 +558,7 @@ body.route-settings { overflow: auto; background: var(--card); }
   font-weight: 500;
 }
 .segmented [role="radio"]:hover { color: var(--ink); }
-.segmented [role="radio"][aria-checked="true"] { background: var(--card); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px color-mix(in srgb, var(--ink) 10%, transparent); }
+.segmented [role="radio"][aria-checked="true"] { background: var(--card); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px var(--shade-near); }
 [role="radio"][aria-disabled="true"], .switch[aria-disabled="true"] { opacity: 0.5; }
 
 .switch {
@@ -737,7 +742,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 .p-side { position: absolute; left: 5%; top: 8%; width: 21%; display: flex; flex-direction: column; gap: 5px; }
 .p-row { height: 7px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 12%, transparent); }
 .p-row.active { background: var(--card); }
-.p-card { position: absolute; left: 30%; right: 4%; top: 20%; bottom: 6%; border-radius: 6px; background: var(--card); box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 12%, transparent); }
+.p-card { position: absolute; left: 30%; right: 4%; top: 20%; bottom: 6%; border-radius: 6px; background: var(--card); box-shadow: 0 1px 3px var(--shade-near); }
 .swatch-name { padding-left: 2px; font-weight: 500; }
 
 /* Spaces manager */

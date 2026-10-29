@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
 import { mkdir, readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -12,9 +13,14 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../features/ai/extension');
 const evidence = process.env.BREEZER_AI_EVIDENCE || '/tmp/breezer-ai-evidence';
 const executablePath = process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined);
+const playwrightModule = process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright';
 let chromium = null;
-try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
-const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
+let PNG = null;
+try {
+  ({ chromium } = await import(playwrightModule));
+  ({ PNG } = createRequire(playwrightModule.startsWith('/') ? playwrightModule : import.meta.url)('pngjs'));
+} catch { /* reported by skip below */ }
+const skip = !chromium || !PNG ? 'playwright or pngjs is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
 const svg = (letter, color) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${color}"/><text x="16" y="22" font-family="Helvetica" font-size="17" font-weight="700" text-anchor="middle" fill="#fff">${letter}</text></svg>`;
 const icon = (letter, color) => `data:image/svg+xml,${encodeURIComponent(svg(letter, color))}`;
@@ -253,6 +259,55 @@ test('favourite tiles stay even, centred and usable across sidebar widths and th
       assert.equal(await page.$eval('#space-pane', (node) => node.getBoundingClientRect().top), before, 'tab rows stay put');
       await page.screenshot({ path: `${evidence}/favorites-empty-drop-target.png`, clip: { x: 0, y: 0, width: 240, height: 160 } });
     });
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
+// Mean change in luminance (0-255) per pixel row of a band, between two
+// screenshots of the same clip: positive is lighter, negative is darker.
+function bandShift(before, after) {
+  const [a, b] = [PNG.sync.read(before), PNG.sync.read(after)];
+  const luma = (png, i) => 0.2126 * png.data[i] + 0.7152 * png.data[i + 1] + 0.0722 * png.data[i + 2];
+  return Array.from({ length: a.height }, (_, y) => {
+    let sum = 0;
+    for (let x = 0; x < a.width; x += 1) { const i = (y * a.width + x) * 4; sum += luma(b, i) - luma(a, i); }
+    return sum / a.width;
+  });
+}
+
+test('floating menus cast a tight dark shadow, never a pale halo, in every scheme', { skip }, async () => {
+  await mkdir(evidence, { recursive: true });
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    for (const item of [
+      { name: 'dark-tide', appearance: { theme: 'tide', colorMode: 'dark' } },
+      { name: 'dark-custom', appearance: { theme: '#d0543c', colorMode: 'dark' } },
+      { name: 'light-mint', appearance: { theme: 'mint', colorMode: 'light' } },
+    ]) {
+      await withSidebar(browser, base, { width: 300, favorites: 0, appearance: item.appearance, reducedMotion: 'reduce' }, async (page) => {
+        const row = page.locator('.row[role="treeitem"]').first();
+        await row.click({ button: 'right' });
+        const box = await page.locator('#menu').boundingBox();
+        // The band beneath the menu, inset from its rounded corners.
+        const clip = { x: box.x + 16, y: box.y + box.height + 1, width: box.width - 32, height: 32 };
+        await page.mouse.move(2, 2);
+        const open = await page.screenshot({ clip, scale: 'css' });
+        await page.screenshot({ path: `${evidence}/menu-shadow-${item.name}.png`, clip: { x: 0, y: Math.max(0, box.y - 40), width: 300, height: box.height + 96 } });
+        await page.keyboard.press('Escape');
+        await page.locator('#menu').waitFor({ state: 'hidden' });
+        await page.mouse.move(2, 2);
+        const shift = bandShift(await page.screenshot({ clip, scale: 'css' }), open);
+        const label = `${item.name}: ${shift.map((v) => v.toFixed(1))}`;
+        if (process.env.BREEZER_LOG_SHADOW) console.log(label);
+        assert.ok(Math.max(...shift) <= 0.5, `${label}: the shadow never lightens the sidebar`);
+        assert.ok(Math.min(...shift.slice(0, 6)) < -1.5, `${label}: some contact depth remains`);
+        assert.ok(shift.slice(20).every((v) => Math.abs(v) <= 0.75), `${label}: no broad haze 20px out`);
+      });
+    }
   } finally {
     await browser.close();
     server.close();
