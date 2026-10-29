@@ -97,8 +97,9 @@ export function applyAppearance(appearance) {
   root.style.setProperty('--sidebar-font-size', `${sidebarFontSize(appearance)}px`);
   const collapse = $('collapse');
   if (collapse) {
-    const label = appearance.sidebarMode === 'expanded' ? 'Compact sidebar' : 'Expand sidebar';
+    const label = appearance.alwaysShowSidebar ? 'Auto-hide sidebar' : 'Keep sidebar visible';
     collapse.setAttribute('aria-label', label);
+    collapse.setAttribute('aria-pressed', String(appearance.alwaysShowSidebar));
     collapse.title = label;
   }
   const scheme = appearance.colorMode === 'system' ? (darkQuery.matches ? 'dark' : 'light') : appearance.colorMode;
@@ -1421,11 +1422,11 @@ function bindSidebar() {
       requestAnimationFrame(() => $('spaces').querySelector('[aria-selected="true"]')?.focus());
     }
   });
-  if (typeof api.breezerPrivate?.setSidebarCollapsed === 'function') {
+  if (typeof api.breezerPrivate?.setAppearance === 'function') {
     $('collapse').hidden = false;
     $('collapse').addEventListener('click', () => {
-      const sidebarMode = state.appearance.sidebarMode === 'expanded' ? 'compact' : 'expanded';
-      void callBridge('setAppearance', { sidebarMode }).then(async (result) => {
+      const alwaysShowSidebar = !state.appearance.alwaysShowSidebar;
+      void callBridge('setAppearance', { alwaysShowSidebar }).then(async (result) => {
         state.appearance = normalizeAppearance(result);
         applyAppearance(state.appearance);
         await api.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() });

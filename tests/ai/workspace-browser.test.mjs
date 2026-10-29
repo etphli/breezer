@@ -273,10 +273,17 @@ test('empty Settings-created spaces and sidebar controls respond to held clicks'
     await page.getByRole('menuitem', { name: 'Pin tab', exact: true }).click();
     await page.locator('#pinned [data-key^="e:"]').waitFor();
     await page.waitForFunction(() => window.fx.tabs.find(tab => tab.id === 4)?.pinned);
-    await page.getByRole('button', { name: 'Compact sidebar' }).click({ delay: 120 });
-    await page.waitForFunction(() => window.fx.appearance.sidebarMode === 'compact');
-    await page.getByRole('button', { name: 'Expand sidebar' }).click({ delay: 120 });
-    await page.waitForFunction(() => window.fx.appearance.sidebarMode === 'expanded');
+    await page.getByRole('button', { name: 'Keep sidebar visible' }).click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.appearance.alwaysShowSidebar === true);
+    assert.equal(await page.locator('#collapse').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.evaluate(() => window.fx.appearance.sidebarMode), 'expanded', 'Pinning does not compact the sidebar');
+    await page.reload();
+    await page.getByRole('button', { name: 'Auto-hide sidebar' }).waitFor();
+    assert.equal(await page.evaluate(() => window.fx.appearance.alwaysShowSidebar), true, 'Pin preference survives reload');
+    await page.getByRole('button', { name: 'Auto-hide sidebar' }).click({ delay: 120 });
+    await page.waitForFunction(() => window.fx.appearance.alwaysShowSidebar === false);
+    assert.equal(await page.locator('#collapse').getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.evaluate(() => window.fx.appearance.sidebarMode), 'expanded', 'Unpinning preserves the chosen sidebar mode');
     await page.getByRole('button', { name: 'New space', exact: true }).click({ delay: 120 });
     await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces.length === 4);
     await page.keyboard.press('Enter');
@@ -428,9 +435,9 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     assert.equal(await page.locator('#pinned').getByRole('treeitem', { name: 'Arc review notes' }).count(), 1, 'pin made this session survives');
     assert.equal(await tree.getByRole('treeitem', { name: /Miso/ }).count(), 0, 'Personal tabs stay out of Work');
 
-    // Collapse calls the native bridge.
-    await page.getByRole('button', { name: 'Compact sidebar' }).click();
-    await page.waitForFunction(() => window.fx.calls.some(([name, patch]) => name === 'setAppearance' && patch.sidebarMode === 'compact'));
+    // Pinning calls the native bridge without changing the compact preference.
+    await page.getByRole('button', { name: 'Keep sidebar visible' }).click();
+    await page.waitForFunction(() => window.fx.calls.some(([name, patch]) => name === 'setAppearance' && patch.alwaysShowSidebar === true));
 
     // Dark scheme.
     await page.emulateMedia({ colorScheme: 'dark' });
