@@ -123,7 +123,7 @@ class PeekSource : public content::WebContentsUserData<PeekSource> {
 
  private:
   friend class content::WebContentsUserData<PeekSource>;
-  explicit PeekSource(content::WebContents& contents);
+  explicit PeekSource(content::WebContents* contents);
 
   bool enabled_ = false;
   bool forwarding_ = false;
@@ -464,8 +464,8 @@ class Peek final : public content::WebContentsDelegate,
   base::WeakPtrFactory<Peek> weak_factory_{this};
 };
 
-PeekSource::PeekSource(content::WebContents& contents)
-    : content::WebContentsUserData<PeekSource>(contents) {}
+PeekSource::PeekSource(content::WebContents* contents)
+    : content::WebContentsUserData<PeekSource>(*contents) {}
 
 PeekSource::~PeekSource() = default;
 

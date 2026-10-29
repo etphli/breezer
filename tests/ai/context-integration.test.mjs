@@ -83,7 +83,7 @@ test('summary transport sends only a consented batch and clear cancels/disconnec
   const denied = await command(p, 'summarize'); assert.equal(denied.ok, false); assert.equal(b.nativeCalls(), 0);
   await command(p, 'consent', { consent: true });
   p.onMessage.fire({ id: 'summary1', type: 'summarize' });
-  for (let i = 0; i < 30 && !b.api.native.sent.some(m => m.type === 'context-summary'); i++) await tick();
+  await waitFor(() => b.api.native.sent.some(m => m.type === 'context-summary'));
   const sent = b.api.native.sent.find(m => m.type === 'context-summary');
   assert.ok(sent); assert.equal(sent.consent, true); assert.equal(JSON.stringify(sent).includes('secret'), false);
   await command(p, 'clear'); await tick();
