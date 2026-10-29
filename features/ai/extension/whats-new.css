@@ -461,3 +461,7 @@ body {
   .grain, .breeze { display: none; }
   .button { border: 1px solid ButtonText; }
 }
+
+.patch-notes { margin-top: 48px; padding-top: 36px; border-top: 1px solid var(--line, #ded8c9); }
+.patch-notes h2 { margin: 12px 0 22px; font-family: var(--serif, Georgia, serif); font-size: clamp(26px, 4vw, 38px); font-weight: 500; }
+.patch-notes ul { display: grid; gap: 14px; margin: 0; padding-left: 22px; line-height: 1.65; }

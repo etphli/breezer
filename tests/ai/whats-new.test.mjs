@@ -60,12 +60,14 @@ test('Continue browsing closes this tab, else the window', async () => {
   assert.equal(closed, 4);
 });
 
-test('describes the 1.1.1 fixes and UX changes honestly', () => {
+test('keeps minor-release features and appends honest patch improvements', () => {
+  assert.match(text, /add an Organato API key in Settings/);
+  assert.match(text, /Choose any color in Settings, under Theme/);
+  assert.match(text, /Update 1.1.1/);
   assert.match(text, /Bookmarks appear on new and blank tabs by default/);
-  assert.match(text, /Choose New tabs only, Always or Hidden in Settings/);
-  assert.match(text, /importing Chrome bookmarks and history/);
-  assert.match(text, /does not sync Chrome changes or import passkeys/);
-  assert.match(text, /Nothing is sent automatically/);
+  assert.match(text, /Organato exams and assignments share one Upcoming list/);
+  assert.match(text, /Double-click a frequently visited shortcut/);
+  assert.match(text, /without sending automatically/);
   // Touch ID is listed as not done, never as fixed or available.
   assert.match(text, /Not yet: Touch ID passkeys/);
   assert.match(text, /Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements/);

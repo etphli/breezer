@@ -1,3 +1,4 @@
+import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY } from './top-sites.js';
 // Breezer new tab: one row of frequently visited sites and what's coming up in
 // Organato: one Upcoming list (exams and assignments together) and To-dos.
 // The page asks the background over a 'breezer-newtab' port once on load and
@@ -201,7 +202,9 @@ function siteTile(api, site) {
   const name = el('span', 'site-name');
   name.textContent = site.title;
   link.append(icon, name);
-  item.append(link);
+  const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
+  remove.textContent = '×';
+  item.append(link, remove);
   return item;
 }
 
@@ -349,11 +352,42 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let problem = null;
   let pending = false;
   const refreshButton = root.getElementById('refresh');
+  const shortcuts = new ShortcutPreferences(api);
+  const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
+  let allSites = [], siteRevision = 0, undoKey;
+  const updateSites = async () => {
+    const revision = ++siteRevision;
+    await shortcuts.load();
+    const sites = await shortcuts.filter(allSites);
+    if (revision !== siteRevision || !view) return;
+    view.topSites = normalizeView({ topSites: sites }).topSites;
+    paint();
+  };
+  const disposeShortcuts = installShortcutActions({ root, remove: async site => {
+    try { undoKey = await shortcuts.hide(site.url); await updateSites(); status.textContent = 'Shortcut removed.'; undo.hidden = false; undo.focus(); }
+    catch { status.textContent = 'Could not save shortcut preferences. Try again.'; }
+  } });
+  undo.addEventListener('click', async () => {
+    if (!undoKey) return;
+    try { await shortcuts.restore(undoKey); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcut restored.'; }
+    catch { status.textContent = 'Could not restore the shortcut. Try again.'; }
+  });
+  reset.addEventListener('click', async () => {
+    try { await shortcuts.reset(); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcuts restored.'; }
+    catch { status.textContent = 'Could not restore shortcuts. Try again.'; }
+  });
+  const changed = (changes, area) => { if (area === 'local' && changes[HIDDEN_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Try Refresh.'; }); };
+  api?.storage?.onChanged?.addListener?.(changed);
+  globalThis.addEventListener?.('pagehide', () => { disposeShortcuts(); api?.storage?.onChanged?.removeListener?.(changed); }, { once: true });
 
   const paint = () => {
     const at = now();
     renderToday(root, at);
-    if (view) renderSites(api, root, view.topSites);
+    if (view) {
+      renderSites(api, root, view.topSites);
+      if (!view.topSites.length && shortcuts.hidden.size) root.getElementById('sites-empty').textContent = 'No visible shortcuts. Restore shortcuts or visit more sites.';
+    }
+    reset.hidden = shortcuts.hidden.size === 0;
     renderOrganato(root, view?.organato ?? null, at, problem);
   };
 
@@ -363,12 +397,13 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     refreshButton.disabled = true;
     refreshButton.setAttribute('aria-busy', 'true');
     try {
-      const result = await requestView(api, { refresh });
+      const [result] = await Promise.all([requestView(api, { refresh }), shortcuts.load()]);
       if (result.dashboardEnabled === false) {
         globalThis.location.replace('chrome://new-tab-page/');
         return;
       }
-      view = normalizeView(result);
+      allSites = result.topSites || [];
+      view = normalizeView({ ...result, topSites: await shortcuts.filter(allSites) });
       problem = null;
     } catch (error) {
       problem = text(error?.message, 160) || null;

@@ -46,15 +46,15 @@ export function installBackground(api) {
         } else {
           if (!['view', 'refresh'].includes(message.type)) throw new Error('Unknown new-tab action.');
           const config = await ask('organato-view');
-          const topSites = (await api.topSites.get()).slice(0, 8).filter(site => /^https?:\/\//.test(site.url));
+          const topSites = (await api.topSites.get()).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
           const organato = { ...config, exams: [], assignments: [], todos: [] };
           if (config.enabled && config.connected && config.dashboardEnabled) {
             try {
               const result = await ask('organato-list');
               const items = result.items.map(item => ({ ...item, dueAt: item.dueAt || item.dueDateLocal, allDay: !item.dueAt && Boolean(item.dueDateLocal) })).filter(item => !['submitted', 'completed'].includes(item.workingStatus)).sort((a, b) => String(a.dueAt || a.dueDateLocal || '9999').localeCompare(String(b.dueAt || b.dueDateLocal || '9999')));
-              organato.exams = items.filter(item => ['checkpoint', 'both'].includes(item.classification)).slice(0, 6);
-              organato.assignments = items.filter(item => item.kind === 'work' && ['assignment', 'both'].includes(item.classification)).slice(0, 6);
-              organato.todos = items.filter(item => item.kind === 'todo').slice(0, 8);
+              organato.exams = items.filter(item => item.kind !== 'todo' && ['checkpoint', 'both'].includes(item.classification)).slice(0, 200);
+              organato.assignments = items.filter(item => item.kind === 'work' && ['assignment', 'both'].includes(item.classification)).slice(0, 200);
+              organato.todos = items.filter(item => item.kind === 'todo').slice(0, 200);
               organato.truncated = result.truncated;
             } catch (error) { organato.error = error.message; }
           }

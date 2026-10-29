@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { installReleaseNotes, RELEASE_SEEN_KEY } from '../../features/ai/extension/release-notes.js';
-import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
+import { RELEASE_PAGE_VERSION } from '../../features/ai/extension/release-info.js';
 const event=()=>({listeners:[],addListener(fn){this.listeners.push(fn);},fire(){return Promise.all(this.listeners.map(fn=>fn()));}});
 function fixture() {
  const data={},opened=[];let windows=[{id:1,type:'normal',incognito:false}],existing=[],fail=false;
@@ -11,7 +11,7 @@ function fixture() {
 test('opens once per release across concurrent startup/install/window events',async()=>{
  const f=fixture(),service=installReleaseNotes(f.api);
  await Promise.all([service.check(),f.api.runtime.onStartup.fire(),f.api.runtime.onInstalled.fire(),f.api.windows.onCreated.fire()]);
- assert.equal(f.opened.length,1);assert.equal(f.data[RELEASE_SEEN_KEY],RELEASE_VERSION);
+ assert.equal(f.opened.length,1);assert.equal(f.data[RELEASE_SEEN_KEY],RELEASE_PAGE_VERSION);
  await installReleaseNotes(f.api).check();assert.equal(f.opened.length,1);
  f.data[RELEASE_SEEN_KEY]='1.0.0';await service.check();assert.equal(f.opened.length,2);
 });
@@ -22,5 +22,10 @@ test('waits for a regular window and never opens in private browsing',async()=>{
 });
 test('failed tab creation remains retryable and an existing update page is reused',async()=>{
  const f=fixture();f.setFail(true);const service=installReleaseNotes(f.api);await service.check();assert.equal(f.data[RELEASE_SEEN_KEY],undefined);
- f.setFail(false);f.setExisting([{id:4,incognito:false}]);await service.check();assert.equal(f.opened.length,0);assert.equal(f.data[RELEASE_SEEN_KEY],RELEASE_VERSION);
+ f.setFail(false);f.setExisting([{id:4,incognito:false}]);await service.check();assert.equal(f.opened.length,0);assert.equal(f.data[RELEASE_SEEN_KEY],RELEASE_PAGE_VERSION);
+});
+
+test('a patch appends to the current minor page without reopening it', async () => {
+  const f=fixture();f.data[RELEASE_SEEN_KEY]='1.1.0';const service=installReleaseNotes(f.api);await service.check();assert.equal(f.opened.length,0);
+  f.data[RELEASE_SEEN_KEY]='1.1.9';await service.check();assert.equal(f.opened.length,0);
 });

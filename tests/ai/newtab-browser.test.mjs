@@ -72,6 +72,8 @@ function installFixture({ view, appearance, delay = 0, hang = false }) {
       disconnect() {},
     };
   };
+  const preferences = JSON.parse(localStorage.getItem('shortcut-fixture') || '{}');
+  const storageListeners = [];
   window.chrome = {
     runtime: {
       connect: ({ name }) => port(name),
@@ -79,7 +81,7 @@ function installFixture({ view, appearance, delay = 0, hang = false }) {
       getManifest: () => ({ permissions: ['favicon'] }),
       lastError: undefined,
     },
-    storage: { onChanged: { addListener() {} } },
+    storage: { local: { async get(key) { return { [key]: structuredClone(preferences[key]) }; }, async set(values) { Object.assign(preferences, structuredClone(values)); localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); for (const fn of storageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); } }, onChanged: { addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { const index=storageListeners.indexOf(fn); if(index>=0) storageListeners.splice(index,1); } } },
     ...(appearance ? { breezerPrivate: { getAppearance: async () => appearance } } : {}),
   };
 }
@@ -193,6 +195,32 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.waitForTimeout(400);
       assert.equal(await page.evaluate(() => window.fx.requests.length), 2);
 
+    });
+
+    await withPage(browser, base, { view: CONNECTED }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      const mail = '.site-link[href="https://mail.example.com/"]';
+      await page.getByRole('button', { name: 'Remove Mail shortcut', exact: true }).click();
+      await page.waitForFunction(selector => !document.querySelector(selector), mail);
+      await page.getByRole('button', { name: 'Undo', exact: true }).click();
+      await page.waitForSelector(mail);
+      await page.locator(mail).dblclick();
+      await page.waitForFunction(selector => !document.querySelector(selector), mail);
+      assert.ok(page.url().includes('newtab.html'), 'double click must not open the site');
+      await page.reload();await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal(await page.locator(mail).count(), 0, 'removal persists after reload');
+      const canvas = '.site-link[href="https://canvas.example.edu/"]';
+      await page.locator(canvas).click({ button: 'right' });
+      await page.keyboard.press('Escape');
+      assert.equal(await page.evaluate(() => document.activeElement.href), 'https://canvas.example.edu/');
+      await page.locator(canvas).click({ button: 'right' });
+      await page.getByRole('menuitem', { name: 'Remove shortcut', exact: true }).click();
+      await page.waitForFunction(selector => !document.querySelector(selector), canvas);
+      await page.getByRole('button', { name: 'Restore shortcuts', exact: true }).click();
+      await page.waitForSelector(mail);await page.waitForSelector(canvas);
+      await page.route('https://mail.example.com/**', route => route.fulfill({ contentType: 'text/html', body: '<title>Mail fixture</title>Mail' }));
+      await Promise.all([page.waitForURL('https://mail.example.com/'), page.locator(mail).click()]);
+      assert.equal(await page.title(), 'Mail fixture', 'single click still opens the site');
     });
 
     await withPage(browser, base, { view: CONNECTED, appearance: { theme: 'tide', colorMode: 'dark' } }, async (page) => {

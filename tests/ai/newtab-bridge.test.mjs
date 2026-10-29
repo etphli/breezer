@@ -48,8 +48,8 @@ test('the real background reply shows a "both" item once and to-dos only in To-d
     return { onMessage: incoming, onDisconnect: disconnected, postMessage: message => outgoing.emit(message), disconnect: () => disconnected.emit() };
   };
   const result = await requestView(fake.api, { timeoutMs: 1000 });
-  // The background contract is unchanged: w1 is in both arrays and t1 is in exams and todos.
-  assert.deepEqual(result.organato.exams.map(item => item.id), ['t1', 'w2', 'w1']);
+  // The response fields stay compatible; work can overlap, while to-dos stay in their own list.
+  assert.deepEqual(result.organato.exams.map(item => item.id), ['w2', 'w1']);
   assert.deepEqual(result.organato.assignments.map(item => item.id), ['w3', 'w1']);
   const view = normalizeView(result);
   assert.deepEqual(view.organato.upcoming.map(item => item.id), ['w3', 'w2', 'w1']);

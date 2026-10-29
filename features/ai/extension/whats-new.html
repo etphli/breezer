@@ -23,7 +23,7 @@
         </defs>
         <path class="breeze-line" pathLength="1" d="M6 78 C 120 30, 210 112, 330 66 S 520 14, 560 54 C 590 84, 552 112, 526 92 C 506 76, 528 46, 566 50 C 596 54, 618 70, 634 64"/>
       </svg>
-      <p class="lede">Four changes in this release, and one thing that isn't ready yet.</p>
+      <p class="lede">The features introduced in 1.1, plus the latest improvements.</p>
       <div class="actions">
         <button class="button primary" type="button" data-action="continue">Continue browsing</button>
         <a class="button secondary" href="workspace.html#/settings">Open Settings</a>
@@ -36,14 +36,14 @@
       <article class="feature" aria-labelledby="f-organato">
         <figure class="plate plate-organato" aria-hidden="true">
           <div class="mini-tab">
-            <div class="mini-lane"><span class="mini-label">New tabs</span><i></i><i class="short"></i></div>
-            <div class="mini-lane"><span class="mini-label">Always</span><i></i><i></i><i class="short"></i></div>
-            <div class="mini-lane"><span class="mini-label">Hidden</span><i class="short"></i><i></i></div>
+            <div class="mini-lane"><span class="mini-label">Exams</span><i></i><i class="short"></i></div>
+            <div class="mini-lane"><span class="mini-label">Assignments</span><i></i><i></i><i class="short"></i></div>
+            <div class="mini-lane"><span class="mini-label">To-dos</span><i class="short"></i><i></i></div>
           </div>
         </figure>
         <div class="feature-copy">
-          <h3 id="f-organato">Bookmarks where you want them</h3>
-          <p>Bookmarks appear on new and blank tabs by default. Choose New tabs only, Always or Hidden in Settings.</p>
+          <h3 id="f-organato">Organato on your new tab</h3>
+          <p>New tabs can show your upcoming exams, assignments and to-dos from Organato. To connect, add an Organato API key in Settings, under New tab and Organato. The key is kept in macOS Keychain.</p>
         </div>
       </article>
 
@@ -53,8 +53,8 @@
           <div class="mini-window"><span class="mini-sidebar"></span><span class="mini-page"></span></div>
         </figure>
         <div class="feature-copy">
-          <h3 id="f-theme">A calmer Settings page</h3>
-          <p>Clearer controls, readable connection status and more space make Settings easier to use, including on narrow windows.</p>
+          <h3 id="f-theme">Your own theme color</h3>
+          <p>Choose any color in Settings, under Theme, and Breezer builds a matching theme for the browser and the sidebar.</p>
         </div>
       </article>
 
@@ -67,21 +67,33 @@
           </div>
         </figure>
         <div class="feature-copy">
-          <h3 id="f-passwords">Bring Chrome along</h3>
-          <p>The getting-started card explains importing Chrome bookmarks and history, plus the password CSV steps. Importing copies data once; it does not sync Chrome changes or import passkeys.</p>
+          <h3 id="f-passwords">Password suggestions that stay put</h3>
+          <p>Saved passwords stay suggested while you type in a sign-in form. Nothing is filled until you choose an account.</p>
         </div>
       </article>
 
       <article class="feature" aria-labelledby="f-updates">
         <figure class="plate plate-updates" aria-hidden="true">
-          <span class="mini-button"><svg viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg>Edit and resend</span>
+          <span class="mini-button"><svg viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg>Check for updates</span>
           <span class="mini-status"><i></i><i class="short"></i></span>
         </figure>
         <div class="feature-copy">
-          <h3 id="f-updates">An AI sidebar that helps you recover</h3>
-          <p>Failed replies offer Edit and resend to put your message back in the composer. Nothing is sent automatically, and browser control stays off until you enable it again.</p>
+          <h3 id="f-updates">Updates from Settings</h3>
+          <p>Settings now has a Check for updates button. It looks for stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</p>
         </div>
       </article>
+    </section>
+
+    <section class="patch-notes" aria-labelledby="patch-title">
+      <p class="release">Update 1.1.1</p>
+      <h2 id="patch-title">Latest improvements</h2>
+      <ul>
+        <li>Bookmarks appear on new and blank tabs by default. Settings also offers Always and Hidden.</li>
+        <li>A getting-started card explains importing Chrome bookmarks, history and passwords, with clearer Settings controls.</li>
+        <li>The AI sidebar explains failures and offers Edit and resend. It restores your draft without sending automatically or turning browser control back on.</li>
+        <li>Organato exams and assignments share one Upcoming list, with no duplicate items. To-dos stay separate.</li>
+        <li>Double-click a frequently visited shortcut to remove it, or use its Remove button or right-click menu. Undo and Restore shortcuts bring it back. Your history and bookmarks stay intact.</li>
+      </ul>
     </section>
 
     <aside class="pending" aria-labelledby="pending-title">

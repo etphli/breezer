@@ -147,8 +147,10 @@ Appearance ReadAppearance(Profile* profile) {
     }
   }
 
-  const int bookmark_state = prefs->GetInteger(bookmarks::prefs::kBookmarkBarVisibilityState);
-  result.bookmark_bar_mode = bookmark_state == 0 ? "always" : bookmark_state == 2 ? "hidden" : "newTab";
+  const int bookmark_state =
+      prefs->GetInteger(bookmarks::prefs::kBookmarkBarVisibilityState);
+  result.bookmark_bar_mode =
+      bookmark_state == 0 ? "always" : bookmark_state == 2 ? "hidden" : "newTab";
   result.show_bookmarks = result.bookmark_bar_mode != "hidden";
   result.sidebar_width =
       std::clamp(prefs->GetInteger(prefs::kVerticalTabsUncollapsedWidth),
