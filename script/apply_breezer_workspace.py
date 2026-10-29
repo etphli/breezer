@@ -457,8 +457,8 @@ def _bookmark_bar_replacements():
         '  return NewTabUI::IsNewTab(url) || NewTabPageUI::IsNewTabPageOrigin(url) ||\n',
         '  return url.IsAboutBlank() ||\n'
         '         (url.SchemeIs("chrome-extension") &&\n'
-        f'          url.host_piece() == "{COMPONENT_ID}" &&\n'
-        '          url.path_piece() == "/newtab.html") ||\n'
+        f'          url.GetHost() == "{COMPONENT_ID}" &&\n'
+        '          url.GetPath() == "/newtab.html") ||\n'
         '         NewTabUI::IsNewTab(url) || NewTabPageUI::IsNewTabPageOrigin(url) ||\n',
     )]
 
