@@ -80,6 +80,19 @@ test('keeps minor-release features and appends honest patch improvements', () =>
   assert.equal([...html.matchAll(/>Open Settings</g)].length, 2);
 });
 
+test('illustrates each patch group with decorative inline SVG only', () => {
+  const groups = [...html.matchAll(/<div class="patch-(?:lead|group)">([\s\S]*?)<\/ul>/g)].map((m) => m[1]);
+  assert.equal(groups.length, 6);
+  for (const group of groups) {
+    assert.match(group, /<figure class="plate patch-plate" aria-hidden="true">\s*<svg class="art" viewBox="[\d ]+" focusable="false">/);
+    assert.match(group, /<h3>[^<]+<\/h3>/);
+  }
+  // Every patch note is still present as a list item, eight in all.
+  assert.equal([...html.matchAll(/<ul class="notes">[\s\S]*?<\/ul>/g)].flatMap((m) => m[0].match(/<li>/g)).length, 8);
+  // Pure vector art: no images, references or embedded links inside it.
+  assert.doesNotMatch(html, /<(?:image|use|foreignObject)\b|xlink:|xmlns=/);
+});
+
 test('stays light and honours reduced motion', () => {
   assert.match(html, /<meta name="color-scheme" content="light">/);
   assert.doesNotMatch(css, /prefers-color-scheme/);
