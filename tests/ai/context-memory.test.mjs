@@ -8,7 +8,11 @@ const { summarizeContext, validateContextSummary, contextSummaryModel } = summar
 const DAY = 86_400_000;
 const tick = () => new Promise(resolve => setImmediate(resolve));
 async function waitFor(predicate) {
-  for (let i = 0; i < 100; i++) { if (predicate()) return; await tick(); }
+  const deadline = performance.now() + 2000;
+  while (performance.now() < deadline) {
+    if (predicate()) return;
+    await new Promise(resolve => setTimeout(resolve, 5));
+  }
   assert.fail('Expected asynchronous test step did not start');
 }
 function storage(initial = {}) {
