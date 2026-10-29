@@ -73,11 +73,7 @@ Leave the constructor call and native transport unchanged. This adds `context-su
 
 ### 3. Settings entry
 
-In `extension/workspace.html`, next to `workspace.css`, add:
-
-```html
-<link rel="stylesheet" href="context-settings.css">
-```
+Context settings styles are included in `workspace.css` to stay within the existing 20-resource allocation.
 
 Add a placeholder in the settings content, for example immediately after `password-settings`:
 

@@ -695,3 +695,26 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Inherits Breezer's settings palette and typography. */
+.context-settings textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 8px 0 12px;
+  padding: 10px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--air);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+}
+.context-settings table { width: 100%; margin: 18px 0; border-collapse: collapse; }
+.context-settings caption { text-align: start; margin-bottom: 8px; font-weight: 600; }
+.context-settings th, .context-settings td { text-align: start; padding: 8px 4px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.context-settings td:first-child { max-width: 32ch; }
+.context-settings th { font-weight: 500; }
+.context-settings [data-context-summary] { white-space: pre-wrap; overflow-wrap: anywhere; }
+.context-settings input[type="checkbox"] { flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--accent); }
+.context-settings :is(input, textarea, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
