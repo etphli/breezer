@@ -553,9 +553,15 @@ try {
   // ---------------------------------------------------------------- AI side panel geometry
   const openPanel = await hostA.evaluate(`chrome.sidePanel.open({ windowId: ${windowA} }).then(() => 'opened')`, { userGesture: true });
   assert.equal(openPanel, 'opened');
-  const panelInfo = await waitFor('AI side panel target', async () => (await targets()).find(target => target.url === `${origin}/panel.html`));
-  const panel = await attach(panelInfo.targetId);
+  const panel = await waitFor('AI side panel in window A', async () => {
+    for (const target of (await targets()).filter(target => target.url === `${origin}/panel.html`)) {
+      const candidate = await attach(target.targetId);
+      if (await candidate.evaluate('chrome.windows.getCurrent().then(w => w.id)') === windowA) return candidate;
+    }
+    return null;
+  });
   await waitFor('panel rendered', () => panel.evaluate(`Boolean(document.querySelector('#model-label'))`));
+  observe('panelGrantContext', { panelWindow: await panel.evaluate('chrome.windows.getCurrent().then(w => w.id)'), expectedWindow: windowA, windows: await worker.evaluate(() => chrome.windows.getAll({ populate: true }).then(windows => windows.map(w => ({ id: w.id, active: w.tabs.filter(t => t.active).map(t => ({id:t.id,url:t.url})) })))) });
   const grantA = await panel.evaluate(settle(privateCall('authorizeCurrentPage')), { userGesture: true });
   assert.deepEqual(grantA, { ok: true, value: true });
   assert.equal((await canScript(alphaB)).ok, false, 'The AI panel in A granted access to B.');
