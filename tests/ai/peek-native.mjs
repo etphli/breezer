@@ -199,8 +199,9 @@ try {
   const tabs = () => worker.evaluate(id => chrome.tabs.query({ windowId: id }), windowId);
   // Match target identity, since a normal tab and a preview may share a URL.
   const peekTarget = async pattern => {
+    const tabIds = new Set((await worker.evaluate(() => chrome.tabs.query({}))).map(tab => tab.id));
     const tabTargets = new Set((await worker.evaluate(() => chrome.debugger.getTargets()))
-      .filter(target => Number.isInteger(target.tabId) && target.tabId >= 0).map(target => target.id));
+      .filter(target => tabIds.has(target.tabId)).map(target => target.id));
     return (await targets()).find(target => pattern.test(target.url) && !tabTargets.has(target.targetId)) || null;
   };
 
@@ -243,13 +244,16 @@ try {
   });
   await worker.evaluate(id => chrome.windows.update(id, { width: 1100, height: 820 }), favourite.windowId);
   pass('resizeViaNativeAPI', 'preview viewport resized with its parent through chrome.windows; physical window resizing is unverified');
-  await blankSession.key('Escape', 'Escape', 27);
+  // CDP Input sets skip_if_unhandled and bypasses browser PreHandleKeyboardEvent.
+  // Exercise the native root's Escape handler through app-owned UI DevTools.
+  const peekRoot = await nativeControl('PeekRootView');
+  await ui('DOM.dispatchKeyEvent', { nodeId: peekRoot.nodeId, event: { type: 'keyPressed', keyCode: 27, code: 0x070029, flags: 0, key: 0, isChar: false } });
   await waitFor('Escape destroys the peek', async () => !(await peekTarget(/\/target\?via=blank$/)));
   assert.equal((await tabs()).length, baseline);
-  pass('blankLinkPeek', 'target=_blank opened a non-tab page; Escape from the focused page destroyed it');
+  pass('blankLinkPeek', 'target=_blank opened a non-tab page; native root Escape handler destroyed it; physical focused-page keyboard routing is unverified');
 
   // Native view handlers, without system mouse injection or OS permissions.
-  for (const [control, name] of [['ImageButton', 'closeButton'], ['PeekRootView', 'backdrop']]) {
+  for (const [control, name] of [['BreezerPeekClose', 'closeButton'], ['PeekRootView', 'backdrop']]) {
     await page.click('#blank');
     await waitFor(`${name} preview`, () => peekTarget(/\/target\?via=blank$/));
     await nativeClick(control, control === 'PeekRootView' ? 0 : 8, control === 'PeekRootView' ? 0 : 12);
@@ -263,7 +267,7 @@ try {
   const expandingSession = await attach(expanding.targetId);
   await waitFor('preview input loaded', () => expandingSession.evaluate('Boolean(document.getElementById("preview-draft"))'));
   await expandingSession.evaluate(`document.getElementById('preview-draft').value='dummy retained draft';globalThis.peekMarker='dummy live page';`);
-  await nativeClick('MdTextButton');
+  await nativeClick('BreezerPeekExpand');
   const expandedTab = await waitFor('Expand creates an ordinary tab', async () => (await tabs()).find(tab => /\/target\?via=blank$/.test(tab.url || tab.pendingUrl)));
   assert.equal((await tabs()).length, baseline + 1);
   assert.equal((await targets()).find(target => target.targetId === expanding.targetId)?.url, expandedTab.url);
@@ -373,6 +377,7 @@ try {
 
   report.unverified.push(
     'Physical macOS pointer routing and native hit-testing for Expand, Close and backdrop.',
+    'Physical Escape routing from focused page content; CDP bypasses the native browser prehandler.',
     'Physical window resizing and full native overlay appearance beyond native-tree geometry and the page capture.',
   );
   report.status = 'passed';

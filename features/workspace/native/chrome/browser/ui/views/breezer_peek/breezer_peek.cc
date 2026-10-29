@@ -208,6 +208,13 @@ class PeekRootView : public views::View {
     dismiss_.Run();
     return true;
   }
+  bool OnKeyPressed(const ui::KeyEvent& event) override {
+    if (event.key_code() != ui::VKEY_ESCAPE) {
+      return false;
+    }
+    dismiss_.Run();
+    return true;
+  }
 
  private:
   base::RepeatingClosure dismiss_;
