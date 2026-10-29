@@ -114,6 +114,139 @@ def check_full_height_cases(expression):
                 f"Full-height sidebar for {label}: expected {expected}, got {actual}")
 
 
+def python_expression(expression):
+    """Translates a C++ expression from the fixed layout vocabulary to Python."""
+    python = re.sub(r"//[^\n]*", "", expression)
+    python = python.replace("std::max(", "max(").replace("->", ".").replace("::", "_")
+    python = python.replace("&&", " and ").replace("||", " or ")
+    python = re.sub(r"!(?!=)", " not ", python)
+    python = re.sub(r"(\d)\.0f\b", r"\1.0", python)
+    ternary = re.fullmatch(r"\s*([^?]+?)\s*\?\s*([^:]+?)\s*:\s*([^:]+?)\s*", python, re.DOTALL)
+    if ternary:
+        python = f"({ternary[2]}) if ({ternary[1]}) else ({ternary[3]})"
+    return " ".join(python.split())
+
+
+def run_cpp_statements(source, names):
+    """Runs straight-line C++ declarations, assignments and `if` blocks."""
+    lines = []
+    depth = 0
+    source = re.sub(r"//[^\n]*", "", source)
+    # Brace initializers become tuples, leaving braces only around blocks.
+    source = re.sub(r"=\s*\{([^{}]*)\};", r"= (\1);", source)
+    for statement in re.findall(r"[^;{}]*[;{}]", source):
+        statement = statement.strip()
+        if statement == "}":
+            depth -= 1
+            continue
+        condition = re.fullmatch(r"if \((.*)\) \{", statement, re.DOTALL)
+        if condition:
+            lines.append("    " * depth + f"if {python_expression(condition[1])}:")
+            depth += 1
+            continue
+        assignment = re.fullmatch(r"(?:const )?(?:int |float )?(\w+)\s*=\s*(.*);", statement, re.DOTALL)
+        require(assignment is not None, f"Unmodelled layout statement: {statement!r}")
+        value = assignment[2].strip()
+        lines.append("    " * depth + f"{assignment[1]} = {python_expression(value)}")
+    require(depth == 0, "Unbalanced layout statements")
+    exec("\n".join(lines), {"__builtins__": {"max": max, "round": round}}, names)  # noqa: S102 - fixed vocabulary
+    return names
+
+
+def scale_extent(extent, ratio):
+    return round(max(0, extent) * ratio)
+
+
+class Rect:
+    def __init__(self, x, y, width, height):
+        self._bounds = (x, y, width, height)
+
+    def x(self):
+        return self._bounds[0]
+
+    def y(self):
+        return self._bounds[1]
+
+    def height(self):
+        return self._bounds[3]
+
+
+class Namespace:
+    def __init__(self, **values):
+        self.__dict__.update(values)
+
+
+# A 1200x800 client area with a 40 DIP toolbar row. Helium's floating sidebar
+# is inset 8 DIP from the window edges and, below a pinned top bar, 5 DIP
+# (frame radius 8 minus base padding 3) from whatever is above it.
+TOOLBAR_ROW = 40
+FLOATING_PADDING = 8
+FLOATING_TOP_PADDING = 5
+
+
+def sidebar_geometry(layout, full_height, floating):
+    """The sidebar's bounds and title bar band as the patched layout computes them."""
+    block = layout.split("      int top_offset = vertical_tab_strip_animation.top_offset;\n", 1)[1]
+    block = "int top_offset = vertical_tab_strip_animation.top_offset;\n" + block.split(
+        "vertical_tab_strip_width, vertical_tab_strip_height};\n", 1)[0] + \
+        "vertical_tab_strip_width, vertical_tab_strip_height};\n"
+    animation = Namespace(top_offset=TOOLBAR_ROW)
+    zen = Namespace(enabled=True, top_chrome_ratio=1.0,
+                    vertical_tab_strip_padding=FLOATING_PADDING if floating else 0,
+                    vertical_tab_strip_top_padding=FLOATING_TOP_PADDING if floating else 0)
+    names = run_cpp_statements(block, dict(
+        vertical_tab_strip_animation=animation, zen=zen, ScaleExtent=scale_extent,
+        breezer_full_height_sidebar=full_height,
+        params=Namespace(visual_client_area=Rect(0, 0, 1200, 800)),
+        vertical_tab_strip_x=zen.vertical_tab_strip_padding, vertical_tab_strip_width=260))
+    band = layout.split("SetBreezerTitlebarForLayout(\n", 1)[1].split(",\n        base::ClampCeil(", 1)[0]
+    band_height = eval(python_expression(band), {"__builtins__": {}}, dict(  # noqa: S307 - fixed vocabulary
+        names, breezer_full_height_sidebar=full_height))
+    return names["vertical_tab_strip_bounds"], band_height
+
+
+def check_full_height_geometry(layout, region):
+    """The shown full-height sidebar runs from the window top, under the controls."""
+    for floating in (False, True):
+        label = "floating (frameless)" if floating else "attached"
+        (_, y, _, height), band = sidebar_geometry(layout, True, floating)
+        require(y == 0, f"Full-height {label} sidebar starts {y} DIP below the window top")
+        require(height == 800 - (FLOATING_PADDING if floating else 0),
+                f"Full-height {label} sidebar has height {height}")
+        require(y + band == TOOLBAR_ROW,
+                f"Title bar band ends at {y + band}, not the toolbar row bottom {TOOLBAR_ROW}")
+    # A floating sidebar that does not run full height keeps Helium's placement
+    # below the top bar, and has no band.
+    (_, y, _, height), band = sidebar_geometry(layout, False, True)
+    require((y, height, band) == (TOOLBAR_ROW + FLOATING_TOP_PADDING,
+                                  800 - TOOLBAR_ROW - FLOATING_TOP_PADDING - FLOATING_PADDING, 0),
+            f"Floating sidebar below the top bar moved to y={y}, height={height}, band={band}")
+
+    # The native background and the document must agree on a square top
+    # wherever the region runs from the window top.
+    shapes = (
+        ("native background", region.split("void VerticalTabStripRegionView::SetFloatingStyleForLayout(", 1)[1]),
+        ("sidebar document", region.split("gfx::RoundedCornersF BreezerWorkspaceCorners(", 1)[1]),
+    )
+    cases = (
+        ("full-height floating sidebar", "kDetached", True, True, False),
+        ("floating sidebar below the top bar", "kDetached", True, False, True),
+        ("floating sidebar, top bar hidden", "kDetached", False, False, True),
+        ("autoHide reveal beside the toolbar", "kAttachedLeading", True, True, False),
+        ("compact rail hover below the toolbar", "kAttachedLeading", True, False, False),
+    )
+    for name, body in shapes:
+        rule = re.search(r"const bool round_top =\s*(.*?);", body, re.DOTALL)
+        require(rule is not None, f"{name} lost its rounded-top rule")
+        python = python_expression(rule[1]).replace("FloatingStyle_", "")
+        for label, style, below_toolbar, at_window_top, expected in cases:
+            actual = eval(python, {"__builtins__": {}}, dict(  # noqa: S307 - fixed vocabulary
+                style=style, kDetached="kDetached", below_toolbar=below_toolbar,
+                at_window_top=at_window_top))
+            require(actual == expected,
+                    f"{name} for {label}: rounded top {actual}, expected {expected}")
+
+
 def ai_layout_section():
     return ai_ui.sections()[sidebar_frame.LAYOUT]
 
@@ -138,6 +271,7 @@ def check_order(tree, ai_first):
     header = (tree / sidebar_frame.REGION_HEADER).read_text()
     full_height = layout.split("const bool breezer_full_height_sidebar =", 1)[1].split(";", 1)[0]
     check_full_height_cases(full_height)
+    check_full_height_geometry(layout, region)
     require(layout.index("const bool breezer_full_height_sidebar") <
             layout.index("if (breezer_full_height_sidebar) {\n        top_offset = 0;"),
             "Sidebar top is not raised to the window top")
@@ -165,10 +299,12 @@ def check_order(tree, ai_first):
             "        !breezer_full_height_sidebar &&" in layout,
             "Floating full-height sidebar is still pushed below the top bar")
     band = layout.split("SetBreezerTitlebarForLayout(", 1)[1].split(";", 1)[0]
-    require("breezer_full_height_sidebar\n            ? vertical_tab_strip_animation.top_offset -\n"
-            "                  zen.vertical_tab_strip_top_padding\n            : 0" in band and
-            band.endswith("-\n            tabstrip_bounds->x())"),
-            "Title bar band is not the toolbar row in the sidebar's coordinates")
+    # check_full_height_geometry covers the band's height.
+    require(band.endswith("-\n            tabstrip_bounds->x())"),
+            "Window controls width is not in the sidebar's coordinates")
+    require(layout.count("/*at_window_top=*/breezer_full_height_sidebar);") == 1 and
+            header.count("bool floating_at_window_top_ = false;") == 1,
+            "The region is not told when it runs from the window top")
     for declaration in ("bool HostsBreezerWorkspace() const;",
                         "bool IsBreezerAutoHideSidebar() const;",
                         "void SetBreezerTitlebarForLayout(int height, int controls_width);"):

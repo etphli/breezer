@@ -13,7 +13,8 @@ the vertical tab strip region after the workspace replacements have run.
   sidebar sits beside the toolbar as in a normal window. An unpinned
   (floating) sidebar still overlays the page while it is revealed, but the top
   bar moves aside with it, so the back, forward, and address controls stay
-  usable beside it.
+  usable beside it. It starts at the window top with a square top, like the
+  attached sidebar, and keeps its floating side and bottom insets.
 - The document fills the region edge to edge, so no frame-colored bands show
   above or below it, and it takes the region's rounded floating shape.
 - The detached (zen mode) sidebar keeps its native resize edge, placed at the
@@ -47,9 +48,12 @@ def _region_header_replacements():
             "  void SetFloatingStyleForLayout(FloatingStyle style,\n"
             "                                 int corner_radius,\n"
             "                                 bool below_toolbar);\n",
+            "  // Breezer: `at_window_top` squares the top of a strip that runs from\n"
+            "  // the window top under the window controls, even a detached one.\n"
             "  void SetFloatingStyleForLayout(FloatingStyle style,\n"
             "                                 int corner_radius,\n"
-            "                                 bool below_toolbar);\n"
+            "                                 bool below_toolbar,\n"
+            "                                 bool at_window_top);\n"
             "\n"
             "  // Breezer: whether this region shows the Breezer sidebar document.\n"
             "  bool HostsBreezerWorkspace() const;\n"
@@ -58,6 +62,11 @@ def _region_header_replacements():
             "  // document, with the window controls covering `controls_width` at the\n"
             "  // leading edge. Zero height when the region starts below the toolbar.\n"
             "  void SetBreezerTitlebarForLayout(int height, int controls_width);\n",
+        ),
+        (
+            "  bool floating_below_toolbar_ = false;\n",
+            "  bool floating_below_toolbar_ = false;\n"
+            "  bool floating_at_window_top_ = false;\n",
         ),
     ]
 
@@ -103,17 +112,19 @@ def _region_replacements():
             "#if BUILDFLAG(ENABLE_EXTENSIONS)\n"
             "// The document fills the region, so it takes the region's floating shape:\n"
             "// rounded except along an attached window edge, and square at the top\n"
-            "// where it joins the toolbar.\n"
+            "// where it joins the toolbar or the window top.\n"
             "gfx::RoundedCornersF BreezerWorkspaceCorners(\n"
             "    VerticalTabStripRegionView::FloatingStyle style,\n"
             "    int corner_radius,\n"
-            "    bool below_toolbar) {\n"
+            "    bool below_toolbar,\n"
+            "    bool at_window_top) {\n"
             "  using FloatingStyle = VerticalTabStripRegionView::FloatingStyle;\n"
             "  if (style == FloatingStyle::kNone) {\n"
             "    return gfx::RoundedCornersF();\n"
             "  }\n"
             "  const bool rtl = base::i18n::IsRTL();\n"
-            "  const bool round_top = style == FloatingStyle::kDetached || !below_toolbar;\n"
+            "  const bool round_top =\n"
+            "      (style == FloatingStyle::kDetached && !at_window_top) || !below_toolbar;\n"
             "  const bool round_left =\n"
             "      style != (rtl ? FloatingStyle::kAttachedTrailing\n"
             "                    : FloatingStyle::kAttachedLeading);\n"
@@ -200,7 +211,8 @@ def _region_replacements():
             "  }\n"
             "  if (BreezerWorkspaceView* const workspace = FindBreezerWorkspace(this)) {\n"
             "    workspace->SetCornerRadii(BreezerWorkspaceCorners(\n"
-            "        floating_style_, floating_corner_radius_, floating_below_toolbar_));\n"
+            "        floating_style_, floating_corner_radius_, floating_below_toolbar_,\n"
+            "        floating_at_window_top_));\n"
             "  }\n"
             "#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n",
         ),
@@ -212,6 +224,38 @@ def _region_replacements():
             "  if (floating_style_ != FloatingStyle::kNone &&\n"
             "      !(floating_style_ == FloatingStyle::kDetached &&\n"
             "        HostsBreezerWorkspace())) {\n",
+        ),
+        (
+            "void VerticalTabStripRegionView::SetFloatingStyleForLayout(FloatingStyle style,\n"
+            "                                                           int corner_radius,\n"
+            "                                                           bool below_toolbar) {\n"
+            "  if (floating_style_ == style && floating_corner_radius_ == corner_radius &&\n"
+            "      floating_below_toolbar_ == below_toolbar) {\n"
+            "    return;\n"
+            "  }\n"
+            "  floating_style_ = style;\n"
+            "  floating_corner_radius_ = corner_radius;\n"
+            "  floating_below_toolbar_ = below_toolbar;\n",
+            "void VerticalTabStripRegionView::SetFloatingStyleForLayout(FloatingStyle style,\n"
+            "                                                           int corner_radius,\n"
+            "                                                           bool below_toolbar,\n"
+            "                                                           bool at_window_top) {\n"
+            "  if (floating_style_ == style && floating_corner_radius_ == corner_radius &&\n"
+            "      floating_below_toolbar_ == below_toolbar &&\n"
+            "      floating_at_window_top_ == at_window_top) {\n"
+            "    return;\n"
+            "  }\n"
+            "  floating_style_ = style;\n"
+            "  floating_corner_radius_ = corner_radius;\n"
+            "  floating_below_toolbar_ = below_toolbar;\n"
+            "  floating_at_window_top_ = at_window_top;\n",
+        ),
+        (
+            "    const bool round_top = style == FloatingStyle::kDetached || !below_toolbar;\n",
+            "    // Breezer: a detached strip running from the window top joins it square.\n"
+            "    const bool round_top =\n"
+            "        (style == FloatingStyle::kDetached && !at_window_top) ||\n"
+            "        !below_toolbar;\n",
         ),
     ]
 
@@ -338,14 +382,36 @@ def _layout_replacements():
             "      int top_offset = vertical_tab_strip_animation.top_offset;\n"
             "      if (zen.enabled) {\n"
             "        top_offset = ScaleExtent(top_offset, zen.top_chrome_ratio);\n"
-            "      }\n",
+            "      }\n"
+            "\n"
+            "      const int vertical_tab_strip_height =\n"
+            "          std::max(0, params.visual_client_area.height() - top_offset -\n"
+            "                          zen.vertical_tab_strip_top_padding -\n"
+            "                          zen.vertical_tab_strip_padding);\n"
+            "      vertical_tab_strip_bounds = {\n"
+            "          vertical_tab_strip_x,\n"
+            "          params.visual_client_area.y() + top_offset +\n"
+            "              zen.vertical_tab_strip_top_padding,\n"
+            "          vertical_tab_strip_width, vertical_tab_strip_height};\n",
             "      int top_offset = vertical_tab_strip_animation.top_offset;\n"
             "      if (zen.enabled) {\n"
             "        top_offset = ScaleExtent(top_offset, zen.top_chrome_ratio);\n"
             "      }\n"
+            "      // A floating sidebar running full height joins the window top too,\n"
+            "      // rather than floating below it, so no frame band shows above it.\n"
+            "      int top_padding = zen.vertical_tab_strip_top_padding;\n"
             "      if (breezer_full_height_sidebar) {\n"
             "        top_offset = 0;\n"
-            "      }\n",
+            "        top_padding = 0;\n"
+            "      }\n"
+            "\n"
+            "      const int vertical_tab_strip_height =\n"
+            "          std::max(0, params.visual_client_area.height() - top_offset -\n"
+            "                          top_padding - zen.vertical_tab_strip_padding);\n"
+            "      vertical_tab_strip_bounds = {\n"
+            "          vertical_tab_strip_x,\n"
+            "          params.visual_client_area.y() + top_offset + top_padding,\n"
+            "          vertical_tab_strip_width, vertical_tab_strip_height};\n",
         ),
         (
             "      if (zen.floating_vertical_tab_strip) {\n"
@@ -397,14 +463,11 @@ def _layout_replacements():
             "        has_leading_exclusion);\n",
             "    views().vertical_tab_strip_region_view->SetHasLeadingExclusionForLayout(\n"
             "        has_leading_exclusion);\n"
-            "    // The band matches the toolbar row beside the sidebar, in the sidebar's\n"
-            "    // coordinates; a floating sidebar is inset from the window's top and\n"
-            "    // leading edges.\n"
+            "    // The band matches the toolbar row beside the sidebar. A full-height\n"
+            "    // sidebar starts at the window top, so the row's height is the band's.\n"
             "    views().vertical_tab_strip_region_view->SetBreezerTitlebarForLayout(\n"
-            "        breezer_full_height_sidebar\n"
-            "            ? vertical_tab_strip_animation.top_offset -\n"
-            "                  zen.vertical_tab_strip_top_padding\n"
-            "            : 0,\n"
+            "        breezer_full_height_sidebar ? vertical_tab_strip_animation.top_offset\n"
+            "                                    : 0,\n"
             "        base::ClampCeil(\n"
             "            browser_params.leading_exclusion.ContentWithPadding().width()) -\n"
             "            tabstrip_bounds->x());\n",
@@ -435,6 +498,13 @@ def _layout_replacements():
             "        needs_exclusion);\n"
             "    top_container_layout.bounds = GetTopContainerBoundsInParent(\n"
             "        top_container_local_bounds, top_container_params);\n",
+        ),
+        (
+            "    views().vertical_tab_strip_region_view->SetFloatingStyleForLayout(\n"
+            "        floating_style, floating_corner_radius, below_toolbar);\n",
+            "    views().vertical_tab_strip_region_view->SetFloatingStyleForLayout(\n"
+            "        floating_style, floating_corner_radius, below_toolbar,\n"
+            "        /*at_window_top=*/breezer_full_height_sidebar);\n",
         ),
     ]
 
