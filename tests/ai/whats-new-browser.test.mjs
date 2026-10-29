@@ -53,8 +53,8 @@ function installFixture({ tabs }) {
 }
 
 async function withPage(browser, base, options, fn) {
-  const { viewport = { width: 1440, height: 900 }, reducedMotion = 'reduce', tabs = 'current' } = options;
-  const context = await browser.newContext({ viewport, reducedMotion, colorScheme: 'dark', locale: 'en-US', deviceScaleFactor: 2 });
+  const { viewport = { width: 1440, height: 900 }, reducedMotion = 'reduce', tabs = 'current', deviceScaleFactor = viewport.width < 720 ? 1 : 2 } = options;
+  const context = await browser.newContext({ viewport, reducedMotion, colorScheme: 'dark', locale: 'en-US', deviceScaleFactor });
   await context.addInitScript(installFixture, { tabs });
   const page = await context.newPage();
   const errors = [];
