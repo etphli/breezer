@@ -26,11 +26,23 @@ windows that show Chromium's own tab rows keep the upstream layout.
 
 REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
 REGION_HEADER = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.h"
+REGION_TEST = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view_browsertest.cc"
 LAYOUT = "chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc"
 
 
 def _region_header_replacements():
     return [
+        (
+            '#include "base/memory/raw_ptr.h"\n',
+            '#include "base/memory/raw_ptr.h"\n'
+            '#include "base/memory/weak_ptr.h"\n',
+        ),
+        (
+            '  base::CallbackListSubscription paint_as_active_subscription_;\n',
+            '  base::CallbackListSubscription paint_as_active_subscription_;\n'
+            '\n'
+            '  base::WeakPtrFactory<VerticalTabStripRegionView> weak_factory_{this};\n',
+        ),
         (
             "  void SetFloatingStyleForLayout(FloatingStyle style,\n"
             "                                 int corner_radius,\n"
@@ -52,6 +64,34 @@ def _region_header_replacements():
 
 def _region_replacements():
     return [
+        (
+            '#include "base/time/time.h"\n',
+            '#include "base/location.h"\n'
+            '#include "base/task/sequenced_task_runner.h"\n'
+            '#include "base/time/time.h"\n',
+        ),
+        (
+            '  if (state == tabs::VerticalTabStripCollapseState::kExpanded ||\n'
+            '      state == tabs::VerticalTabStripCollapseState::kCollapsed) {\n'
+            '    UpdateExpandOnHoverState();\n'
+            '  }\n',
+            '  if (state == tabs::VerticalTabStripCollapseState::kExpanded ||\n'
+            '      state == tabs::VerticalTabStripCollapseState::kCollapsed) {\n'
+            '    // Collapse completion notifies us inside GroupData::OnAnimationEnded.\n'
+            '    // A floating zen sidebar holds a keep-expanded lock, so evaluating\n'
+            '    // hover here can start a new motion before the old callback clears\n'
+            '    // current_motion_, leaving the new animator without a motion.\n'
+            '    base::SequencedTaskRunner::GetCurrentDefault()->PostTask(\n'
+            '        FROM_HERE,\n'
+            '        base::BindOnce(&VerticalTabStripRegionView::UpdateExpandOnHoverState,\n'
+            '                       weak_factory_.GetWeakPtr(), std::nullopt));\n'
+            '  }\n',
+        ),
+        (
+            '  if (IsHitInView(bottom_button_container_, point)) {\n',
+            '  if (bottom_button_container_->GetVisible() &&\n'
+            '      IsHitInView(bottom_button_container_, point)) {\n',
+        ),
         (
             "      region->GetViewByID(BreezerWorkspaceView::kViewId));\n"
             "}\n"
@@ -94,18 +134,17 @@ def _region_replacements():
             "  if (IsHitInView(resize_area_, point)) {\n"
             "    return false;\n"
             "  }\n",
-            "  if (IsHitInView(resize_area_, point)) {\n"
+            "  if (resize_area_->GetVisible() && IsHitInView(resize_area_, point)) {\n"
             "    return false;\n"
             "  }\n"
             "\n"
             "#if BUILDFLAG(ENABLE_EXTENSIONS)\n"
-            "  // The window controls are drawn over the top of Breezer's document; that\n"
-            "  // band drags the window like the rest of the title bar.\n"
+            "  // Classify the document before hidden native controls, which can retain\n"
+            "  // stale bounds. AppKit drops caption hits before reaching the WebView.\n"
             "  if (BreezerWorkspaceView* const workspace = FindBreezerWorkspace(this);\n"
-            "      workspace && workspace->GetVisible() &&\n"
-            "      workspace->IsPointInTitlebar(\n"
-            "          views::View::ConvertPointToTarget(this, workspace, point))) {\n"
-            "    return true;\n"
+            "      workspace && workspace->IsDrawn() && IsHitInView(workspace, point)) {\n"
+            "    return workspace->IsPointInTitlebar(\n"
+            "        views::View::ConvertPointToTarget(this, workspace, point));\n"
             "  }\n"
             "#endif  // BUILDFLAG(ENABLE_EXTENSIONS)\n",
         ),
@@ -174,6 +213,66 @@ def _region_replacements():
             "      !(floating_style_ == FloatingStyle::kDetached &&\n"
             "        HostsBreezerWorkspace())) {\n",
         ),
+    ]
+
+
+def _region_test_replacements():
+    anchor = (
+        'IN_PROC_BROWSER_TEST_F(VerticalTabStripRegionViewTest,\n'
+        '                       SeparatorVisibilityChangesWithCollapsedState) {\n'
+    )
+    tests = '''IN_PROC_BROWSER_TEST_F(VerticalTabStripRegionViewTest,
+                       BreezerFloatingCollapseKeepsHoverMotion) {
+  auto rich_animations = gfx::AnimationTestApi::SetRichAnimationRenderMode(
+      gfx::Animation::RichAnimationRenderMode::FORCE_ENABLED);
+  gfx::ScopedAnimationDurationScaleMode duration(
+      gfx::ScopedAnimationDurationScaleMode::NORMAL_DURATION);
+  auto* prefs = browser()->GetProfile()->GetPrefs();
+  prefs->SetBoolean(prefs::kHeliumZenMode, true);
+  prefs->SetBoolean(prefs::kHeliumZenModeSidebarPinned, false);
+  SetupExpandedVerticalTabStrip();
+
+  for (int attempt = 0; attempt < 3; ++attempt) {
+    state_controller()->RequestCollapse(true);
+    // Collapse completion holds a zen keep-expanded lock. The hover motion
+    // must start after GroupData has finished clearing the collapse motion.
+    ASSERT_TRUE(base::test::RunUntil([&]() {
+      return state_controller()->IsCollapsed() &&
+             region_view()->is_expanded_on_hover() && !IsAnimatingSize();
+    }));
+    state_controller()->RequestCollapse(false);
+    ASSERT_TRUE(base::test::RunUntil([&]() {
+      return !state_controller()->IsCollapsed() && !IsAnimatingSize();
+    }));
+  }
+}
+
+IN_PROC_BROWSER_TEST_F(VerticalTabStripRegionViewTest,
+                       BreezerHiddenControlsDoNotClaimCaption) {
+  SetupExpandedVerticalTabStrip();
+  auto* bottom = region_view()->GetBottomContainer();
+  // Hidden Views retain their old bounds and HitTestPoint ignores visibility.
+  bottom->SetBoundsRect(gfx::Rect(0, 0, 200, 200));
+  for (views::View* child : bottom->children()) {
+    child->SetVisible(false);
+  }
+  bottom->SetVisible(false);
+  gfx::Point point(20, 100);
+  views::View::ConvertPointToTarget(bottom, region_view(), &point);
+  ASSERT_TRUE(region_view()->GetLocalBounds().Contains(point));
+  EXPECT_FALSE(region_view()->IsPositionInWindowCaption(point));
+}
+
+'''
+    return [
+        (
+            '#include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_top_container.h"\n',
+            '#include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_top_container.h"\n'
+            '#include "chrome/browser/ui/views/tabs/vertical/vertical_tab_strip_bottom_container.h"\n'
+            '#include "components/prefs/pref_service.h"\n'
+            '#include "ui/gfx/animation/animation_test_api.h"\n',
+        ),
+        (anchor, tests + anchor),
     ]
 
 
@@ -345,6 +444,7 @@ def replacements():
     return {
         REGION: _region_replacements(),
         REGION_HEADER: _region_header_replacements(),
+        REGION_TEST: _region_test_replacements(),
         LAYOUT: _layout_replacements(),
     }
 

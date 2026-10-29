@@ -181,6 +181,25 @@ def check_order(tree, ai_first):
     caption = caption.split("\n}\n", 1)[0]
     require(caption.index("IsHitInView(resize_area_, point)") < caption.index("IsPointInTitlebar("),
             "The resize edge must win over the title bar band")
+    require('resize_area_->GetVisible() &&' in caption and
+            'bottom_button_container_->GetVisible() &&' in caption,
+            'Hidden native controls must not claim caption hits using stale bounds')
+    require('workspace->IsDrawn() && IsHitInView(workspace, point)' in caption and
+            'return workspace->IsPointInTitlebar(' in caption and
+            caption.index('IsHitInView(workspace, point)') <
+            caption.index('IsHitInView(bottom_button_container_, point)'),
+            'Sidebar document body must be client input before native fallback tests')
+    collapse_changed = region.split('void VerticalTabStripRegionView::OnCollapseStateChanged(', 1)[1]
+    collapse_changed = collapse_changed.split('\n}', 1)[0]
+    require('PostTask(' in collapse_changed and
+            '&VerticalTabStripRegionView::UpdateExpandOnHoverState' in collapse_changed and
+            'weak_factory_.GetWeakPtr(), std::nullopt' in collapse_changed and
+            'base::WeakPtrFactory<VerticalTabStripRegionView> weak_factory_{this};' in header,
+            'Hover motion must wait for the old animation completion callback to unwind')
+    native_tests = (tree / sidebar_frame.REGION_TEST).read_text()
+    require('BreezerFloatingCollapseKeepsHoverMotion' in native_tests and
+            'BreezerHiddenControlsDoNotClaimCaption' in native_tests,
+            'Native sidebar regressions are missing from browser_tests')
     require("if (!HostsBreezerWorkspace()) {\n    available.Inset(interior_margin_);" in region,
             "Native margins still band the document")
     layout_body = region.split("void VerticalTabStripRegionView::Layout(PassKey) {", 1)[1].split("\n}\n", 1)[0]
@@ -208,13 +227,18 @@ def check_document():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--offline", action="store_true",
-                        help="Use only the prepared pinned-source cache")
+    downloads = parser.add_mutually_exclusive_group()
+    downloads.add_argument("--offline", action="store_true",
+                           help="Use only the prepared pinned-source cache")
+    downloads.add_argument("--no-cache", action="store_true",
+                           help="Fetch the pinned fixture into temporary storage only")
     args = parser.parse_args()
     use_merged_replacements()
     check_document()
 
     with tempfile.TemporaryDirectory(prefix="breezer-sidebar-frame-") as directory:
+        if args.no_cache:
+            source_fixture.CACHE = Path(directory).resolve() / "downloads"
         base = Path(directory).resolve() / "pristine"
         originals = source_fixture.prepare(
             base, offline=args.offline, wanted_paths=tuple(workspace.replacements())
