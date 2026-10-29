@@ -21,8 +21,7 @@
   <main class="sheet">
     <section id="organato" class="organato" aria-labelledby="organato-title" aria-busy="true">
       <div class="organato-head">
-        <h2 id="organato-title" class="organato-title">Coming up</h2>
-        <p class="organato-source">From Organato</p>
+        <h2 id="organato-title" class="organato-title">Coming up in Organato</h2>
         <button id="refresh" class="refresh" type="button" title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
       </div>
 
@@ -30,15 +29,11 @@
       <p id="organato-action" class="organato-action" hidden></p>
 
       <div id="organato-lists" class="lanes" hidden>
-        <section class="lane" aria-labelledby="lane-exams">
-          <h3 id="lane-exams" class="lane-title">Exams <span class="lane-count" data-count="exams"></span></h3>
-          <ol class="items" data-list="exams"></ol>
+        <section class="lane lane-upcoming" aria-labelledby="lane-upcoming">
+          <h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3>
+          <ol class="items" data-list="upcoming"></ol>
         </section>
-        <section class="lane" aria-labelledby="lane-assignments">
-          <h3 id="lane-assignments" class="lane-title">Assignments <span class="lane-count" data-count="assignments"></span></h3>
-          <ol class="items" data-list="assignments"></ol>
-        </section>
-        <section class="lane" aria-labelledby="lane-todos">
+        <section class="lane lane-todos" aria-labelledby="lane-todos">
           <h3 id="lane-todos" class="lane-title">To-dos <span class="lane-count" data-count="todos"></span></h3>
           <ol class="items" data-list="todos"></ol>
         </section>

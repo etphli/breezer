@@ -34,18 +34,23 @@ const CONNECTED = {
   topSites: SITES,
   organato: {
     enabled: true, connected: true, error: null,
+    // As the background sends them: b1 is classified as both, so it is in
+    // exams and assignments; t1 is a to-do the exam filter also picked up.
     exams: [
-      { id: 'e1', title: 'Chemistry unit 3 test', dueAt: at(1, 9), subject: 'Chemistry' },
-      { id: 'e2', title: 'Spanish oral exam', dueAt: at(6, 13), subject: 'Spanish' },
+      { id: 't1', kind: 'todo', classification: 'checkpoint', title: 'Email group about slides', dueAt: at(0) },
+      { id: 'e1', kind: 'work', classification: 'checkpoint', title: 'Chemistry unit 3 test', dueAt: at(1, 9), subject: 'Chemistry' },
+      { id: 'b1', kind: 'work', classification: 'both', title: 'Biology field study presentation', dueAt: at(4), subject: 'Biology' },
+      { id: 'e2', kind: 'work', classification: 'checkpoint', title: 'Spanish oral exam', dueAt: at(6, 13), subject: 'Spanish' },
     ],
     assignments: [
-      { id: 'a0', title: 'Reading reflection', dueAt: at(-1), subject: 'English' },
-      { id: 'a1', title: 'History essay draft', dueAt: at(0, 23), subject: 'History', url: 'https://canvas.example.edu/a1' },
-      { id: 'a2', title: 'Lab report: titration', dueAt: at(3, 17), subject: 'Chemistry' },
-      { id: 'a3', title: 'Problem set 7', dueAt: at(9), subject: 'Maths' },
+      { id: 'a0', kind: 'work', classification: 'assignment', title: 'Reading reflection', dueAt: at(-1), subject: 'English' },
+      { id: 'a1', kind: 'work', classification: 'assignment', title: 'History essay draft', dueAt: at(0, 23), subject: 'History', url: 'https://canvas.example.edu/a1' },
+      { id: 'a2', kind: 'work', classification: 'assignment', title: 'Lab report: titration', dueAt: at(3, 17), subject: 'Chemistry' },
+      { id: 'b1', kind: 'work', classification: 'both', title: 'Biology field study presentation', dueAt: at(4), subject: 'Biology' },
+      { id: 'a3', kind: 'work', classification: 'assignment', title: 'Problem set 7', dueAt: at(9), subject: 'Maths' },
     ],
     todos: [
-      { id: 't1', title: 'Email group about slides', dueAt: at(0) },
+      { id: 't1', kind: 'todo', classification: 'checkpoint', title: 'Email group about slides', dueAt: at(0) },
       { id: 't2', title: 'Return library books' },
     ],
   },
@@ -146,11 +151,32 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
 
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
       assert.equal(await page.isHidden('#organato-status'), true);
-      assert.deepEqual(await page.$$eval('[data-count]', (nodes) => nodes.map((node) => node.textContent)), ['2', '4', '2']);
-      const first = await page.$$eval('[data-list="assignments"] .item', (rows) => rows.map((row) => [row.dataset.urgency, row.querySelector('.item-when').textContent]));
-      assert.deepEqual(first.map(([u]) => u), ['overdue', 'today', 'soon', 'later']);
-      assert.equal(first[0][1], 'Due yesterday');
-      assert.equal(await page.getAttribute('[data-list="assignments"] a.item-title', 'href'), 'https://canvas.example.edu/a1');
+      // Two lanes only: one Upcoming list and To-dos, with no Exams/Assignments headings.
+      assert.deepEqual(await page.$$eval('.lane-title', (nodes) => nodes.map((node) => node.firstChild.textContent.trim())), ['Upcoming', 'To-dos']);
+      assert.deepEqual(await page.$$eval('[data-count]', (nodes) => nodes.map((node) => node.textContent)), ['7', '2']);
+      const upcoming = await page.$$eval('[data-list="upcoming"] .item', (rows) => rows.map((row) => ({
+        title: row.querySelector('.item-title').textContent,
+        urgency: row.dataset.urgency,
+        when: row.querySelector('.item-when').textContent,
+        exam: Boolean(row.querySelector('.item-kind')),
+      })));
+      assert.deepEqual(upcoming.map(({ title }) => title), [
+        'Reading reflection', 'History essay draft', 'Chemistry unit 3 test', 'Lab report: titration',
+        'Biology field study presentation', 'Spanish oral exam', 'Problem set 7',
+      ]);
+      assert.deepEqual(upcoming.map(({ urgency }) => urgency), ['overdue', 'today', 'soon', 'soon', 'later', 'later', 'later']);
+      assert.deepEqual(upcoming.map(({ exam }) => exam), [false, false, true, false, true, true, false]);
+      assert.equal(upcoming[0].when, 'Due yesterday');
+      assert.equal(upcoming[4].when, 'In 4 days, Nov 2');
+      assert.equal(await page.getAttribute('[data-list="upcoming"] a.item-title', 'href'), 'https://canvas.example.edu/a1');
+      assert.deepEqual(await page.$$eval('[data-list="todos"] .item-title', (nodes) => nodes.map((node) => node.textContent)), ['Email group about slides', 'Return library books']);
+      // Each title appears once on the whole page.
+      const titles = await page.$$eval('.item-title', (nodes) => nodes.map((node) => node.textContent));
+      assert.equal(new Set(titles).size, titles.length);
+      // Side by side on wide windows, Upcoming the wider of the two.
+      const [wide, narrow] = await page.$$eval('.lane', (lanes) => lanes.map((lane) => lane.getBoundingClientRect()).map(({ top, width }) => ({ top, width })));
+      assert.equal(wide.top, narrow.top);
+      assert.ok(wide.width > narrow.width * 1.4, `lanes ${wide.width} / ${narrow.width}`);
       assert.equal(await page.textContent('[data-list="todos"] .item:last-child .item-when'), 'No due date');
       await page.screenshot({ path: `${evidence}/newtab-connected-light.png` });
 
@@ -188,6 +214,8 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(visible.length, 4);
       assert.equal(new Set(visible).size, 1);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 420), true);
+      const lanes = await page.$$eval('.lane', (nodes) => nodes.map((node) => node.getBoundingClientRect().top));
+      assert.ok(lanes[1] > lanes[0], 'lanes stack on narrow windows');
       await page.screenshot({ path: `${evidence}/newtab-narrow.png`, fullPage: true });
     });
 
@@ -212,6 +240,34 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'disabled');
     });
 
+    // Same titles with different IDs stay separate; a refresh error keeps the last items.
+    const stale = {
+      topSites: SITES.slice(0, 3),
+      organato: {
+        enabled: true, connected: true, error: 'Organato timed out. Try again.',
+        exams: [{ id: 'q1', title: 'Weekly quiz', dueAt: at(2, 10), subject: 'Maths' }],
+        assignments: [{ id: 'q2', title: 'Weekly quiz', dueAt: at(9, 10), subject: 'Maths' }, { id: 'q1', title: 'Weekly quiz', dueAt: at(2, 10), subject: 'Maths' }],
+        todos: [],
+      },
+    };
+    await withPage(browser, base, { view: stale }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
+      assert.match(await page.textContent('#organato-status'), /Showing the last update.*timed out/);
+      assert.deepEqual(await page.$$eval('[data-list="upcoming"] .item-when', (nodes) => nodes.map((node) => node.textContent)), ['In 2 days, Oct 31, 10:00 AM', 'In 9 days, Nov 7, 10:00 AM']);
+      assert.equal(await page.textContent('[data-list="todos"] .item-empty'), 'Nothing on your to-do list.');
+      await page.screenshot({ path: `${evidence}/newtab-stale-same-title.png` });
+    });
+
+    // A failed manual refresh keeps the merged list it already had.
+    await withPage(browser, base, { view: CONNECTED }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      await page.evaluate(() => { const connect = window.chrome.runtime.connect; window.chrome.runtime.connect = () => { window.chrome.runtime.connect = connect; throw new Error('Breezer closed the connection.'); }; });
+      await page.click('#refresh');
+      await page.waitForFunction(() => /Showing the last update/.test(document.getElementById('organato-status').textContent));
+      assert.equal(await page.$$eval('[data-list="upcoming"] .item', (rows) => rows.length), 7);
+    });
+
     // Loading, then a bounded wait when the background never answers.
     await withPage(browser, base, { view: CONNECTED, hang: true }, async (page) => {
       assert.equal(await page.getAttribute('#organato', 'aria-busy'), 'true');
@@ -231,8 +287,8 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.waitForSelector('html[data-loaded="true"]');
       assert.equal(await page.$$eval('.site', (items) => items.length), 1);
       assert.equal(await page.textContent('.site-name'), '<img src=x onerror=alert(1)>');
-      assert.equal(await page.$('[data-list="exams"] a'), null);
-      assert.equal(await page.textContent('[data-list="exams"] .item-title'), '<script>alert(1)</script>');
+      assert.equal(await page.$('[data-list="upcoming"] a'), null);
+      assert.equal(await page.textContent('[data-list="upcoming"] .item-title'), '<script>alert(1)</script>');
       assert.equal(await page.$$eval('main script, main img, main b', (nodes) => nodes.length), 0);
     });
   } finally {

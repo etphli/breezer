@@ -69,12 +69,75 @@ test('normalizeView keeps Organato enabled by default and sorts by due date', ()
     todos: [{ title: 'Undated' }, { title: 'Dated', dueAt: '2026-10-30' }],
   } });
   assert.equal(view.organato.enabled, true);
-  assert.deepEqual(view.organato.assignments.map((item) => item.title), ['Sooner <img src=x>', 'Later']);
-  assert.equal(view.organato.assignments[0].url, null);
-  assert.equal(view.organato.assignments[0].allDay, true);
+  assert.deepEqual(view.organato.upcoming.map((item) => item.title), ['Sooner <img src=x>', 'Later']);
+  assert.equal(view.organato.upcoming[0].url, null);
+  assert.equal(view.organato.upcoming[0].allDay, true);
+  assert.equal(view.organato.upcoming[0].exam, false);
   assert.deepEqual(view.organato.todos.map((item) => item.title), ['Dated', 'Undated']);
-  assert.deepEqual(view.organato.exams, []);
+  assert.equal('exams' in view.organato || 'assignments' in view.organato, false);
   assert.deepEqual(normalizeView(null).topSites, []);
+  assert.deepEqual(normalizeView(null).organato.upcoming, []);
+});
+
+test('an item classified as both exam and assignment shows once in Upcoming', () => {
+  const both = { id: 'w1', kind: 'work', classification: 'both', title: 'Midterm project', dueAt: '2026-11-02' };
+  const view = normalizeView({ organato: {
+    connected: true,
+    exams: [{ id: 'w2', kind: 'work', classification: 'checkpoint', title: 'Quiz 4', dueAt: '2026-11-05T09:00:00Z' }, both],
+    assignments: [both, { id: 'w3', kind: 'work', classification: 'assignment', title: 'Essay', dueAt: '2026-10-31' }, { ...both }],
+  } });
+  assert.deepEqual(view.organato.upcoming.map((item) => item.id), ['w3', 'w1', 'w2']);
+  assert.deepEqual(view.organato.upcoming.map((item) => item.exam), [false, true, true]);
+  // Numeric IDs are stable too.
+  const numeric = normalizeView({ organato: { exams: [{ id: 7, title: 'A' }], assignments: [{ id: '7', title: 'A' }] } });
+  assert.equal(numeric.organato.upcoming.length, 1);
+});
+
+test('to-dos stay in To-dos and never repeat in Upcoming', () => {
+  const todo = { id: 't1', kind: 'todo', classification: 'checkpoint', title: 'Revise flashcards', dueAt: '2026-10-30' };
+  const view = normalizeView({ organato: {
+    connected: true,
+    // The background's exam filter does not check kind, so a to-do can arrive here.
+    exams: [todo, { id: 't9', kind: 'todo', classification: 'checkpoint', title: 'To-do past the cap', dueAt: '2026-11-08' }],
+    assignments: [{ id: 't1', title: 'Revise flashcards', dueAt: '2026-10-30' }, { id: 'w1', kind: 'work', title: 'Essay', dueAt: '2026-11-01' }],
+    todos: [todo, { ...todo }],
+  } });
+  assert.deepEqual(view.organato.upcoming.map((item) => item.id), ['w1']);
+  assert.deepEqual(view.organato.todos.map((item) => item.id), ['t1']);
+});
+
+test('different IDs are never merged, even with the same title', () => {
+  const view = normalizeView({ organato: {
+    connected: true,
+    exams: [{ id: 'q1', title: 'Weekly quiz', dueAt: '2026-11-02', subject: 'Maths' }],
+    assignments: [
+      { id: 'q2', title: 'Weekly quiz', dueAt: '2026-11-09', subject: 'Maths' },
+      { title: 'No ID', dueAt: '2026-11-03' },
+      { title: 'No ID', dueAt: '2026-11-03' },
+    ],
+    todos: [{ id: 'q3', title: 'Weekly quiz' }],
+  } });
+  assert.deepEqual(view.organato.upcoming.map((item) => [item.id, item.title]), [['q1', 'Weekly quiz'], [null, 'No ID'], [null, 'No ID'], ['q2', 'Weekly quiz']]);
+  assert.deepEqual(view.organato.todos.map((item) => item.id), ['q3']);
+});
+
+test('Upcoming is chronological across exams and assignments with local all-day dates', () => {
+  const view = normalizeView({ organato: {
+    connected: true,
+    exams: [
+      { id: 'e2', title: 'Final', dueAt: '2026-12-10T14:00:00' },
+      { id: 'e1', title: 'Quiz', dueAt: '2026-11-01T08:30:00' },
+      { id: 'e0', title: 'Undated exam' },
+    ],
+    assignments: [
+      { id: 'a2', title: 'Lab', dueAt: '2026-11-01T23:59:00' },
+      { id: 'a1', title: 'Reading', dueAt: '2026-11-01' },
+      { id: 'a0', title: 'Overdue', dueAt: '2026-10-27' },
+    ],
+  } });
+  assert.deepEqual(view.organato.upcoming.map((item) => item.id), ['a0', 'a1', 'e1', 'a2', 'e2', 'e0']);
+  const reading = view.organato.upcoming[1];
+  assert.deepEqual([reading.due.getDate(), reading.due.getHours(), reading.allDay], [1, 0, true]);
 });
 
 test('organatoState covers every state the section can show', () => {
@@ -84,7 +147,12 @@ test('organatoState covers every state the section can show', () => {
   assert.equal(organatoState(base), 'setup');
   assert.equal(organatoState({ ...base, connected: true }), 'ready');
   assert.equal(organatoState({ ...base, connected: true, error: 'Key rejected' }), 'error');
-  assert.equal(organatoState({ ...base, connected: true, error: 'Timed out', exams: [{}] }), 'ready');
+  assert.equal(organatoState({ ...base, connected: true, error: 'Timed out', upcoming: [{}] }), 'ready');
+  assert.equal(organatoState({ ...base, connected: true, error: 'Timed out', todos: [{}] }), 'ready');
+  // A stale refresh error with only duplicated items still keeps the last update.
+  const stale = normalizeView({ organato: { connected: true, error: 'Timed out', exams: [{ id: 'x', title: 'X' }], assignments: [{ id: 'x', title: 'X' }] } }).organato;
+  assert.equal(organatoState(stale), 'ready');
+  assert.equal(stale.upcoming.length, 1);
 });
 
 test('date-only due values are local days and relative labels read plainly', () => {

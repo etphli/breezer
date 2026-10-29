@@ -2,13 +2,14 @@
 
 `features/ai/extension/newtab.{html,css,js}` replace the blank Chromium new tab
 with two things: one row of frequently visited sites around the upper third of
-the window, and an Organato section of upcoming exams, assignments and to-dos.
+the window, and an Organato section with two lists: Upcoming (exams and
+assignments together, in date order) and To-dos.
 
 ## Design
 
 - **Sky and sheet.** The top of the page is the profile's Breezer tone (`--air`)
   and holds today's date and the row of sites. Below it a rounded sheet
-  (`--card`) rises from the bottom edge and holds "Coming up". The sheet's
+  (`--card`) rises from the bottom edge and holds "Coming up in Organato". The sheet's
   position is fixed by the reserved row height, so nothing jumps while loading
   or when there are no sites.
 - **Type.** The system serif (`ui-serif`, New York on macOS) for the date,
@@ -18,9 +19,11 @@ the window, and an Organato section of upcoming exams, assignments and to-dos.
   the day of the month in large serif numerals, the weekday below. Its colour
   carries urgency: accent for today and the next three days, the danger colour
   when overdue, muted otherwise, and an empty ring for to-dos with no date.
-- **Three lanes.** Exams, Assignments and To-dos sit side by side on wide
-  windows and stack below 860 px. Each shows the six soonest items, then
-  "N more in Organato".
+- **Two lanes.** Upcoming (the wider column) and To-dos sit side by side on
+  wide windows and stack below 860 px. Upcoming shows the eight soonest items
+  and To-dos the six soonest, then "N more in Organato". Exams have no lane of
+  their own: an exam row carries a quiet bold "Exam" beside its date, so there
+  are no competing Exams/Assignments headings.
 - **One row of sites, always.** Up to 8 sites; 6 below 920 px, 4 below 700 px
   and 3 below 400 px. Hidden tiles use `display: none`, so they are out of the
   tab order too.
@@ -37,7 +40,7 @@ the window, and an Organato section of upcoming exams, assignments and to-dos.
 | Organato section | When | Shows |
 | --- | --- | --- |
 | Loading | Before the first answer | "Loading your exams, assignments and to-dos…", `aria-busy`; 8 placeholder tiles in the sites row |
-| Ready | `connected` or items present | The three lanes. A non-empty `error` with items present shows "Showing the last update…" above them |
+| Ready | `connected` or items present | The two lanes. A non-empty `error` with items present shows "Showing the last update…" above them |
 | Setup | `enabled` and not `connected`, no items | "Connect Organato…" and a link to Settings |
 | Error | `error` set, no items | The error text and a link to Settings |
 | Off | `enabled: false` | "Organato is turned off." and a link to Settings |
@@ -97,6 +100,22 @@ and trimmed (titles to 200 characters, errors to 240), only `http:`/`https:`
 URLs become links, duplicate site URLs are dropped, and lists are sorted by due
 date with undated items last.
 
+### Upcoming and To-dos (merged in the page)
+
+The background contract above is unchanged; the page combines the arrays in
+`normalizeView`:
+
+- **Upcoming** is `exams` followed by `assignments`, sorted together by due
+  date. An item appears once per Organato `id`, even when it arrives in both
+  arrays (Organato `classification: 'both'`) or twice in one. If any copy came
+  from `exams`, the row is tagged "Exam".
+- **To-dos** is `todos`, deduplicated by `id` the same way. A to-do never
+  appears in Upcoming: anything with `kind: 'todo'` and any `id` that is also
+  in `todos` is left out of Upcoming.
+- Only a real `id` (a string or number) can match two rows. Items with
+  different IDs stay separate even when their titles are identical, and items
+  without an ID are never merged.
+
 ## Integration notes for Main
 
 - The three files are not yet wired up. Main needs to add
@@ -108,16 +127,23 @@ date with undated items last.
 - Favicons come from the extension's `/_favicon/` endpoint (the manifest already
   has the `favicon` permission). If it fails, a serif monogram stays in place.
 - Organato's `kind: 'todo'` items map to `todos`. How exams and assignments
-  are told apart (for example `classification: 'checkpoint'`) is Main's choice.
+  are told apart (for example `classification: 'checkpoint'`) is Main's choice;
+  overlap between the arrays is harmless because the page merges by `id`.
 
 ## Tests
 
 - `node --test tests/ai/newtab.test.mjs`: no HTML parsing or remote URLs,
   tone tokens match `workspace.css`, URL filtering, normalization, state
-  selection, date handling, and the port request/timeout/disconnect behaviour.
+  selection, date handling, the Upcoming merge (an item classified as both
+  shows once, to-dos stay out of Upcoming, same titles with different IDs stay
+  separate, chronological order) and the port request/timeout/disconnect
+  behaviour.
+- `node --test tests/ai/newtab-bridge.test.mjs`: runs the real background
+  handler and checks that its overlapping arrays render as one Upcoming list.
 - `node --test tests/ai/newtab-browser.test.mjs`: drives `newtab.html` in
   headless Chrome against a `chrome.*` fixture. It checks every state, the
-  single-row layout, Refresh, keyboard order, the theme bridge and OS fallback,
+  single-row layout, the two lanes with each item shown once, a stale refresh
+  error that keeps the last items, Refresh, keyboard order, the theme bridge and OS fallback,
   narrow widths, and hostile input. It writes screenshots to
   `$BREEZER_AI_EVIDENCE` (default `/tmp/breezer-ai-evidence`). Sites and
   items in the fixture are test data.

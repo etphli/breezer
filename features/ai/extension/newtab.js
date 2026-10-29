@@ -1,7 +1,7 @@
-// Breezer new tab: one row of frequently visited sites and the Organato
-// exams, assignments and to-dos that are coming up. The page asks the
-// background over a 'breezer-newtab' port once on load and again only when the
-// Refresh button is pressed; the background owns persistence and every HTTP call.
+// Breezer new tab: one row of frequently visited sites and what's coming up in
+// Organato: one Upcoming list (exams and assignments together) and To-dos.
+// The page asks the background over a 'breezer-newtab' port once on load and
+// again only when the Refresh button is pressed; the background owns persistence and every HTTP call.
 // Everything received is untrusted: text goes in with textContent and only
 // http(s) URLs become links.
 import { startPanelTheme } from './panel-theme.js';
@@ -9,9 +9,9 @@ import { startPanelTheme } from './panel-theme.js';
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
 export const MAX_SITES = 8;
-export const MAX_ITEMS = 6;
+export const MAX_ITEMS = { upcoming: 8, todos: 6 };
 export const SETTINGS_URL = 'workspace.html#/settings';
-const LISTS = ['exams', 'assignments', 'todos'];
+const LISTS = ['upcoming', 'todos'];
 const TEXT_LIMIT = 200;
 const DAY_MS = 86400000;
 
@@ -59,17 +59,39 @@ export function urgency(days) {
   return days <= 3 ? 'soon' : 'later';
 }
 
-function normalizeItem(raw, index) {
+// Organato's own ID, or null when there is none. Only a real ID can say two
+// rows are the same item; matching titles never do.
+const stableId = (raw) => (typeof raw?.id === 'string' || Number.isFinite(raw?.id) ? text(String(raw.id), 80) || null : null);
+
+function normalizeItem(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const title = text(raw.title);
   if (!title) return null;
   const allDay = raw.allDay === true || /^\d{4}-\d{2}-\d{2}$/.test(raw.dueAt ?? '');
-  return { id: text(String(raw.id ?? index), 80), title, due: parseDue(raw.dueAt), allDay, subject: text(raw.subject, 60) || null, url: safeUrl(raw.url) };
+  return { id: stableId(raw), title, due: parseDue(raw.dueAt), allDay, subject: text(raw.subject, 60) || null, url: safeUrl(raw.url), exam: false };
 }
 
-function normalizeList(value) {
-  const items = (Array.isArray(value) ? value : []).map(normalizeItem).filter(Boolean);
-  // Soonest first; undated to-dos keep their given order at the end.
+// Builds one list from several arrays, keeping the first copy of each ID.
+// Rows from an array marked `exam` (or repeats of them) are tagged as exams.
+function collect(sources, skip = new Set()) {
+  const byId = new Map();
+  const items = [];
+  for (const { value, exam = false } of sources) {
+    for (const raw of Array.isArray(value) ? value : []) {
+      const item = normalizeItem(raw);
+      if (!item || (item.id && skip.has(item.id))) continue;
+      const known = item.id && byId.get(item.id);
+      if (known) { known.exam ||= exam; continue; }
+      item.exam = exam;
+      if (item.id) byId.set(item.id, item);
+      items.push(item);
+    }
+  }
+  return sortByDue(items);
+}
+
+function sortByDue(items) {
+  // Soonest first; undated items keep their given order at the end.
   return items
     .map((item, order) => ({ item, order }))
     .sort((a, b) => ((a.item.due?.getTime() ?? Infinity) - (b.item.due?.getTime() ?? Infinity)) || (a.order - b.order))
@@ -93,7 +115,14 @@ export function normalizeView(raw) {
     connected: source.connected === true,
     error: text(source.error, 240) || null,
   };
-  for (const list of LISTS) organato[list] = normalizeList(source[list]);
+  // The background still sends exams and assignments separately, and an item
+  // classified as both arrives in each. They become one Upcoming list here,
+  // shown once per Organato ID. To-dos stay on their own and never repeat in
+  // Upcoming, whether they are recognised by ID or by `kind: 'todo'`.
+  organato.todos = collect([{ value: source.todos }]);
+  const todoIds = new Set(organato.todos.map((item) => item.id).filter(Boolean));
+  const work = (value) => (Array.isArray(value) ? value.filter((raw) => raw?.kind !== 'todo') : []);
+  organato.upcoming = collect([{ value: work(source.exams), exam: true }, { value: work(source.assignments) }], todoIds);
   return { topSites, organato };
 }
 
@@ -227,6 +256,11 @@ function itemRow(item, now) {
     when.textContent = 'No due date';
     meta.append(when);
   }
+  if (item.exam) {
+    const kind = el('span', 'item-kind');
+    kind.textContent = 'Exam';
+    meta.append(kind);
+  }
   if (item.subject) {
     const subject = el('span', 'item-subject');
     subject.textContent = item.subject;
@@ -237,7 +271,7 @@ function itemRow(item, now) {
   return row;
 }
 
-const EMPTY = { exams: 'No exams coming up.', assignments: 'No assignments due.', todos: 'Nothing on your to-do list.' };
+const EMPTY = { upcoming: 'No exams or assignments coming up.', todos: 'Nothing on your to-do list.' };
 
 function settingsLink(label) {
   const link = el('a', 'action-link', { href: SETTINGS_URL });
@@ -288,14 +322,15 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   for (const list of LISTS) {
     const items = organato[list];
     const target = lanes.querySelector(`[data-list="${list}"]`);
-    const shown = items.slice(0, MAX_ITEMS).map((item) => itemRow(item, now));
+    const limit = MAX_ITEMS[list];
+    const shown = items.slice(0, limit).map((item) => itemRow(item, now));
     if (!items.length) {
       const empty = el('li', 'item-empty');
       empty.textContent = EMPTY[list];
       shown.push(empty);
-    } else if (items.length > MAX_ITEMS) {
+    } else if (items.length > limit) {
       const more = el('li', 'item-more');
-      more.textContent = `${items.length - MAX_ITEMS} more in Organato`;
+      more.textContent = `${items.length - limit} more in Organato`;
       shown.push(more);
     }
     target.replaceChildren(...shown);
