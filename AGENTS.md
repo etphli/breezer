@@ -9,3 +9,7 @@ Create a new update-page edition for each `1.x.0` release. Append `1.x.1`, `1.x.
 ## Local installation
 
 The user has opted out of agent-driven local updates. Keep the installed Breezer app unchanged unless the user explicitly asks to update or replace it. Source edits, tests and GitHub publication do not authorize installation. Read `build/local-update-hold.json` when present before any install workflow. Preserve the browser profile, passwords and required compiled caches.
+
+## Cleanup
+
+After verifying a new release, remove redundant old installers and application backups whose releases remain available on GitHub. Retain a backup only for a concrete recovery purpose. Prepared source, compiled caches and failure evidence have ongoing build or diagnostic purposes; preserve them along with user data and Git history.
