@@ -238,7 +238,7 @@ try {
   // The sidebar's live rows must be exactly this window's Chromium tabs.
   async function assertScoped(host, windowId, label) {
     let detail;
-    await waitFor(`${label}: sidebar rows match window ${windowId} tabs`, async () => {
+    try { await waitFor(`${label}: sidebar rows match window ${windowId} tabs`, async () => {
       const [view, tabs] = await Promise.all([host.evaluate(snapshotExpression), windowTabs(windowId)]);
       const expected = tabs.filter(tab => !tab.pinned).map(tab => tab.id).sort((a, b) => a - b);
       const shown = view.today.map(row => row.id).sort((a, b) => a - b);
@@ -246,8 +246,13 @@ try {
       detail = { windowId, expected, shown, livePinned, chromiumPinned: tabs.filter(tab => tab.pinned).length };
       const activeRow = view.today.find(row => row.active)?.id ?? null;
       const activeTab = tabs.find(tab => tab.active && !tab.pinned)?.id ?? null;
+      detail = { ...detail, activeRow, activeTab };
       return JSON.stringify(expected) === JSON.stringify(shown) && livePinned === detail.chromiumPinned && activeRow === activeTab;
-    });
+    }); } catch (error) {
+      observe('scopeFailure', { label, ...detail, view: await host.evaluate(snapshotExpression).catch(() => null) });
+      await host.screenshot('scope-failure.png').catch(() => {});
+      throw error;
+    }
     return detail;
   }
 
@@ -339,6 +344,18 @@ try {
     return { x: r.x, y: r.y, width: r.width, height: r.height };
   })()`);
   assert.equal(await hostA.evaluate(`document.querySelector('#favorites').hidden`), true);
+  await hostA.evaluate(`(() => {
+    globalThis.__breezerDragTrace = [];
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
+      document.addEventListener(type, event => {
+        const line = document.getElementById('drag-line');
+        __breezerDragTrace.push({ type, x: event.clientX, y: event.clientY,
+          buttons: event.buttons, trusted: event.isTrusted,
+          dragging: document.getElementById('sidebar').classList.contains('dragging'),
+          lineHidden: line.hidden, lineTop: line.style.top });
+      }, { passive: true });
+    }
+  })()`);
   const dragSource = await tabBox(betaA);
   const dragTarget = await tabBox(alphaA);
   const dragX = dragSource.x + dragSource.width / 2;
@@ -354,10 +371,18 @@ try {
     await hostA.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: dragX + (dropX - dragX) * step / 12, y: dragY - 6 + (dropY - dragY + 6) * step / 12, buttons: 1 });
   }
   await hostA.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: dropX, y: dropY, button: 'left', buttons: 0, clickCount: 1 });
-  await waitFor('Chromium tab reordered by drag', async () => {
+  try { await waitFor('Chromium tab reordered by drag', async () => {
     const tabs = await windowTabs(windowA);
     return tabs.find(tab => tab.id === betaA).index < tabs.find(tab => tab.id === alphaA).index;
-  });
+  }); } catch (error) {
+    observe('dragFailure', {
+      source: dragSource, target: dragTarget, drop: { x: dropX, y: dropY },
+      events: await hostA.evaluate('globalThis.__breezerDragTrace').catch(() => null),
+      tabs: (await windowTabs(windowA).catch(() => [])).map(({ id, index, active, pinned }) => ({ id, index, active, pinned })),
+    });
+    await hostA.screenshot('drag-failure.png').catch(() => {});
+    throw error;
+  }
   assert.equal((await worker.evaluate(id => chrome.tabs.get(id), betaA)).pinned, false);
   await assertScoped(hostA, windowA, 'after drag reorder');
   pass('dragReorderViaRenderer', 'held pointer drag kept row geometry stable and reordered the actual Chromium tab without pinning it; physical macOS pointer routing is unverified');
