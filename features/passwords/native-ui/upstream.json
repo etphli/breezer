@@ -6,7 +6,10 @@
     "native password saving default on; explicit user choices and enterprise policy still apply",
     "native password saving preference instead of Helium forced-off policy; preserves passkey policy",
     "native password bubble action and web app password icon",
-    "native manage-passwords footer in autofill suggestions"
+    "native manage-passwords footer in autofill suggestions",
+    "native password-field context menu fallback, with existing fill eligibility checks",
+    "native fill-on-account-select default; no page-load password filling by default",
+    "quiet native save/update suggestion chip, preserving blocklists and dismissal suppression"
   ],
   "direct_chrome_password_import": false,
   "csv_import_route": "chrome://password-manager/settings?import=true",
@@ -24,6 +27,16 @@
     "chrome/utility/importer/chrome_importer.cc": "7a6f26559d8f474e759150234466b66b4bf26197e1183038d711bd34d819802c",
     "components/password_manager/core/browser/features/password_manager_features_util.cc": "1f94e66ae6f050cc866a43b3edb109ad4375b38c159311566b57543e046082ff",
     "components/os_crypt/common/keychain_password_mac.mm": "b762afe19a49726736622da39266d7f39a1792aa0267418cdecab8f6153c886c",
-    "components/password_manager/core/browser/password_manager.cc": "c528968215f7a1445392cd0737c460d47b562b0623fd0e68c1f310122af6b0aa"
+    "components/password_manager/core/browser/password_manager.cc": "f736e307485cdb34b98cbbe51c17f42b6da7100177cdeaa367fa9e30f199dca5",
+    "components/password_manager/core/browser/features/password_features.cc": "500a240a4ca19514ab58159aa2b559e8ed9201fd2b341fbc9925f0d067afbe11",
+    "chrome/browser/renderer_context_menu/render_view_context_menu.cc": "e758187f6a81164ac4f366d14f0e25429b12c855fcdd1904f579b0a20e946ce0",
+    "chrome/browser/ui/passwords/manage_passwords_ui_controller.h": "09174199e4230ca0480ffa9b660a8c6cdc444fbbd708bc5da05d82ba956b2e0b",
+    "chrome/browser/ui/passwords/manage_passwords_ui_controller.cc": "e7deef788610f5b345a5cc0f18c6df9b4856e189fd3d43e8f38e0de4946329c6",
+    "chrome/browser/ui/views/passwords/manage_passwords_page_action_controller.cc": "5a1b59169a06930f6cab841c5b91a69f9950b5c8a55b7b13e6a7209cc13c41c7",
+    "chrome/browser/password_manager/chrome_password_manager_client.cc": "7f733ca72014891ee7cb31ec6cd0fba15adaaa67228635e0ba12b11847abe180",
+    "components/password_manager/core/browser/password_form_filling.cc": "df7a2981f226d67f9af4ae04676576d9dda4f3ac0df5d65df50169e5998260ae",
+    "components/password_manager/core/browser/password_bubble_experiment.cc": "bedeec9100ffbad32fa8d7bccaee5a8d69a7ea5a553e788b7d532c7bd4bdb8cc",
+    "chrome/browser/ui/autofill/autofill_context_menu_manager.cc": "ffe5654b5e99aacc641621f7c95c86a875934354f51c07114477b43dfd567460",
+    "chrome/browser/ui/page_action/page_action_controller.h": "00189a69343b55e90f38fe7ed080ef360223ffb6abaa55898e1e398eb097287e"
   }
 }
