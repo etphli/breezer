@@ -3,8 +3,20 @@ import { pageContext } from './page-context.js';
 export const isWebURL = value => { try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; } };
 export const CONTROL_WORLD = 'breezer-ai';
 export const STOP_BINDING = '__breezerAIStop';
-const pageOperations = new Set(['snapshot', 'resolve', 'pointer', 'check-focus', 'select-content', 'control-check', 'overlay-start', 'overlay-stop', 'screenshot-mask', 'screenshot-mask-stop']);
+const pageOperations = new Set(['snapshot', 'resolve', 'resolve-point', 'pointer', 'check-focus', 'select-content', 'control-check', 'overlay-start', 'overlay-stop', 'screenshot-mask', 'screenshot-mask-stop']);
 const keyCodes = { Enter: 13, Tab: 9, Escape: 27, Backspace: 8, Delete: 46, ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39, Home: 36, End: 35, PageUp: 33, PageDown: 34 };
+const keyParams = key => {
+  if (key === 'Space') return { key: ' ', code: 'Space', windowsVirtualKeyCode: 32 };
+  if (typeof key === 'string' && /^[a-z0-9]$/.test(key)) {
+    const virtualKey = key.toUpperCase().charCodeAt(0);
+    return { key, code: /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : `Digit${key}`, windowsVirtualKeyCode: virtualKey };
+  }
+  if (Object.hasOwn(keyCodes, key)) return { key, code: key, windowsVirtualKeyCode: keyCodes[key] };
+  throw new Error('This keyboard key is not allowed.');
+};
+const maxHoldMs = 5000;
+const mouseButtons = { left: 1, right: 2, middle: 4 };
+
 const bounded = async (promise, milliseconds = 750) => {
   let timeout;
   try { await Promise.race([promise.catch(() => {}), new Promise(resolve => { timeout = setTimeout(resolve, milliseconds); })]); }
@@ -165,7 +177,7 @@ export class BrowserTools {
     if (this.pendingAttachment || this.pendingDetachment) throw new Error('The previous browser control connection is still stopping. Try again.');
     const initialTab = await this.current(tab.windowId);
     if (!isActive() || initialTab.id !== tab.id) throw new Error('Browser control stopped.');
-    const session = { id, tab: { ...initialTab }, stopped: false, attached: false, queue: Promise.resolve(), pending: new Set(), contextIds: new Set() };
+    const session = { id, tab: { ...initialTab }, stopped: false, attached: false, queue: Promise.resolve(), pending: new Set(), contextIds: new Set(), keys: new Map(), buttons: new Map(), inputAbort: new AbortController() };
     this.session = session;
     onCreated(session);
     try {
@@ -200,6 +212,8 @@ export class BrowserTools {
     if (!session) return;
     if (session.stopping) return session.stopping;
     session.stopped = true;
+    session.inputAbort.abort();
+    for (const input of [...session.keys.values(), ...session.buttons.values()]) clearTimeout(input.timer);
     clearTimeout(session.navigationTimeout);
     session.rejectReady?.(new Error('Browser control stopped.'));
     if (this.session === session) this.session = null;
@@ -216,6 +230,13 @@ export class BrowserTools {
           return result;
         };
         await bounded((async () => {
+          // Only release input already owned by this tab session during cleanup.
+          await Promise.all([
+            ...[...session.keys.values()].map(({ params }) => send('Input.dispatchKeyEvent', { type: 'keyUp', ...params }).catch(() => {})),
+            ...[...session.buttons.values()].map(({ params }) => send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...params, buttons: 0, clickCount: 1 }).catch(() => {})),
+          ]);
+          session.keys.clear();
+          session.buttons.clear();
           await send('Runtime.removeBinding', { name: STOP_BINDING }).catch(() => {});
           if (session.installing) await session.installing.catch(() => {});
           checkCleanup();
@@ -237,6 +258,7 @@ export class BrowserTools {
 
   navigationStarted(session) {
     if (session.stopped || session.ready) return;
+    if ([...session.keys.values(), ...session.buttons.values()].some(input => input.persistent)) { void this.stop(session); return; }
     session.ready = new Promise((resolve, reject) => { session.resolveReady = resolve; session.rejectReady = reject; });
     session.ready.catch(() => {});
     session.navigationTimeout = setTimeout(() => {
@@ -289,9 +311,83 @@ export class BrowserTools {
   }
 
   execute(session, name, args = {}) {
-    const work = session.queue.then(() => this.perform(session, name, args));
+    const work = session.queue.then(() => this.perform(session, name, args)).catch(async error => {
+      if (session.keys.size || session.buttons.size) await this.stop(session);
+      throw error;
+    });
     session.queue = work.catch(() => {});
     return work;
+  }
+
+  async mouse(session, args) {
+    const { action, x, y } = args;
+    const button = args.button ?? 'left';
+    if (!['move', 'click', 'down', 'up'].includes(action) || !Object.hasOwn(mouseButtons, button) || !Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || (action === 'move' && args.button !== undefined)) throw new Error('Choose a mouse action, left/right/middle button and finite viewport coordinates.');
+    if (action === 'up' && !session.buttons.has(button)) throw new Error('This mouse button is not held by Breezer.');
+    if (['click', 'down'].includes(action) && session.buttons.has(button)) throw new Error('This mouse button is already held. Release it first.');
+    const point = { x, y };
+    await this.injectControl(session, 'resolve-point', point);
+    await this.injectControl(session, 'pointer', { sessionId: session.id, ...point });
+    const buttons = () => [...session.buttons.keys()].reduce((mask, button) => mask | mouseButtons[button], 0);
+    const send = async params => {
+      await this.injectControl(session, 'resolve-point', point);
+      await this.command(session, 'Input.dispatchMouseEvent', params);
+    };
+    try {
+      await send({ type: 'mouseMoved', ...point, buttons: buttons() });
+      for (const held of session.buttons.values()) Object.assign(held.params, point);
+      if (action === 'move') return;
+      if (action === 'click' || action === 'down') {
+        this.assertSession(session);
+        session.buttons.set(button, { params: { ...point, button }, persistent: action === 'down', timer: setTimeout(() => { void this.stop(session); }, maxHoldMs) });
+        await send({ type: 'mousePressed', ...point, button, buttons: buttons(), clickCount: 1 });
+        if (action === 'down') return;
+      }
+      await send({ type: 'mouseReleased', ...point, button, buttons: buttons() & ~mouseButtons[button], clickCount: 1 });
+      clearTimeout(session.buttons.get(button)?.timer);
+      session.buttons.delete(button);
+    } catch (error) { await this.stop(session); throw error; }
+  }
+
+  waitForRelease(session, milliseconds) {
+    this.assertSession(session);
+    return new Promise((resolve, reject) => {
+      const finish = error => {
+        clearTimeout(timer);
+        session.inputAbort.signal.removeEventListener('abort', abort);
+        if (error) reject(error); else resolve();
+      };
+      const abort = () => finish(new Error('Browser control stopped.'));
+      const timer = setTimeout(() => finish(), milliseconds);
+      session.inputAbort.signal.addEventListener('abort', abort, { once: true });
+    });
+  }
+
+  async key(session, args) {
+    const params = keyParams(args.key);
+    const action = args.action ?? 'press';
+    if (!['press', 'down', 'up'].includes(action) || (args.holdMs !== undefined && (action !== 'press' || !Number.isInteger(args.holdMs) || args.holdMs < 0 || args.holdMs > maxHoldMs))) throw new Error('Choose press, down or up; a press can hold for 0 to 5000 ms.');
+    await this.injectControl(session, 'check-focus');
+    if (action === 'up') {
+      if (!session.keys.has(params.code)) throw new Error('This key is not held by Breezer.');
+      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params });
+      clearTimeout(session.keys.get(params.code)?.timer);
+      session.keys.delete(params.code);
+      return;
+    }
+    if (session.keys.has(params.code)) throw new Error('This key is already held. Release it first.');
+    this.assertSession(session);
+    const held = { params, persistent: action === 'down' || args.holdMs > 0, timer: setTimeout(() => { void this.stop(session); }, action === 'down' ? maxHoldMs : maxHoldMs + 750) };
+    session.keys.set(params.code, held);
+    try {
+      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyDown', ...params, ...(params.key.length === 1 ? { text: params.key, unmodifiedText: params.key } : {}) });
+      if (action === 'down') return;
+      if (args.holdMs) await this.waitForRelease(session, args.holdMs);
+      await this.injectControl(session, 'check-focus');
+      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params });
+      clearTimeout(held.timer);
+      session.keys.delete(params.code);
+    } catch (error) { await this.stop(session); throw error; }
   }
 
   async perform(session, name, args) {
@@ -317,12 +413,10 @@ export class BrowserTools {
       if (!['up', 'down'].includes(args.direction) || (args.amount !== undefined && (!Number.isFinite(args.amount) || args.amount <= 0))) throw new Error('Choose up or down and a positive scroll amount.');
       await this.injectControl(session, 'pointer', { sessionId: session.id, x: 120, y: 120 });
       await this.command(session, 'Input.dispatchMouseEvent', { type: 'mouseWheel', x: 120, y: 120, deltaX: 0, deltaY: Math.min(args.amount || 600, 2000) * (args.direction === 'up' ? -1 : 1) });
+    } else if (name === 'browser_mouse') {
+      await this.mouse(session, args);
     } else if (name === 'browser_key') {
-      if (!Object.hasOwn(keyCodes, args.key)) throw new Error('This keyboard key is not allowed.');
-      await this.injectControl(session, 'check-focus');
-      const params = { key: args.key, windowsVirtualKeyCode: keyCodes[args.key], nativeVirtualKeyCode: keyCodes[args.key] };
-      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyDown', ...params });
-      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params });
+      await this.key(session, args);
     } else if (name === 'browser_navigate') {
       if (!isWebURL(args.url) || new URL(args.url).username || new URL(args.url).password) throw new Error('Navigation requires a normal http or https URL.');
       await this.check(session);
@@ -330,6 +424,7 @@ export class BrowserTools {
       await this.check(session);
       this.assertSession(session);
       this.navigationStarted(session);
+      this.assertSession(session);
       await this.api.tabs.update(session.tab.id, { url: args.url });
       await this.check(session);
     } else throw new Error('This browser action is not allowed.');

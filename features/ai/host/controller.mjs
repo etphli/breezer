@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { validateChat, validateTool, MAX_MESSAGE_BYTES } from './protocol.mjs';
+import { allowedTools, validateChat, validateTool, MAX_MESSAGE_BYTES } from './protocol.mjs';
 
 export class HostController {
   #discovery;
@@ -30,7 +30,7 @@ export class HostController {
       if (message.type === 'toolResult') { this.toolResult(message); return; }
       validateChat(message);
       if (this.#active) throw new Error('Another chat is already running. Stop it before starting a new request.');
-      const run = { id: message.id, controller: new AbortController() };
+      const run = { id: message.id, controller: new AbortController(), tools: allowedTools(message) };
       this.#active = run;
       try {
         await this.discover();
@@ -39,7 +39,7 @@ export class HostController {
         await provider.chat(message, {
           signal: run.controller.signal,
           emit: (event) => { if (this.#active === run && !run.controller.signal.aborted) this.send({ ...event, id: run.id }); },
-          callTool: (name, args, tools) => this.callTool(run, name, args, tools),
+          callTool: (name, args) => this.callTool(run, name, args),
         });
         if (this.#active === run) this.send({ type: 'complete', id: run.id });
       } catch (error) {
@@ -50,9 +50,9 @@ export class HostController {
       }
     } catch (error) { this.send({ type: 'error', ...(typeof message?.id === 'string' ? { id: message.id.slice(0, 100) } : {}), error: error.message.slice(0, 1500) }); }
   }
-  callTool(run, name, args, tools) {
+  callTool(run, name, args) {
     if (this.#active !== run || run.controller.signal.aborted) return Promise.reject(new Error('Cancelled.'));
-    validateTool(name, args, tools);
+    validateTool(name, args, run.tools);
     const requestId = randomUUID();
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => { this.#pending.delete(requestId); reject(new Error('The browser action timed out.')); }, this.toolTimeout);

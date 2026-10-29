@@ -13,6 +13,23 @@ import { ClaudeProvider, claudeSafeArgs, partialText } from '../../features/ai/h
 const chat = { type: 'chat', id: 'chat-1', provider: 'codex', model: 'gpt-test', message: 'Read this page', includeContext: true, control: true };
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
+test('both providers can advertise validated canvas mouse actions and game keys', () => {
+  const tools = allowedTools(chat);
+  assert.ok(tools.some(tool => tool.name === 'browser_mouse'));
+  assert.deepEqual(validateTool('browser_mouse', { action: 'click', x: 300.5, y: 240 }, tools), { action: 'click', x: 300.5, y: 240 });
+  assert.deepEqual(validateTool('browser_key', { key: 'Space', holdMs: 100 }, tools), { key: 'Space', holdMs: 100 });
+  assert.deepEqual(validateTool('browser_key', { key: 'w', action: 'down' }, tools), { key: 'w', action: 'down' });
+});
+
+test('game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions', () => {
+  for (const args of [{ action: 'click', x: NaN, y: 1 }, { action: 'click', x: Infinity, y: 1 }, { action: 'click', x: '1', y: 1 }, { action: 'click', x: -1, y: 1 }, { action: 'click', x: 1, y: 1, tabId: 8 }, { action: 'move', x: 1, y: 1, button: 'left' }]) assert.throws(() => validateTool('browser_mouse', args, browserTools));
+  for (const args of [{ key: 'Meta+L' }, { key: 'Control' }, { key: 'F12' }, { key: 'w', holdMs: 5001 }, { key: 'w', action: 'down', holdMs: 1 }, { key: 'w', modifiers: 4 }]) assert.throws(() => validateTool('browser_key', args, browserTools));
+  for (const consent of [{}, { includeContext: true }]) {
+    assert.throws(() => validateTool('browser_mouse', { action: 'click', x: 1, y: 1 }, allowedTools(consent)), /not permitted/);
+    assert.throws(() => validateTool('browser_key', { key: 'Space' }, allowedTools(consent)), /not permitted/);
+  }
+});
+
 test('native framing decodes fragmented UTF-8 and multiple messages', () => {
   const decoder = new NativeDecoder();
   const frame = Buffer.concat([encodeMessage({ type: 'delta', text: 'é😀' }), encodeMessage({ type: 'complete' })]);
@@ -40,7 +57,7 @@ test('only the exact bundled extension origin is accepted', () => {
 test('context and action permissions are opt-in and tools reject arbitrary execution', () => {
   assert.deepEqual(allowedTools({}), []);
   assert.deepEqual(allowedTools({ includeContext: true }), browserTools.slice(0, 1));
-  assert.equal(allowedTools({ control: true }).length, 6);
+  assert.equal(allowedTools({ control: true }).length, 7);
   assert.throws(() => validateTool('exec_command', { cmd: 'id' }, browserTools), /not permitted/);
   assert.throws(() => validateTool('browser_click', { elementId: '1', script: 'alert(1)' }, browserTools), /Invalid/);
   assert.throws(() => validateTool('browser_click', { elementId: 1 }, browserTools), /Invalid/);
@@ -172,6 +189,17 @@ test('controller awaits matching browser result before completing and denies for
   assert.equal(gotResult, false);
   await host.receive({ type: 'toolResult', id: chat.id, requestId: tool.requestId, result: { ok: true } });
   await run; assert.equal(gotResult, true); assert.equal(messages.at(-1).type, 'complete');
+});
+
+test('controller derives tool permission from consent even if a provider supplies a broader catalog', async () => {
+  const messages = [];
+  const provider = { id: 'codex', discover: async () => ({}), async chat(_chat, api) {
+    await api.callTool('browser_key', { key: 'ArrowRight' }, browserTools);
+  } };
+  const host = new HostController([provider], message => messages.push(message), { toolTimeout: 5 });
+  await host.receive({ ...chat, control: false });
+  assert.equal(messages.some(message => message.type === 'tool'), false);
+  assert.match(messages.at(-1).error, /not permitted/);
 });
 
 test('cancel rejects in-flight tools and suppresses stale text and duplicate completion', async () => {

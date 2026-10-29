@@ -115,11 +115,20 @@ export function pageContext(operation, args = {}) {
     if (state.sessionId !== args.sessionId || !state.overlay?.isConnected || !visible(state.overlay)) throw new Error('The browser control indicator was removed. Browser control stopped.');
     return { ok: true };
   }
+  if (operation === 'resolve-point') {
+    const { x, y } = args;
+    if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) throw new Error('Choose coordinates inside the current viewport in CSS pixels.');
+    const hit = document.elementFromPoint(x, y);
+    // Canvas input cannot target fields, frames, shadow hosts or the Stop indicator.
+    // Ordinary controls continue to use IDs from the latest snapshot.
+    if (!hit || hit.tagName !== 'CANVAS' || !visible(hit) || sensitive(hit) || hit.closest('[data-breezer-ai],input,textarea,[contenteditable]')) throw new Error('Coordinate input requires a visible, uncovered canvas in the main page. Use element IDs for other controls.');
+    return { x, y };
+  }
   if (operation === 'snapshot') {
     state.targets.clear();
     const snapshotId = token();
     const elements = [];
-    const candidates = document.querySelectorAll('a[href],button,input,textarea,select,[role="button"],[role="link"],[contenteditable="true"],[tabindex]');
+    const candidates = document.querySelectorAll('a[href],button,input,textarea,select,canvas,[role="button"],[role="link"],[contenteditable="true"],[tabindex]');
     for (const el of candidates) {
       if (elements.length >= 180) break;
       if (!visible(el) || sensitive(el) || el.closest('[data-breezer-ai]')) continue;

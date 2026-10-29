@@ -5,52 +5,262 @@ import { BrowserTools, isWebURL, STOP_BINDING } from '../../features/ai/extensio
 import { pageContext } from '../../features/ai/extension/page-context.js';
 import { installBackground, NATIVE_HOST } from '../../features/ai/extension/background.js';
 
-function event() {
-  const listeners = [];
-  return { addListener: fn => listeners.push(fn), emit: (...args) => listeners.forEach(fn => fn(...args)) };
-}
-const tick = () => new Promise(resolve => setImmediate(resolve));
-function fakeChrome() {
-  let tab = { id: 7, windowId: 3, url: 'https://example.test/page' };
-  const calls = [];
-  const api = {
-    runtime: { onConnect: event(), onMessage: event(), connectNative(name) { calls.push(['native', name]); return native; } },
-    commands: { onCommand: event() }, action: { onClicked: event() },
-    sidePanel: { open: async value => calls.push(['open', value]), close: async value => calls.push(['close', value]) },
-    tabs: {
-      query: async query => { calls.push(['query', query]); return [{ ...tab }]; },
-      captureVisibleTab: async windowId => { calls.push(['capture', windowId, tab.id]); return 'data:image/jpeg;base64,test'; },
-      update: async (id, value) => { calls.push(['navigate', id, value]); },
-      onActivated: event(), onUpdated: event(), onRemoved: event(),
-    },
-    scripting: { executeScript: async options => {
-      if (!options.args) { calls.push(['grant-probe', options.target.tabId]); return [{ result: new URL(tab.url).origin }]; }
-      const [operation, args] = options.args;
-      calls.push(['script', options.target.tabId, operation, args]);
-      if (operation === 'snapshot') return [{ result: { url: tab.url, title: 'Page', text: 'Visible content', viewport: { width: 1000, height: 700 }, elements: [] } }];
-      if (operation === 'resolve') return [{ result: { x: 50, y: 60 } }];
-      return [{ result: { ok: true } }];
-    } },
-    debugger: { attach: async value => calls.push(['attach', value]), detach: async value => calls.push(['detach', value]), sendCommand: async (target, method, args) => {
-      if (method.startsWith('Input.')) { calls.push(['input', target, method, args]); return {}; }
-      calls.push(['cdp', target, method, args]);
-      if (method === 'Page.getFrameTree') return { frameTree: { frame: { id: 'main', loaderId: tab.url, url: tab.url } } };
-      if (method === 'Page.createIsolatedWorld') return { executionContextId: 101 };
-      if (method === 'Page.addScriptToEvaluateOnNewDocument') return { identifier: 'bootstrap' };
-      if (method === 'Page.captureScreenshot') return { data: 'test' };
-      if (method === 'Runtime.callFunctionOn') {
-        const result = await api.scripting.executeScript({ target, args: args.arguments.map(value => value.value) });
-        return { result: { value: result[0].result } };
-      }
-      return {};
-    }, onDetach: event(), onEvent: event() },
+import { fakeChrome, panel, tick, event } from './browser-api-fixture.mjs';
+
+test('canvas coordinate clicks use tab-scoped mouse input instead of DOM click emulation', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('canvas', fake.tab);
+  try {
+    await tools.execute(session, 'browser_mouse', { action: 'click', x: 300.5, y: 240 });
+    assert.deepEqual(fake.calls.filter(call => call[0] === 'input'), [
+      ['input', { tabId: 7 }, 'Input.dispatchMouseEvent', { type: 'mouseMoved', x: 300.5, y: 240, buttons: 0 }],
+      ['input', { tabId: 7 }, 'Input.dispatchMouseEvent', { type: 'mousePressed', x: 300.5, y: 240, button: 'left', buttons: 1, clickCount: 1 }],
+      ['input', { tabId: 7 }, 'Input.dispatchMouseEvent', { type: 'mouseReleased', x: 300.5, y: 240, button: 'left', buttons: 0, clickCount: 1 }],
+    ]);
+  } finally { await tools.stop(); }
+});
+
+test('game start and direction keys send physical code and bounded key down/up', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('snake', fake.tab);
+  try {
+    await tools.execute(session, 'browser_key', { key: 'Space', holdMs: 1 });
+    await tools.execute(session, 'browser_key', { key: 'w', action: 'down' });
+    await tools.execute(session, 'browser_key', { key: 'w', action: 'up' });
+    const input = fake.calls.filter(call => call[0] === 'input');
+    assert.deepEqual(input, [
+      ['input', { tabId: 7 }, 'Input.dispatchKeyEvent', { type: 'keyDown', key: ' ', code: 'Space', windowsVirtualKeyCode: 32, text: ' ', unmodifiedText: ' ' }],
+      ['input', { tabId: 7 }, 'Input.dispatchKeyEvent', { type: 'keyUp', key: ' ', code: 'Space', windowsVirtualKeyCode: 32 }],
+      ['input', { tabId: 7 }, 'Input.dispatchKeyEvent', { type: 'keyDown', key: 'w', code: 'KeyW', windowsVirtualKeyCode: 87, text: 'w', unmodifiedText: 'w' }],
+      ['input', { tabId: 7 }, 'Input.dispatchKeyEvent', { type: 'keyUp', key: 'w', code: 'KeyW', windowsVirtualKeyCode: 87 }],
+    ]);
+  } finally { await tools.stop(); }
+});
+
+test('Stop interrupts a key hold, releases it only in the original tab, and rejects queued input', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('held', fake.tab);
+  const pending = tools.execute(session, 'browser_key', { key: 'ArrowRight', holdMs: 5000 });
+  const rejected = assert.rejects(pending, /stopped/);
+  await tick();
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['keyDown']);
+  const queued = tools.execute(session, 'browser_key', { key: 'ArrowDown' });
+  const queuedRejected = assert.rejects(queued, /stopped/);
+  fake.setTab({ id: 8, url: 'https://other.test' });
+  await tools.stop();
+  await Promise.all([rejected, queuedRejected]);
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => [call[1], call[3].type]), [[{ tabId: 7 }, 'keyDown'], [{ tabId: 7 }, 'keyUp']]);
+  assert.ok(fake.calls.findIndex(call => call[0] === 'detach') > fake.calls.findIndex(call => call[0] === 'input' && call[3].type === 'keyUp'));
+});
+
+test('holdMs keeps a direction down for the requested duration using a virtual clock', async t => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('duration', fake.tab);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const pending = tools.execute(session, 'browser_key', { key: 'ArrowRight', holdMs: 150 });
+  await tick();
+  t.mock.timers.tick(149);
+  await tick();
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['keyDown']);
+  t.mock.timers.tick(1);
+  await pending;
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['keyDown', 'keyUp']);
+  await tools.stop();
+});
+
+test('a held mouse button expires and is released even while its acknowledgement hangs', async t => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('mouse-timeout', fake.tab);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const send = fake.api.debugger.sendCommand;
+  let release;
+  fake.api.debugger.sendCommand = (target, method, args) => {
+    const result = send(target, method, args);
+    return args.type === 'mousePressed' ? new Promise(resolve => { release = () => result.then(resolve); }) : result;
   };
-  const native = { sent: [], onMessage: event(), onDisconnect: event(), postMessage(value) { this.sent.push(value); }, disconnect() {} };
-  return { api, native, calls, get tab() { return { ...tab }; }, setTab(value) { tab = { ...tab, ...value }; } };
-}
-function panel() {
-  return { name: 'breezer-panel', sent: [], onMessage: event(), onDisconnect: event(), postMessage(value) { this.sent.push(value); } };
-}
+  const pending = tools.execute(session, 'browser_mouse', { action: 'down', x: 300, y: 240 });
+  const rejected = assert.rejects(pending, /stopped/);
+  await tick();
+  t.mock.timers.tick(5000);
+  await tick();
+  assert.equal(session.stopped, true);
+  release();
+  await rejected;
+  await session.stopping;
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['mouseMoved', 'mousePressed', 'mouseReleased']);
+});
+
+test('a failed key release or missing indicator stops control and cleans up held input', async () => {
+  for (const failingOperation of ['check-focus', 'control-check']) {
+    const fake = fakeChrome();
+    const tools = new BrowserTools(fake.api);
+    tools.authorize(fake.tab);
+    const session = await tools.start(failingOperation, fake.tab);
+    await tools.execute(session, 'browser_key', { key: 'w', action: 'down' });
+    const original = fake.api.scripting.executeScript;
+    fake.api.scripting.executeScript = options => {
+      if (options.args?.[0] === failingOperation) throw new Error('Refused by page guard.');
+      return original(options);
+    };
+    await assert.rejects(tools.execute(session, 'browser_key', { key: 'w', action: 'up' }), /Refused/);
+    assert.equal(session.stopped, true);
+    assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['keyDown', 'keyUp']);
+  }
+});
+
+test('explicit keydown has a five second fail-safe even while its transport acknowledgement hangs', async t => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('held-timeout', fake.tab);
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const send = fake.api.debugger.sendCommand;
+  let release;
+  fake.api.debugger.sendCommand = (target, method, args) => {
+    const result = send(target, method, args);
+    return args.type === 'keyDown' ? new Promise(resolve => { release = () => result.then(resolve); }) : result;
+  };
+  const pending = tools.execute(session, 'browser_key', { key: 'w', action: 'down' });
+  const rejected = assert.rejects(pending, /stopped/);
+  await tick();
+  t.mock.timers.tick(5000);
+  await tick();
+  assert.equal(session.stopped, true);
+  release();
+  await rejected;
+  await session.stopping;
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['keyDown', 'keyUp']);
+});
+
+test('navigation while a key is held stops control and releases the key', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('held-navigation', fake.tab);
+  await tools.execute(session, 'browser_key', { key: 'w', action: 'down' });
+  tools.navigationStarted(session);
+  await session.stopping;
+  assert.equal(session.stopped, true);
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3].type), ['keyDown', 'keyUp']);
+});
+
+test('navigation requested during a held input sends no navigation after stopping control', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('held-navigation-command', fake.tab);
+  await tools.execute(session, 'browser_key', { key: 'w', action: 'down' });
+  await assert.rejects(tools.execute(session, 'browser_navigate', { url: 'https://other.test' }), /stopped/);
+  await session.stopping;
+  assert.equal(fake.calls.filter(call => call[0] === 'navigate').length, 0);
+});
+
+test('canvas mouse down/move/up preserves drag button state and release position', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('drag', fake.tab);
+  try {
+    await tools.execute(session, 'browser_mouse', { action: 'down', button: 'right', x: 100, y: 150 });
+    await tools.execute(session, 'browser_mouse', { action: 'move', x: 250, y: 350 });
+    await tools.execute(session, 'browser_mouse', { action: 'up', button: 'right', x: 260, y: 360 });
+    assert.deepEqual(fake.calls.filter(call => call[0] === 'input').map(call => call[3]), [
+      { type: 'mouseMoved', x: 100, y: 150, buttons: 0 },
+      { type: 'mousePressed', x: 100, y: 150, button: 'right', buttons: 2, clickCount: 1 },
+      { type: 'mouseMoved', x: 250, y: 350, buttons: 2 },
+      { type: 'mouseMoved', x: 260, y: 360, buttons: 2 },
+      { type: 'mouseReleased', x: 260, y: 360, button: 'right', buttons: 0, clickCount: 1 },
+    ]);
+  } finally { await tools.stop(); }
+});
+
+test('Stop releases a held mouse at its last drag position and a new session gets no stale release', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('drag-stop', fake.tab);
+  await tools.execute(session, 'browser_mouse', { action: 'down', x: 100, y: 150 });
+  await tools.execute(session, 'browser_mouse', { action: 'move', x: 250, y: 350 });
+  await tools.stop();
+  assert.deepEqual(fake.calls.filter(call => call[0] === 'input').at(-1), ['input', { tabId: 7 }, 'Input.dispatchMouseEvent', { type: 'mouseReleased', x: 250, y: 350, button: 'left', buttons: 0, clickCount: 1 }]);
+  const next = await tools.start('next', fake.tab);
+  fake.calls.length = 0;
+  await tools.stop(session);
+  assert.equal(fake.calls.length, 0);
+  await tools.stop(next);
+});
+
+test('invalid game inputs and refused canvas targets send no input', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('refuse', fake.tab);
+  try {
+    for (const args of [{ key: 'Meta+L' }, { key: 'Shift' }, { key: 'w', holdMs: 5001 }, { key: 'w', holdMs: -1 }, { key: 'w', holdMs: 1.5 }, { key: 'w', action: 'down', holdMs: 1 }, { key: 'w', action: 'up' }]) await assert.rejects(tools.execute(session, 'browser_key', args));
+    for (const args of [{ action: 'click', x: NaN, y: 10 }, { action: 'click', x: -1, y: 10 }, { action: 'click', x: 10, y: 10, button: 'back' }, { action: 'up', x: 10, y: 10 }]) await assert.rejects(tools.execute(session, 'browser_mouse', args));
+    const original = fake.api.scripting.executeScript;
+    fake.api.scripting.executeScript = options => {
+      if (options.args?.[0] === 'resolve-point') throw new Error('Coordinate input requires a visible, uncovered canvas.');
+      return original(options);
+    };
+    await assert.rejects(tools.execute(session, 'browser_mouse', { action: 'click', x: 10, y: 10 }), /canvas/);
+    assert.equal(fake.calls.filter(call => call[0] === 'input').length, 0);
+  } finally { await tools.stop(); }
+});
+
+test('cancelling during canvas validation prevents late mouse input', async () => {
+  const fake = fakeChrome();
+  const tools = new BrowserTools(fake.api);
+  tools.authorize(fake.tab);
+  const session = await tools.start('canvas-cancel', fake.tab);
+  const original = fake.api.scripting.executeScript;
+  let release;
+  fake.api.scripting.executeScript = options => options.args?.[0] === 'resolve-point'
+    ? new Promise(resolve => { release = () => resolve([{ result: { x: 300, y: 240 } }]); })
+    : original(options);
+  const pending = tools.execute(session, 'browser_mouse', { action: 'click', x: 300, y: 240 });
+  const rejected = assert.rejects(pending, /stopped/);
+  await tick();
+  await tools.stop();
+  release();
+  await rejected;
+  assert.equal(fake.calls.filter(call => call[0] === 'input').length, 0);
+});
+
+test('isolated coordinate validation accepts only visible top-level canvas CSS points', () => {
+  const canvas = {
+    id: 'game', tagName: 'CANVAS', isConnected: true,
+    matches: () => false, getAttribute: () => null, closest: () => null,
+    getBoundingClientRect: () => ({ width: 400, height: 300 }),
+  };
+  let hit = canvas;
+  const world = vm.createContext({ crypto: { randomUUID: () => 'doc' }, innerWidth: 1000, innerHeight: 700, getComputedStyle: () => ({ visibility: 'visible', display: 'block', opacity: '1' }), document: { elementFromPoint: () => hit } });
+  const invoke = args => vm.runInContext(`(${pageContext.toString()})('resolve-point',${JSON.stringify(args)})`, world);
+  assert.equal(invoke({ x: 300.5, y: 240 }).x, 300.5);
+  for (const args of [{ x: -1, y: 0 }, { x: 1000, y: 0 }, { x: 0, y: 700 }, { x: '1', y: 1 }, { x: null, y: 1 }]) assert.throws(() => invoke(args), /viewport/);
+  for (const tagName of ['INPUT', 'TEXTAREA', 'IFRAME', 'DIV', 'GAME-HOST', 'BUTTON']) {
+    hit = { ...canvas, tagName };
+    assert.throws(() => invoke({ x: 300, y: 240 }), /canvas/);
+  }
+  hit = null;
+  assert.throws(() => invoke({ x: 300, y: 240 }), /canvas/);
+  hit = { ...canvas, isConnected: false };
+  assert.throws(() => invoke({ x: 300, y: 240 }), /canvas/);
+  hit = { ...canvas, closest: () => ({}) };
+  assert.throws(() => invoke({ x: 300, y: 240 }), /canvas/);
+  hit = { ...canvas, id: 'secret' };
+  assert.throws(() => invoke({ x: 300, y: 240 }), /canvas/);
+});
 
 test('page access requires an explicit gesture for the active HTTP(S) origin', async () => {
   const fake = fakeChrome();
