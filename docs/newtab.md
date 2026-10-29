@@ -148,4 +148,4 @@ The background contract above is unchanged; the page combines the arrays in
   `$BREEZER_AI_EVIDENCE` (default `/tmp/breezer-ai-evidence`). Sites and
   items in the fixture are test data.
 
-Frequently visited shortcuts can be hidden with their Remove button, a double-click or the right-click menu. Normal pointer clicks wait 500 ms to distinguish double-clicks; keyboard and modifier clicks keep normal link behaviour. Undo and Restore shortcuts reverse the local preference. Hiding stores only hashed URLs in `chrome.storage.local`, and never deletes browsing history or bookmarks. Hidden sites are filtered before the eight visible slots are chosen.
+Frequently visited shortcuts can be hidden with their Remove button or the right-click menu. Normal, keyboard and modifier clicks keep immediate native link behaviour. Undo and Restore shortcuts reverse the local preference. Hiding stores only hashed URLs in `chrome.storage.local`, and never deletes browsing history or bookmarks. Hidden sites are filtered before the eight visible slots are chosen.

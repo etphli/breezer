@@ -1,6 +1,5 @@
 // Hidden shortcuts are local preferences, never deletions from history/bookmarks.
 export const HIDDEN_SITES_KEY = 'newtab.hiddenSites.v1';
-export const DOUBLE_CLICK_MS = 500;
 const validKey = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 export async function shortcutKey(value) {
   const url = new URL(value);
@@ -37,25 +36,19 @@ export class ShortcutPreferences {
   }
 }
 
-// A pointer click waits for the double-click window; keyboard/modifier clicks stay native.
-export function installShortcutActions({ root, remove, navigate = url => location.assign(url) }) {
+export function installShortcutActions({ root, remove }) {
   const list = root.getElementById('sites'), events = new AbortController();
-  let timer, menu, menuLink;
-  const clear = () => { clearTimeout(timer); timer = null; };
+  let menu, menuLink;
   const closeMenu = (focus = false) => { const origin = menuLink; menu?.remove(); menu = null; menuLink = null; if (focus && origin?.isConnected) origin.focus(); };
   const linkAt = target => target.closest?.('.site')?.querySelector('.site-link');
-  const hide = link => { clear(); closeMenu(); void remove({ url: link.href, title: link.querySelector('.site-name')?.textContent || 'Site' }); };
+  const hide = link => { closeMenu(); void remove({ url: link.href, title: link.querySelector('.site-name')?.textContent || 'Site' }); };
   list.addEventListener('click', event => {
     const link = linkAt(event.target); if (!link) return;
     if (event.target.closest('.site-remove')) { event.preventDefault(); hide(link); return; }
-    if (!event.target.closest('.site-link') || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.detail === 0) return;
-    event.preventDefault(); clear();
-    if (event.detail === 1) timer = setTimeout(() => navigate(link.href), DOUBLE_CLICK_MS);
   }, { signal: events.signal });
-  list.addEventListener('dblclick', event => { const link = event.target.closest?.('.site-link'); if (link) { event.preventDefault(); hide(link); } }, { signal: events.signal });
   list.addEventListener('contextmenu', event => {
     const link = event.target.closest?.('.site-link'); if (!link) return;
-    event.preventDefault(); clear(); closeMenu();
+    event.preventDefault(); closeMenu();
     menuLink = link; menu = root.createElement('div'); menu.className = 'shortcut-menu'; menu.setAttribute('role', 'menu');
     const button = root.createElement('button'); button.type = 'button'; button.setAttribute('role', 'menuitem'); button.textContent = 'Remove shortcut'; button.addEventListener('click', () => hide(link)); menu.append(button);
     const bounds = link.getBoundingClientRect();
@@ -65,5 +58,5 @@ export function installShortcutActions({ root, remove, navigate = url => locatio
   }, { signal: events.signal });
   root.addEventListener('pointerdown', event => { if (menu && !menu.contains(event.target)) closeMenu(); }, { signal: events.signal });
   root.addEventListener('keydown', event => { if (event.key === 'Escape' && menu) { closeMenu(true); } }, { signal: events.signal });
-  return () => { clear(); closeMenu(); events.abort(); };
+  return () => { closeMenu(); events.abort(); };
 }

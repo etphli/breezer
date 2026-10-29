@@ -204,9 +204,9 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.waitForFunction(selector => !document.querySelector(selector), mail);
       await page.getByRole('button', { name: 'Undo', exact: true }).click();
       await page.waitForSelector(mail);
-      await page.locator(mail).dblclick();
+      await page.getByRole('button', { name: 'Remove Mail shortcut', exact: true }).click();
       await page.waitForFunction(selector => !document.querySelector(selector), mail);
-      assert.ok(page.url().includes('newtab.html'), 'double click must not open the site');
+      assert.ok(page.url().includes('newtab.html'), 'Remove must not open the site');
       await page.reload();await page.waitForSelector('html[data-loaded="true"]');
       assert.equal(await page.locator(mail).count(), 0, 'removal persists after reload');
       const canvas = '.site-link[href="https://canvas.example.edu/"]';
@@ -219,6 +219,16 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.getByRole('button', { name: 'Restore shortcuts', exact: true }).click();
       await page.waitForSelector(mail);await page.waitForSelector(canvas);
       await page.route('https://mail.example.com/**', route => route.fulfill({ contentType: 'text/html', body: '<title>Mail fixture</title>Mail' }));
+      const blockedClick = await page.evaluate(selector => {
+        let prevented;
+        document.addEventListener('click', event => {
+          prevented = event.defaultPrevented;
+          event.preventDefault();
+        }, { once: true });
+        document.querySelector(selector).dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, detail: 1 }));
+        return prevented;
+      }, mail);
+      assert.equal(blockedClick, false, 'normal clicks keep immediate native link navigation');
       await Promise.all([page.waitForURL('https://mail.example.com/'), page.locator(mail).click()]);
       assert.equal(await page.title(), 'Mail fixture', 'single click still opens the site');
     });
