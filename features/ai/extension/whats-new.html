@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>What's new in Breezer</title>
+  <link rel="stylesheet" href="whats-new.css">
+</head>
+<body>
+  <svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.25  0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0.55 0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
+
+  <main class="sheet">
+    <header class="masthead">
+      <p class="release"><img class="mark" src="icon128.png" alt="" width="28" height="28"><span id="release-name">Breezer</span></p>
+      <h1 class="title"><span>A little more</span> <span>your browser</span></h1>
+      <svg class="breeze" viewBox="0 0 640 120" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="breeze-ink" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#8fd5c4"/>
+            <stop offset="1" stop-color="#1d5458"/>
+          </linearGradient>
+        </defs>
+        <path class="breeze-line" pathLength="1" d="M6 78 C 120 30, 210 112, 330 66 S 520 14, 560 54 C 590 84, 552 112, 526 92 C 506 76, 528 46, 566 50 C 596 54, 618 70, 634 64"/>
+      </svg>
+      <p class="lede">Four changes in this release, and one thing that isn't ready yet.</p>
+      <div class="actions">
+        <button class="button primary" type="button" data-action="continue">Continue browsing</button>
+        <a class="button secondary" href="workspace.html#/settings">Open Settings</a>
+      </div>
+    </header>
+
+    <section class="features" aria-labelledby="features-title">
+      <h2 id="features-title" class="visually-hidden">New in this release</h2>
+
+      <article class="feature" aria-labelledby="f-organato">
+        <figure class="plate plate-organato" aria-hidden="true">
+          <div class="mini-tab">
+            <div class="mini-lane"><span class="mini-label">Exams</span><i></i><i class="short"></i></div>
+            <div class="mini-lane"><span class="mini-label">Assignments</span><i></i><i></i><i class="short"></i></div>
+            <div class="mini-lane"><span class="mini-label">To-dos</span><i class="short"></i><i></i></div>
+          </div>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-organato">Organato on your new tab</h3>
+          <p>New tabs can show your upcoming exams, assignments and to-dos from Organato. To connect, add an Organato API key in Settings, under New tab and Organato. The key is kept in macOS Keychain.</p>
+        </div>
+      </article>
+
+      <article class="feature" aria-labelledby="f-theme">
+        <figure class="plate plate-theme" aria-hidden="true">
+          <div class="swatches"><i></i><i></i><i class="picked"></i><i></i><i></i></div>
+          <div class="mini-window"><span class="mini-sidebar"></span><span class="mini-page"></span></div>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-theme">Your own theme color</h3>
+          <p>Choose any color in Settings, under Theme, and Breezer builds a matching theme for the browser and the sidebar.</p>
+        </div>
+      </article>
+
+      <article class="feature" aria-labelledby="f-passwords">
+        <figure class="plate plate-passwords" aria-hidden="true">
+          <div class="mini-field"><span class="dots">••••</span><span class="caret"></span></div>
+          <div class="mini-menu">
+            <div class="mini-account"><b></b><i></i></div>
+            <div class="mini-account"><b></b><i class="short"></i></div>
+          </div>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-passwords">Password suggestions that stay put</h3>
+          <p>Saved passwords stay suggested while you type in a sign-in form. Nothing is filled until you choose an account.</p>
+        </div>
+      </article>
+
+      <article class="feature" aria-labelledby="f-updates">
+        <figure class="plate plate-updates" aria-hidden="true">
+          <span class="mini-button"><svg viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg>Check for updates</span>
+          <span class="mini-status"><i></i><i class="short"></i></span>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-updates">Updates from Settings</h3>
+          <p>Settings now has a Check for updates button. It looks for stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</p>
+        </div>
+      </article>
+    </section>
+
+    <aside class="pending" aria-labelledby="pending-title">
+      <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
+      <div>
+        <h2 id="pending-title">Not yet: Touch ID for passwords</h2>
+        <p>macOS only lets apps with a specific Apple entitlement use Touch ID here, and Breezer doesn't have it yet. Until then, Touch ID can't protect password filling in Breezer.</p>
+      </div>
+    </aside>
+
+    <footer class="closing">
+      <p>That's everything in this release.</p>
+      <div class="actions">
+        <button class="button primary" type="button" data-action="continue">Continue browsing</button>
+        <a class="button secondary" href="workspace.html#/settings">Open Settings</a>
+      </div>
+      <p id="close-hint" class="close-hint" role="status" hidden>This page couldn't close itself. Close the tab to keep browsing.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="whats-new.js"></script>
+</body>
+</html>
