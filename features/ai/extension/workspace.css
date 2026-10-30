@@ -510,6 +510,7 @@ body.route-settings { overflow: auto; background: var(--card); }
 .settings-head img { border-radius: 10px; }
 .settings-head h1 { margin: 0; font-size: 26px; line-height: 32px; font-weight: 650; letter-spacing: -0.015em; }
 .settings-head p { margin: 2px 0 0; color: var(--muted); }
+.settings-head .setup-link { margin-left: auto; text-decoration: none; }
 
 .bridge-note {
   margin: 0 0 28px;
@@ -695,6 +696,10 @@ body.route-settings { overflow: auto; background: var(--card); }
   background: var(--air);
 }
 :root[data-scheme="dark"] .onboarding { background: var(--air-deep); }
+.onboarding:not([hidden]) { animation: onboarding-in 420ms cubic-bezier(.2, .8, .2, 1) both; }
+.onboarding:not([hidden]) .onboarding-path { animation: onboarding-in 460ms cubic-bezier(.2, .8, .2, 1) 80ms both; }
+.onboarding:not([hidden]) .onboarding-path + .onboarding-path { animation-delay: 150ms; }
+@keyframes onboarding-in { from { opacity: 0; transform: translateY(10px); } }
 .onboarding-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .onboarding h2 { margin: 0; font-size: 18px; line-height: 24px; font-weight: 650; letter-spacing: -0.01em; }
 .onboarding-head .button { margin: -4px -10px 0 0; }

@@ -72,7 +72,7 @@ try {
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   assert.equal(await page.title(), 'Breezer assistant');
   assert.match(await page.locator('body').innerText(), /What are we working on,/);
-  assert.equal(await page.locator('#greeting-name').innerText(), 'Ethan');
+  assert.equal(await page.locator('#greeting-name').innerText(), 'there');
   assert.equal(await page.locator('#context-title').innerText(), 'Designing a calmer browser');
   assert.equal(await page.locator('#send').isDisabled(), true);
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
