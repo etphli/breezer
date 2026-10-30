@@ -23,7 +23,7 @@ Open **Settings** from the sidebar footer, choose **Settings** from the browser 
 
 ## First-run setup
 
-A brand-new profile opens the setup guide at `workspace.html#/welcome` instead of the release notes. `release-notes.js` treats a profile as new when it has no `breezer.releaseNotesSeen`, no `breezer.setup.v1`, no `settings.onboarding.v1` and no `breezerProfile`; it records the current notes version at the same time, so the notes page does not follow. Profiles used before 2.0.0 keep getting the notes page once per minor release.
+A brand-new profile opens the setup guide at `workspace.html#/welcome` instead of the release notes. `release-notes.js` treats a profile as new when it has no `breezer.releaseNotesSeen`, no `breezer.setup.v1`, no `settings.onboarding.v1` and no `breezerProfile`; it records the current notes version at the same time, so the notes page does not follow. Profiles used before 1.2.0 keep getting the notes page once per minor release.
 
 The guide has eight steps: welcome, the name Breezer AI calls you, tab layout and sidebar behavior, theme and appearance, Chrome import, Organato, a tour and a summary. Each choice is saved where Breezer already reads it:
 
