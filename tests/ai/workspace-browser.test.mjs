@@ -81,6 +81,7 @@ function installFixture({ seed, bridge, bridgeFails }) {
   };
   const event = (name) => ({ addListener: (fn) => (fx.listeners[name] ||= []).push(fn), removeListener() {} });
   const fire = (name, ...args) => setTimeout(() => (fx.listeners[name] || []).forEach((fn) => fn(...structuredClone(args))), 0);
+  fx.fire = fire;
   const copy = (value) => structuredClone(value);
   const reindex = () => {
     fx.tabs.sort((a, b) => (b.pinned - a.pinned) || (a.index - b.index));
@@ -129,7 +130,12 @@ function installFixture({ seed, bridge, bridgeFails }) {
       onActivated: event('tabs.onActivated'), onMoved: event('tabs.onMoved'), onAttached: event('tabs.onAttached'),
       onDetached: event('tabs.onDetached'), onReplaced: event('tabs.onReplaced'),
       async query(filter = {}) {
-        return copy(fx.tabs.filter((tab) => (filter.active === undefined || tab.active === filter.active)));
+        const snapshot = copy(fx.tabs.filter((tab) => (filter.active === undefined || tab.active === filter.active)));
+        if (fx.holdQuery) {
+          fx.holdQuery = false;
+          await new Promise(resolve => { fx.releaseQuery = resolve; });
+        }
+        return snapshot;
       },
       async get(id) { return copy(find(id)); },
       async create({ url, active = true, pinned = false, index }) {
@@ -338,6 +344,75 @@ test('dragging with no Favorites preserves tab geometry and supports reorder and
     await page.waitForFunction(() => window.fx.local['workspace.v1'].favorites.some(entry => entry.url === 'https://mail.example.com/inbox'));
     await page.locator('#favorites .tile').waitFor();
     assert.equal(await page.evaluate(() => window.fx.tabs.find(tab => tab.id === 5).pinned), true);
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
+  }
+});
+
+test('delayed tab queries cannot revive closed rows or overwrite navigation and activation', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 300, height: 820 } });
+    await context.addInitScript(installFixture, { seed: seed(), bridge: true });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    await page.locator('#today [data-key="t:3"]').waitFor();
+    // Capture a query before Chromium closes a tab, but deliver it after the
+    // removal event and the subsequent fresh query have already been handled.
+    await page.evaluate(() => {
+      window.fx.holdQuery = true;
+      window.fx.fire('tabs.onMoved', 3, { windowId: 7 });
+    });
+    await page.waitForFunction(() => typeof window.fx.releaseQuery === 'function');
+    await page.evaluate(() => chrome.tabs.remove(3));
+    await page.waitForFunction(() => !document.querySelector('#today [data-key="t:3"]:not(.leaving)'));
+    await page.waitForTimeout(150);
+    await page.evaluate(() => window.fx.releaseQuery());
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator('#today [data-key="t:3"]').count(), 0, 'a closed tab must not return as an unresponsive ghost row');
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: `${evidence}/workspace-tab-query-race.png` });
+
+    await page.evaluate(() => {
+      window.fx.releaseQuery = null;
+      window.fx.holdQuery = true;
+      window.fx.fire('tabs.onMoved', 4, { windowId: 7 });
+    });
+    await page.waitForFunction(() => typeof window.fx.releaseQuery === 'function');
+    await page.evaluate(() => {
+      const tab = window.fx.tabs.find(tab => tab.id === 4);
+      tab.title = 'Updated page';
+      window.fx.fire('tabs.onUpdated', 4, { title: tab.title }, tab);
+    });
+    await page.locator('#today [data-key="t:4"]').click();
+    await page.waitForFunction(() => document.querySelector('#today [data-key="t:4"]').classList.contains('active'));
+    await page.evaluate(() => window.fx.releaseQuery());
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator('#today [data-key="t:4"] .title').innerText(), 'Updated page');
+    assert.equal(await page.locator('#today [data-key="t:4"]').getAttribute('aria-selected'), 'true');
+    await page.locator('#today [data-key="t:4"] .row-action').click();
+    await page.waitForFunction(() => !window.fx.tabs.some(tab => tab.id === 4));
+    await page.getByRole('button', { name: 'New tab', exact: true }).click();
+    await page.getByRole('treeitem', { name: 'New Tab', exact: true }).waitFor();
+    // A query must also converge after an activation event when it contains a
+    // tab whose creation happened before this document subscribed to events.
+    await page.evaluate(() => {
+      window.fx.tabs.push({ id: 100, windowId: 7, index: 100, url: 'about:blank', title: 'Newly discovered tab', active: false, pinned: false });
+      window.fx.releaseQuery = null;
+      window.fx.holdQuery = true;
+      window.fx.fire('tabs.onMoved', 100, { windowId: 7 });
+    });
+    await page.waitForFunction(() => typeof window.fx.releaseQuery === 'function');
+    await page.evaluate(() => chrome.tabs.update(100, { active: true }));
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.id === 100).active);
+    await page.waitForTimeout(50);
+    await page.evaluate(() => window.fx.releaseQuery());
+    await page.locator('#today [data-key="t:100"].active').waitFor();
+    assert.deepEqual(errors, []);
   } finally {
     await browser.close();
     await new Promise(done => server.close(done));

@@ -21,7 +21,6 @@ class OverlayBoundaryTest(unittest.TestCase):
     def test_fingerprint_and_targets(self):
         self.assertRegex(overlay.fingerprint(), r'^[0-9a-f]{64}$')
         self.assertEqual(set(overlay.sections()), {
-            'components/autofill/core/browser/foundations/browser_autofill_manager.cc',
             'chrome/browser/policy/configuration_policy_handler_list_factory.cc',
             'components/password_manager/core/browser/password_suggestion_generator.cc',
             'chrome/browser/ui/browser_actions.cc',

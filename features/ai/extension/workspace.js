@@ -191,8 +191,15 @@ async function mutate(fn) {
   }
 }
 
+// A query can return after newer tab events or another query have been handled.
+let tabQueryVersion = 0;
+let tabEventVersion = 0;
 async function refreshTabs() {
+  const version = ++tabQueryVersion;
+  const events = tabEventVersion;
   const tabs = await api.tabs.query({ windowId: state.windowId });
+  if (version !== tabQueryVersion) return;
+  if (events !== tabEventVersion) { scheduleRefresh(); return; }
   state.tabs = new Map(tabs.map((tab) => [tab.id, tab]));
   render();
 }
@@ -1200,6 +1207,7 @@ function belongsHere(windowId) {
 
 function onCreated(tab) {
   if (!belongsHere(tab.windowId)) return;
+  ++tabEventVersion;
   state.tabs.set(tab.id, tab);
   state.expect = state.expect.filter((item) => Date.now() - item.at < 10000);
   const url = urlOf(tab);
@@ -1217,6 +1225,7 @@ function onCreated(tab) {
 
 function onUpdated(tabId, change, tab) {
   if (!belongsHere(tab.windowId)) return;
+  ++tabEventVersion;
   state.tabs.set(tabId, tab);
   if (change.url && state.records[tabId]) setRecord(tabId, {});
   if (change.pinned === false && state.records[tabId]?.e) {
@@ -1230,6 +1239,7 @@ function onUpdated(tabId, change, tab) {
 
 function onRemoved(tabId, info) {
   if (!belongsHere(info.windowId)) return;
+  ++tabEventVersion;
   const removed = state.tabs.get(tabId);
   if (removed?.active && state.model) {
     const visible = visibleTabs(state.model);
@@ -1246,6 +1256,7 @@ function onRemoved(tabId, info) {
 
 function onActivated({ tabId, windowId }) {
   if (!belongsHere(windowId)) return;
+  ++tabEventVersion;
   for (const tab of state.tabs.values()) tab.active = tab.id === tabId;
   const space = spaceOfTab(state.store, state.records, tabId);
   render();
@@ -1271,8 +1282,10 @@ function onActivated({ tabId, windowId }) {
 
 function onAttached(tabId, info) {
   if (!belongsHere(info.newWindowId)) return;
+  ++tabEventVersion;
   state.peekKey = null;
   void api.tabs.get(tabId).then((tab) => {
+    ++tabEventVersion;
     state.tabs.set(tabId, tab);
     const record = state.records[tabId];
     setRecord(tabId, { s: state.activeSpaceId, e: record?.e || '' });
@@ -1282,6 +1295,7 @@ function onAttached(tabId, info) {
 
 function onDetached(tabId, info) {
   if (!belongsHere(info.oldWindowId)) return;
+  ++tabEventVersion;
   state.peekKey = null;
   state.tabs.delete(tabId);
   // The receiving window rewrites the record; don't race it with a delete.
@@ -1294,6 +1308,7 @@ function onReplaced(addedTabId, removedTabId) {
   if (!record) return;
   void api.tabs.get(addedTabId).then((tab) => {
     if (!belongsHere(tab.windowId)) return;
+    ++tabEventVersion;
     state.tabs.delete(removedTabId);
     state.tabs.set(addedTabId, tab);
     dropRecord(removedTabId);
