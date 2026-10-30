@@ -51,6 +51,7 @@
           <h1 id="settings-title" tabindex="-1">Settings</h1>
           <p>Customize Breezer and open browser settings by category.</p>
         </div>
+        <a id="run-setup" class="button subtle setup-link" href="#/welcome">Setup guide</a>
       </header>
 
       <p id="bridge-note" class="bridge-note" role="status" hidden></p>
@@ -232,6 +233,171 @@
         </ul>
       </section>
     </div>
+  </main>
+  <!-- First-run setup: workspace.html#/welcome. onboarding.js drives the steps. -->
+  <main id="welcome" class="welcome" hidden>
+    <header class="wl-top">
+      <div class="wl-brand"><img src="icon128.png" width="28" height="28" alt=""><span>Breezer</span></div>
+      <button id="wl-skip" class="button subtle" type="button">Skip setup</button>
+    </header>
+
+    <div class="wl-stage">
+      <div class="wl-copy">
+        <section class="wl-step" data-step="welcome" aria-labelledby="wl-h-welcome">
+          <h1 id="wl-h-welcome" tabindex="-1">Welcome to Breezer</h1>
+          <p class="wl-lede">Let’s set it up the way you like it. It takes about a minute, and everything here can be changed later in Settings.</p>
+          <ul class="wl-agenda">
+            <li>Your name for Breezer AI</li>
+            <li>Tabs and colors</li>
+            <li>Your Chrome data and Organato</li>
+            <li>A short tour</li>
+          </ul>
+        </section>
+
+        <section class="wl-step" data-step="you" aria-labelledby="wl-h-you" hidden>
+          <h1 id="wl-h-you" tabindex="-1">What should Breezer AI call you?</h1>
+          <p class="wl-lede">The assistant greets you by this name and uses it in replies.</p>
+          <label class="wl-field" for="wl-name"><span>Your name</span>
+            <input id="wl-name" class="text-input wl-input" type="text" maxlength="80" autocomplete="given-name" spellcheck="false" placeholder="First name" aria-describedby="wl-name-note">
+          </label>
+          <p id="wl-name-note" class="field-note">Saved in this browser profile and sent with your AI requests. Leave it empty to stay anonymous.</p>
+          <p id="wl-name-error" class="field-error" role="alert" hidden></p>
+        </section>
+
+        <section class="wl-step" data-step="layout" aria-labelledby="wl-h-layout" hidden>
+          <h1 id="wl-h-layout" tabindex="-1">Where should your tabs live?</h1>
+          <p class="wl-lede">The sidebar keeps long titles readable and adds spaces and favorites.</p>
+          <div id="wl-layout" class="wl-choices" role="radiogroup" aria-labelledby="wl-h-layout" data-field="layout">
+            <button type="button" role="radio" data-value="sidebar" class="wl-choice">
+              <span class="wl-choice-art art-sidebar" aria-hidden="true"><i></i><i></i><i></i><b></b></span>
+              <span class="wl-choice-name">Sidebar</span>
+              <small>Vertical tabs on the left, with spaces and favorites</small>
+            </button>
+            <button type="button" role="radio" data-value="top" class="wl-choice">
+              <span class="wl-choice-art art-top" aria-hidden="true"><i></i><i></i><i></i><b></b></span>
+              <span class="wl-choice-name">Top</span>
+              <small>Classic tabs across the top of the window</small>
+            </button>
+          </div>
+          <div id="wl-sidebar-mode-row" class="setting-row wl-row">
+            <div class="setting-label"><span id="wl-sidebar-mode-label">Sidebar behavior</span><small>Auto-hide slides the sidebar in from the left edge.</small></div>
+            <div class="segmented" role="radiogroup" aria-labelledby="wl-sidebar-mode-label" data-field="sidebarMode">
+              <button type="button" role="radio" data-value="expanded">Expanded</button>
+              <button type="button" role="radio" data-value="compact">Compact</button>
+              <button type="button" role="radio" data-value="autoHide">Auto-hide</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="wl-step" data-step="theme" aria-labelledby="wl-h-theme" hidden>
+          <h1 id="wl-h-theme" tabindex="-1">Pick a color for Breezer</h1>
+          <p class="wl-lede">It colors the sidebar, the assistant, Settings and new tabs. This page changes as you choose.</p>
+          <div id="wl-swatches" class="wl-swatches" role="radiogroup" aria-labelledby="wl-h-theme" data-field="theme"></div>
+          <div class="setting-row wl-row">
+            <label class="setting-label" for="wl-custom-color">Your own color<small>Breezer builds a matching light and dark theme.</small></label>
+            <span class="wl-custom"><input id="wl-custom-color" type="color" value="#23866b"><button id="wl-custom-apply" class="button" type="button">Use this color</button></span>
+          </div>
+          <div class="setting-row wl-row">
+            <div class="setting-label"><span id="wl-mode-label">Appearance</span><small>System follows your Mac.</small></div>
+            <div class="segmented" role="radiogroup" aria-labelledby="wl-mode-label" data-field="colorMode">
+              <button type="button" role="radio" data-value="system">System</button>
+              <button type="button" role="radio" data-value="light">Light</button>
+              <button type="button" role="radio" data-value="dark">Dark</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="wl-step" data-step="import" aria-labelledby="wl-h-import" hidden>
+          <h1 id="wl-h-import" tabindex="-1">Bring your things from Chrome</h1>
+          <p class="wl-lede">Importing copies your data once. Changes you make in Chrome later stay in Chrome.</p>
+          <div class="wl-paths">
+            <div class="wl-path">
+              <h2>Bookmarks and history</h2>
+              <p>Opens the import dialog in a new tab. Choose Google Chrome, then pick what to copy.</p>
+              <button id="wl-import-browser" class="button primary" type="button">Open import dialog</button>
+            </div>
+            <div class="wl-path">
+              <h2>Passwords</h2>
+              <ol class="wl-steps-list">
+                <li>In Chrome, open Password Manager, then Settings, and choose Export passwords.</li>
+                <li>Back in Breezer, choose Import passwords and select the exported file.</li>
+                <li>Delete the exported file afterwards, including from the Trash.</li>
+              </ol>
+              <button id="wl-import-passwords" class="button" type="button">Import passwords</button>
+            </div>
+          </div>
+          <p id="wl-import-status" class="status-line" role="status" aria-live="polite"></p>
+          <p id="wl-import-error" class="field-error" role="alert" hidden></p>
+        </section>
+
+        <section class="wl-step" data-step="organato" aria-labelledby="wl-h-organato" hidden>
+          <h1 id="wl-h-organato" tabindex="-1">Connect Organato?</h1>
+          <p class="wl-lede">Organato puts your upcoming exams, assignments and to-dos on new tabs, and lets Breezer AI update them when you ask. It’s optional.</p>
+          <div class="key-field wl-key">
+            <label for="wl-organato-key">Organato API key</label>
+            <div class="key-row">
+              <input id="wl-organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="wl-organato-note">
+              <button id="wl-organato-connect" class="button primary" type="button">Connect</button>
+            </div>
+            <p id="wl-organato-note" class="field-note">Create a key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>. It’s stored in macOS Keychain, never in this page.</p>
+          </div>
+          <p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p>
+          <p class="field-note">No account? Choose Continue to skip. You can connect later in Settings.</p>
+        </section>
+
+        <section class="wl-step" data-step="tour" aria-labelledby="wl-h-tour" hidden>
+          <p class="wl-count" id="wl-tour-count" aria-live="polite"></p>
+          <h1 id="wl-h-tour" tabindex="-1"></h1>
+          <p id="wl-tour-body" class="wl-lede"></p>
+          <ul id="wl-tour-keys" class="wl-keys"></ul>
+        </section>
+
+        <section class="wl-step" data-step="done" aria-labelledby="wl-h-done" hidden>
+          <h1 id="wl-h-done" tabindex="-1">You’re all set</h1>
+          <p class="wl-lede">Here’s how Breezer is set up. Settings has everything else, and the setup guide is there if you want to run this again.</p>
+          <dl id="wl-summary" class="wl-summary"></dl>
+        </section>
+      </div>
+
+      <figure id="wl-mini" class="mini" aria-hidden="true" data-step="welcome" data-layout="sidebar">
+        <div class="mini-frame">
+          <div class="mini-top">
+            <span class="mini-lights"><i></i><i></i><i></i></span>
+            <span class="mini-tabs"><i class="on"></i><i></i><i></i></span>
+            <span class="mini-url"></span>
+          </div>
+          <div class="mini-marks"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="mini-body">
+            <div class="mini-side">
+              <div class="mini-favs"><i></i><i></i><i></i><i></i></div>
+              <div class="mini-new"><b>+</b><span></span></div>
+              <div class="mini-rows"><i></i><i class="on"></i><i></i><i></i></div>
+              <div class="mini-dock"><span class="mini-dots"><i class="on"></i><i></i><i></i></span><span class="mini-gear"></span></div>
+            </div>
+            <div class="mini-page">
+              <div class="mini-hero"></div>
+              <div class="mini-lines"><i></i><i></i><i></i></div>
+              <div class="mini-deadlines"><span><b></b>Essay draft</span><span><b></b>Chem quiz</span><span><b></b>Lab report</span></div>
+            </div>
+            <div class="mini-ai">
+              <p class="mini-greet">What are we working on, <span id="wl-mini-name">there</span>?</p>
+              <div class="mini-chip">Current page</div>
+              <div class="mini-compose"><span></span><i></i></div>
+              <div class="mini-control"><span></span>Browser control</div>
+            </div>
+          </div>
+        </div>
+        <span class="mini-cursor"></span>
+        <span class="mini-key"></span>
+      </figure>
+    </div>
+
+    <footer class="wl-nav">
+      <button id="wl-back" class="button subtle" type="button">Back</button>
+      <ol id="wl-progress" class="wl-progress" aria-label="Setup steps"></ol>
+      <button id="wl-next" class="button primary wl-next" type="button">Get started</button>
+    </footer>
+    <p id="wl-bridge-note" class="wl-bridge-note" role="status" hidden></p>
   </main>
   <script type="module" src="workspace.js"></script>
 </body>

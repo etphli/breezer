@@ -1492,6 +1492,11 @@ async function boot() {
     await mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, BridgeUnavailable, darkQuery });
     return;
   }
+  if (location.hash.startsWith('#/welcome')) {
+    const { mountWelcome } = await import('./onboarding.js');
+    await mountWelcome({ api, callBridge, loadAppearance, applyAppearance, darkQuery });
+    return;
+  }
   await initSidebar(route);
 }
 

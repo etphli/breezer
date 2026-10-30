@@ -5,13 +5,13 @@ import { TONES } from '../../features/ai/extension/workspace-store.js';
 
 const dir = new URL('../../features/ai/extension/', import.meta.url);
 const read = (name) => readFileSync(new URL(name, dir), 'utf8');
-const files = ['workspace.html', 'workspace.css', 'workspace.js', 'workspace-store.js', 'settings.js', 'settings-onboarding.js'];
+const files = ['workspace.html', 'workspace.css', 'workspace.js', 'workspace-store.js', 'settings.js', 'settings-onboarding.js', 'onboarding.js', 'onboarding.css', 'setup-state.js'];
 
 test('workspace files never parse HTML from strings or load remote resources', () => {
   for (const name of files) {
     const original = read(name);
     // Navigation to the integration's settings is not a loaded remote resource.
-    const source = name === 'workspace.html' ? original.replace('<a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>', '') : original;
+    const source = name === 'workspace.html' ? original.replaceAll('<a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>', '') : original;
     assert.doesNotMatch(source, /\.innerHTML|\.outerHTML|insertAdjacentHTML|document\.write|\beval\(|new Function\(/, name);
     const remote = [...source.matchAll(/https?:\/\/[^\s'"`)]+/g)].map((match) => match[0]).filter((url) => url !== 'http://www.w3.org/2000/svg');
     assert.deepEqual(remote, [], `${name} references remote URLs`);

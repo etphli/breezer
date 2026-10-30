@@ -21,6 +21,25 @@ Open **Settings** from the sidebar footer, choose **Settings** from the browser 
 - Space names, colors, and order.
 - New-tab placement and close-button behavior.
 
+## First-run setup
+
+A brand-new profile opens the setup guide at `workspace.html#/welcome` instead of the release notes. `release-notes.js` treats a profile as new when it has no `breezer.releaseNotesSeen`, no `breezer.setup.v1`, no `settings.onboarding.v1` and no `breezerProfile`; it records the current notes version at the same time, so the notes page does not follow. Profiles used before 2.0.0 keep getting the notes page once per minor release.
+
+The guide has eight steps: welcome, the name Breezer AI calls you, tab layout and sidebar behavior, theme and appearance, Chrome import, Organato, a tour and a summary. Each choice is saved where Breezer already reads it:
+
+- The name goes into `breezerProfile.name`, keeping any saved profile context. An open assistant panel updates its greeting through `storage.onChanged`.
+- Layout, sidebar behavior, theme, custom color and appearance go through `breezerPrivate.setAppearance`, one write at a time, and bump `appearance.rev` so sidebars and the panel repaint. The page itself repaints with the chosen tone. Without the native bridge the controls are disabled and a note explains why.
+- Import buttons open `chrome://settings/importData` and `chrome://password-manager/settings?import=true`. The guide never reports that an import succeeded.
+- The Organato key goes to the background helper over the existing `breezer-organato-settings` port, which stores it in Keychain. Organato is optional; Continue skips it.
+
+The tour has three sidebar slides (tabs, favorites and spaces, Settings) or one top-tab slide, followed by two assistant slides (⌘K and Browser control). A miniature Breezer window beside the copy reflects each choice and points at the part being explained. Its motion stops under Reduce motion and it is hidden in forced-colors mode.
+
+`breezer.setup.v1` stores only `{ step, completed, skipped }`, so a closed guide resumes where it stopped. **Start browsing** marks setup complete, hides the Settings import card, and turns the tab into a new tab rather than closing the only window. **Skip setup** records a skip and leaves the import card in Settings. **Setup guide** in the Settings header reopens the guide at any time. Its stylesheet, `onboarding.css`, loads only on this route.
+
+`tests/ai/onboarding-browser.test.mjs` walks the guide in headless Chrome, including keyboard selection, the top-tab tour, Skip, a missing bridge and a 390 px layout. Set `BREEZER_ONBOARDING_VIDEO=/some/dir` to record the walkthrough at a human pace; Playwright needs its ffmpeg helper (`npx playwright install ffmpeg` in `tests/ai`). Native first-run behavior still needs a compiled app with a fresh profile.
+
+## Chrome import card
+
 On first visit, a **Bring your Chrome data to Breezer** card sits above the settings. **Import bookmarks and history** opens the native import dialog (`chrome://settings/importData`), where an installed Google Chrome can be chosen as the source for bookmarks and history. **Show password steps** expands the Chrome CSV guide in Passwords. The card never reads Chrome files or credentials and never reports that an import succeeded; the user checks results in the native pages. **Hide** stores `{ dismissed: true }` under `settings.onboarding.v1` in `chrome.storage.local`, and open Settings tabs hide the card too. After that, the browser import stays in **More browser settings** and the password guide stays in **Passwords**.
 
 Appearance choices apply to the profile. Space colors identify spaces within the sidebar. The **More browser settings** section opens native categories, including page fonts, search, privacy, site permissions, autofill, downloads, accessibility, and system settings. **All native browser settings** opens `chrome://settings/` directly. The browser menu, Command comma, and general native Settings actions open the workspace hub when its component extension is enabled. Native category routes and the fallback for builds without the extension remain available.

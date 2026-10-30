@@ -14,7 +14,7 @@ chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/whats-new.html
 | `whats-new.css` | Cream palette, layout, artwork, focus, forced colors and reduced motion. |
 | `whats-new.js` | Reads `RELEASE_VERSION`, sets the masthead/title with `textContent`, closes this tab on Continue browsing and handles close refusal. |
 | `release-info.js` | Published version and derived minor-page version. For example, `1.1.2` maps to `1.1.0`. |
-| `release-notes.js` | Opens the page once per minor release in a regular window, deduplicates existing tabs and records `breezer.releaseNotesSeen`. Private windows are excluded. |
+| `release-notes.js` | Opens the page once per minor release in a regular window, deduplicates existing tabs and records `breezer.releaseNotesSeen`. Private windows are excluded. A brand-new profile gets the setup guide (`workspace.html#/welcome`) instead and skips the current notes; see [workspace.md](workspace.md#first-run-setup). |
 | `manifest.json` | Extension version, kept in step with a published release. |
 
 ## Template and release workflow
