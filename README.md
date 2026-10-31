@@ -6,6 +6,8 @@
 
 Breezer is Ethan's personal browser project. Its direction is a fast, efficient browser shaped around the way Ethan works.
 
+[Website](https://breezer-browser.vercel.app) · [Download](https://breezer-browser.vercel.app/download) · [Privacy policy](https://breezer-browser.vercel.app/privacy-policy)
+
 This repository is Breezer's home for source, branding, build tools, and tests. The starting implementation comes from [Helium](https://github.com/imputnet/helium) and Chromium.
 
 ## Direction

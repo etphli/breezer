@@ -26,9 +26,9 @@ class BundledIdentityTest(unittest.TestCase):
     def test_packaged_extension_requires_an_explicit_page_grant(self):
         manifest = json.loads((ROOT / 'features/ai/extension/manifest.json').read_text())
         self.assertIn('activeTab', manifest['permissions'])
-        self.assertNotIn('host_permissions', manifest)
+        self.assertEqual(manifest['host_permissions'], ['https://breezer-browser.vercel.app/*'])
         self.assertEqual(manifest['incognito'], 'not_allowed')
-        self.assertIn("connect-src 'none'", manifest['content_security_policy']['extension_pages'])
+        self.assertIn('connect-src https://breezer-browser.vercel.app', manifest['content_security_policy']['extension_pages'])
         self.assertEqual(manifest['background']['type'], 'module')
         self.assertEqual(manifest['side_panel']['default_path'], 'panel.html')
         self.assertTrue((ROOT / 'features/ai/extension/panel.html').is_file())

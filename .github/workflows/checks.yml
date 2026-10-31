@@ -67,6 +67,20 @@ jobs:
           node tests/ai/panel-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs
           node tests/ai/browser-page.mjs
+      - name: Verify website, usage calculations, and dashboard access boundaries
+        env:
+          BREEZER_SITE_EVIDENCE: ${{ runner.temp }}/breezer-site-evidence
+        run: |
+          npm ci --ignore-scripts --prefix site
+          npm test --prefix site
+      - name: Upload website verification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: breezer-website-verification
+          path: ${{ runner.temp }}/breezer-site-evidence/*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Upload AI verification screenshots
         if: always()
         uses: actions/upload-artifact@v4

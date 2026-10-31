@@ -14,8 +14,11 @@
     "storage",
     "favicon",
     "sessions",
-    "topSites"
+    "topSites",
+    "alarms",
+    "idle"
   ],
+  "host_permissions": ["https://breezer-browser.vercel.app/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -64,7 +67,7 @@
   },
   "incognito": "not_allowed",
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; connect-src 'none'"
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https://breezer-browser.vercel.app"
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"

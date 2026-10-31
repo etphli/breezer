@@ -139,7 +139,7 @@ def check(tree, grit_directory=None, offline=False):
     host = json.loads((ai.ROOT / 'features/ai/integration/native-host-manifest.json').read_text())
     assert host['allowed_origins'] == [f'chrome-extension://{actual_id}/']
     assert host['name'] == ai.HOST and host['path'] == 'host/launch.sh'
-    assert 'host_permissions' not in manifest
+    assert manifest['host_permissions'] == ['https://breezer-browser.vercel.app/*']
     assert manifest['incognito'] == 'not_allowed'
     for file in (ai.ROOT / 'features/ai/extension').rglob('*'):
         if file.is_file():

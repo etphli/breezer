@@ -6,6 +6,7 @@ import {
   validateAppearancePatch,
 } from './workspace-store.js';
 import { mountPasswords } from './passwords.js';
+import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
 
@@ -72,6 +73,7 @@ function setRadioValue(group, value) {
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
+  void mountUsageSettings({ api, container: $('usage-settings') });
   const passwords = mountPasswords({ container: $('password-settings'), api });
   const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords });
   addEventListener('pagehide', () => onboarding.dispose(), { once: true });
