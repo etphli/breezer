@@ -1,0 +1,76 @@
+/* Premium layer for the voiced ads: quieter grain, large display type, glass
+   windows and the closing card. */
+
+#grain { opacity: 0.05; }
+#vignette { background: radial-gradient(130% 100% at 50% 50%, transparent 60%, rgb(0 0 0 / 0.45) 100%); }
+body.light #vignette { background: radial-gradient(130% 100% at 50% 50%, transparent 65%, rgb(60 70 70 / 0.12) 100%); }
+body.light #grain { opacity: 0.035; mix-blend-mode: multiply; }
+
+.caption {
+  left: 0;
+  width: 1920px;
+  text-align: center;
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+  z-index: 40;
+  text-wrap: balance;
+}
+.caption span { display: inline-block; margin: 0 0.12em; will-change: transform, opacity, filter; }
+.caption.hero { top: 440px; font-size: 112px; }
+.caption.mid { top: 470px; font-size: 84px; }
+.caption.low { top: 900px; font-size: 52px; font-weight: 500; letter-spacing: -0.02em; }
+.caption.left { left: 140px; width: 760px; text-align: left; }
+.caption.ink { color: #0b1d22; }
+.caption.soft { color: rgb(234 252 246 / 0.86); }
+
+.win.glass {
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.1),
+    0 1px 0 rgb(255 255 255 / 0.18) inset,
+    0 50px 90px -30px rgb(0 0 0 / 0.7),
+    0 140px 220px -80px rgb(0 30 40 / 0.9);
+}
+.win .sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.10) 45%, rgb(255 255 255 / 0.03) 52%, transparent 60%);
+  background-size: 300% 100%;
+  mix-blend-mode: screen;
+  border-radius: inherit;
+}
+
+.panel {
+  position: absolute;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.1), 0 50px 100px -30px rgb(0 0 0 / 0.75);
+}
+.panel img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; }
+
+/* Closing card */
+.pend { inset: 0; z-index: 70; display: grid; place-items: center; opacity: 0; }
+.pend.dark { background: radial-gradient(70% 80% at 50% 40%, #0b3b47 0%, #04161d 50%, #010507 100%); }
+.pend.light { background: radial-gradient(80% 80% at 50% 38%, #ffffff 0%, #f1f6f4 55%, #dfe9e6 100%); color: #0b1d22; }
+.pend-glow {
+  position: absolute;
+  left: 560px;
+  top: 40px;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(143 240 208 / 0.24), transparent);
+}
+.pend.light .pend-glow { background: radial-gradient(closest-side, rgb(92 196 242 / 0.18), transparent); }
+.pend-inner { position: relative; display: flex; flex-direction: column; align-items: center; transform: translateY(-20px); }
+.pend-logo { width: 200px; height: 200px; filter: drop-shadow(0 30px 50px rgb(0 0 0 / 0.45)); }
+.pend.light .pend-logo { filter: drop-shadow(0 30px 40px rgb(10 50 60 / 0.25)); }
+.pend-word { margin-top: 30px; font-size: 136px; font-weight: 700; letter-spacing: -0.035em; line-height: 1; }
+.pend-tag { margin-top: 26px; font-size: 50px; font-weight: 500; letter-spacing: -0.02em; color: rgb(234 252 246 / 0.88); }
+.pend.light .pend-tag { color: #24464d; }
+.pend-tag span { margin: 0 0.18em; }
+.pend-cta { margin-top: 48px; font-size: 24px; font-weight: 500; letter-spacing: 0.005em; color: rgb(234 252 246 / 0.7); }
+.pend.light .pend-cta { color: #4d6a70; }
