@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 3: Unwatched</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  #bg { inset: 0; background: radial-gradient(90% 90% at 50% 45%, #1a1a20 0%, #08080b 80%); }
+  #bg2 { inset: 0; background: radial-gradient(80% 90% at 50% 45%, #0c4450 0%, #04202a 55%, #020c10 100%); opacity: 0; }
+  #cursor { left: 0; top: 0; width: 44px; height: 60px; z-index: 20; filter: drop-shadow(0 6px 14px rgb(0 0 0 / .6)); }
+  #counter { right: 90px; top: 70px; z-index: 22; text-align: right; }
+  #counter .n { font-size: 132px; font-weight: 800; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+  #counter .l { font-size: 24px; font-weight: 500; color: rgb(255 255 255 / .6); margin-top: 6px; }
+  .cap { left: 0; width: 1920px; text-align: center; font-family: var(--serif); font-size: 64px; color: #eef3f2; z-index: 25; top: 880px; }
+  .cap.big { font-size: 70px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, wind, travel } = AD;
+const B = 60 / 92;
+const FREEZE = 16 * B;
+const SNAP = 18 * B;
+const END = 37 * B;
+const COUNT = 44;
+
+const names = ["ad-pixel.js", "fingerprint", "session-replay", "retarget.io", "analytics.js", "data-broker", "heatmap", "cross-site-id",
+  "social-widget", "beacon", "ad-exchange", "audience-sync", "tag-manager", "conversion-pixel", "device-graph", "lookalike"];
+
+// Effective time along the cursor path: it pauses for the freeze, then glides on.
+const te = (t) => (t < FREEZE ? t : t < SNAP ? FREEZE : FREEZE + (t - SNAP) * 0.75);
+const path = (s) => ({
+  x: 960 + 560 * Math.sin(s * 0.5) + 130 * Math.sin(s * 1.31 + 0.4),
+  y: 520 + 220 * Math.sin(s * 0.79 + 1.1) + 70 * Math.cos(s * 1.83),
+});
+
+const trackers = Array.from({ length: COUNT }, (_, i) => {
+  const h = (k) => hash(i * 17.13 + k * 3.7);
+  return {
+    spawn: 1.0 + 8.8 * (i / COUNT) ** 0.75,
+    angle: h(1) * Math.PI * 2,
+    lag: 0.12 + h(2) * 0.7,
+    r: 70 + h(3) * 280,
+    w: (h(4) - 0.5) * 1.6,
+    a0: h(5) * Math.PI * 2,
+    label: i % 3 === 0 ? names[(i / 3) % names.length] : null,
+    size: 4 + h(6) * 4,
+  };
+});
+
+function trackerPos(k, t) {
+  const s = te(t);
+  const c = path(Math.max(0, s - k.lag));
+  return { x: c.x + Math.cos(k.a0 + s * k.w) * k.r, y: c.y + Math.sin(k.a0 + s * k.w) * k.r * 0.7 };
+}
+// Later attempts that bounce off the shield around the cursor
+const attempts = Array.from({ length: 8 }, (_, k) => ({
+  start: SNAP + 1.6 + k * 2 * B,
+  angle: hash(k * 5.3 + 1) * Math.PI * 2,
+  name: names[(k * 5 + 2) % names.length],
+}));
+const ringRadius = (t) => (t < SNAP ? 0 : ease.out(prog(t, SNAP, SNAP + 1.1)) * 2400);
+const snapPoint = path(FREEZE);
+trackers.forEach((k) => {
+  const p = trackerPos(k, SNAP);
+  const d = Math.hypot(p.x - snapPoint.x, p.y - snapPoint.y);
+  let lo = SNAP, hi = SNAP + 1.1;
+  for (let i = 0; i < 20; i++) { const m = (lo + hi) / 2; if (ringRadius(m) < d) lo = m; else hi = m; }
+  k.release = lo;
+  k.releasePos = p;
+  const len = d || 1;
+  k.dir = { x: (p.x - snapPoint.x) / len, y: (p.y - snapPoint.y) / len };
+});
+
+AD.setup({
+  bpm: 92,
+  progression: ["Dm9", "Bbmaj7", "Fmaj7", "C"],
+  sections: [
+    { from: 0, to: 4 * B, pad: true, bright: 0.12 },
+    { from: 4 * B, to: FREEZE, kick: "half", hats: "16", bass: "4", pad: true, bright: 0.28 },
+    { from: SNAP, to: END, kick: "four", clap: true, hats: "8", bass: "8", arp: true, pad: true, bright: 0.85 },
+    { from: END, to: 29.6, pad: true, bright: 0.5 },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const bg = el("div", "", stage); bg.id = "bg";
+    const bg2 = el("div", "", stage); bg2.id = "bg2";
+    const web = AD.canvas(stage, 2);
+    const fx = AD.canvas(stage, 10);
+    const cursor = el("div", "", stage, `<svg viewBox="0 0 22 30" width="44" height="60"><path d="M2 2 L2 24 L8 18.5 L12 28 L16 26.3 L12 17 L20 17 Z" fill="#fff" stroke="#000" stroke-width="1.6" stroke-linejoin="round"/></svg>`);
+    cursor.id = "cursor";
+    const counter = el("div", "", stage); counter.id = "counter";
+    const num = el("div", "n", counter, "0");
+    el("div", "l", counter, "Trackers following you");
+
+    const caps = [
+      [1.2, 4.2, "Every click."],
+      [4.4, 7.2, "Every scroll."],
+      [7.4, FREEZE, "Someone’s taking notes."],
+      [FREEZE + 0.1, SNAP - 0.05, "Unless you’re using Breezer.", "#8ff0d0", "italic"],
+      [SNAP + 0.9, SNAP + 5.0, "Ads and trackers, blocked before they load."],
+      [SNAP + 5.2, SNAP + 8.6, "No telemetry phoning home."],
+      [SNAP + 8.8, END - 0.1, "Your browsing stays yours.", "#8ff0d0"],
+    ].map(([a, b, text, color, style]) => {
+      const n = el("div", "cap", stage, text);
+      set(n, { color: color || "#eef3f2", fontStyle: style || "normal" });
+      return [a, b, n];
+    });
+
+    const endCard = AD.mountEndCard("Browse unwatched.");
+
+    return (t) => {
+      const calm = ease.out(prog(t, SNAP, SNAP + 1.2));
+      bg2.style.opacity = String(calm);
+      const kicks = pulse(t, Array.from({ length: 40 }, (_, i) => SNAP + i * B).filter((k) => k < END), 0.18);
+
+      // The web drifting past: rows of page outlines
+      web.clearRect(0, 0, 1920, 1080);
+      const scroll = travel((s) => (s < FREEZE ? 40 + s * 4 : s < SNAP ? 0 : 60), t);
+      for (let col = 0; col < 5; col++) {
+        for (let row = -1; row < 7; row++) {
+          const x = 70 + col * 370;
+          const y = ((row * 180 - scroll * (0.6 + col * 0.12)) % 1260 + 1260) % 1260 - 180;
+          const hw = 300 * (0.5 + hash(col * 9 + row) * 0.5);
+          web.fillStyle = calm > 0.5 ? `rgb(143 240 208 / ${0.04 * calm})` : `rgb(255 255 255 / ${0.035 * (1 - calm)})`;
+          web.beginPath(); web.roundRect(x, y, hw, 14, 7); web.fill();
+          web.beginPath(); web.roundRect(x, y + 30, 320, 90, 12); web.fill();
+        }
+      }
+
+      // Cursor and its mint trail once it is free
+      const s = te(t);
+      const c = path(s);
+      const jitter = t > FREEZE && t < SNAP ? (hash(Math.floor(t * 30)) - 0.5) * 3 : 0;
+      cursor.style.transform = `translate(${c.x - 4 + jitter}px, ${c.y - 4}px)`;
+      cursor.style.opacity = String(ease.out(prog(t, 0.1, 0.5)) * (1 - prog(t, END - 0.3, END)));
+
+      fx.clearRect(0, 0, 1920, 1080);
+      if (t > SNAP) {
+        fx.save();
+        fx.lineCap = "round";
+        for (let k = 0; k < 40; k++) {
+          const p0 = path(Math.max(0, s - k * 0.025));
+          const p1 = path(Math.max(0, s - (k + 1) * 0.025));
+          fx.strokeStyle = `rgb(143 240 208 / ${(1 - k / 40) * 0.7 * calm})`;
+          fx.lineWidth = 14 * (1 - k / 40);
+          fx.beginPath(); fx.moveTo(p0.x, p0.y); fx.lineTo(p1.x, p1.y); fx.stroke();
+        }
+        wind(fx, travel((u) => (u < SNAP ? 0 : 700), t), { count: 50, alpha: 0.35 * calm, len: 300, seed: 21, t, wobble: 20 });
+        fx.restore();
+      }
+
+      // Trackers
+      let following = 0;
+      fx.font = "500 19px ui-monospace, Menlo, monospace";
+      for (const k of trackers) {
+        if (t < k.spawn) continue;
+        const arrive = ease.out(prog(t, k.spawn, k.spawn + 0.55));
+        let p;
+        let alpha = 1;
+        if (t < k.release || t < SNAP) {
+          const target = trackerPos(k, t);
+          const start = { x: 960 + Math.cos(k.angle) * 1300, y: 540 + Math.sin(k.angle) * 900 };
+          p = { x: lerp(start.x, target.x, arrive), y: lerp(start.y, target.y, arrive) };
+          if (arrive > 0.95) following++;
+          if (t > FREEZE) { p.x += (hash(k.a0 + Math.floor(t * 30)) - 0.5) * 6; p.y += (hash(k.lag + Math.floor(t * 30)) - 0.5) * 6; }
+          // The string between the cursor and its watcher
+          fx.strokeStyle = `rgb(255 115 87 / ${0.32 * arrive})`;
+          fx.lineWidth = 1.2;
+          fx.beginPath(); fx.moveTo(c.x, c.y); fx.lineTo(p.x, p.y); fx.stroke();
+        } else {
+          const f = t - k.release;
+          p = { x: k.releasePos.x + k.dir.x * (f * 900 + f * f * 2400), y: k.releasePos.y + k.dir.y * (f * 900 + f * f * 2400) };
+          alpha = clamp(1 - f * 1.8);
+          for (let j = 0; j < 6; j++) {
+            const a = k.a0 + j * 1.05;
+            const d = f * (160 + j * 30);
+            fx.fillStyle = `rgb(255 160 130 / ${alpha * 0.7})`;
+            fx.beginPath(); fx.arc(p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, 2.2, 0, 7); fx.fill();
+          }
+        }
+        if (alpha <= 0) continue;
+        const g = fx.createRadialGradient(p.x, p.y, 0, p.x, p.y, k.size * 4);
+        g.addColorStop(0, `rgb(255 115 87 / ${0.55 * alpha})`);
+        g.addColorStop(1, "rgb(255 115 87 / 0)");
+        fx.fillStyle = g;
+        fx.beginPath(); fx.arc(p.x, p.y, k.size * 4, 0, 7); fx.fill();
+        fx.fillStyle = `rgb(255 140 115 / ${alpha})`;
+        fx.beginPath(); fx.arc(p.x, p.y, k.size, 0, 7); fx.fill();
+        if (k.label) {
+          const w = fx.measureText(k.label).width + 22;
+          fx.fillStyle = `rgb(40 14 10 / ${0.85 * alpha * arrive})`;
+          fx.strokeStyle = `rgb(255 115 87 / ${0.6 * alpha * arrive})`;
+          fx.lineWidth = 1;
+          fx.beginPath(); fx.roundRect(p.x + 12, p.y - 17, w, 34, 9); fx.fill(); fx.stroke();
+          fx.fillStyle = `rgb(255 200 185 / ${alpha * arrive})`;
+          fx.fillText(k.label, p.x + 23, p.y + 7);
+        }
+      }
+
+      // Attempts after the snap meet the shield
+      for (const a of attempts) {
+        const f = t - a.start;
+        if (f < 0 || f > 1.65) continue;
+        const hitAt = 0.55;
+        const cs = path(te(a.start + hitAt));
+        const from = { x: cs.x + Math.cos(a.angle) * 1100, y: cs.y + Math.sin(a.angle) * 800 };
+        const stop = { x: cs.x + Math.cos(a.angle) * 130, y: cs.y + Math.sin(a.angle) * 130 };
+        if (f < hitAt) {
+          const p = ease.in(f / hitAt);
+          const x = lerp(from.x, stop.x, p), y = lerp(from.y, stop.y, p);
+          fx.fillStyle = "rgb(255 140 115 / .95)";
+          fx.beginPath(); fx.arc(x, y, 6, 0, 7); fx.fill();
+        } else {
+          const g = f - hitAt;
+          const fade = clamp(1 - Math.max(0, g - 0.55) / 0.5);
+          const cc = c;
+          fx.strokeStyle = `rgb(185 255 230 / ${0.75 * Math.exp(-g / 0.25)})`;
+          fx.lineWidth = 3;
+          fx.beginPath(); fx.arc(cc.x, cc.y, 130 + g * 60, a.angle - 0.6, a.angle + 0.6); fx.stroke();
+          for (let j = 0; j < 8; j++) {
+            const ang = a.angle + (j - 3.5) * 0.25;
+            const d = 130 + g * (200 + j * 25);
+            fx.fillStyle = `rgb(143 240 208 / ${fade * 0.8})`;
+            fx.beginPath(); fx.arc(cc.x + Math.cos(ang) * d, cc.y + Math.sin(ang) * d, 2.4, 0, 7); fx.fill();
+          }
+          const label = `${a.name} blocked`;
+          const lx = stop.x + Math.cos(a.angle) * 40 - (Math.cos(a.angle) < 0 ? fx.measureText(label).width + 22 : 0);
+          const ly = stop.y + Math.sin(a.angle) * 30 - g * 20;
+          fx.fillStyle = `rgb(6 40 46 / ${0.85 * fade})`;
+          fx.strokeStyle = `rgb(143 240 208 / ${0.7 * fade})`;
+          fx.lineWidth = 1;
+          fx.beginPath(); fx.roundRect(lx, ly - 17, fx.measureText(label).width + 22, 34, 9); fx.fill(); fx.stroke();
+          fx.fillStyle = `rgb(200 255 238 / ${fade})`;
+          fx.fillText(label, lx + 11, ly + 7);
+        }
+      }
+
+      // Shockwave
+      if (t >= SNAP && t < SNAP + 1.4) {
+        const r = ringRadius(t);
+        const a = 1 - prog(t, SNAP, SNAP + 1.3);
+        for (const [mul, width] of [[1, 10], [0.82, 3], [0.6, 2]]) {
+          fx.strokeStyle = `rgb(185 255 230 / ${a * (mul === 1 ? 0.9 : 0.5)})`;
+          fx.lineWidth = width;
+          fx.shadowColor = "#8ff0d0";
+          fx.shadowBlur = 40;
+          fx.beginPath(); fx.arc(snapPoint.x, snapPoint.y, r * mul, 0, 7); fx.stroke();
+        }
+        fx.shadowBlur = 0;
+      }
+
+      // Counter: counts up while followed, rolls to zero after the snap
+      const n = t < SNAP ? following : Math.round(COUNT * (1 - ease.inOut(prog(t, SNAP, SNAP + 1.1))));
+      num.textContent = String(n);
+      num.style.color = t > SNAP + 0.6 ? "#8ff0d0" : n > 0 ? "#ff8a70" : "#eafcf6";
+      counter.style.opacity = String(ease.out(prog(t, 0.8, 1.3)) * (1 - prog(t, END - 0.3, END)));
+      counter.style.transform = `scale(${1 + pulse(t, trackers.map((k) => k.spawn + 0.5), 0.1) * 0.05 + pulse(t, [SNAP + 0.6], 0.2) * 0.12})`;
+      counter.style.transformOrigin = "100% 0";
+
+      caps.forEach(([a, b, node]) => {
+        const p = ease.out(prog(t, a, a + 0.5)) * (1 - ease.in(prog(t, b - 0.3, b)));
+        set(node, { opacity: p, transform: `translateY(${(1 - p) * 14}px)`, filter: `blur(${(1 - p) * 6}px)` });
+      });
+
+      bg.style.filter = `brightness(${1 - prog(t, FREEZE, SNAP) * 0.4})`;
+      bg2.style.filter = `brightness(${1 + kicks * 0.12})`;
+      AD.flash(pulse(t, [SNAP], 0.3) * 0.75 + pulse(t, [END], 0.3) * 0.6);
+      endCard(t, END);
+    };
+  },
+});
+
+trackers.forEach((k, i) => AD.sfx(k.spawn + 0.5, "tick", { g: 0.35 + (k.label ? 0.2 : 0), pan: clamp((trackerPos(k, k.spawn + 0.5).x - 960) / 900, -1, 1) }));
+trackers.filter((k) => k.label).slice(0, 8).forEach((k) => AD.sfx(k.spawn + 0.45, "glitch", { length: 0.12, g: 0.25 }));
+AD.sfx(FREEZE, "swell", { length: SNAP - FREEZE });
+AD.sfx(FREEZE, "glitch", { length: 0.25, g: 0.5 });
+AD.sfx(SNAP, "impact");
+AD.sfx(SNAP, "whoosh", { length: 1.1, g: 1.1, pan_from: 0, pan_to: 0 });
+trackers.slice().sort((a, b) => a.release - b.release).filter((_, i) => i % 3 === 0)
+  .forEach((k) => AD.sfx(k.release, "snap", { g: 0.6, pan: clamp(k.dir.x, -1, 1) * 0.8 }));
+attempts.forEach((a) => AD.sfx(a.start + 0.55, "snap", { g: 0.8, pan: Math.cos(a.angle) * 0.6 }));
+AD.sfx(END - 1.3, "riser", { length: 1.3, g: 0.8 });
+AD.sfx(END, "impact", { g: 0.9 });
+AD.sfx(END, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>

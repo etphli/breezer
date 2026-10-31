@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 2: Unclutter</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  #bg { inset: 0; background: radial-gradient(90% 90% at 50% 40%, #1c2b33 0%, #0a1419 75%); }
+  #bg2 { inset: 0; background: radial-gradient(80% 90% at 40% 45%, #0d4652 0%, #05202a 55%, #020c10 100%); opacity: 0; }
+  .cap { left: 0; width: 1920px; text-align: center; font-family: var(--serif); font-size: 52px; color: #dfe9e8; z-index: 30; top: 70px; }
+  #old { left: 384px; top: 200px; width: 1152px; height: 720px; border-radius: 16px; overflow: hidden; z-index: 3;
+    background: #f4f5f7; box-shadow: 0 40px 100px -30px rgb(0 0 0 / .7); }
+  #old .chrome { height: 74px; background: #dfe3e8; display: flex; align-items: center; gap: 10px; padding: 0 20px; }
+  #old .chrome i { width: 13px; height: 13px; border-radius: 50%; background: #b9c0c8; }
+  #old .chrome .tabpill { margin-left: 18px; width: 210px; height: 38px; border-radius: 10px 10px 0 0; background: #f4f5f7; align-self: flex-end; }
+  #old .omni { margin: 12px 20px; height: 40px; border-radius: 20px; background: #e7eaee; }
+  #old .page { margin: 36px 120px; display: grid; gap: 18px; }
+  #old .page b { display: block; height: 18px; border-radius: 9px; background: #e3e6ea; }
+  #junk { inset: 0; z-index: 4; }
+  .j { position: absolute; background: #fff; color: #1d2733; border-radius: 14px; padding: 18px 22px; font-size: 21px; line-height: 1.25;
+    box-shadow: 0 1px 0 rgb(0 0 0 / .04), 0 18px 40px -10px rgb(0 0 0 / .45); white-space: nowrap; font-weight: 500; }
+  .j small { display: block; font-size: 16px; color: #5d6875; font-weight: 400; margin-top: 4px; }
+  .j .btn { display: inline-block; margin-top: 12px; padding: 8px 16px; border-radius: 9px; color: #fff; font-size: 17px; font-weight: 600; }
+  .j .x { position: absolute; right: 10px; top: 6px; color: #9aa4ae; font-size: 18px; }
+  .j.bar { border-radius: 10px; padding: 12px 20px; }
+  .j.red { background: #e5383b; color: #fff; }
+  .j.red small { color: #ffd9d9; }
+  .j.ad { background: #fff6cf; }
+  .j.ad::before { content: "Sponsored"; display: block; font-size: 13px; color: #8a6d00; font-weight: 600; margin-bottom: 4px; }
+  .j.icons { display: flex; gap: 8px; padding: 10px 12px; background: #eef0f3; }
+  .j.icons i { width: 34px; height: 34px; border-radius: 9px; position: relative; }
+  .j.icons i em { position: absolute; right: -5px; top: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: #e5383b; color: #fff; font-size: 11px; font-style: normal; display: grid; place-items: center; font-weight: 700; }
+  .j.bubble { border-radius: 999px; padding: 10px 18px; background: #e5383b; color: #fff; font-weight: 700; }
+  #rig { inset: 0; z-index: 5; perspective: 2000px; }
+  #rig .win { position: absolute; left: 120px; top: 90px; transform-origin: 0 0; }
+  #list { left: 1250px; top: 330px; z-index: 20; display: grid; gap: 30px; }
+  #list div { font-size: 50px; font-weight: 700; letter-spacing: -0.03em; position: relative; white-space: nowrap; }
+  #list div::after { content: ""; position: absolute; left: 0; bottom: -8px; height: 4px; width: var(--w, 0%); border-radius: 2px; background: var(--ribbon); }
+  #big { inset: 0; display: grid; place-items: center; z-index: 25; text-align: center; }
+  #big div { font-size: 170px; font-weight: 800; letter-spacing: -0.055em; line-height: 1.02; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, wind, travel } = AD;
+const B = 60 / 110;
+const CUT = 21 * B;
+const GUST = 24 * B;
+const DROP = 26 * B;
+const BIG = 36 * B;
+const END = 44 * B;
+
+// Clutter that piles up: [x, y, html, class]
+const junk = [
+  [400, 214, Array.from({ length: 15 }, (_, i) => `<i style="background:hsl(${i * 47} 70% 55%)">${i % 3 === 0 ? `<em>${(i * 7) % 9 + 1}</em>` : ""}</i>`).join(""), "icons"],
+  [1120, 330, `Sign in to sync your data<small>Get the most out of your browser</small><span class="btn" style="background:#2563eb">Sign in</span><span class="x">×</span>`],
+  [420, 820, `We value your privacy<small>We and our 847 partners use cookies to personalise ads.</small><span class="btn" style="background:#2563eb">Accept all</span>`],
+  [520, 300, `Your browser is out of date!<small>Restart now to install 3 updates</small>`, "red"],
+  [800, 420, `example.com wants to<small>Show notifications</small><span class="btn" style="background:#2563eb">Allow</span>`],
+  [450, 520, `Best deals on headphones<small>Up to 70% off today only</small>`, "ad"],
+  [1240, 560, `🎉 You earned 3 reward points!`, "bar"],
+  [700, 250, `Make us your default browser?<span class="btn" style="background:#0f766e;margin:0 0 0 14px">Yes</span>`, "bar"],
+  [980, 700, `VPN Pro: 70% off<small>Protect yourself now</small><span class="btn" style="background:#16a34a">Get deal</span>`, "ad"],
+  [380, 380, `Trending for you<small>12 stories you might like</small>`],
+  [1280, 230, `Coupon found! Apply?`, "bar"],
+  [620, 640, `Enjoying the browser?<small>Rate us ★★★★★</small>`],
+  [1380, 420, `Restart to update`, "bubble"],
+  [880, 560, `Try sidebar games<small>New!</small>`],
+  [360, 690, `Connect your crypto wallet`, "bar"],
+  [1100, 800, `Price drop alert<small>Item in your cart is now $3 cheaper</small>`],
+  [580, 430, `Recommended extensions<small>Shopping, coupons and 9 more</small>`],
+  [1350, 650, `72° Partly cloudy`, "bar"],
+  [760, 760, `Customize your feed`, "bar"],
+  [1450, 300, `12`, "bubble"],
+  [980, 260, `Install our app for a better experience`, "bar"],
+  [420, 610, `Sync paused<small>Sign in again</small>`, "red"],
+  [1180, 470, `Turn on ad personalisation?<span class="btn" style="background:#2563eb">Turn on</span>`],
+  [680, 520, `Best laptops of 2026<small>Sponsored picks</small>`, "ad"],
+  [1020, 380, `Translate this page?`, "bar"],
+  [520, 740, `Your weekly report is ready`, "bar"],
+  [860, 300, `Ask our shopping assistant ✨`, "bar"],
+  [1300, 760, `Memory: 4.6 GB`, "bubble"],
+];
+// Accelerating arrivals: one per beat, then halves, then quarters
+const arrive = [];
+for (let b = 5; b < 9; b++) arrive.push(b * B);
+for (let b = 9; b < 13; b += 0.5) arrive.push(b * B);
+for (let b = 13; arrive.length < junk.length; b += 0.25) arrive.push(b * B);
+
+const scale = [1, 9 / 8, 5 / 4, 3 / 2, 5 / 3, 2, 9 / 4, 5 / 2, 3];
+const gustFront = (t) => lerp(-500, 2600, ease.inOut(prog(t, GUST - 0.35, GUST + 1.0)));
+const gustAt = (x) => { // time the wind front reaches x
+  let lo = GUST - 0.35, hi = GUST + 1.0;
+  for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (gustFront(m) < x) lo = m; else hi = m; }
+  return lo;
+};
+
+AD.setup({
+  bpm: 110,
+  progression: ["F", "C", "Dm", "Bb"],
+  sections: [
+    { from: 0, to: 5 * B, pad: true, bright: 0.2 },
+    { from: 5 * B, to: 13 * B, kick: "half", hats: "8", bass: "4", pad: true, bright: 0.35 },
+    { from: 13 * B, to: CUT, kick: "four", hats: "16", bass: "8", clap: true, pad: true, bright: 0.5 },
+    { from: DROP, to: BIG, kick: "four", clap: true, hats: "8", bass: "8", arp: true, pad: true, bright: 0.85 },
+    { from: BIG, to: END, kick: "half", hats: "8", arp: true, pad: true, bright: 0.6 },
+    { from: END, to: 29.6, pad: true, bright: 0.5 },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const bg = el("div", "", stage); bg.id = "bg";
+    const bg2 = el("div", "", stage); bg2.id = "bg2";
+    const ctx = AD.canvas(stage, 6);
+
+    const old = el("div", "", stage); old.id = "old";
+    old.innerHTML = `<div class="chrome"><i></i><i></i><i></i><span class="tabpill"></span></div><div class="omni"></div>
+      <div class="page">${[90, 70, 84, 60, 76, 50, 66].map((w) => `<b style="width:${w}%"></b>`).join("")}</div>`;
+
+    const junkLayer = el("div", "", stage); junkLayer.id = "junk";
+    const items = junk.map(([x, y, html, cls]) => {
+      const n = el("div", "j " + (cls || ""), junkLayer, html);
+      set(n, { left: x + "px", top: y + "px" });
+      return n;
+    });
+
+    const caps = [
+      [0.3, 2.6, "Remember when a browser was just a browser?"],
+      [2.75, 6.2, "Then came the extras."],
+      [6.4, CUT, "And the extras had extras."],
+      [CUT + 0.25, GUST - 0.15, "Let’s clear the air."],
+    ].map(([a, b, text]) => [a, b, el("div", "cap", stage, text)]);
+
+    const rig = el("div", "", stage); rig.id = "rig";
+    const w = AD.browserWindow(rig, {
+      tabs: [["W", "#1f7a63", "Work"], ["D", "#1d6fe0", "Design review"], ["L", "#5b5bd6", "Inbox"], ["M", "#c0392b", "Mail"], ["N", "#0f7a6a", "News"]],
+      url: "Search or type a URL", shot: "newtab-dark.jpg",
+    });
+
+    const list = el("div", "", stage); list.id = "list";
+    const lines = ["No sponsored tiles.", "No sign-in nags.", "No pop-up offers.", "No toolbar clutter."].map((s) => el("div", "", list, s));
+
+    const big = el("div", "", stage); big.id = "big";
+    const bigInner = el("div", "", big);
+    const l1 = el("div", "", bigInner, "Everything you need.");
+    const l2 = el("div", "ribbon-text", bigInner, "Nothing you don’t.");
+
+    const endCard = AD.mountEndCard("Bloat-free, by design.");
+
+    return (t) => {
+      const count = arrive.filter((a) => t >= a).length;
+      const popKick = pulse(t, arrive, 0.08);
+      const shake = t < CUT ? (count / junk.length) ** 2 * 7 + popKick * 4 : 0;
+      const sx = (hash(Math.floor(t * 30)) - 0.5) * shake;
+      const sy = (hash(Math.floor(t * 30) + 0.3) - 0.5) * shake;
+
+      // Wind, only for the gust and after
+      ctx.clearRect(0, 0, 1920, 1080);
+      const gustStrength = prog(t, GUST - 0.4, GUST) * (1 - prog(t, GUST + 1.3, GUST + 2.4) * 0.75);
+      if (t > GUST - 0.4) {
+        const front = gustFront(t);
+        ctx.save();
+        ctx.beginPath(); ctx.rect(0, 0, Math.max(0, front + 300), 1080); ctx.clip();
+        wind(ctx, travel((s) => (s < GUST - 0.4 ? 0 : 3200 - prog(s, GUST + 1, GUST + 2.5) * 2400), t), { count: 140, alpha: 0.7 * gustStrength + 0.12, len: 520, width: 2.6, seed: 9, t, spread: 1.4 });
+        ctx.restore();
+      }
+
+      // Old browser and its clutter
+      const swap = ease.inOut(prog(t, GUST + 0.1, GUST + 0.9));
+      set(old, { transform: `translate(${sx}px, ${sy}px) scale(${1 - swap * 0.08})`, opacity: 1 - swap, filter: `blur(${swap * 10}px)` });
+      items.forEach((n, i) => {
+        const a = arrive[i];
+        const appear = ease.back(prog(t, a, a + 0.22));
+        const x = parseFloat(n.style.left);
+        const g = t - gustAt(x + 150);
+        const fly = g > 0 ? g : 0;
+        const r0 = (hash(i * 3.1) - 0.5) * 8;
+        set(n, {
+          opacity: t < a ? 0 : fly > 0 ? clamp(1 - fly * 1.4) : 1,
+          transform: `translate(${sx + fly * fly * 2600 + fly * 300}px, ${sy - fly * 240 * hash(i)}px) rotate(${r0 + fly * fly * 520 * (hash(i + 9) - 0.3)}deg) scale(${lerp(0.4, 1, appear)})`,
+          filter: fly > 0 ? `blur(${fly * 8}px)` : "none",
+        });
+      });
+      caps.forEach(([a, b, n]) => {
+        const p = ease.out(prog(t, a, a + 0.45)) * (1 - ease.in(prog(t, b - 0.25, b)));
+        set(n, { opacity: p, transform: `translateY(${(1 - p) * 12}px)`, fontStyle: n.textContent.startsWith("Let") ? "italic" : "normal", color: n.textContent.startsWith("Let") ? "#8ff0d0" : "#dfe9e8" });
+      });
+
+      // Breezer, clear and calm
+      const reveal = ease.quint(prog(t, GUST + 0.35, DROP + 0.4));
+      const toBig = ease.inOut(prog(t, BIG - 0.3, BIG + 0.5));
+      bg2.style.opacity = String(reveal);
+      const kick = pulse(t, Array.from({ length: 20 }, (_, i) => DROP + i * B).filter((k) => k < BIG), 0.15);
+      rig.style.opacity = String(clamp(reveal * 1.2));
+      set(w.win, {
+        transform: `translate(${lerp(240, 0, reveal)}px, ${lerp(60, 0, reveal) + Math.sin(t * 0.9) * 6}px) scale(${lerp(0.62, 0.72, reveal) * (1 + kick * 0.006) * lerp(1, 0.9, toBig)}) rotateY(${lerp(18, 6, reveal)}deg)`,
+        filter: `blur(${toBig * 14}px) brightness(${1 - toBig * 0.45})`,
+      });
+      lines.forEach((n, i) => {
+        const a = DROP + (2 + i * 2) * B;
+        const p = ease.expo(prog(t, a, a + 0.3));
+        set(n, { opacity: p * (1 - toBig), transform: `translateX(${(1 - p) * 60}px)` });
+        n.style.setProperty("--w", `${ease.inOut(prog(t, a + 0.15, a + 0.7)) * 100}%`);
+      });
+      const b1 = ease.expo(prog(t, BIG, BIG + 0.4));
+      const b2 = ease.expo(prog(t, BIG + 2 * B, BIG + 2 * B + 0.4));
+      big.style.opacity = String(1 - ease.in(prog(t, END - 0.3, END)));
+      set(l1, { opacity: b1, transform: `translateY(${(1 - b1) * 50}px)`, filter: `blur(${(1 - b1) * 12}px)` });
+      set(l2, { opacity: b2, transform: `translateY(${(1 - b2) * 50}px)`, filter: `blur(${(1 - b2) * 12}px)` });
+      bigInner.style.transform = `scale(${1 + prog(t, BIG, END) * 0.04})`;
+      bg.style.filter = `brightness(${1 + popKick * 0.15})`;
+
+      AD.flash(pulse(t, [DROP], 0.3) * 0.5 + pulse(t, [END], 0.3) * 0.6);
+      endCard(t, END);
+    };
+  },
+});
+
+arrive.forEach((a, i) => AD.sfx(a, "pop", { pitch: scale[i % scale.length] * (i >= scale.length ? 1.5 : 1), g: 0.65, pan: (hash(i) - 0.5) * 1.2 }));
+AD.sfx(CUT, "glitch", { length: 0.35, g: 0.9 });
+AD.sfx(CUT + 0.2, "shimmer", { g: 0.6 });
+AD.sfx(GUST - 0.9, "swell", { length: 0.9 });
+AD.sfx(GUST - 0.35, "whoosh", { length: 1.6, g: 1.3, pan_from: -0.9, pan_to: 0.9 });
+AD.sfx(GUST - 0.1, "whoosh", { length: 1.2, g: 0.9, up: false, pan_from: -0.6, pan_to: 0.8 });
+AD.sfx(DROP, "impact");
+[0, 1, 2, 3].forEach((i) => AD.sfx(DROP + (2 + i * 2) * B, "tick", { g: 0.7 }));
+AD.sfx(BIG - 0.3, "whoosh", { length: 0.6, g: 0.6 });
+AD.sfx(END - 1.2, "riser", { length: 1.2, g: 0.8 });
+AD.sfx(END, "impact", { g: 0.9 });
+AD.sfx(END, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>

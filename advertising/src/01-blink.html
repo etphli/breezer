@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 1: Blink</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  #bg { inset: 0; background: radial-gradient(80% 80% at 50% 50%, #0b3a46 0%, #04161c 70%); }
+  #spin { left: 0; top: 0; width: 1920px; height: 1080px; display: grid; place-items: center; z-index: 5; }
+  #spin .box { display: flex; flex-direction: column; align-items: center; gap: 46px; }
+  #spin svg { width: 120px; height: 120px; }
+  #spin .bar { width: 420px; height: 6px; border-radius: 3px; background: rgb(255 255 255 / 0.08); overflow: hidden; }
+  #spin .bar i { display: block; height: 100%; width: 0; background: #6d7f86; border-radius: 3px; }
+  .cap { left: 0; width: 1920px; text-align: center; font-family: var(--serif); font-size: 50px; color: #cfe3e2; z-index: 6; }
+  #dot { left: 950px; top: 530px; width: 20px; height: 20px; border-radius: 50%; background: #eafcf6; z-index: 7;
+    box-shadow: 0 0 40px 10px #8ff0d0, 0 0 120px 40px rgb(92 196 242 / .5); }
+  #word { inset: 0; display: grid; place-items: center; z-index: 10; }
+  #word span { font-size: 330px; font-weight: 800; letter-spacing: -0.06em; line-height: 1; padding: 0 40px; }
+  #rig { inset: 0; perspective: 2200px; z-index: 12; }
+  #rig .win { position: absolute; left: 240px; top: 54px; transform-origin: 50% 50%; }
+  #punch { position: absolute; inset: 0; background: #eafcf6; opacity: 0; pointer-events: none; }
+  #wincap { top: 968px; font-family: var(--display); font-size: 40px; font-weight: 600; letter-spacing: -0.02em; z-index: 13; }
+  #wincap span { display: inline-block; margin: 0 14px; }
+  #final { inset: 0; display: grid; place-items: center; z-index: 14; text-align: center; }
+  #final .big { font-size: 220px; font-weight: 800; letter-spacing: -0.055em; line-height: 1; }
+  #final .big span { display: inline-block; }
+  #final .small { margin-top: 34px; font-family: var(--serif); font-size: 56px; color: #d9f7ee; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, wind, travel } = AD;
+const B = 60 / 128;
+const DROP = 13 * B;            // the first beat of the drop
+const WORDS_END = DROP + 12 * B;
+const WIN_END = 43 * B;
+const END = 52 * B;
+const beats = (from, to) => { const out = []; for (let b = Math.ceil(from / B - 1e-6); b * B < to - 1e-6; b++) out.push(b * B); return out; };
+const kickTimes = beats(DROP, WIN_END).concat(beats(WIN_END, END).filter((_, i) => i % 2 === 0));
+
+const words = ["Click.", "Loaded.", "Search.", "Found.", "Open.", "Done."];
+const tabs = [["N", "#0f7a6a", "News"], ["D", "#1d6fe0", "Docs: Q4 plan"], ["M", "#7b3fe4", "Music"],
+  ["C", "#178a3c", "Calendar"], ["W", "#c2410c", "Weather"], ["L", "#475569", "Library"], ["G", "#24292f", "GitHub"]];
+const pages = [["newtab-dark.jpg", "New tab"], ["whats-new.jpg", "breezer://whats-new"], ["newtab-light.jpg", "New tab"], ["newtab-dark.jpg", "New tab"]];
+const tabTimes = tabs.slice(1).map((_, i) => WORDS_END + (2 + i * 2) * B);
+const pageTimes = [WORDS_END, WORDS_END + 5 * B, WORDS_END + 9 * B, WORDS_END + 13 * B];
+
+AD.setup({
+  bpm: 128,
+  progression: ["Am", "F", "C", "G"],
+  sections: [
+    { from: 0, to: DROP, pad: true, bright: 0.12 },
+    { from: DROP, to: WORDS_END, kick: "four", clap: true, hats: "16", bass: "8", pad: true, bright: 0.6 },
+    { from: WORDS_END, to: WIN_END, kick: "four", clap: true, hats: "8", bass: "8", arp: true, pad: true, bright: 0.8 },
+    { from: WIN_END, to: END, kick: "half", hats: "8", arp: true, pad: true, bright: 0.45 },
+    { from: END, to: 29.6, pad: true, bright: 0.5 },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const bg = el("div", "", stage); bg.id = "bg";
+    const ctx = AD.canvas(stage, 2);
+
+    const spin = el("div", "", stage); spin.id = "spin";
+    const box = el("div", "box", spin);
+    const svg = el("div", "", box, `<svg viewBox="-50 -50 100 100">${Array.from({ length: 12 }, (_, i) =>
+      `<rect x="-3.5" y="-44" width="7" height="22" rx="3.5" fill="#c4d3d6" opacity="${(0.15 + 0.85 * ((i + 1) / 12)).toFixed(2)}" transform="rotate(${i * 30})"/>`).join("")}</svg>`).firstChild;
+    const barFill = el("i", "", el("div", "bar", box));
+    const cap1 = el("div", "cap", stage, "Somewhere, a page is still loading."); cap1.style.top = "770px";
+    const cap2 = el("div", "cap", stage, "Not in Breezer."); cap2.style.top = "770px";
+    const dot = el("div", "", stage); dot.id = "dot";
+
+    const wordBox = el("div", "", stage); wordBox.id = "word";
+    const word = el("span", "", wordBox);
+
+    const rig = el("div", "", stage); rig.id = "rig";
+    const w = AD.browserWindow(rig, { tabs, url: "New tab" });
+    const shots = pages.map(([file]) => { const img = el("img", "shot", w.main); img.src = AD.SHOTS + file; return img; });
+    const punch = el("div", "", w.main); punch.id = "punch";
+    const winCap = el("div", "cap", stage, ["No spinners.", "No waiting.", "Just the web."].map((s) => `<span>${s}</span>`).join(""));
+    winCap.id = "wincap";
+    const capParts = [...winCap.children];
+
+    const fin = el("div", "", stage); fin.id = "final";
+    const finInner = el("div", "", fin);
+    const big = el("div", "big ribbon-text", finInner, [..."Built for speed."].map((c) => `<span>${c === " " ? "&nbsp;" : c}</span>`).join(""));
+    const bigLetters = [...big.children];
+    bigLetters.forEach((s) => s.classList.add("ribbon-text"));
+    big.classList.remove("ribbon-text");
+    const small = el("div", "small", finInner, "Light enough to forget it’s there.");
+
+    const endCard = AD.mountEndCard("The web, at the speed of you.");
+
+    const speed = (t) => (t < DROP ? 40 : t < WORDS_END ? 2600 : t < WIN_END ? 1100 : t < END ? 1900 : 320);
+
+    return (t) => {
+      const kp = pulse(t, kickTimes, 0.14);
+
+      // Background and wind
+      ctx.clearRect(0, 0, 1920, 1080);
+      const drop = prog(t, DROP, DROP + 0.2);
+      bg.style.filter = `brightness(${lerp(0.55, 1, drop) + kp * 0.25 * drop})`;
+      if (t >= DROP) {
+        wind(ctx, travel(speed, t), { count: 120, alpha: 0.55, len: 420, width: 2.4, seed: 3, t, spread: 1.6 });
+      }
+
+      // Cold open: the familiar wait
+      const collapse = ease.inExpo(prog(t, 4.9, DROP - 0.05));
+      spin.style.opacity = t < DROP ? String(ease.out(prog(t, 0.1, 0.6))) : "0";
+      svg.style.transform = `rotate(${Math.floor(t * 12) * 30}deg)`;
+      box.style.transform = `scale(${1 - collapse * 0.99})`;
+      const load = t < 1 ? 0.2 * ease.out(t) : t < 2.3 ? 0.2 : t < 3 ? lerp(0.2, 0.34, ease.out(prog(t, 2.3, 3))) : 0.34 + (t - 3) * 0.004;
+      barFill.style.width = `${load * 100}%`;
+      set(cap1, { opacity: ease.out(prog(t, 0.6, 1.4)) * (1 - prog(t, 3.4, 3.7)), transform: `translateY(${(1 - ease.out(prog(t, 0.6, 1.4))) * 14}px)` });
+      set(cap2, { opacity: ease.out(prog(t, 3.75, 4.2)) * (1 - prog(t, 5.1, 5.5)), color: "#8ff0d0", fontStyle: "italic" });
+      const dotOn = t > 5.2 && t < DROP + 0.2;
+      set(dot, { opacity: dotOn ? 1 - ease.out(prog(t, DROP, DROP + 0.16)) : 0, transform: `scale(${t < DROP ? lerp(0.3, 1.4, prog(t, 5.2, DROP)) : 1 + ease.out(prog(t, DROP, DROP + 0.16)) * 60})` });
+      AD.flash(pulse(t, [DROP], 0.25) * 0.9 + pulse(t, [END], 0.3) * 0.6);
+
+      // Kinetic words, one every two beats
+      const wi = Math.floor((t - DROP) / (2 * B));
+      if (t >= DROP && wi < words.length) {
+        const local = t - DROP - wi * 2 * B;
+        const inP = ease.expo(prog(local, 0, 0.16));
+        const outP = ease.in(prog(local, 2 * B - 0.12, 2 * B));
+        word.textContent = words[wi];
+        word.className = wi % 2 ? "ribbon-text" : "";
+        set(wordBox, { opacity: 1 });
+        set(word, {
+          transform: `translateX(${-outP * 260}px) skewX(${-outP * 14}deg) scale(${lerp(1.35, 1, inP) + local * 0.03})`,
+          filter: `blur(${(1 - inP) * 22 + outP * 10}px)`,
+          opacity: inP * (1 - outP * 0.6),
+        });
+      } else set(wordBox, { opacity: 0 });
+
+      // The window: tabs and pages arrive on the beat
+      const enter = ease.quint(prog(t, WORDS_END - 0.1, WORDS_END + 0.75));
+      const exit = ease.in(prog(t, WIN_END - 0.05, WIN_END + 0.6));
+      const drift = Math.sin(t * 0.8) * 2.5;
+      rig.style.opacity = t > WORDS_END - 0.1 && t < WIN_END + 0.6 ? 1 : 0;
+      set(w.win, {
+        transform: `translateZ(${lerp(-1400, 0, enter)}px) rotateY(${lerp(-42, drift, enter) + exit * 70}deg) rotateX(${lerp(14, 0, enter)}deg) translateX(${exit * 1500}px) scale(${0.82 * (1 + kp * 0.006)})`,
+        filter: `blur(${exit * 16}px)`,
+        opacity: clamp(enter * 1.4),
+      });
+      w.tabNodes.forEach((n, i) => {
+        const p = i === 0 ? 1 : ease.back(prog(t, tabTimes[i - 1], tabTimes[i - 1] + 0.3));
+        set(n, { height: `${clamp(p) * 40}px`, opacity: clamp(p), transform: `translateX(${(1 - clamp(p)) * -40}px)` });
+        n.classList.toggle("on", i === (tabTimes.filter((x) => t >= x).length));
+      });
+      let pi = pageTimes.filter((x) => t >= x).length - 1;
+      pi = Math.max(0, pi);
+      shots.forEach((img, i) => (img.style.opacity = i === pi ? 1 : 0));
+      w.urlBar.textContent = pages[pi][1] === "New tab" ? "Search or type a URL" : pages[pi][1];
+      const swap = pulse(t, pageTimes.slice(1), 0.12);
+      punch.style.opacity = String(swap * 0.35);
+      shots[pi].style.transform = `scale(${1 + swap * 0.025})`;
+      capParts.forEach((n, i) => {
+        const p = ease.out(prog(t, WORDS_END + (4 + i * 2) * B, WORDS_END + (4 + i * 2) * B + 0.35));
+        set(n, { opacity: p * (1 - exit), transform: `translateY(${(1 - p) * 20}px)`, color: i === 2 ? "#8ff0d0" : "#eafcf6" });
+      });
+
+      // Closing line
+      const finOn = t > WIN_END && t < END + 0.4;
+      fin.style.opacity = finOn ? String(1 - ease.in(prog(t, END - 0.25, END + 0.1))) : "0";
+      bigLetters.forEach((n, i) => {
+        const p = ease.expo(prog(t, WIN_END + 0.2 + i * 0.035, WIN_END + 0.75 + i * 0.035));
+        set(n, { transform: `translateX(${(1 - p) * 220}px) skewX(${(1 - p) * -20}deg)`, opacity: p, filter: `blur(${(1 - p) * 12}px)` });
+      });
+      const sp = ease.out(prog(t, WIN_END + 1.6, WIN_END + 2.3));
+      set(small, { opacity: sp, transform: `translateY(${(1 - sp) * 16}px)` });
+      finInner.style.transform = `scale(${1 + prog(t, WIN_END, END) * 0.05})`;
+
+      endCard(t, END);
+    };
+  },
+});
+
+// Sound cues on the same clock
+[0.5, 1.5, 2.5, 3.5].forEach((t) => AD.sfx(t, "tick", { g: 0.6 }));
+AD.sfx(3.75, "shimmer", { g: 0.5 });
+AD.sfx(DROP - 1.5, "riser", { length: 1.5 });
+AD.sfx(DROP, "impact");
+AD.sfx(DROP, "whoosh", { length: 0.8, g: 0.8 });
+words.forEach((_, i) => i && AD.sfx(DROP + i * 2 * B - 0.14, "whoosh", { length: 0.3, g: 0.45, up: i % 2 === 0, pan_from: 0.6, pan_to: -0.6 }));
+AD.sfx(WORDS_END - 0.3, "whoosh", { length: 1.0, g: 0.8, up: false });
+tabTimes.forEach((t, i) => AD.sfx(t, "pop", { pitch: [1, 1.12, 1.26, 1.5, 1.68, 2][i], g: 0.7, pan: -0.3 }));
+pageTimes.slice(1).forEach((t) => AD.sfx(t, "tick", { g: 0.8 }));
+AD.sfx(WIN_END - 0.1, "whoosh", { length: 0.7, g: 0.9, pan_from: -0.5, pan_to: 0.9 });
+AD.sfx(END - 1.875, "riser", { length: 1.875, g: 0.8 });
+AD.sfx(END, "impact", { g: 0.9 });
+AD.sfx(END, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>
