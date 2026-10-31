@@ -34,36 +34,49 @@ const run = (cmd, args, opts = {}) =>
     if (opts.feed) opts.feed(child.stdin);
   });
 
-async function renderAd(browser, name) {
+async function renderAd(name) {
+  // One browser per ad: a fast capture can stall on a tab that isn't in front.
+  const browser = await chromium.launch({
+    executablePath: chrome,
+    args: ["--allow-file-access-from-files", "--force-color-profile=srgb", "--hide-scrollbars"],
+  });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   await page.goto(pathToFileURL(path.join(here, `${name}.html`)).href + "?render");
   await page.waitForFunction(() => window.AD && window.AD.ready, null, { timeout: 30000 });
-  const { audio, fps, duration } = await page.evaluate(() => ({ audio: AD.audio, fps: AD.fps, duration: AD.duration }));
+  const { audio, fps, duration, subframes } = await page.evaluate(() => ({ audio: AD.audio, fps: AD.fps, duration: AD.duration, subframes: AD.subframes || 1 }));
+  const premium = audio.engine === "premium";
+  const cdp = await page.context().newCDPSession(page);
 
   const temp = await mkdtemp(path.join(tmpdir(), `breezer-${name}-`));
   try {
     const spec = path.join(temp, "score.json");
     const wav = path.join(temp, "score.wav");
     await writeFile(spec, JSON.stringify({ ...audio, duration }));
-    await run("python3", [path.join(here, "soundtrack.py"), spec, wav]);
+    await run("python3", [path.join(here, premium ? "premium_score.py" : "soundtrack.py"), spec, wav], { env: { ...process.env, FFMPEG: ffmpeg } });
 
     const out = path.join(outDir, `breezer-${name}.mp4`);
     const frames = Math.round(fps * duration);
     const started = Date.now();
     await run(ffmpeg, [
       "-y", "-loglevel", "error",
-      "-f", "image2pipe", "-framerate", String(fps), "-c:v", "mjpeg", "-i", "-",
+      "-f", "image2pipe", "-framerate", String(fps * subframes), "-c:v", "mjpeg", "-i", "-",
       "-i", wav,
-      "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-maxrate", "5M", "-bufsize", "10M",
-      "-vf", "scale=in_range=full:out_range=tv,format=yuv420p", "-color_range", "tv", "-profile:v", "high", "-tune", "film",
+      "-c:v", "libx264", "-preset", "slow",
+      ...(premium ? ["-crf", "17", "-maxrate", "9M", "-bufsize", "18M"] : ["-crf", "20", "-maxrate", "5M", "-bufsize", "10M"]),
+      // Sub-frames are averaged into one output frame: a 180-degree shutter's motion blur.
+      "-vf", `${subframes > 1 ? `tmix=frames=${subframes},framestep=${subframes},` : ""}scale=in_range=full:out_range=tv,format=yuv420p`,
+      "-r", String(fps), "-color_range", "tv", "-profile:v", "high", "-tune", "film",
       "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart",
       out,
     ], {
       feed: async (stdin) => {
         for (let f = 0; f < frames; f++) {
-          await page.evaluate((t) => AD.frame(t), f / fps);
-          const jpg = await page.screenshot({ type: "jpeg", quality: 94 });
-          if (!stdin.write(jpg)) await new Promise((r) => stdin.once("drain", r));
+          for (let k = 0; k < subframes; k++) {
+            await page.evaluate((t) => AD.frame(t), (f + (k * 0.5) / subframes) / fps);
+            const { data } = await cdp.send("Page.captureScreenshot", { format: "jpeg", quality: premium ? 97 : 94, optimizeForSpeed: true });
+            const jpg = Buffer.from(data, "base64");
+            if (!stdin.write(jpg)) await new Promise((r) => stdin.once("drain", r));
+          }
           if (f % 150 === 0) console.log(`${name}: frame ${f}/${frames}`);
         }
         stdin.end();
@@ -72,7 +85,7 @@ async function renderAd(browser, name) {
     console.log(`${name}: done in ${Math.round((Date.now() - started) / 1000)}s -> ${path.relative(process.cwd(), out)}`);
   } finally {
     await rm(temp, { recursive: true, force: true });
-    await page.close();
+    await browser.close();
   }
 }
 
@@ -80,15 +93,7 @@ const all = (await readdir(here)).filter((f) => /^\d\d-.*\.html$/.test(f)).map((
 const wanted = process.argv.slice(2);
 const names = wanted.length ? all.filter((n) => wanted.some((w) => n.startsWith(w))) : all;
 
-const browser = await chromium.launch({
-  executablePath: chrome,
-  args: ["--allow-file-access-from-files", "--force-color-profile=srgb", "--hide-scrollbars"],
-});
-try {
-  const queue = [...names];
-  await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
-    while (queue.length) await renderAd(browser, queue.shift());
-  }));
-} finally {
-  await browser.close();
-}
+const queue = [...names];
+await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
+  while (queue.length) await renderAd(queue.shift());
+}));

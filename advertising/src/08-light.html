@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 8: Light</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="premium.css">
+<style>
+  #stage { background: #f4f7f6; color: #0b1d22; }
+  .caption { color: #0b1d22; }
+  #rig { inset: 0; perspective: 2400px; z-index: 20; }
+  #carry { position: absolute; left: 240px; top: 40px; width: 1440px; height: 900px; transform-origin: 50% 60%; }
+  #carry .win { position: absolute; left: 0; top: 0; background: #eef3f2; }
+  #carry .win-side { background: #e3ecea; border-right: 1px solid rgb(0 0 0 / .05); }
+  #carry .win-url { background: rgb(0 0 0 / .05); color: #476168; }
+  #carry .tab { color: #2c4249; }
+  #carry .tab.on { background: rgb(255 255 255 / .85); color: #0b1d22; }
+  #carry .win.glass { box-shadow: 0 0 0 1px rgb(0 0 0 / .06), 0 40px 80px -30px rgb(20 50 60 / .35); }
+  #carry .sheen { background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / .35) 45%, rgb(255 255 255 / .08) 52%, transparent 60%); background-size: 300% 100%; mix-blend-mode: normal; }
+  #shadow { left: 360px; top: 905px; width: 1200px; height: 90px; border-radius: 50%; z-index: 15; background: radial-gradient(closest-side, rgb(20 45 50 / .55), transparent); }
+  .j { position: absolute; background: #fff; color: #1d2733; border-radius: 16px; padding: 18px 22px; font-size: 22px; line-height: 1.25; font-weight: 500; white-space: nowrap;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / .06), 0 20px 40px -14px rgb(20 40 50 / .35); }
+  .j small { display: block; font-size: 16px; color: #5d6875; font-weight: 400; margin-top: 4px; }
+  .j i { display: inline-block; margin-top: 12px; padding: 8px 16px; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 600; font-style: normal; background: #2563eb; }
+  .j.ad { background: #fff7d6; }
+  .j.ad::before { content: "Sponsored"; display: block; font-size: 13px; color: #8a6d00; font-weight: 700; margin-bottom: 6px; }
+  .j.bar { padding: 10px 16px; border-radius: 12px; }
+  .j.pill { border-radius: 999px; padding: 10px 18px; background: #e5383b; color: #fff; font-weight: 700; }
+  .j.icons { display: flex; gap: 9px; padding: 10px 12px; background: #f1f3f5; border-radius: 12px; }
+  .j.icons b { width: 36px; height: 36px; border-radius: 10px; position: relative; }
+  .j.icons b em { position: absolute; right: -5px; top: -5px; min-width: 18px; height: 18px; border-radius: 9px; background: #e5383b; color: #fff; font-size: 11px; font-style: normal; display: grid; place-items: center; font-weight: 700; }
+</style>
+</head>
+<body class="light">
+<div id="stage"></div>
+<script src="common.js"></script>
+<script src="premium.js"></script>
+<script src="voice/08-light.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, travel } = AD;
+AD.duration = 40;
+const P = AD.voice(VO_DATA, "voice/08-light.mp3", [
+  [0, 0, 2.2], [1, 1, 5.4], [2, 2, 8.6], [3, 3, 10.0], [4, 4, 11.6], [5, 5, 13.6], [6, 7, 16.8],
+  [8, 8, 20.8], [9, 9, 23.8], [10, 10, 26.8], [11, 11, 31.0], [12, 12, 32.4], [13, 13, 33.2], [14, 14, 34.0],
+]);
+const T = {
+  away: AD.wordAt(P[1], "away"), clutter: AD.wordAt(P[2], "clutter"), nags: AD.wordAt(P[3], "sign"), tiles: AD.wordAt(P[4], "sponsored"), bars: AD.wordAt(P[5], "toolbars"),
+  left: P[6].start, light: AD.wordAt(P[7], "light"), fast: P[8].start, day: P[9].start, forget: AD.wordAt(P[10], "forget"), there: AD.wordAt(P[10], "there"),
+  end: 30.6, brand: P[11].start, w1: P[12].start, w2: P[13].start, w3: P[14].start,
+};
+const B = 60 / 96;
+
+// Bloat, grouped by what the voice names. [group, x, y, html, class]
+const junk = [
+  ["bars", 20, -46, Array.from({ length: 22 }, (_, i) => `<b style="background:hsl(${i * 41} 65% 58%)">${i % 4 === 0 ? `<em>${(i * 3) % 9 + 1}</em>` : ""}</b>`).join(""), "icons"],
+  ["bars", 300, 20, Array.from({ length: 16 }, (_, i) => `<b style="background:hsl(${i * 67 + 20} 55% 62%)">${i % 5 === 2 ? "<em>!</em>" : ""}</b>`).join(""), "icons"],
+  ["nags", 820, 150, `Sign in to sync your data<small>Get the most out of your browser</small><i>Sign in</i>`],
+  ["nags", 360, 470, `Sign in to keep reading<small>You've reached your free article limit</small><i>Continue</i>`],
+  ["nags", 1040, 560, `Turn on sync?<i>Turn on</i>`],
+  ["tiles", 330, 250, `Best deals on headphones<small>Up to 70% off</small>`, "ad"],
+  ["tiles", 620, 300, `Trending laptops<small>Sponsored picks for you</small>`, "ad"],
+  ["tiles", 930, 360, `VPN Pro, 70% off<small>Protect yourself now</small>`, "ad"],
+  ["tiles", 560, 640, `Recommended for you<small>12 stories</small>`, "ad"],
+  ["clutter", 1180, 90, "Restart to update", "pill"],
+  ["clutter", 300, 760, "🎉 3 reward points earned", "bar"],
+  ["clutter", 1240, 760, "Memory: 4.6 GB", "pill"],
+  ["clutter", 760, 520, "Coupon found! Apply?", "bar"],
+  ["clutter", 1280, 330, "72° Partly cloudy", "bar"],
+  ["clutter", 440, 130, "Shopping assistant ✨", "bar"],
+  ["clutter", 1010, 230, "Price drop alert", "bar"],
+];
+const liftAt = { clutter: T.clutter, nags: T.nags, tiles: T.tiles, bars: T.bars };
+const shots = ["newtab-light.jpg", "whats-new.jpg", "settings.jpg", "newtab-light.jpg"];
+const flips = [T.fast, T.fast + 2 * B, T.fast + 3 * B, T.fast + 4 * B];
+
+AD.setup({
+  bpm: 96,
+  progression: ["Cmaj7", "Am7", "Fmaj7", "G6"],
+  sections: [
+    { from: 0, to: T.clutter, pad: 0.6, bright: 0.3, piano: "single", air: 0.4 },
+    { from: T.clutter, to: T.left, pad: 0.7, bright: 0.45, piano: "single", pulse: true },
+    { from: T.left, to: T.fast, pad: 0.8, bright: 0.6, piano: "motif", air: 0.5 },
+    { from: T.fast, to: T.end, pad: 0.9, bright: 0.85, piano: "motif", pulse: true, kick: "four", kickGain: 0.6, snap: true, hats: "8", bass: true },
+    { from: T.forget, to: T.end, hats: null },
+    { from: T.end, to: 39.5, pad: 0.8, bright: 0.6, piano: "single" },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const studio = AD.shader(`
+      void main(){
+        vec2 uv = gl_FragCoord.xy / res;
+        vec2 p = (gl_FragCoord.xy - .5 * res) / res.y;
+        vec3 col = mix(vec3(.88, .915, .91), vec3(.985, .99, .99), smoothstep(.05, .95, uv.y));
+        col += vec3(1.) * .05 * exp(-pow(length(p - vec2(0., .5)), 2.) * 2.) * (.6 + u0.x);
+        float floorMask = smoothstep(.2, .02, uv.y);
+        float c = fbm(vec2(p.x * 2.4 + t * .06, p.y * 10. - t * .04));
+        col += vec3(.45, .85, .8) * .06 * pow(c, 3.) * 5. * floorMask;
+        float streak = pow(noise(vec2(p.x * .7 - u1.x, p.y * 46.)), 10.) + .6 * pow(noise(vec2(p.x * .4 - u1.x * 1.3, p.y * 90. + 7.)), 14.);
+        col = mix(col, mix(vec3(.55, .9, .82), vec3(.45, .75, .95), uv.x), clamp(streak * u0.y * 1.6, 0., .65));
+        col = mix(col, vec3(1.), u0.z * exp(-dot(p, p) * (1.2 - u0.z)));
+        col += (hash(gl_FragCoord.xy + fract(t * 7.)) - .5) / 255.;
+        o = vec4(col, 1.);
+      }`, 1);
+    const sparks = AD.canvas(stage, 30);
+
+    const shadow = el("div", "", stage); shadow.id = "shadow";
+    const rig = el("div", "", stage); rig.id = "rig";
+    const carry = el("div", "", rig); carry.id = "carry";
+    const w = AD.glassWindow(carry, {
+      tabs: [["W", "#1f7a63", "Work"], ["D", "#1d6fe0", "Q4 plan"], ["M", "#7b3fe4", "Music"], ["C", "#178a3c", "Calendar"], ["N", "#0f7a6a", "News"], ["L", "#475569", "Library"], ["G", "#24292f", "Pull request #4"]],
+      url: "Search or type a URL",
+    });
+    const imgs = [...new Set(shots)].map((s) => { const i = el("img", "shot", w.main); i.src = AD.SHOTS + s; i.dataset.src = s; return i; });
+    const pieces = junk.map(([g, x, y, html, cls]) => { const n = el("div", "j " + (cls || ""), carry, html); set(n, { left: x + "px", top: y + "px" }); return { g, x, y, n }; });
+
+    const caps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => AD.caption(stage, P[i], "low"));
+    caps[6].node.style.transform = "translateX(-120px)";
+    caps[7].node.style.transform = "translateX(140px)";
+    const end = AD.premiumEnd("", { theme: "light", lines: ["Fast.", "Light.", "Private."] });
+
+    const sctx = sparks;
+    const streakSpeed = (s) => (s < T.fast - 0.3 ? 0 : s < T.day ? 3.2 : s < T.forget ? 1.2 : 0.3);
+
+    return (t) => {
+      const fastP = ease.inOut(prog(t, T.fast - 0.3, T.fast + 0.4)) * (1 - ease.inOut(prog(t, T.day - 0.3, T.day + 0.8)) * 0.7) * (1 - prog(t, T.forget, T.forget + 1));
+      const fade = ease.inOut(prog(t, T.forget - 0.2, T.there + 0.4));
+      const whiteout = ease.in(prog(t, T.there, T.end + 0.1));
+      studio(t, { u0: [0.6, fastP, whiteout * 0.95, 0], u1: [travel(streakSpeed, t, 1 / 30), 0, 0, 0] });
+
+      // Weight: the more bloat aboard, the lower and heavier the window sits
+      const remaining = pieces.filter((p) => t < liftAt[p.g]).length / pieces.length;
+      const weight = remaining;
+      const floatUp = ease.inOut(prog(t, T.left, T.light + 1.2));
+      const bob = Math.sin(t * 1.3) * 6 * (1 - weight);
+      let x = 0, y = weight * 70 - floatUp * 40 + bob, ry = Math.sin(t * 0.35) * 6 * (1 - fastP), rx = weight * 6, sc = 0.74 + floatUp * 0.02;
+      // Speed: a swoop on the beat
+      if (t > T.fast - 0.3 && t < T.day + 0.8) {
+        const s = ease.inOut(prog(t, T.fast - 0.3, T.day));
+        x = Math.sin(s * Math.PI * 2) * 140;
+        ry += Math.sin(s * Math.PI * 2 + 0.6) * 14;
+        y -= Math.sin(s * Math.PI) * 30;
+      }
+      const dayZoom = ease.inOut(prog(t, T.day, T.day + 2.2)) * (1 - fade);
+      sc += dayZoom * 0.06;
+      set(carry, { transform: `translate(${x}px, ${y}px) rotateX(${rx}deg) rotateY(${ry}deg) scale(${sc})` });
+      set(shadow, {
+        opacity: String((0.25 + weight * 0.6) * (1 - fade)),
+        transform: `translateX(${x * 0.8}px) scale(${0.9 + weight * 0.15 - floatUp * 0.12}, ${1 + weight * 0.3})`,
+        filter: `blur(${18 + (1 - weight) * 22 + floatUp * 16}px)`,
+      });
+
+      // Pages flip on the beat while it moves
+      let page = 0;
+      flips.forEach((f, i) => { if (t >= f) page = i; });
+      const src = shots[page];
+      imgs.forEach((im) => (im.style.opacity = im.dataset.src === src ? 1 : 0));
+      imgs.forEach((im) => (im.style.transform = `scale(${1 + dayZoom * 0.18})`, im.style.transformOrigin = "20% 70%"));
+      w.light(1 - ((t * 0.08) % 1.4));
+      w.tabNodes.forEach((n, i) => {
+        const at = i < 3 ? -1 : T.day + 0.4 + (i - 3) * 0.32;
+        const p = at < 0 ? 1 : ease.back(prog(t, at, at + 0.3));
+        set(n, { height: `${clamp(p) * 40}px`, opacity: clamp(p), transform: `translateX(${(1 - clamp(p)) * -30}px)` });
+      });
+      // Forget it's there: the chrome dissolves, then the page becomes light
+      set(w.side, { opacity: 1 - fade });
+      set(w.win, { background: `rgb(238 243 242 / ${1 - fade})`, boxShadow: fade > 0 ? "none" : "", opacity: 1 - whiteout * 0.98 });
+      w.sheen.style.opacity = String(1 - fade);
+      w.main.style.borderRadius = "18px";
+      w.main.style.boxShadow = `0 30px 60px -30px rgb(20 50 60 / ${0.35 * (1 - fade)})`;
+      w.main.style.transform = `translateX(${-fade * 130}px)`;
+
+      // Bloat lifts away as it is named
+      sctx.clearRect(0, 0, 1920, 1080);
+      pieces.forEach((p, i) => {
+        const f = t - liftAt[p.g] - (hash(i * 3.7) * 0.25);
+        if (f <= 0) { set(p.n, { opacity: 1, transform: `rotate(${(hash(i) - 0.5) * 4}deg)`, filter: "none" }); return; }
+        const up = f * f * 900 + f * 160;
+        const a = clamp(1 - f * 1.1);
+        set(p.n, { opacity: a, transform: `translateY(${-up}px) rotate(${(hash(i) - 0.5) * 4 + f * 30 * (hash(i + 5) - 0.5)}deg) scale(${1 - f * 0.2})`, filter: `blur(${f * 9}px)` });
+        // Motes of light shed as it goes (drawn in screen space)
+        const r = carry.getBoundingClientRect();
+        const k = r.width / 1440 / (AD.stage.getBoundingClientRect().width / 1920);
+        const ox = (r.left - AD.stage.getBoundingClientRect().left) / (AD.stage.getBoundingClientRect().width / 1920);
+        const oy = (r.top - AD.stage.getBoundingClientRect().top) / (AD.stage.getBoundingClientRect().width / 1920);
+        for (let m = 0; m < 14; m++) {
+          const mf = f - m * 0.03;
+          if (mf <= 0 || mf > 1.6) continue;
+          const mx = ox + (p.x + 40 + hash(i * 31 + m) * 260) * k + Math.sin(mf * 3 + m) * 20;
+          const my = oy + (p.y + 20 + hash(i * 17 + m) * 60) * k - mf * (180 + hash(m) * 260) - up * 0.4;
+          const ma = clamp(1 - mf / 1.6) * 0.9;
+          const g = sctx.createRadialGradient(mx, my, 0, mx, my, 9);
+          g.addColorStop(0, `rgb(255 255 255 / ${ma})`); g.addColorStop(0.4, `rgb(170 240 220 / ${ma * 0.6})`); g.addColorStop(1, "rgb(170 240 220 / 0)");
+          sctx.fillStyle = g; sctx.beginPath(); sctx.arc(mx, my, 9, 0, 7); sctx.fill();
+        }
+      });
+
+      caps.forEach((c, i) => {
+        let until = i + 1 < 11 ? P[i + 1].start - 0.15 : P[i].end + 0.8;
+        if (i === 6) until = P[8].start - 0.2;
+        if (i === 7) until = P[8].start - 0.2;
+        if (i === 10) until = T.end - 0.3;
+        c(t, { until });
+      });
+      end(t, T.end, { wordAt: T.brand, tagAt: [T.w1, T.w2, T.w3] });
+    };
+  },
+});
+
+AD.sfx(0.2, "air", { length: 5, level: 0.6 });
+["clutter", "nags", "tiles", "bars"].forEach((g, i) => {
+  AD.sfx(liftAt[g], "whoosh", { length: 0.9, g: 0.55, up: true, pan_from: -0.3 + i * 0.2, pan_to: 0.2 + i * 0.2 });
+  AD.sfx(liftAt[g] + 0.05, "glass", { g: 0.6, pitch: 84 + [0, 3, 7, 12][i] });
+});
+AD.sfx(T.light, "shimmer", { g: 0.9 });
+AD.sfx(T.fast - 1.6, "riser", { length: 1.6, g: 0.6 });
+AD.sfx(T.fast, "boom", { g: 0.7 });
+flips.slice(1).forEach((f) => AD.sfx(f, "tick", { g: 0.6 }));
+AD.sfx(T.fast - 0.2, "whoosh", { length: 1.0, g: 0.7, pan_from: -0.8, pan_to: 0.8 });
+for (let i = 3; i < 7; i++) AD.sfx(T.day + 0.4 + (i - 3) * 0.32, "tick", { g: 0.45, pan: -0.4 });
+AD.sfx(T.there - 0.4, "riser", { length: T.end - T.there + 0.4, g: 0.35 });
+AD.sfx(T.brand, "shimmer", { g: 0.8 });
+[T.w1, T.w2, T.w3].forEach((t, i) => AD.sfx(t, "glass", { g: 0.5, pitch: 88 + [0, 4, 7][i] }));
+</script>
+</body>
+</html>

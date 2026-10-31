@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 6: Air</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="premium.css">
+<style>
+  #stage { background: #010507; }
+  .caption { color: #f2fbf8; text-shadow: 0 4px 40px rgb(0 0 0 / .65); }
+  #space { inset: 0; perspective: 1400px; z-index: 10; }
+  .frag { position: absolute; left: 960px; top: 540px; border-radius: 16px; color: #dbe7ea; font-size: 22px; font-weight: 500; white-space: nowrap;
+    background: linear-gradient(160deg, rgb(40 62 72 / .78), rgb(14 28 34 / .82)); box-shadow: 0 0 0 1px rgb(255 255 255 / .12), 0 30px 60px -20px rgb(0 0 0 / .7); }
+  .frag.tab { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: 12px; }
+  .frag.tab b { width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; color: #fff; font-size: 13px; }
+  .frag.pop { padding: 22px 26px; width: 330px; white-space: normal; line-height: 1.3; }
+  .frag.pop small { display: block; color: #9fb3b8; font-size: 17px; margin-top: 6px; }
+  .frag.pop i { display: inline-block; margin-top: 14px; padding: 8px 16px; border-radius: 9px; background: #2f6fe4; color: #fff; font-style: normal; font-size: 16px; font-weight: 600; }
+  .frag.spin { width: 120px; height: 120px; border-radius: 50%; background: none; box-shadow: none; }
+  .frag.spin svg { width: 120px; height: 120px; }
+  .frag.eye { width: 16px; height: 16px; border-radius: 50%; background: #ff6a50; box-shadow: 0 0 0 6px rgb(255 106 80 / .18), 0 0 30px 8px rgb(255 106 80 / .55); }
+  #logoHero { left: 860px; top: 300px; width: 200px; height: 200px; z-index: 30; }
+  #rig { inset: 0; perspective: 2200px; z-index: 20; }
+  #rig .win { position: absolute; left: 240px; top: 60px; transform-origin: 50% 50%; }
+  #rig .win img.shot { transition: none; }
+  .panel { z-index: 25; }
+  #side { left: 170px; top: 70px; width: 300px; height: 1025px; transform-origin: 0 0; }
+  #asst { left: 1290px; top: 92px; width: 380px; height: 855px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script src="premium.js"></script>
+<script src="voice/06-air.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, travel } = AD;
+AD.duration = 52;
+const vo = AD.voice(VO_DATA, "voice/06-air.mp3", [
+  [0, 0, 3.0], [1, 1, 7.0], [2, 2, 8.4], [3, 3, 9.8], [4, 5, 11.4], [6, 6, 14.8], [7, 8, 17.0],
+  [9, 9, 21.8], [10, 10, 24.2], [11, 11, 26.6], [12, 12, 30.0], [13, 13, 33.8], [14, 14, 36.6],
+  [15, 16, 40.0], [17, 17, 45.6], [18, 18, 46.9],
+]);
+const P = vo; // phrases in order
+const T = {
+  tabs: P[1].start, pops: P[2].start, wait: P[3].start, people: P[4].start, watching: P[5].start,
+  question: P[6].start, gust: AD.wordAt(P[8], "out"), reveal: 20.4, meet: P[9].start, breath: AD.wordAt(P[10], "breath"),
+  leaves: P[11].start, yours: P[12].start, tabsSide: P[13].start, day: P[14].start,
+  there: AD.wordAt(P[15], "there"), gone: AD.wordAt(P[16], "gone"), end: 45.2, brand: P[17].start, tag: P[18].start,
+};
+
+const sites = [["M", "#7b3fe4", "Inbox (48)"], ["N", "#0f7a6a", "Breaking: live updates"], ["D", "#1d6fe0", "Untitled document"], ["S", "#e11d48", "Sale ends tonight"],
+  ["V", "#9333ea", "Video (paused)"], ["C", "#178a3c", "Calendar"], ["R", "#b45309", "Recipes you'll love"], ["F", "#0891b2", "Flight status"],
+  ["Y", "#dc2626", "Recommended for you"], ["W", "#475569", "Wiki: everything"], ["B", "#be123c", "Bank: sign in"], ["G", "#24292f", "Pull request #4"]];
+const pops = [["Allow notifications?", "news.example wants to send alerts", "Allow"], ["Sign in to sync", "Get the most out of your browser", "Sign in"],
+  ["We value your privacy", "Accept 847 partners' cookies", "Accept all"], ["Try our shopping assistant", "Save on everything", "Try it"],
+  ["Your browser is out of date", "Restart to update", "Restart"], ["Set as default browser?", "It only takes a second", "Yes"]];
+const frags = [];
+const add = (kind, at, html, i) => frags.push({ kind, at, html, x: (hash(i * 3.1 + kind.length) - 0.5) * 1700, y: (hash(i * 7.3 + 1) - 0.5) * 860, z: -900 + hash(i * 1.9) * 700, r: (hash(i * 5.7) - 0.5) * 16 });
+sites.forEach((s, i) => add("tab", T.tabs + i * 0.07, `<b style="background:${s[1]}">${s[0]}</b>${s[2]}`, i));
+pops.forEach((p, i) => add("pop", T.pops + i * 0.14, `${p[0]}<small>${p[1]}</small><i>${p[2]}</i>`, i + 20));
+for (let i = 0; i < 5; i++) add("spin", T.wait + i * 0.12, `<svg viewBox="-50 -50 100 100">${Array.from({ length: 12 }, (_, k) => `<rect x="-3" y="-44" width="6" height="20" rx="3" fill="#cfe0e3" opacity="${(0.12 + 0.88 * (k + 1) / 12).toFixed(2)}" transform="rotate(${k * 30})"/>`).join("")}</svg>`, i + 40);
+for (let i = 0; i < 34; i++) add("eye", T.watching + i * 0.03, "", i + 60);
+
+AD.setup({
+  bpm: 72,
+  progression: ["Dmaj7", "Bm7", "Gmaj7", "Asus4"],
+  sections: [
+    { from: 0, to: T.question, pad: 0.7, bright: 0.18, drone: 0.8, air: 0.8 },
+    { from: 3.0, to: T.tabs, piano: "single" },
+    { from: T.tabs, to: T.question, pulse: true, hats: "8", bright: 0.5, kick: "one", kickGain: 0.5 },
+    { from: T.question, to: T.reveal, pad: 0.6, bright: 0.25, piano: "single", air: 0.6 },
+    { from: T.reveal, to: T.end, pad: 0.9, bright: 0.65, piano: "motif", air: 0.5 },
+    { from: T.breath, to: T.end, pulse: true, kick: "half", kickGain: 0.7, bright: 0.65 },
+    { from: T.leaves, to: T.end, bass: true },
+    { from: T.tabsSide, to: T.end, hats: "8", snap: true },
+    { from: T.end, to: 51.5, pad: 0.8, bright: 0.5, piano: "single" },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const sky = AD.shader(`
+      void main(){
+        vec2 p = (gl_FragCoord.xy - .5 * res) / res.y;
+        float inten = u0.x, chaos = u0.y, warm = u0.w, conv = u1.y, ph = u1.x;
+        vec3 col = vec3(0.004, 0.012, 0.016);
+        float h = fbm(p * 1.4 + vec2(ph * .06, ph * .02));
+        col += vec3(.02, .07, .09) * h * (.4 + inten);
+        for (int i = 0; i < 8; i++) {
+          float fi = float(i);
+          float x = p.x;
+          float y0 = (fi - 3.5) * .085 * (1. - conv);
+          float w = sin(x * (1.5 + fi * .19) + ph * (.35 + fi * .05) + fi * 1.7) * .17
+                  + sin(x * 3.3 - ph * .55 + fi) * .05 * (1. + chaos * 3.)
+                  + (fbm(vec2(x * 1.4 + fi * 3., ph * .25)) - .5) * .35 * chaos;
+          float y = y0 + w * (1. - conv * .8);
+          float d = abs(p.y - y);
+          float width = .0022 + .016 * (.5 + .5 * sin(x * 2.2 + fi * 1.3 + ph * .3));
+          float core = exp(-d * d / (width * width * .6));
+          float glow = exp(-d / (width * 7.));
+          vec3 c = mix(vec3(.74, 1., .9), vec3(.36, .77, .96), smoothstep(-.9, .9, x + sin(fi) * .3));
+          c = mix(c, vec3(1., .42, .32), warm * (.55 + .45 * sin(fi * 2.3)));
+          float edge = smoothstep(1.15, .25, abs(x) * (1. - conv * .45));
+          col += c * (core * .5 + glow * .13) * inten * edge * (.55 + .45 * sin(fi * 1.3 + ph * .2));
+        }
+        col += vec3(.55, .95, .85) * u1.z * exp(-dot(p, p) * 6.);
+        col *= 1. - .3 * dot(p, p);
+        col = col / (1. + col * .35);
+        col += (hash(gl_FragCoord.xy + fract(t * 7.)) - .5) / 200.;
+        o = vec4(col, 1.);
+      }`, 1);
+
+    const space = el("div", "", stage); space.id = "space";
+    const fragNodes = frags.map((f) => { const n = el("div", "frag " + f.kind, space, f.html); return n; });
+
+    const caps = [
+      [P[0], "mid"], [P[1], "hero"], [P[2], "hero"], [P[3], "hero"], [P[4], "hero"], [P[6], "mid"], [P[7], "mid"],
+    ].map(([ph, cls], i, arr) => ({ ph, f: AD.caption(stage, ph, cls) }));
+    // "More people... watching." reads as one line
+    const capWatching = AD.caption(stage, P[5], "hero");
+    const capMeet = AD.caption(stage, P[9], "mid");
+    capMeet.node.style.top = "560px";
+    // "More people..." and "watching." sit on one line
+    caps[4].f.node.style.transform = "translateX(-270px)";
+    capWatching.node.style.transform = "translateX(400px)";
+    capWatching.node.style.color = "#ff8f78";
+    const low = [10, 11, 12, 13, 14, 15, 16].map((i) => ({ ph: P[i], f: AD.caption(stage, P[i], "low") }));
+
+    const logo = el("img", "", stage); logo.id = "logoHero"; logo.src = AD.ASSETS + "breezer-logo.png";
+    const rig = el("div", "", stage); rig.id = "rig";
+    const w = AD.glassWindow(rig, {
+      tabs: [["W", "#1f7a63", "Work"], ["D", "#1d6fe0", "Q4 plan"], ["M", "#7b3fe4", "Music"], ["N", "#0f7a6a", "News"], ["C", "#178a3c", "Calendar"]],
+      url: "Search or type a URL", shot: "newtab-dark.jpg",
+    });
+    const side = el("div", "panel", stage, `<img src="${AD.SHOTS}sidebar.png" alt="">`); side.id = "side";
+    const asst = el("div", "panel", stage, `<img src="${AD.SHOTS}assistant-dark.png" alt="">`); asst.id = "asst";
+    const end = AD.premiumEnd("The web, without the weight.");
+
+    const speed = (s) => (s < T.tabs ? 0.35 : s < T.question ? 0.35 + prog(s, T.tabs, T.watching) * 1.1 : s < T.gust ? 0.12 : s < T.gust + 1 ? 2.2 : 0.4);
+
+    return (t) => {
+      // Light field
+      const chaos = ease.inOut(prog(t, T.tabs, T.watching + 1)) * (1 - 0.4 * prog(t, T.question, T.question + 1)) * (1 - ease.out(prog(t, T.gust, T.gust + 0.9)));
+      const warm = ease.inOut(prog(t, T.watching - 0.2, T.watching + 0.8)) * (1 - ease.out(prog(t, T.gust, T.gust + 0.7)));
+      const conv = ease.inOut(prog(t, T.reveal - 0.6, T.reveal + 0.3)) * (1 - 0.75 * ease.inOut(prog(t, T.breath - 0.3, T.breath + 1.5)));
+      const inten = ease.inOut(prog(t, 0.2, 3.0)) * 0.6 + 0.25 * conv + 0.15 * prog(t, T.reveal, T.reveal + 1) - 0.25 * ease.inOut(prog(t, T.end - 0.5, T.end + 0.5));
+      const burst = pulse(t, [T.reveal], 0.5) * 0.9 + pulse(t, [T.gust], 0.25) * 0.15;
+      sky(t, { u0: [inten, chaos, 0, warm], u1: [travel(speed, t, 1 / 30), conv, burst, 0] });
+
+      // Clutter drifting toward the viewer, cleared by the gust
+      const gust = t - T.gust;
+      frags.forEach((f, i) => {
+        const n = fragNodes[i];
+        const a = ease.back(prog(t, f.at, f.at + 0.45));
+        const freeze = t > T.question && t < T.gust ? 0.25 : 1;
+        const drift = Math.min(t - f.at, 40) * 24 * freeze;
+        const blow = gust > 0 ? gust * gust * 3200 + gust * 600 : 0;
+        const fade = gust > 0 ? clamp(1 - gust * 1.5) : 1;
+        if (t < f.at || fade <= 0) { n.style.opacity = 0; return; }
+        const spinDeg = f.kind === "spin" ? Math.floor(t * 12) * 30 : f.r + (gust > 0 ? gust * 300 * (hash(i) - 0.5) : 0);
+        set(n, {
+          opacity: clamp(a) * fade,
+          transform: `translate(-50%, -50%) translate3d(${f.x + blow}px, ${f.y - (gust > 0 ? gust * 120 : 0)}px, ${f.z + drift}px) rotate(${spinDeg}deg) scale(${lerp(0.5, 1, a)})`,
+          filter: gust > 0 ? `blur(${gust * 10}px)` : "none",
+        });
+      });
+
+      // Opening captions: each holds until the next line starts
+      const starts = caps.map((c) => c.ph.start);
+      caps.forEach((c, i) => {
+        let until = i + 1 < caps.length ? starts[i + 1] - 0.15 : c.ph.end + 0.9;
+        if (c.ph === P[4]) until = P[5].end + 1.2;
+        if (c.ph === P[7]) until = T.gust + 0.9;
+        c.f(t, { until });
+      });
+      capWatching(t, { until: P[5].end + 1.2 });
+
+      // Reveal: the ribbons gather into the logo
+      const lp = ease.out(prog(t, T.reveal + 0.2, T.reveal + 1.6));
+      const lo = ease.inOut(prog(t, T.breath - 0.6, T.breath + 0.2));
+      set(logo, { opacity: lp * (1 - lo), transform: `scale(${lerp(0.7, 1, lp) + (t - T.reveal) * 0.01}) translateY(${-lo * 40}px)`, filter: `blur(${(1 - lp) * 18 + lo * 12}px) drop-shadow(0 0 ${40 * lp}px rgb(143 240 208 / .45))` });
+      capMeet(t, { until: T.breath - 0.4 });
+
+      // The window, born from a breath
+      const wp = ease.out(prog(t, T.breath - 0.2, T.breath + 1.6));
+      const swing = lerp(-9, 9, ease.inOut(prog(t, T.leaves, T.tabsSide)));
+      const focusSide = ease.inOut(prog(t, T.tabsSide - 0.3, T.tabsSide + 0.9)) * (1 - ease.inOut(prog(t, T.day - 0.4, T.day + 0.6)));
+      const hero = ease.inOut(prog(t, T.day - 0.4, T.day + 1.2)) * (1 - ease.inOut(prog(t, T.there - 0.6, T.there + 0.4)));
+      const toEnd = ease.in(prog(t, T.end - 0.6, T.end + 0.4));
+      rig.style.opacity = t > T.breath - 0.3 && t < T.end + 0.5 ? 1 : 0;
+      set(w.win, {
+        transform: `translateY(${(1 - wp) * 60 - toEnd * 80 - hero * 20}px) scale(${lerp(0.84, 0.78, wp) + hero * 0.05 - focusSide * 0.04}) rotateY(${swing * (1 - hero) - focusSide * 4}deg) rotateX(${(1 - wp) * 10}deg) translateX(${focusSide * 260 - asstIn(t) * 200}px)`,
+        filter: `blur(${(1 - wp) * 28 + toEnd * 14}px) brightness(${1 - focusSide * 0.35 - asstIn(t) * 0.25})`,
+        opacity: clamp(wp * 1.3) * (1 - toEnd),
+        boxShadow: `0 0 0 1px rgb(255 255 255 / .1), 0 0 ${80 * pulse(t, [T.yours + 0.3], 1.2)}px ${10 * pulse(t, [T.yours + 0.3], 1.2)}px rgb(143 240 208 / .55), 0 50px 90px -30px rgb(0 0 0 / .7)`,
+      });
+      w.light(1 - ((t * 0.07) % 1.4));
+      set(side, { opacity: focusSide, transform: `translateX(${(1 - focusSide) * -160}px) rotateY(${(1 - focusSide) * 20}deg) scale(0.86)` });
+      set(asst, { opacity: asstIn(t), transform: `translateX(${(1 - asstIn(t)) * 220}px)` });
+
+      low.forEach((c, i) => c.f(t, { until: i + 1 < low.length ? low[i + 1].ph.start - 0.2 : c.ph.end + 0.8 }));
+      // "And an assistant... and gone" read as one line
+      AD.flash(0);
+      end(t, T.end, { wordAt: T.brand, tagAt: [T.tag] });
+    };
+
+    function asstIn(t) {
+      return ease.out(prog(t, T.there - 0.1, T.there + 0.7)) * (1 - ease.in(prog(t, T.gone, T.gone + 0.6)));
+    }
+  },
+});
+
+AD.sfx(0.3, "air", { length: 6, level: 0.9 });
+[T.tabs, T.pops, T.wait].forEach((t) => AD.sfx(t, "tick", { g: 0.8 }));
+AD.sfx(T.watching, "heartbeat", { g: 0.6 });
+AD.sfx(T.gust - 0.35, "whoosh", { length: 1.4, g: 1.2, pan_from: -0.9, pan_to: 0.9 });
+AD.sfx(P[8].end + 0.05, "riser", { length: T.reveal - P[8].end - 0.05, g: 0.8 });
+AD.sfx(T.reveal, "boom", { g: 0.9 });
+AD.sfx(T.reveal, "shimmer", { g: 1.0 });
+AD.sfx(T.breath - 0.5, "whoosh", { length: 1.1, g: 0.6, up: false, pan_from: 0, pan_to: 0 });
+AD.sfx(T.yours + 0.3, "glass", { g: 0.7, pitch: 86 });
+AD.sfx(T.tabsSide - 0.3, "whoosh", { length: 0.8, g: 0.5, pan_from: -0.6, pan_to: 0 });
+AD.sfx(T.there - 0.2, "whoosh", { length: 0.7, g: 0.5, pan_from: 0.7, pan_to: 0.2 });
+AD.sfx(T.gone, "whoosh", { length: 0.7, g: 0.45, up: false, pan_from: 0.2, pan_to: 0.9 });
+AD.sfx(T.end - 1.6, "riser", { length: 1.6, g: 0.5 });
+AD.sfx(T.end, "boom", { g: 0.6 });
+AD.sfx(T.brand, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>
