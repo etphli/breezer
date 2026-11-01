@@ -5,7 +5,7 @@ import { researchSelection, prepareResearch } from '../../features/ai/extension/
 import { sourceURL, maskSecrets } from '../../features/ai/extension/research-sources.js';
 import { allowedTools, browserAccess, researchParts, validateChat } from '../../features/ai/host/protocol.mjs';
 import { installBackground } from '../../features/ai/extension/background.js';
-import { fakeChrome, panel, tick } from './browser-api-fixture.mjs';
+import { fakeChrome, panel, tick, event } from './browser-api-fixture.mjs';
 const selected = [
   { tabId: 7, documentId: 'doc-a', expectedUrl: 'https://one.test/article?q=secret#private' },
   { tabId: 8, documentId: 'doc-b', expectedUrl: 'https://two.test/article' },
@@ -63,6 +63,7 @@ test('source prompts identify evidence and limitations without granting any brow
 async function worker() {
   const fake = fakeChrome();
   fake.setTab({ incognito: false });
+  fake.api.sidePanel.onClosed = event();
   fake.api.tabs.get = async id => ({ id, windowId: 3, url: selected.find(source => source.tabId === id)?.expectedUrl, incognito: false });
   const installed = installBackground(fake.api), port = panel();
   fake.api.runtime.onConnect.emit(port);
@@ -92,13 +93,14 @@ test('worker sends only explicit sources, without active-page screenshot or debu
   assert.match(fake.native.sent.at(-1).error, /control is off/);
 });
 
-for (const kind of ['navigation', 'closed', 'active-tab', 'cancel', 'hidden']) test(`worker stops research on ${kind} and rejects late capture`, async () => {
+for (const kind of ['navigation', 'closed', 'active-tab', 'cancel', 'hidden', 'panel-close']) test(`worker stops research on ${kind} and rejects late capture`, async () => {
   const fake = await worker();
   await send(fake);
   if (kind === 'navigation') fake.api.tabs.onUpdated.emit(7, { status: 'loading' }, { active: false });
   if (kind === 'closed') fake.api.tabs.onRemoved.emit(8);
   if (kind === 'active-tab') fake.api.tabs.onActivated.emit({ windowId: 3, tabId: 9 });
   if (kind === 'cancel') fake.port.onMessage.emit({ type: 'cancel', id: 'research' });
+  if (kind === 'panel-close') fake.api.sidePanel.onClosed.emit({ windowId: 3 });
   if (kind === 'hidden') fake.port.onMessage.emit({ type: 'visibility', visible: false });
   await tick();
   assert.ok(fake.native.sent.some(message => message.type === 'cancel'));

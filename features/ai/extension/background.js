@@ -158,7 +158,7 @@ export function installBackground(api) {
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
     await cancel(activeRun);
-    if (panel.closed) return;
+    if (panel.closed || !panel.visible) throw new Error('The assistant closed. Reopen it and select sources again.');
     const run = { id: message.id, panel, control: message.control === true, includeContext: message.includeContext === true || message.control === true, cancelled: false, session: null, tab: null };
     activeRun = run;
     try {
@@ -275,6 +275,7 @@ export function installBackground(api) {
     for (const panel of panels) if (panel.windowId === info.windowId) {
       panel.metadataRevision++;
       panel.visible = false;
+      invalidateResearch(panel, undefined, 'Panel closed. Select source tabs again.');
       if (activeRun?.panel === panel) void cancel(activeRun);
     }
   });
