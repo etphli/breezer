@@ -77,9 +77,11 @@ are recorded in [verification.txt](evidence/login-enter-baseline/verification.tx
 
 Four `HTMLFormElementTest.BreezerLoginEnter*` native tests are included in the
 overlay. They cover advance/submit, synthetic/composition/modifier/repeat guards,
-other controls and validation. They have not been compiled or executed. Neither
-source assertions nor the stock-browser baseline prove the patched C++ compiles
-or the new behavior works in Breezer.
+other controls and validation. Those unit tests have not been compiled or
+executed. The final 1.2.0 production browser has compiled and passed all 32
+real-page scenarios without `--baseline`, including the new focus/submission
+behavior. Physical input, native password-picker and IME acceptance remain
+separate checks.
 
 ## Native acceptance gate
 
@@ -90,14 +92,20 @@ and `EventHandler::HandleTextInputEvent` wraps the original keypress as its
 underlying event. The fallback previously accepted only a direct `KeyboardEvent`.
 It now also resolves that newline event's trusted underlying Enter, rejecting
 paste, drop and composition. The native tests use the same wrapped event shape.
-Fresh compilation and the non-baseline runtime rerun remain required before
-calling this repair accepted.
+The corrected production objects compiled for both host and macOS arm64, and
+the non-baseline runtime run passed all 32 scenarios in the final 1.2.0 app.
 
-The release coordinator confirmed there is no verified disposable compiled
-Breezer or configured native unit output. Do not change the frozen PC build,
-stopped Mac build, installed app or prepared-source markers to run these checks.
-This overlay changes its preparation fingerprint and needs the normal fresh-stage
-or verified migration workflow later.
+The runner now opens a fresh page for each case. Its former shared-page reset
+aborted on a competing same-URL navigation after the submit-button case in both
+the old and repaired compiled candidates. Fresh-page isolation removes that
+cross-case state without changing any of the behavior or security assertions.
+The original failed runs are retained in the local release evidence.
+
+The disposable compiled 1.2.0 app is available to the release coordinator. The PC
+release migration verified every before/after source hash and retained compiled
+objects. The stopped Mac build, installed app and personal profiles remain
+unchanged. Use the verified disposable app for remaining runtime checks and a
+separately authorized configured output for the native unit target.
 
 Before accepting the native feature:
 
@@ -116,4 +124,6 @@ Before accepting the native feature:
    conservative. Test any reported real site separately without recording real
    credentials. No Microsoft acceptance result currently exists.
 
-Until these pass, this is a source implementation awaiting native acceptance.
+The 32-scenario runtime gate has passed. The native unit, physical input,
+password-picker and IME gates remain pending; universal sign-in support is not
+claimed.

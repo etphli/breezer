@@ -1,0 +1,33 @@
+PASS annotated no-button username advances to password
+PASS annotated no-button final password submits once
+PASS native submit-button form submits once
+PASS native username Enter submits a complete form once
+PASS native validation focuses missing password
+PASS disabled submit
+PASS custom next step
+PASS MFA
+PASS consent
+PASS textarea
+PASS empty password never submits
+PASS invalid username never submits
+PASS site cancellation takes precedence
+PASS form ownership rather than nearest ancestor
+PASS canceled native submit-button click is not retried
+PASS multi-step native username Next stays native
+PASS synthetic Enter does not trigger fallback
+PASS multiple forms stay isolated
+PASS unannotated login
+PASS new-password registration
+PASS read-only field
+PASS hidden password
+PASS GET form
+PASS novalidate form
+PASS site custom validity is preserved
+PASS modifier Enter does not trigger fallback
+PASS held Enter cannot advance then immediately submit
+PASS change handler removal aborts the fallback
+PASS first Enter belongs to an open site picker
+PASS textarea and contenteditable Enter remain editing
+PASS frame-local login on 127.0.0.1
+PASS frame-local login on localhost
+PASS 32 real-page scenarios (compiled browser acceptance)

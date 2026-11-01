@@ -12,8 +12,10 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined) });
 let passed = 0;
 try {
-  const page = await browser.newPage();
+  let page;
   const reset = async extra => {
+    if (page) await page.close();
+    page = await browser.newPage();
     await page.goto(origin);
     if (extra) await page.evaluate(extra);
     await page.locator('#username').fill('dummy@example.test');
