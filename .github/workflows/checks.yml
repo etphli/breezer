@@ -67,6 +67,7 @@ jobs:
           node tests/ai/panel-browser.mjs
           node tests/ai/research-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs
+          node --test tests/ai/translation.test.mjs tests/ai/translation-browser.test.mjs
           node tests/ai/browser-page.mjs
       - name: Verify passkey component and virtual WebAuthn protocol
         env:

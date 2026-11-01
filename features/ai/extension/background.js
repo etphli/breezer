@@ -3,10 +3,12 @@ import { installReleaseNotes } from './release-notes.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
 import { installContextBackground } from './context-background.js';
+import { installTranslation } from './translation-background.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
 
 export function installBackground(api) {
+  installTranslation(api);
   installUsage(api);
   installReleaseNotes(api);
   api.runtime.onConnect.addListener(port => {
