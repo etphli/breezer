@@ -1,0 +1,10 @@
+{
+  "chromium_version": "156.0.8078.47",
+  "source_sha256": {
+    "chrome/browser/mac/code_sign_clone_manager.mm": "b876a588a115ef8e851085937cfa17b614b42b0d9d3f4db7c93ceccb5b9358f9",
+    "chrome/browser/mac/code_sign_clone_manager_unittest.mm": "fee4bc51c2bbacf774ef9a0c907e7a1557f3ae9b5b5b8076f6bab11903f22a41",
+    "chrome/browser/mac/BUILD.gn": "ac78bf11b0dc8c185b387bd678792672c04eccb7436cc362e405398e3108b715"
+  },
+  "managed_root_suffix": ".code_sign_clone.sessions-v1",
+  "legacy_clones": "Unmarked clones and older namespace retained; no lsof-based ownership inference."
+}

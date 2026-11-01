@@ -1,0 +1,15 @@
+TAP version 13
+# Subtest: What's new page renders, closes its tab and opens Settings
+ok 1 - What's new page renders, closes its tab and opens Settings
+  ---
+  duration_ms: 19787.524208
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 20050.143083

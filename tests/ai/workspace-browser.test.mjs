@@ -63,6 +63,7 @@ function seed() {
 // Runs inside the page. Persists to localStorage/sessionStorage so reloads behave
 // like a sidebar document reopening in the same (or a restarted) browser.
 function installFixture({ seed, bridge, bridgeFails }) {
+  const windowId = seed.windowId ?? 7;
   const load = (store, key, fallback) => JSON.parse(store.getItem(key) || 'null') ?? fallback;
   const fx = {
     tabs: load(localStorage, 'fx-tabs', seed.tabs),
@@ -93,8 +94,9 @@ function installFixture({ seed, bridge, bridgeFails }) {
     return tab;
   };
   const setActive = (id) => {
-    for (const tab of fx.tabs) tab.active = tab.id === id;
-    fire('tabs.onActivated', { tabId: id, windowId: 7 });
+    const currentWindow = find(id).windowId;
+    for (const tab of fx.tabs) if (tab.windowId === currentWindow) tab.active = tab.id === id;
+    fire('tabs.onActivated', { tabId: id, windowId: currentWindow });
   };
   let nextId = Math.max(0, ...fx.tabs.map((tab) => tab.id)) + 1;
   const area = (name) => ({
@@ -121,7 +123,7 @@ function installFixture({ seed, bridge, bridgeFails }) {
       lastError: undefined,
     },
     windows: {
-      getCurrent: async () => ({ id: 7 }),
+      getCurrent: async () => ({ id: windowId }),
       update: async (id, props) => { fx.calls.push(['windows.update', id, props]); return { id }; },
     },
     storage: { local: area('local'), session: area('session'), onChanged: event('storage.onChanged') },
@@ -130,7 +132,8 @@ function installFixture({ seed, bridge, bridgeFails }) {
       onActivated: event('tabs.onActivated'), onMoved: event('tabs.onMoved'), onAttached: event('tabs.onAttached'),
       onDetached: event('tabs.onDetached'), onReplaced: event('tabs.onReplaced'),
       async query(filter = {}) {
-        const snapshot = copy(fx.tabs.filter((tab) => (filter.active === undefined || tab.active === filter.active)));
+        const snapshot = copy(fx.tabs.filter(tab => (filter.active === undefined || tab.active === filter.active)
+          && (filter.windowId === undefined || tab.windowId === filter.windowId)));
         if (fx.holdQuery) {
           fx.holdQuery = false;
           await new Promise(resolve => { fx.releaseQuery = resolve; });
@@ -138,9 +141,11 @@ function installFixture({ seed, bridge, bridgeFails }) {
         return snapshot;
       },
       async get(id) { return copy(find(id)); },
-      async create({ url, active = true, pinned = false, index }) {
+      async create({ url, active = true, pinned = false, index, windowId = 7 }) {
         fx.calls.push(['tabs.create', { url, active, pinned, index }]);
-        const tab = { id: nextId++, windowId: 7, index: index ?? fx.tabs.length, url: url || 'chrome://newtab/', title: url ? hostOf(url) : 'New Tab', active: false, pinned, status: 'complete' };
+        if (fx.holdCreate) await new Promise(resolve => { fx.releaseCreate = resolve; });
+        if (fx.failCreate) throw new Error('Fixture create failure');
+        const tab = { id: nextId++, windowId, index: index ?? fx.tabs.length, url: url || 'chrome://newtab/', title: url ? hostOf(url) : 'New Tab', active: false, pinned, status: 'complete' };
         fx.tabs.forEach((item) => { if (item.index >= tab.index) item.index += 1; });
         fx.tabs.push(tab);
         reindex();
@@ -524,17 +529,23 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     const settings = await newPage({ bridge: true }, { width: 1000, height: 1400 });
     await settings.goto(`${base}/workspace.html#/settings`);
     await settings.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    // Categories show one at a time, like the browser's own settings.
+    const go = (page, name) => page.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
+    await go(settings, 'Appearance');
     assert.equal(await settings.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
+    await go(settings, 'Layout');
     assert.equal(await settings.getByRole('radio', { name: 'Sidebar' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('[data-field="bookmarkBarMode"] [data-value="newTab"]').getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('#sidebar-width').inputValue(), '240');
-    assert.equal(await settings.title(), 'Settings');
+    assert.equal(await settings.title(), 'Layout – Settings');
+    await go(settings, 'Appearance');
     assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
     for (const value of [12, 20, 15]) {
       await settings.getByRole('slider', { name: 'Sidebar font size' }).fill(String(value));
       await settings.waitForFunction(v => window.fx.appearance.sidebarFontSize === v, value);
       assert.equal(await settings.locator('#sidebar-font-size-value').innerText(), `${value} px`);
     }
+    await go(settings, 'Layout');
     for (const [id, initial] of [['centered-address-bar', true], ['minimal-url', true], ['show-load-progress', true], ['frameless', true], ['always-show-sidebar', false], ['always-show-top-bar', true]]) {
       const control = settings.locator(`#${id}`);
       assert.equal(await control.getAttribute('aria-checked'), String(initial));
@@ -543,43 +554,53 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
       await control.click();
       await settings.waitForFunction(({ id, value }) => document.getElementById(id).getAttribute('aria-checked') === String(value), { id, value: initial });
     }
+    await go(settings, 'Browser settings');
     await settings.getByRole('button', { name: 'Privacy and security', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/privacy'));
     await settings.getByRole('button', { name: 'All native browser settings', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/'));
+    await go(settings, 'Layout');
     for (const [label, mode] of [['Compact', 'compact'], ['Auto-hide', 'autoHide'], ['Expanded', 'expanded']]) {
       await settings.getByRole('radio', { name: label, exact: true }).click();
       await settings.waitForFunction(value => window.fx.appearance.sidebarMode === value, mode);
       assert.equal(await settings.getByRole('radio', { name: label, exact: true }).getAttribute('aria-checked'), 'true');
     }
+    await go(settings, 'Appearance');
     await settings.getByRole('radio', { name: 'Dusk' }).click();
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'dusk');
     assert.deepEqual((await calls(settings)).at(-1), ['setAppearance', { theme: 'dusk' }]);
     await settings.getByRole('radio', { name: 'Dusk' }).focus();
     await settings.keyboard.press('ArrowRight');
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'rose');
+    await go(settings, 'Layout');
     await settings.locator('[data-field="bookmarkBarMode"] [data-value="hidden"]').click();
     await settings.waitForFunction(() => window.fx.appearance.bookmarkBarMode === 'hidden');
+    await go(settings, 'General');
     await settings.getByRole('radio', { name: 'At top' }).click();
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].prefs.newTabPosition === 'top');
+    await go(settings, 'Spaces');
     await settings.getByRole('textbox', { name: 'Name of space 2' }).fill('Home');
     await settings.keyboard.press('Enter');
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].spaces[1].name === 'Home');
     await settings.getByRole('button', { name: 'Add space' }).click();
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].spaces.length === 3);
+    await go(settings, 'Appearance');
     await settings.getByRole('radio', { name: 'Mint' }).click();
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'mint');
     await settings.getByRole('slider', { name: 'Sidebar font size' }).fill('18');
     await settings.waitForFunction(() => window.fx.appearance.sidebarFontSize === 18);
+    await go(settings, 'Layout');
     await settings.locator('#centered-address-bar').click();
     await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === false);
     await settings.reload();
-    await settings.getByRole('slider', { name: 'Sidebar font size' }).waitFor();
-    assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '18');
+    await settings.locator('#centered-address-bar').waitFor();
+    assert.equal(await settings.locator('#sidebar-font-size').inputValue(), '18');
     assert.equal(await settings.locator('#centered-address-bar').getAttribute('aria-checked'), 'false');
     assert.equal(await settings.locator('#frameless').getAttribute('aria-checked'), 'true');
+    await go(settings, 'Appearance');
     await settings.getByRole('slider', { name: 'Sidebar font size' }).fill('15');
     await settings.waitForFunction(() => window.fx.appearance.sidebarFontSize === 15);
+    await go(settings, 'Layout');
     await settings.locator('#centered-address-bar').click();
     await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === true);
     await settings.screenshot({ path: `${evidence}/workspace-settings.png`, fullPage: true });
@@ -588,7 +609,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
 
     // A rejected change is reported and the control keeps the browser's value.
     const failing = await newPage({ bridge: true, bridgeFails: true }, { width: 900, height: 900 });
-    await failing.goto(`${base}/workspace.html#/settings`);
+    await failing.goto(`${base}/workspace.html#/settings/appearance`);
     await failing.getByRole('radio', { name: 'Tide' }).click();
     await failing.getByText(/Couldn’t change the theme\. Rejected by the browser\./).waitFor();
     assert.equal(await failing.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
@@ -596,20 +617,23 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await failing.getByRole('slider', { name: 'Sidebar font size' }).fill('18');
     await failing.locator('#typography-error').getByText(/Rejected by the browser/).waitFor();
     assert.equal(await failing.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
+    await go(failing, 'Layout');
     await failing.locator('#frameless').click();
-    await failing.locator('#layout-error').getByText(/Rejected by the browser/).waitFor();
+    await failing.locator('#frameless-error').getByText(/Rejected by the browser/).waitFor();
     assert.equal(await failing.locator('#frameless').getAttribute('aria-checked'), 'true');
 
     // Without the native bridge nothing pretends to apply.
     const missing = await newPage({ bridge: false }, { width: 900, height: 900 });
-    await missing.goto(`${base}/workspace.html#/settings`);
+    await missing.goto(`${base}/workspace.html#/settings/layout`);
     await missing.getByText(/this build doesn’t include/).waitFor();
     assert.equal(await missing.getByRole('radio', { name: 'Top', exact: true }).getAttribute('aria-disabled'), 'true');
     assert.equal(await missing.locator('#sidebar-width').isDisabled(), true);
     assert.equal(await missing.locator('#sidebar-font-size').isDisabled(), true);
     assert.equal(await missing.locator('#frameless').getAttribute('aria-disabled'), 'true');
+    await go(missing, 'Appearance');
     await missing.getByRole('radio', { name: 'Dusk' }).click({ force: true });
     assert.equal(await missing.evaluate(() => document.documentElement.dataset.tone), 'mint');
+    await go(missing, 'General');
     assert.equal(await missing.getByRole('radio', { name: 'At bottom' }).getAttribute('aria-disabled'), null, 'store-backed tab settings still work');
 
     const sidebarWithoutBridge = await newPage({ bridge: false });
@@ -627,5 +651,190 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
   } finally {
     await browser.close();
     server.close();
+  }
+});
+
+test('tab updates leave unchanged rows and their audio controls intact', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 300, height: 820 } });
+    await context.addInitScript(installFixture, { seed: seed(), bridge: true });
+    const page = await context.newPage();
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const row = page.locator('#today [data-key="t:3"]');
+    await row.waitFor();
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const unchanged = await page.evaluate(async () => {
+      const records = [];
+      const observer = new MutationObserver(values => records.push(...values));
+      document.querySelectorAll('.row').forEach(row => observer.observe(row, { subtree: true, attributes: true, childList: true, characterData: true }));
+      const tab = fx.tabs.find(tab => tab.id === 3);
+      for (const listener of fx.listeners['tabs.onUpdated']) listener(tab.id, { autoDiscardable: true }, { ...tab, autoDiscardable: true });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      records.push(...observer.takeRecords());
+      observer.disconnect();
+      return records.length;
+    });
+    assert.equal(unchanged, 0, 'an unchanged presentation must cause no row mutations');
+    await page.evaluate(() => {
+      const tab = fx.tabs.find(tab => tab.id === 3);
+      Object.assign(tab, { title: 'Updated document', audible: true });
+      for (const listener of fx.listeners['tabs.onUpdated']) listener(tab.id, { title: tab.title, audible: true }, { ...tab });
+    });
+    await page.waitForFunction(() => document.querySelector('[data-key="t:3"] .title').textContent === 'Updated document');
+    assert.equal(await row.locator('.row-sound').isVisible(), true);
+    await row.click();
+    assert.equal(await row.getAttribute('aria-selected'), 'true');
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: `${evidence}/workspace-efficient-updates.png` });
+  } finally {
+    await browser.close();
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
+// Replays the native host's cancelable command in the shipped document. This
+// verifies the bridge recipient, not physical macOS accelerator dispatch.
+async function numberedCommand(page, index) {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const { frameTree } = await cdp.send('Page.getFrameTree');
+    const { executionContextId } = await cdp.send('Page.createIsolatedWorld', {
+      frameId: frameTree.frame.id, worldName: 'breezer-shortcut-native-fixture',
+    });
+    const result = await cdp.send('Runtime.evaluate', {
+      expression: `!document.dispatchEvent(new CustomEvent('breezer-select-numbered-tab',{cancelable:true,detail:${JSON.stringify(index)}}))`,
+      contextId: executionContextId, returnByValue: true,
+    });
+    assert.equal(result.exceptionDetails, undefined);
+    return result.result.value;
+  } finally { await cdp.detach(); }
+}
+
+test('numbered favorite command lazily opens the saved first slot, once under rapid repeat', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const initial = seed();
+    initial.tabs = initial.tabs.filter(tab => tab.id === 3).map(tab => ({ ...tab, index: 0 }));
+    const page = await browser.newPage({ viewport: { width: 300, height: 820 } });
+    await page.addInitScript(installFixture, { seed: initial, bridge: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    await page.locator('#favorites .tile').first().waitFor();
+    assert.equal(await page.evaluate(() => window.fx.tabs.length), 1, 'no favorite is preloaded');
+    await page.evaluate(() => { window.fx.holdCreate = true; });
+    assert.equal(await numberedCommand(page, 0), true, 'Command+1 must handle the saved favorite, not native live index 0');
+    await numberedCommand(page, 0);
+    await page.locator('#favorites .tile').first().click();
+    assert.equal(await page.evaluate(() => window.fx.calls.filter(([name]) => name === 'tabs.create').length), 1);
+    await page.evaluate(() => { window.fx.holdCreate = false; window.fx.releaseCreate(); });
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.url === 'https://calendar.example.com/week');
+    assert.equal(await page.evaluate(() => window.fx.tabs.length), 2);
+    await numberedCommand(page, 0);
+    assert.equal(await page.evaluate(() => window.fx.calls.filter(([name]) => name === 'tabs.create').length), 1);
+    await page.locator('#favorites .tile.active').first().waitFor();
+    await page.waitForFunction(() => !document.querySelector('#today .row.active'));
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: `${evidence}/favorite-number-lazy-fixture.png` });
+    // Failed creation releases the entry for a subsequent deliberate retry.
+    await page.evaluate(() => { window.fx.failCreate = true; });
+    await numberedCommand(page, 1);
+    await page.locator('#toast').filter({ hasText: 'Fixture create failure' }).waitFor();
+    await page.evaluate(() => { window.fx.failCreate = false; });
+    await numberedCommand(page, 1);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.url === 'https://chat.example.com/');
+    await numberedCommand(page, 0);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.url === 'https://calendar.example.com/week');
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
+  }
+});
+
+test('numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const initial = seed();
+    initial.tabs.find(tab => tab.id === 8).discarded = true;
+    initial.local['workspace.v1'].spaces[0].pinned[0].open = false;
+    const page = await browser.newPage({ viewport: { width: 300, height: 820 } });
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.addInitScript(installFixture, { seed: initial, bridge: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    await page.locator('#favorites .tile').first().waitFor();
+    // A browser command still handles the slot while a text field has focus.
+    await page.evaluate(() => { const input = document.createElement('input'); input.id = 'typing'; document.body.append(input); input.focus(); });
+    await page.keyboard.type('123');
+    assert.equal(await page.locator('#typing').inputValue(), '123', 'ordinary typing is left alone');
+    assert.equal(await numberedCommand(page, 0), true);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.id === 8);
+    assert.equal(await page.evaluate(() => window.fx.calls.filter(([name]) => name === 'tabs.create').length), 0, 'discarded target is activated in place');
+    await numberedCommand(page, 6); // Four favorites, two folder children, Linear.
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.id === 1);
+    await numberedCommand(page, 4); // Closed folders still have stable saved slots.
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.id === 2);
+    await numberedCommand(page, 5);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.url === 'https://docs.breezer.dev/spec');
+    assert.equal(await numberedCommand(page, 7), false, 'unassigned saved slot falls back to native order');
+    assert.equal(await numberedCommand(page, 8), false, 'Command+9 is never a saved slot');
+    for (const invalid of [-1, 99, 0.5, '1', null]) assert.equal(await numberedCommand(page, invalid), false);
+    await page.locator('#spaces [data-key="s:space-personal"]').click();
+    await numberedCommand(page, 0);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.id === 8);
+    assert.equal(await page.locator('#space-name').textContent(), 'Personal', 'global favorite does not switch spaces');
+    assert.equal(await numberedCommand(page, 4), false, 'pins belong to the active space');
+    await page.evaluate(async () => {
+      const store = window.fx.local['workspace.v1'];
+      [store.favorites[0], store.favorites[1]] = [store.favorites[1], store.favorites[0]];
+      store.rev++;
+      await chrome.storage.local.set({ 'workspace.v1': store });
+    });
+    await page.waitForFunction(() => document.querySelector('#favorites .tile').dataset.key === 'v:v-chat');
+    await numberedCommand(page, 0);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.url === 'https://chat.example.com/');
+    // Restart fixture: retain saved order, drop live favorites, rotate membership session.
+    await page.evaluate(() => {
+      const tab = window.fx.tabs.find(tab => tab.id === 3);
+      localStorage.setItem('fx-tabs', JSON.stringify([{ ...tab, index: 0, active: true }]));
+      sessionStorage.clear();
+    });
+    await page.reload();
+    await page.locator('#favorites .tile').first().waitFor();
+    assert.equal(await page.evaluate(() => window.fx.tabs.length), 1);
+    await numberedCommand(page, 0);
+    await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.url === 'https://chat.example.com/');
+    assert.equal(await page.evaluate(() => window.fx.tabs.length), 2);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
+  }
+});
+
+test('numbered favorite activation is scoped to the host window, including another window with a live target', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    for (const windowId of [7, 8]) {
+      const initial = seed();
+      initial.windowId = windowId;
+      // Same saved favorite already live in window 7. Window 8 must open its own.
+      initial.tabs.push({ id: 20, windowId: 8, index: 0, active: true, url: 'https://ordinary.example.test/', title: 'Other window' });
+      const page = await browser.newPage({ viewport: { width: 300, height: 820 } });
+      await page.addInitScript(installFixture, { seed: initial, bridge: true });
+      await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=${windowId}`);
+      await page.locator('#favorites .tile').first().waitFor();
+      await numberedCommand(page, 0);
+      await page.waitForFunction(id => window.fx.tabs.some(tab => tab.windowId === id && tab.active && tab.url === 'https://calendar.example.com/week'), windowId);
+      assert.equal(await page.evaluate(() => window.fx.calls.filter(([name]) => name === 'tabs.create').length), windowId === 7 ? 0 : 1);
+      assert.equal(await page.evaluate(() => window.fx.tabs.find(tab => tab.id === 20).active), windowId === 7, 'the other window retains its selection');
+      await page.close();
+    }
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
   }
 });

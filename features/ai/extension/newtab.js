@@ -13,6 +13,9 @@ export const REQUEST_TIMEOUT_MS = 65000;
 export const MAX_SITES = 8;
 export const MAX_ITEMS = { upcoming: 8, todos: 6 };
 export const SETTINGS_URL = 'workspace.html#/settings';
+// The background's local copy of the Organato switches (background.js keeps the
+// same name). Reading it lets an open new tab follow Settings and setup at once.
+export const ORGANATO_SWITCHES_KEY = 'organato.switches.v1';
 const LISTS = ['upcoming', 'todos'];
 const TEXT_LIMIT = 200;
 const DAY_MS = 86400000;
@@ -111,9 +114,11 @@ export function normalizeView(raw) {
     if (topSites.length === MAX_SITES) break;
   }
   const source = raw?.organato && typeof raw.organato === 'object' ? raw.organato : {};
+  // Organato is on unless the background explicitly says it was turned off. Off
+  // never carries account state or items, even if an older answer included them.
+  if (source.enabled === false) return { topSites, organato: { enabled: false, connected: false, error: null, todos: [], upcoming: [] } };
   const organato = {
-    // Organato is on unless the background explicitly says it was turned off.
-    enabled: source.enabled !== false,
+    enabled: true,
     connected: source.connected === true,
     error: text(source.error, 240) || null,
   };
@@ -306,9 +311,10 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     return;
   }
   if (state === 'disabled') {
-    status.textContent = 'Organato is turned off.';
-    action.append(settingsLink('Turn on Organato in Settings'));
-    action.hidden = false;
+    // The page hides the whole sheet; nothing here should be read out or focused.
+    status.textContent = '';
+    for (const list of root.querySelectorAll('[data-list]')) list.replaceChildren();
+    for (const count of root.querySelectorAll('[data-count]')) count.textContent = '';
     return;
   }
   if (state === 'setup') {
@@ -347,6 +353,27 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   }
 }
 
+// Off removes the whole Organato sheet: no heading, Refresh, rows or reserved
+// space, so the date and sites have the page to themselves.
+export function showOrganato(root, on) {
+  root.documentElement.dataset.organato = on ? 'on' : 'off';
+  root.querySelector('.sheet').hidden = !on;
+}
+
+function renderLoading(root) {
+  const section = root.getElementById('organato');
+  delete section.dataset.state;
+  section.setAttribute('aria-busy', 'true');
+  root.getElementById('organato-lists').hidden = true;
+  root.getElementById('organato-action').hidden = true;
+  const status = root.getElementById('organato-status');
+  status.hidden = false;
+  status.textContent = 'Loading your exams, assignments and to-dos…';
+}
+
+const switchedOff = (value) => value?.enabled === false;
+const OFF = normalizeView({ organato: { enabled: false } }).organato;
+
 function renderToday(root, now) {
   root.getElementById('today').textContent = longDate.format(now);
 }
@@ -357,6 +384,10 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let view = null;
   let problem = null;
   let pending = false;
+  let again = false;
+  // The saved switch wins over any answer: turning Organato off hides it at
+  // once, including over an answer still on its way.
+  let off = false;
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
@@ -384,7 +415,21 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     try { await shortcuts.reset(); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcuts restored.'; }
     catch { status.textContent = 'Could not restore shortcuts. Try again.'; }
   });
-  const changed = (changes, area) => { if (area === 'local' && (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY])) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Try Refresh.'; }); };
+  const changed = (changes, area) => {
+    if (area !== 'local') return;
+    if (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Reload this tab to try again.'; });
+    if (changes[ORGANATO_SWITCHES_KEY]) {
+      const nowOff = switchedOff(changes[ORGANATO_SWITCHES_KEY].newValue);
+      if (nowOff === off) return;
+      off = nowOff;
+      if (off) { paint(); return; }
+      // Turned back on: show the loading sheet and ask again.
+      if (view) view.organato = undefined;
+      showOrganato(root, true);
+      renderLoading(root);
+      void load(false);
+    }
+  };
   api?.storage?.onChanged?.addListener?.(changed);
   globalThis.addEventListener?.('resize', () => void updateSites().catch(() => {}));
   globalThis.addEventListener?.('pagehide', () => { disposeShortcuts(); api?.storage?.onChanged?.removeListener?.(changed); }, { once: true });
@@ -397,11 +442,15 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       if (!view.topSites.length && shortcuts.hidden.size) root.getElementById('sites-empty').textContent = 'No visible shortcuts. Restore shortcuts or visit more sites.';
     }
     reset.hidden = shortcuts.hidden.size === 0;
-    renderOrganato(root, view?.organato ?? null, at, problem);
+    if (off) { showOrganato(root, false); renderOrganato(root, OFF, at); return; }
+    // Still waiting for the first answer (or the one after turning back on).
+    if (!view || view.organato === undefined) { showOrganato(root, true); return; }
+    showOrganato(root, view.organato?.enabled !== false);
+    renderOrganato(root, view.organato, at, problem);
   };
 
   const load = async (refresh) => {
-    if (pending) return;
+    if (pending) { again = true; return; }
     pending = true;
     refreshButton.disabled = true;
     refreshButton.setAttribute('aria-busy', 'true');
@@ -424,6 +473,8 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     }
     paint();
     root.documentElement.dataset.loaded = 'true';
+    // A switch flipped on while an answer was in flight asks once more.
+    if (again) { again = false; if (!off) await load(false); }
   };
 
   // "Today" and "Tomorrow" move at midnight; repaint without asking again.
@@ -437,7 +488,11 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   renderPlaceholders(root);
   refreshButton.addEventListener('click', () => void load(true));
   scheduleMidnight();
-  return load(false);
+  // A saved "off" hides the sheet before the first answer, so it never flashes.
+  const saved = Promise.resolve(api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
+    if (switchedOff(value?.[ORGANATO_SWITCHES_KEY])) { off = true; showOrganato(root, false); }
+  }, () => {});
+  return saved.then(() => load(false));
 }
 
 if (typeof document !== 'undefined' && document.getElementById('organato')) {

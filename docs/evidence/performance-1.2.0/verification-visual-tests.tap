@@ -1,0 +1,25 @@
+TAP version 13
+# Subtest: favourite tiles stay even, centred and usable across sidebar widths and themes
+ok 1 - favourite tiles stay even, centred and usable across sidebar widths and themes
+  ---
+  duration_ms: 4646.43625
+  ...
+# Subtest: floating menus cast a tight dark shadow, never a pale halo, in every scheme
+ok 2 - floating menus cast a tight dark shadow, never a pale halo, in every scheme
+  ---
+  duration_ms: 1998.58575
+  ...
+# Subtest: new-tab sites keep equal slots and icon spacing whatever the title length
+ok 3 - new-tab sites keep equal slots and icon spacing whatever the title length
+  ---
+  duration_ms: 2899.473375
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 9826.998667

@@ -4,6 +4,7 @@ export const PASSWORD_ROUTES = Object.freeze({
   settings: 'chrome://password-manager/settings',
   import: 'chrome://password-manager/settings?import=true',
   browserImport: 'chrome://settings/importData',
+  passkeys: 'chrome://settings/passkeys',
 });
 
 export const CHROME_EXPORT_HELP = 'https://support.google.com/chrome/answer/13068232?hl=en';
@@ -77,7 +78,9 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
       if (disposed) return;
       status.textContent = destination === 'import'
         ? 'Import opened in a new tab. Follow its prompts and check the import result there.'
-        : 'Password manager opened in a new tab.';
+        : destination === 'passkeys'
+          ? 'Local passkey management opened in a new tab. Check availability there.'
+          : 'Password manager opened in a new tab.';
       onOpened(destination);
     }, { signal: events.signal });
     return control;
@@ -86,6 +89,15 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   section.append(button('Open password manager', 'manager'));
   section.append(node('p', 'View, edit, or delete saved passwords. Your Mac may ask you to authenticate before showing them.', 'section-note'));
   section.append(button('Password settings', 'settings'));
+
+  section.append(
+    node('h3', 'Passkeys'),
+    node('p', 'Create a passkey on a website, then choose it in the browser sign-in dialog or an eligible username field. Available choices depend on the website and authenticator.', 'section-note'),
+    button('Manage local passkeys', 'passkeys'),
+    node('p', 'This native page lists passkeys saved by Breezer’s Mac profile authenticator. You can edit their usernames or delete them there. It does not list passkeys held by Apple Passwords, a phone, or a security key; manage those with their provider.', 'section-note'),
+    node('p', 'Touch ID and Apple Passwords require signing entitlements that this build does not have. Local Mac passkeys are not available in this build. A compatible security key or another device may be offered by the native sign-in dialog. Phone sign-in needs Bluetooth and device approval.', 'section-note'),
+    node('p', 'Passkeys are not included in CSV import or Breezer sync. Local Mac passkeys stay tied to the Mac and Breezer profile; they are not iCloud backups. Breezer AI cannot read or enter passkeys.', 'section-note'),
+  );
 
   const guide = node('details');
   guide.dataset.passwordImportGuide = '';

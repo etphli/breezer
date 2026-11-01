@@ -9,6 +9,8 @@ source_set("breezer_private") {
   sources = [
     "breezer_private_api.cc",
     "breezer_private_api.h",
+    "research_text.h",
+    "workspace_sync_api.cc",
   ]
 
   public_deps = [ "//extensions/browser" ]
@@ -18,6 +20,9 @@ source_set("breezer_private") {
     "//chrome/browser/extensions",
     "//chrome/browser/profiles:profile",
     "//chrome/browser/themes",
+    "//chrome/browser/sync",
+    "//components/sync/service",
+    "//components/sync/base",
     "//chrome/browser/ui/browser_window",
     "//chrome/browser/ui/helium:helium_layout_state_controller",
     "//chrome/browser/ui/tabs:tab_strip",

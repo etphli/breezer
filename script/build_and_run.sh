@@ -64,6 +64,23 @@ cd "$BREEZER_ROOT"
 "$BREEZER_PYTHON" script/verify_upstream.py
 export PATH="$(dirname "$BREEZER_PYTHON"):$PATH"
 BREEZER_STAGE="${BREEZER_BUILD_DIR:-$BREEZER_ROOT/build/helium-macos}"
+if [[ -n "${BREEZER_COMPILED_FILTERS:-}" ]]; then
+  if [[ "$BREEZER_MODE" != --build-only ]]; then
+    echo "The compiled-list experiment requires --build-only; it cannot install or open an app." >&2
+    exit 2
+  fi
+  "$BREEZER_PYTHON" - "$BREEZER_STAGE" "$BREEZER_ROOT/build/helium-macos" <<'PY'
+from pathlib import Path
+import sys
+stage, default = (Path(value).resolve() for value in sys.argv[1:])
+if stage.is_relative_to(default) or default.is_relative_to(stage):
+    sys.exit("The compiled-list experiment requires a separate BREEZER_BUILD_DIR outside the default build tree.")
+PY
+fi
+if [[ -f "$BREEZER_STAGE/build/src/.breezer-filter-lists-prepared" && -z "${BREEZER_COMPILED_FILTERS:-}" ]]; then
+  echo "This source tree contains the opt-in compiled-list experiment. Supply its BREEZER_COMPILED_FILTERS directory or use a separate build directory." >&2
+  exit 1
+fi
 mkdir -p "$BREEZER_STAGE"
 git archive HEAD:upstream/helium-macos | tar -x -C "$BREEZER_STAGE"
 
@@ -90,11 +107,20 @@ fi
 BREEZER_WORKSPACE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_workspace.py" --fingerprint)"
 BREEZER_AI_UI_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_ai_ui.py" --fingerprint)"
 BREEZER_PASSWORDS_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/features/passwords/native-ui/apply.py" --fingerprint)"
-for BREEZER_OVERLAY in workspace ai-ui passwords; do
+BREEZER_CLONE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/features/storage/code-sign-clones/apply.py" --fingerprint)"
+BREEZER_CLONE_PREPARED="$_src_dir/.breezer-code-sign-clones-prepared"
+if [[ -f "$BREEZER_CLONE_PREPARED" ]] && [[ "$(cat "$BREEZER_CLONE_PREPARED")" != "$BREEZER_CLONE_ID" ]]; then
+  echo "Signature-clone overlay changed. Existing source and compiled caches are preserved; verify a targeted overlay migration before rebuilding." >&2
+  exit 1
+fi
+BREEZER_SYNC_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_sync.py" --fingerprint)"
+for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
   if [[ "$BREEZER_OVERLAY" == workspace ]]; then
     BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
   elif [[ "$BREEZER_OVERLAY" == ai-ui ]]; then
     BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  elif [[ "$BREEZER_OVERLAY" == sync ]]; then
+    BREEZER_OVERLAY_ID="$BREEZER_SYNC_ID"
   else
     BREEZER_OVERLAY_ID="$BREEZER_PASSWORDS_ID"
   fi
@@ -110,7 +136,7 @@ BREEZER_SOURCE_TREE="$(git rev-parse HEAD:upstream/helium-macos)"
 BREEZER_BASE_PREPARATION_ID="$(
   {
     printf '%s\n' "$BREEZER_SOURCE_TREE"
-    shasum -a 256 script/apply_breezer_branding.py assets/branding/breezer-logo.png upstream.lock.json
+    shasum -a 256 script/apply_breezer_branding.py script/breezer_release.py features/ai/extension/release-info.js assets/branding/breezer-logo.png upstream.lock.json
   } | shasum -a 256 | awk '{print $1}'
 )"
 BREEZER_PREPARATION_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_preparation.py" --base-id "$BREEZER_BASE_PREPARATION_ID")"
@@ -155,13 +181,16 @@ fi
 "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check "$_src_dir"
 printf '%s\n' "$BREEZER_OMNIBOX_ID" > "$BREEZER_OMNIBOX_PREPARED.tmp"
 mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"
-for BREEZER_OVERLAY in workspace ai-ui passwords; do
+for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
   if [[ "$BREEZER_OVERLAY" == workspace ]]; then
     BREEZER_OVERLAY_SCRIPT=script/apply_breezer_workspace.py
     BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
   elif [[ "$BREEZER_OVERLAY" == ai-ui ]]; then
     BREEZER_OVERLAY_SCRIPT=script/apply_breezer_ai_ui.py
     BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  elif [[ "$BREEZER_OVERLAY" == sync ]]; then
+    BREEZER_OVERLAY_SCRIPT=script/apply_breezer_sync.py
+    BREEZER_OVERLAY_ID="$BREEZER_SYNC_ID"
   else
     BREEZER_OVERLAY_SCRIPT=features/passwords/native-ui/apply.py
     BREEZER_OVERLAY_ID="$BREEZER_PASSWORDS_ID"
@@ -174,6 +203,16 @@ for BREEZER_OVERLAY in workspace ai-ui passwords; do
   printf '%s\n' "$BREEZER_OVERLAY_ID" > "$BREEZER_OVERLAY_MARKER.tmp"
   mv "$BREEZER_OVERLAY_MARKER.tmp" "$BREEZER_OVERLAY_MARKER"
 done
+if [[ ! -f "$BREEZER_CLONE_PREPARED" ]]; then
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/features/storage/code-sign-clones/apply.py" "$_src_dir"
+fi
+"$BREEZER_PYTHON" "$BREEZER_ROOT/features/storage/code-sign-clones/apply.py" --check "$_src_dir"
+printf '%s\n' "$BREEZER_CLONE_ID" > "$BREEZER_CLONE_PREPARED.tmp"
+mv "$BREEZER_CLONE_PREPARED.tmp" "$BREEZER_CLONE_PREPARED"
+if [[ -n "${BREEZER_COMPILED_FILTERS:-}" ]]; then
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_filter_lists.py" "$_src_dir" --artifacts "$BREEZER_COMPILED_FILTERS"
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_filter_lists.py" "$_src_dir" --artifacts "$BREEZER_COMPILED_FILTERS" --check
+fi
 write_gn_args "$_arch" release
 if [[ -n "$BREEZER_PROFILE_ARGS" ]]; then
   printf '%s\n' "$BREEZER_PROFILE_ARGS" >> "$_out_dir/args.gn"

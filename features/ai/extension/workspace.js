@@ -247,10 +247,17 @@ function activate(tabId) {
   return api.tabs.update(tabId, { active: true }).catch((error) => showToast(errorText(error)));
 }
 
+const openingEntries = new Map();
 function openEntry(entry, tab) {
-  if (tab) return activate(tab.id);
+  if (openingEntries.has(entry.id)) return openingEntries.get(entry.id);
+  // The rendered tile may predate a tab-created event or an earlier command.
+  const live = (tab && state.tabs.get(tab.id)) || [...state.tabs.values()].find(item => state.records[item.id]?.e === entry.id);
+  if (live) return activate(live.id);
   const found = findNode(state.store, entry.id);
-  return createTab({ url: entry.url, spaceId: found?.space?.id ?? state.activeSpaceId, entryId: entry.id, pinned: true });
+  const opening = createTab({ url: entry.url, spaceId: found?.space?.id ?? state.activeSpaceId, entryId: entry.id, pinned: true })
+    .finally(() => openingEntries.delete(entry.id));
+  openingEntries.set(entry.id, opening);
+  return opening;
 }
 
 // Keeps the space from going empty and keeps focus inside it when the active tab closes.
@@ -520,7 +527,14 @@ function rowNode() {
   return row;
 }
 
+const rowPresentation = new WeakMap();
 function updateRow(row, { title, tab, url, active, asleep, actionLabel, actionIcon, selected }) {
+  const presentation = [title, faviconFor(tab, url), urlOf(tab) || url, Boolean(active), Boolean(asleep),
+    tab?.status, Boolean(tab?.discarded), Boolean(tab?.audible), Boolean(tab?.mutedInfo?.muted),
+    actionLabel, actionIcon, Boolean(selected), state.renaming?.key === row.dataset.key];
+  const previous = rowPresentation.get(row);
+  if (previous && presentation.every((value, index) => value === previous[index])) return;
+  rowPresentation.set(row, presentation);
   const [favicon, label, sound, action] = row.children;
   if (state.renaming?.key !== row.dataset.key && label.textContent !== title) label.textContent = title;
   updateFavicon(favicon, tab, url, title);
@@ -706,11 +720,17 @@ function syncRovingFocus() {
     const wanted = items.find((node) => node.dataset.key === state.focus[name])
       || items.find((node) => node.getAttribute('aria-selected') === 'true')
       || items[0];
-    for (const node of items) node.tabIndex = node === wanted ? 0 : -1;
+    for (const node of items) {
+      const tabIndex = node === wanted ? 0 : -1;
+      if (node.tabIndex !== tabIndex) node.tabIndex = tabIndex;
+    }
   }
   const tiles = [...$('favorites').children].filter((node) => !node.classList.contains('leaving'));
   const tile = tiles.find((node) => node.dataset.key === state.focus.favorites) || tiles.find((node) => node.classList.contains('active')) || tiles[0];
-  for (const node of tiles) node.tabIndex = node === tile ? 0 : -1;
+  for (const node of tiles) {
+    const tabIndex = node === tile ? 0 : -1;
+    if (node.tabIndex !== tabIndex) node.tabIndex = tabIndex;
+  }
 }
 
 function focusItem(node) {
@@ -1369,6 +1389,18 @@ async function initSidebar(route) {
 }
 
 function bindSidebar() {
+  // Native browser commands reach this window's document even when web content
+  // has focus. Cancel only saved slots; native selection handles other indices.
+  document.addEventListener('breezer-select-numbered-tab', (event) => {
+    const index = event.detail;
+    if (!Number.isInteger(index) || index < 0 || index > 7) return;
+    const model = buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: state.activeSpaceId });
+    const slots = [...model.favorites, ...model.pinned.flatMap(node => node.kind === 'folder' ? node.children : [node])];
+    const item = slots[index];
+    if (!item) return;
+    event.preventDefault();
+    void openEntry(item.entry, item.tab);
+  });
   api.tabs.onCreated.addListener(onCreated);
   api.tabs.onUpdated.addListener(onUpdated);
   api.tabs.onRemoved.addListener(onRemoved);
@@ -1515,5 +1547,10 @@ async function boot() {
   await initSidebar(route);
 }
 
-addEventListener('hashchange', () => location.reload());
+// Settings switches categories in place (#/settings/<category>); every other route change reloads.
+addEventListener('hashchange', (event) => {
+  const settings = (url) => parseRoute(new URL(url).hash).view === 'settings';
+  if (settings(event.oldURL) && settings(event.newURL)) return;
+  location.reload();
+});
 void boot();

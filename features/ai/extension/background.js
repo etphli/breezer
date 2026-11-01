@@ -1,12 +1,90 @@
+import { prepareResearch, researchSelection } from './research-policy.js';
 import { installReleaseNotes } from './release-notes.js';
+import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
 import { installContextBackground } from './context-background.js';
+import { installTranslation } from './translation-background.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
+// Extension-local copy of the helper's Organato switches. The helper's file stays
+// the source of truth; this copy lets new tabs honour "off" without starting it
+// and lets open new tabs follow a change made in Settings or setup.
+export const ORGANATO_SWITCHES_KEY = 'organato.switches.v1';
+
+export async function loadOrganatoSwitches(api) {
+  try {
+    const value = (await api.storage.local.get(ORGANATO_SWITCHES_KEY))?.[ORGANATO_SWITCHES_KEY];
+    return value && typeof value.enabled === 'boolean' && typeof value.dashboardEnabled === 'boolean' ? { enabled: value.enabled, dashboardEnabled: value.dashboardEnabled } : null;
+  } catch { return null; }
+}
+
+export async function saveOrganatoSwitches(api, { enabled, dashboardEnabled }) {
+  if (typeof enabled !== 'boolean' || typeof dashboardEnabled !== 'boolean') return;
+  try { await api.storage.local.set({ [ORGANATO_SWITCHES_KEY]: { enabled, dashboardEnabled } }); } catch { /* the helper still answers */ }
+}
+
+function createOrganatoTransport(api) {
+  const pending = new Map();
+  let serial = 0, native = null, idleTimer;
+  const release = () => {
+    clearTimeout(idleTimer);
+    const connection = native;
+    native = null;
+    connection?.disconnect();
+  };
+  const releaseWhenIdle = () => {
+    clearTimeout(idleTimer);
+    if (!pending.size) idleTimer = setTimeout(release, 250);
+  };
+  const connect = () => {
+    clearTimeout(idleTimer);
+    if (native) return native;
+    const connection = api.runtime.connectNative(NATIVE_HOST);
+    native = connection;
+    connection.onMessage.addListener(message => {
+      if (native !== connection) return;
+      const request = pending.get(message?.id);
+      if (!request) return;
+      if (message.type === 'organato-progress') { request.progress?.(message.stage); return; }
+      pending.delete(message.id);
+      clearTimeout(request.timer);
+      message.ok ? request.resolve(message.value) : request.reject(new Error(message.error));
+      releaseWhenIdle();
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (native !== connection) return;
+      native = null;
+      for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); }
+      pending.clear();
+    });
+    return connection;
+  };
+  const ask = (owner, type, values, progress, timeoutMs) => new Promise((resolve, reject) => {
+    const id = `organato_${++serial}`;
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); releaseWhenIdle(); }, timeoutMs);
+    pending.set(id, { owner, resolve, reject, timer, progress });
+    try { connect().postMessage({ type, id, ...values }); }
+    catch (error) { clearTimeout(timer); pending.delete(id); reject(error); releaseWhenIdle(); }
+  });
+  const close = owner => {
+    for (const [id, request] of pending) {
+      if (request.owner !== owner) continue;
+      clearTimeout(request.timer);
+      pending.delete(id);
+      request.reject(new Error('Closed'));
+    }
+    if (!pending.size) release();
+  };
+  return { ask, close };
+}
 
 export function installBackground(api) {
+  installTranslation(api);
+  installWorkspaceSync(api);
   installUsage(api);
+  const organato = createOrganatoTransport(api);
   installReleaseNotes(api);
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
@@ -15,13 +93,49 @@ export function installBackground(api) {
     try { url = new URL(port.sender.url); } catch { return; }
     url.hash = ''; url.search = '';
     if (url.href !== api.runtime.getURL('workspace.html')) return;
-    const native = api.runtime.connectNative(NATIVE_HOST);
-    native.onMessage.addListener(message => { if (message?.type === 'update-result') { try { port.postMessage(message); } catch {} } });
-    native.onDisconnect.addListener(() => { void api.runtime.lastError; try { port.disconnect(); } catch {} });
+    const pending = new Map();
+    let native = null, idleTimer, closed = false, candidate = false, installing = false;
+    const release = () => {
+      clearTimeout(idleTimer);
+      const connection = native; native = null;
+      try { connection?.disconnect(); } catch {}
+    };
+    const releaseWhenIdle = () => {
+      clearTimeout(idleTimer);
+      if (!pending.size && !candidate && !installing) idleTimer = setTimeout(release, 250);
+    };
+    const connect = () => {
+      clearTimeout(idleTimer);
+      if (native) return native;
+      const connection = api.runtime.connectNative(NATIVE_HOST);
+      native = connection;
+      connection.onMessage.addListener(message => {
+        if (closed || native !== connection || message?.type !== 'update-result' || !pending.has(message.id)) return;
+        const type = pending.get(message.id); pending.delete(message.id);
+        if (message.ok) {
+          if (type === 'update-check') candidate = message.value?.available === true;
+          if (type === 'update-install' && message.value?.installing === true) { candidate = false; installing = true; }
+          if (type === 'update-status' && ['installed', 'failed'].includes(message.value?.phase)) installing = false;
+        }
+        try { port.postMessage(message); } catch {}
+        releaseWhenIdle();
+      });
+      connection.onDisconnect.addListener(() => {
+        void api.runtime.lastError;
+        if (closed || native !== connection) return;
+        native = null;
+        try { port.disconnect(); } catch {}
+      });
+      return connection;
+    };
     port.onMessage.addListener(message => {
-      if (['update-check', 'update-install', 'update-status'].includes(message?.type) && typeof message.id === 'string' && message.id.length < 100) native.postMessage({ type: message.type, id: message.id });
+      if (closed || !['update-check', 'update-install', 'update-status'].includes(message?.type)
+          || typeof message.id !== 'string' || message.id.length >= 100 || pending.has(message.id)) return;
+      pending.set(message.id, message.type);
+      try { connect().postMessage({ type: message.type, id: message.id }); }
+      catch { try { port.disconnect(); } catch {} }
     });
-    port.onDisconnect.addListener(() => { try { native.disconnect(); } catch {} });
+    port.onDisconnect.addListener(() => { closed = true; pending.clear(); release(); });
   });
   api.runtime.onConnect.addListener(port => {
     if (!['breezer-newtab', 'breezer-organato-settings'].includes(port.name)) return;
@@ -29,28 +143,28 @@ export function installBackground(api) {
     let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
     const settings = port.name === 'breezer-organato-settings';
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
-    const native = api.runtime.connectNative(NATIVE_HOST), pending = new Map();
-    let serial = 0, closed = false;
-    const ask = (type, values = {}, progress) => new Promise((resolve, reject) => {
-      const id = `organato_${++serial}`;
-      const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); }, settings ? 90000 : 65000);
-      pending.set(id, { resolve, reject, timer, progress }); native.postMessage({ type, id, ...values });
-    });
-    native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; if (message.type === 'organato-progress') { request.progress?.(message.stage); return; } pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
-    native.onDisconnect.addListener(() => { void api.runtime.lastError; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); } pending.clear(); });
+    let closed = false;
+    const ask = (type, values = {}, progress) => organato.ask(port, type, values, progress, settings ? 90000 : 65000);
+    const remember = value => { if (value && typeof value === 'object') void saveOrganatoSwitches(api, value); return value; };
     port.onMessage.addListener(message => {
       void (async () => {
         if (closed || typeof message?.id !== 'string' || message.id.length > 100) return;
         let value;
         if (settings) {
           if (!['view', 'configure'].includes(message.type)) throw new Error('Unknown settings action.');
-          value = await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); });
+          value = remember(await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); }));
         } else {
           if (!['view', 'refresh'].includes(message.type)) throw new Error('Unknown new-tab action.');
-          const config = await ask('organato-view');
+          // A saved "off" answers without the helper; otherwise the helper's file decides.
+          // Settings and setup own the saved copy; a new tab only fills it in once
+          // (profiles from before it existed), so a slow read never overwrites a newer choice.
+          const saved = await loadOrganatoSwitches(api);
+          const config = saved?.enabled === false ? saved : await ask('organato-view');
+          if (!saved) remember(config);
           const topSites = (await api.topSites.get()).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
-          const organato = { ...config, exams: [], assignments: [], todos: [] };
-          if (config.enabled && config.connected && config.dashboardEnabled) {
+          // Off carries no account state or items, so nothing stale can be drawn.
+          const organato = config.enabled === false ? { enabled: false } : { ...config, exams: [], assignments: [], todos: [] };
+          if (config.enabled !== false && config.connected && config.dashboardEnabled) {
             try {
               const result = await ask('organato-list');
               const items = result.items.map(item => ({ ...item, dueAt: item.dueAt || item.dueDateLocal, allDay: !item.dueAt && Boolean(item.dueDateLocal) })).filter(item => !['submitted', 'completed'].includes(item.workingStatus)).sort((a, b) => String(a.dueAt || a.dueDateLocal || '9999').localeCompare(String(b.dueAt || b.dueDateLocal || '9999')));
@@ -65,7 +179,7 @@ export function installBackground(api) {
         if (!closed) port.postMessage(settings ? { id: message.id, ok: true, value } : { type: 'view', id: message.id, ...value });
       })().catch(error => { if (!closed) { try { port.postMessage(settings ? { id: message.id, ok: false, error: error.message } : { type: 'view', id: message.id, topSites: [], organato: { error: error.message } }); } catch {} } });
     });
-    port.onDisconnect.addListener(() => { closed = true; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Closed')); } pending.clear(); native.disconnect(); });
+    port.onDisconnect.addListener(() => { closed = true; organato.close(port); });
   });
   const panels = new Set();
   let activeRun = null;
@@ -157,11 +271,21 @@ export function installBackground(api) {
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
     await cancel(activeRun);
-    if (panel.closed) return;
+    if (panel.closed || !panel.visible) throw new Error('The assistant closed. Reopen it and select sources again.');
     const run = { id: message.id, panel, control: message.control === true, includeContext: message.includeContext === true || message.control === true, cancelled: false, session: null, tab: null };
     activeRun = run;
     try {
-      let context;
+      let context, researchSources;
+      if (message.researchSources !== undefined) {
+        if (message.control || message.includeContext) throw new Error('Research sources do not authorize browser control or active-page sharing.');
+        const draft = panel.researchDraft;
+        if (draft?.id !== run.id) throw new Error('Source selection expired. Select tabs and send again.');
+        run.research = draft;
+        researchSources = await prepareResearch(api, message.researchSources, draft, panel.windowId);
+        ensureActive(run);
+        if (draft.invalidated) throw new Error('A source changed during capture. Select sources and send again.');
+        if (!researchSources.some(source => source.status === 'available' && source.text)) throw new Error('No source text is available. Select loaded tabs and try again.');
+      }
       if (run.includeContext) {
         const tab = await currentPage(panel);
         run.tab = tab;
@@ -182,6 +306,7 @@ export function installBackground(api) {
         ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
         message: message.message, history: Array.isArray(message.history) ? message.history.slice(-40) : [],
         profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
+        ...(researchSources ? { researchSources } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
       });
     } catch (error) {
@@ -190,6 +315,7 @@ export function installBackground(api) {
   };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
+    if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito || port.sender?.url !== api.runtime.getURL('panel.html')) return;
     const panel = { port, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
     panels.add(panel);
     port.onMessage.addListener(message => {
@@ -205,13 +331,18 @@ export function installBackground(api) {
             if (!panel.closed) connectNative(panel).postMessage({ type: 'init' });
           })();
           await panel.ready;
+        } else if (message.type === 'research-begin') {
+          await panel.ready;
+          panel.researchDraft = { id: message.id, selection: researchSelection(message.sources), invalidated: false };
         } else if (message.type === 'chat') { await panel.ready; await sendChat(panel, message); }
         else if (message.type === 'visibility') {
           panel.metadataRevision++;
           panel.visible = message.visible === true;
+          if (!panel.visible) invalidateResearch(panel, undefined, 'Panel closed. Select sources again.');
           if (!panel.visible && activeRun?.panel === panel) await cancel(activeRun);
         }
         else if (message.type === 'cancel') {
+          if (panel.researchDraft) panel.researchDraft.invalidated = true;
           if (activeRun?.panel === panel && (!message.id || activeRun.id === message.id)) await cancel(activeRun);
         } else if (message.type === 'context') {
           await panel.ready;
@@ -257,6 +388,7 @@ export function installBackground(api) {
     for (const panel of panels) if (panel.windowId === info.windowId) {
       panel.metadataRevision++;
       panel.visible = false;
+      invalidateResearch(panel, undefined, 'Panel closed. Select source tabs again.');
       if (activeRun?.panel === panel) void cancel(activeRun);
     }
   });
@@ -266,16 +398,27 @@ export function installBackground(api) {
   api.runtime.onMessage.addListener((message, sender) => {
     if (message?.type === 'stop-control' && activeRun?.session?.id === message.sessionId && sender.tab?.id === activeRun.session.tab.id) void cancel(activeRun, 'Browser control stopped.');
   });
+  const invalidateResearch = (panel, tabId, reason) => {
+    if (tabId !== undefined && !panel.researchDraft?.selection.some(source => source.tabId === tabId)) {
+      post(panel.port, { type: 'research-invalidated', tabId, reason }); return;
+    }
+    if (panel.researchDraft) panel.researchDraft.invalidated = true;
+    post(panel.port, { type: 'research-invalidated', tabId, reason });
+    if (activeRun?.panel === panel && activeRun.research) void cancel(activeRun, reason);
+  };
   api.tabs.onActivated.addListener(info => {
+    for (const panel of panels) if (panel.windowId === info.windowId) invalidateResearch(panel, undefined, 'Active tab changed. Select source tabs again.');
     const run = activeRun;
     if (run?.session && info.windowId === run.session.tab.windowId && info.tabId !== run.session.tab.id) void cancel(run, 'Browser control stopped because the active tab changed.');
     void publishMetadata(info.windowId, info.tabId).catch(() => {});
   });
   api.tabs.onRemoved.addListener(tabId => {
+    for (const panel of panels) invalidateResearch(panel, tabId, 'Source closed. Select source tabs again.');
     tools.grants.delete(tabId);
     if (activeRun?.session?.tab.id === tabId) void cancel(activeRun, 'Browser control stopped because the tab closed.');
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
+    if (change.url || change.status === 'loading') for (const panel of panels) invalidateResearch(panel, tabId, 'Source navigated or is loading. Select source tabs again.');
     if (tab?.active !== false && (change.url || change.title || change.status === 'complete')) void publishMetadata(tab?.windowId, tabId).catch(() => {});
     if (change.url && tools.grants.has(tabId)) {
       try { if (tools.grants.get(tabId) !== new URL(change.url).origin) tools.grants.delete(tabId); } catch { tools.grants.delete(tabId); }
@@ -287,10 +430,14 @@ export function installBackground(api) {
     } else if (change.status === 'loading') tools.navigationStarted(run.session);
     else if (change.status === 'complete') void tools.navigationComplete(run.session);
   });
+  api.tabs.onDetached?.addListener(tabId => {
+    for (const panel of panels) invalidateResearch(panel, tabId, 'Source moved to another window. Select source tabs again.');
+  });
   api.windows?.onFocusChanged?.addListener(windowId => {
     // WINDOW_ID_NONE means another app has focus. Input still goes only to the controlled
     // tab, so watching from another app does not end control; another Breezer window does.
     if (windowId === (api.windows.WINDOW_ID_NONE ?? -1)) return;
+    for (const panel of panels) if (panel.windowId !== windowId) invalidateResearch(panel, undefined, 'Browser window changed. Select source tabs again.');
     if (activeRun?.session && activeRun.session.tab.windowId !== windowId) void cancel(activeRun, 'Browser control stopped because the active window changed.');
   });
   api.debugger.onDetach.addListener(source => {

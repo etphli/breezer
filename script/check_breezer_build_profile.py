@@ -91,6 +91,20 @@ class BuildProfileTests(unittest.TestCase):
         })
         self.assertEqual({path.name: path.read_bytes() for path in self.default.iterdir()}, before)
 
+    def test_pgo_preserves_release_output_and_only_adds_profile_use(self):
+        self.assertEqual(assignments(gn_overrides("pgo-performance")), {
+            **assignments(gn_overrides("release-performance")), "chrome_pgo_phase": "2",
+        })
+        self.assertEqual(output_directory(self.tree, "pgo-performance"), (self.tree / "out/PGOPerformance").resolve())
+        result = self.run_config({"BREEZER_BUILD_PROFILE": "pgo-performance"})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        actual = assignments((self.tree / "out/PGOPerformance/args.gn").read_text())
+        self.assertEqual(actual["chrome_pgo_phase"], "2")
+        self.assertEqual(actual["dcheck_always_on"], "false")
+        for path in ("out/Default", "out/ReleasePerformance", "out/ReleasePerformance/nested"):
+            with self.assertRaises(ValueError):
+                output_directory(self.tree, "pgo-performance", path)
+
     def test_custom_output_after_upstream_env_is_respected(self):
         result = self.run_config({"BREEZER_BUILD_PROFILE": "release-performance", "BREEZER_OUT_DIR": "out/Perf with spaces"})
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -127,6 +141,42 @@ class BuildProfileTests(unittest.TestCase):
         self.assertIn("Existing output is preserved", result.stderr)
         self.assertFalse((self.tree / "out/ReleasePerformance").exists())
         self.assertEqual((self.default / "compiled-object").read_bytes(), b"existing object\x00\xff")
+
+    def test_compiled_filter_build_requires_isolation_and_build_only_before_staging(self):
+        source = (ROOT / "script/build_and_run.sh").read_text()
+        anchor = 'BREEZER_STAGE="'
+        guard = anchor + source.split(anchor, 1)[1].split('\nmkdir -p "$BREEZER_STAGE"', 1)[0]
+        project = self.root / "guard project"
+        default = project / "build/helium-macos"
+        default.mkdir(parents=True)
+        sentinel = default / "compiled-object"
+        sentinel.write_bytes(b"preserved compiled cache")
+        alias = self.root / "default stage alias"
+        alias.symlink_to(default, target_is_directory=True)
+        separate = project / "build/isolated stage"
+        env = {key: value for key, value in os.environ.items()
+               if key not in ("BREEZER_BUILD_DIR", "BREEZER_COMPILED_FILTERS", "BREEZER_MODE")}
+        env.update(BREEZER_ROOT=str(project), BREEZER_PYTHON=sys.executable,
+                   BREEZER_COMPILED_FILTERS=str(self.root / "artifacts"))
+        shell = ('set -euo pipefail\n' + guard
+                 + '\nmkdir -p "$BREEZER_STAGE"\nprintf staged > "$BREEZER_STAGE/after-guard"\n')
+        cases = [(stage, "--build-only") for stage in (
+            None, default, default / "nested", alias, alias / "nested", project,
+        )] + [(separate, mode) for mode in ("run", "--install", "--verify", "--debug", "--logs", "--telemetry")]
+        for stage, mode in cases:
+            with self.subTest(stage=stage, mode=mode):
+                extra = {"BREEZER_MODE": mode}
+                if stage is not None:
+                    extra["BREEZER_BUILD_DIR"] = str(stage)
+                result = subprocess.run(["bash", "-c", shell], env={**env, **extra}, capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0, "Unsafe staging was accepted")
+                self.assertFalse((default / "after-guard").exists())
+                self.assertEqual(sentinel.read_bytes(), b"preserved compiled cache")
+        result = subprocess.run(["bash", "-c", shell], env={**env, "BREEZER_MODE": "--build-only",
+                                "BREEZER_BUILD_DIR": str(separate)}, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((separate / "after-guard").read_text(), "staged")
+        self.assertEqual(sentinel.read_bytes(), b"preserved compiled cache")
 
     def test_cli_only_prints_configuration_and_paths(self):
         helper = ROOT / "script/breezer_build_profile.py"

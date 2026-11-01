@@ -8,7 +8,17 @@ Click **New tab** or press Command T to create a page. Click a row to switch pag
 
 Use the dots at the bottom to switch spaces. Control 1 through Control 4 selects the first four spaces on macOS. A space filters the sidebar's tab list; its other tabs remain open in the browser. Favorites appear in every space. Saved pins and folders remain available after their live tabs close.
 
-Open **Settings** from the sidebar footer, choose **Settings** from the browser menu, or press Command comma. The full-page settings screen provides:
+With the custom sidebar, Command 1 through Command 8 on macOS (Control 1 through Control 8 on Windows/Linux) selects saved slots in sidebar order: favorites first, then the current space's pins, including entries inside closed folders. An unopened slot opens only that saved page; an open or discarded tab is reused in the same window. Favorites keep the same slots across spaces and restart, and dragging favorites changes that order. Repeating a shortcut while its page opens does not create more tabs. These are browser commands, so they also work while a web page or sidebar field has focus; ordinary number typing is unaffected.
+
+Command 9 keeps Chromium's last-tab behavior. A numbered slot without a saved entry keeps Chromium's native numbered-tab behavior. Top tabs, private windows and an unavailable custom sidebar use native selection throughout. Custom keyboard assignments still invoke their corresponding browser command. Favorites beyond the first eight remain available by clicking their tiles.
+
+Open **Settings** from the sidebar footer, choose **Settings** from the browser menu, or press Command comma. Settings has a category list on the left and one category at a time on the right, under a **Settings / Category** breadcrumb. Categories are General, Appearance, Layout and Spaces, then **Your data** (Passwords, Sync, Privacy), **Breezer AI** (Assistant, New tab and Organato) and **Browser** (Languages, Browser settings, Other). Each category has its own address, `workspace.html#/settings/<category>` (for example `#/settings/languages`). Back and Forward move between categories without reloading, and `#/settings` opens General. Up and Down arrows move through the list, and Home and End jump to its ends.
+
+**Other** opens Chromium's own settings page, `chrome://settings/`, in the same tab. Back returns to Breezer's settings. The browser only sends the Settings command (menu, Command comma) to Breezer's page, never a typed or opened `chrome://settings/` address, so the two pages cannot redirect into each other.
+
+The search field at the top of the list (press `/` to reach it) searches every category's headings, setting names, descriptions and keywords, plus the native destinations under Browser settings. Results are grouped by category. Up and Down choose a result, Enter opens it, and Escape clears the search. A Breezer result opens its category, scrolls to the setting, focuses its control and highlights it briefly; the highlight is skipped under Reduce motion. A native result opens beside Settings. The last result always offers **Search browser settings for "…"**, which opens `chrome://settings/?search=…`. With no Breezer match, the page says so and that option is selected.
+
+The full-page settings screen provides:
 
 - Sidebar or top tabs.
 - Expanded sidebar, compact icons, or auto-hide with reveal from the left edge.
@@ -30,7 +40,7 @@ The guide has eight steps: welcome, the name Breezer AI calls you, tab layout an
 - The name goes into `breezerProfile.name`, keeping any saved profile context. An open assistant panel updates its greeting through `storage.onChanged`.
 - Layout, sidebar behavior, theme, custom color and appearance go through `breezerPrivate.setAppearance`, one write at a time, and bump `appearance.rev` so sidebars and the panel repaint. The page itself repaints with the chosen tone. Without the native bridge the controls are disabled and a note explains why.
 - Import buttons open `chrome://settings/importData` and `chrome://password-manager/settings?import=true`. The guide never reports that an import succeeded.
-- The Organato key goes to the background helper over the existing `breezer-organato-settings` port, which stores it in Keychain. Organato is optional; Continue skips it.
+- The Organato key goes to the background helper over the existing `breezer-organato-settings` port, which stores it in Keychain. Organato is optional. **Don’t use Organato** saves `enabled: false` through the same port and moves on only after the helper confirms it; a failed save says so, keeps Organato on and leaves focus on the button. Continue leaves the setting as it is, and a profile that already turned Organato off is shown as off and never reset. The summary reads Turned off, Connected or Not connected.
 
 The tour has three sidebar slides (tabs, favorites and spaces, Settings) or one top-tab slide, followed by two assistant slides (⌘K and Browser control). A miniature Breezer window beside the copy reflects each choice and points at the part being explained. Its motion stops under Reduce motion and it is hidden in forced-colors mode.
 
@@ -38,11 +48,15 @@ The tour has three sidebar slides (tabs, favorites and spaces, Settings) or one 
 
 `tests/ai/onboarding-browser.test.mjs` walks the guide in headless Chrome, including keyboard selection, the top-tab tour, Skip, a missing bridge and a 390 px layout. Set `BREEZER_ONBOARDING_VIDEO=/some/dir` to record the walkthrough at a human pace; Playwright needs its ffmpeg helper (`npx playwright install ffmpeg` in `tests/ai`). Native first-run behavior still needs a compiled app with a fresh profile.
 
+## Settings for feature modules
+
+Features add settings through `FEATURE_MOUNTS` in `settings.js`. Each entry names an empty container in `workspace.html` and loads a function called as `mount({ container, api })`. It may be async and may return `{ dispose }`, which runs on `pagehide`. A failed load leaves the container empty and the rest of Settings working. Categories marked `data-optional` (Sync, Languages, Assistant) stay out of the list and search until their container has content. Render a `section.settings-section` with an `h2`, and rows as `.setting-row` (a `.setting-label` with a `small` description, then the control) inside a `div.setting-group`. Search reads the rendered headings, rows, buttons and `data-search-terms`, so no separate index needs updating. Older components that render loose content (Passwords, Privacy, Assistant) are wrapped in one group after they mount.
+
 ## Chrome import card
 
-On first visit, a **Bring your Chrome data to Breezer** card sits above the settings. **Import bookmarks and history** opens the native import dialog (`chrome://settings/importData`), where an installed Google Chrome can be chosen as the source for bookmarks and history. **Show password steps** expands the Chrome CSV guide in Passwords. The card never reads Chrome files or credentials and never reports that an import succeeded; the user checks results in the native pages. **Hide** stores `{ dismissed: true }` under `settings.onboarding.v1` in `chrome.storage.local`, and open Settings tabs hide the card too. After that, the browser import stays in **More browser settings** and the password guide stays in **Passwords**.
+On first visit, a **Bring your Chrome data to Breezer** card sits at the top of General. **Import bookmarks and history** opens the native import dialog (`chrome://settings/importData`), where an installed Google Chrome can be chosen as the source for bookmarks and history. **Show password steps** switches to Passwords and expands the Chrome CSV guide there. The card never reads Chrome files or credentials and never reports that an import succeeded; the user checks results in the native pages. **Hide** stores `{ dismissed: true }` under `settings.onboarding.v1` in `chrome.storage.local`, and open Settings tabs hide the card too. After that, the browser import stays in **More browser settings** and the password guide stays in **Passwords**.
 
-Appearance choices apply to the profile. Space colors identify spaces within the sidebar. The **More browser settings** section opens native categories, including page fonts, search, privacy, site permissions, autofill, downloads, accessibility, and system settings. **All native browser settings** opens `chrome://settings/` directly. The browser menu, Command comma, and general native Settings actions open the workspace hub when its component extension is enabled. Native category routes and the fallback for builds without the extension remain available.
+Appearance choices apply to the profile. Space colors identify spaces within the sidebar. The **More browser settings** section, under Browser settings, opens native categories in a new tab, including page fonts, search, privacy, site permissions, autofill, downloads, accessibility, and system settings. **All native browser settings** opens `chrome://settings/` directly. The browser menu, Command comma, and general native Settings actions open the workspace hub when its component extension is enabled. Native category routes and the fallback for builds without the extension remain available.
 
 Space membership is restored by matching saved URLs when the match is unambiguous. If identical restored URLs belonged to different spaces, Breezer keeps the pages open in the default space rather than assigning another window's saved membership.
 
@@ -95,9 +109,13 @@ The migration records `breezer.workspace.appearance_defaults_version = 2`. It pr
 
 `node --test tests/ai/workspace-store.test.mjs tests/ai/workspace-static.test.mjs` checks JavaScript bounds and static safety. The existing `tests/ai/workspace-browser.test.mjs` drives the shipped page with a deterministic browser API fixture. `python3 -B script/check_breezer_workspace.py --no-cache` downloads a pinned source fixture into temporary storage and checks overlay application, idempotence, interrupted application, and anchor drift without reading or writing the shared cache.
 
+`tests/ai/settings-nav.test.mjs` checks settings routes, category pages and search ranking. `tests/ai/settings-redesign-browser.test.mjs` drives categories, Back, keyboard navigation, search results, no results, the Other tab, persistence, dark mode and a 390 px layout in headless Chrome, and writes screenshots to `BREEZER_AI_EVIDENCE`.
+
 `tests/ai/workspace-peek.test.mjs` checks peek-source syncing and saved favorite identity in the sidebar fixture. `script/check_breezer_workspace.py` checks the Peek source hooks, trigger conditions and the opacity-only, reduced-motion-aware entrance. `node tests/ai/peek-native.mjs /path/Breezer.app` drives the compiled app. App-owned native UI DevTools exercises Expand, Close, the backdrop and root Escape. Physical macOS pointer routing and focused-page keyboard dispatch remain unverified. Same-site and scripted-creation fixtures are required for the 1.1.3 candidate; authenticated Google Docs and Canvas/Reshet workflows require separate acceptance.
 
 Native behavior requires a compiled Breezer app. `tests/ai/workspace-native.mjs` checks v1 saved choices by default. `BREEZER_TEST_FRESH_PROFILE=1` selects fresh defaults. Its settings checks include font boundaries and rejected mixed patches. Browser fixture and source checks do not prove native compilation, live policy enforcement, or window geometry.
+
+Numbered favorite activation is covered by `tests/ai/workspace-browser.test.mjs` and the native dispatch contracts in `script/check_breezer_workspace.py`. The browser fixture replays the host's cancelable DOM command; it does not send a physical Command-number key through macOS. See [shortcut evidence and native acceptance](evidence/favorite-shortcuts/README.md) for the remaining combined-build gate.
 
 ## Source layout
 

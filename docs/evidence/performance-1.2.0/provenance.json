@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-11-01T12:03:38.149226+00:00",
+  "rawResultsSha256": "9de536bfee10f4da801473cf29bb1b4a76090b62d9848e5aa87198eba1facb3a",
+  "rawGzipSha256": "5b5a8764724aae3a7a482eded75185a274777c1ad4d9d5202179ab96ea50d9e8",
+  "protocol": "installed-browser-v8-initialized-three-way-footprint",
+  "sourceSnapshotCommit": "fa19c374cfe28ca3c083ce28c1fdbc3e36c5a19a",
+  "candidateMainBaseCommit": "5d1db7fb7d8283fc5b41b0b2764281315307f74c",
+  "scoredLaunches": 36,
+  "untimedSetups": 18,
+  "rawSummaryRecomputed": true,
+  "nativeForegroundChecksPassed": 36,
+  "versioningAndPresentationChangesAfterBenchmark": true,
+  "noPublishedReleaseOrInstalledAppChange": true
+}

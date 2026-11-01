@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 7: Unseen</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="premium.css">
+<style>
+  #stage { background: #02060a; }
+  .caption { color: #f2fbf8; text-shadow: 0 4px 40px rgb(0 0 0 / .8); }
+  #black { inset: 0; background: #000; z-index: 35; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script src="premium.js"></script>
+<script src="voice/07-unseen.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, travel } = AD;
+AD.duration = 41;
+const P = AD.voice(VO_DATA, "voice/07-unseen.mp3", [
+  [0, 0, 2.6], [1, 1, 7.4], [2, 2, 8.9], [3, 3, 10.4], [4, 4, 12.8], [5, 5, 16.6], [6, 6, 19.8],
+  [7, 7, 24.6], [8, 8, 26.0], [9, 9, 27.4], [10, 11, 30.4], [12, 12, 34.6], [13, 13, 35.8],
+]);
+const T = {
+  read: P[1].start, click: AD.wordAt(P[2], "click"), stay: P[3].start, normal: P[4].start, isnt: P[5].start,
+  cut: P[5].start - 0.18, snap: P[5].end + 1.1, blocks: P[6].start, tele: P[7].start, prof: P[8].start, score: P[9].start,
+  just: P[10].start, end: 34.2, brand: P[12].start, tag: P[13].start,
+};
+
+// The web: page panes in depth
+const F = 900;
+const panes = [{ x: 0, y: 0, z: 900, hero: true }];
+for (let i = 1; i < 46; i++) {
+  const c = (i % 9) - 4, r = Math.floor(i / 9) - 2;
+  panes.push({ x: c * 520 + (hash(i * 1.7) - 0.5) * 240, y: r * 360 + (hash(i * 2.9) - 0.5) * 160, z: 1300 + hash(i * 4.1) * 2600 });
+}
+const dots = [];
+panes.forEach((p, i) => {
+  const n = p.hero ? 0 : 1 + Math.floor(hash(i * 3.3) * 3);
+  for (let k = 0; k < n; k++) dots.push({ pane: i, u: (hash(i * 7 + k) - 0.5) * 300, v: (hash(i * 11 + k) - 0.5) * 180, at: 3.2 + hash(i * 5 + k * 9) * (T.normal + 2 - 3.2) });
+});
+// The hero pane's three watchers, on cue
+dots.push({ pane: 0, u: -60, v: -40, at: T.read + 0.2, kind: "read" }, { pane: 0, u: 110, v: 52, at: T.click, kind: "click" }, { pane: 0, u: 150, v: -78, at: T.stay + 0.2, kind: "stay" });
+const collector = { x: 0, y: -1500, z: 2400 };
+
+const camZ = (t) => {
+  if (t < T.read) return lerp(-500, 330, ease.inOut(prog(t, 0, T.read)));
+  if (t < T.normal) return 330 + (t - T.read) * 6;
+  if (t < T.cut) return lerp(360, -2200, ease.inOut(prog(t, T.normal, T.cut)));
+  if (t < T.tele) return lerp(-900, 120, ease.inOut(prog(t, T.snap, T.blocks + 1.0)));
+  if (t < T.just) return lerp(120, -450, ease.inOut(prog(t, T.tele - 0.6, T.just - 0.4)));
+  return lerp(-450, 300, ease.inOut(prog(t, T.just - 0.5, T.end)));
+};
+const project = (x, y, z, cz) => { const d = Math.max(30, z - cz); const s = F / d; return { x: 960 + x * s, y: 540 + y * s, s, d }; };
+
+AD.setup({
+  bpm: 80,
+  progression: ["Dm9", "Bbmaj7", "Fmaj7", "C6"],
+  sections: [
+    { from: 0, to: T.cut, drone: 1.0, pad: 0.5, bright: 0.15, air: 0.5 },
+    { from: T.read, to: T.cut, pulse: true, bright: 0.3 },
+    { from: T.normal, to: T.cut, hats: "16", kick: "half", kickGain: 0.5 },
+    { from: T.snap, to: T.end, pad: 0.9, bright: 0.7, piano: "motif", air: 0.4 },
+    { from: T.blocks, to: T.end, pulse: true, kick: "half", kickGain: 0.7, bass: true },
+    { from: T.tele, to: T.end, hats: "8", snap: true },
+    { from: T.end, to: 40.5, pad: 0.8, bright: 0.5, piano: "single" },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const fog = AD.shader(`
+      void main(){
+        vec2 uv = gl_FragCoord.xy / res;
+        vec2 p = (gl_FragCoord.xy - .5 * res) / res.y;
+        float red = u0.x, mint = u0.y, ring = u0.z, ringA = u0.w;
+        float f = fbm(p * 1.3 + vec2(t * .015, -t * .01)) * fbm(p * 2.6 - vec2(t * .02, 0.));
+        vec3 base = vec3(.008, .016, .028) + vec3(.03, .06, .09) * f;
+        base += vec3(.16, .03, .02) * red * f * 1.6 + vec3(.25, .05, .03) * red * exp(-pow(length(p - vec2(0., .62)), 2.) * 5.);
+        base += vec3(.03, .14, .13) * mint * f * 1.5;
+        float d = abs(length(p) - ring);
+        base += vec3(.6, 1., .88) * ringA * (exp(-d * 60.) + .25 * exp(-d * 8.));
+        for (int i = 0; i < 5; i++) {
+          float fi = float(i);
+          float y = sin(p.x * 1.4 + t * .3 + fi * 1.9) * .16 + (fi - 2.) * .09;
+          float dd = abs(p.y - y);
+          base += mix(vec3(.7, 1., .9), vec3(.36, .77, .96), uv.x) * u1.x * (exp(-dd * dd / .00004) * .35 + exp(-dd * 50.) * .08) * smoothstep(1.1, .2, abs(p.x));
+        }
+        base *= 1. - .35 * dot(p, p);
+        o = vec4(base + (hash(gl_FragCoord.xy + fract(t * 7.)) - .5) / 220., 1.);
+      }`, 1);
+    const cv = AD.canvas(stage, 5);
+    const black = el("div", "", stage); black.id = "black";
+
+    const caps = {
+      p0: AD.caption(stage, P[0], "low"), p1: AD.caption(stage, P[1], "low"), p2: AD.caption(stage, P[2], "low"), p3: AD.caption(stage, P[3], "low"),
+      p4: AD.caption(stage, P[4], "low"), p5: AD.caption(stage, P[5], "hero"), p6: AD.caption(stage, P[6], "low"),
+      p7: AD.caption(stage, P[7], "hero"), p8: AD.caption(stage, P[8], "hero"), p9: AD.caption(stage, P[9], "hero"),
+      p10: AD.caption(stage, P[10], "mid"), p11: AD.caption(stage, P[11], "mid"),
+    };
+    caps.p10.node.style.transform = "translateX(-215px)";
+    caps.p11.node.style.transform = "translateX(235px)";
+    caps.p11.node.style.color = "#9ff5da";
+    caps.p5.node.style.zIndex = 50;
+    const end = AD.premiumEnd("Browse unwatched.");
+
+    const ctx = cv;
+    const arrow = (x, y, s = 1, a = 1) => {
+      ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.globalAlpha = a;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 30); ctx.lineTo(8, 23); ctx.lineTo(13, 34); ctx.lineTo(18, 32); ctx.lineTo(13, 21); ctx.lineTo(23, 21); ctx.closePath();
+      ctx.fillStyle = "#fff"; ctx.strokeStyle = "#000"; ctx.lineWidth = 1.6; ctx.fill(); ctx.stroke(); ctx.restore();
+    };
+
+    // Pane sprites: [normal, calm] x blur levels, drawn once.
+    const SPRITE_SCALE = 1.6, SPRITE_PAD = 40, BLURS = [0, 1.5, 3, 5, 7.5, 10];
+    const sprites = [false, true].map((isCalm) => BLURS.map((b) => {
+      const c = document.createElement("canvas");
+      const S = SPRITE_SCALE;
+      c.width = Math.ceil(380 * S + SPRITE_PAD * 2 * S);
+      c.height = Math.ceil(240 * S + SPRITE_PAD * 2 * S);
+      const x = c.getContext("2d");
+      x.filter = b > 0 ? `blur(${b * S}px)` : "none";
+      x.translate(SPRITE_PAD * S, SPRITE_PAD * S);
+      x.scale(S, S);
+      const g = x.createLinearGradient(0, 0, 0, 240);
+      g.addColorStop(0, isCalm ? "#173b44" : "#1b2b36"); g.addColorStop(1, "#0d171e");
+      x.fillStyle = g; x.beginPath(); x.roundRect(0, 0, 380, 240, 16); x.fill();
+      x.strokeStyle = isCalm ? "rgb(143 240 208 / .25)" : "rgb(255 255 255 / .09)"; x.lineWidth = 1; x.stroke();
+      x.fillStyle = "rgb(255 255 255 / .1)"; x.beginPath(); x.roundRect(18, 18, 120, 12, 6); x.fill();
+      for (let l = 0; l < 5; l++) { x.fillStyle = "rgb(255 255 255 / .07)"; x.beginPath(); x.roundRect(18, 50 + l * 22, 230 - (l % 3) * 40, 8, 4); x.fill(); }
+      x.fillStyle = "rgb(255 255 255 / .05)"; x.beginPath(); x.roundRect(270, 50, 92, 100, 10); x.fill();
+      return c;
+    }));
+
+    return (t) => {
+      const cz = camZ(t);
+      const black0 = t >= T.cut && t < T.snap;
+      const snapT = t - T.snap;
+      const calm = ease.out(prog(t, T.snap, T.snap + 1.5));
+      const red = ease.inOut(prog(t, 3, T.normal + 2)) * (1 - calm);
+      fog(t, { u0: [red, calm * 0.8, snapT > 0 ? ease.out(prog(snapT, 0, 1.4)) * 1.4 : 0, snapT > 0 ? 1 - prog(snapT, 0, 1.4) : 0], u1: [ease.inOut(prog(t, T.just - 0.3, T.just + 1.5)) * (1 - prog(t, T.end - 0.3, T.end + 0.3)) * 0.8, 0, 0, 0] });
+      black.style.opacity = black0 ? 1 : snapT > 0 && snapT < 0.15 ? 1 - snapT / 0.15 : 0;
+
+      ctx.clearRect(0, 0, 1920, 1080);
+      const focusOne = ease.inOut(prog(t, T.just - 0.3, T.just + 1.2));
+      // Panes, far to near, with depth-of-field
+      const order = panes.map((p, i) => i).sort((a, b) => panes[b].z - panes[a].z);
+      const focusD = 570 + (t > T.normal && t < T.cut ? 1800 * prog(t, T.normal, T.cut) : 0);
+      for (const i of order) {
+        const p = panes[i];
+        const q = project(p.x, p.y, p.z, cz);
+        if (q.d < 60) continue;
+        const w = 380 * q.s, h = 240 * q.s;
+        const blur = Math.min(10, Math.abs(q.d - focusD) / 260);
+        const fadeOthers = p.hero ? 1 : 1 - focusOne * 0.85;
+        const alpha = clamp((4200 - q.d) / 1200) * fadeOthers * (p.hero ? 1 : 0.8);
+        if (alpha <= 0.01 || q.x < -w || q.x > 1920 + w) continue;
+        // Panes all look alike, so draw a pre-blurred sprite at the nearest blur level.
+        const level = BLURS.reduce((best, b, k) => (Math.abs(b - blur) < Math.abs(BLURS[best] - blur) ? k : best), 0);
+        const sprite = sprites[calm > 0.5 ? 1 : 0][level];
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const x0 = q.x - w / 2, y0 = q.y - h / 2;
+        const k = q.s / SPRITE_SCALE;
+        ctx.drawImage(sprite, x0 - SPRITE_PAD * q.s, y0 - SPRITE_PAD * q.s, sprite.width * k, sprite.height * k);
+        // The hero pane's "read" highlight scan
+        if (p.hero && t > T.read && t < T.normal + 1) {
+          const sp = prog(t, T.read, T.read + 1.2);
+          ctx.fillStyle = `rgb(255 106 80 / ${0.35 * (1 - prog(t, T.normal, T.normal + 1))})`;
+          for (let l = 0; l < 3; l++) ctx.fillRect(x0 + 18 * q.s, y0 + (50 + l * 22) * q.s, (230 - (l % 3) * 40) * q.s * clamp(sp * 3 - l), 8 * q.s);
+        }
+        ctx.restore();
+      }
+
+      // Trackers and their strings
+      const pts = [];
+      dots.forEach((d, i) => {
+        const p = panes[d.pane];
+        const q = project(p.x + d.u, p.y + d.v, p.z, cz);
+        if (t < d.at || q.d < 60) return;
+        const appear = ease.out(prog(t, d.at, d.at + 0.4));
+        let a = appear * (p.hero ? 1 : 1 - focusOne);
+        let x = q.x, y = q.y, color = "255 106 80";
+        if (t >= T.snap) {
+          const f = snapT - Math.hypot(q.x - 960, q.y - 540) / 1700;
+          if (f > 0) { x += f * f * 1400 + f * 300; y -= f * 120; color = "159 245 218"; a *= clamp(1 - f * 1.4); }
+          if (f > 0.75) return;
+        }
+        if (a <= 0) return;
+        pts.push({ x, y, s: q.s, a, d });
+        const r = Math.max(2.5, 7 * q.s);
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, r * 5);
+        glow.addColorStop(0, `rgb(${color} / ${0.5 * a})`); glow.addColorStop(1, `rgb(${color} / 0)`);
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, r * 5, 0, 7); ctx.fill();
+        ctx.fillStyle = `rgb(${color} / ${a})`; ctx.beginPath(); ctx.arc(x, y, r * (1 + 0.25 * Math.sin(t * 6 + i)), 0, 7); ctx.fill();
+        if (d.kind === "stay" && t < T.cut) {
+          const secs = Math.floor((t - d.at) * 7 + 3);
+          ctx.font = `600 ${Math.round(22 * q.s)}px -apple-system, system-ui`;
+          ctx.fillStyle = `rgb(255 170 150 / ${a})`;
+          ctx.fillText(`00:${String(secs).padStart(2, "0")}`, x + 14 * q.s, y + 7 * q.s);
+        }
+      });
+      // Network: everything reports upward
+      const net = ease.inOut(prog(t, T.normal, T.normal + 2.2)) * (t < T.snap ? 1 : 0);
+      if (net > 0) {
+        const c = project(collector.x, collector.y, collector.z, cz);
+        ctx.lineWidth = 1;
+        pts.forEach((pt, i) => {
+          ctx.strokeStyle = `rgb(255 106 80 / ${0.22 * net * pt.a})`;
+          ctx.beginPath(); ctx.moveTo(pt.x, pt.y); ctx.lineTo(lerp(pt.x, c.x, net), lerp(pt.y, c.y, net)); ctx.stroke();
+          const nb = pts[(i * 7 + 3) % pts.length];
+          ctx.strokeStyle = `rgb(255 140 110 / ${0.12 * net})`;
+          ctx.beginPath(); ctx.moveTo(pt.x, pt.y); ctx.lineTo(nb.x, nb.y); ctx.stroke();
+        });
+      }
+      // The click
+      if (t > T.click - 0.8 && t < T.normal + 0.5) {
+        const p0 = project(panes[0].x + 110, panes[0].y + 52, panes[0].z, cz);
+        const mv = ease.inOut(prog(t, T.click - 0.8, T.click - 0.05));
+        arrow(lerp(p0.x + 260, p0.x, mv), lerp(p0.y + 160, p0.y, mv), 1.3, 1 - prog(t, T.normal, T.normal + 0.5));
+        const rp = prog(t, T.click, T.click + 0.6);
+        if (rp > 0 && rp < 1) { ctx.strokeStyle = `rgb(255 106 80 / ${1 - rp})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p0.x, p0.y, 10 + rp * 60, 0, 7); ctx.stroke(); }
+      }
+      // Blocked attempts around the hero pane
+      if (t > T.blocks && t < T.just + 1) {
+        const hp = project(panes[0].x, panes[0].y, panes[0].z, cz);
+        const R = 260 * hp.s + 60;
+        for (let k = 0; k < 9; k++) {
+          const st = T.blocks + 0.3 + k * 0.55;
+          const f = t - st;
+          if (f < 0 || f > 1.4) continue;
+          const ang = hash(k * 9.1) * Math.PI * 2;
+          if (f < 0.5) {
+            const r = lerp(1400, R, ease.in(f / 0.5));
+            ctx.fillStyle = "rgb(255 120 95)"; ctx.beginPath(); ctx.arc(hp.x + Math.cos(ang) * r, hp.y + Math.sin(ang) * r * 0.75, 6, 0, 7); ctx.fill();
+          } else {
+            const g = f - 0.5;
+            ctx.strokeStyle = `rgb(185 255 230 / ${0.8 * Math.exp(-g / 0.3)})`; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.ellipse(hp.x, hp.y, R + g * 50, (R + g * 50) * 0.75, 0, ang - 0.5, ang + 0.5); ctx.stroke();
+            for (let j = 0; j < 7; j++) {
+              const a2 = ang + (j - 3) * 0.2, rr = R + g * (180 + j * 20);
+              ctx.fillStyle = `rgb(159 245 218 / ${clamp(1 - g / 0.9) * 0.8})`;
+              ctx.beginPath(); ctx.arc(hp.x + Math.cos(a2) * rr, hp.y + Math.sin(a2) * rr * 0.75, 2.4, 0, 7); ctx.fill();
+            }
+          }
+        }
+      }
+      // Just you and the web
+      if (t > T.just - 0.5 && t < T.end + 0.5) {
+        const hp = project(panes[0].x, panes[0].y, panes[0].z, cz);
+        const a = ease.out(prog(t, T.just - 0.3, T.just + 0.6)) * (1 - prog(t, T.end - 0.2, T.end + 0.3));
+        arrow(hp.x + 60 + Math.sin(t * 0.8) * 40, hp.y + 30 + Math.cos(t * 0.6) * 20, 1.3, a);
+      }
+
+      const until = (i) => P[i + 1].start - 0.12;
+      caps.p0(t, { until: until(0) }); caps.p1(t, { until: until(1) }); caps.p2(t, { until: until(2) }); caps.p3(t, { until: until(3) });
+      caps.p4(t, { until: T.cut }); caps.p5(t, { until: T.snap - 0.2 }); caps.p6(t, { until: T.tele - 0.3 });
+      caps.p7(t, { until: until(7) }); caps.p8(t, { until: until(8) }); caps.p9(t, { until: T.just - 0.4 });
+      caps.p10(t, { until: T.end - 0.2 }); caps.p11(t, { until: T.end - 0.2 });
+      end(t, T.end, { wordAt: T.brand, tagAt: [T.tag] });
+    };
+  },
+});
+
+AD.sfx(T.read + 0.2, "tick", { g: 0.7 });
+AD.sfx(T.click, "tick", { g: 1.0, pan: 0.2 });
+AD.sfx(T.stay + 0.2, "tick", { g: 0.7 });
+[T.normal, T.normal + 1.5, T.normal + 3].forEach((t) => AD.sfx(t, "heartbeat", { g: 0.7 }));
+AD.sfx(T.normal + 0.4, "riser", { length: T.cut - T.normal - 0.4, g: 0.5 });
+AD.sfx(T.snap - 0.5, "whoosh", { length: 0.6, g: 0.5, up: true, pan_from: 0, pan_to: 0 });
+AD.sfx(T.snap, "boom", { g: 1.0 });
+AD.sfx(T.snap, "whoosh", { length: 1.4, g: 1.0, pan_from: -0.3, pan_to: 0.9 });
+AD.sfx(T.snap + 0.1, "shimmer", { g: 0.9 });
+for (let k = 0; k < 9; k++) AD.sfx(T.blocks + 0.3 + k * 0.55 + 0.5, "glass", { g: 0.35, pitch: 88 + (k % 3) * 3 });
+AD.sfx(T.end - 1.3, "riser", { length: 1.3, g: 0.45 });
+AD.sfx(T.end, "boom", { g: 0.55 });
+AD.sfx(T.brand, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>

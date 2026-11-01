@@ -12,6 +12,7 @@ import subprocess
 import tarfile
 import tempfile
 import urllib.request
+from breezer_release import release_version
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -77,6 +78,7 @@ def framework_resources(app):
 
 
 def package(app, architecture, cache):
+    version = release_version(ROOT)
     lock = json.loads((FEATURE / "runtime.lock.json").read_text())
     archive = download_runtime(lock["distributions"][architecture], cache)
     resources = framework_resources(app)
@@ -103,8 +105,23 @@ def package(app, architecture, cache):
         if target.exists():
             shutil.rmtree(target)
         staged.replace(target)
-    print(f"Bundled private AI host and Node {lock['version']} for {architecture}: {target}")
+    stamp_bundle_version(app, version)
+    print(f"Bundled Breezer {version}, private AI host and Node {lock['version']} for {architecture}: {target}")
     return target
+
+
+def stamp_bundle_version(app, version):
+    path = app / 'Contents/Info.plist'
+    if path.is_symlink():
+        raise ValueError('The app Info.plist must not be a symlink.')
+    raw = path.read_bytes()
+    info = plistlib.loads(raw)
+    if info.get('CFBundleIdentifier') != BUNDLE_ID:
+        raise ValueError('Only the Breezer app receives its release version.')
+    info['CFBundleShortVersionString'] = version
+    info['CFBundleVersion'] = version
+    fmt = plistlib.FMT_BINARY if raw.startswith(b'bplist') else plistlib.FMT_XML
+    path.write_bytes(plistlib.dumps(info, fmt=fmt))
 
 
 def main():

@@ -411,3 +411,20 @@ test('duplicate saved pins never borrow another space or multiply during restore
   assert.deepEqual(model.today.map(tab => tab.id), [42]);
   assert.equal(store.spaces.reduce((sum, space) => sum + space.pinned.length, 0), 2);
 });
+
+test('restoring a large session parses each saved URL once instead of rescanning the session per tab', () => {
+  const size = 250;
+  const store = normalizeStore({ version: 1, spaces: [{ id: 'work', name: 'Work', pinned: [] }] });
+  const tabs = Array.from({ length: size }, (_, i) => tab(i + 1, `https://docs.example.com/doc/${i}?new=1`));
+  const members = normalizeMembers({ version: 1, session: 'new', prev: 'old', tabs: Object.fromEntries(tabs.map((value, i) => [1000 + i, { s: 'work', u: value.url.replace('?new=1', '?old=1'), k: 'old' }])) });
+  const OriginalURL = globalThis.URL;
+  let parses = 0;
+  globalThis.URL = class extends OriginalURL { constructor(...args) { super(...args); parses++; } };
+  try {
+    const { assigned } = reconcileWindowTabs({ members, store, tabs, session: 'new' });
+    assert.equal(Object.keys(assigned).length, size);
+    assert.ok(Object.values(assigned).every(value => value.s === 'work'));
+    assert.ok(parses <= size * 3, `${parses} URL parses for ${size} tabs`);
+    assert.equal(Object.keys(members.tabs).length, size, 'path matches consume each old record exactly once');
+  } finally { globalThis.URL = OriginalURL; }
+});

@@ -1,4 +1,4 @@
-// Full-page settings route: workspace.html#/settings. Layout and theme go through
+// Full-page settings route: workspace.html#/settings/<category>. Layout and theme go through
 // chrome.breezerPrivate (native prefs); spaces and tab behavior live in the workspace store.
 import {
   APPEARANCE_REV_KEY, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
@@ -9,6 +9,18 @@ import { mountPasswords } from './passwords.js';
 import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
+import { mountSettingsNav } from './settings-nav.js';
+
+// Settings owned by feature modules. Each entry names an empty container in workspace.html
+// and loads a function called as mount({ container, api }). It may be async and may return
+// { dispose }, which runs on pagehide. Categories marked data-optional stay out of the
+// navigation and search until their container has content. Search indexes the rendered
+// headings, .setting-row labels and descriptions, buttons and data-search-terms.
+//   { container: 'sync-settings', load: () => import('./sync-settings.js').then((m) => m.mountSyncSettings) }
+export const FEATURE_MOUNTS = Object.freeze([
+  { container: 'sync-settings', load: () => import('./sync-settings.js').then((m) => m.mountSyncSettings) },
+  { container: 'translation-settings', load: () => import('./translation-settings.js').then((m) => m.mountTranslationSettings) },
+]);
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -22,9 +34,9 @@ const FIELD_LABELS = {
 const FIELD_ERRORS = {
   layout: 'layout-error', sidebarMode: 'layout-error', sidebarWidth: 'layout-error',
   showBookmarks: 'layout-error', bookmarkBarMode: 'layout-error', theme: 'theme-error', colorMode: 'theme-error',
-  sidebarFontSize: 'typography-error', centeredAddressBar: 'layout-error',
-  minimalUrl: 'layout-error', showLoadProgress: 'layout-error', frameless: 'layout-error',
-  alwaysShowSidebar: 'layout-error', alwaysShowTopBar: 'layout-error',
+  sidebarFontSize: 'typography-error', centeredAddressBar: 'address-error',
+  minimalUrl: 'address-error', showLoadProgress: 'address-error', frameless: 'frameless-error',
+  alwaysShowSidebar: 'frameless-error', alwaysShowTopBar: 'frameless-error',
 };
 const VALUE_LABELS = { sidebar: 'Sidebar', top: 'Top', expanded: 'Expanded', compact: 'Compact', autoHide: 'Auto-hide', system: 'System', light: 'Light', dark: 'Dark', true: 'On', false: 'Off', ...TONE_NAMES };
 
@@ -70,19 +82,58 @@ function setRadioValue(group, value) {
   }
 }
 
+// Older components render a heading followed by loose content. Keep the heading and its
+// leading notes above, and put the rest in a rounded group like the other settings.
+export function groupSection(container) {
+  const section = container?.querySelector('.settings-section');
+  if (!section || section.querySelector('.setting-group')) return;
+  const group = el('div', 'setting-group panel');
+  let leading = true;
+  for (const child of [...section.children]) {
+    if (child.tagName === 'H2') continue;
+    if (leading && child.matches('.section-note')) continue;
+    leading = false;
+    group.append(child);
+  }
+  section.append(group);
+}
+
+async function mountFeatures(api) {
+  await Promise.all(FEATURE_MOUNTS.map(async ({ container, load }) => {
+    const node = $(container);
+    if (!node) return;
+    try {
+      const handle = await (await load())({ container: node, api });
+      if (typeof handle?.dispose === 'function') addEventListener('pagehide', () => handle.dispose(), { once: true });
+    } catch (failure) {
+      // One feature failing to load must not take the rest of Settings with it.
+      node.replaceChildren();
+      console.error(`Settings: ${container} failed to load.`, failure);
+    }
+  }));
+}
+
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
   void mountUsageSettings({ api, container: $('usage-settings') });
+  groupSection($('usage-settings'));
   const passwords = mountPasswords({ container: $('password-settings'), api });
-  const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords });
+  groupSection($('password-settings'));
+  let nav = null;
+  // The card's password steps live in the Passwords category; show it before revealing them.
+  const passwordSteps = { showImport() { nav?.open('passwords'); passwords.showImport(); } };
+  const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords: passwordSteps });
   addEventListener('pagehide', () => onboarding.dispose(), { once: true });
   if (typeof api.runtime?.connect === 'function') {
     mountUpdates(api);
     mountOrganato(api);
     const contextSettings = mountContextSettings({ container: $('context-settings'), api });
+    groupSection($('context-settings'));
     window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
   }
+  nav = mountSettingsNav({ api });
+  void mountFeatures(api).then(() => nav.refreshAvailability());
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
 
@@ -378,48 +429,93 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 export function mountUpdates(api) {
   const container = $('update-settings');
   if (!container) return;
-  const port = api.runtime.connect({ name: 'breezer-updates' });
   const status = $('update-status'), check = $('update-check'), install = $('update-install');
-  let sequence = 0, pending = null, timer, poll;
+  let sequence = 0, pending = null, timer, poll, port = null, closed = false, available = false, installing = false;
+  const disconnected = () => {
+    const needsCheck = pending !== null || available || installing;
+    clearTimeout(timer); clearInterval(poll); poll = null; pending = null;
+    available = false; installing = false;
+    check.disabled = false; install.disabled = true; install.hidden = true;
+    if (needsCheck) status.textContent = 'Update helper disconnected. Check for updates again.';
+  };
+  const connect = () => {
+    if (port) return port;
+    const connection = api.runtime.connect({ name: 'breezer-updates' });
+    port = connection;
+    connection.onMessage.addListener(message => {
+      if (closed || port !== connection || message.id !== pending) return;
+      clearTimeout(timer); pending = null;
+      check.disabled = false;
+      if (!message.ok) { status.textContent = message.error; return; }
+      const value = message.value;
+      status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
+      if (value.available !== undefined) { available = value.available === true; install.hidden = !available; }
+      install.disabled = !available;
+      if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
+      if (value.installing) {
+        installing = true; available = false; check.disabled = true; install.hidden = true;
+        if (!poll) poll = setInterval(() => request('update-status'), 2000);
+      }
+      if (['installed', 'failed'].includes(value.phase)) { installing = false; clearInterval(poll); poll = null; check.disabled = false; }
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (closed || port !== connection) return;
+      port = null; disconnected();
+    });
+    return connection;
+  };
   const request = type => {
-    if (pending) return;
+    if (closed || pending || (type === 'update-install' && !available)) return;
     pending = String(++sequence);
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
     timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Try again.'; }, 65_000);
-    port.postMessage({ type, id: pending });
+    try { connect().postMessage({ type, id: pending }); }
+    catch {
+      const connection = port; port = null;
+      try { connection?.disconnect(); } catch {}
+      disconnected();
+    }
   };
-  port.onMessage.addListener(message => {
-    if (message.id !== pending) return;
-    clearTimeout(timer); pending = null;
-    check.disabled = false;
-    if (!message.ok) { status.textContent = message.error; return; }
-    const value = message.value;
-    status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
-    if (value.available !== undefined) install.hidden = !value.available;
-    install.disabled = !value.available;
-    if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
-    if (value.installing) { check.disabled = true; install.hidden = true; poll = setInterval(() => request('update-status'), 2000); }
-    if (['installed', 'failed'].includes(value.phase)) { clearInterval(poll); check.disabled = false; }
-  });
-  port.onDisconnect.addListener(() => { clearTimeout(timer); clearInterval(poll); check.disabled = false; install.disabled = true; status.textContent = 'Update helper disconnected. Reopen Settings to retry.'; });
   check.addEventListener('click', () => request('update-check'));
   install.addEventListener('click', () => request('update-install'));
-  const dispose = () => { clearTimeout(timer); clearInterval(poll); port.disconnect(); };
+  const dispose = () => { closed = true; clearTimeout(timer); clearInterval(poll); port?.disconnect(); port = null; };
   window.addEventListener('pagehide', dispose, { once: true });
   request('update-check');
   return { dispose };
 }
 
 export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
-  const port = api.runtime.connect({ name: 'breezer-organato-settings' });
   const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
   const controls = ['organato-connect', 'organato-disconnect', 'organato-key', ...Object.keys(mappings)];
-  let next = 0, pending, timer, closed = false;
+  let next = 0, pending, timer, closed = false, port = null;
   const busy = value => { for (const id of controls) $(id).disabled = value; };
   const finish = text => {
     clearTimeout(timer); pending = null; busy(false);
     if (text) $('organato-status').textContent = text;
+  };
+  const connect = () => {
+    if (port) return port;
+    const connection = api.runtime.connect({ name: 'breezer-organato-settings' });
+    port = connection;
+    connection.onMessage.addListener(message => {
+      if (closed || port !== connection || message.id !== pending?.id) return;
+      if (message.type === 'progress') {
+        $('organato-status').textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…';
+        return;
+      }
+      if (!message.ok) { finish(message.error); return; }
+      for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
+      finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (closed || port !== connection) return;
+      port = null;
+      if (pending) finish('Connection closed. Try again.');
+    });
+    return connection;
   };
   const request = (type, settings) => {
     if (closed || pending?.type === 'configure') return;
@@ -427,27 +523,20 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
     pending = { id: String(++next), type };
     busy(type === 'configure');
     timer = setTimeout(() => finish('Organato connection timed out. Check your connection and try again.'), timeoutMs);
-    try { port.postMessage({ id: pending.id, type, settings }); }
-    catch { finish('Organato helper is unavailable. Reopen Settings to retry.'); }
-  };
-  port.onMessage.addListener(message => {
-    if (closed || message.id !== pending?.id) return;
-    if (message.type === 'progress') {
-      $('organato-status').textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…';
-      return;
+    try { connect().postMessage({ id: pending.id, type, settings }); }
+    catch {
+      const connection = port; port = null;
+      try { connection?.disconnect(); } catch {}
+      finish('Organato helper is unavailable. Try again.');
     }
-    if (!message.ok) { finish(message.error); return; }
-    for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
-    finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
-  });
-  port.onDisconnect.addListener(() => { if (!closed) finish('Connection closed. Reopen Settings to retry.'); });
+  };
   for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));
   $('organato-connect').addEventListener('click', () => {
     const key = $('organato-key').value.trim(); $('organato-key').value = '';
     $('organato-status').textContent = 'Connecting to Organato…'; request('configure', { key });
   });
   $('organato-disconnect').addEventListener('click', () => request('configure', { disconnect: true }));
-  const dispose = () => { closed = true; clearTimeout(timer); port.disconnect(); };
+  const dispose = () => { closed = true; clearTimeout(timer); port?.disconnect(); port = null; };
   window.addEventListener('pagehide', dispose, { once: true });
   request('view');
   return { dispose };

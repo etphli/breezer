@@ -12,12 +12,13 @@ test('password actions open pinned native pages in Breezer, without reading cred
     },
   });
   const actions = createPasswordActions({ api });
-  for (const destination of ['manager', 'settings', 'import', 'browserImport']) await actions.open(destination);
+  for (const destination of ['manager', 'settings', 'import', 'browserImport', 'passkeys']) await actions.open(destination);
   assert.deepEqual(calls, [
     { url: 'chrome://password-manager/passwords', active: true },
     { url: 'chrome://password-manager/settings', active: true },
     { url: 'chrome://password-manager/settings?import=true', active: true },
     { url: 'chrome://settings/importData', active: true },
+    { url: 'chrome://settings/passkeys', active: true },
   ]);
   assert.equal(PASSWORD_ROUTES.import, calls[2].url);
 });

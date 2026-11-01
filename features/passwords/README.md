@@ -73,6 +73,13 @@ Primary source locations:
 - https://chromium.googlesource.com/chromium/src/+/156.0.8078.47/chrome/browser/ui/passwords/manage_passwords_ui_controller.cc
 - https://chromium.googlesource.com/chromium/src/+/156.0.8078.47/chrome/browser/ui/autofill/autofill_context_menu_manager.cc
 
+## Login Enter fallback
+
+The overlay also adds a narrowly scoped Enter fallback for explicitly annotated
+username/current-password POST forms without a submit button. See
+[scope, source evidence and pending native acceptance](../../docs/login-enter.md).
+Existing default buttons and native autofill routing retain priority.
+
 ## Automated verification
 
 ```sh
@@ -98,7 +105,7 @@ action tests also pass.
 
 No shared settings, CSS, HTML, AI, or native workspace/frame files changed.
 Existing preparation already fingerprints and applies everything under
-`features/passwords/native-ui/`. The overlay now stages ten native targets. It
+`features/passwords/native-ui/`. The overlay now stages fourteen native targets. It
 still refuses drift and supports an interrupted retry.
 
 The native overlay fingerprint changes. The existing build wrapper deliberately
@@ -152,3 +159,12 @@ private windows, and same-origin/cross-origin frames. Confirm that initial page
 load does not fill credentials, selecting a suggestion does not submit a form,
 and dismissing or switching tabs does not reopen a modal. No runtime acceptance
 is claimed by the source tests.
+
+## Passkeys
+
+The same overlay restores the native Mac profile passkey management route and
+removes Helium's forced-off passkey preference. Current signing still prevents
+local Touch ID and Apple Passwords use. See [passkey availability, source audit,
+protocol evidence and remaining native acceptance](../../docs/passkeys.md).
+No private-key export, credential store migration or signing identity change is
+part of this overlay.

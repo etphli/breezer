@@ -11,6 +11,8 @@
 #include "base/memory/raw_ref.h"
 #include "base/memory/weak_ptr.h"
 #include "base/scoped_observation.h"
+#include "base/values.h"
+#include "chrome/browser/ui/tabs/tab_strip_user_gesture_details.h"
 #include "chrome/browser/ui/views/extensions/extension_view_views.h"
 #include "extensions/browser/extension_host_registry.h"
 #include "extensions/browser/extension_registry.h"
@@ -47,6 +49,11 @@ class BreezerWorkspaceView final
 
  public:
   static constexpr int kViewId = 0x42525753;  // "BRWS"
+
+  // Available custom sidebar in this browser only. Top tabs and private windows
+  // keep Chromium's native commands.
+  static BreezerWorkspaceView* FromBrowser(BrowserWindowInterface* browser);
+  bool SelectNumberedTab(int index, TabStripUserGestureDetails gesture);
 
   // Runs whenever is_available() changes after construction.
   using AvailabilityChangedCallback = base::RepeatingCallback<void(bool)>;
@@ -89,6 +96,9 @@ class BreezerWorkspaceView final
   void UpdateTitlebarArea();
   void UpdateCornerRadii();
   void HandleCloseExtensionHost(extensions::ExtensionHost* host);
+  void OnNumberedTabResult(int index,
+                          TabStripUserGestureDetails gesture,
+                          base::Value handled);
 
   // ExtensionViewViews::Observer:
   void OnViewDestroying() override;

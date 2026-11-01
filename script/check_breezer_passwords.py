@@ -4,6 +4,7 @@
 import argparse
 import hashlib
 import importlib.util
+import json
 import os
 import subprocess
 import sys
@@ -39,7 +40,12 @@ def main():
             'components/password_manager/core/browser/password_bubble_experiment.cc',
             'chrome/browser/ui/autofill/autofill_context_menu_manager.cc',
         }
+        manifest = json.loads((ROOT / 'features/passwords/native-ui/upstream.json').read_text())
+        evidence |= set(manifest['source_evidence_sha256']) | set(manifest['passkey_source_evidence_sha256']) | {'chrome/VERSION'}
         prepare(tree, offline=args.offline, wanted_paths=set(paths) | evidence)
+        keychain = tree / 'components/os_crypt/common/keychain_password_mac.mm'
+        keychain.write_text(keychain.read_text().replace('Helium Storage Key', 'Breezer Storage Key')
+                            .replace('kDefaultAccountName[] = "Helium"', 'kDefaultAccountName[] = "Breezer"'))
         original = hashes(tree, paths)
         try:
             overlay.apply(tree, check=True)
@@ -56,6 +62,13 @@ def main():
         subprocess.run([sys.executable, str(ROOT / 'tests/passwords_proactive_test.py'), '-v'],
                        env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),
                             'PYTHONDONTWRITEBYTECODE': '1'}, check=True)
+        subprocess.run([sys.executable, str(ROOT / 'tests/passwords_enter_test.py'), '-v'],
+                       env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),
+                            'PYTHONDONTWRITEBYTECODE': '1'}, check=True)
+        for suite in ('passwords_native_test.py', 'passkeys_native_test.py'):
+            subprocess.run([sys.executable, str(ROOT / 'tests' / suite), '-v'],
+                           env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),
+                                'PYTHONDONTWRITEBYTECODE': '1'}, check=True)
         name = next(iter(paths))
         (tree / name).write_text("unrecognized source\n")
         drifted = hashes(tree, paths)

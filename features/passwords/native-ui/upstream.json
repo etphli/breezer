@@ -4,13 +4,15 @@
   "helium_macos_commit": "9aa975a56de8c2376d7c22f71da564b9426cda5f",
   "restores": [
     "native password saving default on; explicit user choices and enterprise policy still apply",
-    "native password saving preference instead of Helium forced-off policy; preserves passkey policy",
+    "native password and passkey preferences instead of Helium forced-off policy; real enterprise policy still applies",
     "native password bubble action and web app password icon",
     "native manage-passwords footer in autofill suggestions",
     "native password-field context menu fallback, with existing fill eligibility checks",
     "native fill-on-account-select default; no page-load password filling by default",
     "quiet native save/update suggestion chip, preserving blocklists and dismissal suppression",
-    "native dismissal of saved-password suggestions while typing allows Enter to submit"
+    "native dismissal of saved-password suggestions while typing allows Enter to submit",
+    "native macOS profile passkey management at chrome://settings/passkeys; platform entitlement gates unchanged",
+    "trusted Enter for annotated two-field POST logins without a submit button; existing native submission retains priority"
   ],
   "direct_chrome_password_import": false,
   "csv_import_route": "chrome://password-manager/settings?import=true",
@@ -39,6 +41,26 @@
     "components/password_manager/core/browser/password_bubble_experiment.cc": "bedeec9100ffbad32fa8d7bccaee5a8d69a7ea5a553e788b7d532c7bd4bdb8cc",
     "chrome/browser/ui/autofill/autofill_context_menu_manager.cc": "ffe5654b5e99aacc641621f7c95c86a875934354f51c07114477b43dfd567460",
     "chrome/browser/ui/page_action/page_action_controller.h": "00189a69343b55e90f38fe7ed080ef360223ffb6abaa55898e1e398eb097287e",
-    "components/autofill/core/browser/foundations/browser_autofill_manager.cc": "a8ca04e81cb488fd5e60f4d778a6bb97645d22443204373fd5c9204d6d34dbd1"
+    "components/autofill/core/browser/foundations/browser_autofill_manager.cc": "a8ca04e81cb488fd5e60f4d778a6bb97645d22443204373fd5c9204d6d34dbd1",
+    "chrome/browser/resources/settings/route.ts": "01ad15cf728ec96d0cd299095880442e883c19e5e27bdf2ad3e13e520b88406a",
+    "chrome/browser/resources/settings/settings_main/settings_main.html": "a6ffcddeb68218d769d16ba5bdfee4465c33cb394b62b4598dc07e74b8fa1415",
+    "third_party/blink/renderer/core/html/forms/html_form_element.cc": "2a96a97bfb4246b7a23895be7548533ce7adc32286f10df36831e370f8f86102",
+    "third_party/blink/renderer/core/html/forms/html_form_element_test.cc": "89c9949ef25d8602c4e09ae19b662f4a9d3d010e9c925234d5be89eef1a538ff",
+    "third_party/blink/renderer/core/html/forms/html_input_element.cc": "e24b3b06861f2602fe38806310ffc719305dd577f0972cdd8330547db66039dc"
+  },
+  "passkey_source_evidence_sha256": {
+    "chrome/browser/webauthn/chrome_web_authentication_delegate.cc": "6027d0e3e08eb1b83fc59759aa8f4a6789cbb2364ff83867ead42e2809828775",
+    "chrome/browser/webauthn/chrome_authenticator_request_delegate.cc": "9adc8fe0032af599fc950ad2e963801a3a3a096f789b95e547408ce1f81363ce",
+    "chrome/browser/webauthn/local_credential_management_mac.cc": "a079b9f77df3b094e6bf01c8574c31ac799440b571a9e563d781b9f06f01d141",
+    "device/fido/mac/touch_id_context.mm": "74018b32fd03af81b15e44e2b2bda3f1d2f20b788e2f9750c44538c10c31046a",
+    "device/fido/mac/credential_store.mm": "a45d6afca8f7397bffc2be238e1914d8c8702f35e154ca4190fb175d7bd3d171",
+    "device/fido/mac/icloud_keychain.mm": "f2b33c3bb6f3bb7f481e04874d4f1095bbaf1d9d92f49ff7550a861279e28713",
+    "device/fido/mac/icloud_keychain_sys.mm": "e36a50aeace76eb45a30e61d1e12fbc5e4d0ebbf7d648d4b5c485efa12716a47",
+    "content/browser/webauth/authenticator_common_impl.cc": "55d54519b3714c623f131080a841137503848a17a9b52b858ad97fbfaa0698f8",
+    "chrome/browser/ui/webui/settings/settings_security_key_handler.cc": "e96add0688de6f048bac5ab69c0bf61d98f104b1adbeb523bd176707abc901ea",
+    "chrome/browser/resources/settings/autofill_page/passwords/passkeys_page.ts": "ca59d54883b9dd282291d671b7f8fe52c72a802df26865fbca0637a71e387138",
+    "chrome/browser/resources/settings/lazy_load.ts": "ba07442994d2b595bb8717c087dcf9e2721d68edc2b0cec6c0f666b7ae8a198d",
+    "chrome/browser/resources/settings/settings_main/settings_main.ts": "13e308ad677db60b8df44d07b2342fb1e43c016ca4525bf6f56fd91ed14b74e2",
+    "chrome/browser/ui/webui/settings/settings_ui.cc": "413da05f619a7105d9060a2e806b7269f58fa472f1879cbe21513e3abc61d8d0"
   }
 }

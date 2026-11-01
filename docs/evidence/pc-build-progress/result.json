@@ -1,0 +1,76 @@
+{
+  "Passed": true,
+  "CounterTests": {
+    "Passed": true,
+    "Cases": [
+      "UTF8/UTF16LE/UTF16BE and incremental remaining counts",
+      "Partial writes and split Unicode code units",
+      "Pass boundaries, driver changes and truncation",
+      "Failures and paused/compiled state are separate from counter",
+      "Preparation, missing files and partial JSON",
+      "Bounded initial/backlog reads and stale-log label"
+    ],
+    "FixtureOnly": true,
+    "BuildTouched": false
+  },
+  "Snapshot": {
+    "Display": "5237/5643",
+    "Remaining": 5237,
+    "Total": 5643,
+    "Finished": 406,
+    "Status": "Current pass",
+    "Phase": "build-driver-running",
+    "Detail": "Current-pass actions only. Finished actions can include failures; this is not release completion.",
+    "Jobs": 4,
+    "Warning": false,
+    "LogAgeSeconds": 0,
+    "BytesRead": 47
+  },
+  "Layout": {
+    "Counter": "5237/5643",
+    "Status": "Current pass",
+    "CounterWidth": 129,
+    "ClientWidth": 168,
+    "ControlCount": 3,
+    "Visible": false,
+    "TimerEnabled": false,
+    "TopMost": true
+  },
+  "LargeCounterLayout": {
+    "Counter": "96267/96268",
+    "Status": "Current pass",
+    "CounterWidth": 155,
+    "ClientWidth": 168,
+    "ControlCount": 3,
+    "Visible": false,
+    "TimerEnabled": false,
+    "TopMost": true
+  },
+  "VisibleWindowOpened": false,
+  "LiveBuildRead": false,
+  "PowerShellVersion": "5.1.26100.9711",
+  "Files": [
+    {
+      "Name": "build-progress.test.ps1",
+      "Sha256": "c9a17876b673059db6975dadebe6d7477fc15604175e63a324f970c83bb808a0"
+    },
+    {
+      "Name": "BuildProgress.psm1",
+      "Sha256": "a44998e716faa29bd43701dd674f669b9980bb8e555eb863c37e25dffab4f62d"
+    },
+    {
+      "Name": "PC-BUILD.md",
+      "Sha256": "b66e72219d0d33b1227a2cb101ea9898171edb8c7e70f8180bdfed8e6126d84c"
+    },
+    {
+      "Name": "show-build-progress.ps1",
+      "Sha256": "4096112ec067cbe66b26bf0b1d3c4f6f381f29ff949a34a11f9058198481ea3c"
+    }
+  ],
+  "VerificationScope": "Fixture counter tests and unshown native-control construction only; visible desktop interactions unverified",
+  "Author": "gpt-6.1-sol",
+  "CurrentBuildAltered": false,
+  "WidgetActivated": false,
+  "FinalRunbookReadBackVerified": true,
+  "FinalRunbookSha256": "74d48feb4b26230e563fb0c5010dc7ea249dd337bf4e4146a684f227a55823fb"
+}

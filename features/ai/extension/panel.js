@@ -1,3 +1,4 @@
+import { ResearchSources, maskSecrets } from './research-sources.js';
 import { renderMessage } from './render-message.js';
 import { latestModels } from './model-catalog.js';
 import { startPanelTheme } from './panel-theme.js';
@@ -20,6 +21,10 @@ const state = {
   sessionKey: 'breezer-conversation',
   windowId: null,
 };
+const research = new ResearchSources({ api: chrome, root: document,
+  onChange: () => { if (research.size) setControl(false); updateControls(); },
+  onRevoke: reason => { if (state.running) stop(); notify(reason); },
+});
 const messageNodes = new Map();
 let scheduledRender = false;
 
@@ -102,24 +107,31 @@ function updateControls() {
   $('send').title = running ? 'Stop response' : 'Send message';
   $('send-arrow').toggleAttribute('hidden', running);
   $('send-stop').hidden = !running;
-  $('control-toggle').disabled = running || !state.page;
-  $('context-toggle').disabled = running || !state.page;
+  research.setBusy(running);
+  $('control-toggle').disabled = running || !state.page || research.size > 0;
+  $('context-toggle').hidden = research.size > 0;
+  $('context-toggle').disabled = running || !state.page || research.size > 0;
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
   $('context-check').hidden = !state.includeContext;
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
-  $('context-hint').textContent = ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('context-hint').textContent = research.size ? `${research.size} selected tabs · text only · no control` : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
   $('control-toggle').title = state.page
     ? 'Let Breezer click, type, scroll, and navigate in this tab until you turn this off'
     : 'Browser control works only on ordinary web pages';
-  $('prompt').placeholder = state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
+  $('prompt').placeholder = research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
   const selected = selectedModel();
   renderWelcomeStatus(selected);
   $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
   $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
   $('model-button').disabled = running;
+  const summarize = document.querySelector('[data-prompt^="Summarize"]');
+  if (summarize) {
+    summarize.dataset.prompt = research.size ? 'Summarize these selected pages and cite the sources.' : 'Summarize this page. What should I take away from it?';
+    summarize.querySelector('span').textContent = research.size ? 'Summarize selected sources' : 'Summarize this page';
+  }
   renderSettings(selected, running);
 }
 
@@ -138,7 +150,7 @@ function renderWelcomeStatus(selected) {
   $('welcome-status-text').textContent = text;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
-  document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = state.pageKnown && !state.page; });
+  document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
 
 function refreshModels() {
@@ -255,6 +267,7 @@ function setPage(page) {
 // Consent belongs to one tab. It lasts across replies until the user turns it off,
 // stops a reply, switches tabs, starts a new conversation, or control fails.
 function setControl(on) {
+  if (on && research.size) return;
   state.control = on && Boolean(state.page);
   state.controlTabId = state.control ? state.page.tabId : null;
   if (state.control) state.includeContext = true;
@@ -419,7 +432,7 @@ async function send() {
   const id = crypto.randomUUID();
   const assistantId = `${id}-reply`;
   const history = state.messages.filter((item) => item.text).slice(-30).map(({ role, text: content }) => ({ role, content }));
-  const userMessage = { id, role: 'user', text, contextTitle: state.includeContext ? state.page?.title || 'Current page' : '' };
+  const userMessage = { id, role: 'user', text, contextTitle: research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '' };
   const assistantMessage = { id: assistantId, role: 'assistant', text: '' };
   state.messages.push(userMessage, assistantMessage);
   appendMessage(userMessage);
@@ -431,7 +444,24 @@ async function send() {
   $('activity-label').textContent = state.control ? 'Getting ready to help' : 'Thinking';
   updateControls();
   scrollToBottom();
-  if (state.includeContext || state.control) {
+  let sources;
+  if (research.size) {
+    // Start before awaiting anything so native sees the user's send gesture.
+    post({ type: 'research-begin', id, sources: [...research.selected.values()].map(tab => ({ tabId: tab.tabId, documentId: tab.documentId, expectedUrl: tab.url })) });
+    const capture = research.capture();
+    try {
+      sources = await capture;
+      if (state.running?.id !== id) return;
+      const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
+      userMessage.contextTitle = summary;
+      const meta = messageNodes.get(id)?.parentElement.querySelector('.message-meta');
+      if (meta) meta.textContent = summary;
+      if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');
+    } catch (error) {
+      if (state.running?.id === id) fail(error.message, `Could not read selected sources. ${error.message}`);
+      return;
+    }
+  } else if (state.includeContext || state.control) {
     try {
       const allowed = await chrome.breezerPrivate.authorizeCurrentPage();
       if (!allowed) throw new Error('Page access is only available on ordinary HTTP or HTTPS web pages.');
@@ -447,12 +477,14 @@ async function send() {
     ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
     ...(selected.provider.id === 'codex' ? { speed: settings.speed } : {}),
     message: text, history, profile: state.profile,
-    includeContext: state.includeContext, control: state.control,
+    includeContext: !sources && state.includeContext, control: !sources && state.control,
+    ...(sources ? { researchSources: sources } : {}),
   });
   if (!sent) offerRetry({ id, assistantId, control: false });
 }
 
 function receive(message) {
+  if (message.type === 'research-invalidated') { research.invalidate(message.tabId, message.reason); return; }
   if (message.type === 'status') return acceptProviders(message.providers);
   if (message.type === 'context') return setPage(message.context);
   if (message.id && message.id !== state.running?.id) return;
@@ -515,6 +547,7 @@ document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventLi
 }));
 $('new-chat').addEventListener('click', () => {
   stop();
+  research.clear();
   state.messages = [];
   messageNodes.clear();
   $('messages').replaceChildren();
@@ -559,7 +592,7 @@ document.addEventListener('keydown', (event) => {
 });
 document.addEventListener('visibilitychange', () => {
   if (state.port) post({ type: 'visibility', visible: !document.hidden });
-  if (document.hidden) stop();
+  if (document.hidden) { stop(); research.clear(); }
   else if (state.port) { revealPanel(); post({ type: 'context' }); }
 });
 $('open-profile').addEventListener('click', () => {

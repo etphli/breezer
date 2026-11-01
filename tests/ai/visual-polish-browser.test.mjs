@@ -369,7 +369,8 @@ async function withNewTab(browser, base, { width, height = 720, appearance = { t
   try {
     await page.goto(`${base}/newtab.html`);
     await page.waitForSelector('html[data-loaded="true"]');
-    await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 8);
+    // Narrower windows ask for fewer sites, so wait for every rendered favicon.
+    await page.waitForFunction(() => { const tiles = document.querySelectorAll('.site:not(.site-add)'); return tiles.length > 0 && document.querySelectorAll('.site:not(.site-add) .site-icon.has-icon').length === tiles.length; });
     await fn(page);
     assert.deepEqual(errors, []);
   } finally {
@@ -385,7 +386,7 @@ const siteGeometry = (page) => page.evaluate(() => [...document.querySelectorAll
   return {
     left: slot.left, right: slot.right, width: slot.width, top: Math.round(slot.top),
     cx: icon.left + icon.width / 2, labelLeft: label.left, labelRight: label.right,
-    truncated: name.scrollWidth > name.clientWidth, title: site.querySelector('.site-link').title, text: name.textContent,
+    truncated: name.scrollWidth > name.clientWidth, title: site.querySelector('.site-link').title, text: name.textContent, add: site.classList.contains('site-add'),
   };
 }));
 
@@ -396,7 +397,7 @@ function assertSiteRow(sites, visible, label, viewport) {
   assert.ok(spread(intervals(sites.map((s) => s.cx))) <= 0.5, `${label}: even icon centres ${intervals(sites.map((s) => s.cx))}`);
   for (const site of sites) {
     assert.ok(site.labelLeft >= site.left - 0.5 && site.labelRight <= site.right + 0.5, `${label}: "${site.text}" stays in its slot`);
-    assert.ok(site.title.startsWith(`${site.text}\n`), `${label}: full title tooltip kept`);
+    if (!site.add) assert.ok(site.title.startsWith(`${site.text}\n`), `${label}: full title tooltip kept`);
     assert.ok(site.right <= viewport, `${label}: inside the window`);
   }
 }
@@ -408,8 +409,9 @@ test('new-tab sites keep equal slots and icon spacing whatever the title length'
   const browser = await chromium.launch({ executablePath, headless: true });
   try {
     const cases = [
-      { name: 'wide-dark-tide', width: 1440, visible: 8 },
-      { name: 'wide-light-mint', width: 1280, visible: 8, appearance: { theme: 'mint', colorMode: 'light' } },
+      // `visible` counts the Add shortcut tile, which always ends the row.
+      { name: 'wide-dark-tide', width: 1440, visible: 9 },
+      { name: 'wide-light-mint', width: 1280, visible: 9, appearance: { theme: 'mint', colorMode: 'light' } },
       { name: 'medium-custom', width: 900, visible: 6, appearance: { theme: '#d0543c', colorMode: 'light' } },
       { name: 'small-custom-dark', width: 640, visible: 4, appearance: { theme: '#d0543c', colorMode: 'dark' } },
       { name: 'mobile-dark', width: 390, visible: 3 },
@@ -419,7 +421,7 @@ test('new-tab sites keep equal slots and icon spacing whatever the title length'
         const sites = await siteGeometry(page);
         assertSiteRow(sites, item.visible, item.name, item.width);
         assert.ok(sites.some((s) => s.truncated), `${item.name}: long titles are truncated`);
-        assert.ok(sites.some((s) => s.text === 'X' && !s.truncated) || item.visible < 6, `${item.name}: short titles are whole`);
+        assert.ok(sites.some((s) => s.text === 'X' && !s.truncated) || item.visible <= 6, `${item.name}: short titles are whole`);
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${item.name}: no page overflow`);
         await page.screenshot({ path: `${evidence}/newtab-sites-${item.name}.png`, clip: { x: 0, y: 0, width: item.width, height: 360 } });
       });
@@ -438,7 +440,7 @@ test('new-tab sites keep equal slots and icon spacing whatever the title length'
       await page.waitForFunction(() => !document.querySelector('.site-link[href="https://canvas.example.edu/"]'));
       assert.ok(page.url().endsWith('/newtab.html'), 'Remove must not open the site');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'shortcut-undo');
-      assertSiteRow(await siteGeometry(page), 8, 'after removal', 1280);
+      assertSiteRow(await siteGeometry(page), 9, 'after removal', 1280); // the next site fills the gap, then Add
       await page.keyboard.press('Enter');
       await page.waitForSelector('.site-link[href="https://canvas.example.edu/"]');
       assert.equal(await page.$eval('.site:hover .site-icon, .site-icon', (node) => getComputedStyle(node).transitionDuration), '0s', 'reduced motion drops the hover lift');

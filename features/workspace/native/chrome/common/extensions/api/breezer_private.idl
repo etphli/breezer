@@ -61,11 +61,52 @@ namespace breezerPrivate {
     boolean? alwaysShowTopBar;
   };
 
+  dictionary ResearchTab {
+    long tabId;
+    DOMString documentId;
+    DOMString url;
+    DOMString title;
+    boolean loading;
+  };
+  dictionary ResearchText {
+    DOMString text;
+    boolean truncated;
+    long capturedCharacters;
+  };
+  callback ResearchTabsCallback = void(ResearchTab[] tabs);
+  callback ResearchTextCallback = void(ResearchText page);
+
   callback AppearanceCallback = void(Appearance appearance);
   callback BooleanCallback = void(boolean allowed);
   callback VoidCallback = void();
 
+  // Workspace metadata only; native passwords and vault keys are never exposed.
+  dictionary WorkspaceSyncState {
+    boolean configured;
+    boolean workspaceEnabled;
+    boolean nativeError;
+    DOMString nativeMessage;
+    DOMString providerId;
+    DOMString vaultId;
+    DOMString model;
+  };
+  dictionary WorkspaceSyncExchange {
+    DOMString providerId;
+    DOMString vaultId;
+    DOMString expectedModel;
+    DOMString model;
+  };
+  callback WorkspaceSyncCallback = void(WorkspaceSyncState state);
+
+  interface Events {
+    // Bounded wake-up hint only. No key, credential or workspace payload.
+    static void onSyncStateChanged();
+  };
+
   interface Functions {
+    static void readWorkspaceSync(WorkspaceSyncCallback callback);
+    static void exchangeWorkspaceSync(WorkspaceSyncExchange request,
+                                      WorkspaceSyncCallback callback);
     static void getAppearance(AppearanceCallback callback);
     static void setAppearance(
         AppearancePatch patch,
@@ -73,6 +114,12 @@ namespace breezerPrivate {
     static void setSidebarCollapsed(
         boolean collapsed,
         optional VoidCallback callback);
+    // Metadata only. No scripting, debugger or host permission is granted.
+    static void getResearchTabs(ResearchTabsCallback callback);
+    // One user-gesture-bound read of an exact document in the calling window.
+    static void readResearchTab(long tabId, DOMString documentId,
+                                DOMString expectedUrl,
+                                ResearchTextCallback callback);
     static void authorizeCurrentPage(BooleanCallback callback);
     // Marks the live favourite tabs of the calling sidebar's own window, where
     // links open in a peek. Every other tab in that window is cleared. Unknown

@@ -38,6 +38,8 @@
     <div id="notice" class="notice" role="status" hidden><span id="notice-text"></span><button type="button" id="dismiss-notice" aria-label="Dismiss message">×</button></div>
 
     <footer class="compose-area">
+      <div class="research-row"><button type="button" id="research-open" class="text-button" aria-haspopup="dialog">Choose source tabs</button><button type="button" id="research-clear" class="text-button" hidden>Clear sources</button></div>
+      <div id="research-chips" class="research-chips" aria-label="Selected research sources"></div>
       <div class="context-row">
         <button type="button" id="context-toggle" class="context-chip" aria-pressed="true" aria-describedby="context-hint" title="Include the current page and a screenshot with your message">
           <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
@@ -86,6 +88,12 @@
       <p class="privacy-note">Saved in this browser. Included with your messages to the provider you choose.</p>
       <button type="submit" class="save-button">Save context</button>
     </form>
+  </dialog>
+  <dialog id="research-dialog" aria-labelledby="research-title">
+    <div class="dialog-heading"><h2 id="research-title">Research source tabs</h2><button type="button" id="research-close" class="text-button">Done</button></div>
+    <p>Choose up to six tabs in this window. Sending shares their page text with your selected provider. No screenshots or browser control. Form fields, frames and recognizable secrets are excluded.</p>
+    <p id="research-limit" role="status">Sources are read only when you send. Navigation clears the selection.</p>
+    <div id="research-options" class="research-options"></div>
   </dialog>
   <script type="module" src="panel.js"></script>
 </body>

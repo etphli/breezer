@@ -14,6 +14,33 @@ import { performance } from 'node:perf_hooks';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 export const commonFlags = ['--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', '--window-size=1280,900'];
+export function comparisonPlan({ trials, initializedProfiles, baselineBreezer, physicalFootprint }) {
+  if (physicalFootprint) assert.ok(initializedProfiles, '--physical-footprint requires --initialized-profiles');
+  if (baselineBreezer) {
+    assert.ok(initializedProfiles, '--baseline-breezer requires --initialized-profiles');
+    assert.equal(trials % 6, 0, 'Three-browser trials must be a multiple of six for balanced order');
+  }
+  const orders = baselineBreezer ? [
+    ['breezer', 'baselineBreezer', 'chrome'],
+    ['chrome', 'baselineBreezer', 'breezer'],
+    ['baselineBreezer', 'breezer', 'chrome'],
+    ['chrome', 'breezer', 'baselineBreezer'],
+    ['breezer', 'chrome', 'baselineBreezer'],
+    ['baselineBreezer', 'chrome', 'breezer'],
+  ] : [['breezer', 'chrome'], ['chrome', 'breezer']];
+  return {
+    protocol: initializedProfiles
+      ? `installed-browser-v8-initialized-${baselineBreezer ? 'three-way' : 'foreground'}${physicalFootprint ? '-footprint' : ''}`
+      : 'installed-browser-v3-observed-cpu',
+    roundOrders: Array.from({ length: trials }, (_, index) => [...orders[index % orders.length]]),
+  };
+}
+export function nativeForegroundReady(snapshot, pid) {
+  return snapshot.pid === pid && snapshot.active === true && snapshot.hidden === false
+    && snapshot.terminated === false && snapshot.frontmostPid === pid
+    && Array.isArray(snapshot.windows) && snapshot.windows.some(window => window.layer === 0
+      && window.onScreen === true && window.bounds?.Width >= 320 && window.bounds?.Height >= 200);
+}
 export function parseProcesses(text) {
   return text.trim().split('\n').filter(Boolean).map(line => {
     const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\d+)\s+(.+)$/);
@@ -93,7 +120,129 @@ export function observedCpuWindow(samples, rootPid) {
   return { status: 'observed-lower-bound', coverage, ...observation, observedCpuSeconds: observedCentiseconds / 100, cpuSecondsLowerBound,
     cpuSecondsPerElapsedSecondLowerBound: cpuSecondsLowerBound / elapsedSeconds };
 }
+const footprintCoverage = 'Sequential kernel reads of the bracketed observed process tree. Unobserved short-lived children and simultaneous peaks are not covered. Footprint includes charged compressed/swapped memory; it is not current resident or unique physical RAM.';
+export function observedPhysicalFootprint({ rootPid, captureStartedAt, before, after, usageBefore, usageAfter }) {
+  const unavailable = reason => ({ status: 'unavailable', reason, coverage: footprintCoverage });
+  const wallStart = Date.parse(captureStartedAt);
+  if (!Number.isSafeInteger(rootPid) || rootPid <= 0 || !Number.isFinite(wallStart)) return unavailable('Missing root or capture wall time');
+  for (const tree of [before, after]) {
+    if (!Array.isArray(tree) || !tree.length || !tree.some(row => row.pid === rootPid)
+        || new Set(tree.map(row => row.pid)).size !== tree.length
+        || processTree(tree, rootPid).length !== tree.length) return unavailable('Missing root, duplicate PID or invalid owned tree');
+  }
+  if (before.length !== after.length) return unavailable('Observed process tree changed during capture');
+  for (const row of before) {
+    const next = after.find(item => item.pid === row.pid);
+    const started = typeof row.startedAt === 'string' ? Date.parse(row.startedAt) : NaN;
+    if (!Number.isSafeInteger(row.pid) || row.pid <= 0 || !Number.isSafeInteger(row.ppid) || typeof row.command !== 'string'
+        || !Number.isFinite(started) || wallStart - started <= 1000) return unavailable('Missing or too-recent process identity');
+    if (!next || next.ppid !== row.ppid || next.command !== row.command || next.role !== row.role
+        || next.startedAt !== row.startedAt) return unavailable('Process identity changed during capture');
+  }
+  const kernelTime = value => typeof value === 'string' && /^[1-9]\d*$/.test(value) ? BigInt(value) : null;
+  let previousEnd;
+  for (const usage of [usageBefore, usageAfter]) {
+    if (usage?.schema !== 1 || !Array.isArray(usage.processes) || usage.processes.length !== before.length
+        || new Set(usage.processes.map(row => row.pid)).size !== before.length) return unavailable('Missing or partial native process capture');
+    const start = kernelTime(usage.captureStartedNs), end = kernelTime(usage.captureEndedNs);
+    if (start === null || end === null || end < start || (previousEnd !== undefined && start < previousEnd)) return unavailable('Invalid native capture bounds');
+    previousEnd = end;
+    for (const row of usage.processes) {
+      if (!before.some(item => item.pid === row.pid) || row.status !== 'ok'
+          || kernelTime(row.startAbstime) === null || typeof row.executableUuid !== 'string' || !/^[a-f0-9]{32}$/.test(row.executableUuid)
+          || !Number.isSafeInteger(row.physicalFootprintBytes) || row.physicalFootprintBytes < 0) return unavailable('Missing native identity or footprint counter');
+    }
+  }
+  let bytes = 0;
+  for (const row of usageBefore.processes) {
+    const next = usageAfter.processes.find(item => item.pid === row.pid);
+    if (next.startAbstime !== row.startAbstime || next.executableUuid !== row.executableUuid) return unavailable('Native PID identity changed during capture');
+    bytes += row.physicalFootprintBytes;
+    if (!Number.isSafeInteger(bytes)) return unavailable('Footprint total exceeds numeric precision');
+  }
+  return { status: 'observed', miB: bytes / 1024 ** 2, processCount: before.length,
+    captureStartedNs: usageBefore.captureStartedNs, captureEndedNs: usageBefore.captureEndedNs,
+    identityGuardEndedNs: usageAfter.captureEndedNs, coverage: footprintCoverage };
+}
+export function summarizeFootprints(samples) {
+  if (!samples.length || samples.some(sample => sample?.status !== 'observed' || !Number.isFinite(sample.miB) || sample.miB < 0)) {
+    return { status: 'unavailable', sampleCount: samples.length, reason: 'Every footprint observation is required; missing or invalid captures cannot be pooled.' };
+  }
+  return { status: 'observed', ...summarize(samples.map(sample => sample.miB)) };
+}
+export function capturePhysicalFootprint({ rootPid, before, captureStartedAt, captureLoad, probeExecutable }) {
+  let usageBefore, after, usageAfter;
+  const probe = () => JSON.parse(execFileSync(probeExecutable, before.map(row => String(row.pid)), { encoding: 'utf8', timeout: 2000 }));
+  try {
+    usageBefore = probe();
+    after = captureLoad();
+    usageAfter = probe();
+    return { ...observedPhysicalFootprint({ rootPid, before, after, captureStartedAt, usageBefore, usageAfter }),
+      before, after, usageBefore, usageAfter, captureStartedAt };
+  } catch (error) {
+    return { status: 'unavailable', reason: `Native footprint capture failed: ${error.message}`, coverage: footprintCoverage,
+      before, after, usageBefore, usageAfter, captureStartedAt };
+  }
+}
 const sidebarPrefix = 'chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/workspace.html#/sidebar?w=';
+const breezerExtensionId = 'namgcidocfgliiedlkdafcmifpdfiakj';
+const breezerExtensionUrl = `chrome-extension://${breezerExtensionId}/`;
+export async function initializeBreezerProfile(cdp, targets, state) {
+  const welcomeUrl = `${breezerExtensionUrl}workspace.html#/welcome`;
+  const notesUrl = `${breezerExtensionUrl}whats-new.html`;
+  const welcome = targets.find(target => target.type === 'page' && target.url === welcomeUrl);
+  const reader = welcome
+    || targets.find(target => target.type === 'page' && target.url === notesUrl)
+    || targets.find(target => target.type === 'page' && target.url.startsWith(sidebarPrefix) && /^\d+$/.test(target.url.slice(sidebarPrefix.length)))
+    || targets.find(target => target.type === 'service_worker' && target.url === `${breezerExtensionUrl}background.js`);
+  if (!reader) return false;
+  const session = await cdp.attach(reader.targetId);
+  let saved;
+  try {
+    saved = await cdp.evaluate(session, `(async () => {
+      const value = await chrome.storage.local.get(['breezer.releaseNotesSeen', 'breezer.setup.v1']);
+      return { extensionId: chrome.runtime.id, seen: value['breezer.releaseNotesSeen'], setup: value['breezer.setup.v1'] };
+    })()`);
+  } finally {
+    await cdp.send('Target.detachFromTarget', { sessionId: session });
+  }
+  assert.equal(saved?.extensionId, breezerExtensionId, 'Setup state must come from the bundled component');
+  if (typeof saved.seen !== 'string' || !/^\d+\.\d+\.\d+$/.test(saved.seen)) return false;
+  if (welcome && !state.clickedWelcomeTargets.has(welcome.targetId)) {
+    const welcomeSession = await cdp.attach(welcome.targetId);
+    let clicked;
+    try {
+      clicked = await cdp.evaluate(welcomeSession, `(() => {
+        if (location.href !== ${JSON.stringify(welcomeUrl)} || chrome.runtime.id !== ${JSON.stringify(breezerExtensionId)}) return false;
+        const button = document.getElementById('wl-skip');
+        if (!button || button.disabled || !button.getClientRects().length) return false;
+        button.click();
+        return true;
+      })()`);
+    } finally {
+      await cdp.send('Target.detachFromTarget', { sessionId: welcomeSession });
+    }
+    if (clicked) {
+      state.clickedWelcomeTargets.add(welcome.targetId);
+      state.actions.push({ action: 'skip-setup', targetId: welcome.targetId, url: welcomeUrl, via: 'normal Skip setup button' });
+    }
+    return false;
+  }
+  if (welcome) return false;
+  for (const targetId of state.clickedWelcomeTargets) {
+    if (saved.setup?.completed !== true) return false;
+    const target = targets.find(item => item.targetId === targetId);
+    if (!target) continue;
+    if (!['chrome://newtab/', `${breezerExtensionUrl}newtab.html`].includes(target.url)) return false;
+    await cdp.send('Target.closeTarget', { targetId });
+    state.actions.push({ action: 'close-completed-setup-tab', targetId, url: target.url });
+  }
+  for (const target of targets.filter(item => item.type === 'page' && item.url === notesUrl)) {
+    await cdp.send('Target.closeTarget', { targetId: target.targetId });
+    state.actions.push({ action: 'close-first-run-notes', targetId: target.targetId, url: target.url });
+  }
+  return true;
+}
 export function accountPageTargets(targets, evidence = {}) {
   const contentPages = [];
   const excludedSidebarHosts = [];
@@ -112,7 +261,11 @@ async function pageInventory(cdp) {
   const evidence = {};
   for (const target of targetInfos.filter(item => item.type === 'page' && item.url.startsWith(sidebarPrefix))) {
     const session = await cdp.attach(target.targetId);
-    evidence[target.targetId] = await cdp.evaluate(session, '(async () => ({ contexts: await chrome.runtime.getContexts({}), tabs: await chrome.tabs.query({}) }))()');
+    try {
+      evidence[target.targetId] = await cdp.evaluate(session, '(async () => ({ contexts: await chrome.runtime.getContexts({}), tabs: await chrome.tabs.query({}) }))()');
+    } finally {
+      await cdp.send('Target.detachFromTarget', { sessionId: session });
+    }
   }
   return accountPageTargets(targetInfos, evidence);
 }
@@ -140,7 +293,7 @@ async function until(label, probe, timeout = 30000, interval = 25) {
   }
   throw new Error(`${label} timed out: ${last?.message || 'condition never became true'}`);
 }
-class CDP {
+export class CDP {
   constructor(socket) {
     this.socket = socket;
     this.next = 0;
@@ -195,8 +348,20 @@ if CommandLine.arguments.contains("--snapshot") {
   print(String(data: data, encoding: .utf8)!)
   exit(0)
 }
+let requireForeground = CommandLine.arguments.contains("--activate")
+var activationRequested = false
 let deadline = ProcessInfo.processInfo.systemUptime + 35
 while ProcessInfo.processInfo.systemUptime < deadline {
+  if requireForeground {
+    RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.01))
+    let app = NSRunningApplication(processIdentifier: pid)
+    if !activationRequested {
+      activationRequested = app?.activate(options: [.activateAllWindows, .activateIgnoringOtherApps]) ?? false
+    }
+    if app?.isActive != true || app?.isHidden != false || NSWorkspace.shared.frontmostApplication?.processIdentifier != pid {
+      continue
+    }
+  }
   let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
   for window in windows {
     guard (window[kCGWindowOwnerPID as String] as? NSNumber)?.int32Value == pid,
@@ -207,9 +372,9 @@ while ProcessInfo.processInfo.systemUptime < deadline {
     print("visible")
     exit(0)
   }
-  Thread.sleep(forTimeInterval: 0.01)
+  if !requireForeground { Thread.sleep(forTimeInterval: 0.01) }
 }
-fputs("No visible native window for owned browser PID\\n", stderr)
+fputs("Native window readiness failed for owned browser PID\\n", stderr)
 exit(1)
 `;
 function fixtureHtml() {
@@ -268,7 +433,7 @@ function environment() {
     gitStatus: command('/usr/bin/git', ['-C', root, 'status', '--short']),
   };
 }
-async function launch(browser, profile, url, output, label, probeExecutable) {
+async function launch(browser, profile, url, output, label, probeExecutable, { initializedProfiles = false, setup = false } = {}) {
   const args = [`--user-data-dir=${profile}`, ...commonFlags, url];
   const started = performance.now();
   const proc = spawn(browser.executable, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: true });
@@ -319,7 +484,7 @@ async function launch(browser, profile, url, output, label, probeExecutable) {
     await writeFile(join(output, `${label}.browser.log`), Buffer.concat(logs));
   };
   try {
-    windowProbe = spawn(probeExecutable, [String(proc.pid)], { stdio: ['ignore', 'pipe', 'pipe'] });
+    windowProbe = spawn(probeExecutable, [String(proc.pid), ...(initializedProfiles ? ['--activate'] : [])], { stdio: ['ignore', 'pipe', 'pipe'] });
     windowResult = new Promise((done, reject) => {
       let text = '';
       windowProbe.stdout.on('data', chunk => { text += chunk; if (text.includes('visible')) done(performance.now() - started); });
@@ -340,10 +505,31 @@ async function launch(browser, profile, url, output, label, probeExecutable) {
     const session = await cdp.attach(target.targetId);
     instance.operation = { stage: 'startup', targetId: target.targetId, session, expectedUrl: url };
     await cdp.send('Target.activateTarget', { targetId: target.targetId });
+    if (setup) {
+      // Exercise the shipped setup UI outside scoring, without changing feature
+      // settings or writing synthetic setup/seen values into the profile.
+      const setupState = { actions: [], clickedWelcomeTargets: new Set() };
+      result.setupActions = setupState.actions;
+      await until('initial setup', async () => {
+        const { targetInfos } = await cdp.send('Target.getTargets');
+        if (browser.bundleId === 'io.github.etphli.breezer') {
+          if (!await initializeBreezerProfile(cdp, targetInfos, setupState)) return false;
+        }
+        const inventory = await pageInventory(cdp);
+        return inventory.contentPageCount === 1 && inventory.contentPages[0].url === url;
+      });
+      await cdp.send('Target.activateTarget', { targetId: target.targetId });
+    }
     result.startupReadiness = await pageReady(cdp, session, url);
     result.startupPageReadyMs = performance.now() - started;
     result.startupNativeWindowMs = await windowResult;
     result.startupUsableMs = Math.max(result.startupPageReadyMs, result.startupNativeWindowMs);
+    if (initializedProfiles) {
+      instance.operation.stage = 'startup-foreground';
+      result.startupNativeForeground = instance.nativeWindowSnapshot();
+      assert.ok(nativeForegroundReady(result.startupNativeForeground, proc.pid), 'Startup requires the measured browser PID to be active and frontmost with a visible window');
+      result.startupUsableMs = performance.now() - started;
+    }
     result.version = await cdp.send('Browser.getVersion');
     result.initialNavigationTiming = await cdp.evaluate(session, 'performance.getEntriesByType("navigation")[0]?.toJSON()');
     result.initialPageInventory = await pageInventory(cdp);
@@ -357,7 +543,7 @@ async function launch(browser, profile, url, output, label, probeExecutable) {
     throw error;
   }
 }
-async function memorySample(instance, seconds, samples) {
+async function memorySample(instance, seconds, samples, footprintProbeExecutable) {
   await sleep(seconds * 1000);
   const rows = [];
   for (let index = 0; index < samples; index++) {
@@ -368,9 +554,13 @@ async function memorySample(instance, seconds, samples) {
     assert.ok(tree.length, 'Owned browser process tree disappeared');
     rows.push({ at: new Date().toISOString(), captureStartedAt, monotonicStartedMs, monotonicEndedMs, rssMiB: tree.reduce((sum, row) => sum + row.rssKiB, 0) / 1024,
       processes: tree.map(({ pid, ppid, rssKiB, cpuPercent, cpuTime, startedAt, role, command: cmd }) => ({ pid, ppid, rssKiB, cpuPercent, cpuTime, startedAt, role, executable: cmd.split(' --')[0] })) });
+    if (footprintProbeExecutable) rows.at(-1).physicalFootprint = capturePhysicalFootprint({ rootPid: instance.result.pid,
+      before: tree, captureStartedAt, captureLoad: instance.captureLoad, probeExecutable: footprintProbeExecutable });
     if (index + 1 < samples) await sleep(1000);
   }
-  return { rssMiB: summarize(rows.map(row => row.rssMiB)), cpu: observedCpuWindow(rows, instance.result.pid), samples: rows };
+  const result = { rssMiB: summarize(rows.map(row => row.rssMiB)), cpu: observedCpuWindow(rows, instance.result.pid), samples: rows };
+  if (footprintProbeExecutable) result.physicalFootprint = summarizeFootprints(rows.map(row => row.physicalFootprint));
+  return result;
 }
 async function exercise(instance, fixtureUrl, options) {
   const { cdp, session, targetId, result } = instance;
@@ -402,7 +592,7 @@ async function exercise(instance, fixtureUrl, options) {
       navigationTiming: await cdp.evaluate(session, 'performance.getEntriesByType("navigation")[0].toJSON()') });
   }
   instance.operation = { stage: 'one-tab-memory', targetId, session };
-  result.memoryOneTab = await memorySample(instance, options.settleSeconds, options.memorySamples);
+  result.memoryOneTab = await memorySample(instance, options.settleSeconds, options.memorySamples, options.footprintProbeExecutable);
   result.multiTabs = [];
   for (let index = 1; index < options.tabs; index++) {
     const url = `${fixtureUrl}?tab=${index}`;
@@ -419,7 +609,7 @@ async function exercise(instance, fixtureUrl, options) {
   result.multiTabPageInventory = await pageInventory(cdp);
   result.actualPageTabCount = result.multiTabPageInventory.contentPageCount;
   assert.equal(result.actualPageTabCount, options.tabs, 'Unexpected tabs would bias memory comparison');
-  result.memoryMultiTab = await memorySample(instance, options.settleSeconds, options.memorySamples);
+  result.memoryMultiTab = await memorySample(instance, options.settleSeconds, options.memorySamples, options.footprintProbeExecutable);
   // Both products quit with the same single fixture tab, so relaunches do not
   // compare a restored multi-tab session against a single-tab session.
   for (const id of result.multiTabs) await cdp.send('Target.closeTarget', { targetId: id });
@@ -430,14 +620,14 @@ async function exercise(instance, fixtureUrl, options) {
   result.preRelaunchPageInventory = await pageInventory(cdp);
   assert.equal(result.preRelaunchPageInventory.contentPageCount, 1);
 }
-function aggregate(trials) {
+export function aggregateTrials(trials, names = ['breezer', 'chrome']) {
   const result = {};
-  for (const name of ['breezer', 'chrome']) {
+  for (const name of names) {
     const samples = trials.filter(trial => trial.browser === name);
-    const first = samples.filter(trial => trial.profileState === 'fresh');
+    const first = samples.filter(trial => trial.profileState !== 'reused');
     const warm = samples.filter(trial => trial.profileState === 'reused');
     result[name] = {
-      startupFreshProfileMs: summarize(first.map(item => item.startupUsableMs)),
+      [first[0]?.profileState === 'initialized' ? 'startupInitializedProfileMs' : 'startupFreshProfileMs']: summarize(first.map(item => item.startupUsableMs)),
       startupReusedProfileMs: summarize(warm.map(item => item.startupUsableMs)),
       blankTabMs: summarize(first.flatMap(item => item.newTabs.filter(tab => tab.requestedUrl === 'about:blank').map(tab => tab.usableMs))),
       productNewTabMs: summarize(first.flatMap(item => item.newTabs.filter(tab => tab.requestedUrl === 'chrome://newtab/').map(tab => tab.usableMs))),
@@ -446,17 +636,24 @@ function aggregate(trials) {
       oneTabRssMiB: summarize(first.map(item => item.memoryOneTab.rssMiB.median)),
       multiTabRssMiB: summarize(first.map(item => item.memoryMultiTab.rssMiB.median)),
     };
+    for (const [metric, stage] of [['oneTabPhysicalFootprintMiB', 'memoryOneTab'], ['multiTabPhysicalFootprintMiB', 'memoryMultiTab']]) {
+      if (first.some(item => item[stage]?.physicalFootprint)) result[name][metric] = summarizeFootprints(first.map(item => ({
+        status: item[stage]?.physicalFootprint?.status, miB: item[stage]?.physicalFootprint?.median,
+      })));
+    }
   }
   return result;
 }
 export async function main(argv = process.argv.slice(2)) {
-  const help = `Usage: node script/benchmark_browsers.mjs --prepare|--run --breezer /absolute/Breezer.app --chrome '/Applications/Google Chrome.app' --output NEW_DIRECTORY [--trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5]\n--prepare verifies bundles, records environment, and compiles the native window probe. It never launches a browser.\n--run performs measurements. Run only after builds and competing work have stopped. See docs/browser-benchmark.md.`;
+  const help = `Usage: node script/benchmark_browsers.mjs --prepare|--run --breezer /absolute/Breezer.app --chrome '/Applications/Google Chrome.app' --output NEW_DIRECTORY [--trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5] [--initialized-profiles] [--baseline-breezer /absolute/Previous/Breezer.app] [--physical-footprint]\n--initialized-profiles uses an untimed onboarding pass for each app and verifies each launched PID is active and frontmost at startup readiness. This is protocol v6, not fresh-profile startup.\n--baseline-breezer adds a previous Breezer under protocol v6 three-way. Requires initialized profiles and a multiple of six rounds; every app occupies each order position equally.\n--physical-footprint adds identity-checked macOS footprint probes under protocol v7. Requires initialized profiles and rerunning every comparison participant.\n--prepare verifies bundles, records environment, and compiles the native probes. It never launches a browser.\n--run performs measurements. Run only after builds and competing work have stopped. See docs/browser-benchmark.md.`;
   if (argv.includes('--help') || !argv.length) { console.log(help); return; }
   const options = { trials: 6, repetitions: 3, tabs: 10, settleSeconds: 5, memorySamples: 5 };
-  const valueKeys = { '--breezer': 'breezer', '--chrome': 'chrome', '--output': 'output', '--trials': 'trials', '--repetitions': 'repetitions', '--tabs': 'tabs', '--settle-seconds': 'settleSeconds', '--memory-samples': 'memorySamples' };
+  const valueKeys = { '--breezer': 'breezer', '--baseline-breezer': 'baselineBreezer', '--chrome': 'chrome', '--output': 'output', '--trials': 'trials', '--repetitions': 'repetitions', '--tabs': 'tabs', '--settle-seconds': 'settleSeconds', '--memory-samples': 'memorySamples' };
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
-    if (arg === '--run' || arg === '--prepare') { assert.ok(!options.mode, 'Choose exactly one mode'); options.mode = arg.slice(2); }
+    if (arg === '--initialized-profiles') options.initializedProfiles = true;
+    else if (arg === '--physical-footprint') options.physicalFootprint = true;
+    else if (arg === '--run' || arg === '--prepare') { assert.ok(!options.mode, 'Choose exactly one mode'); options.mode = arg.slice(2); }
     else {
       assert.ok(valueKeys[arg] && argv[index + 1], `Unknown or incomplete argument ${arg}`);
       const key = valueKeys[arg];
@@ -467,15 +664,33 @@ export async function main(argv = process.argv.slice(2)) {
   assert.ok(options.mode && options.breezer && options.chrome && options.output, help);
   for (const key of ['trials', 'repetitions', 'tabs', 'settleSeconds', 'memorySamples']) assert.ok(Number.isSafeInteger(options[key]) && options[key] >= 1, `Invalid ${key}`);
   assert.ok(options.tabs >= 2);
+  const plan = comparisonPlan(options);
   options.output = resolve(options.output);
   const browsers = { breezer: await metadata(resolve(options.breezer)), chrome: await metadata(resolve(options.chrome)) };
-  assert.notEqual(browsers.breezer.executableSha256, browsers.chrome.executableSha256, 'Two distinct browser executables required');
+  if (options.baselineBreezer) {
+    browsers.baselineBreezer = await metadata(resolve(options.baselineBreezer));
+    assert.equal(browsers.breezer.bundleId, 'io.github.etphli.breezer');
+    assert.equal(browsers.baselineBreezer.bundleId, browsers.breezer.bundleId);
+    assert.equal(browsers.chrome.bundleId, 'com.google.Chrome');
+  }
+  assert.equal(new Set(Object.values(browsers).map(browser => browser.executableSha256)).size,
+    Object.keys(browsers).length, 'Distinct browser executables required');
   await mkdir(options.output, { recursive: false });
   const probeSource = join(options.output, 'native-window-probe.swift');
   const probeExecutable = join(options.output, 'native-window-probe');
   await writeFile(probeSource, windowProbeSource);
   execFileSync('/usr/bin/xcrun', ['swiftc', probeSource, '-o', probeExecutable], { stdio: 'pipe', timeout: 120000 });
-  const report = { protocol: 'installed-browser-v3-observed-cpu', status: options.mode === 'prepare' ? 'prepared' : 'running', options, browsers, flags: commonFlags, environmentBefore: environment(), trials: [] };
+  const report = { protocol: plan.protocol, status: options.mode === 'prepare' ? 'prepared' : 'running', options, browsers, roundOrders: plan.roundOrders, flags: commonFlags, environmentBefore: environment(), setups: [], trials: [] };
+  if (options.physicalFootprint) {
+    const source = await readFile(join(root, 'script/macos_process_usage.c'));
+    const sourcePath = join(options.output, 'macos-process-usage.c');
+    options.footprintProbeExecutable = join(options.output, 'macos-process-usage');
+    await writeFile(sourcePath, source);
+    execFileSync('/usr/bin/xcrun', ['clang', '-O2', '-Wall', '-Wextra', '-Werror', sourcePath, '-o', options.footprintProbeExecutable], { stdio: 'pipe', timeout: 20000 });
+    report.physicalFootprintProbe = { schema: 1, sourcePath, executable: options.footprintProbeExecutable,
+      sourceSha256: createHash('sha256').update(source).digest('hex'),
+      executableSha256: createHash('sha256').update(await readFile(options.footprintProbeExecutable)).digest('hex') };
+  }
   const save = () => writeFile(join(options.output, 'results.json'), `${JSON.stringify(report, null, 2)}\n`);
   await save();
   if (options.mode === 'prepare') { console.log(`Prepared without launching browsers: ${options.output}`); return; }
@@ -505,21 +720,28 @@ export async function main(argv = process.argv.slice(2)) {
   try {
     // Do not count window-probe compilation or binary hashing in a browser timing.
     await sleep(10000);
-    for (let trial = 0; trial < options.trials; trial++) {
-      const order = trial % 2 === 0 ? ['breezer', 'chrome'] : ['chrome', 'breezer'];
+    for (let trial = 0; trial < plan.roundOrders.length; trial++) {
+      const order = plan.roundOrders[trial];
       for (const name of order) {
         profile = await mkdtemp(join(tmpdir(), `breezer-benchmark-${name}-`));
-        for (const state of ['fresh', 'reused']) {
+        if (options.initializedProfiles) {
+          active = await launch(browsers[name], profile, fixtureUrl, options.output, `trial-${trial + 1}-${name}-setup`, probeExecutable, { initializedProfiles: true, setup: true });
+          report.setups.push(active.result);
+          await active.cleanup();
+          active = undefined;
+          await sleep(2000);
+        }
+        for (const state of options.initializedProfiles ? ['initialized', 'reused'] : ['fresh', 'reused']) {
           await rm(join(profile, 'DevToolsActivePort'), { force: true });
           const label = `trial-${trial + 1}-${name}-${state}`;
           console.log(`Measuring ${label}`);
-          active = await launch(browsers[name], profile, fixtureUrl, options.output, label, probeExecutable);
+          active = await launch(browsers[name], profile, fixtureUrl, options.output, label, probeExecutable, options);
           active.result.browser = name;
           active.result.trial = trial + 1;
           active.result.profileState = state;
           active.result.environmentAtLaunch = environment();
           report.trials.push(active.result);
-          if (state === 'fresh') await exercise(active, fixtureUrl, options);
+          if (state !== 'reused') await exercise(active, fixtureUrl, options);
           await save();
           await active.cleanup();
           active = undefined;
@@ -529,7 +751,7 @@ export async function main(argv = process.argv.slice(2)) {
         profile = undefined;
       }
     }
-    report.summary = aggregate(report.trials);
+    report.summary = aggregateTrials(report.trials, Object.keys(browsers));
     report.status = 'completed';
     report.environmentAfter = environment();
   } catch (error) {

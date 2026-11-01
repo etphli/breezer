@@ -244,7 +244,7 @@ test('isolated coordinate validation accepts only visible top-level canvas CSS p
     getBoundingClientRect: () => ({ width: 400, height: 300 }),
   };
   let hit = canvas;
-  const world = vm.createContext({ crypto: { randomUUID: () => 'doc' }, innerWidth: 1000, innerHeight: 700, getComputedStyle: () => ({ visibility: 'visible', display: 'block', opacity: '1' }), document: { elementFromPoint: () => hit } });
+  const world = vm.createContext({ location: new URL('https://example.test'), crypto: { randomUUID: () => 'doc' }, innerWidth: 1000, innerHeight: 700, getComputedStyle: () => ({ visibility: 'visible', display: 'block', opacity: '1' }), document: { elementFromPoint: () => hit } });
   const invoke = args => vm.runInContext(`(${pageContext.toString()})('resolve-point',${JSON.stringify(args)})`, world);
   assert.equal(invoke({ x: 300.5, y: 240 }).x, 300.5);
   for (const args of [{ x: -1, y: 0 }, { x: 1000, y: 0 }, { x: 0, y: 700 }, { x: '1', y: 1 }, { x: null, y: 1 }]) assert.throws(() => invoke(args), /viewport/);

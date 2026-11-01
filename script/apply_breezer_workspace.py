@@ -463,6 +463,45 @@ def _bookmark_bar_replacements():
     )]
 
 
+def _numbered_tab_replacements():
+    return [
+        (
+            '#include "chrome/browser/ui/views/frame/browser_view.h"\n',
+            '#include "chrome/browser/ui/views/frame/browser_view.h"\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '#include "chrome/browser/ui/views/frame/breezer_workspace_view.h"\n'
+            '#endif\n',
+        ),
+        (
+            '      SelectNumberedTab(\n'
+            '          browser_, id - IDC_SELECT_TAB_0,\n',
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '      if (auto* workspace = BreezerWorkspaceView::FromBrowser(browser_);\n'
+            '          workspace && workspace->SelectNumberedTab(\n'
+            '              id - IDC_SELECT_TAB_0,\n'
+            '              TabStripUserGestureDetails(\n'
+            '                  TabStripUserGestureDetails::GestureType::kKeyboard,\n'
+            '                  time_stamp))) {\n'
+            '        break;\n'
+            '      }\n'
+            '#endif\n'
+            '      SelectNumberedTab(\n'
+            '          browser_, id - IDC_SELECT_TAB_0,\n',
+        ),
+        (
+            '  return command_id == IDC_CLOSE_TAB || command_id == IDC_CLOSE_WINDOW ||\n',
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '  // The custom sidebar owns saved slots even while a page has focus.\n'
+            '  if (command_id >= IDC_SELECT_TAB_0 && command_id <= IDC_SELECT_TAB_7 &&\n'
+            '      BreezerWorkspaceView::FromBrowser(browser_)) {\n'
+            '    return true;\n'
+            '  }\n'
+            '#endif\n'
+            '  return command_id == IDC_CLOSE_TAB || command_id == IDC_CLOSE_WINDOW ||\n',
+        ),
+    ]
+
+
 PEEK_DELEGATE = (
     "chrome/browser/ui/browser_web_contents_delegate/browser_web_contents_delegate.cc"
 )
@@ -675,6 +714,7 @@ def replacements():
                 '      "//chrome/browser/extensions/api/breezer_private",\n',
             ),
         ],
+        "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
         **_peek_replacements(),
     })
 

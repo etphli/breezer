@@ -9,7 +9,7 @@ import argparse
 from pathlib import Path
 
 
-PROFILES = ("upstream", "development", "release-performance")
+PROFILES = ("upstream", "development", "release-performance", "pgo-performance")
 DEVELOPMENT_ARGS = """is_official_build = false
 chrome_pgo_phase = 0
 symbol_level = 0
@@ -22,14 +22,15 @@ def gn_overrides(profile):
         return ""
     if profile == "development":
         return DEVELOPMENT_ARGS
-    if profile == "release-performance":
+    if profile in ("release-performance", "pgo-performance"):
         # V8 debug code, cppgc API checks and allocator DCHECKs derive from
         # dcheck_always_on. Keep their release defaults instead of overriding
         # individual subsystems or security settings.
-        return DEVELOPMENT_ARGS + """is_debug = false
+        overrides = DEVELOPMENT_ARGS + """is_debug = false
 dcheck_always_on = false
 enable_expensive_dchecks = false
 """
+        return overrides + ("chrome_pgo_phase = 2\n" if profile == "pgo-performance" else "")
     raise ValueError(f"Unknown build profile: {profile}")
 
 
@@ -37,15 +38,18 @@ def output_directory(source, profile, requested=None):
     gn_overrides(profile)
     source = Path(source).resolve()
     output_root = (source / "out").resolve()
-    default = "out/ReleasePerformance" if profile == "release-performance" else "out/Default"
+    default = {"release-performance": "out/ReleasePerformance", "pgo-performance": "out/PGOPerformance"}.get(profile, "out/Default")
     output = Path(requested or default)
     if not output.is_absolute():
         output = source / output
     output = output.resolve()
     if not output.is_relative_to(output_root) or output == output_root:
         raise ValueError("BREEZER_OUT_DIR must be a subdirectory of the prepared source's out directory.")
-    if profile == "release-performance" and output.is_relative_to((source / "out/Default").resolve()):
-        raise ValueError("The release-performance profile requires a separate output; out/Default is preserved.")
+    preserved = ["out/Default"]
+    if profile == "pgo-performance":
+        preserved.append("out/ReleasePerformance")
+    if profile in ("release-performance", "pgo-performance") and any(output.is_relative_to((source / path).resolve()) for path in preserved):
+        raise ValueError(f"The {profile} profile requires a separate output; existing compiled outputs are preserved.")
     return output
 
 

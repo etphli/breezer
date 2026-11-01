@@ -3,7 +3,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
 import { JsonLineProcess, cliEnvironment, findCli, runCli } from './cli.mjs';
-import { allowedTools, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
+import { allowedTools, researchParts, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
 
 export function codexModelMetadata(model) {
   const reasoningEfforts = (model.supportedReasoningEfforts ?? []).map((entry) => entry.reasoningEffort);
@@ -221,7 +221,7 @@ export class CodexProvider {
         // Attach rejection handling before requests, which may fail synchronously on cancellation.
         done.catch(() => {});
         const started = await rpc.request('thread/start', this.threadParams(model, tools));
-        const input = [{ type: 'text', text: promptText(chat) }, ...(chat.includeContext === true ? contextParts(chat.context) : [])];
+        const input = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...(chat.includeContext === true ? contextParts(chat.context) : [])];
         try {
           await rpc.request('turn/start', { threadId: started.thread.id, input: input.map((part) => part.type === 'image' ? { type: 'image', url: part.image } : part), ...options });
         } catch (error) { throw fastRequestError(error, chat.speed); }

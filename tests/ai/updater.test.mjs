@@ -64,6 +64,64 @@ test('update settings require an explicit install click and show helper errors',
   } finally { mounted.dispose(); }
 });
 
+async function updateSettingsFixture() {
+  const { readFileSync } = await import('node:fs');
+  const { createDom, userClick } = await import('./settings-dom.mjs');
+  const { event } = await import('./browser-api-fixture.mjs');
+  const { mountUpdates } = await import('../../features/ai/extension/settings.js');
+  const dom = createDom(readFileSync(new URL('../../features/ai/extension/workspace.html', import.meta.url), 'utf8'));
+  Object.assign(globalThis, dom.globals); globalThis.window = globalThis;
+  const ports = [];
+  const api = { runtime: { connect() {
+    const port = { sent: [], closed: false, onMessage: event(), onDisconnect: event(),
+      postMessage(message) { if (this.closed) throw new Error('Disconnected'); this.sent.push(message); },
+      disconnect() { this.closed = true; this.onDisconnect.emit(); },
+    };
+    ports.push(port); return port;
+  } } };
+  const mounted = mountUpdates(api);
+  return { ports, mounted, userClick, get: id => dom.document.getElementById(id) };
+}
+
+test('idle update settings preserve status and reconnect on the next explicit check', async () => {
+  const { ports, mounted, userClick, get } = await updateSettingsFixture();
+  try {
+    const first = ports[0];
+    first.onMessage.emit({ id: first.sent[0].id, ok: true, value: { available: false, notice: 'Breezer is up to date.' } });
+    first.disconnect();
+    assert.equal(get('update-status').textContent, 'Breezer is up to date.');
+    assert.equal(get('update-check').disabled, false);
+    assert.equal(ports.length, 1, 'idle disconnect does not eagerly reconnect');
+    userClick(get('update-check'));
+    assert.equal(ports.length, 2);
+    assert.equal(ports[1].sent[0].type, 'update-check');
+    first.onDisconnect.emit();
+    first.onMessage.emit({ id: ports[1].sent[0].id, ok: false, error: 'Late old reply' });
+    assert.equal(get('update-status').textContent, 'Checking GitHub releases…');
+    ports[1].onMessage.emit({ id: ports[1].sent[0].id, ok: false, error: 'Network unavailable' });
+    assert.equal(get('update-status').textContent, 'Network unavailable');
+    assert.equal(get('update-check').disabled, false);
+  } finally { mounted.dispose(); }
+});
+
+test('a lost updater connection invalidates the install action and never replays installation', async () => {
+  const { ports, mounted, userClick, get } = await updateSettingsFixture();
+  try {
+    const first = ports[0];
+    first.onMessage.emit({ id: first.sent[0].id, ok: true, value: { available: true, version: '1.2.0' } });
+    userClick(get('update-install'));
+    assert.equal(first.sent.at(-1).type, 'update-install');
+    first.disconnect();
+    assert.equal(get('update-install').hidden, true, 'a new host has no checked release');
+    assert.equal(get('update-check').disabled, false);
+    assert.match(get('update-status').textContent, /Check for updates again/);
+    assert.equal(ports.length, 1, 'no automatic replay of the install request');
+    userClick(get('update-check'));
+    assert.equal(ports.length, 2);
+    assert.deepEqual(ports[1].sent.map(message => message.type), ['update-check']);
+  } finally { mounted.dispose(); }
+});
+
 test('handoff reuses the existing runtime and waits for the worker to acknowledge startup', async () => {
   const { startUpdateWorker } = await import('../../features/ai/host/updater.mjs');
   const { readdir, stat } = await import('node:fs/promises');

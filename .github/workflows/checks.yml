@@ -44,11 +44,14 @@ jobs:
         run: python script/check_ai_overlay.py
       - name: Install upstream test dependencies
         run: python -m pip install -r upstream/helium-macos/helium-chromium/.requirements.txt
+      - name: Verify shared release identity
+        run: python script/check_breezer_release.py
       - name: Verify omnibox source overlay
         run: python script/check_breezer_omnibox.py
       - name: Verify workspace and full-height assistant overlays
         run: |
           python script/check_breezer_workspace.py
+          python script/check_breezer_sync.py
           python script/check_breezer_sidebar_frame.py
           python script/check_breezer_ai_ui.py
           python script/check_breezer_passwords.py
@@ -65,8 +68,20 @@ jobs:
           BREEZER_AI_EVIDENCE: ${{ runner.temp }}/breezer-ai-evidence
         run: |
           node tests/ai/panel-browser.mjs
+          node tests/ai/research-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs
+          node --test tests/ai/translation.test.mjs tests/ai/translation-browser.test.mjs
+          node --test tests/sync/setup-browser.test.mjs
           node tests/ai/browser-page.mjs
+          node tests/ai/docs-editor-browser.mjs
+      - name: Verify passkey component and virtual WebAuthn protocol
+        env:
+          BREEZER_PASSKEY_EVIDENCE: ${{ runner.temp }}/breezer-passkey-evidence
+        run: |
+          node tests/passkeys/component.mjs
+          node tests/passkeys/virtual.mjs
+      - name: Verify login Enter stock-browser baseline (not native Breezer acceptance)
+        run: node tests/passwords/enter-browser.mjs --baseline
       - name: Verify website, usage calculations, and dashboard access boundaries
         env:
           BREEZER_SITE_EVIDENCE: ${{ runner.temp }}/breezer-site-evidence
@@ -87,5 +102,13 @@ jobs:
         with:
           name: breezer-ai-ui-verification
           path: ${{ runner.temp }}/breezer-ai-evidence/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload passkey fixture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: breezer-passkey-fixtures-not-native-acceptance
+          path: ${{ runner.temp }}/breezer-passkey-evidence/
           if-no-files-found: ignore
           retention-days: 7

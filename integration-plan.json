@@ -1,0 +1,36 @@
+{
+  "originMain": "5d1db7fb7d8283fc5b41b0b2764281315307f74c",
+  "rootBase": "f2cd3c958fa8c81fe9bd95b0596829638bef4981",
+  "rootChangesIncluded": [
+    "docs/browser-benchmark.md",
+    "docs/building-breezer.md",
+    "docs/updating.md",
+    "docs/whats-new.md",
+    "features/ai/extension/background.js",
+    "features/ai/extension/context-settings.js",
+    "features/ai/extension/settings.js",
+    "features/ai/extension/whats-new.css",
+    "features/ai/extension/whats-new.html",
+    "features/ai/extension/workspace-store.js",
+    "features/ai/extension/workspace.js",
+    "features/ai/host/main.mjs",
+    "script/benchmark_browsers.mjs",
+    "script/breezer_build_profile.py",
+    "script/build_and_run.sh",
+    "script/check_breezer_build_profile.py",
+    "tests/ai/context-settings.test.mjs",
+    "tests/ai/organato-settings.test.mjs",
+    "tests/ai/settings-onboarding-browser.test.mjs",
+    "tests/ai/updater.test.mjs",
+    "tests/ai/whats-new-browser.test.mjs",
+    "tests/ai/whats-new.test.mjs",
+    "tests/ai/workspace-browser.test.mjs",
+    "tests/ai/workspace-store.test.mjs",
+    "tests/benchmark-browsers.test.mjs"
+  ],
+  "conflicts": [
+    "features/ai/extension/background.js",
+    "script/build_and_run.sh",
+    "tests/ai/workspace-browser.test.mjs"
+  ]
+}

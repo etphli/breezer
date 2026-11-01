@@ -6,8 +6,9 @@ Chrome and Breezer use separate profiles and Keychain identities. Import copies 
 
 ## User flow
 
-The component has three discoverable actions:
+The component has password actions and a separate passkey section:
 
+- Manage local passkeys opens Chromium's Mac profile passkey page. The section explains current signing limits and external-provider ownership.
 - Open password manager opens Breezer's native saved-password list.
 - Password settings opens native controls for saving, automatic sign-in, and supported authentication before filling.
 - Import passwords from Chrome expands an export/import guide. Import Chrome CSV opens the native importer and file picker.
@@ -26,7 +27,7 @@ const passwords = mountPasswords({
 	api: chrome,
 	onOpened(destination) {
 		// Optional navigation notification only. Never an import completion event.
-		// destination is 'manager', 'settings', or 'import'.
+		// destination is 'manager', 'settings', 'import', or 'passkeys'.
 	},
 });
 
@@ -55,12 +56,12 @@ python3 features/passwords/native-ui/apply.py --fingerprint
 
 `script/build_and_run.sh` checks the separate `src/.breezer-passwords-prepared` fingerprint before refreshing resources. A matching marker still runs `--check`; a different marker refuses before changing source. The hosted cache fingerprint includes every native password input. Existing compiled output is retained on first application.
 
-The applicator stages all ten files before writing. It accepts either the pinned Helium state or its already-applied state, refuses missing, ambiguous, drifted, or symlinked targets, and uses file-level atomic replacement. A retry after a partial application converges. `--check` never writes. Its implementation follows the existing omnibox applicator's staging rules; its wider patch context also prevents duplicate insertion of the restored native action. See [native password behavior and verification](../features/passwords/README.md) for save/update cues and explicit fill selection.
+The applicator stages all fourteen files before writing. It accepts either the pinned Helium state or its already-applied state, refuses missing, ambiguous, drifted, or symlinked targets, and uses file-level atomic replacement. A retry after a partial application converges. `--check` never writes. Its implementation follows the existing omnibox applicator's staging rules; its wider patch context also prevents duplicate insertion of the restored native action. See [native password behavior and verification](../features/passwords/README.md) for save/update cues and explicit fill selection.
 
 The patch restores only password functionality removed by Helium:
 
 - Restores the native password-saving default to on, preserving explicit saved choices. Automatic sign-in stays off.
-- Removes the forced-false `kCredentialsEnableService` assignment. Chromium's password-saving preference and enterprise policy apply normally. Helium's passkey policy remains disabled.
+- Removes the forced-false `kCredentialsEnableService` assignment. Chromium's password-saving preference and enterprise policy apply normally. The fabricated passkey policy is also removed; native passkey availability still depends on platform signing and authentication. See [passkey availability and verification](passkeys.md).
 - Restores Chromium's native password action, so the password page-action controller and save/update bubble have their normal action item. It also restores the password icon in app windows.
 - Restores the native manage-passwords footer in autofill suggestions.
 
@@ -92,7 +93,7 @@ BREEZER_PASSWORD_SOURCE=/path/to/prepared/chromium/src python3 tests/passwords_n
 node tests/passwords/installed.mjs /absolute/path/Breezer.app
 ```
 
-Without `BREEZER_PASSWORD_SOURCE`, the six native-source tests explicitly skip. With it, the checks read only named source files. They apply the overlay to temporary copies, verify idempotence, interrupted retries, drift/symlink refusal, preserved passkey policy, restored native entry points, routes, profile encryption wiring, native authentication, and unsupported direct import. They also compare the inspected source hashes. They never open a profile or password database.
+Without `BREEZER_PASSWORD_SOURCE`, the six native-source tests explicitly skip. With it, the checks read only named source files. They apply the overlay to temporary copies, verify idempotence, interrupted retries, drift/symlink refusal, native passkey policy and platform boundaries, restored native entry points, routes, profile encryption wiring, native authentication, and unsupported direct import. They also compare the inspected source hashes. They never open a profile or password database.
 
 The installed-app test uses a temporary profile with the native Mac password backend. It checks that saving is enabled, then adds one dummy local credential, changes its username, restarts the profile to check persistence, and deletes it. It never requests plaintext. CSV import, autofill selection, and OS authentication need the separate UI acceptance below. The pre-fix installed app fails this test because saving is enforced off.
 

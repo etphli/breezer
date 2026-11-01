@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breezer disposable WebAuthn check</title>
+<h1>Disposable passkey check</h1>
+<p>Use only a disposable browser profile and a test authenticator. This page uses dummy data. A virtual authenticator does not test Touch ID, Keychain, a phone, or a security key.</p>
+<label>Dummy username <input id="username" autocomplete="username webauthn" value="breezer-test@example.test"></label>
+<button id="create">Create dummy passkey</button>
+<button id="use">Sign in with dummy passkey</button>
+<button id="conditional">Offer passkey autofill</button>
+<button id="cancel">Cancel request</button>
+<p id="result" role="status">Ready</p>
+<script src="webauthn.js"></script>
+</html>

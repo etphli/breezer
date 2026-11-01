@@ -47,6 +47,6 @@ test('failed tab creation remains retryable and an existing page is reused',asyn
  assert.deepEqual(fresh.opened.map(tab=>tab.url),[SETUP],'a Settings tab is not the setup guide');
 });
 test('a patch appends to the current minor page without reopening it', async () => {
-  const f=fixture({[RELEASE_SEEN_KEY]:'1.1.0'});const service=installReleaseNotes(f.api);await service.check();
+  const f=fixture({[RELEASE_SEEN_KEY]:RELEASE_PAGE_VERSION});const service=installReleaseNotes(f.api);await service.check();
   f.data[RELEASE_SEEN_KEY]=RELEASE_PAGE_VERSION.replace(/0$/,'9');await service.check();assert.equal(f.opened.length,0);
 });

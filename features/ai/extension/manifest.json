@@ -2,10 +2,11 @@
   "manifest_version": 3,
   "name": "Breezer AI",
   "description": "Ask about this page and control your browser with your local AI assistant.",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsCqa/J/JV+57GOz5koMs4B71fWO/Z5za5wGnJrwRQ1/20Kp1BCNPwW7pCPjapak98e2pT21RIZ8nHiwz4+LBGkxAUCkdyztaIG3nwPck8rxDhyAf4u9cl1DZ0CIV7xBrU1rORsT8GcNBh49p1X0NK9rUbA+YbEo3RnYsgK8EcDjYII1wJA4fNLNv6OI8mML2pijgl7zlSw7jdE6vwDdjpKvT2INHA0AamjmYXEm7PP9bRDASK98rW+FnwsVo4WfpxvK0FJE2YZDj/z2xTi8RQz1rxdtz4lqOLgkETxslY8P0Fbg5s48wzq+ivoQQ6QIGXKvHhOyHXKBMfB94ID8dWQIDAQAB",
   "permissions": [
     "activeTab",
+    "contextMenus",
     "scripting",
     "tabs",
     "debugger",
@@ -19,6 +20,7 @@
     "idle"
   ],
   "host_permissions": ["https://breezer-browser.vercel.app/*"],
+  "optional_host_permissions": ["http://localhost/*", "https://libretranslate.com/*"],
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -33,6 +35,9 @@
     "128": "icon128.png"
   },
   "commands": {
+    "translate-page": {
+      "description": "Translate page"
+    },
     "toggle-breezer-ai": {
       "description": "Toggle Breezer AI"
     },
@@ -67,7 +72,7 @@
   },
   "incognito": "not_allowed",
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https://breezer-browser.vercel.app"
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https://breezer-browser.vercel.app http://localhost:5000 https://libretranslate.com"
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"
