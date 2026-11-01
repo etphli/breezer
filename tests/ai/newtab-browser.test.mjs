@@ -56,8 +56,9 @@ const CONNECTED = {
   },
 };
 
-function installFixture({ view, appearance, delay = 0, hang = false }) {
-  window.fx = { requests: [] };
+function installFixture({ view, appearance, delay = 0, hang = false, switches }) {
+  // fx.view and fx.delay can be changed mid-test to script later answers.
+  window.fx = { requests: [], view, delay };
   const port = (name) => {
     const listeners = { message: [], disconnect: [] };
     return {
@@ -67,13 +68,28 @@ function installFixture({ view, appearance, delay = 0, hang = false }) {
       postMessage(message) {
         window.fx.requests.push({ name, ...message });
         if (hang) return;
-        setTimeout(() => listeners.message.forEach((fn) => fn({ type: 'view', id: message.id, ...structuredClone(view) })), delay);
+        const answer = structuredClone(window.fx.view);
+        setTimeout(() => listeners.message.forEach((fn) => fn({ type: 'view', id: message.id, ...answer })), window.fx.delay);
       },
       disconnect() {},
     };
   };
   const preferences = JSON.parse(localStorage.getItem('shortcut-fixture') || '{}');
+  if (switches && !('organato.switches.v1' in preferences)) { preferences['organato.switches.v1'] = switches; localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); }
   const storageListeners = [];
+  // chrome.storage is shared by every extension page; same-origin storage events
+  // stand in for that, so a change in one tab reaches the others.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== 'shortcut-fixture') return;
+    const next = JSON.parse(event.newValue || '{}');
+    const changes = {};
+    for (const key of new Set([...Object.keys(preferences), ...Object.keys(next)])) {
+      if (JSON.stringify(preferences[key]) !== JSON.stringify(next[key])) changes[key] = { oldValue: preferences[key], newValue: next[key] };
+    }
+    Object.keys(preferences).forEach((key) => delete preferences[key]);
+    Object.assign(preferences, next);
+    if (Object.keys(changes).length) for (const fn of storageListeners) fn(changes, 'local');
+  });
   window.chrome = {
     tabs: { query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }] },
     runtime: {
@@ -126,7 +142,7 @@ async function withPage(browser, base, options, fn) {
   page.on('console', (message) => { if (message.type() === 'error') errors.push(`${message.text()} ${message.location().url}`); });
   try {
     await page.goto(`${base}/newtab.html`);
-    await fn(page);
+    await fn(page, context);
     assert.deepEqual(errors, []);
   } finally {
     await context.close();
@@ -367,4 +383,134 @@ test('add shortcuts by URL and open tab, persist across reload and keep Add visi
   await page.getByRole('option', {name: /Open project/}).waitFor();
   await page.screenshot({path:`${evidence}/newtab-add-popover.png`});
  }); } finally { await browser.close(); await new Promise(done=>server.close(done)); }
+});
+
+
+// Organato off: the whole lower sheet goes, whatever the answer carries.
+const OFF_SWITCHES = { enabled: false, dashboardEnabled: true };
+const CACHED_OFF = { topSites: SITES.slice(0, 6), organato: { ...CONNECTED.organato, enabled: false, error: 'Old refresh failure' } };
+async function organatoGone(page) {
+  return page.evaluate(() => {
+    const sheet = document.querySelector('.sheet');
+    const top = document.getElementById('today').getBoundingClientRect().top;
+    const bottom = document.getElementById('sites').getBoundingClientRect().bottom;
+    return {
+      hidden: sheet.hidden && sheet.getBoundingClientRect().height === 0,
+      // Not visible, not read out, and nothing focusable inside.
+      text: /Organato|Loading your exams|Refresh/.test(document.body.innerText),
+      refreshVisible: Boolean(document.getElementById('refresh').offsetParent),
+      flag: document.documentElement.dataset.organato,
+      skyCentre: Math.round((top + bottom) / 2),
+      height: innerHeight,
+      overflow: document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight,
+    };
+  });
+}
+async function tabStops(page, count) {
+  const stops = [];
+  for (let at = 0; at < count; at += 1) {
+    await page.keyboard.press('Tab');
+    stops.push(await page.evaluate(() => document.activeElement.getAttribute('href') || document.activeElement.id || document.activeElement.textContent.trim()));
+  }
+  return stops;
+}
+
+test('Organato off removes the whole section and follows the switch live', { skip, timeout: 120_000 }, async () => {
+  await mkdir(evidence, { recursive: true });
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    // An "off" answer that still carries cached items, a connection and an error.
+    await withPage(browser, base, { view: CACHED_OFF, appearance: { theme: 'mint', colorMode: 'light' } }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 6);
+      const state = await organatoGone(page);
+      assert.deepEqual({ hidden: state.hidden, text: state.text, refreshVisible: state.refreshVisible, flag: state.flag, overflow: state.overflow }, { hidden: true, text: false, refreshVisible: false, flag: 'off', overflow: false });
+      // The date and sites sit a little above the middle, not up top over a blank gap.
+      assert.ok(state.skyCentre > state.height * 0.35 && state.skyCentre < state.height * 0.5, `sky centre ${state.skyCentre}`);
+      assert.equal(await page.locator('.item, .item-empty, #organato-action a').count(), 0);
+      assert.equal(await page.getByRole('heading', { name: /Organato/ }).count(), 0);
+      assert.equal(await page.getByRole('status').filter({ hasText: /Organato/ }).count(), 0);
+      // Keyboard: Settings, six sites (each with its remove button) and Add; then out of the page.
+      const stops = await tabStops(page, 2);
+      assert.deepEqual(stops, ['workspace.html#/settings', 'https://mail.example.com/']);
+      await page.locator('.site-add-button').focus();
+      await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(() => document.activeElement.closest('.sheet')), null, 'nothing in the hidden sheet takes focus');
+      await page.locator('.site-link').first().focus();
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-light.png` });
+      // Shortcut controls still work with Organato off.
+      await page.getByRole('button', { name: 'Remove Mail shortcut', exact: true }).click();
+      await page.getByRole('button', { name: 'Undo', exact: true }).click();
+      await page.waitForSelector('.site-link[href="https://mail.example.com/"]');
+    });
+
+    await withPage(browser, base, { view: CACHED_OFF, appearance: { theme: 'tide', colorMode: 'dark' } }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 6);
+      assert.equal((await organatoGone(page)).hidden, true);
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-dark.png` });
+    });
+
+    await withPage(browser, base, { view: CACHED_OFF, viewport: { width: 375, height: 760 } }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      const state = await organatoGone(page);
+      assert.equal(state.hidden, true);
+      assert.equal(state.overflow, false, 'no scrolling at 375px');
+      assert.equal(await page.getByRole('button', { name: 'Add shortcut', exact: true }).isVisible(), true);
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-narrow.png` });
+    });
+
+    // A saved "off" hides the sheet before any answer, so loading never flashes it.
+    await withPage(browser, base, { view: CONNECTED, hang: true, switches: OFF_SWITCHES }, async (page) => {
+      await page.waitForFunction(() => document.documentElement.dataset.organato === 'off');
+      assert.equal((await organatoGone(page)).hidden, true);
+      assert.equal(await page.$$eval('.site.placeholder', (items) => items.length), 8);
+    });
+
+    // A saved "off" beats a late or mismatched answer that still says on, and survives reload.
+    await withPage(browser, base, { view: CONNECTED, switches: OFF_SWITCHES }, async (page) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal((await organatoGone(page)).hidden, true);
+      await page.reload();
+      await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal((await organatoGone(page)).hidden, true);
+    });
+
+    // Live: two open new tabs follow a switch made elsewhere, including over an in-flight answer.
+    await withPage(browser, base, { view: CONNECTED }, async (page, context) => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      const other = await context.newPage();
+      await other.goto(`${base}/newtab.html`);
+      await other.waitForSelector('html[data-loaded="true"]');
+      for (const tab of [page, other]) assert.equal(await tab.getAttribute('#organato', 'data-state'), 'ready');
+
+      // A slow refresh is on its way when Organato is turned off.
+      await page.evaluate(() => { window.fx.delay = 600; });
+      await page.click('#refresh');
+      await page.evaluate((value) => window.chrome.storage.local.set({ 'organato.switches.v1': value }), OFF_SWITCHES);
+      for (const tab of [page, other]) await tab.waitForFunction(() => document.querySelector('.sheet').hidden);
+      await page.waitForFunction(() => document.getElementById('refresh').getAttribute('aria-busy') === null);
+      await page.waitForTimeout(200);
+      assert.equal((await organatoGone(page)).hidden, true, 'the late "on" answer does not bring it back');
+      assert.equal((await organatoGone(other)).hidden, true);
+
+      // Back on: the loading sheet shows, a fresh request goes out and the lanes return.
+      const before = await other.evaluate(() => window.fx.requests.length);
+      await page.evaluate(() => { window.fx.delay = 400; });
+      await other.evaluate(() => { window.fx.delay = 400; });
+      await page.evaluate(() => window.chrome.storage.local.set({ 'organato.switches.v1': { enabled: true, dashboardEnabled: true } }));
+      await other.waitForFunction(() => !document.querySelector('.sheet').hidden && document.getElementById('organato').getAttribute('aria-busy') === 'true');
+      assert.match(await other.textContent('#organato-status'), /Loading/);
+      await other.screenshot({ path: `${evidence}/newtab-organato-reenabled-loading.png` });
+      for (const tab of [page, other]) await tab.waitForFunction(() => document.getElementById('organato').dataset.state === 'ready');
+      assert.equal(await other.evaluate(() => window.fx.requests.length), before + 1);
+      assert.equal(await other.$$eval('[data-list="upcoming"] .item', (rows) => rows.length), 7);
+      await other.close();
+    });
+  } finally {
+    await browser.close();
+    server.close();
+  }
 });
