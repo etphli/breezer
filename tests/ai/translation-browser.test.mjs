@@ -54,7 +54,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   const tabId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, page.url());
   let ui = await context.newPage();
   await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
-  const status = ui.locator('#status');
+  let status = ui.locator('#status');
   await ui.locator('#languages').click();
   await ui.waitForFunction(() => document.getElementById('source').options.length > 1);
   assert.equal(requests.length, 0, 'loading languages sends no page text');
@@ -84,6 +84,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   await ui.close();
   assert.match(await page.locator('#article').textContent(), /^English:/);
   ui = await context.newPage(); await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
+  status = ui.locator('#status');
   await ui.waitForFunction(() => document.getElementById('status').textContent.includes('remains'));
   assert.equal(await ui.locator('#languages').isEnabled(), true);
   assert.equal(await ui.locator('#consent').isChecked(), false, 'sharing confirmation is not persisted');
