@@ -26,11 +26,19 @@ The switch is consent for the tab it was turned on in. It stays on across follow
 
 Control is limited to one active tab in one browser window. Switching tabs or Breezer windows, closing the panel, or losing the debugger connection stops it. Moving focus to another app does not: input is delivered only to the controlled tab, so you can watch from elsewhere.
 
-Browser control is not screen or computer control. Breezer cannot see or operate the desktop, other apps, other tabs, browser settings, or file dialogs; requests for those are declined. Its only transport is the Chromium debugger attached to the one controlled tab. Browser control cannot execute arbitrary JavaScript, shell commands, or operating system actions. It does not type into password, payment, token, or one-time-code fields. New tabs, embedded frames, and closed shadow roots are outside this first version's action scope.
+Browser control is not screen or computer control. Breezer cannot see or operate the desktop, other apps, other tabs, browser settings, or file dialogs; requests for those are declined. Its only transport is the Chromium debugger attached to the one controlled tab. Browser control cannot execute arbitrary JavaScript, shell commands, or operating system actions. It does not type into password, payment, token, or one-time-code fields. New tabs, general embedded-frame control and closed shadow roots are outside the action scope. The Google Docs editor has a narrow same-origin input-frame exception described below.
 
 An opted-in control task can follow links across HTTP and HTTPS sites in that tab. The debugger connection ends with the task. If it moved to a different site, reopen the sidebar with Command K before asking a new page question so Chromium can grant access to that site.
 
 Normal page questions use Chromium's `activeTab` permission granted by explicitly opening the assistant or sending a message with page context. Automatic tab changes do not grant access. Internal browser pages and private browsing are excluded. Password and recognisable secret fields are omitted from text context and covered during screenshot capture. The rest of the visible page is sent to the selected provider when page context is enabled.
+
+## Google Docs editor input
+
+On HTTPS Google Docs document edit pages, a recognized canvas editor appears as **Document editor** in control snapshots. The assistant clicks that target to focus the document, then uses insert typing at the current caret or selection. Shift with an arrow, Home or End can extend the selection for follow-up editing. Ordinary field typing still replaces the chosen field.
+
+The editor input is bound to the exact document URL, visible editor, same-origin text-input frame, frame document and focused editable element. Changed focus, navigation, stale targets and recognizable secret fields refuse further input. A new snapshot and click are required after the editor changes. Escape inside the input frame also stops control. Embedded frames are covered during screenshot capture; research still extracts top-document text only and never enables control.
+
+This path is verified against a synthetic Docs-shaped canvas, hit layer and off-screen same-origin contenteditable frame using real Chromium input. It has **not** been accepted against an authenticated disposable Google Doc or a compiled Breezer app. See [diagnosis and acceptance limits](ai-docs-control.md).
 
 ## Implementation
 
@@ -75,6 +83,7 @@ npm ci --prefix tests/ai
 npx --prefix tests/ai playwright install --with-deps chromium
 node tests/ai/panel-browser.mjs
 node tests/ai/browser-page.mjs
+node tests/ai/docs-editor-browser.mjs
 ```
 
 The browser checks use Chrome on macOS and Playwright Chromium elsewhere. Set `BREEZER_TEST_BROWSER` for another executable. Screenshots are saved to `/tmp/breezer-ai-evidence`, or `BREEZER_AI_EVIDENCE` when set. These tests render the real sidebar and drive real trusted browser input, while supplying a deterministic extension-API fixture. They do not represent a compiled Breezer app.

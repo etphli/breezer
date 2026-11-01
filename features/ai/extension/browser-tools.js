@@ -3,7 +3,7 @@ import { pageContext } from './page-context.js';
 export const isWebURL = value => { try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; } };
 export const CONTROL_WORLD = 'breezer-ai';
 export const STOP_BINDING = '__breezerAIStop';
-const pageOperations = new Set(['snapshot', 'resolve', 'resolve-point', 'pointer', 'check-focus', 'select-content', 'control-check', 'overlay-start', 'overlay-stop', 'screenshot-mask', 'screenshot-mask-stop']);
+const pageOperations = new Set(['snapshot', 'bind-editor', 'editor-focus', 'resolve', 'resolve-point', 'pointer', 'check-focus', 'select-content', 'control-check', 'overlay-start', 'overlay-stop', 'screenshot-mask', 'screenshot-mask-stop']);
 const keyCodes = { Enter: 13, Tab: 9, Escape: 27, Backspace: 8, Delete: 46, ArrowUp: 38, ArrowDown: 40, ArrowLeft: 37, ArrowRight: 39, Home: 36, End: 35, PageUp: 33, PageDown: 34 };
 const keyParams = key => {
   if (key === 'Space') return { key: ' ', code: 'Space', windowsVirtualKeyCode: 32 };
@@ -301,11 +301,12 @@ export class BrowserTools {
     else if (method === 'Page.loadEventFired') void this.navigationComplete(session);
   }
 
-  async command(session, method, params) {
+  async command(session, method, params, focus = {}) {
     await this.check(session);
     try { await this.injectControl(session, 'control-check', { sessionId: session.id }); }
     catch (error) { await this.stop(session); throw error; }
     await this.check(session);
+    if (focus.focusId) await this.injectControl(session, 'check-focus', focus);
     await this.protocol(session, method, params);
     await this.check(session);
   }
@@ -346,6 +347,7 @@ export class BrowserTools {
       await send({ type: 'mouseReleased', ...point, button, buttons: buttons() & ~mouseButtons[button], clickCount: 1 });
       clearTimeout(session.buttons.get(button)?.timer);
       session.buttons.delete(button);
+      await this.injectControl(session, 'bind-editor', point);
     } catch (error) { await this.stop(session); throw error; }
   }
 
@@ -365,12 +367,14 @@ export class BrowserTools {
 
   async key(session, args) {
     const params = keyParams(args.key);
+    if (args.shift !== undefined && (args.shift !== true || !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(args.key) || (args.action !== undefined && args.action !== 'press') || args.holdMs !== undefined)) throw new Error('Shift is only allowed for a navigation key press.');
+    if (args.shift) params.modifiers = 8;
     const action = args.action ?? 'press';
     if (!['press', 'down', 'up'].includes(action) || (args.holdMs !== undefined && (action !== 'press' || !Number.isInteger(args.holdMs) || args.holdMs < 0 || args.holdMs > maxHoldMs))) throw new Error('Choose press, down or up; a press can hold for 0 to 5000 ms.');
-    await this.injectControl(session, 'check-focus');
+    const focus = await this.injectControl(session, 'check-focus');
     if (action === 'up') {
       if (!session.keys.has(params.code)) throw new Error('This key is not held by Breezer.');
-      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params });
+      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params }, focus);
       clearTimeout(session.keys.get(params.code)?.timer);
       session.keys.delete(params.code);
       return;
@@ -380,11 +384,11 @@ export class BrowserTools {
     const held = { params, persistent: action === 'down' || args.holdMs > 0, timer: setTimeout(() => { void this.stop(session); }, action === 'down' ? maxHoldMs : maxHoldMs + 750) };
     session.keys.set(params.code, held);
     try {
-      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyDown', ...params, ...(params.key.length === 1 ? { text: params.key, unmodifiedText: params.key } : {}) });
+      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyDown', ...params, ...(params.key.length === 1 ? { text: params.key, unmodifiedText: params.key } : {}) }, focus);
       if (action === 'down') return;
       if (args.holdMs) await this.waitForRelease(session, args.holdMs);
-      await this.injectControl(session, 'check-focus');
-      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params });
+      await this.injectControl(session, 'check-focus', focus);
+      await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params }, focus);
       clearTimeout(held.timer);
       session.keys.delete(params.code);
     } catch (error) { await this.stop(session); throw error; }
@@ -396,7 +400,14 @@ export class BrowserTools {
     if (name === 'browser_snapshot') return this.snapshot(session.tab, session);
     if (name === 'browser_click' || name === 'browser_type') {
       if (typeof args.elementId !== 'string') throw new Error('Choose an element from the latest snapshot.');
+      if (name === 'browser_type' && args.mode !== undefined && !['replace', 'insert'].includes(args.mode)) throw new Error('Choose replace or insert typing.');
       if (name === 'browser_type' && (typeof args.text !== 'string' || args.text.length > 10000)) throw new Error('Enter text of at most 10,000 characters.');
+      if (name === 'browser_type' && args.mode === 'insert') {
+        const focus = await this.injectControl(session, 'editor-focus', { elementId: args.elementId });
+        if (!focus?.focusId) throw new Error('Click the document editor before inserting text.');
+        await this.command(session, 'Input.insertText', { text: args.text }, focus);
+        return this.snapshot(session.tab, session);
+      }
       const point = await this.injectControl(session, 'resolve', { elementId: args.elementId, typing: name === 'browser_type' });
       await this.check(session);
       await this.injectControl(session, 'pointer', { sessionId: session.id, ...point });
@@ -405,6 +416,7 @@ export class BrowserTools {
       if (currentPoint.x !== point.x || currentPoint.y !== point.y) throw new Error('This element moved. Take a new snapshot.');
       await this.command(session, 'Input.dispatchMouseEvent', { type: 'mousePressed', ...point, button: 'left', clickCount: 1 });
       await this.command(session, 'Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 });
+      await this.injectControl(session, 'bind-editor', { elementId: args.elementId });
       if (name === 'browser_type') {
         await this.injectControl(session, 'select-content', { elementId: args.elementId });
         await this.command(session, 'Input.insertText', { text: args.text });

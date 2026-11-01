@@ -9,7 +9,24 @@ export function pageContext(operation, args = {}) {
     const style = getComputedStyle(el);
     return el.isConnected && rect.width > 0 && rect.height > 0 && style.visibility === 'visible' && style.display !== 'none' && Number(style.opacity) !== 0 && (!el.checkVisibility || el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }));
   };
+  const docsPage = location.origin === 'https://docs.google.com' && /^\/document\/(?:u\/\d+\/)?d\/[^/]+\/edit(?:\/|$)/.test(location.pathname);
+  const docsEditor = el => docsPage && el?.matches('.kix-appview-editor') && visible(el) && el.querySelector('canvas');
+  const clearEditor = () => {
+    state.editor?.document.removeEventListener('keydown', state.escape, true);
+    state.editor = undefined;
+  };
+  const editorFocus = () => {
+    const binding = state.editor;
+    if (!binding || binding.url !== location.href || !docsEditor(binding.root) || !binding.frame.isConnected || document.activeElement !== binding.frame || binding.frame.contentDocument !== binding.document || binding.document.activeElement !== binding.target || !binding.target.isConnected) throw new Error('The document editor changed or lost focus. Click it again from a new snapshot.');
+    if (sensitive(binding.frame)) throw new Error('Breezer cannot enter passwords or secret fields.');
+    for (let el = binding.target; el; el = el.parentElement) {
+      if (sensitive(el)) throw new Error('Breezer cannot enter passwords or secret fields.');
+    }
+    if (!binding.target.isContentEditable && !binding.target.matches('textarea:not([readonly]):not([disabled]),input:not([readonly]):not([disabled])')) throw new Error('Choose an editable field.');
+    return { focusId: binding.id };
+  };
   const removeOverlay = () => {
+    clearEditor();
     state.overlay?.remove();
     state.mask?.remove();
     document.removeEventListener('keydown', state.escape, true);
@@ -26,8 +43,8 @@ export function pageContext(operation, args = {}) {
     host.dataset.breezerAi = 'redaction';
     host.style.cssText = 'position:fixed;inset:0;z-index:2147483646;pointer-events:none';
     const shadow = host.attachShadow({ mode: 'closed' });
-    for (const el of document.querySelectorAll('input,textarea,[contenteditable="true"]')) {
-      if (!sensitive(el) || !visible(el)) continue;
+    for (const el of document.querySelectorAll('input,textarea,[contenteditable="true"],iframe,frame')) {
+      if ((!sensitive(el) && !el.matches('iframe,frame')) || !visible(el)) continue;
       const rect = el.getBoundingClientRect();
       const mask = document.createElement('div');
       mask.style.cssText = `position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;background:#172033;border-radius:3px`;
@@ -115,29 +132,54 @@ export function pageContext(operation, args = {}) {
     if (state.sessionId !== args.sessionId || !state.overlay?.isConnected || !visible(state.overlay)) throw new Error('The browser control indicator was removed. Browser control stopped.');
     return { ok: true };
   }
+  if (operation === 'bind-editor') {
+    const el = args.elementId ? state.targets.get(args.elementId) : document.elementFromPoint(args.x, args.y)?.closest('.kix-appview-editor');
+    clearEditor();
+    if (!docsEditor(el)) return { ok: true };
+    const frame = document.activeElement;
+    // Access stays within Chromium's same-origin DOM boundary. No frame IDs,
+    // cross-origin debugger sessions or model-provided selectors are accepted.
+    if (!frame?.matches('iframe.docs-texteventtarget-iframe') || !frame.contentDocument) throw new Error('Click the document editor to focus its same-origin text input.');
+    const doc = frame.contentDocument;
+    state.editor = { id: token(), url: location.href, root: el, frame, document: doc, target: doc.activeElement };
+    try {
+      const result = editorFocus();
+      doc.addEventListener('keydown', state.escape, true);
+      return result;
+    } catch (error) { clearEditor(); throw error; }
+  }
+  if (operation === 'editor-focus') {
+    if (state.targets.get(args.elementId) !== state.editor?.root) throw new Error('Click the document editor from a new snapshot before inserting text.');
+    return editorFocus();
+  }
   if (operation === 'resolve-point') {
     const { x, y } = args;
     if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) throw new Error('Choose coordinates inside the current viewport in CSS pixels.');
     const hit = document.elementFromPoint(x, y);
-    // Canvas input cannot target fields, frames, shadow hosts or the Stop indicator.
-    // Ordinary controls continue to use IDs from the latest snapshot.
-    if (!hit || hit.tagName !== 'CANVAS' || !visible(hit) || sensitive(hit) || hit.closest('[data-breezer-ai],input,textarea,[contenteditable]')) throw new Error('Coordinate input requires a visible, uncovered canvas in the main page. Use element IDs for other controls.');
+    // Docs uses a hit layer above its painted canvas. Only the recognized editor
+    // on an HTTPS document edit URL can use that layer as a coordinate target.
+    const editor = hit?.closest('.kix-appview-editor');
+    if (!hit || (hit.tagName !== 'CANVAS' && !docsEditor(editor)) || !visible(hit) || sensitive(hit) || hit.closest('[data-breezer-ai],input,textarea,[contenteditable]')) throw new Error('Coordinate input requires a visible, uncovered canvas in the main page. Use element IDs for other controls.');
     return { x, y };
   }
   if (operation === 'snapshot') {
     state.targets.clear();
     const snapshotId = token();
     const elements = [];
-    const candidates = document.querySelectorAll('a[href],button,input,textarea,select,canvas,[role="button"],[role="link"],[contenteditable="true"],[tabindex]');
+    const editorRoot = docsPage && document.querySelector('.kix-appview-editor');
+    const candidates = new Set([...(editorRoot ? [editorRoot] : []), ...document.querySelectorAll('a[href],button,input,textarea,select,canvas,[role="button"],[role="link"],[contenteditable="true"],[tabindex]')]);
     for (const el of candidates) {
       if (elements.length >= 180) break;
       if (!visible(el) || sensitive(el) || el.closest('[data-breezer-ai]')) continue;
+      const editor = el.closest('.kix-appview-editor');
+      if (editor && docsEditor(editor) && el !== editor) continue;
+      if (el.matches('.kix-appview-editor') && !docsEditor(el)) continue;
       const rect = el.getBoundingClientRect();
       if (rect.bottom <= 0 || rect.right <= 0 || rect.top >= innerHeight || rect.left >= innerWidth) continue;
       const id = `${state.documentId}:${snapshotId}:${elements.length + 1}`;
       state.targets.set(id, el);
-      const label = el.getAttribute('aria-label') || el.labels?.[0]?.innerText || el.getAttribute('placeholder') || (el.matches('input,textarea,[contenteditable="true"]') ? '' : el.innerText) || el.getAttribute('title') || '';
-      elements.push({ id, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || el.tagName.toLowerCase(), label: label.slice(0, 180), type: el.getAttribute('type') || undefined, x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) });
+      const label = el.getAttribute('aria-label') || (docsEditor(el) ? 'Document editor' : '') || el.labels?.[0]?.innerText || el.getAttribute('placeholder') || (el.matches('input,textarea,[contenteditable="true"]') ? '' : el.innerText) || el.getAttribute('title') || '';
+      elements.push({ id, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || el.tagName.toLowerCase(), label: label.slice(0, 180), type: docsEditor(el) ? 'canvas-editor' : el.getAttribute('type') || undefined, x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) });
     }
     const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
     const text = [];
@@ -164,6 +206,11 @@ export function pageContext(operation, args = {}) {
     return { x, y };
   }
   if (operation === 'check-focus' || operation === 'select-content') {
+    if (state.editor || args.focusId || document.activeElement?.matches('iframe,frame')) {
+      const result = editorFocus();
+      if (args.focusId && args.focusId !== result.focusId) throw new Error('The document editor changed. Take a new snapshot.');
+      return result;
+    }
     if (document.activeElement && sensitive(document.activeElement)) throw new Error('Breezer cannot enter passwords or secret fields.');
     if (args.elementId) {
       const target = state.targets.get(args.elementId);

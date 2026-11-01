@@ -69,6 +69,7 @@ jobs:
           node --test tests/ai/workspace-browser.test.mjs
           node --test tests/ai/translation.test.mjs tests/ai/translation-browser.test.mjs
           node tests/ai/browser-page.mjs
+          node tests/ai/docs-editor-browser.mjs
       - name: Verify passkey component and virtual WebAuthn protocol
         env:
           BREEZER_PASSKEY_EVIDENCE: ${{ runner.temp }}/breezer-passkey-evidence
