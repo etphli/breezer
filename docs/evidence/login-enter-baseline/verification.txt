@@ -1,0 +1,139 @@
+Original reproduction, stock Chrome, before and after source edit: FAIL as expected; patched Breezer unavailable.
+Command: node tests/passwords/enter-browser.mjs
+node:internal/modules/run_main:122
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'username'
+- 'password'
+
+    at file:///Users/likht.ethan/.t3/worktrees/breezer/t3-314f8dc4/tests/passwords/enter-browser.mjs:27:12
+    at async check (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-314f8dc4/tests/passwords/enter-browser.mjs:24:54)
+    at async file:///Users/likht.ethan/.t3/worktrees/breezer/t3-314f8dc4/tests/passwords/enter-browser.mjs:25:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'username',
+  expected: 'password',
+  operator: 'strictEqual'
+}
+
+Node.js v22.14.0
+
+Stock Chrome baseline command: node tests/passwords/enter-browser.mjs --baseline
+PASS annotated no-button username advances to password
+PASS annotated no-button final password submits once
+PASS native submit-button form submits once
+PASS native username Enter submits a complete form once
+PASS native validation focuses missing password
+PASS disabled submit
+PASS custom next step
+PASS MFA
+PASS consent
+PASS textarea
+PASS empty password never submits
+PASS invalid username never submits
+PASS site cancellation takes precedence
+PASS form ownership rather than nearest ancestor
+PASS canceled native submit-button click is not retried
+PASS multi-step native username Next stays native
+PASS synthetic Enter does not trigger fallback
+PASS multiple forms stay isolated
+PASS unannotated login
+PASS new-password registration
+PASS read-only field
+PASS hidden password
+PASS GET form
+PASS novalidate form
+PASS site custom validity is preserved
+PASS modifier Enter does not trigger fallback
+PASS held Enter cannot advance then immediately submit
+PASS change handler removal aborts the fallback
+PASS first Enter belongs to an open site picker
+PASS textarea and contenteditable Enter remain editing
+PASS frame-local login on 127.0.0.1
+PASS frame-local login on localhost
+PASS 32 real-page scenarios (stock browser baseline; enhancement absent)
+
+Node action tests:
+TAP version 13
+# Subtest: password actions open pinned native pages in Breezer, without reading credentials
+ok 1 - password actions open pinned native pages in Breezer, without reading credentials
+  ---
+  duration_ms: 0.797958
+  ...
+# Subtest: no arbitrary URL or inherited object property can become a password destination
+ok 2 - no arbitrary URL or inherited object property can become a password destination
+  ---
+  duration_ms: 0.367791
+  ...
+# Subtest: unavailable integration and rejected tab opens fail without claiming import success
+ok 3 - unavailable integration and rejected tab opens fail without claiming import success
+  ---
+  duration_ms: 0.477
+  ...
+# Subtest: runtime fixture contains only one explicit dummy credential
+ok 4 - runtime fixture contains only one explicit dummy credential
+  ---
+  duration_ms: 3.197583
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 61.357417
+
+Pinned source checker: python3 script/check_breezer_passwords.py --offline
+test_cue_guard_exhaustive_dummy_states (__main__.ProactivePasswordSourceTest.test_cue_guard_exhaustive_dummy_states) ... ok
+test_native_fill_requires_account_selection_by_default (__main__.ProactivePasswordSourceTest.test_native_fill_requires_account_selection_by_default) ... ok
+test_native_save_suppression_and_submission_pipeline_are_preserved (__main__.ProactivePasswordSourceTest.test_native_save_suppression_and_submission_pipeline_are_preserved) ... ok
+test_password_fields_reach_native_contextual_fill_menu (__main__.ProactivePasswordSourceTest.test_password_fields_reach_native_contextual_fill_menu) ... ok
+test_save_update_cue_is_visible_and_uses_native_actions (__main__.ProactivePasswordSourceTest.test_save_update_cue_is_visible_and_uses_native_actions) ... ok
+test_typed_password_closes_suggestions_so_enter_can_submit (__main__.ProactivePasswordSourceTest.test_typed_password_closes_suggestions_so_enter_can_submit) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.134s
+
+OK
+test_exact_form_and_explicit_login_pair (__main__.LoginEnterSourceTest.test_exact_form_and_explicit_login_pair) ... ok
+test_native_regressions_are_staged_and_original_fixture_untouched (__main__.LoginEnterSourceTest.test_native_regressions_are_staged_and_original_fixture_untouched) ... ok
+test_native_submission_has_priority (__main__.LoginEnterSourceTest.test_native_submission_has_priority) ... ok
+test_trusted_unmodified_enter_only (__main__.LoginEnterSourceTest.test_trusted_unmodified_enter_only) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.265s
+
+OK
+test_fingerprint_and_targets (__main__.OverlayBoundaryTest.test_fingerprint_and_targets) ... ok
+test_missing_source_refused (__main__.OverlayBoundaryTest.test_missing_source_refused) ... ok
+test_apply_check_and_retry_on_source_copy_only (__main__.PinnedSourceTest.test_apply_check_and_retry_on_source_copy_only) ... ok
+test_direct_chrome_password_import_is_not_advertised (__main__.PinnedSourceTest.test_direct_chrome_password_import_is_not_advertised) ... ok
+test_interrupted_apply_converges_and_symlink_refused (__main__.PinnedSourceTest.test_interrupted_apply_converges_and_symlink_refused) ... ok
+test_missing_overlay_and_drift_refused_without_partial_writes (__main__.PinnedSourceTest.test_missing_overlay_and_drift_refused_without_partial_writes) ... ok
+test_pinned_routes_and_storage_authentication_contract (__main__.PinnedSourceTest.test_pinned_routes_and_storage_authentication_contract) ... ok
+test_recorded_source_evidence (__main__.PinnedSourceTest.test_recorded_source_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 1.139s
+
+OK
+test_management_uses_same_profile_store_and_native_confirmation (__main__.PasskeySourceTest.test_management_uses_same_profile_store_and_native_confirmation) ... ok
+test_native_management_route_is_mounted_and_lazy_loaded_on_mac (__main__.PasskeySourceTest.test_native_management_route_is_mounted_and_lazy_loaded_on_mac) ... ok
+test_native_preferences_and_real_policy_are_preserved (__main__.PasskeySourceTest.test_native_preferences_and_real_policy_are_preserved) ... ok
+test_origin_rp_and_native_selection_pipeline_are_unchanged (__main__.PasskeySourceTest.test_origin_rp_and_native_selection_pipeline_are_unchanged) ... ok
+test_platform_identity_authentication_and_storage_are_unchanged (__main__.PasskeySourceTest.test_platform_identity_authentication_and_storage_are_unchanged) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.276s
+
+OK
+PASS: password manager overlay, 14 pinned native targets, idempotence and drift retention
+
+Native Blink unit tests and compiled Breezer acceptance: NOT RUN, no disposable build or unit output supplied.
+Site picker fixture is not a native saved-password picker test. IME native acceptance pending.

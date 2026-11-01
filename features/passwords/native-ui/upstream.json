@@ -11,7 +11,8 @@
     "native fill-on-account-select default; no page-load password filling by default",
     "quiet native save/update suggestion chip, preserving blocklists and dismissal suppression",
     "native dismissal of saved-password suggestions while typing allows Enter to submit",
-    "native macOS profile passkey management at chrome://settings/passkeys; platform entitlement gates unchanged"
+    "native macOS profile passkey management at chrome://settings/passkeys; platform entitlement gates unchanged",
+    "trusted Enter for annotated two-field POST logins without a submit button; existing native submission retains priority"
   ],
   "direct_chrome_password_import": false,
   "csv_import_route": "chrome://password-manager/settings?import=true",
@@ -42,7 +43,10 @@
     "chrome/browser/ui/page_action/page_action_controller.h": "00189a69343b55e90f38fe7ed080ef360223ffb6abaa55898e1e398eb097287e",
     "components/autofill/core/browser/foundations/browser_autofill_manager.cc": "a8ca04e81cb488fd5e60f4d778a6bb97645d22443204373fd5c9204d6d34dbd1",
     "chrome/browser/resources/settings/route.ts": "01ad15cf728ec96d0cd299095880442e883c19e5e27bdf2ad3e13e520b88406a",
-    "chrome/browser/resources/settings/settings_main/settings_main.html": "a6ffcddeb68218d769d16ba5bdfee4465c33cb394b62b4598dc07e74b8fa1415"
+    "chrome/browser/resources/settings/settings_main/settings_main.html": "a6ffcddeb68218d769d16ba5bdfee4465c33cb394b62b4598dc07e74b8fa1415",
+    "third_party/blink/renderer/core/html/forms/html_form_element.cc": "2a96a97bfb4246b7a23895be7548533ce7adc32286f10df36831e370f8f86102",
+    "third_party/blink/renderer/core/html/forms/html_form_element_test.cc": "89c9949ef25d8602c4e09ae19b662f4a9d3d010e9c925234d5be89eef1a538ff",
+    "third_party/blink/renderer/core/html/forms/html_input_element.cc": "e24b3b06861f2602fe38806310ffc719305dd577f0972cdd8330547db66039dc"
   },
   "passkey_source_evidence_sha256": {
     "chrome/browser/webauthn/chrome_web_authentication_delegate.cc": "6027d0e3e08eb1b83fc59759aa8f4a6789cbb2364ff83867ead42e2809828775",

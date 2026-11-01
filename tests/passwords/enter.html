@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Disposable login Enter fixture</title>
+<style>body{font:18px system-ui;max-width:580px;margin:60px auto}label{display:block;margin:20px 0}input,button{font:inherit;padding:8px}input:focus{outline:3px solid #177d76}output{display:block;margin:20px 0}</style>
+<h1>Login Enter fixture</h1>
+<p>Dummy fields only. No credentials are sent or recorded.</p>
+<form id="login" action="/never-send" method="post">
+  <label>Username <input id="username" name="username" autocomplete="username" required></label>
+  <label>Password <input id="password" name="password" type="password" autocomplete="current-password" required></label>
+</form>
+<output id="status" aria-live="polite">Ready</output>
+<script>
+window.submissions = 0;
+document.addEventListener('submit', event => {
+  event.preventDefault();
+  window.submissions++;
+  document.querySelector('#status').textContent = `Submitted ${window.submissions} time(s)`;
+});
+</script>
+</html>

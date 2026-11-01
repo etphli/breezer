@@ -73,6 +73,13 @@ Primary source locations:
 - https://chromium.googlesource.com/chromium/src/+/156.0.8078.47/chrome/browser/ui/passwords/manage_passwords_ui_controller.cc
 - https://chromium.googlesource.com/chromium/src/+/156.0.8078.47/chrome/browser/ui/autofill/autofill_context_menu_manager.cc
 
+## Login Enter fallback
+
+The overlay also adds a narrowly scoped Enter fallback for explicitly annotated
+username/current-password POST forms without a submit button. See
+[scope, source evidence and pending native acceptance](../../docs/login-enter.md).
+Existing default buttons and native autofill routing retain priority.
+
 ## Automated verification
 
 ```sh
@@ -98,7 +105,7 @@ action tests also pass.
 
 No shared settings, CSS, HTML, AI, or native workspace/frame files changed.
 Existing preparation already fingerprints and applies everything under
-`features/passwords/native-ui/`. The overlay now stages ten native targets. It
+`features/passwords/native-ui/`. The overlay now stages fourteen native targets. It
 still refuses drift and supports an interrupted retry.
 
 The native overlay fingerprint changes. The existing build wrapper deliberately
