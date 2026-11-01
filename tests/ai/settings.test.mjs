@@ -220,7 +220,9 @@ test('a rejected change shows an error and the control reverts to the browser va
   page.bridge.reject = 'Rejected by the browser.';
   userClick(page.$('frameless'));
   await settle();
-  assert.match(page.$('layout-error').textContent, /Couldn’t change the frameless mode\. Rejected by the browser\./);
+  // Errors appear in the section that holds the control.
+  assert.match(page.$('frameless-error').textContent, /Couldn’t change the frameless mode\. Rejected by the browser\./);
+  assert.equal(page.$('layout-error').hidden, true);
   assert.equal(page.$('frameless').getAttribute('aria-checked'), 'true');
   const font = page.$('sidebar-font-size');
   font.focus();
@@ -231,7 +233,7 @@ test('a rejected change shows an error and the control reverts to the browser va
   page.bridge.reject = null;
   userClick(page.$('frameless'));
   await settle();
-  assert.equal(page.$('layout-error').hidden, true, 'a later success clears the error');
+  assert.equal(page.$('frameless-error').hidden, true, 'a later success clears the error');
 });
 
 test('a browser that keeps a different value reports it', async () => {

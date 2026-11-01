@@ -72,13 +72,13 @@ test('settings onboarding, Organato and updates render and respond in a real bro
   const url = `http://127.0.0.1:${server.address().port}/workspace.html#/settings`;
   const browser = await chromium.launch({ executablePath, headless: true });
   const errors = [];
-  const open = async ({ colorMode = 'light', theme = 'mint', width = 900, height = 1200, reducedMotion = 'no-preference' } = {}) => {
+  const open = async ({ colorMode = 'light', theme = 'mint', width = 900, height = 1200, reducedMotion = 'no-preference', category = '' } = {}) => {
     const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, colorScheme: colorMode, reducedMotion });
     await context.addInitScript(installFixture, { colorMode, theme });
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto(url);
-    await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer' }).waitFor();
+    await page.goto(category ? `${url}/${category}` : url);
+    await page.getByRole('heading', { name: category ? 'Settings' : 'Bring your Chrome data to Breezer', exact: true }).waitFor();
     // Initial helper replies: Organato not connected, no update available.
     await page.evaluate(() => {
       const org = window.fx.ports['breezer-organato-settings'];
@@ -108,11 +108,13 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     assert.equal(await page.evaluate(() => document.activeElement.dataset.onboardingAction), 'passwords');
     await page.keyboard.press('Enter');
     assert.equal(await page.locator('[data-password-import-guide]').evaluate((node) => node.open), true);
+    assert.equal(await page.locator('.nav-item[aria-current="page"]').innerText(), 'Passwords', 'password steps open the Passwords category');
     assert.equal(await page.evaluate(() => document.activeElement.tagName), 'SUMMARY');
     assert.equal(await page.evaluate(() => window.fx.opened.length), 1, 'password steps do not open the importer by themselves');
     await page.screenshot({ path: join(evidence, 'settings-password-guide-light.png') });
 
     // ---------------------------------------------------- Organato busy and error
+    await page.getByRole('link', { name: 'New tab and Organato' }).click();
     await page.locator('#organato-key').fill('org_' + 'x'.repeat(43));
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
     assert.equal(await page.locator('#organato-key').inputValue(), '', 'key leaves the page as soon as Connect is chosen');
@@ -136,6 +138,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     assert.equal(await page.locator('#organato-ai').isChecked(), false);
 
     // ---------------------------------------------------- updates available
+    await page.getByRole('link', { name: 'General' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: {} }); });
     await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: { available: true, version: '1.1.1' } }); });
@@ -150,6 +153,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
     await page.waitForTimeout(100);
     assert.equal(await page.locator('[data-onboarding]').isHidden(), true, 'stays hidden after reload');
+    await page.getByRole('link', { name: 'Browser settings' }).click();
     assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).count(), 1, 'browser import remains in More browser settings');
     await context.close();
 
@@ -157,7 +161,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     const dark = await open({ colorMode: 'dark', theme: '#c2410c' });
     assert.equal(await dark.page.evaluate(() => document.documentElement.dataset.tone), 'custom');
     await dark.page.screenshot({ path: join(evidence, 'settings-onboarding-dark-custom.png') });
-    await dark.page.evaluate(() => document.getElementById('organato-settings').scrollIntoView());
+    await dark.page.getByRole('link', { name: 'New tab and Organato' }).click();
     await dark.page.screenshot({ path: join(evidence, 'settings-organato-dark-custom.png') });
     await dark.context.close();
 
@@ -166,7 +170,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await darkMint.context.close();
 
     // ---------------------------------------------------- narrow, reduced motion
-    const narrow = await open({ width: 380, height: 900, reducedMotion: 'reduce' });
+    const narrow = await open({ width: 380, height: 900, reducedMotion: 'reduce', category: 'newtab' });
     assert.equal(await noOverflow(narrow.page), true, 'no horizontal scrolling at 380 px');
     const [label, toggle] = await narrow.page.evaluate(() => [document.querySelector('label[for="organato-ai"]'), document.getElementById('organato-ai')].map((node) => node.getBoundingClientRect().top));
     assert.ok(toggle - label < 24, 'toggles stay beside their labels on narrow screens');

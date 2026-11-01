@@ -44,196 +44,294 @@
   </div>
 
   <main id="settings" class="settings" hidden>
-    <div class="settings-column">
+    <nav class="settings-nav" aria-label="Settings">
+      <div class="settings-search" role="search">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+        <input id="settings-search" type="search" role="combobox" aria-label="Search settings" aria-expanded="false" aria-controls="settings-results" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Search">
+        <kbd aria-hidden="true">/</kbd>
+      </div>
+      <div id="settings-categories" class="nav-groups">
+        <ul class="nav-list" aria-label="Breezer">
+          <li><a class="nav-item" href="#/settings/general" data-category="general"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg><span>General</span></a></li>
+          <li><a class="nav-item" href="#/settings/appearance" data-category="appearance"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5a5.5 5.5 0 1 0 0 11c.9 0 1.3-.6 1.1-1.3-.3-.9.3-1.7 1.2-1.7h1.4a1.8 1.8 0 0 0 1.8-1.8A6 6 0 0 0 8 2.5Z"/><circle cx="5.4" cy="7" r=".6"/><circle cx="7.6" cy="5" r=".6"/><circle cx="10.4" cy="5.8" r=".6"/></svg><span>Appearance</span></a></li>
+          <li><a class="nav-item" href="#/settings/layout" data-category="layout"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M6 3v10"/></svg><span>Layout</span></a></li>
+          <li><a class="nav-item" href="#/settings/spaces" data-category="spaces"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m8 2.5 5.5 3L8 8.5l-5.5-3L8 2.5Z"/><path d="m2.5 8 5.5 3 5.5-3M2.5 10.5l5.5 3 5.5-3"/></svg><span>Spaces</span></a></li>
+        </ul>
+        <h2 id="nav-group-data" class="nav-group">Your data</h2>
+        <ul class="nav-list" aria-labelledby="nav-group-data">
+          <li><a class="nav-item" href="#/settings/passwords" data-category="passwords"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="5.5" cy="10.5" r="3"/><path d="m7.6 8.4 5.4-5.4M11 5l1.5 1.5M9.5 6.5 11 8"/></svg><span>Passwords</span></a></li>
+          <li><a class="nav-item" href="#/settings/sync" data-category="sync"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 6.5A5 5 0 0 0 3.6 5M3 9.5A5 5 0 0 0 12.4 11"/><path d="M3.5 2.5V5H6M12.5 13.5V11H10"/></svg><span>Sync</span></a></li>
+          <li><a class="nav-item" href="#/settings/privacy" data-category="privacy"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2 3 4v3.8c0 3 2.1 5.3 5 6.2 2.9-.9 5-3.2 5-6.2V4L8 2Z"/></svg><span>Privacy</span></a></li>
+        </ul>
+        <h2 id="nav-group-ai" class="nav-group">Breezer AI</h2>
+        <ul class="nav-list" aria-labelledby="nav-group-ai">
+          <li><a class="nav-item" href="#/settings/assistant" data-category="assistant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2.5 8.2 6 11.5 7.2 8.2 8.4 7 12 5.8 8.4 2.5 7.2 5.8 6 7 2.5ZM12 10.5l.6 1.4 1.4.6-1.4.6L12 14.5l-.6-1.4-1.4-.6 1.4-.6.6-1.4Z"/></svg><span>Assistant</span></a></li>
+          <li><a class="nav-item" href="#/settings/newtab" data-category="newtab"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 9.5l1.3 1.3 2.7-2.6"/></svg><span>New tab and Organato</span></a></li>
+        </ul>
+        <h2 id="nav-group-browser" class="nav-group">Browser</h2>
+        <ul class="nav-list" aria-labelledby="nav-group-browser">
+          <li><a class="nav-item" href="#/settings/languages" data-category="languages"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.3 3.4 2.3 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.7 5.9 5.7 8s.7 3.9 2.3 5.5"/></svg><span>Languages</span></a></li>
+          <li><a class="nav-item" href="#/settings/browser" data-category="browser"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Browser settings</span></a></li>
+          <li><button id="open-native-settings" class="nav-item" type="button" aria-describedby="native-settings-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 8 8"/><path d="M11.5 9.5v2.5a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h2.5"/></svg><span>Other</span></button></li>
+        </ul>
+        <p id="native-settings-hint" class="nav-hint">Opens Chromium settings in this tab. Use Back to return.</p>
+        <p id="native-settings-error" class="field-error nav-error" role="alert" hidden></p>
+      </div>
+    </nav>
+
+    <div class="settings-main">
       <header class="settings-head">
-        <img src="icon128.png" width="40" height="40" alt="">
-        <div>
+        <div class="crumbs">
           <h1 id="settings-title" tabindex="-1">Settings</h1>
-          <p>Customize Breezer and open browser settings by category.</p>
+          <span class="crumb-sep" aria-hidden="true">/</span>
+          <span id="settings-crumb" class="crumb-current" aria-live="polite">General</span>
         </div>
         <a id="run-setup" class="button subtle setup-link" href="#/welcome">Setup guide</a>
       </header>
 
-      <p id="bridge-note" class="bridge-note" role="status" hidden></p>
-      <div id="settings-onboarding"></div>
+      <div id="settings-scroll" class="settings-scroll">
+        <div class="settings-column">
+          <p id="bridge-note" class="bridge-note" role="status" hidden></p>
+          <p id="settings-search-status" class="sr-only" role="status" aria-live="polite"></p>
+          <div id="settings-results" class="search-results" role="listbox" aria-label="Search results" hidden></div>
 
-      <section class="settings-section" aria-labelledby="layout-heading">
-        <h2 id="layout-heading">Layout</h2>
-        <div class="setting-row">
-          <div class="setting-label"><span id="layout-label">Tabs</span><small>Vertical tabs use the left sidebar by default.</small></div>
-          <div class="segmented" role="radiogroup" aria-labelledby="layout-label" data-field="layout">
-            <button role="radio" data-value="sidebar">Sidebar</button>
-            <button role="radio" data-value="top">Top</button>
-          </div>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Auto-hide reveals tabs at the sidebar edge. This also controls auto-expand on hover.</small></div>
-          <div class="segmented" role="radiogroup" aria-labelledby="sidebar-mode-label" data-field="sidebarMode">
-            <button role="radio" data-value="expanded">Expanded</button>
-            <button role="radio" data-value="compact">Compact</button>
-            <button role="radio" data-value="autoHide">Auto-hide</button>
-          </div>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><label for="sidebar-width">Sidebar width</label><small id="sidebar-width-value">240 px</small></div>
-          <input id="sidebar-width" type="range" min="200" max="360" step="4" value="240" data-field="sidebarWidth">
-        </div>
-        <div class="setting-row">
-          <div class="setting-label" id="bookmarks-label">Bookmarks bar<small>Choose when your bookmarks appear.</small></div>
-          <div class="segmented" role="radiogroup" aria-labelledby="bookmarks-label" data-field="bookmarkBarMode">
-            <button type="button" role="radio" aria-checked="true" data-value="newTab" tabindex="0">New tabs only</button>
-            <button type="button" role="radio" aria-checked="false" data-value="always" tabindex="-1">Always</button>
-            <button type="button" role="radio" aria-checked="false" data-value="hidden" tabindex="-1">Hidden</button>
-          </div>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="centered-address-bar-label">Centered address bar</span><small>Keep the address field centered in the top bar.</small></div>
-          <button id="centered-address-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="centered-address-bar-label" data-field="centeredAddressBar"><span aria-hidden="true"></span></button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="minimal-url-label">Minimal URL in the address bar</span><small>Show a shorter address when you are not editing it.</small></div>
-          <button id="minimal-url" class="switch" role="switch" aria-checked="true" aria-labelledby="minimal-url-label" data-field="minimalUrl"><span aria-hidden="true"></span></button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="show-load-progress-label">Show loading progress in the address bar</span><small>Display page loading progress behind the address.</small></div>
-          <button id="show-load-progress" class="switch" role="switch" aria-checked="true" aria-labelledby="show-load-progress-label" data-field="showLoadProgress"><span aria-hidden="true"></span></button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="frameless-label">Frameless mode</span><small>Hide unpinned browser UI until you hover the window edge.</small></div>
-          <button id="frameless" class="switch" role="switch" aria-checked="true" aria-labelledby="frameless-label" data-field="frameless"><span aria-hidden="true"></span></button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="always-show-sidebar-label">Always show the sidebar</span><small>Keep the sidebar visible in frameless mode.</small></div>
-          <button id="always-show-sidebar" class="switch" role="switch" aria-checked="false" aria-labelledby="always-show-sidebar-label" data-field="alwaysShowSidebar"><span aria-hidden="true"></span></button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span><small>Keep the top bar visible in frameless mode.</small></div>
-          <button id="always-show-top-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="always-show-top-bar-label" data-field="alwaysShowTopBar"><span aria-hidden="true"></span></button>
-        </div>
-        <p id="layout-error" class="field-error" role="alert" hidden></p>
-      </section>
+          <section class="settings-page" data-page="general" aria-label="General">
+            <div id="settings-onboarding"></div>
+            <section class="settings-section" aria-labelledby="tabs-heading">
+              <h2 id="tabs-heading">Tabs</h2>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="new tab position order top bottom">
+                  <div class="setting-label"><span id="position-label">New tabs open</span><small>Where new tabs appear in the sidebar list.</small></div>
+                  <div class="segmented" role="radiogroup" aria-labelledby="position-label" data-pref="newTabPosition">
+                    <button role="radio" data-value="top">At top</button>
+                    <button role="radio" data-value="bottom">At bottom</button>
+                  </div>
+                </div>
+                <div class="setting-row" data-search-terms="close x hover always">
+                  <div class="setting-label"><span id="close-label">Close button</span><small>When the close button shows on sidebar tabs.</small></div>
+                  <div class="segmented" role="radiogroup" aria-labelledby="close-label" data-pref="closeButton">
+                    <button role="radio" data-value="hover">On hover</button>
+                    <button role="radio" data-value="always">Always</button>
+                  </div>
+                </div>
+              </div>
+              <p id="tabs-error" class="field-error" role="alert" hidden></p>
+            </section>
+            <section id="update-settings" class="settings-section" aria-labelledby="update-heading" data-search-terms="update upgrade version release restart github">
+              <h2 id="update-heading">Breezer updates</h2>
+              <div class="setting-group">
+                <div class="setting-row update-row">
+                  <div class="setting-label"><p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p><small>Checks stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</small></div>
+                  <div class="update-actions">
+                    <button id="update-check" class="button" type="button">Check for updates</button>
+                    <button id="update-install" class="button primary" type="button" hidden>Update and restart</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </section>
 
-      <section class="settings-section" aria-labelledby="typography-heading">
-        <h2 id="typography-heading">Typography</h2>
-        <div class="setting-row">
-          <div class="setting-label"><label for="sidebar-font-size">Sidebar font size</label><small id="sidebar-font-size-value">15 px</small></div>
-          <input id="sidebar-font-size" type="range" min="12" max="20" step="1" value="15" data-field="sidebarFontSize" aria-describedby="sidebar-font-note">
-        </div>
-        <p id="sidebar-font-note" class="section-note">Changes tab titles and labels in the sidebar. Page fonts have their own browser setting below.</p>
-        <p id="typography-error" class="field-error" role="alert" hidden></p>
-      </section>
+          <section class="settings-page" data-page="appearance" aria-label="Appearance" hidden>
+            <section class="settings-section" aria-labelledby="theme-heading" data-search-terms="theme color colour mint tide dusk rose pollen graphite">
+              <h2 id="theme-heading">Theme</h2>
+              <p class="section-note">Choosing a Breezer theme replaces your current browser theme.</p>
+              <div id="theme-swatches" class="swatches" role="radiogroup" aria-labelledby="theme-heading"></div>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="custom theme colour picker">
+                  <label class="setting-label" for="custom-theme-color">Custom color<small>Create a theme for the browser and sidebar.</small></label>
+                  <span class="control-cluster">
+                    <input id="custom-theme-color" type="color" value="#23866b">
+                    <button id="custom-theme-apply" class="button" type="button">Apply color</button>
+                  </span>
+                </div>
+                <div class="setting-row" data-search-terms="dark mode light mode system color scheme night">
+                  <div class="setting-label"><span id="mode-label">Appearance</span><small>System follows your Mac.</small></div>
+                  <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-field="colorMode">
+                    <button role="radio" data-value="system">System</button>
+                    <button role="radio" data-value="light">Light</button>
+                    <button role="radio" data-value="dark">Dark</button>
+                  </div>
+                </div>
+              </div>
+              <p id="theme-error" class="field-error" role="alert" hidden></p>
+            </section>
+            <section class="settings-section" aria-labelledby="typography-heading">
+              <h2 id="typography-heading">Typography</h2>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="font text size bigger smaller">
+                  <div class="setting-label"><label for="sidebar-font-size">Sidebar font size</label><small id="sidebar-font-note">Changes tab titles and labels in the sidebar. Page fonts are in Browser settings.</small></div>
+                  <span class="range-control">
+                    <input id="sidebar-font-size" type="range" min="12" max="20" step="1" value="15" data-field="sidebarFontSize" aria-describedby="sidebar-font-note">
+                    <output id="sidebar-font-size-value" for="sidebar-font-size">15 px</output>
+                  </span>
+                </div>
+              </div>
+              <p id="typography-error" class="field-error" role="alert" hidden></p>
+            </section>
+          </section>
 
-      <section class="settings-section" aria-labelledby="theme-heading">
-        <h2 id="theme-heading">Theme</h2>
-        <p class="section-note">Choosing a Breezer theme replaces your current browser theme.</p>
-        <div id="theme-swatches" class="swatches" role="radiogroup" aria-labelledby="theme-heading"></div>
-        <div class="setting-row">
-          <label class="setting-label" for="custom-theme-color">Custom color<small>Create a theme for the browser and sidebar.</small></label>
-          <input id="custom-theme-color" type="color" value="#23866b">
-          <button id="custom-theme-apply" class="button" type="button">Apply color</button>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="mode-label">Appearance</span><small>System follows your Mac.</small></div>
-          <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-field="colorMode">
-            <button role="radio" data-value="system">System</button>
-            <button role="radio" data-value="light">Light</button>
-            <button role="radio" data-value="dark">Dark</button>
-          </div>
-        </div>
-        <p id="theme-error" class="field-error" role="alert" hidden></p>
-      </section>
+          <section class="settings-page" data-page="layout" aria-label="Layout" hidden>
+            <section class="settings-section" aria-labelledby="layout-heading">
+              <h2 id="layout-heading">Tabs and sidebar</h2>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="vertical horizontal tab strip position">
+                  <div class="setting-label"><span id="layout-label">Tabs</span><small>Vertical tabs use the left sidebar by default.</small></div>
+                  <div class="segmented" role="radiogroup" aria-labelledby="layout-label" data-field="layout">
+                    <button role="radio" data-value="sidebar">Sidebar</button>
+                    <button role="radio" data-value="top">Top</button>
+                  </div>
+                </div>
+                <div class="setting-row" data-search-terms="collapse compact icons auto hide expand hover">
+                  <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Auto-hide reveals tabs at the sidebar edge. This also controls auto-expand on hover.</small></div>
+                  <div class="segmented" role="radiogroup" aria-labelledby="sidebar-mode-label" data-field="sidebarMode">
+                    <button role="radio" data-value="expanded">Expanded</button>
+                    <button role="radio" data-value="compact">Compact</button>
+                    <button role="radio" data-value="autoHide">Auto-hide</button>
+                  </div>
+                </div>
+                <div class="setting-row" data-search-terms="sidebar size wide narrow">
+                  <div class="setting-label"><label for="sidebar-width">Sidebar width</label><small>Space for tab titles in the expanded sidebar.</small></div>
+                  <span class="range-control">
+                    <input id="sidebar-width" type="range" min="200" max="360" step="4" value="240" data-field="sidebarWidth">
+                    <output id="sidebar-width-value" for="sidebar-width">240 px</output>
+                  </span>
+                </div>
+                <div class="setting-row" data-search-terms="bookmark bar favorites toolbar show hide">
+                  <div class="setting-label"><span id="bookmarks-label">Bookmarks bar</span><small>Choose when your bookmarks appear.</small></div>
+                  <div class="segmented" role="radiogroup" aria-labelledby="bookmarks-label" data-field="bookmarkBarMode">
+                    <button type="button" role="radio" aria-checked="true" data-value="newTab" tabindex="0">New tabs only</button>
+                    <button type="button" role="radio" aria-checked="false" data-value="always" tabindex="-1">Always</button>
+                    <button type="button" role="radio" aria-checked="false" data-value="hidden" tabindex="-1">Hidden</button>
+                  </div>
+                </div>
+              </div>
+              <p id="layout-error" class="field-error" role="alert" hidden></p>
+            </section>
+            <section class="settings-section" aria-labelledby="address-heading" data-search-terms="omnibox url location bar">
+              <h2 id="address-heading">Address bar</h2>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="omnibox center">
+                  <div class="setting-label"><span id="centered-address-bar-label">Centered address bar</span><small>Keep the address field centered in the top bar.</small></div>
+                  <button id="centered-address-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="centered-address-bar-label" data-field="centeredAddressBar"><span aria-hidden="true"></span></button>
+                </div>
+                <div class="setting-row" data-search-terms="short url domain only">
+                  <div class="setting-label"><span id="minimal-url-label">Minimal URL in the address bar</span><small>Show a shorter address when you are not editing it.</small></div>
+                  <button id="minimal-url" class="switch" role="switch" aria-checked="true" aria-labelledby="minimal-url-label" data-field="minimalUrl"><span aria-hidden="true"></span></button>
+                </div>
+                <div class="setting-row" data-search-terms="progress bar loading indicator">
+                  <div class="setting-label"><span id="show-load-progress-label">Show loading progress in the address bar</span><small>Display page loading progress behind the address.</small></div>
+                  <button id="show-load-progress" class="switch" role="switch" aria-checked="true" aria-labelledby="show-load-progress-label" data-field="showLoadProgress"><span aria-hidden="true"></span></button>
+                </div>
+              </div>
+              <p id="address-error" class="field-error" role="alert" hidden></p>
+            </section>
+            <section class="settings-section" aria-labelledby="frameless-heading" data-search-terms="zen mode focus fullscreen chrome ui">
+              <h2 id="frameless-heading">Frameless window</h2>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="zen hide toolbar">
+                  <div class="setting-label"><span id="frameless-label">Frameless mode</span><small>Hide unpinned browser UI until you hover the window edge.</small></div>
+                  <button id="frameless" class="switch" role="switch" aria-checked="true" aria-labelledby="frameless-label" data-field="frameless"><span aria-hidden="true"></span></button>
+                </div>
+                <div class="setting-row" data-search-terms="pin sidebar visible">
+                  <div class="setting-label"><span id="always-show-sidebar-label">Always show the sidebar</span><small>Keep the sidebar visible in frameless mode.</small></div>
+                  <button id="always-show-sidebar" class="switch" role="switch" aria-checked="false" aria-labelledby="always-show-sidebar-label" data-field="alwaysShowSidebar"><span aria-hidden="true"></span></button>
+                </div>
+                <div class="setting-row" data-search-terms="pin toolbar top bar visible">
+                  <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span><small>Keep the top bar visible in frameless mode.</small></div>
+                  <button id="always-show-top-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="always-show-top-bar-label" data-field="alwaysShowTopBar"><span aria-hidden="true"></span></button>
+                </div>
+              </div>
+              <p id="frameless-error" class="field-error" role="alert" hidden></p>
+            </section>
+          </section>
 
-      <section class="settings-section" aria-labelledby="spaces-heading">
-        <h2 id="spaces-heading">Spaces</h2>
-        <p class="section-note">Each space keeps its own pinned tabs and open tabs. Deleting a space moves its tabs to the first space.</p>
-        <ol id="space-list" class="space-list"></ol>
-        <button id="settings-add-space" class="text-button"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg>Add space</button>
-        <p id="spaces-error" class="field-error" role="alert" hidden></p>
-      </section>
+          <section class="settings-page" data-page="spaces" aria-label="Spaces" hidden>
+            <section class="settings-section" aria-labelledby="spaces-heading" data-search-terms="space workspace profile rename color reorder delete add">
+              <h2 id="spaces-heading">Spaces</h2>
+              <p class="section-note">Each space keeps its own pinned tabs and open tabs. Deleting a space moves its tabs to the first space.</p>
+              <ol id="space-list" class="space-list setting-group"></ol>
+              <button id="settings-add-space" class="text-button"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg>Add space</button>
+              <p id="spaces-error" class="field-error" role="alert" hidden></p>
+            </section>
+          </section>
 
-      <section class="settings-section" aria-labelledby="tabs-heading">
-        <h2 id="tabs-heading">Tabs</h2>
-        <div class="setting-row">
-          <div class="setting-label"><span id="position-label">New tabs open</span></div>
-          <div class="segmented" role="radiogroup" aria-labelledby="position-label" data-pref="newTabPosition">
-            <button role="radio" data-value="top">At top</button>
-            <button role="radio" data-value="bottom">At bottom</button>
-          </div>
-        </div>
-        <div class="setting-row">
-          <div class="setting-label"><span id="close-label">Close button</span></div>
-          <div class="segmented" role="radiogroup" aria-labelledby="close-label" data-pref="closeButton">
-            <button role="radio" data-value="hover">On hover</button>
-            <button role="radio" data-value="always">Always</button>
-          </div>
-        </div>
-        <p id="tabs-error" class="field-error" role="alert" hidden></p>
-      </section>
+          <section class="settings-page" data-page="passwords" aria-label="Passwords" hidden>
+            <div id="password-settings" data-search-terms="passwords passkeys touch id security key apple passwords autofill sign in credentials import chrome csv export"></div>
+          </section>
 
-      <div id="password-settings"></div>
-      <div id="context-settings"></div>
-      <div id="translation-settings"></div>
-      <div id="usage-settings"></div>
-      <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading">
-        <h2 id="organato-heading">New tab and Organato</h2>
-        <p class="section-note">Connect Organato to see deadlines and let Breezer AI manage the items you ask it to. Your API key stays in macOS Keychain.</p>
-        <div class="setting-row">
-          <label class="setting-label" for="dashboard-enabled">Breezer new-tab dashboard<small>Open new tabs on Breezer’s dashboard instead of a blank page.</small></label>
-          <input id="dashboard-enabled" class="toggle" type="checkbox" checked>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="organato-enabled">Organato on the dashboard<small>Show upcoming exams, assignments, and to-dos.</small></label>
-          <input id="organato-enabled" class="toggle" type="checkbox" checked>
-        </div>
-        <div class="setting-row">
-          <label class="setting-label" for="organato-ai">Organato in the AI sidebar<small>Let Breezer AI read and update Organato when you ask it to.</small></label>
-          <input id="organato-ai" class="toggle" type="checkbox" checked>
-        </div>
-        <div class="key-field">
-          <label for="organato-key">Organato API key</label>
-          <div class="key-row">
-            <input id="organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="organato-key-note">
-            <button id="organato-connect" class="button primary" type="button">Connect</button>
-            <button id="organato-disconnect" class="button subtle" type="button">Disconnect</button>
-          </div>
-          <p id="organato-key-note" class="field-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A read-only key can display them.</p>
-        </div>
-        <p id="organato-status" class="status-line" role="status" aria-live="polite"></p>
-      </section>
-      <section id="update-settings" class="settings-section" aria-labelledby="update-heading">
-        <h2 id="update-heading">Breezer updates</h2>
-        <p class="section-note">Check for stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</p>
-        <div class="update-row">
-          <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
-          <div class="update-actions">
-            <button id="update-check" class="button" type="button">Check for updates</button>
-            <button id="update-install" class="button primary" type="button" hidden>Update and restart</button>
-          </div>
-        </div>
-      </section>
+          <section class="settings-page" data-page="sync" aria-label="Sync" data-optional hidden>
+            <div id="sync-settings" data-search-terms="sync encrypted spaces passwords credentials provider recovery key disconnect devices"></div>
+          </section>
 
-      <section class="settings-section" aria-labelledby="browser-heading">
-        <h2 id="browser-heading">More browser settings</h2>
-        <p class="section-note">These categories open native browser settings in a new tab.</p>
-        <ul class="link-list">
-          <li><button data-url="chrome://settings/appearance">Native appearance, page fonts and zoom</button></li>
-          <li><button data-url="chrome://settings/search">Search engine</button></li>
-          <li><button data-url="chrome://settings/onStartup">On startup</button></li>
-          <li><button data-url="chrome://settings/privacy">Privacy and security</button></li>
-          <li><button data-url="chrome://settings/content">Site permissions</button></li>
-          <li><button data-url="chrome://settings/autofill">Addresses and payment methods</button></li>
-          <li><button data-url="chrome://settings/downloads">Downloads</button></li>
-          <li><button data-url="chrome://settings/languages">Languages</button></li>
-          <li><button data-url="chrome://settings/accessibility">Accessibility</button></li>
-          <li><button data-url="chrome://settings/system">System</button></li>
-          <li><button data-url="chrome://settings/reset">Reset settings</button></li>
-          <li><button data-url="chrome://settings/help">About Breezer</button></li>
-          <li><button data-url="chrome://settings/importData">Import bookmarks and history</button></li>
-          <li><button data-url="chrome://settings/">All native browser settings</button></li>
-          <li><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button></li>
-          <li><button data-url="chrome://bookmarks">Bookmarks</button></li>
-        </ul>
-      </section>
+          <section class="settings-page" data-page="privacy" aria-label="Privacy" hidden>
+            <div id="usage-settings" data-search-terms="privacy usage statistics telemetry analytics tracking data collection"></div>
+          </section>
+
+          <section class="settings-page" data-page="assistant" aria-label="Assistant" data-optional hidden>
+            <div id="context-settings" data-search-terms="ai assistant context habits memory activity sites suggestions"></div>
+          </section>
+
+          <section class="settings-page" data-page="newtab" aria-label="New tab and Organato" hidden>
+            <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading" data-search-terms="organato dashboard deadlines assignments homework api key">
+              <h2 id="organato-heading">New tab and Organato</h2>
+              <p class="section-note">Connect Organato to see deadlines and let Breezer AI manage the items you ask it to. Your API key stays in macOS Keychain.</p>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="new tab page dashboard home">
+                  <label class="setting-label" for="dashboard-enabled">Breezer new-tab dashboard<small>Open new tabs on Breezer’s dashboard instead of a blank page.</small></label>
+                  <input id="dashboard-enabled" class="toggle" type="checkbox" checked>
+                </div>
+                <div class="setting-row" data-search-terms="exams assignments to-dos deadlines">
+                  <label class="setting-label" for="organato-enabled">Organato on the dashboard<small>Show upcoming exams, assignments, and to-dos.</small></label>
+                  <input id="organato-enabled" class="toggle" type="checkbox" checked>
+                </div>
+                <div class="setting-row" data-search-terms="ai assistant organato tools">
+                  <label class="setting-label" for="organato-ai">Organato in the AI sidebar<small>Let Breezer AI read and update Organato when you ask it to.</small></label>
+                  <input id="organato-ai" class="toggle" type="checkbox" checked>
+                </div>
+                <div class="key-field" data-search-terms="api key connect disconnect token">
+                  <label for="organato-key">Organato API key</label>
+                  <div class="key-row">
+                    <input id="organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="organato-key-note">
+                    <button id="organato-connect" class="button primary" type="button">Connect</button>
+                    <button id="organato-disconnect" class="button subtle" type="button">Disconnect</button>
+                  </div>
+                  <p id="organato-key-note" class="field-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A read-only key can display them.</p>
+                  <p id="organato-status" class="status-line" role="status" aria-live="polite"></p>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="settings-page" data-page="languages" aria-label="Languages" data-optional hidden>
+            <div id="translation-settings" data-search-terms="translate translation page language original libretranslate privacy"></div>
+          </section>
+
+          <section class="settings-page" data-page="browser" aria-label="Browser settings" hidden>
+            <section class="settings-section" aria-labelledby="browser-heading">
+              <h2 id="browser-heading">More browser settings</h2>
+              <p class="section-note">These categories open native browser settings in a new tab.</p>
+              <ul class="link-list setting-group">
+                <li data-search-terms="page fonts zoom font size native theme"><button data-url="chrome://settings/appearance">Native appearance, page fonts and zoom</button><small>Web page fonts, default zoom and browser theme.</small></li>
+                <li data-search-terms="search engine google duckduckgo bing address bar"><button data-url="chrome://settings/search">Search engine</button><small>Choose the search engine used in the address bar.</small></li>
+                <li data-search-terms="startup restore session open pages"><button data-url="chrome://settings/onStartup">On startup</button><small>Restore your last session or open specific pages.</small></li>
+                <li data-search-terms="privacy security cookies safe browsing https clear browsing data history cache"><button data-url="chrome://settings/privacy">Privacy and security</button><small>Cookies, Safe Browsing, HTTPS and clearing browsing data.</small></li>
+                <li data-search-terms="permissions camera microphone location notifications pop-ups javascript site settings"><button data-url="chrome://settings/content">Site permissions</button><small>Camera, microphone, location, notifications and pop-ups.</small></li>
+                <li data-search-terms="autofill addresses credit cards payment"><button data-url="chrome://settings/autofill">Addresses and payment methods</button><small>Saved addresses and payment cards.</small></li>
+                <li data-search-terms="downloads folder location ask where to save"><button data-url="chrome://settings/downloads">Downloads</button><small>Download location and whether to ask each time.</small></li>
+                <li data-search-terms="languages spell check spelling"><button data-url="chrome://settings/languages">Languages</button><small>Preferred languages and spell check.</small></li>
+                <li data-search-terms="accessibility captions focus highlight"><button data-url="chrome://settings/accessibility">Accessibility</button><small>Live captions, focus highlighting and more.</small></li>
+                <li data-search-terms="system proxy hardware acceleration background apps"><button data-url="chrome://settings/system">System</button><small>Proxy, hardware acceleration and background activity.</small></li>
+                <li data-search-terms="reset restore defaults"><button data-url="chrome://settings/reset">Reset settings</button><small>Restore Chromium settings to their defaults.</small></li>
+                <li data-search-terms="about version build"><button data-url="chrome://settings/help">About Breezer</button><small>Version and build information.</small></li>
+                <li data-search-terms="import chrome safari firefox bookmarks history"><button data-url="chrome://settings/importData">Import bookmarks and history</button><small>Copy bookmarks and history from another browser.</small></li>
+                <li data-search-terms="other chromium chrome native all settings"><button data-url="chrome://settings/">All native browser settings</button><small>Every Chromium setting in one page.</small></li>
+                <li data-search-terms="keyboard shortcuts hotkeys extensions commands"><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button><small>Shortcuts for extensions and Breezer AI.</small></li>
+                <li data-search-terms="bookmarks manager organize"><button data-url="chrome://bookmarks">Bookmarks</button><small>Organize and edit your bookmarks.</small></li>
+              </ul>
+            </section>
+          </section>
+        </div>
+      </div>
     </div>
   </main>
   <!-- First-run setup: workspace.html#/welcome. onboarding.js drives the steps. -->

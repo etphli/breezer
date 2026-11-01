@@ -524,17 +524,23 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     const settings = await newPage({ bridge: true }, { width: 1000, height: 1400 });
     await settings.goto(`${base}/workspace.html#/settings`);
     await settings.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    // Categories show one at a time, like the browser's own settings.
+    const go = (page, name) => page.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
+    await go(settings, 'Appearance');
     assert.equal(await settings.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
+    await go(settings, 'Layout');
     assert.equal(await settings.getByRole('radio', { name: 'Sidebar' }).getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('[data-field="bookmarkBarMode"] [data-value="newTab"]').getAttribute('aria-checked'), 'true');
     assert.equal(await settings.locator('#sidebar-width').inputValue(), '240');
-    assert.equal(await settings.title(), 'Settings');
+    assert.equal(await settings.title(), 'Layout – Settings');
+    await go(settings, 'Appearance');
     assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
     for (const value of [12, 20, 15]) {
       await settings.getByRole('slider', { name: 'Sidebar font size' }).fill(String(value));
       await settings.waitForFunction(v => window.fx.appearance.sidebarFontSize === v, value);
       assert.equal(await settings.locator('#sidebar-font-size-value').innerText(), `${value} px`);
     }
+    await go(settings, 'Layout');
     for (const [id, initial] of [['centered-address-bar', true], ['minimal-url', true], ['show-load-progress', true], ['frameless', true], ['always-show-sidebar', false], ['always-show-top-bar', true]]) {
       const control = settings.locator(`#${id}`);
       assert.equal(await control.getAttribute('aria-checked'), String(initial));
@@ -543,43 +549,53 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
       await control.click();
       await settings.waitForFunction(({ id, value }) => document.getElementById(id).getAttribute('aria-checked') === String(value), { id, value: initial });
     }
+    await go(settings, 'Browser settings');
     await settings.getByRole('button', { name: 'Privacy and security', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/privacy'));
     await settings.getByRole('button', { name: 'All native browser settings', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/'));
+    await go(settings, 'Layout');
     for (const [label, mode] of [['Compact', 'compact'], ['Auto-hide', 'autoHide'], ['Expanded', 'expanded']]) {
       await settings.getByRole('radio', { name: label, exact: true }).click();
       await settings.waitForFunction(value => window.fx.appearance.sidebarMode === value, mode);
       assert.equal(await settings.getByRole('radio', { name: label, exact: true }).getAttribute('aria-checked'), 'true');
     }
+    await go(settings, 'Appearance');
     await settings.getByRole('radio', { name: 'Dusk' }).click();
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'dusk');
     assert.deepEqual((await calls(settings)).at(-1), ['setAppearance', { theme: 'dusk' }]);
     await settings.getByRole('radio', { name: 'Dusk' }).focus();
     await settings.keyboard.press('ArrowRight');
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'rose');
+    await go(settings, 'Layout');
     await settings.locator('[data-field="bookmarkBarMode"] [data-value="hidden"]').click();
     await settings.waitForFunction(() => window.fx.appearance.bookmarkBarMode === 'hidden');
+    await go(settings, 'General');
     await settings.getByRole('radio', { name: 'At top' }).click();
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].prefs.newTabPosition === 'top');
+    await go(settings, 'Spaces');
     await settings.getByRole('textbox', { name: 'Name of space 2' }).fill('Home');
     await settings.keyboard.press('Enter');
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].spaces[1].name === 'Home');
     await settings.getByRole('button', { name: 'Add space' }).click();
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].spaces.length === 3);
+    await go(settings, 'Appearance');
     await settings.getByRole('radio', { name: 'Mint' }).click();
     await settings.waitForFunction(() => document.documentElement.dataset.tone === 'mint');
     await settings.getByRole('slider', { name: 'Sidebar font size' }).fill('18');
     await settings.waitForFunction(() => window.fx.appearance.sidebarFontSize === 18);
+    await go(settings, 'Layout');
     await settings.locator('#centered-address-bar').click();
     await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === false);
     await settings.reload();
-    await settings.getByRole('slider', { name: 'Sidebar font size' }).waitFor();
-    assert.equal(await settings.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '18');
+    await settings.locator('#centered-address-bar').waitFor();
+    assert.equal(await settings.locator('#sidebar-font-size').inputValue(), '18');
     assert.equal(await settings.locator('#centered-address-bar').getAttribute('aria-checked'), 'false');
     assert.equal(await settings.locator('#frameless').getAttribute('aria-checked'), 'true');
+    await go(settings, 'Appearance');
     await settings.getByRole('slider', { name: 'Sidebar font size' }).fill('15');
     await settings.waitForFunction(() => window.fx.appearance.sidebarFontSize === 15);
+    await go(settings, 'Layout');
     await settings.locator('#centered-address-bar').click();
     await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === true);
     await settings.screenshot({ path: `${evidence}/workspace-settings.png`, fullPage: true });
@@ -588,7 +604,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
 
     // A rejected change is reported and the control keeps the browser's value.
     const failing = await newPage({ bridge: true, bridgeFails: true }, { width: 900, height: 900 });
-    await failing.goto(`${base}/workspace.html#/settings`);
+    await failing.goto(`${base}/workspace.html#/settings/appearance`);
     await failing.getByRole('radio', { name: 'Tide' }).click();
     await failing.getByText(/Couldn’t change the theme\. Rejected by the browser\./).waitFor();
     assert.equal(await failing.getByRole('radio', { name: 'Mint' }).getAttribute('aria-checked'), 'true');
@@ -596,20 +612,23 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await failing.getByRole('slider', { name: 'Sidebar font size' }).fill('18');
     await failing.locator('#typography-error').getByText(/Rejected by the browser/).waitFor();
     assert.equal(await failing.getByRole('slider', { name: 'Sidebar font size' }).inputValue(), '15');
+    await go(failing, 'Layout');
     await failing.locator('#frameless').click();
-    await failing.locator('#layout-error').getByText(/Rejected by the browser/).waitFor();
+    await failing.locator('#frameless-error').getByText(/Rejected by the browser/).waitFor();
     assert.equal(await failing.locator('#frameless').getAttribute('aria-checked'), 'true');
 
     // Without the native bridge nothing pretends to apply.
     const missing = await newPage({ bridge: false }, { width: 900, height: 900 });
-    await missing.goto(`${base}/workspace.html#/settings`);
+    await missing.goto(`${base}/workspace.html#/settings/layout`);
     await missing.getByText(/this build doesn’t include/).waitFor();
     assert.equal(await missing.getByRole('radio', { name: 'Top', exact: true }).getAttribute('aria-disabled'), 'true');
     assert.equal(await missing.locator('#sidebar-width').isDisabled(), true);
     assert.equal(await missing.locator('#sidebar-font-size').isDisabled(), true);
     assert.equal(await missing.locator('#frameless').getAttribute('aria-disabled'), 'true');
+    await go(missing, 'Appearance');
     await missing.getByRole('radio', { name: 'Dusk' }).click({ force: true });
     assert.equal(await missing.evaluate(() => document.documentElement.dataset.tone), 'mint');
+    await go(missing, 'General');
     assert.equal(await missing.getByRole('radio', { name: 'At bottom' }).getAttribute('aria-disabled'), null, 'store-backed tab settings still work');
 
     const sidebarWithoutBridge = await newPage({ bridge: false });
