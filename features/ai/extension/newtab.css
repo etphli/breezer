@@ -368,3 +368,12 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 920px) { .site:not(.site-add):nth-child(n+6) { display: none; } .site-add { display: block !important; } }
 @media (max-width: 700px) { .site:not(.site-add):nth-child(n+4) { display: none; } }
 @media (max-width: 400px) { .site:not(.site-add):nth-child(n+3) { display: none; } }
+
+/* ------------------------------------------------------------ Organato off */
+
+/* With Organato off there is no sheet: the date and sites sit a little above
+   the middle of an otherwise empty sky. */
+:root[data-organato="off"] .sky {
+  margin-block: auto;
+  padding-block: 48px max(48px, 12vh);
+}

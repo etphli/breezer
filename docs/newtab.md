@@ -54,10 +54,35 @@ links so assignment titles open their task inside Organato.
 | Ready | `connected` or items present | The two lanes. A non-empty `error` with items present shows "Showing the last update…" above them |
 | Setup | `enabled` and not `connected`, no items | "Connect Organato…" and a link to Settings |
 | Error | `error` set, no items | The error text and a link to Settings |
-| Off | `enabled: false` | "Organato is turned off." and a link to Settings |
+| Off | `enabled: false`, from the answer or the saved switch | Nothing: the whole sheet is removed (see below) |
 | Unavailable | No answer, port closed, or 8 s timeout | What went wrong and "Press Refresh to try again" |
 
 Every Settings link is `workspace.html#/settings`.
+
+### Organato off
+
+Off removes the whole sheet (`<main class="sheet">` gets `hidden`, and
+`<html data-organato="off">`): no heading, Refresh, rows, placeholders, card or
+reserved space, so nothing in it is read out or reachable with Tab. The date
+and sites then sit a little above the middle of the window. Settings stays in
+the corner; shortcut Remove, Undo, Restore and Add keep working.
+
+Off always wins:
+
+- An answer with `enabled: false` renders as off even if it also carries
+  items, `connected` or `error`; `normalizeView` drops them.
+- The page reads `organato.switches.v1` from `chrome.storage.local` at start,
+  so a saved "off" hides the sheet before the first answer arrives.
+- It listens for changes to that key. Turning Organato off in Settings or setup
+  hides the sheet in every open new tab at once, including over an answer still
+  on its way. Turning it back on shows the loading sheet and asks again.
+
+The background keeps `organato.switches.v1` (`{ enabled, dashboardEnabled }`)
+as a copy of the helper's file: Settings and setup refresh it on every read and
+change, and a new tab fills it in once for profiles that predate it. When it
+says off, the new-tab port answers `organato: { enabled: false }` with the
+sites and never starts the native helper or calls Organato. Re-enabling does
+not touch the Keychain key.
 
 ## Background contract (`breezer-newtab` port)
 
@@ -150,12 +175,18 @@ The background contract above is unchanged; the page combines the arrays in
   separate, chronological order) and the port request/timeout/disconnect
   behaviour.
 - `node --test tests/ai/newtab-bridge.test.mjs`: runs the real background
-  handler and checks that its overlapping arrays render as one Upcoming list.
+  handler and checks that its overlapping arrays render as one Upcoming list,
+  that a saved "off" never starts the helper, that "off" answers carry no
+  items, and that Settings changes refresh the saved switches without
+  disconnecting the key.
 - `node --test tests/ai/newtab-browser.test.mjs`: drives `newtab.html` in
   headless Chrome against a `chrome.*` fixture. It checks every state, the
   single-row layout, the two lanes with each item shown once, a stale refresh
   error that keeps the last items, Refresh, keyboard order, the theme bridge and OS fallback,
-  narrow widths, and hostile input. It writes screenshots to
+  narrow widths, and hostile input. With Organato off it checks that the sheet
+  is gone (layout, text, headings, status and Tab order) for cached, late and
+  saved-off answers, in light, dark and narrow windows, across reload, and that
+  two open tabs follow the switch off and back on. It writes screenshots to
   `$BREEZER_AI_EVIDENCE` (default `/tmp/breezer-ai-evidence`). Sites and
   items in the fixture are test data.
 

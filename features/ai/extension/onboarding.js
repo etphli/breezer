@@ -67,6 +67,8 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   let index = setup.completed ? 0 : STEPS.indexOf(setup.step);
   let slide = 0;
   let organatoConnected = false;
+  // Organato is on unless the helper reports it was turned off.
+  let organatoEnabled = true;
 
   // ------------------------------------------------------------ appearance
 
@@ -217,10 +219,27 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   // ------------------------------------------------------------ Organato
 
   const organato = (() => {
-    let port = null, pending = null, sequence = 0, timer;
+    let port = null, pending = null, pendingType = null, done = null, sequence = 0, timer;
     const status = $('wl-organato-status');
-    const busy = (value) => { $('wl-organato-connect').disabled = value; $('wl-organato-key').disabled = value; root.classList.toggle('wl-connecting', value); };
-    const finish = (text) => { clearTimeout(timer); pending = null; busy(false); if (text !== undefined) status.textContent = text; };
+    const off = $('wl-organato-off');
+    const busy = (value) => {
+      for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
+      root.classList.toggle('wl-connecting', value);
+    };
+    const finish = (text) => {
+      const kind = pendingType;
+      clearTimeout(timer); pending = null; pendingType = null; done = null; busy(false);
+      if (text !== undefined) status.textContent = text;
+      // A failed opt-out leaves focus where the person can try again.
+      if (kind === 'off' && organatoEnabled) off.focus();
+    };
+    // Shows the saved choice. Off is only shown once the helper confirms it.
+    const show = (value) => {
+      organatoConnected = value?.connected === true;
+      organatoEnabled = value?.enabled !== false;
+      mini.classList.toggle('organato-on', organatoConnected && organatoEnabled);
+      off.hidden = !organatoEnabled;
+    };
     const connect = () => {
       if (port) return port;
       const connection = api.runtime.connect({ name: 'breezer-organato-settings' });
@@ -228,10 +247,15 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       connection.onMessage.addListener((message) => {
         if (port !== connection || message.id !== pending) return;
         if (message.type === 'progress') { status.textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…'; return; }
-        if (!message.ok) { finish(message.error); return; }
-        organatoConnected = message.value?.connected === true;
-        mini.classList.toggle('organato-on', organatoConnected);
-        finish(organatoConnected ? 'Organato is connected. Your deadlines will appear on new tabs.' : '');
+        if (!message.ok) {
+          finish(pendingType === 'off' ? `Couldn’t turn Organato off. ${message.error || 'Try again.'}` : message.error);
+          return;
+        }
+        const after = done;
+        show(message.value);
+        if (after) { after(message.value); return; }
+        finish(!organatoEnabled ? 'Organato is turned off. You can turn it on in Settings.'
+          : organatoConnected ? 'Organato is connected. Your deadlines will appear on new tabs.' : '');
       });
       connection.onDisconnect.addListener(() => {
         void api.runtime.lastError;
@@ -241,14 +265,30 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       });
       return connection;
     };
-    const request = (type, settings) => {
-      if (pending || typeof api.runtime?.connect !== 'function') return;
+    // A change replaces a pending read; nothing replaces a pending change.
+    const request = (type, settings, { kind = type, then = null } = {}) => {
+      if ((pending && pendingType !== 'view') || typeof api.runtime?.connect !== 'function') return false;
+      clearTimeout(timer);
       pending = String(++sequence);
+      pendingType = kind;
+      done = then;
       busy(type === 'configure');
-      timer = setTimeout(() => finish('Organato didn’t respond. Check your connection and try again, or skip for now.'), 85_000);
+      timer = setTimeout(() => finish(kind === 'off'
+        ? 'Organato didn’t respond, so it’s still on. Try again, or turn it off later in Settings.'
+        : 'Organato didn’t respond. Check your connection and try again, or skip for now.'), 85_000);
       try { connect().postMessage({ id: pending, type, settings }); }
-      catch { port = null; finish('The Organato helper is unavailable. You can connect later in Settings.'); }
+      catch { port = null; finish(kind === 'off' ? 'The Organato helper is unavailable, so Organato is still on. Try again, or turn it off later in Settings.' : 'The Organato helper is unavailable. You can connect later in Settings.'); }
+      return true;
     };
+    // One click: save "off" in the helper, and only then move on.
+    off.addEventListener('click', () => {
+      status.textContent = 'Turning Organato off…';
+      request('configure', { enabled: false }, { kind: 'off', then: (value) => {
+        if (value?.enabled !== false) { finish('Couldn’t turn Organato off. Try again.'); return; }
+        finish('Organato is turned off. You can turn it on in Settings.');
+        if (STEPS[index] === 'organato') void next();
+      } });
+    });
     $('wl-organato-connect').addEventListener('click', () => {
       const key = $('wl-organato-key').value.trim();
       if (!key) { status.textContent = 'Paste your API key first, or choose Continue to skip.'; $('wl-organato-key').focus(); return; }
@@ -262,6 +302,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   if (typeof api.runtime?.connect === 'function') organato.view();
   else {
     $('wl-organato-connect').disabled = true;
+    $('wl-organato-off').disabled = true;
     $('wl-organato-status').textContent = 'Open this page in Breezer to connect Organato.';
   }
   addEventListener('pagehide', () => organato.dispose(), { once: true });
@@ -295,7 +336,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       ['Breezer AI calls you', savedName || 'No name'],
       ['Tabs', appearance.layout === 'top' ? 'Across the top' : `Sidebar, ${{ expanded: 'expanded', compact: 'compact', autoHide: 'auto-hide' }[appearance.sidebarMode] ?? 'expanded'}`],
       ['Color', `${theme}, ${{ system: 'following your Mac', light: 'light', dark: 'dark' }[appearance.colorMode] ?? appearance.colorMode}`],
-      ['Organato', organatoConnected ? 'Connected' : 'Not connected'],
+      ['Organato', !organatoEnabled ? 'Turned off' : organatoConnected ? 'Connected' : 'Not connected'],
     ];
     $('wl-summary').replaceChildren(...rows.flatMap(([term, value]) => {
       const dt = doc.createElement('dt'); dt.textContent = term;

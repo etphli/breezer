@@ -17,8 +17,10 @@ let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
-function installFixture({ bridge, layout }) {
-  const fx = { local: {}, session: {}, opened: [], updated: [], ports: {}, listeners: [], writes: [] };
+function installFixture({ bridge, layout, local = {}, organato = {} }) {
+  // fx.organato is the helper's saved state; fx.configure scripts a change: 'ok', 'fail' or 'hang'.
+  const fx = { local: structuredClone(local), session: {}, opened: [], updated: [], ports: {}, listeners: [], writes: [],
+    organato: { connected: false, enabled: true, allowAI: true, dashboardEnabled: true, ...organato }, configure: 'ok' };
   window.fx = fx;
   const area = (data, name) => ({
     async get(keys) { const list = keys == null ? Object.keys(data) : [keys].flat(); return structuredClone(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))); },
@@ -42,10 +44,16 @@ function installFixture({ bridge, layout }) {
         // configure with a key reports progress and then a connection.
         port.postMessage = (message) => {
           port.sent.push(message);
-          if (message.type === 'view') setTimeout(() => port.reply({ id: message.id, ok: true, value: { connected: false, enabled: true, allowAI: true, dashboardEnabled: true } }), 0);
+          if (message.type === 'view') setTimeout(() => port.reply({ id: message.id, ok: true, value: structuredClone(fx.organato) }), 0);
           if (message.type === 'configure') {
-            setTimeout(() => port.reply({ id: message.id, type: 'progress', stage: 'Checking your Organato key…' }), 300);
-            setTimeout(() => port.reply({ id: message.id, ok: true, value: { connected: true, enabled: true, allowAI: true, dashboardEnabled: true } }), 1200);
+            const { key, ...switches } = message.settings || {};
+            if (key) setTimeout(() => port.reply({ id: message.id, type: 'progress', stage: 'Checking your Organato key…' }), 300);
+            if (fx.configure === 'hang') return;
+            setTimeout(() => {
+              if (fx.configure === 'fail') { port.reply({ id: message.id, ok: false, error: 'Couldn’t save Organato settings.' }); return; }
+              Object.assign(fx.organato, switches, key ? { connected: true } : {});
+              port.reply({ id: message.id, ok: true, value: structuredClone(fx.organato) });
+            }, key ? 1200 : 250);
           }
         };
         fx.ports[name] = port;
@@ -87,12 +95,12 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
   const errors = [];
   // A tester pauses to read; automated runs only wait for animations to settle.
   const pause = (ms) => new Promise((done) => setTimeout(done, videoDir ? ms : 60));
-  const open = async ({ width = 1280, height = 800, reducedMotion = 'no-preference', bridge = true, record = false, layout = 'sidebar' } = {}) => {
+  const open = async ({ width = 1280, height = 800, reducedMotion = 'no-preference', bridge = true, record = false, layout = 'sidebar', local, organato } = {}) => {
     const context = await browser.newContext({
       viewport: { width, height }, deviceScaleFactor: record ? 1 : 2, colorScheme: 'light', reducedMotion,
       ...(record ? { recordVideo: { dir: videoDir, size: { width, height } } } : {}),
     });
-    await context.addInitScript(installFixture, { bridge, layout });
+    await context.addInitScript(installFixture, { bridge, layout, local, organato });
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !/404/.test(message.text())) errors.push(message.text()); });
@@ -240,6 +248,82 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       await page.waitForFunction(() => fx.updated.length === 1);
       assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'done', completed: true, skipped: true });
       assert.equal(await page.evaluate(() => fx.local['settings.onboarding.v1']), undefined);
+      await context.close();
+    }
+
+    // One button turns Organato off: saved in the helper first, then setup moves on.
+    {
+      const { context, page } = await open({ reducedMotion: 'reduce', local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
+      assert.equal(await page.locator('.wl-step:not([hidden]) h1').innerText(), 'Connect Organato?');
+      const optOut = page.getByRole('button', { name: 'Don’t use Organato' });
+      assert.equal(await optOut.getAttribute('aria-describedby'), 'wl-organato-off-note');
+      await shot(page, '6-organato-optout');
+      // Keyboard: the opt-out is reachable and works with Enter.
+      // Key field, Connect, the Organato Settings link, then the opt-out.
+      await page.locator('#wl-organato-key').focus();
+      for (let at = 0; at < 3; at += 1) await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-off');
+      await page.keyboard.press('Enter');
+      // Nothing moves on, and nothing claims "off", until the helper confirms.
+      assert.equal(await page.locator('#wl-next').isDisabled(), true);
+      assert.equal(await page.locator('#wl-organato-status').innerText(), 'Turning Organato off…');
+      assert.equal(await page.locator('.wl-step:not([hidden]) h1').innerText(), 'Connect Organato?');
+      await page.locator('#wl-tour-count').waitFor();
+      assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type, settings }) => ({ type, settings }))), [{ type: 'view', settings: undefined }, { type: 'configure', settings: { enabled: false } }]);
+      assert.equal(await page.evaluate(() => fx.organato.enabled), false);
+      assert.equal(await page.evaluate(() => fx.organato.connected), false);
+      assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'tour', completed: false });
+      // Back shows the saved choice, without offering to turn it off again.
+      await page.locator('#wl-back').click();
+      assert.equal(await page.locator('#wl-organato-status').innerText(), 'Organato is turned off. You can turn it on in Settings.');
+      assert.equal(await page.locator('#wl-organato-off').isVisible(), false);
+      assert.equal(await page.locator('#wl-organato-off-note').isVisible(), false);
+      for (let at = 0; at < 6; at += 1) await page.locator('#wl-next').click();
+      assert.match(await page.locator('#wl-summary').innerText(), /Organato\s+Turned off/);
+      await shot(page, '8-done-organato-off');
+      await page.locator('#wl-next').click();
+      await page.waitForFunction(() => fx.updated.length === 1);
+      assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'done', completed: true, skipped: false });
+      assert.equal(await page.evaluate(() => fx.organato.enabled), false, 'finishing setup keeps the choice');
+      await context.close();
+    }
+
+    // A failed save says so, keeps Organato on and leaves the person on this step.
+    {
+      const { context, page } = await open({ reducedMotion: 'reduce', width: 390, height: 844, local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
+      await page.evaluate(() => { fx.configure = 'fail'; });
+      await page.getByRole('button', { name: 'Don’t use Organato' }).click();
+      await page.locator('#wl-organato-status', { hasText: 'Couldn’t turn Organato off.' }).waitFor();
+      assert.equal(await page.locator('.wl-step:not([hidden]) h1').innerText(), 'Connect Organato?');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-off');
+      assert.equal(await page.locator('#wl-next').isDisabled(), false);
+      assert.equal(await page.evaluate(() => fx.organato.enabled), true);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+      await shot(page, '6-organato-optout-failed-narrow');
+      // Retry succeeds.
+      await page.evaluate(() => { fx.configure = 'ok'; });
+      await page.getByRole('button', { name: 'Don’t use Organato' }).click();
+      await page.locator('#wl-tour-count').waitFor();
+      assert.equal(await page.evaluate(() => fx.organato.enabled), false);
+      await context.close();
+    }
+
+    // Continue alone is not an opt-out, and a profile's earlier "off" is shown, not reset.
+    {
+      const { context, page } = await open({ reducedMotion: 'reduce', local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
+      await page.locator('#wl-next').click();
+      assert.equal(await page.evaluate(() => fx.organato.enabled), true);
+      assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type }) => type)), ['view']);
+      await context.close();
+    }
+    {
+      const { context, page } = await open({ reducedMotion: 'reduce', organato: { enabled: false, connected: true }, local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
+      await page.locator('#wl-organato-status', { hasText: 'Organato is turned off' }).waitFor();
+      assert.equal(await page.locator('#wl-organato-off').isVisible(), false);
+      await page.locator('#wl-skip').click();
+      await page.waitForFunction(() => fx.updated.length === 1);
+      assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type }) => type)), ['view']);
+      assert.equal(await page.evaluate(() => fx.organato.enabled), false);
       await context.close();
     }
 

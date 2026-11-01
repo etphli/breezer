@@ -6,6 +6,22 @@ import { installContextBackground } from './context-background.js';
 import { installTranslation } from './translation-background.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
+// Extension-local copy of the helper's Organato switches. The helper's file stays
+// the source of truth; this copy lets new tabs honour "off" without starting it
+// and lets open new tabs follow a change made in Settings or setup.
+export const ORGANATO_SWITCHES_KEY = 'organato.switches.v1';
+
+export async function loadOrganatoSwitches(api) {
+  try {
+    const value = (await api.storage.local.get(ORGANATO_SWITCHES_KEY))?.[ORGANATO_SWITCHES_KEY];
+    return value && typeof value.enabled === 'boolean' && typeof value.dashboardEnabled === 'boolean' ? { enabled: value.enabled, dashboardEnabled: value.dashboardEnabled } : null;
+  } catch { return null; }
+}
+
+export async function saveOrganatoSwitches(api, { enabled, dashboardEnabled }) {
+  if (typeof enabled !== 'boolean' || typeof dashboardEnabled !== 'boolean') return;
+  try { await api.storage.local.set({ [ORGANATO_SWITCHES_KEY]: { enabled, dashboardEnabled } }); } catch { /* the helper still answers */ }
+}
 
 export function installBackground(api) {
   installTranslation(api);
@@ -32,28 +48,44 @@ export function installBackground(api) {
     let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
     const settings = port.name === 'breezer-organato-settings';
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
-    const native = api.runtime.connectNative(NATIVE_HOST), pending = new Map();
-    let serial = 0, closed = false;
+    const pending = new Map();
+    let serial = 0, closed = false, native = null;
+    // The helper starts only when a request actually needs it, so a new tab with
+    // Organato turned off never launches it.
+    const helper = () => {
+      if (native) return native;
+      native = api.runtime.connectNative(NATIVE_HOST);
+      native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; if (message.type === 'organato-progress') { request.progress?.(message.stage); return; } pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
+      native.onDisconnect.addListener(() => { void api.runtime.lastError; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); } pending.clear(); });
+      return native;
+    };
     const ask = (type, values = {}, progress) => new Promise((resolve, reject) => {
       const id = `organato_${++serial}`;
       const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); }, settings ? 90000 : 65000);
-      pending.set(id, { resolve, reject, timer, progress }); native.postMessage({ type, id, ...values });
+      pending.set(id, { resolve, reject, timer, progress });
+      try { helper().postMessage({ type, id, ...values }); } catch (error) { pending.delete(id); clearTimeout(timer); reject(error); }
     });
-    native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; if (message.type === 'organato-progress') { request.progress?.(message.stage); return; } pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
-    native.onDisconnect.addListener(() => { void api.runtime.lastError; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); } pending.clear(); });
+    // Every helper answer refreshes the local copy of the switches the new tab reads.
+    const remember = value => { if (value && typeof value === 'object') void saveOrganatoSwitches(api, value); return value; };
     port.onMessage.addListener(message => {
       void (async () => {
         if (closed || typeof message?.id !== 'string' || message.id.length > 100) return;
         let value;
         if (settings) {
           if (!['view', 'configure'].includes(message.type)) throw new Error('Unknown settings action.');
-          value = await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); });
+          value = remember(await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); }));
         } else {
           if (!['view', 'refresh'].includes(message.type)) throw new Error('Unknown new-tab action.');
-          const config = await ask('organato-view');
+          // A saved "off" answers without the helper; otherwise the helper's file decides.
+          // Settings and setup own the saved copy; a new tab only fills it in once
+          // (profiles from before it existed), so a slow read never overwrites a newer choice.
+          const saved = await loadOrganatoSwitches(api);
+          const config = saved?.enabled === false ? saved : await ask('organato-view');
+          if (!saved) remember(config);
           const topSites = (await api.topSites.get()).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
-          const organato = { ...config, exams: [], assignments: [], todos: [] };
-          if (config.enabled && config.connected && config.dashboardEnabled) {
+          // Off carries no account state or items, so nothing stale can be drawn.
+          const organato = config.enabled === false ? { enabled: false } : { ...config, exams: [], assignments: [], todos: [] };
+          if (config.enabled !== false && config.connected && config.dashboardEnabled) {
             try {
               const result = await ask('organato-list');
               const items = result.items.map(item => ({ ...item, dueAt: item.dueAt || item.dueDateLocal, allDay: !item.dueAt && Boolean(item.dueDateLocal) })).filter(item => !['submitted', 'completed'].includes(item.workingStatus)).sort((a, b) => String(a.dueAt || a.dueDateLocal || '9999').localeCompare(String(b.dueAt || b.dueDateLocal || '9999')));
@@ -68,7 +100,7 @@ export function installBackground(api) {
         if (!closed) port.postMessage(settings ? { id: message.id, ok: true, value } : { type: 'view', id: message.id, ...value });
       })().catch(error => { if (!closed) { try { port.postMessage(settings ? { id: message.id, ok: false, error: error.message } : { type: 'view', id: message.id, topSites: [], organato: { error: error.message } }); } catch {} } });
     });
-    port.onDisconnect.addListener(() => { closed = true; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Closed')); } pending.clear(); native.disconnect(); });
+    port.onDisconnect.addListener(() => { closed = true; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Closed')); } pending.clear(); try { native?.disconnect(); } catch {} });
   });
   const panels = new Set();
   let activeRun = null;

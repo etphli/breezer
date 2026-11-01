@@ -40,7 +40,7 @@ The guide has eight steps: welcome, the name Breezer AI calls you, tab layout an
 - The name goes into `breezerProfile.name`, keeping any saved profile context. An open assistant panel updates its greeting through `storage.onChanged`.
 - Layout, sidebar behavior, theme, custom color and appearance go through `breezerPrivate.setAppearance`, one write at a time, and bump `appearance.rev` so sidebars and the panel repaint. The page itself repaints with the chosen tone. Without the native bridge the controls are disabled and a note explains why.
 - Import buttons open `chrome://settings/importData` and `chrome://password-manager/settings?import=true`. The guide never reports that an import succeeded.
-- The Organato key goes to the background helper over the existing `breezer-organato-settings` port, which stores it in Keychain. Organato is optional; Continue skips it.
+- The Organato key goes to the background helper over the existing `breezer-organato-settings` port, which stores it in Keychain. Organato is optional. **Don’t use Organato** saves `enabled: false` through the same port and moves on only after the helper confirms it; a failed save says so, keeps Organato on and leaves focus on the button. Continue leaves the setting as it is, and a profile that already turned Organato off is shown as off and never reset. The summary reads Turned off, Connected or Not connected.
 
 The tour has three sidebar slides (tabs, favorites and spaces, Settings) or one top-tab slide, followed by two assistant slides (⌘K and Browser control). A miniature Breezer window beside the copy reflects each choice and points at the part being explained. Its motion stops under Reduce motion and it is hidden in forced-colors mode.
 
