@@ -65,6 +65,7 @@ jobs:
           BREEZER_AI_EVIDENCE: ${{ runner.temp }}/breezer-ai-evidence
         run: |
           node tests/ai/panel-browser.mjs
+          node tests/ai/research-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs
           node tests/ai/browser-page.mjs
       - name: Verify passkey component and virtual WebAuthn protocol

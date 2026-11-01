@@ -12,6 +12,12 @@ The profile button edits your name and personal context. These are saved in this
 
 Enter sends and Shift+Enter adds a line. The hint beside the page chip says what the next message shares: the page and a screenshot, the page with browser control, nothing, or that the current tab is not a web page. When no model is connected or the tab has no web page, the empty conversation says so and offers the next step. A reply that fails, or is stopped before any text arrives, shows the reason in place with **Edit and resend**. That button only puts the original message back in the composer; it never sends by itself, and browser control stays off until you turn it on again.
 
+## Research across selected tabs
+
+Choose **Choose source tabs** to select up to six HTTP(S) pages in this window for a comparison, summary or synthesis. The source chips show what the next message shares. Research sends text only, with labeled source references, truncation and individual errors. It does not share screenshots or authorize browser actions. Clear sources to return to the ordinary current-page mode or enable Browser control.
+
+See [Selected-tab research](ai-research.md) for the native document-read boundary, cancellation rules and verification limits.
+
 ## Browser control
 
 Turn on Browser control before asking Breezer to act. The assistant can inspect the page, click visible elements, type into ordinary fields, scroll, press navigation keys, and navigate the controlled tab. While it works, a flowing blue wave frames the page, a Breezer pointer moves to each element before it is clicked or typed into, and a Stop button stays visible. Stop in the sidebar, Stop on the page, or Escape ends the reply.

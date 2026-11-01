@@ -1,3 +1,4 @@
+import { prepareResearch, researchSelection } from './research-policy.js';
 import { installReleaseNotes } from './release-notes.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
@@ -161,7 +162,17 @@ export function installBackground(api) {
     const run = { id: message.id, panel, control: message.control === true, includeContext: message.includeContext === true || message.control === true, cancelled: false, session: null, tab: null };
     activeRun = run;
     try {
-      let context;
+      let context, researchSources;
+      if (message.researchSources !== undefined) {
+        if (message.control || message.includeContext) throw new Error('Research sources do not authorize browser control or active-page sharing.');
+        const draft = panel.researchDraft;
+        if (draft?.id !== run.id) throw new Error('Source selection expired. Select tabs and send again.');
+        run.research = draft;
+        researchSources = await prepareResearch(api, message.researchSources, draft, panel.windowId);
+        ensureActive(run);
+        if (draft.invalidated) throw new Error('A source changed during capture. Select sources and send again.');
+        if (!researchSources.some(source => source.status === 'available' && source.text)) throw new Error('No source text is available. Select loaded tabs and try again.');
+      }
       if (run.includeContext) {
         const tab = await currentPage(panel);
         run.tab = tab;
@@ -182,6 +193,7 @@ export function installBackground(api) {
         ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
         message: message.message, history: Array.isArray(message.history) ? message.history.slice(-40) : [],
         profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
+        ...(researchSources ? { researchSources } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
       });
     } catch (error) {
@@ -190,6 +202,7 @@ export function installBackground(api) {
   };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
+    if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito || port.sender?.url !== api.runtime.getURL('panel.html')) return;
     const panel = { port, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
     panels.add(panel);
     port.onMessage.addListener(message => {
@@ -205,13 +218,18 @@ export function installBackground(api) {
             if (!panel.closed) connectNative(panel).postMessage({ type: 'init' });
           })();
           await panel.ready;
+        } else if (message.type === 'research-begin') {
+          await panel.ready;
+          panel.researchDraft = { id: message.id, selection: researchSelection(message.sources), invalidated: false };
         } else if (message.type === 'chat') { await panel.ready; await sendChat(panel, message); }
         else if (message.type === 'visibility') {
           panel.metadataRevision++;
           panel.visible = message.visible === true;
+          if (!panel.visible) invalidateResearch(panel, undefined, 'Panel closed. Select sources again.');
           if (!panel.visible && activeRun?.panel === panel) await cancel(activeRun);
         }
         else if (message.type === 'cancel') {
+          if (panel.researchDraft) panel.researchDraft.invalidated = true;
           if (activeRun?.panel === panel && (!message.id || activeRun.id === message.id)) await cancel(activeRun);
         } else if (message.type === 'context') {
           await panel.ready;
@@ -266,16 +284,27 @@ export function installBackground(api) {
   api.runtime.onMessage.addListener((message, sender) => {
     if (message?.type === 'stop-control' && activeRun?.session?.id === message.sessionId && sender.tab?.id === activeRun.session.tab.id) void cancel(activeRun, 'Browser control stopped.');
   });
+  const invalidateResearch = (panel, tabId, reason) => {
+    if (tabId !== undefined && !panel.researchDraft?.selection.some(source => source.tabId === tabId)) {
+      post(panel.port, { type: 'research-invalidated', tabId, reason }); return;
+    }
+    if (panel.researchDraft) panel.researchDraft.invalidated = true;
+    post(panel.port, { type: 'research-invalidated', tabId, reason });
+    if (activeRun?.panel === panel && activeRun.research) void cancel(activeRun, reason);
+  };
   api.tabs.onActivated.addListener(info => {
+    for (const panel of panels) if (panel.windowId === info.windowId) invalidateResearch(panel, undefined, 'Active tab changed. Select source tabs again.');
     const run = activeRun;
     if (run?.session && info.windowId === run.session.tab.windowId && info.tabId !== run.session.tab.id) void cancel(run, 'Browser control stopped because the active tab changed.');
     void publishMetadata(info.windowId, info.tabId).catch(() => {});
   });
   api.tabs.onRemoved.addListener(tabId => {
+    for (const panel of panels) invalidateResearch(panel, tabId, 'Source closed. Select source tabs again.');
     tools.grants.delete(tabId);
     if (activeRun?.session?.tab.id === tabId) void cancel(activeRun, 'Browser control stopped because the tab closed.');
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
+    if (change.url || change.status === 'loading') for (const panel of panels) invalidateResearch(panel, tabId, 'Source navigated or is loading. Select source tabs again.');
     if (tab?.active !== false && (change.url || change.title || change.status === 'complete')) void publishMetadata(tab?.windowId, tabId).catch(() => {});
     if (change.url && tools.grants.has(tabId)) {
       try { if (tools.grants.get(tabId) !== new URL(change.url).origin) tools.grants.delete(tabId); } catch { tools.grants.delete(tabId); }
@@ -287,10 +316,14 @@ export function installBackground(api) {
     } else if (change.status === 'loading') tools.navigationStarted(run.session);
     else if (change.status === 'complete') void tools.navigationComplete(run.session);
   });
+  api.tabs.onDetached?.addListener(tabId => {
+    for (const panel of panels) invalidateResearch(panel, tabId, 'Source moved to another window. Select source tabs again.');
+  });
   api.windows?.onFocusChanged?.addListener(windowId => {
     // WINDOW_ID_NONE means another app has focus. Input still goes only to the controlled
     // tab, so watching from another app does not end control; another Breezer window does.
     if (windowId === (api.windows.WINDOW_ID_NONE ?? -1)) return;
+    for (const panel of panels) if (panel.windowId !== windowId) invalidateResearch(panel, undefined, 'Browser window changed. Select source tabs again.');
     if (activeRun?.session && activeRun.session.tab.windowId !== windowId) void cancel(activeRun, 'Browser control stopped because the active window changed.');
   });
   api.debugger.onDetach.addListener(source => {

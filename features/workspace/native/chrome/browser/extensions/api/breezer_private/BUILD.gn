@@ -9,6 +9,7 @@ source_set("breezer_private") {
   sources = [
     "breezer_private_api.cc",
     "breezer_private_api.h",
+    "research_text.h",
   ]
 
   public_deps = [ "//extensions/browser" ]

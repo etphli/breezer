@@ -117,7 +117,7 @@ try {
   await page.getByLabel('Your name', { exact: true }).fill('Ethan');
   await page.getByLabel('What should Breezer know?').fill('I build thoughtful software. Keep explanations clear and concise.');
   await page.getByRole('button', { name: 'Save context' }).click();
-  assert.equal(await page.locator('dialog').isVisible(), false);
+  assert.equal(await page.locator('#profile-dialog').isVisible(), false);
   assert.equal(await page.evaluate(() => window.testStorage.local.breezerProfile.context), 'I build thoughtful software. Keep explanations clear and concise.');
 
   await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
