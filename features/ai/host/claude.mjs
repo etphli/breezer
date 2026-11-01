@@ -2,7 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { JsonLineProcess, cliEnvironment, findCli, runCli } from './cli.mjs';
-import { allowedTools, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
+import { allowedTools, researchParts, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
 
 export const claudeSafeArgs = ['--safe-mode', '--restricted', '--setting-sources', '', '--settings', '{"disableAllHooks":true,"autoUpdatesChannel":"stable"}', '--tools', '', '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--disable-slash-commands', '--no-chrome', '--no-session-persistence', '--permission-mode', 'dontAsk', '--permission-prompts', 'none', '--print', '--input-format', 'stream-json', '--output-format', 'stream-json', '--include-partial-messages', '--verbose'];
 
@@ -89,7 +89,7 @@ export class ClaudeProvider {
       signal.addEventListener('abort', abort, { once: true });
       try {
         await rpc.control({ subtype: 'initialize' });
-        let content = [{ type: 'text', text: promptText(chat) }, ...(chat.includeContext === true ? imageContent(chat.context) : [])];
+        let content = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...(chat.includeContext === true ? imageContent(chat.context) : [])];
         for (let round = 0; round < 30; round++) {
           if (signal.aborted) throw new Error('Cancelled.');
           const result = await this.round(rpc, content, emit);

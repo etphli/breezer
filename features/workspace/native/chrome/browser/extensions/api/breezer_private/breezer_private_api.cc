@@ -10,6 +10,13 @@
 #include <utility>
 
 #include "base/values.h"
+#include "base/functional/bind.h"
+#include "base/strings/utf_string_conversions.h"
+#include "base/time/time.h"
+#include "chrome/browser/extensions/api/breezer_private/research_text.h"
+#include "chrome/common/chrome_isolated_world_ids.h"
+#include "content/public/browser/render_frame_host.h"
+#include "extensions/browser/extension_api_frame_id_map.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/containers/flat_set.h"
 #include "chrome/browser/extensions/extension_tab_util.h"
@@ -551,6 +558,124 @@ BreezerPrivateAuthorizeCurrentPageFunction::RunFunction() {
   }
   granter->GrantIfRequested(extension());
   return RespondNow(WithArguments(true));
+}
+
+// Research reads never call ActiveTabPermissionGranter, ScriptExecutor or the
+// debugger. Only this fixed extractor executes, with no caller-supplied code.
+ExtensionFunction::ResponseAction
+BreezerPrivateGetResearchTabsFunction::RunFunction() {
+  if (!args().empty() || source_url().GetPath() != kPanelPath) {
+    return RespondNow(Error("Research sources are only available in Breezer AI."));
+  }
+  auto* browser = GetCallerBrowser();
+  if (!browser) {
+    return RespondNow(Error("The calling window is unavailable."));
+  }
+  base::ListValue result;
+  auto* tabs = browser->GetTabStripModel();
+  for (int i = 0; i < tabs->count(); ++i) {
+    auto* contents = tabs->GetWebContentsAt(i);
+    const GURL& url = contents->GetLastCommittedURL();
+    if (!url.SchemeIsHTTPOrHTTPS() || url.has_username() || url.has_password()) {
+      continue;
+    }
+    auto* frame = contents->GetPrimaryMainFrame();
+    if (!frame || frame->IsErrorDocument()) {
+      continue;
+    }
+    base::DictValue item;
+    item.Set("tabId", ExtensionTabUtil::GetTabId(contents));
+    item.Set("documentId",
+             ExtensionApiFrameIdMap::GetDocumentId(frame).ToString());
+    item.Set("url", url.spec());
+    item.Set("title", base::UTF16ToUTF8(contents->GetTitle()));
+    item.Set("loading", contents->IsLoading());
+    result.Append(std::move(item));
+  }
+  return RespondNow(WithArguments(std::move(result)));
+}
+
+ExtensionFunction::ResponseAction
+BreezerPrivateReadResearchTabFunction::RunFunction() {
+  if (!user_gesture() || source_url().GetPath() != kPanelPath) {
+    return RespondNow(
+        Error("Select sources and send from Breezer AI to share text."));
+  }
+  if (args().size() != 3 || !args()[0].is_int() || !args()[1].is_string() ||
+      !args()[2].is_string()) {
+    return RespondNow(Error("Invalid research source."));
+  }
+  auto* browser = GetCallerBrowser();
+  if (!browser) {
+    return RespondNow(Error("The calling window is unavailable."));
+  }
+  auto* tabs = browser->GetTabStripModel();
+  tab_id_ = args()[0].GetInt();
+  for (int i = 0; i < tabs->count(); ++i) {
+    auto* contents = tabs->GetWebContentsAt(i);
+    if (ExtensionTabUtil::GetTabId(contents) != tab_id_) {
+      continue;
+    }
+    const GURL& url = contents->GetLastCommittedURL();
+    auto* frame = contents->GetPrimaryMainFrame();
+    if (!url.SchemeIsHTTPOrHTTPS() || url.has_username() || url.has_password() ||
+        !frame || !frame->IsRenderFrameLive() || frame->IsErrorDocument() ||
+        contents->IsLoading()) {
+      return RespondNow(Error(
+          "Source is loading or unavailable. Select it again when ready."));
+    }
+    if (ExtensionApiFrameIdMap::GetDocumentId(frame).ToString() !=
+            args()[1].GetString() ||
+        url.spec() != args()[2].GetString()) {
+      return RespondNow(Error("Source navigated. Select it again."));
+    }
+    expected_url_ = url.spec();
+    document_ = frame->GetWeakDocumentPtr();
+    timeout_.Start(FROM_HERE, base::Seconds(8), this,
+                   &BreezerPrivateReadResearchTabFunction::OnTimeout);
+    frame->ExecuteJavaScriptInIsolatedWorld(
+        kBreezerResearchText,
+        base::BindOnce(&BreezerPrivateReadResearchTabFunction::OnText, this),
+        ISOLATED_WORLD_ID_CHROME_INTERNAL);
+    return RespondLater();
+  }
+  return RespondNow(Error("Source closed or moved to another window."));
+}
+
+void BreezerPrivateReadResearchTabFunction::OnTimeout() {
+  if (!did_respond()) {
+    Respond(Error("Source text timed out."));
+  }
+}
+
+void BreezerPrivateReadResearchTabFunction::OnText(base::Value value) {
+  if (did_respond()) {
+    return;
+  }
+  timeout_.Stop();
+  auto* browser = GetCallerBrowser();
+  auto* frame = document_.AsRenderFrameHostIfValid();
+  bool valid = false;
+  if (browser && frame) {
+    auto* tabs = browser->GetTabStripModel();
+    for (int i = 0; i < tabs->count(); ++i) {
+      auto* contents = tabs->GetWebContentsAt(i);
+      if (ExtensionTabUtil::GetTabId(contents) == tab_id_ &&
+          contents->GetPrimaryMainFrame() == frame && !contents->IsLoading() &&
+          contents->GetLastCommittedURL().spec() == expected_url_) {
+        valid = true;
+      }
+    }
+  }
+  if (!valid) {
+    Respond(Error("Source closed, moved or navigated during capture."));
+    return;
+  }
+  if (!value.is_dict() || !value.GetDict().FindString("text")) {
+    Respond(Error("Source text is unavailable."));
+    return;
+  }
+  Respond(WithArguments(std::move(value)));
 }
 
 ExtensionFunction::ResponseAction

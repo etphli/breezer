@@ -1035,3 +1035,15 @@ dialog .privacy-note {
 :root[data-scheme="dark"][data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: #2c3038; --ink: #f1f3f6; --muted: #bcc3ce; --accent: color-mix(in srgb, var(--custom-seed) 40%, white); }
 
 :root[data-tone="custom"] { --page: var(--air); --paper: var(--card); --line: color-mix(in srgb, var(--ink) 18%, var(--page)); --accent-soft: color-mix(in srgb, var(--accent) 15%, var(--page)); --accent-ink: var(--ink); }
+
+.research-row { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; }
+.research-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.research-chips:empty { display:none; }
+.research-chip { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid var(--line); border-radius:8px; padding:5px 8px; background:var(--paper); color:inherit; font:inherit; font-size:12px; cursor:pointer; }
+.research-options { display:flex; flex-direction:column; gap:6px; max-height:45vh; overflow:auto; }
+.research-option { display:flex; align-items:center; gap:10px; padding:9px 4px; cursor:pointer; }
+.research-option input { width:18px; height:18px; flex:none; }
+.research-option span { min-width:0; }
+.research-option strong, .research-option small { display:block; overflow-wrap:anywhere; }
+.research-option small { opacity:.7; font-size:11px; margin-top:3px; }
+#research-dialog { max-width:min(420px, calc(100vw - 32px)); }

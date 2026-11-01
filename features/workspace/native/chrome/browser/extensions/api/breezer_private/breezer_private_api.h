@@ -4,6 +4,11 @@
 #ifndef CHROME_BROWSER_EXTENSIONS_API_BREEZER_PRIVATE_BREEZER_PRIVATE_API_H_
 #define CHROME_BROWSER_EXTENSIONS_API_BREEZER_PRIVATE_BREEZER_PRIVATE_API_H_
 
+#include <string>
+
+#include "base/timer/timer.h"
+#include "base/values.h"
+#include "content/public/browser/weak_document_ptr.h"
 #include "extensions/browser/extension_function.h"
 #include "extensions/browser/extension_function_histogram_value.h"
 
@@ -62,6 +67,28 @@ class BreezerPrivateAuthorizeCurrentPageFunction final
  private:
   ~BreezerPrivateAuthorizeCurrentPageFunction() override = default;
   ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateGetResearchTabsFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.getResearchTabs", UNKNOWN)
+ private:
+  ~BreezerPrivateGetResearchTabsFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateReadResearchTabFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.readResearchTab", UNKNOWN)
+ private:
+  ~BreezerPrivateReadResearchTabFunction() override = default;
+  ResponseAction RunFunction() override;
+  void OnText(base::Value value);
+  void OnTimeout();
+  content::WeakDocumentPtr document_;
+  int tab_id_ = -1;
+  std::string expected_url_;
+  base::OneShotTimer timeout_;
 };
 
 class BreezerPrivateSetPeekSourcesFunction final

@@ -12,7 +12,7 @@ export function fakeChrome() {
       async get(key) { return { [key]: structuredClone(local[key]) }; },
       async set(values) { Object.assign(local, structuredClone(values)); },
     } },
-    runtime: { onConnect: event(), onMessage: event(), connectNative(name) { calls.push(['native', name]); return native; } },
+    runtime: { id: 'fixture', getURL: path => `chrome-extension://fixture/${path}`, onConnect: event(), onMessage: event(), connectNative(name) { calls.push(['native', name]); return native; } },
     commands: { onCommand: event() }, action: { onClicked: event() },
     sidePanel: { open: async value => calls.push(['open', value]), close: async value => calls.push(['close', value]) },
     tabs: {
@@ -47,5 +47,5 @@ export function fakeChrome() {
   return { api, native, calls, get tab() { return { ...tab }; }, setTab(value) { tab = { ...tab, ...value }; } };
 }
 export function panel() {
-  return { name: 'breezer-panel', sent: [], onMessage: event(), onDisconnect: event(), postMessage(value) { this.sent.push(value); } };
+  return { name: 'breezer-panel', sender: { id: 'fixture', url: 'chrome-extension://fixture/panel.html' }, sent: [], onMessage: event(), onDisconnect: event(), postMessage(value) { this.sent.push(value); } };
 }
