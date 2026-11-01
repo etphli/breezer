@@ -51,11 +51,20 @@ class LoginEnterSourceTest(unittest.TestCase):
 
     def test_trusted_unmodified_enter_only(self):
         for guard in ['!event.isTrusted()', 'event.defaultPrevented()', 'event.DefaultHandled()', '!key',
-                      'event.type() != event_type_names::kKeypress', "key->charCode() != '\\r'",
+                      'key->type() != event_type_names::kKeypress', "key->charCode() != '\\r'",
                       'key->isComposing()', 'key->repeat()', 'key->ctrlKey()',
                       'key->altKey()', 'key->metaKey()', 'key->shiftKey()',
                       '!isConnected()', '!GetDocument().IsActive()']:
             self.assertIn(guard, self.submit)
+
+    def test_text_input_uses_its_trusted_underlying_enter(self):
+        for guard in ['DynamicTo<TextEvent>(event)', 'event.UnderlyingEvent()',
+                      '!text->IsPaste()', '!text->IsDrop()', '!text->IsComposition()',
+                      'text->data() == "\\n"', '!key->isTrusted()', 'key->defaultPrevented()']:
+            self.assertIn(guard, self.submit)
+        unit = (self.tree / UNIT).read_text()
+        self.assertIn('TextEvent::Create(nullptr, "\\n")', unit)
+        self.assertIn('event->SetUnderlyingEvent(key)', unit)
 
     def test_exact_form_and_explicit_login_pair(self):
         for guard in ['submission_trigger_count != 2', 'event.RawTarget() != focused',
