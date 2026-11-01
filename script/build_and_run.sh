@@ -90,11 +90,14 @@ fi
 BREEZER_WORKSPACE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_workspace.py" --fingerprint)"
 BREEZER_AI_UI_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_ai_ui.py" --fingerprint)"
 BREEZER_PASSWORDS_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/features/passwords/native-ui/apply.py" --fingerprint)"
-for BREEZER_OVERLAY in workspace ai-ui passwords; do
+BREEZER_SYNC_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_sync.py" --fingerprint)"
+for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
   if [[ "$BREEZER_OVERLAY" == workspace ]]; then
     BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
   elif [[ "$BREEZER_OVERLAY" == ai-ui ]]; then
     BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  elif [[ "$BREEZER_OVERLAY" == sync ]]; then
+    BREEZER_OVERLAY_ID="$BREEZER_SYNC_ID"
   else
     BREEZER_OVERLAY_ID="$BREEZER_PASSWORDS_ID"
   fi
@@ -155,13 +158,16 @@ fi
 "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check "$_src_dir"
 printf '%s\n' "$BREEZER_OMNIBOX_ID" > "$BREEZER_OMNIBOX_PREPARED.tmp"
 mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"
-for BREEZER_OVERLAY in workspace ai-ui passwords; do
+for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
   if [[ "$BREEZER_OVERLAY" == workspace ]]; then
     BREEZER_OVERLAY_SCRIPT=script/apply_breezer_workspace.py
     BREEZER_OVERLAY_ID="$BREEZER_WORKSPACE_ID"
   elif [[ "$BREEZER_OVERLAY" == ai-ui ]]; then
     BREEZER_OVERLAY_SCRIPT=script/apply_breezer_ai_ui.py
     BREEZER_OVERLAY_ID="$BREEZER_AI_UI_ID"
+  elif [[ "$BREEZER_OVERLAY" == sync ]]; then
+    BREEZER_OVERLAY_SCRIPT=script/apply_breezer_sync.py
+    BREEZER_OVERLAY_ID="$BREEZER_SYNC_ID"
   else
     BREEZER_OVERLAY_SCRIPT=features/passwords/native-ui/apply.py
     BREEZER_OVERLAY_ID="$BREEZER_PASSWORDS_ID"

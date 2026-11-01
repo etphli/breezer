@@ -91,6 +91,22 @@ class BreezerPrivateReadResearchTabFunction final : public BreezerPrivateFunctio
   base::OneShotTimer timeout_;
 };
 
+class BreezerPrivateReadWorkspaceSyncFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.readWorkspaceSync", UNKNOWN)
+ private:
+  ~BreezerPrivateReadWorkspaceSyncFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateExchangeWorkspaceSyncFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.exchangeWorkspaceSync", UNKNOWN)
+ private:
+  ~BreezerPrivateExchangeWorkspaceSyncFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
 class BreezerPrivateSetPeekSourcesFunction final
     : public BreezerPrivateFunction {
  public:

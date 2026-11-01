@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Breezer Sync</title><link rel="stylesheet" href="setup.css"></head>
+<body>
+<main>
+<header><p class="brand">Breezer</p><h1>Encrypted sync</h1><p>Keep saved spaces and passwords together across your Breezer profiles.</p></header>
+<p id="status" role="status" aria-live="polite">Reading sync state…</p>
+<p id="error" role="alert" hidden></p>
+<section id="connected" hidden><h2>This profile</h2><dl><dt>Provider</dt><dd id="connected-provider"></dd><dt>Saved spaces and preferences</dt><dd id="spaces-status"></dd><dt>Browser-managed passwords</dt><dd id="passwords-status"></dd><dt>Last authenticated vault contact</dt><dd id="last-success">Not yet confirmed</dd></dl>
+<p>“Connected” means this profile has a protected vault key. A confirmed vault contact establishes authentication. Changes may still be queued for upload.</p>
+<div class="actions"><button id="retry">Retry sync</button><button id="disconnect">Disconnect this profile</button></div>
+<p>Disconnect keeps saved spaces and local passwords on this device. It does not erase the remote vault or disconnect other profiles.</p>
+</section>
+<section id="invalid" hidden><h2>Recover saved sync configuration</h2><p>This build cannot read the saved sync configuration. It will not overwrite that configuration automatically. Keep your recovery key and provider access, then disconnect the saved configuration before joining your vault again. Local saved data and the remote vault are kept.</p><button id="reset-configuration">Disconnect saved configuration</button></section>
+<section id="choose" hidden><h2>Choose a provider</h2>
+<p>The provider stores encrypted vault objects. Your recovery key stays in Breezer. Install a provider you trust before connecting.</p>
+<label for="provider">Installed provider</label><select id="provider"></select><button id="select-provider">Continue</button>
+<p id="no-providers" hidden>No sync provider is installed or available in this build.</p>
+</section>
+<section id="vaults" hidden><h2>Choose a vault</h2>
+<label for="vault">Existing vault</label><select id="vault"></select>
+<label for="join-key">Recovery key for this vault</label><input id="join-key" type="password" autocomplete="off" spellcheck="false">
+<button id="join">Join vault</button>
+<h3>Or create a vault</h3><label for="vault-name">Vault name</label><input id="vault-name" maxlength="80" value="Breezer" autocomplete="off"><button id="create">Create vault</button><p>The vault name is visible to your provider. Saved workspace contents and passwords are encrypted.</p>
+<fieldset><legend>Sync in this profile</legend><label><input id="spaces" type="checkbox" checked> Saved spaces, folders, pins, favorites and supported preferences</label><label><input id="passwords" type="checkbox" checked> Browser-managed passwords</label></fieldset>
+<p>Current live tabs, windows, AI conversations, AI memory and provider sign-in tokens stay on this device. Passkeys stored by Touch ID or Apple Passwords are managed by the platform and are not included in this vault.</p>
+</section>
+<section id="recovery" hidden><h2>Save your recovery key</h2><p>Store this key somewhere private, outside this browser profile. You need it to join another profile or recover after losing this device's key protection. Breezer cannot reset it. Anyone with the key and access to your vault can read its contents.</p>
+<label for="recovery-key">Recovery key</label><textarea id="recovery-key" rows="3" readonly spellcheck="false" autocomplete="off"></textarea>
+<label><input id="saved-key" type="checkbox"> I saved the recovery key somewhere private.</label><button id="confirm-key" disabled>Connect this profile</button>
+</section>
+<button id="cancel" hidden>Cancel setup</button>
+<details><summary>Recovery and transport limits</summary><p>When a vault fails authentication, do not overwrite or recreate it. Check the provider and recovery key. Disconnecting and rejoining preserves your local saved data; reconnecting merges it with the vault. Deleted saved items remain deleted when an offline profile reconnects.</p><p>Sync needs a provider that supports exact revision checks. A local test provider is available for disposable-profile testing. It is not a hosted cloud service. Never enter your vault recovery key in a provider's web page or an AI chat.</p></details>
+</main><script type="module" src="setup.js"></script>
+</body></html>

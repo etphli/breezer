@@ -80,7 +80,33 @@ namespace breezerPrivate {
   callback BooleanCallback = void(boolean allowed);
   callback VoidCallback = void();
 
+  // Workspace metadata only; native passwords and vault keys are never exposed.
+  dictionary WorkspaceSyncState {
+    boolean configured;
+    boolean workspaceEnabled;
+    boolean nativeError;
+    DOMString nativeMessage;
+    DOMString providerId;
+    DOMString vaultId;
+    DOMString model;
+  };
+  dictionary WorkspaceSyncExchange {
+    DOMString providerId;
+    DOMString vaultId;
+    DOMString expectedModel;
+    DOMString model;
+  };
+  callback WorkspaceSyncCallback = void(WorkspaceSyncState state);
+
+  interface Events {
+    // Bounded wake-up hint only. No key, credential or workspace payload.
+    static void onSyncStateChanged();
+  };
+
   interface Functions {
+    static void readWorkspaceSync(WorkspaceSyncCallback callback);
+    static void exchangeWorkspaceSync(WorkspaceSyncExchange request,
+                                      WorkspaceSyncCallback callback);
     static void getAppearance(AppearanceCallback callback);
     static void setAppearance(
         AppearancePatch patch,
