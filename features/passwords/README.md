@@ -152,3 +152,12 @@ private windows, and same-origin/cross-origin frames. Confirm that initial page
 load does not fill credentials, selecting a suggestion does not submit a form,
 and dismissing or switching tabs does not reopen a modal. No runtime acceptance
 is claimed by the source tests.
+
+## Passkeys
+
+The same overlay restores the native Mac profile passkey management route and
+removes Helium's forced-off passkey preference. Current signing still prevents
+local Touch ID and Apple Passwords use. See [passkey availability, source audit,
+protocol evidence and remaining native acceptance](../../docs/passkeys.md).
+No private-key export, credential store migration or signing identity change is
+part of this overlay.

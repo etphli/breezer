@@ -67,6 +67,12 @@ jobs:
           node tests/ai/panel-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs
           node tests/ai/browser-page.mjs
+      - name: Verify passkey component and virtual WebAuthn protocol
+        env:
+          BREEZER_PASSKEY_EVIDENCE: ${{ runner.temp }}/breezer-passkey-evidence
+        run: |
+          node tests/passkeys/component.mjs
+          node tests/passkeys/virtual.mjs
       - name: Verify website, usage calculations, and dashboard access boundaries
         env:
           BREEZER_SITE_EVIDENCE: ${{ runner.temp }}/breezer-site-evidence
@@ -87,5 +93,13 @@ jobs:
         with:
           name: breezer-ai-ui-verification
           path: ${{ runner.temp }}/breezer-ai-evidence/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload passkey fixture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: breezer-passkey-fixtures-not-native-acceptance
+          path: ${{ runner.temp }}/breezer-passkey-evidence/
           if-no-files-found: ignore
           retention-days: 7
