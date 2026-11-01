@@ -70,7 +70,7 @@ export function uid(prefix) {
 export function parseRoute(hash) {
   const raw = String(hash || '').replace(/^#\/?/, '');
   const [path, query = ''] = raw.split('?');
-  const view = path === 'settings' ? 'settings' : 'sidebar';
+  const view = path === 'settings' || path.startsWith('settings/') ? 'settings' : 'sidebar';
   const w = new URLSearchParams(query).get('w');
   const windowId = w !== null && /^\d{1,10}$/.test(w) ? Number(w) : null;
   return { view, windowId };

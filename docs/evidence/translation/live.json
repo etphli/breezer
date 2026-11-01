@@ -1,0 +1,10 @@
+{
+  "source": "es",
+  "target": "en",
+  "heading": "Hello",
+  "sentence": "The library opens in the morning.",
+  "input": "untouched",
+  "status": "Page translated.",
+  "browser": "156.0.8078.4",
+  "restored": "La biblioteca abre por la mañana."
+}

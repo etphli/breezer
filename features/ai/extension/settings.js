@@ -9,6 +9,7 @@ import { mountPasswords } from './passwords.js';
 import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
+import { mountTranslationSettings } from './translation-settings.js';
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -73,6 +74,7 @@ function setRadioValue(group, value) {
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
+  void mountTranslationSettings({ api, container: $('translation-settings') });
   void mountUsageSettings({ api, container: $('usage-settings') });
   const passwords = mountPasswords({ container: $('password-settings'), api });
   const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords });
