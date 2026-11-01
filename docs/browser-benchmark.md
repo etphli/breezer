@@ -11,11 +11,11 @@ node script/benchmark_browsers.mjs --prepare \
   --output build/benchmark-20261027-prepared
 ```
 
-After the final app has been installed and builds and competing tests have stopped, run:
+After the candidate bundle is verified and builds and competing tests have stopped, run:
 
 ```sh
 node script/benchmark_browsers.mjs --run \
-  --breezer "$HOME/Applications/Breezer.app" \
+  --breezer /path/to/candidate/Breezer.app \
   --chrome '/Applications/Google Chrome.app' \
   --output build/benchmark-20261027-run \
   --trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5
@@ -23,11 +23,141 @@ node script/benchmark_browsers.mjs --run \
 
 The output directory must be new and its parent must exist. Store temporary evidence under the ignored `build/` directory. Keep the machine plugged in, with stable power and display settings, and avoid other active work during the run. Existing open browser sessions contribute system load, but their memory is excluded from each measured process tree.
 
+## Initialized-profile comparison
+
+The current initialized protocol is v8. It retains the v6 foreground endpoints,
+v7 footprint accounting, workload, flags and balanced orders described below.
+During untimed setup it also handles the new Breezer setup guide: it invokes the
+shipped **Skip setup** button, waits for the guide's own completed state, and
+closes only that exact guide tab after it becomes the known product new tab.
+It never writes fabricated setup/seen values or closes unexpected pages. Older
+bundles still use their actual first-run notes. Setup actions are recorded in
+each setup observation; extension inspection sessions are detached afterward.
+
+The full labels are `installed-browser-v8-initialized-foreground`,
+`installed-browser-v8-initialized-three-way`, and their `-footprint` variants.
+All comparison participants must be rerun under v8. Earlier v6/v7 reports remain
+labelled history. The first v7 attempt against the new guide failed before any
+scored launches and is preserved separately from the v8 run.
+
+For current Breezer editions that open a one-time update page, add
+`--initialized-profiles` to the run command. This selects protocol
+`installed-browser-v6-initialized-foreground`. It leaves onboarding enabled and
+performs an untimed setup launch for **both** products with the same fixture and
+flags. For Breezer it waits for the bundled extension to record its seen edition,
+closes only the exact bundled `whats-new.html` page, and waits until the fixture
+is the sole content tab. It neither suppresses nor changes the shipped release
+page behavior. Unknown tabs cause setup to wait or fail rather than being closed.
+The setup observations are retained in `setups`, outside the timing summaries.
+
+Each setup and measured launch asks AppKit to activate only the launched PID and
+its windows. The native probe retries until the activation request is accepted,
+then waits for that PID to be active and frontmost with a sufficiently large
+on-screen window. It advances the main run loop so AppKit's time-varying state
+can refresh. After the document and native-window gates pass, a second native
+snapshot must confirm the same conditions. That proof is retained as
+`startupNativeForeground`; the startup interval ends after this check.
+
+Activation and verification are inside the startup interval and apply equally to
+every app. This is protocol v6: v4/v5 requested activation but did not verify
+foreground state at the endpoint. Retain their old results as labelled history;
+rerun every comparison participant under v6. Double animation frames, flags,
+fixture, memory sampling, alternating order and failure retention are unchanged.
+
+The first measured launch is `profileState: initialized`; its summary is
+`startupInitializedProfileMs`. It follows setup and is **not** fresh-profile
+startup. The second measured launch is `reused`. Do not compare initialized
+startup directly with older fresh-profile results as an optimization claim.
+Rerun the baseline and candidate with this same protocol and options. Setup
+failures remain failures and their partial observations are not pooled into a
+completed run.
+
+## Candidate, baseline and Chrome in one run
+
+Add `--baseline-breezer` to compare the candidate, a previous Breezer bundle and
+Chrome in the same session. This selects
+`installed-browser-v6-initialized-three-way`, requires `--initialized-profiles`
+and a multiple of six rounds. In each six-round block, all six app orders occur
+once. Every app occupies each position twice, and each pair appears in either
+order three times. The exact schedule is recorded in `roundOrders`.
+
+```sh
+node script/benchmark_browsers.mjs --run --initialized-profiles \
+  --breezer /path/to/candidate/Breezer.app \
+  --baseline-breezer "$HOME/Applications/Breezer.app" \
+  --chrome '/Applications/Google Chrome.app' \
+  --output build/benchmark-three-way-run \
+  --trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5
+```
+
+Use `--prepare` with the same arguments and a different new output directory to
+verify all three bundles and compile the window probe without launching them.
+The two Breezer inputs must have Breezer's bundle identity; Chrome must have
+Chrome's identity. Duplicate executable hashes are rejected. The installed
+baseline is only read and launched with a disposable profile; no app installation
+or replacement is required.
+
+Every app receives the same untimed setup, initialized/reused launches, fixture,
+flags, verified foreground readiness, memory sampling and failure handling.
+Six rounds produce 36 scored launches plus 18 untimed setup launches. The
+previous Breezer's summary is `baselineBreezer`; candidate and Chrome retain
+`breezer` and `chrome`. Failed setup or measurements leave the run failed. The
+ordinary two-app command retains its alternating order. Its initialized mode now
+uses v6 foreground verification; fresh-profile v3 endpoints remain unchanged.
+
+## macOS footprint comparison
+
+Add `--physical-footprint` to an initialized-profile command to collect macOS
+footprint alongside RSS. This selects `installed-browser-v7-initialized-foreground-footprint`
+or `installed-browser-v7-initialized-three-way-footprint`. Preparation compiles
+the read-only `script/macos_process_usage.c` probe and records its source and
+executable hashes. Run every participant with the same mode and options.
+
+```sh
+node script/benchmark_browsers.mjs --run --initialized-profiles --physical-footprint \
+  --breezer /path/to/candidate/Breezer.app \
+  --baseline-breezer "$HOME/Applications/Breezer.app" \
+  --chrome '/Applications/Google Chrome.app' \
+  --output build/benchmark-three-way-footprint-run \
+  --trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5
+```
+
+The probe reads `ri_phys_footprint` through `proc_pid_rusage`, using the fixed
+`RUSAGE_INFO_V4` layout. Footprint accounts for dirty memory and charges compressed
+or swapped pages; it is not a count of currently resident or uniquely owned RAM.
+See [Apple's memory accounting explanation](https://developer.apple.com/videos/play/wwdc2022/10106/).
+
+For each RSS sample, the tool retains that process listing, reads native usage,
+lists the owned tree again, then reads native usage again. It requires the same
+complete PID set, parent, command, role and process start time in both listings.
+Processes must predate capture by more than one second because `ps lstart` has
+one-second resolution. Both native reads must also agree on kernel start identity
+and executable UUID. Missing processes/counters, exits, identity changes and
+invalid capture bounds make the footprint sample unavailable, without a number.
+Partial captures never become smaller memory scores.
+
+The sample sums the first native read's footprint values. Both raw native reads
+and process listings remain in the report. These are sequential observations;
+short-lived children between listings and simultaneous memory peaks are not
+covered. Per-process lifetime maxima are retained as diagnostic data and are not
+summed. Every sample must be observed for the trial's footprint median, and every
+trial median must be observed for an app's summary. Unavailable data remains
+unavailable rather than being dropped or replaced with zero. The summary fields
+are `oneTabPhysicalFootprintMiB` and `multiTabPhysicalFootprintMiB`.
+
+V7 keeps v6 startup, foreground, tab/navigation endpoints, flags and balanced
+order. Its additional native reads and process listing run after each RSS/CPU
+listing's capture timestamp. They add time between samples, so CPU uses the
+actual recorded elapsed interval. The extra instrumentation is why v7 has a
+separate protocol label. Existing v3/v6 commands retain their sampling path.
+Historical RSS cannot be converted into footprint. Rerun the candidate, baseline
+and Chrome together for new comparisons.
+
 ## What it measures
 
 Each of six rounds alternates which browser goes first. For each browser, the tool creates a new temporary profile, measures its first launch, exercises tabs and navigation, measures memory, quits that browser instance, and measures a relaunch of the same profile. After the memory check it closes only the extra fixture tabs it created, explicitly activates the retained tab, and returns that tab to the common fixture URL before quitting. Explicit activation requests the retained foreground tab before the post-measurement animation-frame readiness check. It does not establish the cause of an animation-frame timeout; a timed-out run remains failed. It records content-tab inventories at startup, at ten tabs, and before quitting, and requires a single content tab on both launches. An unexpected restored session fails the run. It removes the temporary profile after the pair. These are **fresh-profile** and **reused-profile** launches. Neither is an OS-cold launch: the tool does not reboot, flush file caches, or claim to control the OS page cache. Six rounds give each browser three first positions. Use an even number of rounds to keep positions balanced.
 
-All timing values use the same host monotonic clock. Startup begins immediately before spawning the installed executable. Its endpoint is the later of a visible native window and a loaded fixture document after two animation frames. The native probe checks CoreGraphics for an on-screen, layer-zero window owned by the launched PID, at least 320 by 200 pixels. The page check requires a complete document, the expected URL, a body with positive width, and two animation frames. This estimates a visible usable page. It does not prove that every native toolbar control has finished drawing, or measure keyboard input response. Polling and CDP connection overhead are included and apply to both browsers.
+All timing values use the same host monotonic clock. Startup begins immediately before spawning the executable. For fresh-profile v3, it ends at the later of a visible native window and a loaded fixture document after two animation frames. The native probe checks CoreGraphics for an on-screen, layer-zero window owned by the launched PID, at least 320 by 200 pixels. The page check requires a complete document, the expected URL, a body with positive width, and two animation frames. Initialized v6 also requires the final foreground snapshot described above and ends after that verification. This estimates a visible usable page. It does not prove that every native toolbar control has finished drawing, or measure keyboard input response. Polling, CDP connection and native verification overhead are included and apply equally to every app.
 
 New-tab timing starts before `Target.createTarget` and ends after the new foreground document is ready and two animation frames have passed. It separately measures `about:blank` and each browser's `chrome://newtab/` document. It waits for the product new tab to leave `about:blank`, and records the actual resolved URL. This measures programmatic tab creation and document readiness. It excludes a user's click or shortcut and does not establish that every asynchronous native new-tab control is ready.
 
@@ -39,7 +169,7 @@ Each process sample also records its Chromium `--type` role, `ps` CPU percentage
 
 ### Observed CPU during settled memory sampling
 
-`memoryOneTab.cpu` and `memoryMultiTab.cpu` analyse the same five RSS samples after the same five-second settle. They add no browser requests, process listings, or sample delays. CPU observation starts with the first listing and ends with the fifth, covering roughly four seconds plus listing overhead. It excludes the settle, startup, tab creation, navigation and readiness periods.
+`memoryOneTab.cpu` and `memoryMultiTab.cpu` analyse the same five RSS samples after the same five-second settle. The CPU calculation adds no browser requests, process listings, or sample delays. CPU observation starts with the first listing and ends with the fifth, covering roughly four seconds plus listing overhead in v3/v6. V7 also includes the intervening footprint-probe time, as described above. It excludes the settle, startup, tab creation, navigation and readiness periods.
 
 macOS `ps time` supplies cumulative user + system CPU time without adding exited children's CPU time. The parser accepts the locally observed `minutes:seconds.hundredths` format, including minute counts above 59. For each process present in every sample, the calculation subtracts its first counter from its last and checks all intermediate counters for decreases. It sums those deltas as `observedCpuSeconds` only when the result exceeds aggregate counter uncertainty. `counterResolutionSeconds` is 0.01. `counterUncertaintyCpuSeconds` allows 0.02 seconds per process for the two displayed endpoints. `counterUncertaintyCpuSecondsPerElapsedSecond` divides that allowance by the observation duration. These fields describe counter precision only; missing process work has no bounded uncertainty.
 
@@ -59,7 +189,7 @@ The public `captureFailureState(instance, error)` helper supports disposable-pro
 
 For a slow navigation, retain the observation and compare host elapsed time with the full navigation entry. A large delay before `requestStart` needs network/request evidence; it does not establish a rendering or animation-frame cause. A hidden-tab negative control can verify that frame waits fail truthfully, but it does not prove why an intermittent foreground sample timed out. Capture failure state in the actual failing run before drawing that conclusion.
 
-For the next comparison, prepare a new directory, wait for the final installed app and an idle build queue, then run the six-round command above unchanged for both products. Preserve every failed attempt, all slow observations, fixture and executable hashes, and the complete raw report. A failed attempt remains failed even if completed pairs are described separately. Any later activation, timeout, server, tracing, or endpoint change starts a labelled protocol revision and requires both products to be rerun identically.
+For the next comparison, prepare a new directory, verify the candidate bundle and wait for an idle build queue, then run the chosen six-round command with identical settings for every app. Preserve every failed attempt, all slow observations, fixture and executable hashes, and the complete raw report. A failed attempt remains failed even if completed pairs are described separately. Any later activation, timeout, server, tracing, or endpoint change starts a labelled protocol revision and requires every product to be rerun identically.
 
 ## Flags and evidence
 

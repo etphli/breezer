@@ -206,7 +206,7 @@ std::unique_ptr<syncer::CustomSyncBackend> CreateBackend(
       configuration.vault_uuid, *checkpoint,
       base::BindRepeating(&PersistCheckpoint, profile->GetWeakPtr(), configuration, encryptor, context));
   std::fill(key->begin(), key->end(), '\0');
-  if (!store) return nullptr;
+  if (!store.has_value()) return nullptr;
   return std::make_unique<Backend>(std::move(*store), context,
       base::BindRepeating(&ReportDiagnostics, profile->GetWeakPtr(), configuration, context->active));
 }

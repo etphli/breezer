@@ -1,3 +1,3 @@
-// Bump for a published release, not for each development build.
-export const RELEASE_VERSION = '1.1.5';
+// Shared by native branding, packaging and the minor-release update page.
+export const RELEASE_VERSION = '1.2.0';
 export const RELEASE_PAGE_VERSION = RELEASE_VERSION.replace(/\.\d+$/, '.0');

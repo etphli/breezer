@@ -1,0 +1,66 @@
+{
+  "verifiedAt": "2026-11-01T11:14:37.275256+00:00",
+  "state": {
+    "pid": 527,
+    "source": "/home/breezer/builds/breezer-1.2.0-pc/src",
+    "output": "/home/breezer/builds/breezer-1.2.0-pc/src/out/PCMacPerformance",
+    "macBuildUntouched": true,
+    "fullBrowserBuildProven": true,
+    "pcBrowserCompilerStarted": false,
+    "phase": "built-unverified-on-mac",
+    "updatedAt": "2026-11-01T11:02:27.614558+00:00",
+    "pgoProfileSha256": "15fbc265a780b68bd943e5a2f2c89b58a006c45e28435257e4d927f1c7ee0c20",
+    "planSha256": "7199118cf78826ee4548d458ffb224b5187f89965d1b5a6f0772717ea4caeb77",
+    "resourceGuardHistory": [],
+    "jobs": 4,
+    "availableLogicalCpus": 16,
+    "memoryPolicy": "10GiB WSL limit,16logicalCPUs; 4 compiler slots;1 link slot",
+    "resourceGuard": "Interrupt after15s sustained paging pressure; bounded4-to2-to1 reduction; pause if1job is still unsafe",
+    "resourceGuardTriggered": false,
+    "driverStartedAt": "2026-11-01T10:54:30.348256+00:00",
+    "driverPid": 534,
+    "keepGoingOnFailures": true,
+    "failurePolicy": "Any action failure prevents success; only paging pressure permits a lower-concurrency pass",
+    "expectedOutput": "/home/breezer/builds/breezer-1.2.0-pc/src/out/PCMacPerformance/Breezer.app/Contents/MacOS/Breezer",
+    "outputSha256": "49dd57e41577e1f67cfad2e0b38c812704a769f70fdb6e1171c22671be0f2185"
+  },
+  "graph": [
+    23,
+    23
+  ],
+  "failedActions": 0,
+  "noBuildDriversActive": true,
+  "compiledCrossHostBrowserVerified": true,
+  "newFeaturesIncludedInNativeSource": true,
+  "files": [
+    {
+      "path": "Breezer.app/Contents/MacOS/Breezer",
+      "bytes": 76336,
+      "sha256": "49dd57e41577e1f67cfad2e0b38c812704a769f70fdb6e1171c22671be0f2185",
+      "format": "Mach-O64bit arm64"
+    },
+    {
+      "path": "Breezer.app/Contents/Frameworks/Breezer Framework.framework/Versions/156.0.8078.47/Breezer Framework",
+      "bytes": 442692784,
+      "sha256": "434dbd4548fb20a2671401bb3ca3d53eb40ecbc29cb3b2d56a95cab19a7326da",
+      "format": "Mach-O64bit arm64"
+    },
+    {
+      "path": "chromedriver",
+      "bytes": 27504080,
+      "sha256": "f997e09caa447196ce157f009215e958700586524c3596965ae13814da933292",
+      "format": "Mach-O64bit arm64"
+    }
+  ],
+  "bundleIdentifier": "io.github.etphli.breezer",
+  "bundleShortVersion": "0.20.1.1",
+  "bundleBuildVersion": "0.20.1.1",
+  "archiveWindowsPath": "B:/BreezerBuild/setup/latest-native-candidate-20261101.tar.gz",
+  "archiveBytes": 221738103,
+  "archiveSha256": "2bec3013e1a116b1e4a7c0557c7f547d65dca478beaea0cb9d38d27ddd08e8d8",
+  "packagingVerified": false,
+  "macRuntimeVerified": false,
+  "signingVerified": false,
+  "installedAppChanged": false,
+  "sourceOutputsPreserved": true
+}

@@ -1,0 +1,167 @@
+--- a/chrome/browser/mac/code_sign_clone_manager.mm
++++ b/chrome/browser/mac/code_sign_clone_manager.mm
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ #include "chrome/browser/mac/code_sign_clone_manager.h"
++#include "chrome/browser/mac/breezer_clone_session.h"
+ 
+ #import <Foundation/Foundation.h>
+ #include <errno.h>
+@@ -219,41 +220,26 @@
+   }
+   std::string_view prefix = base::apple::BaseBundleID();
+   *path = base::MakeAbsoluteFilePath(temp_dir).Append(
+-      base::StrCat({prefix, ".", kCodeSignClone}));
++      base::StrCat({prefix, ".", kCodeSignClone, ".sessions-v1"}));
+   return true;
+ }
+ 
+ // Example:
+ //   /private/var/folders/.../X/org.chromium.Chromium.code_sign_clone/code_sign_clone.tKdILk
+-bool CreateUniqueCloneTempDir(base::FilePath* path) {
+-  base::FilePath clone_temp_dir;
+-  if (!GetCloneTempDir(&clone_temp_dir)) {
+-    return false;
+-  }
+-
+-  // 0700 was chosen intentionally to avoid giving away filesystem access more
+-  // broadly to something that might be private and protected.
+-  if (mkdir(clone_temp_dir.value().c_str(), 0700) != 0 && errno != EEXIST) {
+-    DPLOG(ERROR) << "mkdir " << std::quoted(clone_temp_dir.value());
+-    return false;
+-  }
+-  RemoveQuarantineAttribute(clone_temp_dir);
+-
+-  // Example:
+-  //   code_sign_clone.XXXXXX
+-  std::string format = base::StrCat(
+-      {kCodeSignClone, ".", std::string(kMkdtempFormatXCount, 'X')});
+-
+-  base::FilePath unique_format = clone_temp_dir.Append(format);
+-  char* buffer = const_cast<char*>(unique_format.value().c_str());
+-  if (!mkdtemp(buffer)) {
+-    DPLOG(ERROR) << "mkdtemp " << std::quoted(buffer);
+-    return false;
+-  }
+-  base::FilePath unique_path = base::FilePath(buffer);
+-  RemoveQuarantineAttribute(unique_path);
+-
+-  *path = unique_path;
++bool CreateUniqueCloneTempDir(base::FilePath* path,
++                              breezer::clone_sessions::Fd* lease) {
++  base::FilePath root;
++  if (!GetCloneTempDir(&root)) {
++    return false;
++  }
++  auto session = breezer::clone_sessions::CreateSession(root.value());
++  if (!session.lease.valid()) {
++    return false;
++  }
++  *path = base::FilePath(session.path);
++  RemoveQuarantineAttribute(root);
++  RemoveQuarantineAttribute(*path);
++  *lease = std::move(session.lease);
+   return true;
+ }
+ 
+@@ -421,9 +407,11 @@
+   if (!GetCloneTempDir(&clone_temp_dir)) {
+     return false;
+   }
+-  base::FilePath prefix =
+-      clone_temp_dir.Append(base::StrCat({kCodeSignClone, "."}));
+-  return unique_temp_dir_path.value().starts_with(prefix.value());
++  const std::string prefix = base::StrCat({kCodeSignClone, "."});
++  const std::string name = unique_temp_dir_path.BaseName().value();
++  return unique_temp_dir_path.DirName() == clone_temp_dir &&
++         name.starts_with(prefix) &&
++         ValidateUniqueDirSuffix(name.substr(prefix.size()));
+ }
+ 
+ void RecordCloneCount() {
+@@ -582,7 +570,8 @@
+   //
+   // The clone will be created inside of this directory.
+   base::FilePath unique_temp_dir_path;
+-  if (!CreateUniqueCloneTempDir(&unique_temp_dir_path)) {
++  breezer::clone_sessions::Fd session_lease;
++  if (!CreateUniqueCloneTempDir(&unique_temp_dir_path, &session_lease)) {
+     std::move(callback).Run(base::FilePath());
+     return;
+   }
+@@ -625,6 +614,11 @@
+     std::move(callback).Run(base::FilePath());
+     return;
+   }
++
++  // Keep the lease until process death, including shutdown after this manager
++  // is destroyed. CLOEXEC prevents child processes from extending ownership.
++  // This intentionally retained descriptor is released by the kernel on exit.
++  (void)session_lease.release();
+ 
+   base::TimeDelta delta = base::TimeTicks::Now() - start_time;
+   base::UmaHistogramTimes("Mac.AppCodeSignCloneCreationTime", delta);
+@@ -654,10 +648,10 @@
+ 
+   RecordCloneCount();
+ 
+-  // TODO(https://crbug.com/343784575): Search for inactive clones and clean
+-  // them up if the clone count gets too high.
+-
+   std::move(callback).Run(clone_app_path);
++
++  // Background, bounded maintenance only after the new clone is ready.
++  breezer::clone_sessions::Cleanup(unique_temp_dir_path.DirName().value());
+ }
+ 
+ void CodeSignCloneManager::SetTemporaryDirectoryPathForTesting(
+@@ -762,7 +756,11 @@
+     }
+   }
+ 
+-  base::DeletePathRecursively(unique_temp_dir_path);
++  base::FilePath clone_root;
++  if (!GetCloneTempDir(&clone_root)) {
++    return 1;
++  }
++  breezer::clone_sessions::Cleanup(clone_root.value(), unique_temp_dir_suffix);
+   return 0;
+ }
+ 
+--- a/chrome/browser/mac/code_sign_clone_manager_unittest.mm
++++ b/chrome/browser/mac/code_sign_clone_manager_unittest.mm
+@@ -3,6 +3,7 @@
+ // found in the LICENSE file.
+ 
+ #include "chrome/browser/mac/code_sign_clone_manager.h"
++#include "chrome/browser/mac/breezer_clone_session.h"
+ 
+ #import <Foundation/Foundation.h>
+ 
+@@ -243,9 +244,15 @@
+   base::FilePath temp_dir =
+       CodeSignCloneManager::GetCloneTemporaryDirectoryForTesting();
+ 
++  ASSERT_TRUE(base::CreateDirectory(temp_dir));
++  ASSERT_EQ(chmod(temp_dir.value().c_str(), 0700), 0);
+   for (TestCase& test : test_cases) {
+     base::FilePath test_dir = temp_dir.Append("code_sign_clone." + test.name);
+     EXPECT_TRUE(base::CreateDirectory(test_dir));
++    ASSERT_EQ(chmod(test_dir.value().c_str(), 0700), 0);
++    base::FilePath lease = test_dir.Append(breezer::clone_sessions::kLeaseName);
++    ASSERT_TRUE(base::WriteFile(lease, breezer::clone_sessions::kLeaseContents));
++    ASSERT_EQ(chmod(lease.value().c_str(), 0600), 0);
+ 
+     // Test that ChromeCodeSignCloneCleanupMain only deletes valid paths.
+     base::CommandLine cli(
+--- a/chrome/browser/mac/BUILD.gn
++++ b/chrome/browser/mac/BUILD.gn
+@@ -76,6 +76,7 @@
+ 
+ source_set("impl") {
+   sources = [
++    "breezer_clone_session.h",
+     "auth_session_request.mm",
+     "chrome_browser_main_extra_parts_mac.mm",
+     "code_sign_clone_manager.mm",

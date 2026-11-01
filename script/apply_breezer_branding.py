@@ -11,6 +11,7 @@ import subprocess
 import sys
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
+from breezer_release import release_version
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -57,6 +58,14 @@ def brand_product(tree):
     })
     replace_file(tree / "chrome/app/chrome_crash_reporter_client.cc", {
         'const char* product_name = "Helium"': 'const char* product_name = "Breezer"',
+    })
+
+
+def brand_version(tree):
+    version = release_version(ROOT)
+    replace_file(tree / 'base/version_info/version_info_values.h.version', {
+        '#define HELIUM_PRODUCT_VERSION "@HELIUM_MAJOR@.@HELIUM_MINOR@.@HELIUM_PATCH@.@HELIUM_PLATFORM@"':
+            f'#define HELIUM_PRODUCT_VERSION "{version}"',
     })
 
 
@@ -203,6 +212,7 @@ def main():
     tree = args.source_tree.resolve()
     if not (tree / "OWNERS").is_file() or not (tree / "tools/grit").is_dir():
         parser.error("Use the prepared Chromium source tree, after applying upstream patches.")
+    brand_version(tree)
     brand_product(tree)
     brand_strings(tree)
     brand_onboarding(tree)

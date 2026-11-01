@@ -1,0 +1,9 @@
+test_bundle_version_changes_only_the_public_breezer_app (__main__.ReleaseVersionTests.test_bundle_version_changes_only_the_public_breezer_app) ... ok
+test_foreign_bundle_and_symlink_are_refused (__main__.ReleaseVersionTests.test_foreign_bundle_and_symlink_are_refused) ... ok
+test_native_display_uses_release_and_preserves_chromium_version (__main__.ReleaseVersionTests.test_native_display_uses_release_and_preserves_chromium_version) ... ok
+test_release_metadata_agrees_and_rejects_ambiguous_versions (__main__.ReleaseVersionTests.test_release_metadata_agrees_and_rejects_ambiguous_versions) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.009s
+
+OK

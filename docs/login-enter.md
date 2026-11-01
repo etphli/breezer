@@ -83,6 +83,16 @@ or the new behavior works in Breezer.
 
 ## Native acceptance gate
 
+During 1.2.0 release verification, the compiled combined candidate failed the
+first non-baseline scenario: username Enter left focus on the username. The
+pinned `TextFieldInputType::ShouldSubmitImplicitly` accepts a newline `TextEvent`,
+and `EventHandler::HandleTextInputEvent` wraps the original keypress as its
+underlying event. The fallback previously accepted only a direct `KeyboardEvent`.
+It now also resolves that newline event's trusted underlying Enter, rejecting
+paste, drop and composition. The native tests use the same wrapped event shape.
+Fresh compilation and the non-baseline runtime rerun remain required before
+calling this repair accepted.
+
 The release coordinator confirmed there is no verified disposable compiled
 Breezer or configured native unit output. Do not change the frozen PC build,
 stopped Mac build, installed app or prepared-source markers to run these checks.

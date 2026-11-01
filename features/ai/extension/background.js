@@ -24,10 +24,67 @@ export async function saveOrganatoSwitches(api, { enabled, dashboardEnabled }) {
   try { await api.storage.local.set({ [ORGANATO_SWITCHES_KEY]: { enabled, dashboardEnabled } }); } catch { /* the helper still answers */ }
 }
 
+function createOrganatoTransport(api) {
+  const pending = new Map();
+  let serial = 0, native = null, idleTimer;
+  const release = () => {
+    clearTimeout(idleTimer);
+    const connection = native;
+    native = null;
+    connection?.disconnect();
+  };
+  const releaseWhenIdle = () => {
+    clearTimeout(idleTimer);
+    if (!pending.size) idleTimer = setTimeout(release, 250);
+  };
+  const connect = () => {
+    clearTimeout(idleTimer);
+    if (native) return native;
+    const connection = api.runtime.connectNative(NATIVE_HOST);
+    native = connection;
+    connection.onMessage.addListener(message => {
+      if (native !== connection) return;
+      const request = pending.get(message?.id);
+      if (!request) return;
+      if (message.type === 'organato-progress') { request.progress?.(message.stage); return; }
+      pending.delete(message.id);
+      clearTimeout(request.timer);
+      message.ok ? request.resolve(message.value) : request.reject(new Error(message.error));
+      releaseWhenIdle();
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (native !== connection) return;
+      native = null;
+      for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); }
+      pending.clear();
+    });
+    return connection;
+  };
+  const ask = (owner, type, values, progress, timeoutMs) => new Promise((resolve, reject) => {
+    const id = `organato_${++serial}`;
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); releaseWhenIdle(); }, timeoutMs);
+    pending.set(id, { owner, resolve, reject, timer, progress });
+    try { connect().postMessage({ type, id, ...values }); }
+    catch (error) { clearTimeout(timer); pending.delete(id); reject(error); releaseWhenIdle(); }
+  });
+  const close = owner => {
+    for (const [id, request] of pending) {
+      if (request.owner !== owner) continue;
+      clearTimeout(request.timer);
+      pending.delete(id);
+      request.reject(new Error('Closed'));
+    }
+    if (!pending.size) release();
+  };
+  return { ask, close };
+}
+
 export function installBackground(api) {
   installTranslation(api);
   installWorkspaceSync(api);
   installUsage(api);
+  const organato = createOrganatoTransport(api);
   installReleaseNotes(api);
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
@@ -36,13 +93,49 @@ export function installBackground(api) {
     try { url = new URL(port.sender.url); } catch { return; }
     url.hash = ''; url.search = '';
     if (url.href !== api.runtime.getURL('workspace.html')) return;
-    const native = api.runtime.connectNative(NATIVE_HOST);
-    native.onMessage.addListener(message => { if (message?.type === 'update-result') { try { port.postMessage(message); } catch {} } });
-    native.onDisconnect.addListener(() => { void api.runtime.lastError; try { port.disconnect(); } catch {} });
+    const pending = new Map();
+    let native = null, idleTimer, closed = false, candidate = false, installing = false;
+    const release = () => {
+      clearTimeout(idleTimer);
+      const connection = native; native = null;
+      try { connection?.disconnect(); } catch {}
+    };
+    const releaseWhenIdle = () => {
+      clearTimeout(idleTimer);
+      if (!pending.size && !candidate && !installing) idleTimer = setTimeout(release, 250);
+    };
+    const connect = () => {
+      clearTimeout(idleTimer);
+      if (native) return native;
+      const connection = api.runtime.connectNative(NATIVE_HOST);
+      native = connection;
+      connection.onMessage.addListener(message => {
+        if (closed || native !== connection || message?.type !== 'update-result' || !pending.has(message.id)) return;
+        const type = pending.get(message.id); pending.delete(message.id);
+        if (message.ok) {
+          if (type === 'update-check') candidate = message.value?.available === true;
+          if (type === 'update-install' && message.value?.installing === true) { candidate = false; installing = true; }
+          if (type === 'update-status' && ['installed', 'failed'].includes(message.value?.phase)) installing = false;
+        }
+        try { port.postMessage(message); } catch {}
+        releaseWhenIdle();
+      });
+      connection.onDisconnect.addListener(() => {
+        void api.runtime.lastError;
+        if (closed || native !== connection) return;
+        native = null;
+        try { port.disconnect(); } catch {}
+      });
+      return connection;
+    };
     port.onMessage.addListener(message => {
-      if (['update-check', 'update-install', 'update-status'].includes(message?.type) && typeof message.id === 'string' && message.id.length < 100) native.postMessage({ type: message.type, id: message.id });
+      if (closed || !['update-check', 'update-install', 'update-status'].includes(message?.type)
+          || typeof message.id !== 'string' || message.id.length >= 100 || pending.has(message.id)) return;
+      pending.set(message.id, message.type);
+      try { connect().postMessage({ type: message.type, id: message.id }); }
+      catch { try { port.disconnect(); } catch {} }
     });
-    port.onDisconnect.addListener(() => { try { native.disconnect(); } catch {} });
+    port.onDisconnect.addListener(() => { closed = true; pending.clear(); release(); });
   });
   api.runtime.onConnect.addListener(port => {
     if (!['breezer-newtab', 'breezer-organato-settings'].includes(port.name)) return;
@@ -50,24 +143,8 @@ export function installBackground(api) {
     let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
     const settings = port.name === 'breezer-organato-settings';
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
-    const pending = new Map();
-    let serial = 0, closed = false, native = null;
-    // The helper starts only when a request actually needs it, so a new tab with
-    // Organato turned off never launches it.
-    const helper = () => {
-      if (native) return native;
-      native = api.runtime.connectNative(NATIVE_HOST);
-      native.onMessage.addListener(message => { const request = pending.get(message?.id); if (!request) return; if (message.type === 'organato-progress') { request.progress?.(message.stage); return; } pending.delete(message.id); clearTimeout(request.timer); message.ok ? request.resolve(message.value) : request.reject(new Error(message.error)); });
-      native.onDisconnect.addListener(() => { void api.runtime.lastError; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Organato helper disconnected.')); } pending.clear(); });
-      return native;
-    };
-    const ask = (type, values = {}, progress) => new Promise((resolve, reject) => {
-      const id = `organato_${++serial}`;
-      const timer = setTimeout(() => { pending.delete(id); reject(new Error('Organato timed out. Try again.')); }, settings ? 90000 : 65000);
-      pending.set(id, { resolve, reject, timer, progress });
-      try { helper().postMessage({ type, id, ...values }); } catch (error) { pending.delete(id); clearTimeout(timer); reject(error); }
-    });
-    // Every helper answer refreshes the local copy of the switches the new tab reads.
+    let closed = false;
+    const ask = (type, values = {}, progress) => organato.ask(port, type, values, progress, settings ? 90000 : 65000);
     const remember = value => { if (value && typeof value === 'object') void saveOrganatoSwitches(api, value); return value; };
     port.onMessage.addListener(message => {
       void (async () => {
@@ -102,7 +179,7 @@ export function installBackground(api) {
         if (!closed) port.postMessage(settings ? { id: message.id, ok: true, value } : { type: 'view', id: message.id, ...value });
       })().catch(error => { if (!closed) { try { port.postMessage(settings ? { id: message.id, ok: false, error: error.message } : { type: 'view', id: message.id, topSites: [], organato: { error: error.message } }); } catch {} } });
     });
-    port.onDisconnect.addListener(() => { closed = true; for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('Closed')); } pending.clear(); try { native?.disconnect(); } catch {} });
+    port.onDisconnect.addListener(() => { closed = true; organato.close(port); });
   });
   const panels = new Set();
   let activeRun = null;

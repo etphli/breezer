@@ -33,7 +33,30 @@ Each patch has a `.patch-lead` row for its main illustration and related notes, 
 
 A patch may add a second `.patch-pair` and end with a `.patch-limit` block that states what keeps its normal behavior or what the change cannot promise.
 
-The 1.1.1 drawings explain new-tab changes, Chrome import and AI error recovery. The 1.1.2 drawings explain Peek, favourite tile states and equal-width shortcuts. The 1.1.3 drawings explain same-site Peek, the opacity-only fade, menu shadows with icon fallback, the sidebar info button and startup tabs. The 1.1.4 drawings explain the worker handoff, failed-start reporting and the retained safety checks. The Organato feature plate shows one Upcoming list beside To-dos. Keep the descriptions beside the art so the meaning remains available to screen readers.
+The 1.2.0 draft has ten illustrated rows. Its first six cover the setup guide, custom shortcuts, Organato task links, sidebar snapshot ordering, idle helpers and storage cleanup. Additional rows come from accepted merged features:
+
+- PR #7 adds limited native passkey-management guidance and retains the Apple signing limitation. It does not announce Touch ID, Apple Passwords or complete platform enrollment.
+- PR #8 adds research across at most six explicitly selected, text-only page sources, separate from browser control. Citation quality depends on the model. Text exclusions are heuristic, not universal secret detection.
+- PR #9 adds page translation with a running local LibreTranslate server or the user's own LibreTranslate.com key, with confirmation before sharing text. It does not claim bundled models, AI-account access or general translation quality.
+- PR #10 adds the settings category list, search and Other destination for full browser settings. Translation mounts under Languages, passwords/passkeys stay under Passwords and Sync stays hidden until its module mounts.
+
+The shortcut row also includes merged PR #11: sidebar favorite/pin number slots open only the selected page lazily, reuse it on repeat and preserve native fallback, top/private and Command+9 behavior. Its native workspace fingerprint changes. Source and isolated-world fixtures do not prove physical macOS key dispatch.
+
+Merged PR #12 adds a bounded Google Docs canvas-editor input path. Its update-sheet entry stays in the pending-verification section: the source/fixture repair does not establish authenticated Docs typing, persistence, provider or native acceptance. Do not replace that entry with a live-site success claim until the combined-build checklist passes.
+
+PR #13's narrow native Enter fallback also merged after explicit user instruction. Include its source in the next combined plan, but hold its runtime release copy until the Blink, patched-browser, native picker and IME/site checks in the inventory pass. Keep the existing Microsoft Enter limitation unchanged.
+
+Merged PR #14 adds persistent Organato opt-out to the setup row and fully removes the disabled Organato sheet in the task-links row. Its native acceptance must confirm storage changes reaching real open new tabs and no helper process launch while off. The switch mirror is `organato.switches.v1` with `enabled` and `dashboardEnabled`; it is a fast-path copy of helper settings, not a second source of truth. AI-sidebar Organato behavior stays unchanged.
+
+The merged feature batch is now included in the completed combined PC compilation. Native invocation and feature-specific acceptance remain separate gates, including the Settings command through the hub to Other. Sync PR #6 is merged and its native files compile; encrypted two-profile/password acceptance remains pending, so working sync stays outside shipped claims.
+
+The fuller performance/lifecycle details and the post-build benchmark workflow are mapped in [the 1.2.0 inventory](release-1.2.0-inventory.md). After final combined-artifact measurements, put the strongest supported findings and a complete results table before the feature rows. Keep workloads, comparators, units, conditions, regressions and unavailable results explicit; do not promote old component measurements or compilation throughput into browser claims.
+
+The setup illustration follows the real guide's step sequence and links to `workspace.html#/welcome`. The storage illustration distinguishes active, ended and older sessions. Keep descriptions beside the artwork so their meaning remains available to screen readers. Earlier editions and patch drawings remain in Git history.
+
+Release preparation now sets the extension, native display and packaged app version to 1.2.0 from `release-info.js`. The browser fixture also verifies that edition. The benchmarked private candidate predates that final version stamp and remains labelled with its actual metadata. The managed performance candidate includes the prepared ad-block-list experiment; retain that release note only if the final build enables it and passes its promotion checks. Feature acceptance, signature-copy cleanup and the final versioned release artifact remain separate checks.
+
+The results section follows the masthead. Its headline charts show selected measured wins with exact comparators; a closed Full results section retains all 11 browser measurements, component results, regressions and unavailable values. `efficiency.html` is a separate, read-only article linked from the update log. It reuses `whats-new.css`; the extension now fills all 50 reserved resource slots. Adding another resource requires revisiting that allocation.
 
 ## Page contract
 

@@ -1,35 +1,55 @@
+import { CONTEXT_KEY } from './context-memory.js';
+
 export function createContextClient(api = globalThis.chrome) {
-  const port = api.runtime.connect({ name: 'breezer-context-settings' });
   const pending = new Map(), listeners = new Set();
-  let sequence = 0, closed = false;
-  const close = () => {
-    closed = true;
-    for (const entry of pending.values()) { clearTimeout(entry.timer); entry.reject(new Error('Context settings connection closed. Reopen Settings.')); }
+  let sequence = 0, closed = false, port = null;
+  const failPending = () => {
+    for (const entry of pending.values()) { clearTimeout(entry.timer); entry.reject(new Error('Context settings connection closed. Try again.')); }
     pending.clear();
   };
-  port.onMessage.addListener(message => {
-    if (closed) return;
-    if (message?.type === 'context-changed') { for (const listener of listeners) listener(); return; }
-    const entry = pending.get(message?.id);
-    if (!entry) return;
-    clearTimeout(entry.timer); pending.delete(message.id);
-    if (message.ok === true) entry.resolve(message.value);
-    else entry.reject(new Error(typeof message.error === 'string' ? message.error : 'Could not update context settings.'));
-  });
-  port.onDisconnect.addListener(() => { void api.runtime.lastError; close(); });
+  const connect = () => {
+    if (port) return port;
+    const connection = api.runtime.connect({ name: 'breezer-context-settings' });
+    port = connection;
+    connection.onMessage.addListener(message => {
+      if (closed || port !== connection) return;
+      if (message?.type === 'context-changed') { for (const listener of listeners) listener(); return; }
+      const entry = pending.get(message?.id);
+      if (!entry) return;
+      clearTimeout(entry.timer); pending.delete(message.id);
+      if (message.ok === true) entry.resolve(message.value);
+      else entry.reject(new Error(typeof message.error === 'string' ? message.error : 'Could not update context settings.'));
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (port !== connection) return;
+      port = null;
+      failPending();
+    });
+    return connection;
+  };
+  const changed = (changes, area) => {
+    if (closed || port || area !== 'local' || !Object.hasOwn(changes, CONTEXT_KEY)) return;
+    for (const listener of listeners) listener();
+  };
+  api.storage.onChanged.addListener(changed);
   return {
     request(type, fields = {}) {
-      if (closed) return Promise.reject(new Error('Context settings connection closed. Reopen Settings.'));
+      if (closed) return Promise.reject(new Error('Context settings connection closed.'));
       const id = `context_ui_${++sequence}`;
       return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => { pending.delete(id); reject(new Error('Context settings request timed out. Reopen Settings.')); }, 65_000);
+        const timer = setTimeout(() => { pending.delete(id); reject(new Error('Context settings request timed out. Try again.')); }, 65_000);
         pending.set(id, { resolve, reject, timer });
-        try { port.postMessage({ ...fields, type, id }); }
-        catch { clearTimeout(timer); pending.delete(id); reject(new Error('Context settings connection closed. Reopen Settings.')); }
+        try { connect().postMessage({ ...fields, type, id }); }
+        catch {
+          const connection = port; port = null;
+          try { connection?.disconnect(); } catch {}
+          failPending();
+        }
       });
     },
     onChange(listener) { listeners.add(listener); return () => listeners.delete(listener); },
-    dispose() { close(); listeners.clear(); port.disconnect(); },
+    dispose() { closed = true; failPending(); listeners.clear(); api.storage.onChanged.removeListener(changed); port?.disconnect(); port = null; },
   };
 }
 

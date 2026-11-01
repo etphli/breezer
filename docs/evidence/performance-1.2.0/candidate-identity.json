@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T11:18:45.684869+00:00",
+  "appPath": "/Users/likht.ethan/.t3/projects/breezer/build/windows-crossbuild-20261031/retrieved-latest-candidate/extracted/Breezer.app",
+  "sourceSnapshotCommit": "fa19c374cfe28ca3c083ce28c1fdbc3e36c5a19a",
+  "baseMainCommit": "5d1db7fb7d8283fc5b41b0b2764281315307f74c",
+  "sourcePlanSha256": "7199118cf78826ee4548d458ffb224b5187f89965d1b5a6f0772717ea4caeb77",
+  "sourceSnapshotPrivateOnly": true,
+  "matchingHostRuntimePackaged": true,
+  "nodePinVerified": true,
+  "deepStrictSignatureVerified": true,
+  "signingKind": "ad hoc development signature; not notarized",
+  "appVerificationPassed": true,
+  "runtimeAcceptancePending": true,
+  "installedAppChanged": false
+}

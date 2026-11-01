@@ -1,6 +1,169 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { accountPageTargets, captureFailureState, commonFlags, cpuTimeCentiseconds, observedCpuWindow, pageReady, parseProcessLoad, parseProcesses, processRole, processTree, summarize } from '../script/benchmark_browsers.mjs';
+import { accountPageTargets, aggregateTrials, captureFailureState, commonFlags, comparisonPlan, cpuTimeCentiseconds, nativeForegroundReady, observedCpuWindow, pageReady, parseProcessLoad, parseProcesses, processRole, processTree, summarize } from '../script/benchmark_browsers.mjs';
+import * as benchmark from '../script/benchmark_browsers.mjs';
+
+test('footprint instrumentation has its own initialized protocol and preserves balanced orders', () => {
+  assert.throws(() => comparisonPlan({ trials: 6, physicalFootprint: true }), /initialized-profiles/);
+  const two = comparisonPlan({ trials: 6, initializedProfiles: true, physicalFootprint: true });
+  assert.equal(two.protocol, 'installed-browser-v8-initialized-foreground-footprint');
+  assert.deepEqual(two.roundOrders, comparisonPlan({ trials: 6, initializedProfiles: true }).roundOrders);
+  const three = comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline', physicalFootprint: true });
+  assert.equal(three.protocol, 'installed-browser-v8-initialized-three-way-footprint');
+  assert.deepEqual(three.roundOrders, comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline' }).roundOrders);
+});
+
+function footprintFixture() {
+  const before = [
+    { pid: 200, ppid: 1, command: '/Browser', role: 'browser', startedAt: '2026-10-30T00:00:00.000Z' },
+    { pid: 201, ppid: 200, command: '/Renderer --type=renderer', role: 'renderer', startedAt: '2026-10-30T00:00:01.000Z' },
+  ];
+  const usageBefore = { schema: 1, captureStartedNs: '100', captureEndedNs: '200', processes: before.map((row, index) => ({
+    pid: row.pid, status: 'ok', startAbstime: String(1000 + index), executableUuid: 'a'.repeat(32),
+    physicalFootprintBytes: (index + 2) * 1024 ** 2, residentBytes: 900 * 1024 ** 2, lifetimeMaxPhysicalFootprintBytes: 1000 * 1024 ** 2,
+  })) };
+  const usageAfter = structuredClone(usageBefore);
+  usageAfter.captureStartedNs = '300'; usageAfter.captureEndedNs = '400';
+  usageAfter.processes.forEach(row => { row.physicalFootprintBytes *= 2; });
+  return { rootPid: 200, captureStartedAt: '2026-10-30T00:00:10.000Z', before, after: structuredClone(before), usageBefore, usageAfter };
+}
+
+test('footprint sums the first kernel observation after checking the full tree and both kernel identities', () => {
+  const fixture = footprintFixture();
+  fixture.after.reverse(); fixture.usageAfter.processes.reverse();
+  const result = benchmark.observedPhysicalFootprint(fixture);
+  assert.equal(result.status, 'observed');
+  assert.equal(result.miB, 5, 'resident sets and lifetime peaks do not enter the footprint sum');
+  assert.equal(result.processCount, 2);
+  assert.equal(result.captureStartedNs, '100'); assert.equal(result.captureEndedNs, '200');
+  assert.equal(result.identityGuardEndedNs, '400');
+  assert.match(result.coverage, /Sequential/);
+});
+
+test('footprint is unavailable for churn, PID reuse, missing values, partial capture or unsafe totals', () => {
+  for (const change of [
+    x => { x.before = []; }, x => x.before.push(x.before[0]),
+    x => { x.before = [x.before[1]]; }, x => { x.after.pop(); },
+    x => { x.after[1].ppid = 300; }, x => { x.after[1].command = '/Other'; },
+    x => { x.after[1].startedAt = '2026-10-30T00:00:02.000Z'; },
+    x => { x.before[1].startedAt = x.after[1].startedAt = '2026-10-30T00:00:09.000Z'; },
+    x => { x.captureStartedAt = undefined; }, x => { x.usageBefore.schema = 2; },
+    x => { x.usageBefore.processes.pop(); }, x => { x.usageAfter.processes.push(x.usageAfter.processes[0]); },
+    x => { x.usageAfter.processes[0].status = 'exited'; }, x => { x.usageAfter.processes[0].status = 'unavailable'; },
+    x => { x.usageAfter.processes[0].startAbstime = '2000'; },
+    x => { x.usageAfter.processes[0].executableUuid = 'b'.repeat(32); },
+    x => { x.usageBefore.processes[0].physicalFootprintBytes = NaN; },
+    x => { delete x.usageAfter.processes[0].physicalFootprintBytes; },
+    x => { x.usageBefore.processes[0].physicalFootprintBytes = -1; },
+    x => { x.usageBefore.processes[0].physicalFootprintBytes = Number.MAX_SAFE_INTEGER; },
+    x => { x.usageBefore.captureEndedNs = '99'; }, x => { x.usageAfter.captureStartedNs = '199'; },
+    x => { x.usageBefore.processes[0].startAbstime = 'not-a-counter'; },
+  ]) {
+    const fixture = footprintFixture(); change(fixture);
+    const result = benchmark.observedPhysicalFootprint(fixture);
+    assert.equal(result.status, 'unavailable', change.toString());
+    assert.ok(result.reason); assert.equal(result.miB, undefined);
+  }
+});
+
+test('footprint summaries require every observation and never replace missing data with zero', () => {
+  assert.deepEqual(benchmark.summarizeFootprints([{ status: 'observed', miB: 8 }, { status: 'observed', miB: 4 }]),
+    { status: 'observed', count: 2, median: 6, min: 4, max: 8, p25: 5, p75: 7 });
+  for (const samples of [[], [{ status: 'unavailable' }], [{ status: 'observed', miB: 4 }, { status: 'unavailable' }]]) {
+    const result = benchmark.summarizeFootprints(samples);
+    assert.equal(result.status, 'unavailable'); assert.equal(result.median, undefined);
+  }
+});
+
+test('three-app footprint summaries keep trial medians separate and retain unavailable windows', () => {
+  const names = ['breezer', 'baselineBreezer', 'chrome'];
+  const trials = names.flatMap((browser, index) => {
+    const first = value => ({ browser, profileState: 'initialized', startupUsableMs: 10,
+      newTabs: [{ requestedUrl: 'about:blank', usableMs: 1 }, { requestedUrl: 'chrome://newtab/', usableMs: 1 }],
+      navigations: [{ usableMs: 1, navigationTiming: { loadEventEnd: 1 } }],
+      memoryOneTab: { rssMiB: { median: 100 }, physicalFootprint: { status: 'observed', median: value } },
+      memoryMultiTab: { rssMiB: { median: 200 }, physicalFootprint: { status: 'observed', median: value * 2 } },
+    });
+    return [first(index * 10 + 1), first(index * 10 + 3), { browser, profileState: 'reused', startupUsableMs: 10 }];
+  });
+  trials.find(trial => trial.browser === 'baselineBreezer').memoryOneTab.physicalFootprint = { status: 'unavailable', reason: 'PID churn' };
+  const summary = aggregateTrials(trials, names);
+  assert.equal(summary.breezer.oneTabPhysicalFootprintMiB.median, 2);
+  assert.equal(summary.chrome.oneTabPhysicalFootprintMiB.median, 22);
+  assert.equal(summary.baselineBreezer.oneTabPhysicalFootprintMiB.status, 'unavailable');
+  assert.equal(summary.baselineBreezer.oneTabPhysicalFootprintMiB.median, undefined);
+  assert.equal(summary.baselineBreezer.multiTabPhysicalFootprintMiB.median, 24);
+  assert.equal(summary.baselineBreezer.oneTabRssMiB.median, 100, 'RSS is independent of missing footprint data');
+});
+
+test('native foreground readiness rejects covered, hidden, wrong-PID and unusable windows', () => {
+  const ready = { pid: 200, active: true, hidden: false, terminated: false, frontmostPid: 200,
+    windows: [{ layer: 0, onScreen: true, bounds: { Width: 320, Height: 200 } }] };
+  assert.equal(nativeForegroundReady(ready, 200), true);
+  for (const patch of [{ active: false }, { hidden: true }, { terminated: true }, { pid: 201 },
+    { frontmostPid: 201 }, { windows: [] }, { windows: null },
+    { windows: [{ ...ready.windows[0], onScreen: false }] },
+    { windows: [{ ...ready.windows[0], layer: 1 }] },
+    { windows: [{ ...ready.windows[0], bounds: { Width: 319, Height: 200 } }] },
+    { windows: [{ ...ready.windows[0], bounds: { Width: 320, Height: 199 } }] }]) {
+    assert.equal(nativeForegroundReady({ ...ready, ...patch }, 200), false, JSON.stringify(patch));
+  }
+});
+
+test('two-browser protocols retain their existing alternating order', () => {
+  const orders = [['breezer', 'chrome'], ['chrome', 'breezer'], ['breezer', 'chrome']];
+  assert.deepEqual(comparisonPlan({ trials: 3 }).roundOrders, orders);
+  assert.equal(comparisonPlan({ trials: 3 }).protocol, 'installed-browser-v3-observed-cpu');
+  const active = comparisonPlan({ trials: 3, initializedProfiles: true });
+  assert.equal(active.protocol, 'installed-browser-v8-initialized-foreground');
+  assert.deepEqual(active.roundOrders, orders);
+});
+
+test('three-browser order balances positions and every pair in each six-round block', () => {
+  const plan = comparisonPlan({ trials: 12, initializedProfiles: true, baselineBreezer: '/baseline' });
+  assert.equal(plan.protocol, 'installed-browser-v8-initialized-three-way');
+  const names = ['breezer', 'baselineBreezer', 'chrome'];
+  for (const block of [plan.roundOrders.slice(0, 6), plan.roundOrders.slice(6)]) {
+    assert.equal(new Set(block.map(order => order.join(','))).size, 6);
+    for (const name of names) {
+      for (let position = 0; position < 3; position++) assert.equal(block.filter(order => order[position] === name).length, 2);
+      for (const other of names.filter(other => other !== name)) {
+        assert.equal(block.filter(order => order.indexOf(name) < order.indexOf(other)).length, 3);
+      }
+    }
+  }
+  assert.throws(() => comparisonPlan({ trials: 6, baselineBreezer: '/baseline' }), /initialized-profiles/);
+  assert.throws(() => comparisonPlan({ trials: 7, initializedProfiles: true, baselineBreezer: '/baseline' }), /multiple of six/);
+});
+
+test('three-browser summaries retain separate startup and memory observations', () => {
+  const names = ['breezer', 'baselineBreezer', 'chrome'];
+  const trials = names.flatMap((browser, index) => {
+    const value = 10 ** index;
+    return [
+      { browser, profileState: 'initialized', startupUsableMs: value,
+        newTabs: [{ requestedUrl: 'about:blank', usableMs: value * 2 }, { requestedUrl: 'chrome://newtab/', usableMs: value * 3 }],
+        navigations: [{ usableMs: value * 4, navigationTiming: { loadEventEnd: value * 5 } }],
+        memoryOneTab: { rssMiB: { median: value * 6 } }, memoryMultiTab: { rssMiB: { median: value * 7 } } },
+      { browser, profileState: 'reused', startupUsableMs: value * 8 },
+    ];
+  });
+  const summary = aggregateTrials(trials, names);
+  assert.deepEqual(Object.keys(summary), names);
+  names.forEach((name, index) => {
+    const value = 10 ** index;
+    const s = summary[name];
+    assert.equal(s.startupInitializedProfileMs.median, value);
+    assert.equal(s.startupReusedProfileMs.median, value * 8);
+    assert.equal(s.blankTabMs.median, value * 2);
+    assert.equal(s.productNewTabMs.median, value * 3);
+    assert.equal(s.localNavigationUsableMs.median, value * 4);
+    assert.equal(s.localNavigationLoadEventEndMs.median, value * 5);
+    assert.equal(s.oneTabRssMiB.median, value * 6);
+    assert.equal(s.multiTabRssMiB.median, value * 7);
+    assert.equal(s.oneTabPhysicalFootprintMiB, undefined, 'legacy summaries retain their exact fields');
+  });
+});
 
 test('process RSS includes every descendant and excludes unrelated user sessions', () => {
   const rows = parseProcesses('  200 1 1024 /Applications/Breezer.app/Contents/MacOS/Breezer --user-data-dir=/tmp/owned\n  202 201 4096 /Applications/Breezer.app/Contents/Frameworks/Helper\n  201 200 2048 helper\n  300 1 99999 user browser');
@@ -232,4 +395,56 @@ test('content tab count excludes only runtime-verified native sidebar hosts', ()
   const actualTab = structuredClone(proof);
   actualTab.host.tabs.push({ id: 2, url: hostUrl });
   assert.equal(accountPageTargets(targets, actualTab).contentPageCount, 2, 'An extension document in a real tab must count');
+});
+
+test('untimed initialization completes the actual setup guide and closes only its resulting new tab', async () => {
+  const prefix = 'chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/';
+  const sidebar = { type: 'page', targetId: 'sidebar', url: `${prefix}workspace.html#/sidebar?w=1` };
+  const welcome = { type: 'page', targetId: 'welcome', url: `${prefix}workspace.html#/welcome` };
+  const unrelated = { type: 'page', targetId: 'other', url: 'https://example.test/' };
+  let targets = [sidebar, welcome, unrelated], completed = false;
+  const calls = [], state = { actions: [], clickedWelcomeTargets: new Set() };
+  const cdp = {
+    attach: async id => `session-${id}`,
+    evaluate: async (session, expression) => {
+      calls.push({ session, expression });
+      if (expression.includes('wl-skip')) { assert.equal(session, 'session-welcome'); completed = true; return true; }
+      return { extensionId: 'namgcidocfgliiedlkdafcmifpdfiakj', seen: '1.1.0', setup: { completed } };
+    },
+    send: async (method, params) => {
+      calls.push({ method, params });
+      if (method === 'Target.closeTarget') targets = targets.filter(t => t.targetId !== params.targetId);
+      return {};
+    },
+  };
+  assert.equal(await benchmark.initializeBreezerProfile(cdp, targets, state), false);
+  assert.equal(calls.filter(c => c.expression?.includes('wl-skip')).length, 1);
+  assert.equal(calls.filter(c => c.method === 'Target.closeTarget').length, 0);
+  targets = targets.map(t => t.targetId === 'welcome' ? { ...t, url: `${prefix}newtab.html` } : t);
+  assert.equal(await benchmark.initializeBreezerProfile(cdp, targets, state), true);
+  assert.deepEqual(calls.filter(c => c.method === 'Target.closeTarget').map(c => c.params.targetId), ['welcome']);
+  assert.ok(targets.some(t => t.targetId === 'other'), 'Unknown tabs must remain for the main inventory gate to reject');
+  assert.equal(calls.filter(c => c.expression?.includes('wl-skip')).length, 1);
+  assert.equal(calls.filter(c => c.method === 'Target.detachFromTarget').length, 3);
+});
+
+test('untimed initialization supports the old notes page and always detaches failed sessions', async () => {
+  const prefix = 'chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/';
+  const target = { type: 'page', targetId: 'notes', url: `${prefix}whats-new.html` };
+  const calls = [];
+  const cdp = { attach: async () => 'session', evaluate: async () => ({ extensionId: 'namgcidocfgliiedlkdafcmifpdfiakj', seen: '1.1.0' }), send: async (method, params) => { calls.push({ method, params }); return {}; } };
+  assert.equal(await benchmark.initializeBreezerProfile(cdp, [target], { actions: [], clickedWelcomeTargets: new Set() }), true);
+  assert.deepEqual(calls.filter(c => c.method === 'Target.closeTarget').map(c => c.params.targetId), ['notes']);
+  cdp.evaluate = async () => { throw new Error('real extension failure'); };
+  await assert.rejects(benchmark.initializeBreezerProfile(cdp, [target], { actions: [], clickedWelcomeTargets: new Set() }), /real extension failure/);
+  assert.equal(calls.filter(c => c.method === 'Target.detachFromTarget').length, 2);
+});
+
+test('untimed initialization never closes a setup target that navigated to an unexpected page', async () => {
+  const prefix = 'chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/';
+  const targets = [{ type: 'page', targetId: 'sidebar', url: `${prefix}workspace.html#/sidebar?w=1` }, { type: 'page', targetId: 'welcome', url: 'https://example.test/' }];
+  const calls = [], state = { actions: [], clickedWelcomeTargets: new Set(['welcome']) };
+  const cdp = { attach: async () => 'session', evaluate: async () => ({ extensionId: 'namgcidocfgliiedlkdafcmifpdfiakj', seen: '1.1.0', setup: { completed: true } }), send: async method => { calls.push(method); return {}; } };
+  assert.equal(await benchmark.initializeBreezerProfile(cdp, targets, state), false);
+  assert.equal(calls.includes('Target.closeTarget'), false);
 });

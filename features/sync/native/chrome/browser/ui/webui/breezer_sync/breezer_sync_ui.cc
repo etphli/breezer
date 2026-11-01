@@ -67,8 +67,8 @@ SetupResult PrepareVault(std::unique_ptr<syncer::SyncVaultTransport> transport,
       std::move(transport), std::make_unique<syncer::LoopbackServerStateCodec>(),
       key, vault, std::nullopt,
       base::BindRepeating([](const syncer::SyncVaultCheckpoint&) { return true; }));
-  if (!store) result.error = "Could not prepare this encrypted vault.";
-  if (store) {
+  if (!store.has_value()) result.error = "Could not prepare this encrypted vault.";
+  if (store.has_value()) {
     (*store)->SetCancelationSignal(cancel.get());
     auto read = create ? (*store)->InitializeEmptyVaultAndReadState() : (*store)->ReadState();
     if (!read) {

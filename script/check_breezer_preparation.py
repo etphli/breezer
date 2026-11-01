@@ -158,7 +158,7 @@ class NativeOverlayHookTests(unittest.TestCase):
             fake = '''import os,sys
 from pathlib import Path
 if '--fingerprint' in sys.argv:
- letter = 'd' if Path(__file__).stem == 'apply_breezer_sync' else 'c' if 'passwords' in Path(__file__).parts else 'b' if Path(__file__).stem == 'apply_breezer_ai_ui' else 'a'
+ letter = 'e' if 'code-sign-clones' in Path(__file__).parts else 'd' if Path(__file__).stem == 'apply_breezer_sync' else 'c' if 'passwords' in Path(__file__).parts else 'b' if Path(__file__).stem == 'apply_breezer_ai_ui' else 'a'
  print(letter*64);sys.exit(0)
 tree=Path(sys.argv[-1])
 with (tree/'calls').open('a') as out:out.write(Path(__file__).stem+(' check\\n' if '--check' in sys.argv else ' apply\\n'))
@@ -169,18 +169,21 @@ if '--check' in sys.argv and os.environ.get('FAIL_CHECK'):sys.exit(1)
             password_script = root / 'features/passwords/native-ui/apply.py'
             password_script.parent.mkdir(parents=True)
             password_script.write_text(fake)
+            clone_script = root / 'features/storage/code-sign-clones/apply.py'
+            clone_script.parent.mkdir(parents=True)
+            clone_script.write_text(fake)
             env = {**os.environ, 'BREEZER_ROOT': str(root), 'BREEZER_PYTHON': sys.executable,
                    '_src_dir': str(tree), 'BREEZER_STAGE': str(root)}
             shell = 'set -euo pipefail\n' + preflight + '\nprintf refreshed >> "$_src_dir/refresh"\n' + hooks
             def run(extra=None):
                 return subprocess.run(['bash', '-c', shell], env={**env, **(extra or {})}, capture_output=True)
             self.assertEqual(run().returncode, 0)
-            fingerprints = {'workspace': 'a' * 64, 'ai-ui': 'b' * 64, 'passwords': 'c' * 64, 'sync': 'd' * 64}
+            fingerprints = {'workspace': 'a' * 64, 'ai-ui': 'b' * 64, 'passwords': 'c' * 64, 'sync': 'd' * 64, 'code-sign-clones': 'e' * 64}
             for name, fingerprint in fingerprints.items():
                 self.assertEqual((tree / f'.breezer-{name}-prepared').read_text().strip(), fingerprint)
-            self.assertEqual((tree / 'calls').read_text().count(' apply'), 4)
+            self.assertEqual((tree / 'calls').read_text().count(' apply'), 5)
             self.assertEqual(run().returncode, 0)
-            self.assertEqual((tree / 'calls').read_text().count(' apply'), 4)
+            self.assertEqual((tree / 'calls').read_text().count(' apply'), 5)
             previous_refresh = (tree / 'refresh').read_bytes()
             for name, fingerprint in fingerprints.items():
                 mismatched = tree / f'.breezer-{name}-prepared'

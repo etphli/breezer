@@ -1,0 +1,432 @@
+{
+  "at": "2026-11-01T11:41:08.611Z",
+  "scope": "Synthetic saved-record CPU component benchmark, not live browser tabs or whole-browser speed",
+  "node": "v22.14.0",
+  "baselineCommit": "a1e0491bb0a36f88dcf9e8174c7edc3f28eed09b",
+  "candidateSourceSnapshot": "fa19c374cfe28ca3c083ce28c1fdbc3e36c5a19a",
+  "baselineSha256": "2aedbd7eb81bd2f72d2f12593684c5c672b6cd9db78fde074b31ca8ea57e423c",
+  "candidateSha256": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+  "rounds": 6,
+  "order": "AB/BA alternating;11internal repetitions;20model builds per observation",
+  "rows": [
+    {
+      "savedTabs": 10,
+      "baseline": {
+        "restoreMs": 0.1492494999999998,
+        "modelMs": 0.007179150000000067
+      },
+      "candidate": {
+        "restoreMs": 0.07856299999999994,
+        "modelMs": 0.005144799999999972
+      }
+    },
+    {
+      "savedTabs": 100,
+      "baseline": {
+        "restoreMs": 2.5274789999999996,
+        "modelMs": 0.048606250000000004
+      },
+      "candidate": {
+        "restoreMs": 0.5864165000000003,
+        "modelMs": 0.028443724999999986
+      }
+    },
+    {
+      "savedTabs": 500,
+      "baseline": {
+        "restoreMs": 48.06793800000003,
+        "modelMs": 0.8086666500000006
+      },
+      "candidate": {
+        "restoreMs": 1.7209794999999986,
+        "modelMs": 0.09212914999999988
+      }
+    },
+    {
+      "savedTabs": 1000,
+      "baseline": {
+        "restoreMs": 189.9556869999999,
+        "modelMs": 3.298555200000004
+      },
+      "candidate": {
+        "restoreMs": 2.9015830000000022,
+        "modelMs": 0.18676977500000047
+      }
+    }
+  ],
+  "trials": [
+    {
+      "round": 1,
+      "browser": "baseline",
+      "module": "build/benchmark-1.2.0-components-20261101/baseline-workspace-store.mjs",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.1671250000000022,
+          "modelMs": 0.007758350000000113,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 2.6164580000000015,
+          "modelMs": 0.050995849999999975,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 48.03054200000008,
+          "modelMs": 0.8014917000000026,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 189.76233299999967,
+          "modelMs": 3.331766700000003,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 1,
+      "browser": "candidate",
+      "module": "build/release-combined-120/features/ai/extension/workspace-store.js",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.08787500000000037,
+          "modelMs": 0.005239599999999988,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 0.5827500000000008,
+          "modelMs": 0.028735399999999876,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 1.7017919999999975,
+          "modelMs": 0.08933749999999989,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 2.972082999999998,
+          "modelMs": 0.1917354000000003,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "browser": "candidate",
+      "module": "build/release-combined-120/features/ai/extension/workspace-store.js",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.08079199999999886,
+          "modelMs": 0.005087499999999956,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 0.6282920000000018,
+          "modelMs": 0.03331250000000008,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 1.712958999999998,
+          "modelMs": 0.09431039999999982,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 2.6444170000000042,
+          "modelMs": 0.1830416999999997,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "browser": "baseline",
+      "module": "build/benchmark-1.2.0-components-20261101/baseline-workspace-store.mjs",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.15233299999999872,
+          "modelMs": 0.011816699999999968,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 2.502082999999999,
+          "modelMs": 0.04919374999999988,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 47.81462500000009,
+          "modelMs": 0.8087916500000005,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 189.2287080000001,
+          "modelMs": 3.29812290000001,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "browser": "baseline",
+      "module": "build/benchmark-1.2.0-components-20261101/baseline-workspace-store.mjs",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.14583299999999966,
+          "modelMs": 0.006810399999999994,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 2.4697499999999977,
+          "modelMs": 0.04702079999999995,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 46.926708000000005,
+          "modelMs": 0.8085416500000008,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 185.43837499999995,
+          "modelMs": 3.278020849999996,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "browser": "candidate",
+      "module": "build/release-combined-120/features/ai/extension/workspace-store.js",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.07737499999999997,
+          "modelMs": 0.005202099999999987,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 0.5900829999999999,
+          "modelMs": 0.027441699999999968,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 1.8459590000000077,
+          "modelMs": 0.09042295000000067,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 2.931999999999988,
+          "modelMs": 0.1912645999999995,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "browser": "candidate",
+      "module": "build/release-combined-120/features/ai/extension/workspace-store.js",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.07808399999999871,
+          "modelMs": 0.005077100000000012,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 0.5537080000000003,
+          "modelMs": 0.028152050000000095,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 1.7289999999999992,
+          "modelMs": 0.09430414999999996,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 2.964499999999987,
+          "modelMs": 0.19044580000000053,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "browser": "baseline",
+      "module": "build/benchmark-1.2.0-components-20261101/baseline-workspace-store.mjs",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.1461660000000009,
+          "modelMs": 0.006833350000000138,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 2.4899580000000014,
+          "modelMs": 0.04859789999999986,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 48.10533399999997,
+          "modelMs": 0.8060000000000003,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 190.14904100000012,
+          "modelMs": 3.298697900000002,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "browser": "baseline",
+      "module": "build/benchmark-1.2.0-components-20261101/baseline-workspace-store.mjs",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.14158399999999816,
+          "modelMs": 0.006958299999999973,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 2.5528750000000002,
+          "modelMs": 0.048614600000000154,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 48.52574999999999,
+          "modelMs": 0.8120770499999999,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 192.111083,
+          "modelMs": 3.3019750000000045,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "browser": "candidate",
+      "module": "build/release-combined-120/features/ai/extension/workspace-store.js",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.07691600000000065,
+          "modelMs": 0.004835399999999978,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 0.6013330000000003,
+          "modelMs": 0.027833350000000045,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 1.6572500000000048,
+          "modelMs": 0.09080204999999993,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 2.813459000000009,
+          "modelMs": 0.17514375000000015,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "browser": "candidate",
+      "module": "build/release-combined-120/features/ai/extension/workspace-store.js",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.07904200000000117,
+          "modelMs": 0.00527709999999999,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 0.5739170000000016,
+          "modelMs": 0.03266045000000002,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 1.7504160000000013,
+          "modelMs": 0.09345624999999984,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 2.8711660000000165,
+          "modelMs": 0.18309375000000044,
+          "assigned": 1000
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "browser": "baseline",
+      "module": "build/benchmark-1.2.0-components-20261101/baseline-workspace-store.mjs",
+      "results": [
+        {
+          "tabs": 10,
+          "restoreMs": 0.1527499999999975,
+          "modelMs": 0.007400000000000162,
+          "assigned": 10
+        },
+        {
+          "tabs": 100,
+          "restoreMs": 2.6676669999999945,
+          "modelMs": 0.04828960000000002,
+          "assigned": 100
+        },
+        {
+          "tabs": 500,
+          "restoreMs": 48.256708,
+          "modelMs": 0.8097208499999994,
+          "assigned": 500
+        },
+        {
+          "tabs": 1000,
+          "restoreMs": 190.59733400000005,
+          "modelMs": 3.298412500000006,
+          "assigned": 1000
+        }
+      ]
+    }
+  ],
+  "aggregation": "Median of six per-process medians; even-sized median averages the two middle values"
+}

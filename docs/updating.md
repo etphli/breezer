@@ -1,6 +1,31 @@
 # In-app updates and macOS trust
 
+## Temporary signature clones
+
+The native signature-clone overlay in
+[`features/storage/code-sign-clones`](../features/storage/code-sign-clones/README.md)
+uses process-held leases to retain active app snapshots through shutdown and
+recover abandoned snapshots after forced exits. Cleanup is bounded, runs after
+clone readiness, and never uses absence from `lsof` as evidence of abandonment.
+Older clones without a recognized ownership record are retained. This preserves
+the APFS clone, hard-linked executable and parent-exit handoff used for update
+signature validation. Machine-specific recovery scripts are not shipped.
+
 Breezer checks stable GitHub releases, requires a descendant source commit, validates the release manifest and download digest, and verifies the downloaded app identity, architecture and code signature before replacement. These checks are in `features/ai/host/updater.mjs` and `update-worker.mjs`.
+
+## Settings helper lifetime
+
+The extension starts the updater host on the first request. After a reply, it
+disconnects after 250 ms only when there are no pending requests, no checked
+release and no active installation. An available release retains its exact host
+and checked candidate. A successful worker acknowledgement retains the connection
+through status polling until `installed` or `failed`. A failed check does not
+discard a previously checked candidate that the host still owns.
+
+Idle Settings clients reconnect on their next action after worker retirement.
+An unexpected disconnect invalidates the Install control and requires another
+check. Installation requests are never automatically replayed. These lifetime
+rules do not change release validation, worker handoff or replacement checks.
 
 ## Worker handoff
 
@@ -28,6 +53,9 @@ Apple reference: https://developer.apple.com/documentation/security/notarizing-m
 
 ```sh
 node --test tests/ai/updater.test.mjs
+node --test tests/ai/update-lifetime.test.mjs
 ```
 
 These cover release validation, rollback, reuse of the running runtime, private request permissions, startup acknowledgement, early exit, startup timeout and executable lifetime across replacement. Test the signed distribution and actual published upgrade separately; source tests are not proof of Gatekeeper acceptance.
+The lifetime tests also cover pending calls, checked candidates, active installs,
+terminal status, idle release, page ownership and reconnect without install replay.

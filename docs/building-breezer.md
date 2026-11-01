@@ -4,6 +4,9 @@ This build compiles the pinned Chromium source with the imported browser patches
 
 Breezer supports local incremental builds. Keep the prepared source and compiled output to reuse completed work when rebuilding changes.
 
+For Ethan's configured Windows cross-host build PC, connection commands and the
+optional local progress square, see [the PC runbook](pc-build.md).
+
 ## Build without local Xcode
 
 Use the [Build Breezer for Apple Silicon workflow](https://github.com/etphli/breezer/actions/workflows/build-breezer-macos.yml) to compile on a GitHub-hosted Mac. Xcode is required on the build machine; it is not needed to run the resulting app on your Mac.
@@ -56,6 +59,13 @@ The output is `build/helium-macos/build/src/out/Default/Breezer.app`. The upstre
 
 Before signing, the build packages the AI host and a checksum-pinned Node runtime, including its licence, inside the framework resources. The resulting app does not need a system Node installation. Using AI requires an installed, signed-in Codex or Claude CLI. Provider credentials remain with those CLIs. See the [sidebar guide](ai-sidebar.md) for configuration and verification.
 
+The extension's `release-info.js` is the release-version source. Branding uses it
+for the native product display, and packaging stamps the app's short/build
+versions before signing. Its value must match the extension manifest. Chromium's
+engine version and framework directory remain unchanged. Release-version inputs
+participate in native preparation/cache fingerprints; a mismatched prepared tree
+is preserved and refused rather than silently reused with stale version data.
+
 The local build uses an ad hoc signature. It is not a notarized public release. Public distribution requires Breezer's own Apple signing identity and a verified packaging and notarization process.
 
 ## Build profiles and separate outputs
@@ -103,6 +113,27 @@ Run the focused profile and output-preservation checks without Chromium compilat
 python3 script/check_breezer_build_profile.py
 bash -n script/build_and_run.sh
 ```
+
+## PGO experiment
+
+`BREEZER_BUILD_PROFILE=pgo-performance` extends `release-performance` with
+`chrome_pgo_phase=2` and defaults to `out/PGOPerformance`. It refuses the existing
+`out/Default` and `out/ReleasePerformance` outputs, including symlink aliases.
+It uses the exact profile pinned by Chromium for the selected platform. Missing
+or incompatible profile data is a build failure, not a reason to silently fall
+back to an unprofiled build.
+
+This isolates profile-guided compilation from official-build and ThinLTO changes.
+All other release-performance settings, product features and security settings
+stay the same. Expect a broad native recompile and extra disk use. Build only
+with enough storage and stop before exhausting the build volume. No runtime
+improvement is established until the resulting app passes native acceptance and
+the paired benchmark. The local installation hold still applies.
+
+The optional compiled filter-list experiment has a separate generation and
+source-contract check. See [its guide](../features/performance/README.md). It is
+disabled in ordinary builds and must use an isolated build directory until its
+native performance and feature-preservation gates pass.
 
 ## Install and launch
 

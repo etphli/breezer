@@ -44,7 +44,8 @@ function installFixture({ colorMode, theme }) {
         return port;
       },
     },
-    storage: { local: area(fx.local, () => localStorage.setItem('fx-local', JSON.stringify(fx.local))), session: area({}), onChanged: { addListener: (fn) => fx.listeners.push(fn) } },
+    storage: { local: area(fx.local, () => localStorage.setItem('fx-local', JSON.stringify(fx.local))), session: area({}),
+      onChanged: { addListener: (fn) => fx.listeners.push(fn), removeListener(fn) { const index=fx.listeners.indexOf(fn); if(index>=0)fx.listeners.splice(index,1); } } },
     tabs: {
       async query() { return [{ index: 0, windowId: 1 }]; },
       async create(props) { fx.opened.push(props); return props; },

@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-01T11:27:07.158756+00:00",
+  "source": "script/benchmark_browsers.mjs",
+  "sha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+  "protocol": "installed-browser-v8-initialized-three-way-footprint",
+  "revisionReason": "Handle actual new first-run setup via its Skip setup button in untimed initialization; detach inspected extension sessions; retain all scoring endpoints/flags/workloads",
+  "failedPriorAttempt": "../benchmark-1.2.0-three-way-run-20261101/results.json",
+  "regressionTests": {
+    "passed": 28,
+    "failed": 0
+  },
+  "candidateProvenance": "../windows-crossbuild-20261031/benchmark-candidate-packaged.json"
+}

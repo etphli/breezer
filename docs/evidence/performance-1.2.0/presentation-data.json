@@ -1,0 +1,941 @@
+{
+  "verifiedAt": "2026-11-01T11:38:13.181Z",
+  "status": "completed-raw-summary-verified",
+  "protocol": "installed-browser-v8-initialized-three-way-footprint",
+  "rawReport": "build/benchmark-1.2.0-three-way-v8-run-20261101/results.json",
+  "rawReportSha256": "9de536bfee10f4da801473cf29bb1b4a76090b62d9848e5aa87198eba1facb3a",
+  "sourceSnapshotCommit": "fa19c374cfe28ca3c083ce28c1fdbc3e36c5a19a",
+  "browsers": {
+    "breezer": {
+      "app": "/Users/likht.ethan/.t3/projects/breezer/build/windows-crossbuild-20261031/retrieved-latest-candidate/extracted/Breezer.app",
+      "executable": "/Users/likht.ethan/.t3/projects/breezer/build/windows-crossbuild-20261031/retrieved-latest-candidate/extracted/Breezer.app/Contents/MacOS/Breezer",
+      "bundleId": "io.github.etphli.breezer",
+      "version": "0.20.1.1",
+      "build": "0.20.1.1",
+      "executableSha256": "bce7119f16b4e2b1d30d886ed2425fdfabce73916f360cdd7d10207b402b0318"
+    },
+    "chrome": {
+      "app": "/Applications/Google Chrome.app",
+      "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "bundleId": "com.google.Chrome",
+      "version": "156.0.8078.47",
+      "build": "8078.47",
+      "executableSha256": "2346fb044448ef1e7aef6593a19c0d258b194694e37c214f0bbd39e68e5ea881"
+    },
+    "baselineBreezer": {
+      "app": "/Users/likht.ethan/Applications/Breezer.app",
+      "executable": "/Users/likht.ethan/Applications/Breezer.app/Contents/MacOS/Breezer",
+      "bundleId": "io.github.etphli.breezer",
+      "version": "0.20.1.1",
+      "build": "0.20.1.1",
+      "executableSha256": "292b42774acde8e305d173c8c566fea58544d97d2033f6e074a17d033ee5262d"
+    }
+  },
+  "roundOrders": [
+    [
+      "breezer",
+      "baselineBreezer",
+      "chrome"
+    ],
+    [
+      "chrome",
+      "baselineBreezer",
+      "breezer"
+    ],
+    [
+      "baselineBreezer",
+      "breezer",
+      "chrome"
+    ],
+    [
+      "chrome",
+      "breezer",
+      "baselineBreezer"
+    ],
+    [
+      "breezer",
+      "chrome",
+      "baselineBreezer"
+    ],
+    [
+      "baselineBreezer",
+      "chrome",
+      "breezer"
+    ]
+  ],
+  "scoredLaunches": 36,
+  "untimedSetups": 18,
+  "trialsPerBrowser": 6,
+  "timingRepetitions": 3,
+  "tabs": 10,
+  "memorySamplesPerStage": 5,
+  "foregroundProofPassed": 36,
+  "metrics": [
+    {
+      "key": "startupInitializedProfileMs",
+      "label": "Initialized-profile usable startup",
+      "unit": "ms",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 6,
+          "median": 730.4359164999914,
+          "min": 720.766958000022,
+          "max": 762.5761249999996,
+          "p25": 722.6626249999899,
+          "p75": 755.6346772499965
+        },
+        "breezer": {
+          "count": 6,
+          "median": 742.0851045000163,
+          "min": 712.8253329999861,
+          "max": 851.2360840000001,
+          "p25": 726.888864499997,
+          "p75": 763.5383439999787
+        },
+        "chrome": {
+          "count": 6,
+          "median": 734.8840624999939,
+          "min": 671.0237089999719,
+          "max": 877.6826669999864,
+          "p25": 711.7033539999939,
+          "p75": 746.7892702500103
+        }
+      },
+      "candidateReductionVsChromePercent": -0.9798881711388979,
+      "candidateReductionVsBaselinePercent": -1.5948268337959002
+    },
+    {
+      "key": "startupReusedProfileMs",
+      "label": "Reused-profile usable startup",
+      "unit": "ms",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 6,
+          "median": 846.5709375000442,
+          "min": 763.9501670000027,
+          "max": 1026.1507079999865,
+          "p25": 779.2117710000239,
+          "p75": 929.2307602499495
+        },
+        "breezer": {
+          "count": 6,
+          "median": 861.2768539999815,
+          "min": 784.8895830000401,
+          "max": 990.3242499999469,
+          "p25": 815.9978017500107,
+          "p75": 927.9648744999977
+        },
+        "chrome": {
+          "count": 6,
+          "median": 1070.2004580000066,
+          "min": 1010.3144999999786,
+          "max": 1754.6632499999832,
+          "p25": 1063.4214479999791,
+          "p75": 1107.261843750006
+        }
+      },
+      "candidateReductionVsChromePercent": 19.52191315545333,
+      "candidateReductionVsBaselinePercent": -1.7371156802718064
+    },
+    {
+      "key": "blankTabMs",
+      "label": "Blank-tab readiness",
+      "unit": "ms",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 18,
+          "median": 64.97674999997253,
+          "min": 49.37858300001244,
+          "max": 84.3458330000285,
+          "p25": 54.498427500002435,
+          "p75": 67.53576049999174
+        },
+        "breezer": {
+          "count": 18,
+          "median": 68.84120800001256,
+          "min": 49.96845799999937,
+          "max": 228.26995799998986,
+          "p25": 63.255072500003735,
+          "p75": 80.92559350001102
+        },
+        "chrome": {
+          "count": 18,
+          "median": 66.1568954999675,
+          "min": 41.528999999994994,
+          "max": 82.81208300002618,
+          "p25": 50.08539600000222,
+          "p75": 66.94657274998463
+        }
+      },
+      "candidateReductionVsChromePercent": -4.057494656844004,
+      "candidateReductionVsBaselinePercent": -5.94744735623383
+    },
+    {
+      "key": "productNewTabMs",
+      "label": "Product new-tab readiness",
+      "unit": "ms",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 18,
+          "median": 99.16125000000466,
+          "min": 81.12670799996704,
+          "max": 148.85100000002421,
+          "p25": 83.17016674999468,
+          "p75": 100.24773925000045
+        },
+        "breezer": {
+          "count": 18,
+          "median": 98.81902099997387,
+          "min": 78.08645800000158,
+          "max": 216.50233300000036,
+          "p25": 86.76249949999328,
+          "p75": 101.13361425000767
+        },
+        "chrome": {
+          "count": 18,
+          "median": 198.71572949996335,
+          "min": 149.50458300000173,
+          "max": 249.23233299999265,
+          "p25": 182.0573230000009,
+          "p75": 201.22063500003424
+        }
+      },
+      "candidateReductionVsChromePercent": 50.27116310891127,
+      "candidateReductionVsBaselinePercent": 0.34512372527652474
+    },
+    {
+      "key": "localNavigationUsableMs",
+      "label": "Local-page navigation readiness",
+      "unit": "ms",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 18,
+          "median": 33.87850000000617,
+          "min": 31.264541000011377,
+          "max": 792.7981670000008,
+          "p25": 32.83832250001251,
+          "p75": 705.3433334999281
+        },
+        "breezer": {
+          "count": 18,
+          "median": 48.869979499986584,
+          "min": 31.929124999966007,
+          "max": 452.99995900000795,
+          "p25": 32.92577125001117,
+          "p75": 196.22579174996645
+        },
+        "chrome": {
+          "count": 18,
+          "median": 33.058875000002445,
+          "min": 31.050332999962848,
+          "max": 71.71829099999741,
+          "p25": 32.49933350001811,
+          "p75": 36.62901000002239
+        }
+      },
+      "candidateReductionVsChromePercent": -47.827109966636705,
+      "candidateReductionVsBaselinePercent": -44.250718006929716
+    },
+    {
+      "key": "localNavigationLoadEventEndMs",
+      "label": "Local-page loadEventEnd",
+      "unit": "ms",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 18,
+          "median": 11.5,
+          "min": 10.400000095367432,
+          "max": 754.0999999046326,
+          "p25": 11.225000023841858,
+          "p75": 676.4500000476837
+        },
+        "breezer": {
+          "count": 18,
+          "median": 11.200000047683716,
+          "min": 9.099999904632568,
+          "max": 416.7000000476837,
+          "p25": 10.075000047683716,
+          "p75": 155.0249999165535
+        },
+        "chrome": {
+          "count": 18,
+          "median": 6.599999904632568,
+          "min": 5.299999952316284,
+          "max": 9.799999952316284,
+          "p25": 5.725000023841858,
+          "p75": 7
+        }
+      },
+      "candidateReductionVsChromePercent": -69.69697287150545,
+      "candidateReductionVsBaselinePercent": 2.6086952375329058
+    },
+    {
+      "key": "firstLocalNavigationUsableMs",
+      "label": "First local navigation after tab exercises",
+      "unit": "ms",
+      "better": "lower",
+      "scope": "First of3local navigations after each launch’s tab exercises;6observations. Not a universal page-load or OS-cold metric.",
+      "values": {
+        "baselineBreezer": {
+          "count": 6,
+          "median": 717.4024790000112,
+          "min": 703.7515830000048,
+          "max": 792.7981670000008,
+          "p25": 707.7672294999284,
+          "p75": 758.913416999967
+        },
+        "breezer": {
+          "count": 6,
+          "median": 262.210041000013,
+          "min": 154.9279169999063,
+          "max": 452.99995900000795,
+          "p25": 212.7152914999897,
+          "p75": 366.09907225000734
+        },
+        "chrome": {
+          "count": 6,
+          "median": 52.43916650002211,
+          "min": 35.465666999996756,
+          "max": 71.71829099999741,
+          "p25": 40.794093250035075,
+          "p75": 55.63727024999025
+        }
+      },
+      "candidateReductionVsChromePercent": -400.02709520545574,
+      "candidateReductionVsBaselinePercent": 63.45007876673243
+    },
+    {
+      "key": "oneTabRssMiB",
+      "label": "One-tab process-tree RSS",
+      "unit": "MiB",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 6,
+          "median": 1245.4921875,
+          "min": 1204.03125,
+          "max": 1349.796875,
+          "p25": 1227.4375,
+          "p75": 1301.57421875
+        },
+        "breezer": {
+          "count": 6,
+          "median": 1417.6328125,
+          "min": 1250.859375,
+          "max": 1439.4375,
+          "p25": 1302.1171875,
+          "p75": 1428.53515625
+        },
+        "chrome": {
+          "count": 6,
+          "median": 1418.3203125,
+          "min": 1349.5,
+          "max": 1518.03125,
+          "p25": 1356.93359375,
+          "p75": 1506.8125
+        }
+      },
+      "candidateReductionVsChromePercent": 0.04847283042771765,
+      "candidateReductionVsBaselinePercent": -13.821092314157932
+    },
+    {
+      "key": "multiTabRssMiB",
+      "label": "Ten-tab process-tree RSS",
+      "unit": "MiB",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "count": 6,
+          "median": 2560.796875,
+          "min": 2524.84375,
+          "max": 2652.0625,
+          "p25": 2540.765625,
+          "p75": 2568.58203125
+        },
+        "breezer": {
+          "count": 6,
+          "median": 2756.1015625,
+          "min": 2658.890625,
+          "max": 2837.4375,
+          "p25": 2708.7578125,
+          "p75": 2779.73828125
+        },
+        "chrome": {
+          "count": 6,
+          "median": 2515.1015625,
+          "min": 2426.3125,
+          "max": 2568.078125,
+          "p25": 2486.63671875,
+          "p75": 2554.265625
+        }
+      },
+      "candidateReductionVsChromePercent": -9.582118018345433,
+      "candidateReductionVsBaselinePercent": -7.626715316887443
+    },
+    {
+      "key": "oneTabPhysicalFootprintMiB",
+      "label": "One-tab macOS physical footprint",
+      "unit": "MiB",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "status": "observed",
+          "count": 6,
+          "median": 461.2616882324219,
+          "min": 450.9337158203125,
+          "max": 472.73095703125,
+          "p25": 452.7068634033203,
+          "p75": 468.597900390625
+        },
+        "breezer": {
+          "status": "observed",
+          "count": 6,
+          "median": 454.84814453125,
+          "min": 446.57403564453125,
+          "max": 484.6524658203125,
+          "p25": 449.13673400878906,
+          "p75": 461.37940979003906
+        },
+        "chrome": {
+          "status": "unavailable",
+          "sampleCount": 6,
+          "reason": "Every footprint observation is required; missing or invalid captures cannot be pooled."
+        }
+      },
+      "candidateReductionVsChromePercent": null,
+      "candidateReductionVsBaselinePercent": 1.3904349450197997
+    },
+    {
+      "key": "multiTabPhysicalFootprintMiB",
+      "label": "Ten-tab macOS physical footprint",
+      "unit": "MiB",
+      "better": "lower",
+      "values": {
+        "baselineBreezer": {
+          "status": "observed",
+          "count": 6,
+          "median": 956.1527099609375,
+          "min": 952.84033203125,
+          "max": 976.4187622070312,
+          "p25": 953.6958465576172,
+          "p75": 958.9143524169922
+        },
+        "breezer": {
+          "status": "observed",
+          "count": 6,
+          "median": 959.5043334960938,
+          "min": 946.933349609375,
+          "max": 966.0899047851562,
+          "p25": 951.3594055175781,
+          "p75": 964.6719665527344
+        },
+        "chrome": {
+          "status": "unavailable",
+          "sampleCount": 6,
+          "reason": "Every footprint observation is required; missing or invalid captures cannot be pooled."
+        }
+      },
+      "candidateReductionVsChromePercent": null,
+      "candidateReductionVsBaselinePercent": -0.35053224241692277
+    }
+  ],
+  "cpuWindows": [
+    {
+      "browser": "breezer",
+      "round": 1,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.934005042000001,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03242801712564605
+    },
+    {
+      "browser": "breezer",
+      "round": 1,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.515859167000002,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07529021331855894
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 1,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.495833999999995,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03558850260040744
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 1,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.500676166999998,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.0755442043337752
+    },
+    {
+      "browser": "chrome",
+      "round": 1,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 1,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 2,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 2,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 2,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.490202208000002,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.035633139130111964
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 2,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.482638999999995,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07584817782560684
+    },
+    {
+      "browser": "breezer",
+      "round": 2,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.502344666999997,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03553703943918874
+    },
+    {
+      "browser": "breezer",
+      "round": 2,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.519082624999981,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07523650886998365
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 3,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.485480290999985,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.035670650547955006
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 3,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.504360667000001,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07548241029873995
+    },
+    {
+      "browser": "breezer",
+      "round": 3,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.515924832999997,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.035430173423349386
+    },
+    {
+      "browser": "breezer",
+      "round": 3,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.523477667000028,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07516340856071654
+    },
+    {
+      "browser": "chrome",
+      "round": 3,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 3,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 4,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 4,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "breezer",
+      "round": 4,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.511712916999997,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.035463249312057264
+    },
+    {
+      "browser": "breezer",
+      "round": 4,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.521712624999986,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07519274845557021
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 4,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.53179250000004,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03530611783306464
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 4,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.479936540999974,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07589393217701876
+    },
+    {
+      "browser": "breezer",
+      "round": 5,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.512038624999986,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03546068934638175
+    },
+    {
+      "browser": "breezer",
+      "round": 5,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.519025790999993,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07523745508979782
+    },
+    {
+      "browser": "chrome",
+      "round": 5,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 5,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 5,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.518326250000042,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.035411342861750746
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 5,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.480760000000009,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07587998464546178
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 6,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.524105417000014,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03536610782736752
+    },
+    {
+      "browser": "baselineBreezer",
+      "round": 6,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.490835709000006,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07570973912909171
+    },
+    {
+      "browser": "chrome",
+      "round": 6,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "chrome",
+      "round": 6,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed process tree changed during the window",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01
+    },
+    {
+      "browser": "breezer",
+      "round": 6,
+      "stage": "one-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 8,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.488090833000024,
+      "counterUncertaintyCpuSeconds": 0.16,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.03564990236462069
+    },
+    {
+      "browser": "breezer",
+      "round": 6,
+      "stage": "ten-tab",
+      "status": "unavailable",
+      "reason": "Observed CPU does not exceed aggregate counter uncertainty",
+      "coverage": "Sampled process tree only; processes born and exited between listings are unobserved. No full-browser CPU or efficiency ratio.",
+      "counterResolutionSeconds": 0.01,
+      "sampledProcessCount": 17,
+      "sampleCount": 5,
+      "elapsedSeconds": 4.479708041999955,
+      "counterUncertaintyCpuSeconds": 0.34,
+      "counterUncertaintyCpuSecondsPerElapsedSecond": 0.07589780334171238
+    }
+  ],
+  "environmentBefore": {
+    "recordedAt": "2026-11-01T11:26:24.824Z",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v22.14.0",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7\nBuildVersion:\t\t25G229",
+    "cpu": "Apple M1",
+    "logicalCpus": "8",
+    "ramBytes": "8589934592",
+    "loadAverage": "{ 2.01 2.03 1.92 }",
+    "vmStat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    16567.\nPages active:                                 130131.\nPages inactive:                               120524.\nPages speculative:                              9533.\nPages throttled:                                   0.\nPages wired down:                             114766.\nPages purgeable:                                7651.\n\"Translation faults\":                    56979274624.\nPages copy-on-write:                       488774219.\nPages zero filled:                        8083042675.\nPages reactivated:                       21870997612.\nPages purged:                              202898195.\nFile-backed pages:                            106248.\nAnonymous pages:                              153940.\nPages stored in compressor:                   505774.\nPages occupied by compressor:                  96931.\nDecompressions:                          28641755303.\nCompressions:                            29635085616.\nPageins:                                   932423285.\nPageouts:                                    9389543.\nSwapins:                                   166000000.\nSwapouts:                                  174284919.",
+    "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=7929955)\t100%; charged; 0:00 remaining present: true",
+    "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded",
+    "gitCommit": "f2cd3c958fa8c81fe9bd95b0596829638bef4981",
+    "gitStatus": "M docs/browser-benchmark.md\n M docs/building-breezer.md\n M docs/updating.md\n M docs/whats-new.md\n M features/ai/extension/background.js\n M features/ai/extension/context-settings.js\n M features/ai/extension/settings.js\n M features/ai/extension/whats-new.css\n M features/ai/extension/whats-new.html\n M features/ai/extension/workspace-store.js\n M features/ai/extension/workspace.js\n M features/ai/host/main.mjs\n M script/benchmark_browsers.mjs\n M script/breezer_build_profile.py\n M script/build_and_run.sh\n M script/check_breezer_build_profile.py\n M tests/ai/context-settings.test.mjs\n M tests/ai/organato-settings.test.mjs\n M tests/ai/settings-onboarding-browser.test.mjs\n M tests/ai/updater.test.mjs\n M tests/ai/whats-new-browser.test.mjs\n M tests/ai/whats-new.test.mjs\n M tests/ai/workspace-browser.test.mjs\n M tests/ai/workspace-store.test.mjs\n M tests/benchmark-browsers.test.mjs\n?? advertising/\n?? docs/evidence/\n?? docs/pc-build.md\n?? docs/performance.md\n?? docs/release-1.2.0-inventory.md\n?? features/performance/\n?? features/storage/\n?? script/apply_breezer_filter_lists.py\n?? script/benchmark_workspace.mjs\n?? script/breezer_filter_lists.mjs\n?? script/check_breezer_filter_lists.py\n?? script/generate_breezer_filter_lists.mjs\n?? script/macos_process_usage.c\n?? script/verify_breezer_filter_behavior.mjs\n?? script/verify_breezer_filter_lists.mjs\n?? script/verify_breezer_filter_lists_native.mjs\n?? script/verify_breezer_helper_lifetime.mjs\n?? script/verify_breezer_settings_lifetime.mjs\n?? script/verify_breezer_update_lifetime.mjs\n?? script/windows/\n?? tests/ai/host-loading.test.mjs\n?? tests/ai/native-lifetime.test.mjs\n?? tests/ai/update-lifetime.test.mjs\n?? tests/code_sign_clone_sessions_test.cc\n?? tests/code_sign_clones_test.py\n?? tests/compiled-filter-lists.test.mjs\n?? tests/windows/"
+  },
+  "environmentAfter": {
+    "recordedAt": "2026-11-01T11:37:08.678Z",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v22.14.0",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7\nBuildVersion:\t\t25G229",
+    "cpu": "Apple M1",
+    "logicalCpus": "8",
+    "ramBytes": "8589934592",
+    "loadAverage": "{ 2.82 2.68 2.38 }",
+    "vmStat": "Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free:                                    47294.\nPages active:                                 104039.\nPages inactive:                               100061.\nPages speculative:                              9204.\nPages throttled:                                   0.\nPages wired down:                             111709.\nPages purgeable:                                2480.\n\"Translation faults\":                    56994916997.\nPages copy-on-write:                       489847007.\nPages zero filled:                        8089463943.\nPages reactivated:                       21872903215.\nPages purged:                              202961258.\nFile-backed pages:                             92157.\nAnonymous pages:                              121147.\nPages stored in compressor:                   544345.\nPages occupied by compressor:                 115980.\nDecompressions:                          28642409324.\nCompressions:                            29636212913.\nPageins:                                   933198796.\nPageouts:                                    9396681.\nSwapins:                                   166000309.\nSwapouts:                                  174284919.",
+    "power": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=7929955)\t100%; charged; 0:00 remaining present: true",
+    "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\nNote: No CPU power status has been recorded",
+    "gitCommit": "f2cd3c958fa8c81fe9bd95b0596829638bef4981",
+    "gitStatus": "M docs/browser-benchmark.md\n M docs/building-breezer.md\n M docs/updating.md\n M docs/whats-new.md\n M features/ai/extension/background.js\n M features/ai/extension/context-settings.js\n M features/ai/extension/settings.js\n M features/ai/extension/whats-new.css\n M features/ai/extension/whats-new.html\n M features/ai/extension/workspace-store.js\n M features/ai/extension/workspace.js\n M features/ai/host/main.mjs\n M script/benchmark_browsers.mjs\n M script/breezer_build_profile.py\n M script/build_and_run.sh\n M script/check_breezer_build_profile.py\n M tests/ai/context-settings.test.mjs\n M tests/ai/organato-settings.test.mjs\n M tests/ai/settings-onboarding-browser.test.mjs\n M tests/ai/updater.test.mjs\n M tests/ai/whats-new-browser.test.mjs\n M tests/ai/whats-new.test.mjs\n M tests/ai/workspace-browser.test.mjs\n M tests/ai/workspace-store.test.mjs\n M tests/benchmark-browsers.test.mjs\n?? advertising/\n?? docs/evidence/\n?? docs/pc-build.md\n?? docs/performance.md\n?? docs/release-1.2.0-inventory.md\n?? features/performance/\n?? features/storage/\n?? script/apply_breezer_filter_lists.py\n?? script/benchmark_workspace.mjs\n?? script/breezer_filter_lists.mjs\n?? script/check_breezer_filter_lists.py\n?? script/generate_breezer_filter_lists.mjs\n?? script/macos_process_usage.c\n?? script/verify_breezer_filter_behavior.mjs\n?? script/verify_breezer_filter_lists.mjs\n?? script/verify_breezer_filter_lists_native.mjs\n?? script/verify_breezer_helper_lifetime.mjs\n?? script/verify_breezer_settings_lifetime.mjs\n?? script/verify_breezer_update_lifetime.mjs\n?? script/windows/\n?? tests/ai/host-loading.test.mjs\n?? tests/ai/native-lifetime.test.mjs\n?? tests/ai/update-lifetime.test.mjs\n?? tests/code_sign_clone_sessions_test.cc\n?? tests/code_sign_clones_test.py\n?? tests/compiled-filter-lists.test.mjs\n?? tests/windows/"
+  },
+  "limitations": [
+    "Six rounds on one M1 Mac; descriptive medians and ranges, no statistical significance claim",
+    "Startup is initialized/reused-profile, not OS-cold boot; no cache flushing",
+    "Local deterministic navigation fixture, not a general internet-speed claim",
+    "RSS sums process resident sets and may double-count shared pages; it is not unique RAM",
+    "Footprint is charged macOS process-tree footprint, including compressed/swapped pages; preserve unavailable values",
+    "CPU windows cover only stable observed processes, not complete app CPU, energy or battery life; do not compute CPU efficiency ratios",
+    "Exact private ad hoc candidate includes combined1.2.0source plus performance/storage changes; functional feature acceptance and release identity still pending",
+    "Earlier v7 setup attempt failed before scoring and remains preserved; never pool it with this v8 run",
+    "No comparative speed claim may use the PC compiler batch benchmark"
+  ],
+  "cpuSummary": "All36settled CPU windows unavailable because observed CPU did not exceed aggregate counter uncertainty. No comparative CPU/battery/energy claim.",
+  "chromeFootprint": "Unavailable summaries:49/60native samples observed,7missing/too-recent process identities,2tree changes,2missing native identities/counters. Never pool only the observed samples.",
+  "componentResults": "build/benchmark-1.2.0-components-20261101/results.json",
+  "interpretation": "Candidate product-new-tab readiness and reused-profile startup are lower than Chrome, but those strengths mostly predate this update. The first local-navigation pause is lower than the installed baseline but remains higher than Chrome. Overall navigation and ten-tab RSS regress; do not imply universal gains, all-faster browsing, or lower whole-browser RAM."
+}

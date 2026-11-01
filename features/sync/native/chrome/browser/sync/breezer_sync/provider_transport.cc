@@ -67,7 +67,7 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
            Service::ResponseCallback done) {
           return service->ReadObject(vault, object, maximum, std::move(done));
         }, vault_, object, static_cast<int>(maximum)));
-    if (!response) return base::unexpected(response.error());
+    if (!response.has_value()) return base::unexpected(response.error());
     if (!response->has_value()) {
       if (response->error().error == api::SyncVaultProviderError::kNotFound)
         return std::nullopt;
@@ -95,7 +95,7 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
           return service->WriteObject(vault, object, std::move(data), std::move(revision),
                                epoch, std::move(done));
         }, vault_, object, std::move(data), std::move(revision), retention));
-    if (!response) return base::unexpected(response.error());
+    if (!response.has_value()) return base::unexpected(response.error());
     if (!response->has_value()) return base::unexpected(MapError(response->error().error));
     const auto& success = *response->value().success;
     if (!success.revision || success.revision->empty())

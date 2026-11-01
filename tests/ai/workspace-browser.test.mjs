@@ -654,6 +654,46 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
   }
 });
 
+test('tab updates leave unchanged rows and their audio controls intact', { skip }, async () => {
+  const server = await startServer();
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const context = await browser.newContext({ viewport: { width: 300, height: 820 } });
+    await context.addInitScript(installFixture, { seed: seed(), bridge: true });
+    const page = await context.newPage();
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const row = page.locator('#today [data-key="t:3"]');
+    await row.waitFor();
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const unchanged = await page.evaluate(async () => {
+      const records = [];
+      const observer = new MutationObserver(values => records.push(...values));
+      document.querySelectorAll('.row').forEach(row => observer.observe(row, { subtree: true, attributes: true, childList: true, characterData: true }));
+      const tab = fx.tabs.find(tab => tab.id === 3);
+      for (const listener of fx.listeners['tabs.onUpdated']) listener(tab.id, { autoDiscardable: true }, { ...tab, autoDiscardable: true });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      records.push(...observer.takeRecords());
+      observer.disconnect();
+      return records.length;
+    });
+    assert.equal(unchanged, 0, 'an unchanged presentation must cause no row mutations');
+    await page.evaluate(() => {
+      const tab = fx.tabs.find(tab => tab.id === 3);
+      Object.assign(tab, { title: 'Updated document', audible: true });
+      for (const listener of fx.listeners['tabs.onUpdated']) listener(tab.id, { title: tab.title, audible: true }, { ...tab });
+    });
+    await page.waitForFunction(() => document.querySelector('[data-key="t:3"] .title').textContent === 'Updated document');
+    assert.equal(await row.locator('.row-sound').isVisible(), true);
+    await row.click();
+    assert.equal(await row.getAttribute('aria-selected'), 'true');
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: `${evidence}/workspace-efficient-updates.png` });
+  } finally {
+    await browser.close();
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
 // Replays the native host's cancelable command in the shipped document. This
 // verifies the bridge recipient, not physical macOS accelerator dispatch.
 async function numberedCommand(page, index) {

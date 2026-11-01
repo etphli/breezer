@@ -1,0 +1,5 @@
+{
+  "extensionOnlyChangeKeepsNativeFingerprint": true,
+  "releaseVersionChangeInvalidatesNativeFingerprint": true,
+  "actualBuildShellHashFragmentTested": true
+}

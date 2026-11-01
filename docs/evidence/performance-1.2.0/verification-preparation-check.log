@@ -1,0 +1,16 @@
+test_first_apply_reuse_mismatch_and_failed_check_preserve_output (__main__.NativeOverlayHookTests.test_first_apply_reuse_mismatch_and_failed_check_preserve_output) ... ok
+test_extension_only_changes_reconstruct_previous_marker (__main__.PreparationTests.test_extension_only_changes_reconstruct_previous_marker) ... ok
+test_historical_file_set_is_preserved_across_source_addition_or_removal (__main__.PreparationTests.test_historical_file_set_is_preserved_across_source_addition_or_removal) ... ok
+test_ignores_only_prepared_top_level_generated_build_file (__main__.PreparationTests.test_ignores_only_prepared_top_level_generated_build_file) ... ok
+test_matches_legacy_source_and_outer_hash_byte_for_byte (__main__.PreparationTests.test_matches_legacy_source_and_outer_hash_byte_for_byte) ... ok
+test_native_overlay_integration_and_base_changes_prevent_match (__main__.PreparationTests.test_native_overlay_integration_and_base_changes_prevent_match) ... ok
+test_refresh_allows_additions_but_refuses_removed_resources (__main__.PreparationTests.test_refresh_allows_additions_but_refuses_removed_resources) ... ok
+test_refuses_missing_empty_and_file_in_place_of_prepared_directory (__main__.PreparationTests.test_refuses_missing_empty_and_file_in_place_of_prepared_directory) ... ok
+test_refuses_non_sha256_base_ids (__main__.PreparationTests.test_refuses_non_sha256_base_ids) ... ok
+test_refuses_symlinked_overlay_and_integration (__main__.PreparationTests.test_refuses_symlinked_overlay_and_integration) ... ok
+test_refuses_symlinked_tree_file_directory_and_generated_file (__main__.PreparationTests.test_refuses_symlinked_tree_file_directory_and_generated_file) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 2.680s
+
+OK

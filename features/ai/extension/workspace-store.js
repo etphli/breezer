@@ -224,6 +224,18 @@ export function findNode(store, id) {
   return null;
 }
 
+// Rebuilt for each operation so mutations never leave stale node references.
+function indexNodes(store) {
+  const nodes = new Map(store.favorites.map(node => [node.id, { node, space: null }]));
+  for (const space of store.spaces) {
+    for (const node of space.pinned) {
+      nodes.set(node.id, { node, space });
+      if (node.kind === 'folder') for (const child of node.children) nodes.set(child.id, { node: child, space });
+    }
+  }
+  return nodes;
+}
+
 export function entriesOf(space) {
   return space.pinned.flatMap((node) => (node.kind === 'folder' ? node.children : [node]));
 }
@@ -381,6 +393,7 @@ export function setPrefs(store, patch) {
 // space. `hints` are optional per-tab membership values supplied by the caller.
 export function reconcileWindowTabs({ members, store, tabs, session, fallbackSpaceId, hints = {} }) {
   const fallback = resolveSpaceId(store, fallbackSpaceId);
+  const nodes = indexNodes(store);
   if (!members.quarantine || members.quarantine.session !== session) {
     members.quarantine = { session, exact: [], path: [] };
   }
@@ -395,7 +408,7 @@ export function reconcileWindowTabs({ members, store, tabs, session, fallbackSpa
 
   const accept = (tab, record) => {
     const clean = { s: resolveSpaceId(store, record.s), u: urlOf(tab), k: session };
-    if (record.e && findNode(store, record.e) && !boundEntries.has(record.e)) {
+    if (record.e && nodes.has(record.e) && !boundEntries.has(record.e)) {
       clean.e = record.e;
       boundEntries.add(record.e);
     }
@@ -415,11 +428,29 @@ export function reconcileWindowTabs({ members, store, tabs, session, fallbackSpa
   }
 
   // 2. Previous-session records matched by URL across the stored membership set.
-  const pool = Object.entries(records).filter(([id, record]) => record.k !== session && !(id in assigned));
-  const assignmentKey = (record) => JSON.stringify([
-    resolveSpaceId(store, record.s),
-    record.e && findNode(store, record.e) ? record.e : '',
-  ]);
+  const byExact = new Map(), byPath = new Map();
+  const add = (index, key, item) => {
+    let bucket = index.get(key);
+    if (!bucket) index.set(key, bucket = { records: new Map(), assignments: new Map() });
+    bucket.records.set(item.id, item);
+    bucket.assignments.set(item.assignment, (bucket.assignments.get(item.assignment) || 0) + 1);
+  };
+  for (const [id, record] of Object.entries(records)) {
+    if (record.k === session || id in assigned) continue;
+    const keys = urlKeys(record.u);
+    const item = { id, record, keys, assignment: JSON.stringify([
+      resolveSpaceId(store, record.s), record.e && nodes.has(record.e) ? record.e : '',
+    ]) };
+    add(byExact, keys.exact, item);
+    add(byPath, keys.path, item);
+  }
+  const remove = (index, key, item) => {
+    const bucket = index.get(key);
+    bucket.records.delete(item.id);
+    const count = bucket.assignments.get(item.assignment) - 1;
+    if (count) bucket.assignments.set(item.assignment, count);
+    else bucket.assignments.delete(item.assignment);
+  };
   const quarantine = (kind, key) => {
     const token = urlKeyToken(key);
     const list = members.quarantine[kind];
@@ -427,24 +458,20 @@ export function reconcileWindowTabs({ members, store, tabs, session, fallbackSpa
     if (kind === 'exact') exactQuarantine.add(token);
     else pathQuarantine.add(token);
   };
-  const take = (predicate, kind, key) => {
-    const matches = pool.filter(predicate);
-    if (!matches.length) return { record: null, ambiguous: false };
-
-    const assignments = new Set(matches.map(([, record]) => assignmentKey(record)));
-    if (assignments.size > 1) {
-      // Keep the conflict visible to other restoring windows, while marking this
-      // URL and its path unsafe for weaker fallback.
+  const take = (index, kind, key) => {
+    const bucket = index.get(key);
+    if (!bucket?.records.size) return { record: null, ambiguous: false };
+    if (bucket.assignments.size > 1) {
+      // Conflicts remain visible to other windows and weaker path matching.
       quarantine(kind, key);
       if (kind === 'exact') quarantine('path', urlKeys(key).path);
       return { record: null, ambiguous: true };
     }
-
-    const [id, record] = matches[0];
-    const index = pool.findIndex(([candidateId]) => candidateId === id);
-    if (index >= 0) pool.splice(index, 1);
-    if (records[id]?.k !== session) delete records[id];
-    return { record, ambiguous: false };
+    const item = bucket.records.values().next().value;
+    remove(byExact, item.keys.exact, item);
+    remove(byPath, item.keys.path, item);
+    if (records[item.id]?.k !== session) delete records[item.id];
+    return { record: item.record, ambiguous: false };
   };
   for (const tab of pending) {
     const keys = urlKeys(urlOf(tab));
@@ -452,13 +479,13 @@ export function reconcileWindowTabs({ members, store, tabs, session, fallbackSpa
     const exact = urlOf(tab)
       ? exactQuarantine.has(exactToken)
         ? { record: null, ambiguous: true }
-        : take(([, r]) => urlKeys(r.u).exact === keys.exact, 'exact', keys.exact)
+        : take(byExact, 'exact', keys.exact)
       : { record: null, ambiguous: false };
     const pathToken = urlKeyToken(keys.path);
     const path = !exact.record && !exact.ambiguous && urlOf(tab)
       ? pathQuarantine.has(pathToken)
         ? { record: null, ambiguous: true }
-        : take(([, r]) => urlKeys(r.u).path === keys.path, 'path', keys.path)
+        : take(byPath, 'path', keys.path)
       : { record: null, ambiguous: false };
     const record = exact.record || path.record;
     if (record) { accept(tab, record); continue; }
@@ -499,13 +526,14 @@ export function rollSession(members, token) {
 export function buildSidebarModel({ store, records, tabs, activeSpaceId }) {
   const spaceId = resolveSpaceId(store, activeSpaceId);
   const space = spaceById(store, spaceId);
+  const nodes = indexNodes(store);
   const bound = new Map();
   const today = [];
   const counts = Object.fromEntries(store.spaces.map((s) => [s.id, 0]));
   const sorted = [...tabs].sort((a, b) => a.index - b.index);
   for (const tab of sorted) {
     const record = records[tab.id];
-    const found = record?.e ? findNode(store, record.e) : null;
+    const found = record?.e ? nodes.get(record.e) : null;
     if (found && !bound.has(record.e)) {
       bound.set(record.e, tab);
       if (found.space) counts[found.space.id] += 1;

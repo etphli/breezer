@@ -98,7 +98,7 @@ class BreezerWorkspaceView final
   void HandleCloseExtensionHost(extensions::ExtensionHost* host);
   void OnNumberedTabResult(int index,
                           TabStripUserGestureDetails gesture,
-                          const base::Value& handled);
+                          base::Value handled);
 
   // ExtensionViewViews::Observer:
   void OnViewDestroying() override;

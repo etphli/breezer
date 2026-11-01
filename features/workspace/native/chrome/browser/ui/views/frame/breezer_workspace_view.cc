@@ -117,7 +117,7 @@ bool BreezerWorkspaceView::SelectNumberedTab(
 void BreezerWorkspaceView::OnNumberedTabResult(
     int index,
     TabStripUserGestureDetails gesture,
-    const base::Value& handled) {
+    base::Value handled) {
   if (!browser_->IsDeleteScheduled() &&
       (!handled.is_bool() || !handled.GetBool())) {
     // Missing saved slots and a document still starting up keep the original

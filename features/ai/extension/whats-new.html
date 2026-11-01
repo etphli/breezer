@@ -13,7 +13,7 @@
   <main class="sheet">
     <header class="masthead">
       <p class="release"><img class="mark" src="icon128.png" alt="" width="28" height="28"><span id="release-name">Breezer</span></p>
-      <h1 class="title"><span>A little more</span> <span>your browser</span></h1>
+      <h1 class="title"><span>Yours from</span> <span>the first tab</span></h1>
       <svg class="breeze" viewBox="0 0 640 120" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id="breeze-ink" x1="0" x2="1" y1="0" y2="0">
@@ -23,629 +23,587 @@
         </defs>
         <path class="breeze-line" pathLength="1" d="M6 78 C 120 30, 210 112, 330 66 S 520 14, 560 54 C 590 84, 552 112, 526 92 C 506 76, 528 46, 566 50 C 596 54, 618 70, 634 64"/>
       </svg>
-      <p class="lede">The features introduced in 1.1, plus the latest improvements.</p>
+      <p class="lede">A setup guide for new profiles, searchable settings, research across chosen tabs, page translation and improvements to saved tabs, passwords and background work.</p>
       <div class="actions">
         <button class="button primary" type="button" data-action="continue">Continue browsing</button>
         <a class="button secondary" href="workspace.html#/settings">Open Settings</a>
       </div>
     </header>
 
+    <!-- Measured results. Browser values: build/benchmark-1.2.0-three-way-v8-run-20261101/
+         presentation-data.json; saved-tab records: build/benchmark-1.2.0-components-20261101/
+         results.json. Bar widths are each median over the largest in its comparison.
+         The efficiency article is its own page, efficiency.html, linked from here. -->
+    <section class="results" aria-labelledby="results-title">
+      <h2 id="results-title">Measured against Chrome and the previous Breezer</h2>
+      <p class="results-lede">We timed a pre-release Breezer 1.2.0 build beside the previous Breezer and Chrome 156. Two measurements improved in this build, and two leads over Chrome carried over from before. <a href="#results-table">See the full results</a>, including slower and unavailable measurements.</p>
+
+      <h3 class="results-group">New in this build</h3>
+      <div class="readings">
+        <article class="reading reading-wide" aria-labelledby="r-first-load">
+          <div class="reading-copy">
+            <h4 id="r-first-load">First local page after opening tabs: 63.5% less time than the previous Breezer</h4>
+            <p>After each launch the test opens and switches tabs, then loads a small local page three times. The first of those loads took 262.2 ms instead of 717.4 ms (medians of 6 launches). Chrome took 52.4 ms on the same workload, so it is still quicker here.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="36.55%" height="100%" rx="4"/></svg> <span class="bar-value">262.2 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">717.4 ms</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="reading reading-wide" aria-labelledby="r-saved-records">
+          <div class="reading-copy">
+            <h4 id="r-saved-records">Saved-tab records: restoring 1,000 took 2.90 ms instead of 189.96 ms</h4>
+            <p>A separate synthetic test of the sidebar’s workspace code, comparing the previous Breezer code with the 1.2.0 candidate code. Building the sidebar model for the same records took 0.187 ms instead of 3.299 ms. It times this code alone, not 1,000 open tabs or overall browser speed.</p>
+          </div>
+          <div class="reading-chart">
+            <p class="bars-caption">Restore 1,000 records</p>
+            <ul class="bars" aria-label="Restore 1,000 records">
+              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="1.53%" height="100%" rx="4"/></svg> <span class="bar-value">2.90 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">189.96 ms</span></li>
+            </ul>
+            <p class="bars-caption">Build the sidebar model</p>
+            <ul class="bars" aria-label="Build the sidebar model">
+              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="5.66%" height="100%" rx="4"/></svg> <span class="bar-value">0.187 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">3.299 ms</span></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <h3 class="results-group">Still ahead of Chrome, as before</h3>
+      <div class="readings">
+        <article class="reading" aria-labelledby="r-new-tab">
+          <div class="reading-copy">
+            <h4 id="r-new-tab">New tab: 50.3% less time than Chrome</h4>
+            <p>Breezer’s own new-tab page was ready in 98.8 ms, against 198.7 ms for Chrome’s (medians of 18 tabs). The previous Breezer measured 99.2 ms, so this lead isn’t new in 1.2.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.73%" height="100%" rx="4"/></svg> <span class="bar-value">98.8 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.90%" height="100%" rx="4"/></svg> <span class="bar-value">99.2 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">198.7 ms</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="reading" aria-labelledby="r-relaunch">
+          <div class="reading-copy">
+            <h4 id="r-relaunch">Relaunch: 19.5% less time than Chrome</h4>
+            <p>Quitting and reopening a set-up test profile until the page was usable took 861.3 ms, against 1,070.2 ms for Chrome (medians of 6 launches). The previous Breezer measured 846.6 ms, so this lead isn’t new either.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="80.48%" height="100%" rx="4"/></svg> <span class="bar-value">861.3 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="79.10%" height="100%" rx="4"/></svg> <span class="bar-value">846.6 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">1,070.2 ms</span></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+      <p class="results-method">Measured on one Apple M1 Mac with 8 GB of memory, 6 rounds per browser. Bars show medians, start at zero and use a separate scale in each comparison. These are selected results for specific workloads, not overall browser speed.</p>
+      <p class="results-article"><a class="button secondary" href="efficiency.html">Read about the efficiency work in 1.2</a></p>
+
+      <details class="full-results">
+        <summary>Full results: all 11 measurements, including slower and unavailable ones</summary>
+        <p>Some results are slower or use more memory than Chrome or the previous Breezer, and two Chrome values couldn’t be measured. Every result is listed here.</p>
+        <div class="table-scroll" role="region" aria-labelledby="results-table" tabindex="0">
+          <table class="results-table">
+            <caption id="results-table">All 11 measurements: medians, with the lowest and highest observation beneath. Lower is better in every row.</caption>
+            <thead><tr><th scope="col">Measurement</th><th scope="col">Breezer 1.2.0 candidate</th><th scope="col">Previous Breezer</th><th scope="col">Chrome 156</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr class="table-group"><th scope="colgroup" colspan="5">Speed, in milliseconds</th></tr>
+              <tr><th scope="row">Initialized-profile usable startup<span class="measure-note">Launch with a set-up test profile until the page is usable. 6 launches.</span></th><td>742.1 ms<span class="range"><span class="visually-hidden">range </span>712.8–851.2</span></td><td>730.4 ms<span class="range"><span class="visually-hidden">range </span>720.8–762.6</span></td><td>734.9 ms<span class="range"><span class="visually-hidden">range </span>671.0–877.7</span></td><td class="verdict">Within 2% of both</td></tr>
+              <tr><th scope="row">Reused-profile usable startup<span class="measure-note">Quit, then relaunch the same profile until the page is usable. 6 launches.</span></th><td>861.3 ms<span class="range"><span class="visually-hidden">range </span>784.9–990.3</span></td><td>846.6 ms<span class="range"><span class="visually-hidden">range </span>764.0–1,026.2</span></td><td>1,070.2 ms<span class="range"><span class="visually-hidden">range </span>1,010.3–1,754.7</span></td><td class="verdict">19.5% lower than Chrome; similar to previous Breezer</td></tr>
+              <tr><th scope="row">Blank-tab readiness<span class="measure-note">Open an empty tab until it is ready. 18 tabs, 3 per launch.</span></th><td>68.8 ms<span class="range"><span class="visually-hidden">range </span>50.0–228.3</span></td><td>65.0 ms<span class="range"><span class="visually-hidden">range </span>49.4–84.3</span></td><td>66.2 ms<span class="range"><span class="visually-hidden">range </span>41.5–82.8</span></td><td class="verdict">4–6% higher than both</td></tr>
+              <tr><th scope="row">Product new-tab readiness<span class="measure-note">Open the browser’s own new-tab page until it is ready. 18 tabs.</span></th><td>98.8 ms<span class="range"><span class="visually-hidden">range </span>78.1–216.5</span></td><td>99.2 ms<span class="range"><span class="visually-hidden">range </span>81.1–148.9</span></td><td>198.7 ms<span class="range"><span class="visually-hidden">range </span>149.5–249.2</span></td><td class="verdict">50.3% lower than Chrome; same as previous Breezer</td></tr>
+              <tr><th scope="row">Local-page navigation readiness<span class="measure-note">Load the same local test page until it is usable. 18 loads.</span></th><td>48.9 ms<span class="range"><span class="visually-hidden">range </span>31.9–453.0</span></td><td>33.9 ms<span class="range"><span class="visually-hidden">range </span>31.3–792.8</span></td><td>33.1 ms<span class="range"><span class="visually-hidden">range </span>31.1–71.7</span></td><td class="verdict">47.8% higher than Chrome; 44.3% higher than previous Breezer</td></tr>
+              <tr><th scope="row">Local-page loadEventEnd<span class="measure-note">The page’s own load-finished time for those loads. 18 loads.</span></th><td>11.2 ms<span class="range"><span class="visually-hidden">range </span>9.1–416.7</span></td><td>11.5 ms<span class="range"><span class="visually-hidden">range </span>10.4–754.1</span></td><td>6.6 ms<span class="range"><span class="visually-hidden">range </span>5.3–9.8</span></td><td class="verdict">69.7% higher than Chrome; similar to previous Breezer</td></tr>
+              <tr><th scope="row">First local navigation after tab exercises<span class="measure-note">The first of those three loads after each launch’s tab exercises. 6 loads.</span></th><td>262.2 ms<span class="range"><span class="visually-hidden">range </span>154.9–453.0</span></td><td>717.4 ms<span class="range"><span class="visually-hidden">range </span>703.8–792.8</span></td><td>52.4 ms<span class="range"><span class="visually-hidden">range </span>35.5–71.7</span></td><td class="verdict">63.5% lower than previous Breezer; still about 5 times Chrome’s</td></tr>
+            </tbody>
+            <tbody>
+              <tr class="table-group"><th scope="colgroup" colspan="5">Memory, in MiB</th></tr>
+              <tr><th scope="row">One-tab process-tree RSS<span class="measure-note">Resident memory of all browser processes with one tab. 6 launches, 5 samples each.</span></th><td>1,417.6 MiB<span class="range"><span class="visually-hidden">range </span>1,250.9–1,439.4</span></td><td>1,245.5 MiB<span class="range"><span class="visually-hidden">range </span>1,204.0–1,349.8</span></td><td>1,418.3 MiB<span class="range"><span class="visually-hidden">range </span>1,349.5–1,518.0</span></td><td class="verdict">Same as Chrome; 13.8% higher than previous Breezer</td></tr>
+              <tr><th scope="row">Ten-tab process-tree RSS<span class="measure-note">The same with ten tabs open. 6 launches, 5 samples each.</span></th><td>2,756.1 MiB<span class="range"><span class="visually-hidden">range </span>2,658.9–2,837.4</span></td><td>2,560.8 MiB<span class="range"><span class="visually-hidden">range </span>2,524.8–2,652.1</span></td><td>2,515.1 MiB<span class="range"><span class="visually-hidden">range </span>2,426.3–2,568.1</span></td><td class="verdict">9.6% higher than Chrome; 7.6% higher than previous Breezer</td></tr>
+              <tr><th scope="row">One-tab macOS physical footprint<span class="measure-note">Memory macOS charges to the browser’s processes, one tab. 6 launches.</span></th><td>454.8 MiB<span class="range"><span class="visually-hidden">range </span>446.6–484.7</span></td><td>461.3 MiB<span class="range"><span class="visually-hidden">range </span>450.9–472.7</span></td><td class="unavailable">Unavailable</td><td class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
+              <tr><th scope="row">Ten-tab macOS physical footprint<span class="measure-note">The same with ten tabs open. 6 launches.</span></th><td>959.5 MiB<span class="range"><span class="visually-hidden">range </span>946.9–966.1</span></td><td>956.2 MiB<span class="range"><span class="visually-hidden">range </span>952.8–976.4</span></td><td class="unavailable">Unavailable</td><td class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Saved-tab records code test</h3>
+        <p>This synthetic test runs the sidebar’s workspace code on its own in Node, comparing the previous Breezer code with the 1.2.0 candidate code. It isn’t a measurement of open tabs or the browser.</p>
+        <table class="results-table component-table">
+          <caption>Milliseconds; medians of 6 alternating rounds, 11 repetitions each.</caption>
+          <thead>
+            <tr><td></td><th scope="colgroup" colspan="2">Restore</th><th scope="colgroup" colspan="2">Sidebar model</th></tr>
+            <tr><th scope="col">Records</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">10</th><td>0.15</td><td>0.08</td><td>0.007</td><td>0.005</td></tr>
+            <tr><th scope="row">100</th><td>2.53</td><td>0.59</td><td>0.049</td><td>0.028</td></tr>
+            <tr><th scope="row">500</th><td>48.07</td><td>1.72</td><td>0.809</td><td>0.092</td></tr>
+            <tr><th scope="row">1,000</th><td>189.96</td><td>2.90</td><td>3.299</td><td>0.187</td></tr>
+          </tbody>
+        </table>
+        <h3>How this was measured, and what it doesn’t show</h3>
+        <ul class="results-limits">
+          <li>One Apple M1 Mac with 8 GB of memory, macOS 26.7, on AC power with no thermal warning. 6 rounds rotated the launch order: 36 timed launches after 18 untimed setup launches, and all 36 timed launches passed their foreground check.</li>
+          <li>Startups use test profiles that were already set up, then reused. They aren’t cold starts after a reboot, and no caches were flushed.</li>
+          <li>Page loads use the same small local test page in every browser, not real websites over the internet.</li>
+          <li>Process-tree RSS adds up the resident memory of every browser process and can count shared memory more than once. It isn’t the memory Activity Monitor shows. Physical footprint is the memory macOS charges to those processes, including compressed memory.</li>
+          <li>Chrome’s physical footprint is unavailable: 11 of its 60 samples failed process-identity or process-tree checks, and the remaining samples aren’t summarized on their own.</li>
+          <li>CPU use couldn’t be measured: in all 36 sampling windows the CPU time stayed within the counters’ uncertainty. These results make no CPU, energy or battery-life claims.</li>
+          <li>Six rounds give medians and ranges, not statistically significant differences.</li>
+          <li>The candidate is a private ad hoc signed build of the combined 1.2.0 source (snapshot fa19c37); its internal version still reads 0.20.1.1. Its release identity and full feature checks are still pending, so the published release may measure differently.</li>
+        </ul>
+      </details>
+    </section>
+
     <section class="features" aria-labelledby="features-title">
       <h2 id="features-title" class="visually-hidden">New in this release</h2>
 
-      <article class="feature" aria-labelledby="f-organato">
-        <figure class="plate plate-organato" aria-hidden="true">
-          <div class="mini-tab">
-            <div class="mini-lane">
-              <span class="mini-label">Upcoming</span>
-              <span class="mini-item"><b></b><i></i></span>
-              <span class="mini-item"><b class="soft"></b><i class="short"></i></span>
-              <span class="mini-item"><b></b><i></i></span>
-              <span class="mini-item"><b class="soft"></b><i class="short"></i></span>
-            </div>
-            <div class="mini-lane">
-              <span class="mini-label">To-dos</span>
-              <span class="mini-item todo done"><b></b><i></i></span>
-              <span class="mini-item todo"><b></b><i class="short"></i></span>
-            </div>
-          </div>
+      <!-- Setup: the guide's eight steps beside a miniature window that
+           takes on each choice. The steps really are a sequence. -->
+      <article class="feature feature-lead" aria-labelledby="f-setup">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 360 248" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="359" height="247" rx="14"/>
+            <line class="axis" x1="26" y1="28" x2="26" y2="210"/>
+            <line class="stroke-accent" x1="26" y1="28" x2="26" y2="106"/>
+            <circle class="accent" cx="26" cy="28" r="7"/><path class="tick" d="M22.6 28 l2.4 2.4 l4.4 -4.8"/><text x="40" y="31.5">Start</text>
+            <circle class="accent" cx="26" cy="54" r="7"/><path class="tick" d="M22.6 54 l2.4 2.4 l4.4 -4.8"/><text x="40" y="57.5">Name</text>
+            <circle class="accent" cx="26" cy="80" r="7"/><path class="tick" d="M22.6 80 l2.4 2.4 l4.4 -4.8"/><text x="40" y="83.5">Tabs</text>
+            <circle class="card" cx="26" cy="106" r="8"/><circle class="target" cx="26" cy="106" r="7"/><circle class="accent" cx="26" cy="106" r="3"/><text class="label" x="40" y="109.5">Color</text>
+            <circle class="card" cx="26" cy="132" r="6.5"/><circle class="ghost" cx="26" cy="132" r="6"/><text class="quiet" x="40" y="135.5">Import</text>
+            <circle class="card" cx="26" cy="158" r="6.5"/><circle class="ghost" cx="26" cy="158" r="6"/><text class="quiet" x="40" y="161.5">Organato</text>
+            <circle class="card" cx="26" cy="184" r="6.5"/><circle class="ghost" cx="26" cy="184" r="6"/><text class="quiet" x="40" y="187.5">Tour</text>
+            <circle class="card" cx="26" cy="210" r="6.5"/><circle class="ghost" cx="26" cy="210" r="6"/><text class="quiet" x="40" y="213.5">Done</text>
+
+            <rect class="paper lift" x="110.5" y="16.5" width="233" height="215" rx="12"/>
+            <circle class="bar" cx="122" cy="28" r="3"/><circle class="bar" cx="131" cy="28" r="3"/><circle class="bar" cx="140" cy="28" r="3"/>
+            <rect class="s1" x="118" y="40" width="56" height="184" rx="8"/>
+            <rect class="toast-bar" x="126" y="52" width="40" height="5" rx="2.5"/>
+            <rect class="toast-bar" x="126" y="66" width="30" height="5" rx="2.5"/>
+            <rect class="card" x="123" y="78" width="46" height="16" rx="5"/><rect class="bar strong" x="129" y="84" width="28" height="4" rx="2"/>
+            <rect class="toast-bar" x="126" y="102" width="36" height="5" rx="2.5"/>
+            <rect class="toast-bar" x="126" y="116" width="26" height="5" rx="2.5"/>
+            <rect class="bar strong" x="190" y="44" width="96" height="8" rx="4"/>
+            <rect class="bar" x="190" y="60" width="128" height="4" rx="2"/>
+            <circle class="s1" cx="202" cy="92" r="10"/><circle class="target" cx="202" cy="92" r="14"/>
+            <circle class="s2" cx="230" cy="92" r="10"/>
+            <circle class="s3" cx="258" cy="92" r="10"/>
+            <circle class="s4" cx="286" cy="92" r="10"/>
+            <circle class="s5" cx="314" cy="92" r="10"/>
+            <rect class="well" x="190" y="122" width="96" height="24" rx="12"/>
+            <rect class="card edge" x="193" y="125" width="45" height="18" rx="9"/>
+            <circle class="stroke-accent" cx="215.5" cy="134" r="3.4"/><path class="stroke-accent" d="M215.5 127.4 v1.6 M215.5 139 v1.6 M208.9 134 h1.6 M220.5 134 h1.6"/>
+            <path class="stroke-quiet" d="M265.5 129 a5.2 5.2 0 1 0 5 6.4 a4.2 4.2 0 0 1 -5 -6.4 Z"/>
+            <rect class="mint-soft" x="190" y="158" width="128" height="30" rx="10"/>
+            <text x="200" y="176.5">Hi, Alex</text><rect class="bar" x="246" y="171" width="58" height="4" rx="2"/>
+            <text class="quiet" x="192" y="216">Back</text>
+            <rect class="accent" x="258" y="202" width="76" height="22" rx="11"/>
+            <text class="on-accent" x="296" y="216.5" text-anchor="middle">Continue</text>
+          </svg>
         </figure>
         <div class="feature-copy">
-          <h3 id="f-organato">Organato on your new tab</h3>
-          <p>New tabs can show your upcoming exams, assignments and to-dos from Organato. To connect, add an Organato API key in Settings, under New tab and Organato. The key is kept in macOS Keychain.</p>
+          <h3 id="f-setup">A setup guide for new profiles</h3>
+          <p>A new profile now opens a short setup guide instead of these notes. Pick the name Breezer AI greets you by, where your tabs sit, a theme color and appearance, then import from Chrome and connect Organato if you use it. A quick tour of the sidebar and the assistant finishes it, and you can skip at any step.</p>
+          <p>Already set up? Open the guide whenever you like with the Setup guide button in Settings.</p>
+          <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
+          <a class="button secondary" href="workspace.html#/welcome">Open the setup guide</a>
         </div>
       </article>
 
-      <article class="feature" aria-labelledby="f-theme">
-        <figure class="plate plate-theme" aria-hidden="true">
-          <div class="swatches"><i></i><i></i><i class="picked"></i><i></i><i></i></div>
-          <div class="mini-window"><span class="mini-sidebar"></span><span class="mini-page"></span></div>
-        </figure>
-        <div class="feature-copy">
-          <h3 id="f-theme">Your own theme color</h3>
-          <p>Choose any color in Settings, under Theme, and Breezer builds a matching theme for the browser and the sidebar.</p>
-        </div>
-      </article>
-
-      <article class="feature" aria-labelledby="f-passwords">
-        <figure class="plate plate-passwords" aria-hidden="true">
-          <div class="mini-field"><span class="dots">••••</span><span class="caret"></span></div>
-          <div class="mini-menu">
-            <div class="mini-account"><b></b><i></i></div>
-            <div class="mini-account"><b></b><i class="short"></i></div>
-          </div>
-        </figure>
-        <div class="feature-copy">
-          <h3 id="f-passwords">Password suggestions that stay put</h3>
-          <p>Saved passwords stay suggested while you type in a sign-in form. Nothing is filled until you choose an account.</p>
-        </div>
-      </article>
-
-      <article class="feature" aria-labelledby="f-updates">
-        <figure class="plate plate-updates" aria-hidden="true">
-          <span class="mini-button"><svg viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg>Check for updates</span>
-          <span class="mini-status"><i></i><i class="short"></i></span>
-        </figure>
-        <div class="feature-copy">
-          <h3 id="f-updates">Updates from Settings</h3>
-          <p>Settings now has a Check for updates button. It looks for stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</p>
-        </div>
-      </article>
-    </section>
-
-    <section class="patch-notes" aria-labelledby="patch-title">
-      <p class="release">Update 1.1.1</p>
-      <h2 id="patch-title">Latest improvements</h2>
-
-      <div class="patch-lead">
-        <figure class="plate patch-plate" aria-hidden="true">
+      <!-- Shortcuts: the Add tile on the new tab, and its popover offering a
+           typed address or one of the open tabs. -->
+      <article class="feature" aria-labelledby="f-shortcuts">
+        <figure class="plate plate-art" aria-hidden="true">
           <svg class="art" viewBox="0 0 320 232" focusable="false">
             <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
-            <g>
-              <rect class="well" x="14" y="14" width="52" height="16" rx="8"/><circle class="dot" cx="23" cy="22" r="3"/><rect class="bar" x="30" y="20" width="28" height="4" rx="2"/>
-              <rect class="well" x="73" y="14" width="52" height="16" rx="8"/><circle class="dot" cx="82" cy="22" r="3"/><rect class="bar" x="89" y="20" width="22" height="4" rx="2"/>
-              <rect class="well" x="132" y="14" width="52" height="16" rx="8"/><circle class="dot" cx="141" cy="22" r="3"/><rect class="bar" x="148" y="20" width="28" height="4" rx="2"/>
-              <rect class="well" x="191" y="14" width="52" height="16" rx="8"/><circle class="dot" cx="200" cy="22" r="3"/><rect class="bar" x="207" y="20" width="18" height="4" rx="2"/>
-              <rect class="well" x="250" y="14" width="52" height="16" rx="8"/><circle class="dot" cx="259" cy="22" r="3"/><rect class="bar" x="266" y="20" width="26" height="4" rx="2"/>
-            </g>
+            <rect class="mint-soft" x="8" y="8" width="304" height="86" rx="10"/>
+            <rect class="bar strong" x="22" y="20" width="62" height="6" rx="3"/>
+            <rect class="card" x="30" y="36" width="36" height="36" rx="10"/><circle class="s1" cx="48" cy="54" r="8"/><rect class="bar" x="34" y="78" width="28" height="4" rx="2"/>
+            <rect class="card" x="84" y="36" width="36" height="36" rx="10"/><circle class="s2" cx="102" cy="54" r="8"/><rect class="bar" x="88" y="78" width="28" height="4" rx="2"/>
+            <rect class="card" x="138" y="36" width="36" height="36" rx="10"/><circle class="s3" cx="156" cy="54" r="8"/><rect class="bar" x="142" y="78" width="28" height="4" rx="2"/>
+            <rect class="card" x="192" y="36" width="36" height="36" rx="10"/><circle class="s4" cx="210" cy="54" r="8"/><rect class="bar" x="196" y="78" width="28" height="4" rx="2"/>
+            <rect class="card ring" x="246.75" y="36.75" width="34.5" height="34.5" rx="9.5"/>
+            <path class="stroke-accent" d="M264 47 v14 M257 54 h14"/>
+            <text class="label" x="264" y="86" text-anchor="middle">Add</text>
+
+            <rect class="well" x="14" y="104" width="92" height="114" rx="10"/>
+            <rect class="bar" x="24" y="118" width="54" height="4" rx="2"/>
+            <rect class="bar" x="24" y="132" width="70" height="4" rx="2"/>
+            <rect class="bar" x="24" y="146" width="44" height="4" rx="2"/>
+            <rect class="card edge" x="24" y="176" width="20" height="16" rx="4"/><path class="stroke-ink" d="M34 180 l-3.4 3.6 M34 180 l3.4 3.6 M34 180 v8"/>
+            <rect class="card edge" x="48" y="176" width="20" height="16" rx="4"/><path class="stroke-ink" d="M58 188 l-3.4 -3.6 M58 188 l3.4 -3.6 M58 188 v-8"/>
+            <text class="quiet" x="24" y="208">Choose a tab</text>
+
             <g class="lift">
-              <path class="card edge" d="M154 42 L160 36 L166 42"/>
-              <rect class="card edge" x="44" y="41" width="232" height="28" rx="14"/>
-              <rect class="accent" x="47" y="44" width="100" height="22" rx="11"/>
-              <text class="on-accent" x="97" y="58.5" text-anchor="middle">New tabs only</text>
-              <text class="quiet" x="179" y="58.5" text-anchor="middle">Always</text>
-              <line class="rule" x1="211" y1="49" x2="211" y2="61"/>
-              <text class="quiet" x="243" y="58.5" text-anchor="middle">Hidden</text>
+              <path class="card edge" d="M258 104 L264 98 L270 104"/>
+              <rect class="card edge" x="118.5" y="103.5" width="189" height="117" rx="12"/>
             </g>
-            <g>
-              <rect class="well" x="33" y="84" width="30" height="30" rx="9"/><circle class="s1" cx="48" cy="99" r="7"/><rect class="bar" x="35" y="120" width="26" height="4" rx="2"/>
-              <rect class="well" x="89" y="84" width="30" height="30" rx="9"/><circle class="s2" cx="104" cy="99" r="7"/><rect class="bar" x="91" y="120" width="26" height="4" rx="2"/>
-              <rect class="well" x="145" y="84" width="30" height="30" rx="9"/><circle class="s3" cx="160" cy="99" r="7"/><rect class="bar" x="147" y="120" width="26" height="4" rx="2"/>
-              <rect class="ghost" x="201.5" y="84.5" width="29" height="29" rx="8.5"/>
-              <rect class="well" x="257" y="84" width="30" height="30" rx="9"/><circle class="s4" cx="272" cy="99" r="7"/><rect class="bar" x="259" y="120" width="26" height="4" rx="2"/>
-            </g>
+            <rect class="box" x="130.5" y="114.5" width="165" height="21" rx="7"/>
+            <rect class="caret" x="138" y="119" width="1.4" height="12"/>
+            <text class="quiet" x="143" y="128.5">Type a web address</text>
+            <text class="lane" x="130" y="152">Open tabs</text>
+            <circle class="s3" cx="140" cy="166" r="4"/><rect class="bar" x="150" y="164" width="92" height="4" rx="2"/>
+            <rect class="mint-soft" x="126" y="176" width="174" height="20" rx="6"/>
+            <circle class="s1" cx="140" cy="186" r="4"/><rect class="bar strong" x="150" y="184" width="74" height="4" rx="2"/>
+            <rect class="card edge" x="262.5" y="179.5" width="31" height="13" rx="3.5"/><text class="letter" x="278" y="189" text-anchor="middle">Enter</text>
+            <circle class="s4" cx="140" cy="206" r="4"/><rect class="bar" x="150" y="204" width="64" height="4" rx="2"/>
+          </svg>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-shortcuts">Shortcuts you choose</h3>
+          <p>On a new tab, the Add tile after your sites takes a web address or one of your open tabs. Arrow keys move through the tabs and Enter adds the one you pick. Your shortcuts are saved in this profile on your Mac, and they use the same Remove, Undo and Restore controls as the suggested sites. On a smaller window, the row makes room for them.</p>
+          <p>For sidebar favorites and pins, Command-number shortcuts now open the saved page even when it is asleep. Only the selected page opens, repeated presses reuse it, and favorite slots stay consistent across spaces and restarts.</p>
+          <p>Top tabs, private windows and Command+9 keep their usual numbered-tab behavior. A slot without a saved favorite or pin falls back to the ordinary tab shortcut.</p>
+        </div>
+      </article>
+
+      <!-- Organato: an Upcoming item linking straight to its own page. -->
+      <article class="feature" aria-labelledby="f-tasks">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <rect class="well" x="14" y="14" width="150" height="204" rx="10"/>
+            <text class="lane" x="26" y="34">Upcoming</text>
+            <circle class="accent" cx="29" cy="52" r="3.5"/><rect class="bar strong" x="38" y="49.5" width="96" height="5" rx="2.5"/><rect class="bar" x="38" y="59" width="54" height="4" rx="2"/>
+            <rect class="card" x="20" y="74" width="138" height="32" rx="7"/>
+            <circle class="mint" cx="29" cy="86" r="3.5"/><rect class="accent" x="38" y="83.5" width="88" height="5" rx="2.5"/>
+            <line class="stroke-accent" x1="38" y1="92.5" x2="126" y2="92.5"/>
+            <rect class="bar" x="38" y="97" width="48" height="4" rx="2"/>
+            <circle class="accent" cx="29" cy="124" r="3.5"/><rect class="bar strong" x="38" y="121.5" width="82" height="5" rx="2.5"/><rect class="bar" x="38" y="131" width="60" height="4" rx="2"/>
+            <text class="lane" x="26" y="162">To-dos</text>
+            <rect class="box" x="25.5" y="172.5" width="7" height="7" rx="2"/><rect class="bar" x="38" y="174" width="72" height="4" rx="2"/>
+            <rect class="box" x="25.5" y="188.5" width="7" height="7" rx="2"/><rect class="bar" x="38" y="190" width="56" height="4" rx="2"/>
+            <path class="cursor" d="M114 94 l0 14 l3.6 -3.4 l2.6 5.6 l2.4 -1.1 l-2.6 -5.5 l5 -0.3 Z"/>
+
+            <path class="stroke-accent dash" d="M152 86 C 170 86, 168 52, 180 52"/>
+            <path class="stroke-accent" d="M175.5 48 L181 52 L175.5 56.5"/>
+
             <g class="lift">
-              <rect class="toast" x="164" y="128" width="104" height="22" rx="11"/>
-              <rect class="toast-bar" x="176" y="137" width="44" height="4" rx="2"/>
-              <text class="on-toast" x="232" y="142.5">Undo</text>
+              <rect class="card edge" x="184.5" y="24.5" width="121" height="184" rx="10"/>
             </g>
-            <rect class="well" x="14" y="162" width="192" height="56" rx="10"/>
-            <text class="lane" x="24" y="177">Upcoming</text>
-            <circle class="accent" cx="27" cy="188" r="3"/><rect class="bar" x="35" y="186" width="120" height="4" rx="2"/>
-            <circle class="mint" cx="27" cy="198" r="3"/><rect class="bar" x="35" y="196" width="96" height="4" rx="2"/>
-            <circle class="accent" cx="27" cy="208" r="3"/><rect class="bar" x="35" y="206" width="108" height="4" rx="2"/>
-            <rect class="well" x="214" y="162" width="92" height="56" rx="10"/>
-            <text class="lane" x="224" y="177">To-dos</text>
-            <rect class="accent" x="224" y="185" width="8" height="8" rx="2"/><path class="tick" d="M226 189 l1.6 1.6 l2.8 -3"/><rect class="bar" x="238" y="187" width="52" height="4" rx="2"/>
-            <rect class="box" x="224.5" y="199.5" width="7" height="7" rx="2"/><rect class="bar" x="238" y="201" width="40" height="4" rx="2"/>
+            <rect class="well" x="192" y="32" width="106" height="14" rx="7"/><circle class="dot" cx="200" cy="39" r="3"/><rect class="bar" x="207" y="37" width="58" height="4" rx="2"/>
+            <rect class="mint-soft" x="194" y="58" width="62" height="15" rx="7.5"/><text class="label" x="225" y="68.8" text-anchor="middle">Assignment</text>
+            <rect class="bar strong" x="194" y="84" width="92" height="8" rx="4"/>
+            <rect class="bar" x="194" y="98" width="68" height="4" rx="2"/>
+            <circle class="stroke-accent" cx="199" cy="120" r="5"/><path class="stroke-accent" d="M199 117.2 v3 l2 1.4"/><rect class="bar" x="210" y="118" width="50" height="4" rx="2"/>
+            <rect class="accent" x="194" y="140" width="9" height="9" rx="2.5"/><path class="tick" d="M196.2 144.6 l1.8 1.8 l3 -3.4"/><rect class="bar" x="210" y="142.5" width="74" height="4" rx="2"/>
+            <rect class="box" x="194.5" y="158.5" width="8" height="8" rx="2.5"/><rect class="bar" x="210" y="160.5" width="60" height="4" rx="2"/>
+            <rect class="box" x="194.5" y="176.5" width="8" height="8" rx="2.5"/><rect class="bar" x="210" y="178.5" width="68" height="4" rx="2"/>
           </svg>
         </figure>
-        <div class="patch-copy">
-          <h3>On new tabs</h3>
-          <ul class="notes">
-            <li>Bookmarks appear on new and blank tabs by default. Settings also offers Always and Hidden.</li>
-            <li>Organato exams and assignments share one Upcoming list, with no duplicate items. To-dos stay separate.</li>
-            <li>Remove a frequently visited shortcut with its Remove button or right-click menu. Undo and Restore shortcuts bring it back. Links open immediately, and your history and bookmarks stay intact.</li>
-          </ul>
+        <div class="feature-copy">
+          <h3 id="f-tasks">Tasks open where they live</h3>
+          <p>Assignment titles in the new tab's Upcoming list now link to that task's own page in Organato, so one click takes you to the details.</p>
+          <p>With Organato turned off, new tabs show just the date and your shortcuts, with no empty Organato panel or reserved space. Open new tabs update straight away, and the choice survives reloads and restarts.</p>
+          <p>Those new tabs do not start the Organato helper or request Organato data while it is off. Turning it back on restores the panel and fetches fresh data.</p>
         </div>
-      </div>
+      </article>
 
-      <div class="patch-pair">
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card lift" x="0.5" y="0.5" width="319" height="179" rx="14"/>
-              <path class="stroke-quiet" d="M294 16 l8 8 M302 16 l-8 8"/>
-              <rect class="bar strong" x="20" y="16" width="120" height="8" rx="4"/>
-              <rect class="bar" x="20" y="32" width="200" height="4" rx="2"/>
-              <rect class="bar" x="20" y="41" width="150" height="4" rx="2"/>
-              <rect class="well" x="38" y="66" width="58" height="46" rx="8"/>
-              <circle class="bar" cx="46" cy="73" r="2"/><circle class="bar" cx="52" cy="73" r="2"/><circle class="bar" cx="58" cy="73" r="2"/>
-              <rect class="bar" x="46" y="84" width="40" height="4" rx="2"/><rect class="bar" x="46" y="93" width="30" height="4" rx="2"/><rect class="bar" x="46" y="102" width="36" height="4" rx="2"/>
-              <rect class="mint-soft" x="224" y="66" width="58" height="46" rx="8"/>
-              <path class="swirl" d="M232 96 C 244 80, 254 104, 266 88 C 272 80, 266 74, 261 79 C 257 83, 262 89, 272 86"/>
-              <path class="stroke-accent dash" d="M100 89 C 130 60, 190 60, 220 89"/>
-              <path class="stroke-accent" d="M212.5 88 L220 89 L218.5 81.5"/>
-              <g class="lift">
-                <circle class="card edge" cx="127" cy="73" r="11"/>
-                <path class="stroke-accent" d="M123 67.5 h8 v11 l-4 -3 l-4 3 Z"/>
-                <circle class="card edge" cx="160" cy="67" r="11"/>
-                <circle class="stroke-accent" cx="160" cy="67" r="5.5"/><path class="stroke-accent" d="M160 64 v3 l2 1.6"/>
-                <circle class="card edge" cx="193" cy="73" r="11"/>
-                <circle class="stroke-accent" cx="189.5" cy="73" r="3"/><path class="stroke-accent" d="M192.5 73 h6 M196.5 73 v2.5"/>
-              </g>
-              <rect class="accent" x="20" y="134" width="168" height="26" rx="13"/>
-              <text class="on-accent" x="104" y="150.5" text-anchor="middle">Import bookmarks and history</text>
-              <rect class="card edge" x="196" y="134" width="100" height="26" rx="13"/>
-              <rect class="bar" x="216" y="145" width="60" height="4" rx="2"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>Getting started in Settings</h3>
-            <ul class="notes">
-              <li>A getting-started card explains importing Chrome bookmarks, history and passwords, with clearer Settings controls.</li>
-            </ul>
-          </div>
-        </div>
+      <!-- Sidebar: the latest list of tabs is applied; an older one that
+           arrives late is ignored, so the closed row stays closed. -->
+      <article class="feature" aria-labelledby="f-sidebar">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <rect class="well" x="14" y="14" width="140" height="204" rx="10"/>
+            <circle class="dot" cx="30" cy="35" r="4"/><rect class="bar" x="40" y="33" width="74" height="4" rx="2"/>
+            <rect class="card" x="20" y="48" width="128" height="24" rx="6"/><rect class="accent" x="20" y="53" width="3" height="14" rx="1.5"/>
+            <circle class="s1" cx="30" cy="60" r="4"/><rect class="bar strong" x="40" y="58" width="82" height="4" rx="2"/>
+            <rect class="ghost" x="20.5" y="80.5" width="127" height="23" rx="6"/>
+            <g class="fade-1"><circle class="dot" cx="30" cy="92" r="4"/><rect class="bar strong" x="40" y="90" width="52" height="4" rx="2"/></g>
+            <text class="quiet" x="140" y="95" text-anchor="end">Closed</text>
+            <circle class="dot" cx="30" cy="124" r="4"/><rect class="bar" x="40" y="122" width="64" height="4" rx="2"/>
+            <circle class="dot" cx="30" cy="148" r="4"/><rect class="bar" x="40" y="146" width="88" height="4" rx="2"/>
+            <circle class="dot" cx="30" cy="172" r="4"/><rect class="bar" x="40" y="170" width="56" height="4" rx="2"/>
 
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card lift" x="60.5" y="0.5" width="199" height="179" rx="14"/>
-              <rect class="mint-soft" x="136" y="14" width="110" height="26" rx="10"/>
-              <rect class="bar" x="146" y="21" width="84" height="4" rx="2"/><rect class="bar" x="146" y="29" width="60" height="4" rx="2"/>
-              <rect class="notice" x="74.5" y="50.5" width="171" height="57" rx="10"/>
-              <circle class="stroke-quiet" cx="88" cy="64" r="6.5"/><path class="stroke-quiet" d="M88 60.5 v4 M88 67.4 v0.1"/>
-              <rect class="bar" x="102" y="59" width="120" height="4" rx="2"/><rect class="bar" x="102" y="68" width="88" height="4" rx="2"/>
-              <rect class="card ring" x="102" y="80" width="102" height="20" rx="10"/>
-              <path class="stroke-accent" d="M110 94 l1 -3.4 l5.6 -5.6 l2.4 2.4 l-5.6 5.6 Z"/>
-              <text class="label" x="122" y="93.5">Edit and resend</text>
-              <path class="stroke-accent dash" d="M208 90 C 236 92, 240 116, 222 126"/>
-              <path class="stroke-accent" d="M224.5 119 L221 126.5 L229 127"/>
-              <rect class="card ring" x="74" y="130" width="172" height="38" rx="12"/>
-              <rect class="bar" x="86" y="140" width="112" height="4" rx="2"/>
-              <rect class="caret" x="203" y="137" width="1.5" height="10" rx="0.75"/>
-              <rect class="well strong-well" x="86" y="153" width="17" height="9" rx="4.5"/><circle class="card" cx="90.5" cy="157.5" r="3"/>
-              <circle class="well" cx="233" cy="156" r="7"/><path class="stroke-quiet" d="M233 159.5 v-7 M230 155.5 l3 -3 l3 3"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>When an AI reply fails</h3>
-            <ul class="notes">
-              <li>The AI sidebar explains failures and offers Edit and resend. It restores your draft without sending automatically or turning browser control back on.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="patch-notes" aria-labelledby="patch-112-title">
-      <p class="release">Update 1.1.2</p>
-      <h2 id="patch-112-title">Previews from favourites</h2>
-
-      <div class="patch-lead">
-        <figure class="plate patch-plate" aria-hidden="true">
-          <svg class="art" viewBox="0 0 360 240" focusable="false">
-            <rect class="card lift" x="0.5" y="0.5" width="359" height="239" rx="14"/>
-            <circle class="bar" cx="16" cy="14" r="3.5"/><circle class="bar" cx="28" cy="14" r="3.5"/><circle class="bar" cx="40" cy="14" r="3.5"/>
-            <rect class="well" x="8" y="26" width="76" height="206" rx="10"/>
-            <rect class="card" x="48" y="34" width="30" height="30" rx="8"/><circle class="s2" cx="63" cy="49" r="7"/>
-            <rect class="card" x="14" y="68" width="30" height="30" rx="8"/><circle class="s3" cx="29" cy="83" r="7"/>
-            <rect class="card" x="48" y="68" width="30" height="30" rx="8"/><circle class="s4" cx="63" cy="83" r="7"/>
-            <circle class="bar" cx="20" cy="114" r="3"/><rect class="bar" x="28" y="112" width="46" height="4" rx="2"/>
-            <circle class="bar" cx="20" cy="128" r="3"/><rect class="bar" x="28" y="126" width="38" height="4" rx="2"/>
-            <circle class="bar" cx="20" cy="142" r="3"/><rect class="bar" x="28" y="140" width="44" height="4" rx="2"/>
-            <rect class="bar strong" x="104" y="38" width="100" height="8" rx="4"/>
-            <rect class="mint-soft" x="104" y="56" width="236" height="70" rx="8"/>
-            <rect class="bar" x="104" y="140" width="220" height="4" rx="2"/><rect class="bar" x="104" y="152" width="180" height="4" rx="2"/><rect class="bar" x="104" y="164" width="200" height="4" rx="2"/>
-            <rect class="scrim" x="0.5" y="0.5" width="359" height="239" rx="14"/>
-            <rect class="card ring-accent" x="14" y="34" width="30" height="30" rx="8"/><circle class="s1" cx="29" cy="49" r="7"/>
-            <path class="stroke-mint dash" d="M46 49 C 66 50, 74 58, 92 70"/>
-            <g class="lift-strong">
-              <rect class="card hairline" x="92" y="44" width="176" height="168" rx="10"/>
-              <rect class="bar" x="102" y="53" width="64" height="5" rx="2.5"/>
-              <rect class="mint-soft" x="226" y="47" width="16" height="16" rx="5"/>
-              <path class="stroke-ink" d="M235.5 50.5 H239.5 V54.5 M239.5 50.5 L235.5 54.5 M228.5 55.5 V59.5 H232.5 M228.5 59.5 L232.5 55.5"/>
-              <path class="stroke-ink" d="M250.5 51.5 L257.5 58.5 M257.5 51.5 L250.5 58.5"/>
-              <line class="rule" x1="92" y1="66.5" x2="268" y2="66.5"/>
-              <rect class="mint-soft" x="102" y="76" width="156" height="56" rx="6"/>
-              <rect class="bar strong" x="112" y="90" width="70" height="6" rx="3"/>
-              <rect class="bar" x="112" y="102" width="96" height="4" rx="2"/>
-              <rect class="bar" x="102" y="144" width="140" height="4" rx="2"/><rect class="bar" x="102" y="154" width="120" height="4" rx="2"/>
-              <rect class="bar" x="102" y="164" width="150" height="4" rx="2"/><rect class="bar" x="102" y="174" width="90" height="4" rx="2"/>
-              <rect class="bar" x="102" y="190" width="132" height="4" rx="2"/>
-            </g>
-          </svg>
-        </figure>
-        <div class="patch-copy">
-          <h3>Peek from a favourite</h3>
-          <ul class="notes">
-            <li>Peek opens new foreground tabs and links to another site from a favourite in a centred live-page preview over a tinted background. Click outside to close it, or use the expand icon to keep the page as a normal tab. Your saved favourite keeps its original identity.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="patch-pair">
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card lift" x="24.5" y="10.5" width="149" height="159" rx="12"/>
-              <rect class="card ring-accent" x="34" y="22" width="38" height="34" rx="9"/><circle class="s1" cx="53" cy="37" r="7"/><circle class="accent" cx="53" cy="50" r="1.8"/>
-              <rect class="card edge" x="80" y="22" width="38" height="34" rx="9"/><circle class="s3" cx="99" cy="37" r="7"/><circle class="bar" cx="99" cy="50" r="1.8"/>
-              <rect class="well" x="126" y="22" width="38" height="34" rx="9"/><circle class="asleep" cx="145" cy="39" r="7"/>
-              <rect class="well" x="34" y="64" width="38" height="34" rx="9"/><circle class="asleep" cx="53" cy="81" r="7"/>
-              <rect class="card edge" x="80" y="64" width="38" height="34" rx="9"/><circle class="s4" cx="99" cy="79" r="7"/><circle class="bar" cx="99" cy="92" r="1.8"/>
-              <rect class="well" x="126" y="64" width="38" height="34" rx="9"/><circle class="asleep" cx="145" cy="81" r="7"/>
-              <rect class="bar" x="36" y="114" width="110" height="4" rx="2"/><rect class="bar" x="36" y="128" width="90" height="4" rx="2"/><rect class="bar" x="36" y="142" width="100" height="4" rx="2"/>
-              <rect class="card lift" x="204.5" y="10.5" width="91" height="159" rx="12"/>
-              <rect class="card ring-accent" x="213" y="20" width="34" height="30" rx="8"/><circle class="s1" cx="230" cy="33" r="6"/><circle class="accent" cx="230" cy="44.5" r="1.6"/>
-              <rect class="card edge" x="253" y="20" width="34" height="30" rx="8"/><circle class="s3" cx="270" cy="33" r="6"/><circle class="bar" cx="270" cy="44.5" r="1.6"/>
-              <rect class="well" x="213" y="56" width="34" height="30" rx="8"/><circle class="asleep" cx="230" cy="71" r="6"/>
-              <rect class="card edge" x="253" y="56" width="34" height="30" rx="8"/><circle class="s4" cx="270" cy="69" r="6"/><circle class="bar" cx="270" cy="80.5" r="1.6"/>
-              <rect class="well" x="213" y="92" width="34" height="30" rx="8"/><circle class="asleep" cx="230" cy="107" r="6"/>
-              <rect class="well" x="253" y="92" width="34" height="30" rx="8"/><circle class="asleep" cx="270" cy="107" r="6"/>
-              <rect class="bar" x="215" y="138" width="66" height="4" rx="2"/><rect class="bar" x="215" y="152" width="52" height="4" rx="2"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>Favourite tiles</h3>
-            <ul class="notes">
-              <li>Favourite tiles have clearer active and sleeping states, balanced proportions and a compact layout for a narrow sidebar.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card lift" x="10.5" y="14.5" width="299" height="111" rx="14"/>
-              <g class="measure">
-                <path d="M26 30 H70 M26 27 V33 M70 27 V33"/><path d="M82 30 H126 M82 27 V33 M126 27 V33"/><path d="M138 30 H182 M138 27 V33 M182 27 V33"/><path d="M194 30 H238 M194 27 V33 M238 27 V33"/><path d="M250 30 H294 M250 27 V33 M294 27 V33"/>
-              </g>
-              <path class="guide" d="M76 38 V112 M132 38 V112 M188 38 V112 M244 38 V112"/>
-              <rect class="well" x="34" y="44" width="28" height="28" rx="8"/><circle class="s1" cx="48" cy="58" r="7"/><rect class="bar" x="36" y="84" width="24" height="4" rx="2"/>
-              <rect class="well" x="90" y="44" width="28" height="28" rx="8"/><circle class="s2" cx="104" cy="58" r="7"/><rect class="bar" x="93" y="84" width="22" height="4" rx="2"/>
-              <rect class="well" x="146" y="44" width="28" height="28" rx="8"/><circle class="s3" cx="160" cy="58" r="7"/><rect class="bar" x="140" y="84" width="32" height="4" rx="2"/><text class="quiet ellipsis" x="173.5" y="89">…</text>
-              <rect class="well" x="202" y="44" width="28" height="28" rx="8"/><circle class="s4" cx="216" cy="58" r="7"/><rect class="bar" x="203" y="84" width="26" height="4" rx="2"/>
-              <rect class="well" x="258" y="44" width="28" height="28" rx="8"/><circle class="s5" cx="272" cy="58" r="7"/><rect class="bar" x="261" y="84" width="22" height="4" rx="2"/>
-              <path class="cursor" d="M166 62 v13 l3.5 -3.2 l2.5 5.2 l2 -1 l-2.4 -5 h4.4 Z"/>
-              <g class="lift">
-                <path class="toast" d="M104 136 h50 l6 -6 l6 6 h50 a8 8 0 0 1 8 8 v12 a8 8 0 0 1 -8 8 h-112 a8 8 0 0 1 -8 -8 v-12 a8 8 0 0 1 8 -8 Z"/>
-                <rect class="toast-bar" x="112" y="148" width="104" height="4" rx="2"/>
-              </g>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>Site shortcuts</h3>
-            <ul class="notes">
-              <li>Commonly visited sites use equal-width slots. Long names shorten to fit, so the icons stay evenly spaced. Hover over a shortcut to read its full name.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="patch-notes" aria-labelledby="patch-113-title">
-      <p class="release">Update 1.1.3</p>
-      <h2 id="patch-113-title">Keep your favourites at home</h2>
-
-      <div class="patch-lead">
-        <figure class="plate patch-plate" aria-hidden="true">
-          <svg class="art" viewBox="0 0 360 240" focusable="false">
-            <rect class="card lift" x="0.5" y="0.5" width="359" height="239" rx="14"/>
-            <circle class="bar" cx="16" cy="14" r="3.5"/><circle class="bar" cx="28" cy="14" r="3.5"/><circle class="bar" cx="40" cy="14" r="3.5"/>
-            <rect class="well" x="8" y="26" width="76" height="206" rx="10"/>
-            <rect class="card" x="48" y="34" width="30" height="30" rx="8"/><circle class="s2" cx="63" cy="49" r="7"/>
-            <rect class="card" x="14" y="68" width="30" height="30" rx="8"/><circle class="s3" cx="29" cy="83" r="7"/>
-            <rect class="card" x="48" y="68" width="30" height="30" rx="8"/><circle class="s4" cx="63" cy="83" r="7"/>
-            <circle class="bar" cx="20" cy="114" r="3"/><rect class="bar" x="28" y="112" width="46" height="4" rx="2"/>
-            <circle class="bar" cx="20" cy="128" r="3"/><rect class="bar" x="28" y="126" width="38" height="4" rx="2"/>
-            <rect class="bar strong" x="100" y="36" width="92" height="8" rx="4"/>
-            <rect class="bar" x="100" y="52" width="140" height="4" rx="2"/>
-            <g>
-              <rect class="well" x="100" y="68" width="112" height="24" rx="6"/>
-              <path class="stroke-quiet" d="M108 73.5 h6 l3 3 v10 h-9 Z"/><rect class="bar" x="124" y="78" width="70" height="4" rx="2"/>
-              <rect class="mint-soft" x="100" y="98" width="112" height="24" rx="6"/>
-              <path class="stroke-accent" d="M108 103.5 h6 l3 3 v10 h-9 Z"/><rect class="bar strong" x="124" y="108" width="58" height="4" rx="2"/>
-              <rect class="well" x="100" y="128" width="112" height="24" rx="6"/>
-              <path class="stroke-quiet" d="M108 133.5 h6 l3 3 v10 h-9 Z"/><rect class="bar" x="124" y="138" width="64" height="4" rx="2"/>
-              <rect class="well" x="100" y="158" width="112" height="24" rx="6"/>
-              <path class="stroke-quiet" d="M108 163.5 h6 l3 3 v10 h-9 Z"/><rect class="bar" x="124" y="168" width="52" height="4" rx="2"/>
-            </g>
-            <rect class="scrim" x="0.5" y="0.5" width="359" height="239" rx="14"/>
-            <rect class="card ring-accent" x="14" y="34" width="30" height="30" rx="8"/><circle class="s1" cx="29" cy="49" r="7"/>
-            <path class="cursor" d="M176 108 v13 l3.5 -3.2 l2.5 5.2 l2 -1 l-2.4 -5 h4.4 Z"/>
-            <path class="stroke-mint dash" d="M190 104 C 206 92, 214 84, 226 76"/>
-            <g class="lift-strong">
-              <rect class="card hairline" x="196" y="40" width="152" height="180" rx="10"/>
-              <circle class="s1" cx="209" cy="53" r="4.5"/>
-              <rect class="bar" x="218" y="51" width="44" height="4" rx="2"/>
-              <rect class="mint-soft" x="306" y="45" width="16" height="16" rx="5"/>
-              <path class="stroke-ink" d="M315.5 48.5 H319.5 V52.5 M319.5 48.5 L315.5 52.5 M308.5 53.5 V57.5 H312.5 M308.5 57.5 L312.5 53.5"/>
-              <path class="stroke-ink" d="M330.5 49.5 L337.5 56.5 M337.5 49.5 L330.5 56.5"/>
-              <line class="rule" x1="196" y1="66.5" x2="348" y2="66.5"/>
-              <rect class="well" x="214" y="78" width="116" height="130" rx="4"/>
-              <rect class="card" x="222" y="86" width="100" height="114" rx="2"/>
-              <rect class="bar strong" x="232" y="98" width="62" height="6" rx="3"/>
-              <rect class="bar" x="232" y="112" width="80" height="4" rx="2"/><rect class="bar" x="232" y="121" width="72" height="4" rx="2"/>
-              <rect class="bar" x="232" y="130" width="78" height="4" rx="2"/><rect class="bar" x="232" y="139" width="50" height="4" rx="2"/>
-              <rect class="bar" x="232" y="154" width="80" height="4" rx="2"/><rect class="bar" x="232" y="163" width="66" height="4" rx="2"/>
-              <rect class="bar" x="232" y="172" width="74" height="4" rx="2"/>
-            </g>
             <g class="lift">
-              <rect class="card" x="100" y="196" width="84" height="22" rx="11"/>
-              <circle class="s1" cx="113" cy="207" r="4"/>
-              <text class="label" x="122" y="210.5">Same site</text>
+              <rect class="card edge" x="186.5" y="28.5" width="117" height="62" rx="9"/>
             </g>
+            <text class="label" x="198" y="46">Latest tabs</text>
+            <rect class="bar strong" x="198" y="56" width="70" height="4" rx="2"/>
+            <rect class="bar" x="198" y="66" width="82" height="4" rx="2"/>
+            <rect class="bar" x="198" y="76" width="58" height="4" rx="2"/>
+            <path class="stroke-accent" d="M186 60 C 172 60, 170 60, 158 60"/>
+            <path class="stroke-accent" d="M163 55.5 L157.5 60 L163 64.5"/>
+
+            <g class="fade-2">
+              <rect class="paper" x="186.5" y="120.5" width="117" height="72" rx="9"/>
+              <text class="quiet" x="198" y="138">Older, arrived late</text>
+              <rect class="bar" x="198" y="148" width="70" height="4" rx="2"/>
+              <rect class="bar" x="198" y="158" width="52" height="4" rx="2"/>
+              <rect class="bar" x="198" y="168" width="82" height="4" rx="2"/>
+              <rect class="bar" x="198" y="178" width="58" height="4" rx="2"/>
+            </g>
+            <path class="stroke-quiet dash" d="M186 156 C 178 156, 180 128, 176 116"/>
+            <circle class="card" cx="172" cy="106" r="9"/><circle class="stroke-quiet" cx="172" cy="106" r="7"/><path class="stroke-quiet" d="M167 101 l10 10"/>
+            <text class="quiet" x="245" y="212" text-anchor="middle">Ignored</text>
           </svg>
         </figure>
-        <div class="patch-copy">
-          <h3>Documents and subjects open in Peek</h3>
+        <div class="feature-copy">
+          <h3 id="f-sidebar">No more ghost tabs</h3>
+          <p>A tab you closed could come back to the sidebar when an older list of tabs arrived late, sometimes with an outdated title or the wrong tab highlighted. The sidebar now ignores lists older than what it already shows.</p>
           <ul class="notes">
-            <li>In a favourite, a link to a different page on the same site now opens in Peek. Open a document, a subject or an assignment from a course site and the favourite stays on the list you came from.</li>
-            <li>Peek also catches pages a site opens with a script after you click, including windows that start blank and are filled in a moment later.</li>
+            <li>Restoring a large saved session also takes less work. Matching saved tabs and preparing the sidebar no longer repeatedly scan the whole saved workspace.</li>
+            <li>When one tab changes, the rows that didn't are left as they are. Keyboard focus stays on the existing row instead of being lost to a redraw.</li>
           </ul>
         </div>
-      </div>
+      </article>
 
-      <div class="patch-pair">
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <path class="guide" d="M20 56 H300"/>
-              <g class="fade-1">
-                <rect class="card hairline" x="16" y="16" width="84" height="66" rx="8"/>
-                <rect class="bar" x="24" y="24" width="34" height="4" rx="2"/><rect class="mint-soft" x="24" y="34" width="68" height="16" rx="4"/>
-              </g>
-              <g class="fade-2">
-                <rect class="card hairline" x="118" y="16" width="84" height="66" rx="8"/>
-                <rect class="bar" x="126" y="24" width="34" height="4" rx="2"/><rect class="mint-soft" x="126" y="34" width="68" height="16" rx="4"/>
-              </g>
-              <g class="lift">
-                <rect class="card hairline" x="220" y="16" width="84" height="66" rx="8"/>
-                <rect class="bar" x="228" y="24" width="34" height="4" rx="2"/><rect class="mint-soft" x="228" y="34" width="68" height="16" rx="4"/>
-              </g>
-              <circle class="target" cx="74" cy="66" r="6"/><circle class="accent" cx="74" cy="66" r="1.8"/>
-              <circle class="target" cx="176" cy="66" r="6"/><circle class="accent" cx="176" cy="66" r="1.8"/>
-              <circle class="target" cx="278" cy="66" r="6"/><circle class="accent" cx="278" cy="66" r="1.8"/>
-              <path class="axis" d="M58 100 H262 M58 96 V104 M160 96 V104 M262 96 V104"/>
-              <text class="quiet" x="58" y="117" text-anchor="middle">0 ms</text>
-              <text class="quiet" x="262" y="117" text-anchor="middle">about 200 ms</text>
-              <rect class="card edge" x="16" y="134" width="288" height="32" rx="16"/>
-              <rect class="accent" x="26" y="142" width="28" height="16" rx="8"/><circle class="card" cx="46" cy="150" r="6"/>
-              <text x="62" y="153.5">Reduce Motion</text>
-              <path class="stroke-accent" d="M144 150 H222 M216 145 L222 150 L216 155"/>
-              <rect class="card ring" x="234" y="141" width="58" height="18" rx="5"/>
-              <rect class="mint-soft" x="240" y="146" width="46" height="8" rx="3"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>A short fade, nothing that moves</h3>
-            <ul class="notes">
-              <li>The tinted background and then the Peek card fade in over about 200 ms. Only their opacity changes, so a click lands where the page is drawn from the first frame. With Reduce Motion on in macOS, Peek appears at once.</li>
-            </ul>
-          </div>
-        </div>
+      <!-- Background helpers: one at work for Settings, two resting. -->
+      <article class="feature" aria-labelledby="f-helpers">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <g class="lift">
+              <rect class="card edge" x="20.5" y="18.5" width="279" height="86" rx="12"/>
+            </g>
+            <rect class="bar strong" x="36" y="34" width="64" height="6" rx="3"/>
+            <rect class="box" x="36.5" y="50.5" width="146" height="21" rx="7"/>
+            <text class="secret" x="46" y="64.5">••••••••••</text><rect class="caret" x="108" y="55" width="1.4" height="12"/>
+            <rect class="accent" x="192" y="50" width="94" height="22" rx="11"/>
+            <text class="on-accent" x="239" y="64.5" text-anchor="middle">Check for updates</text>
+            <circle class="mint" cx="41" cy="89" r="4"/><rect class="bar" x="51" y="87" width="104" height="4" rx="2"/>
 
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <g class="menu-shadow">
-                <rect class="card" x="18" y="22" width="128" height="104" rx="10"/>
-              </g>
-              <rect class="bar" x="30" y="36" width="72" height="4" rx="2"/>
-              <rect class="mint-soft" x="24" y="48" width="116" height="22" rx="6"/><rect class="bar strong" x="34" y="57" width="64" height="4" rx="2"/>
-              <rect class="bar" x="30" y="82" width="86" height="4" rx="2"/>
-              <line class="rule" x1="24" y1="96.5" x2="140" y2="96.5"/>
-              <rect class="bar" x="30" y="108" width="58" height="4" rx="2"/>
-              <rect class="card lift" x="168.5" y="18.5" width="135" height="143" rx="12"/>
-              <rect class="well" x="178" y="30" width="116" height="28" rx="7"/>
-              <rect class="card" x="185" y="36" width="16" height="16" rx="4"/><circle class="s3" cx="193" cy="44" r="4.5"/>
-              <rect class="bar" x="209" y="42" width="60" height="4" rx="2"/>
-              <rect class="well" x="178" y="66" width="116" height="28" rx="7"/>
-              <rect class="letter-tile" x="185" y="72" width="16" height="16" rx="4"/>
-              <text class="letter" x="193" y="83.5" text-anchor="middle">K</text>
-              <rect class="bar" x="209" y="78" width="48" height="4" rx="2"/>
-              <path class="stroke-accent dash" d="M193 94 C 193 106, 193 106, 193 112"/>
-              <path class="stroke-accent" d="M189 108 L193 113 L197 108"/>
-              <rect class="mint-soft" x="178" y="118" width="116" height="28" rx="7"/>
-              <rect class="card" x="185" y="124" width="16" height="16" rx="4"/><circle class="s2" cx="193" cy="132" r="4.5"/>
-              <rect class="bar strong" x="209" y="130" width="48" height="4" rx="2"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>Crisper menus and steadier icons</h3>
-            <ul class="notes">
-              <li>Sidebar menus sit on a tight, darker shadow instead of a pale halo, so their edges read clearly on light themes.</li>
-              <li>When a tab's icon fails to load, it shows the site's first letter. The real icon replaces it as soon as a valid one arrives.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+            <path class="lifeline" d="M80 105 V 140"/>
+            <path class="stroke-accent" d="M160 105 V 140"/>
+            <path class="lifeline" d="M240 105 V 140"/>
 
-      <div class="patch-pair">
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card lift" x="16.5" y="12.5" width="105" height="155" rx="12"/>
-              <rect class="card ring-accent" x="26" y="24" width="24" height="24" rx="6"/><circle class="s1" cx="38" cy="36" r="5.5"/>
-              <rect class="well" x="56" y="24" width="24" height="24" rx="6"/><circle class="s2" cx="68" cy="36" r="5.5"/>
-              <rect class="well" x="86" y="24" width="24" height="24" rx="6"/><circle class="s4" cx="98" cy="36" r="5.5"/>
-              <circle class="bar" cx="32" cy="66" r="3"/><rect class="bar" x="40" y="64" width="58" height="4" rx="2"/>
-              <circle class="bar" cx="32" cy="80" r="3"/><rect class="bar" x="40" y="78" width="46" height="4" rx="2"/>
-              <circle class="bar" cx="32" cy="94" r="3"/><rect class="bar" x="40" y="92" width="52" height="4" rx="2"/>
-              <line class="rule" x1="26" y1="132.5" x2="112" y2="132.5"/>
-              <circle class="stroke-quiet" cx="36" cy="150" r="5"/><path class="stroke-quiet" d="M36 142 v2 M36 156 v2 M28 150 h2 M42 150 h2"/>
-              <circle class="mint-soft" cx="58" cy="150" r="10"/>
-              <circle class="stroke-accent" cx="58" cy="150" r="6"/><path class="stroke-accent" d="M58 149 v4 M58 146.6 v0.1"/>
-              <path class="stroke-accent dash" d="M70 146 C 120 140, 140 110, 164 96"/>
-              <path class="stroke-accent" d="M156 95 L164 96 L161 103.5"/>
-              <rect class="paper lift" x="170.5" y="18.5" width="133" height="143" rx="10"/>
-              <rect class="bar strong" x="184" y="34" width="70" height="7" rx="3.5"/>
-              <rect class="bar strong" x="184" y="46" width="52" height="7" rx="3.5"/>
-              <path class="swirl" d="M184 66 C 204 56, 220 74, 242 64 S 276 56, 288 64"/>
-              <rect class="mint-soft" x="184" y="80" width="40" height="28" rx="5"/><rect class="bar" x="230" y="84" width="58" height="4" rx="2"/><rect class="bar" x="230" y="93" width="44" height="4" rx="2"/>
-              <rect class="mint-soft" x="184" y="114" width="40" height="28" rx="5"/><rect class="bar" x="230" y="118" width="54" height="4" rx="2"/><rect class="bar" x="230" y="127" width="40" height="4" rx="2"/>
-              <rect class="accent" x="184" y="148" width="44" height="8" rx="4"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>This page, one click away</h3>
-            <ul class="notes">
-              <li>The info button beside Settings at the bottom of the sidebar opens this updates page whenever you want to look back at what changed.</li>
-            </ul>
-          </div>
-        </div>
+            <circle class="asleep" cx="80" cy="162" r="21"/>
+            <path class="stroke-quiet" d="M80 152 l2.6 7.4 l7.4 2.6 l-7.4 2.6 l-2.6 7.4 l-2.6 -7.4 l-7.4 -2.6 l7.4 -2.6 Z"/>
+            <text class="quiet" x="96" y="146">z</text><text class="quiet" x="102" y="139">z</text>
+            <circle class="mint-soft" cx="160" cy="162" r="21"/><circle class="target" cx="160" cy="162" r="24"/>
+            <rect class="stroke-accent" x="151" y="153" width="18" height="18" rx="4"/><path class="stroke-accent" d="M155 162 l3.2 3.2 l6 -6.6"/>
+            <circle class="asleep" cx="240" cy="162" r="21"/>
+            <path class="stroke-quiet" d="M247 162 a7 7 0 1 1 -2.2 -5.1 M247 152.4 v5 h-5"/>
+            <text class="quiet" x="256" y="146">z</text><text class="quiet" x="262" y="139">z</text>
 
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <g class="lift">
-                <path class="card edge" d="M20 70 h44 a6 6 0 0 1 6 6 v18 h-56 v-18 a6 6 0 0 1 6 -6 Z"/>
-              </g>
-              <path class="stroke-accent" d="M42 82 h12 M48 76 v12"/>
-              <path class="stroke-accent dash" d="M72 86 C 100 86, 112 120, 140 122"/>
-              <path class="stroke-accent" d="M133 117.5 L140 122 L133 126.5"/>
-              <rect class="card lift" x="150.5" y="12.5" width="145" height="155" rx="12"/>
-              <circle class="bar" cx="166" cy="34" r="3.5"/><rect class="bar" x="176" y="32" width="70" height="4" rx="2"/>
-              <circle class="bar" cx="166" cy="58" r="3.5"/><rect class="bar" x="176" y="56" width="56" height="4" rx="2"/>
-              <circle class="bar" cx="166" cy="82" r="3.5"/><rect class="bar" x="176" y="80" width="64" height="4" rx="2"/>
-              <rect class="mint-soft" x="158" y="108" width="128" height="28" rx="7"/>
-              <circle class="accent" cx="168" cy="122" r="3.5"/><rect class="bar strong" x="178" y="120" width="60" height="4" rx="2"/>
-              <circle class="stroke-accent" cx="272" cy="152" r="7"/><path class="stroke-accent" d="M277.5 147.5 v3.5 h-3.5"/>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>Tabs opened during startup</h3>
-            <ul class="notes">
-              <li>Tabs that open while the sidebar is still starting now appear in its first refresh, instead of staying missing until the next change.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="patch-limit">
-        <h3>What keeps its normal behavior</h3>
-        <p>Form submissions, app routes that change within the same page, links to another part of the same page, background-tab clicks and private windows behave as before. Peek was checked with test pages; signed-in Google Docs and Canvas haven't been tested yet.</p>
-      </div>
-    </section>
-
-    <section class="patch-notes" aria-labelledby="patch-114-title">
-      <p class="release">Update 1.1.4</p>
-      <h2 id="patch-114-title">A steadier update handoff</h2>
-
-      <div class="patch-lead">
-        <figure class="plate patch-plate" aria-hidden="true">
-          <svg class="art" viewBox="0 0 360 240" focusable="false">
-            <rect class="card lift" x="0.5" y="0.5" width="359" height="239" rx="14"/>
-            <rect class="card ring" x="16" y="16" width="120" height="56" rx="10"/>
-            <text x="28" y="34">Breezer</text>
-            <rect class="mint-soft" x="26" y="42" width="100" height="20" rx="6"/>
-            <path class="stroke-accent" d="M33 52 l3 3 l6 -6"/>
-            <text class="label" x="48" y="55.5">Installed runtime</text>
-            <rect class="card ring" x="224" y="16" width="120" height="56" rx="10"/>
-            <text x="236" y="34">Update worker</text>
-            <rect class="bar" x="236" y="46" width="80" height="4" rx="2"/><rect class="bar" x="236" y="55" width="56" height="4" rx="2"/>
-            <rect class="ghost" x="156.5" y="22.5" width="48" height="44" rx="8"/>
-            <rect class="well" x="170" y="34" width="21" height="21" rx="5"/>
-            <path class="stroke-quiet" d="M175 41 l3.5 3.5 l-3.5 3.5 M181 48.5 h5"/>
-            <path class="stroke-quiet" d="M154 70 L207 19"/>
-            <path class="lifeline" d="M76 72 V228 M284 72 V228"/>
-            <text class="quiet" x="180" y="96" text-anchor="middle">Start, with the update request</text>
-            <path class="stroke-accent" d="M80 104 H278 M271 99.5 L278 104 L271 108.5"/>
-            <rect class="accent" x="152" y="124" width="56" height="20" rx="10"/>
-            <text class="on-accent" x="180" y="137.5" text-anchor="middle">Ready</text>
-            <path class="stroke-accent" d="M280 134 H212 M148 134 H82 M89 129.5 L82 134 L89 138.5"/>
-            <rect class="well" x="20" y="160" width="112" height="30" rx="8"/>
-            <rect class="strong-well" x="30" y="178" width="92" height="5" rx="2.5"/><rect class="accent" x="30" y="178" width="38" height="5" rx="2.5"/>
-            <text class="quiet" x="30" y="173">Progress shown</text>
-            <rect class="well" x="228" y="160" width="112" height="30" rx="8"/>
-            <text class="quiet" x="284" y="179" text-anchor="middle">Download and check</text>
-            <rect class="well" x="228" y="198" width="112" height="30" rx="8"/>
-            <text class="quiet" x="284" y="217" text-anchor="middle">Replace and restart</text>
+            <text x="80" y="202" text-anchor="middle">Breezer AI</text><text class="quiet" x="80" y="215" text-anchor="middle">Resting</text>
+            <text x="160" y="202" text-anchor="middle">Organato</text><text class="label" x="160" y="215" text-anchor="middle">Working</text>
+            <text x="240" y="202" text-anchor="middle">Updates</text><text class="quiet" x="240" y="215" text-anchor="middle">Resting</text>
           </svg>
         </figure>
-        <div class="patch-copy">
-          <h3>Started by the runtime you already have</h3>
+        <div class="feature-copy">
+          <h3 id="f-helpers">Helpers that rest when idle</h3>
           <ul class="notes">
-            <li>The updater now starts its worker with Breezer's installed runtime. Earlier versions copied that program into a temporary folder first, and macOS could quarantine the new copy and refuse to run it.</li>
-            <li>Breezer shows update progress only after the worker confirms it has started. Previously, a worker that never ran could still look like an update in progress.</li>
+            <li>The background helpers behind Breezer AI, Organato and updates now start when something needs them and close once they've been idle, rather than staying open.</li>
+            <li>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
+            <li>Breezer AI loads its provider code with your first request. Opening Settings or serving Organato requests does not load that code just in case.</li>
+            <li>After Settings has sat quietly for a while, your next action reconnects on its own. What you typed stays in place, and an interrupted change is never resent automatically.</li>
+            <li>An update you've checked for stays ready to install. If the connection drops first, Breezer asks you to check again. The checksum, identity, signature and rollback checks are unchanged.</li>
           </ul>
         </div>
-      </div>
+      </article>
 
-      <div class="patch-pair">
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card ring" x="16" y="16" width="96" height="40" rx="9"/>
-              <text x="28" y="40">Breezer</text>
-              <rect class="ghost" x="208.5" y="16.5" width="95" height="39" rx="9"/>
-              <text class="quiet" x="222" y="40">Worker</text>
-              <path class="stroke-quiet" d="M280 30 l10 10 M290 30 l-10 10"/>
-              <path class="stroke-accent dash" d="M116 36 H200"/>
-              <circle class="card edge" cx="158" cy="72" r="11"/>
-              <circle class="stroke-quiet" cx="158" cy="72" r="6"/><path class="stroke-quiet" d="M158 68.5 v3.5 l2.5 1.5"/>
-              <text class="quiet" x="158" y="98" text-anchor="middle">No reply</text>
-              <rect class="notice" x="16.5" y="112.5" width="190" height="52" rx="10"/>
-              <circle class="stroke-quiet" cx="34" cy="128" r="6.5"/><path class="stroke-quiet" d="M34 124.5 v4 M34 131.4 v0.1"/>
-              <rect class="bar strong" x="48" y="124" width="110" height="5" rx="2.5"/>
-              <rect class="bar" x="48" y="136" width="140" height="4" rx="2"/><rect class="bar" x="48" y="146" width="96" height="4" rx="2"/>
-              <path class="ghost" d="M232.5 120.5 h18 l6 6 h30 v34 h-54 Z"/>
-              <path class="stroke-quiet" d="M252 136 l14 14 M266 136 l-14 14"/>
-              <text class="quiet" x="259.5" y="175" text-anchor="middle">Cleaned up</text>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>A failed start is reported</h3>
-            <ul class="notes">
-              <li>If the worker exits early or never confirms, Breezer reports an error instead of showing progress, and removes the temporary folder it prepared for the update.</li>
-            </ul>
-          </div>
+      <!-- Startup and storage: prepared ad-block lists; and which app copies
+           cleanup removes and which it keeps. -->
+      <article class="feature" aria-labelledby="f-storage">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <line class="rule" x1="160" y1="22" x2="160" y2="210"/>
+
+            <rect class="paper" x="30.5" y="44.5" width="78" height="100" rx="8"/>
+            <rect class="paper" x="38.5" y="36.5" width="78" height="100" rx="8"/>
+            <rect class="card edge lift" x="46.5" y="28.5" width="78" height="100" rx="8"/>
+            <rect class="bar strong" x="56" y="40" width="44" height="5" rx="2.5"/>
+            <rect class="bar" x="56" y="54" width="58" height="4" rx="2"/>
+            <rect class="bar" x="56" y="64" width="48" height="4" rx="2"/>
+            <rect class="bar" x="56" y="74" width="54" height="4" rx="2"/>
+            <rect class="bar" x="56" y="84" width="40" height="4" rx="2"/>
+            <path class="accent" d="M110 104 l17 6.2 v12.4 c0 10 -7.4 16.6 -17 20.4 c-9.6 -3.8 -17 -10.4 -17 -20.4 v-12.4 Z"/>
+            <path class="tick" d="M103.4 122.6 l4.4 4.4 l8.6 -9.4"/>
+            <text x="76" y="174" text-anchor="middle">Lists ready</text>
+            <text class="quiet" x="76" y="188" text-anchor="middle">Custom filters</text>
+            <text class="quiet" x="76" y="200" text-anchor="middle">as before</text>
+
+            <rect class="accent" x="182" y="34" width="30" height="30" rx="8"/>
+            <path class="tick" d="M191.5 48.5 h11 v9 h-11 Z M193.8 48.5 v-2.8 a3.2 3.2 0 0 1 6.4 0 v2.8"/>
+            <text x="224" y="46">In use</text><text class="quiet" x="224" y="59">Kept</text>
+
+            <rect class="ghost" x="188.5" y="92.5" width="29" height="29" rx="8"/>
+            <rect class="card" x="181" y="99" width="31" height="31" rx="8.5"/><rect class="ghost" x="182.5" y="100.5" width="28" height="28" rx="8"/>
+            <path class="stroke-quiet" d="M192 110 l9 9 M201 110 l-9 9"/>
+            <text x="224" y="112">Session ended</text><text class="label" x="224" y="125">Removed</text>
+
+            <rect class="strong-well" x="182" y="160" width="30" height="30" rx="8"/>
+            <circle class="stroke-quiet" cx="197" cy="175" r="7"/><path class="stroke-quiet" d="M197 170.6 v4.4 l3 2"/>
+            <text x="224" y="172">Earlier version</text><text class="quiet" x="224" y="185">Kept</text>
+          </svg>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-storage">Less work at startup, less left on disk</h3>
+          <ul class="notes">
+            <li>Breezer can reuse prepared versions of unchanged built-in ad-block lists. Custom filters, list updates and your blocking settings work as before.</li>
+            <li>If a prepared list has changed or cannot be used, Breezer processes it normally instead.</li>
+            <li>While Breezer runs, it keeps a private copy of itself so macOS can still check its signature after an update. Copies left by sessions that have ended are now removed.</li>
+            <li>A copy a running Breezer still holds is never touched, and copies from earlier versions, or whose owner can't be confirmed, are kept.</li>
+          </ul>
         </div>
-
-        <div class="patch-group">
-          <figure class="plate patch-plate" aria-hidden="true">
-            <svg class="art" viewBox="0 0 320 180" focusable="false">
-              <rect class="card lift" x="14.5" y="14.5" width="138" height="151" rx="12"/>
-              <rect class="bar strong" x="28" y="28" width="70" height="6" rx="3"/>
-              <circle class="accent" cx="34" cy="58" r="7"/><path class="tick" d="M30.5 58 l2.5 2.5 l4.5 -5"/><text x="48" y="61.5">Checksum</text>
-              <circle class="accent" cx="34" cy="86" r="7"/><path class="tick" d="M30.5 86 l2.5 2.5 l4.5 -5"/><text x="48" y="89.5">App signature</text>
-              <circle class="accent" cx="34" cy="114" r="7"/><path class="tick" d="M30.5 114 l2.5 2.5 l4.5 -5"/><text x="48" y="117.5">Newer source</text>
-              <rect class="bar" x="28" y="140" width="100" height="4" rx="2"/>
-              <rect class="frame" x="168.5" y="14.5" width="137" height="94" rx="12"/>
-              <rect class="card edge" x="180" y="26" width="52" height="56" rx="9"/>
-              <circle class="s1" cx="206" cy="48" r="9"/><rect class="bar" x="192" y="66" width="28" height="4" rx="2"/>
-              <rect class="well" x="242" y="26" width="52" height="56" rx="9"/>
-              <circle class="asleep" cx="268" cy="48" r="9"/><rect class="bar" x="254" y="66" width="28" height="4" rx="2"/>
-              <path class="stroke-accent" d="M262 90 C 252 100, 222 100, 212 90 M218 88.5 L212 90 L213.5 96"/>
-              <rect class="mint-soft" x="168" y="124" width="138" height="42" rx="12"/>
-              <rect class="card" x="178" y="133" width="24" height="24" rx="6"/>
-              <circle class="stroke-accent" cx="190" cy="142" r="3.5"/><path class="stroke-accent" d="M183.5 152.5 c1.5 -4 11.5 -4 13 0"/>
-              <text x="210" y="149">Profile and passwords</text>
-            </svg>
-          </figure>
-          <div class="patch-copy">
-            <h3>The same safety checks</h3>
-            <ul class="notes">
-              <li>Before replacing Breezer, the updater still checks the download's checksum, the app's identity and signature, and that the release builds on the version you have.</li>
-              <li>The previous app is kept during replacement so a failed update can roll back. Your profile and passwords live outside the app and stay as they are.</li>
-            </ul>
-          </div>
+      </article>
+      <article class="feature" aria-labelledby="f-passkeys">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <rect class="well" x="14" y="14" width="128" height="204" rx="10"/>
+            <text class="lane" x="26" y="36">Passwords</text>
+            <rect class="box" x="26.5" y="52.5" width="102" height="23" rx="7"/>
+            <text class="secret" x="36" y="68">••••••••</text>
+            <rect class="bar" x="26" y="92" width="88" height="4" rx="2"/>
+            <rect class="bar" x="26" y="104" width="72" height="4" rx="2"/>
+            <rect class="mint-soft" x="22" y="132" width="112" height="43" rx="8"/>
+            <text class="label" x="32" y="150">Manage local</text>
+            <text class="label" x="32" y="164">passkeys</text>
+            <path class="stroke-accent dash" d="M137 154 H177"/>
+            <path class="stroke-accent" d="M172 149 l6 5 l-6 5"/>
+            <rect class="paper lift" x="184.5" y="34.5" width="121" height="164" rx="10"/>
+            <circle class="dot" cx="196" cy="46" r="3"/><rect class="bar" x="204" y="44" width="72" height="4" rx="2"/>
+            <text class="label" x="196" y="73">Local passkeys</text>
+            <circle class="mint-soft" cx="244" cy="115" r="23"/>
+            <circle class="stroke-accent" cx="236" cy="115" r="7"/>
+            <path class="stroke-accent" d="M243 115 h20 M255 115 v6 M262 115 v4"/>
+            <rect class="bar" x="196" y="155" width="96" height="4" rx="2"/>
+            <rect class="bar" x="196" y="167" width="76" height="4" rx="2"/>
+            <text class="quiet" x="26" y="202">Storage and provider help</text>
+          </svg>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-passkeys">Clearer passkey settings</h3>
+          <p>Passwords settings now explains where passkeys are stored and opens native local passkey management.</p>
+          <p>Touch ID and Apple Passwords remain unavailable until Breezer has the required Apple signing entitlements. Saving passwords and importing them from CSV work as before.</p>
+          <p>Password suggestions close in Chromium's usual way again as you type. The Microsoft sign-in Enter behavior remains unconfirmed, as noted below.</p>
         </div>
-      </div>
-
-      <div class="patch-limit">
-        <h3>What this can't fix</h3>
-        <p>Breezer is signed locally, not notarized by Apple, so macOS may still ask you to approve a downloaded build. If you use 1.1.3 or earlier, its older updater lacks this fix, so a one-time manual install of 1.1.4 may be needed before later updates use the new handoff.</p>
-      </div>
+      </article>
+      <article class="feature" aria-labelledby="f-research">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <text class="lane" x="20" y="29">Choose source tabs</text>
+            <rect class="mint-soft" x="16" y="43" width="128" height="39" rx="9"/>
+            <circle class="accent" cx="31" cy="62" r="8"/>
+            <path class="tick" d="M27 62 l3 3 l5 -6"/>
+            <text class="label" x="47" y="60">Source 1</text>
+            <rect class="bar" x="47" y="68" width="70" height="3" rx="1.5"/>
+            <rect class="mint-soft" x="16" y="90" width="128" height="39" rx="9"/>
+            <circle class="accent" cx="31" cy="109" r="8"/>
+            <path class="tick" d="M27 109 l3 3 l5 -6"/>
+            <text class="label" x="47" y="107">Source 2</text>
+            <rect class="bar" x="47" y="115" width="58" height="3" rx="1.5"/>
+            <rect class="well" x="16" y="137" width="128" height="39" rx="9"/>
+            <circle class="stroke-quiet" cx="31" cy="156" r="7"/>
+            <text class="quiet" x="47" y="160">Not selected</text>
+            <path class="stroke-accent dash" d="M149 85 h25"/>
+            <path class="stroke-accent" d="M169 80 l6 5 l-6 5"/>
+            <rect class="paper lift" x="183.5" y="44.5" width="120" height="149" rx="10"/>
+            <text class="label" x="196" y="67">Assistant</text>
+            <rect class="bar" x="196" y="81" width="93" height="4" rx="2"/>
+            <rect class="bar" x="196" y="92" width="82" height="4" rx="2"/>
+            <rect class="bar" x="196" y="103" width="65" height="4" rx="2"/>
+            <rect class="mint-soft" x="196" y="123" width="91" height="22" rx="6"/>
+            <text class="label" x="204" y="138">[1]   [2]</text>
+            <text class="quiet" x="196" y="171">Text only</text>
+            <text class="quiet" x="20" y="209">Up to six pages in this window</text>
+          </svg>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-research">Research across tabs you choose</h3>
+          <p>Choose source tabs in the assistant to compare and summarize up to six pages, with source references and clear text-only sharing. Research sources never enable browser control.</p>
+          <p>Review the selected pages before sharing their text. Source labels, URLs, captured lengths, truncation and individual page errors stay visible. Remove a source, clear the list or cancel a pending capture whenever you need to.</p>
+        </div>
+      </article>
+      <article class="feature" aria-labelledby="f-translation">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <rect class="paper" x="16.5" y="20.5" width="287" height="191" rx="10"/>
+            <text class="lane" x="30" y="43">Translate page</text>
+            <rect class="well" x="29" y="55" width="113" height="26" rx="7"/>
+            <text class="label" x="39" y="72">Spanish</text>
+            <path class="stroke-accent" d="M151 68 h18 m-5 -5 l5 5 l-5 5"/>
+            <rect class="mint-soft" x="179" y="55" width="111" height="26" rx="7"/>
+            <text class="label" x="189" y="72">English</text>
+            <rect class="bar" x="30" y="100" width="233" height="4" rx="2"/>
+            <rect class="bar" x="30" y="112" width="199" height="4" rx="2"/>
+            <rect class="bar" x="30" y="124" width="217" height="4" rx="2"/>
+            <rect class="box" x="29.5" y="142.5" width="122" height="26" rx="7"/>
+            <path class="stroke-accent" d="M42 151 l-4 4 l4 4 M38 155 h7 a4 4 0 0 1 0 8"/>
+            <text class="label" x="54" y="160">Restore original</text>
+            <circle class="dot" cx="34" cy="191" r="3"/>
+            <text class="quiet" x="43" y="195">Connect your translation provider</text>
+          </svg>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-translation">Translate a page, keep the original</h3>
+          <p>Translate page text in place, choose languages and restore the original. Connect your local LibreTranslate server or use your own LibreTranslate.com key, with explicit confirmation before sharing page text.</p>
+          <p>Right-click a page and choose Translate page to begin. Translation needs your provider to be running; Breezer does not bundle translation models or use your AI account.</p>
+          <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
+        </div>
+      </article>
+      <article class="feature" aria-labelledby="f-settings">
+        <figure class="plate plate-art" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
+            <rect class="well" x="12" y="12" width="96" height="208" rx="10"/>
+            <text class="lane" x="24" y="34">Settings</text>
+            <circle class="stroke-quiet" cx="28" cy="62" r="4"/>
+            <text class="quiet" x="40" y="66">General</text>
+            <circle class="stroke-quiet" cx="28" cy="93" r="4"/>
+            <text class="quiet" x="40" y="97">Passwords</text>
+            <rect class="mint-soft" x="17" y="111" width="86" height="27" rx="7"/>
+            <circle class="accent" cx="28" cy="124" r="4"/>
+            <text class="label" x="40" y="128">Languages</text>
+            <path class="stroke-quiet" d="M23 181 h10 v10 H23 Z M28 186 l6 -6 m-5 0 h5 v5"/>
+            <text class="quiet" x="40" y="190">Other</text>
+            <text class="quiet" x="122" y="32">Settings / Languages</text>
+            <rect class="box" x="120.5" y="47.5" width="187" height="30" rx="8"/>
+            <circle class="stroke-quiet" cx="134" cy="61" r="5"/>
+            <path class="stroke-quiet" d="M138 65 l4 4"/>
+            <text class="label" x="151" y="67">translate</text>
+            <text class="quiet" x="122" y="100">Languages</text>
+            <rect class="mint-soft" x="120" y="111" width="188" height="47" rx="9"/>
+            <text class="label" x="132" y="130">Translate page</text>
+            <rect class="bar" x="132" y="140" width="128" height="4" rx="2"/>
+            <path class="stroke-accent" d="M284 129 l5 5 l-5 5"/>
+            <text class="quiet" x="122" y="184">Search browser settings</text>
+            <rect class="bar" x="122" y="197" width="128" height="3" rx="1.5"/>
+          </svg>
+        </figure>
+        <div class="feature-copy">
+          <h3 id="f-settings">Find settings by category or search</h3>
+          <p>Settings has a new look. Categories sit in a list on the left, and search takes you straight to the setting you need.</p>
+          <p>Press / to search by name, description or keyword. Search also offers Chromium's own settings. Choose Other to open the full browser settings page.</p>
+          <p>Back and Forward move between categories. Use the keyboard to move through categories and search results; the layout follows your Breezer theme and light or dark appearance.</p>
+        </div>
+      </article>
     </section>
 
-    <section class="patch-notes" aria-labelledby="patch-115-title">
-      <p class="release">Update 1.1.5</p>
-      <h2 id="patch-115-title">The latest changes, explained</h2>
-      <p class="lede">The 1.1.3 and 1.1.4 notes now include illustrated guides to Peek, the sidebar improvements and the update handoff, with their limits explained alongside them.</p>
-    </section>
+    <aside class="pending" aria-labelledby="pending-sync-title">
+      <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h12l-3-3M19 16H7l3 3M5 8v5M19 16v-5"/></svg>
+      <div>
+        <h2 id="pending-sync-title">Still to verify: encrypted sync</h2>
+        <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+      </div>
+    </aside>
+
+    <aside class="pending" aria-labelledby="pending-docs-title">
+      <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+      <div>
+        <h2 id="pending-docs-title">Still to verify: Google Docs editing</h2>
+        <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
+      </div>
+    </aside>
+
+    <aside class="pending" aria-labelledby="pending-passwords-title">
+      <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg>
+      <div>
+        <h2 id="pending-passwords-title">Still to confirm: Enter on Microsoft sign-in</h2>
+        <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
+        <p>A narrow Enter fallback is included for explicit username/current-password forms. Native password-picker, IME, validation and site checks remain pending.</p>
+      </div>
+    </aside>
 
     <aside class="pending" aria-labelledby="pending-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>

@@ -527,7 +527,14 @@ function rowNode() {
   return row;
 }
 
+const rowPresentation = new WeakMap();
 function updateRow(row, { title, tab, url, active, asleep, actionLabel, actionIcon, selected }) {
+  const presentation = [title, faviconFor(tab, url), urlOf(tab) || url, Boolean(active), Boolean(asleep),
+    tab?.status, Boolean(tab?.discarded), Boolean(tab?.audible), Boolean(tab?.mutedInfo?.muted),
+    actionLabel, actionIcon, Boolean(selected), state.renaming?.key === row.dataset.key];
+  const previous = rowPresentation.get(row);
+  if (previous && presentation.every((value, index) => value === previous[index])) return;
+  rowPresentation.set(row, presentation);
   const [favicon, label, sound, action] = row.children;
   if (state.renaming?.key !== row.dataset.key && label.textContent !== title) label.textContent = title;
   updateFavicon(favicon, tab, url, title);
@@ -713,11 +720,17 @@ function syncRovingFocus() {
     const wanted = items.find((node) => node.dataset.key === state.focus[name])
       || items.find((node) => node.getAttribute('aria-selected') === 'true')
       || items[0];
-    for (const node of items) node.tabIndex = node === wanted ? 0 : -1;
+    for (const node of items) {
+      const tabIndex = node === wanted ? 0 : -1;
+      if (node.tabIndex !== tabIndex) node.tabIndex = tabIndex;
+    }
   }
   const tiles = [...$('favorites').children].filter((node) => !node.classList.contains('leaving'));
   const tile = tiles.find((node) => node.dataset.key === state.focus.favorites) || tiles.find((node) => node.classList.contains('active')) || tiles[0];
-  for (const node of tiles) node.tabIndex = node === tile ? 0 : -1;
+  for (const node of tiles) {
+    const tabIndex = node === tile ? 0 : -1;
+    if (node.tabIndex !== tabIndex) node.tabIndex = tabIndex;
+  }
 }
 
 function focusItem(node) {

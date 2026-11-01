@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-01T11:15:19.853404+00:00",
+  "artifactCopiedToMac": true,
+  "archiveSha256Verified": true,
+  "allThreeNativeBinaryHashesVerified": true,
+  "graph": [
+    23,
+    23
+  ],
+  "failedActions": 0,
+  "appPath": "/Users/likht.ethan/.t3/projects/breezer/build/windows-crossbuild-20261031/retrieved-latest-candidate/extracted/Breezer.app",
+  "chromedriverPath": "/Users/likht.ethan/.t3/projects/breezer/build/windows-crossbuild-20261031/retrieved-latest-candidate/extracted/chromedriver",
+  "pcUbuntuTerminated": true,
+  "noBuildStarted": true,
+  "installedAppChanged": false,
+  "macRuntimeVerified": false,
+  "signingVerified": false,
+  "matchingHostPackagingStillRequired": true
+}

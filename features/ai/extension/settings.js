@@ -429,48 +429,93 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 export function mountUpdates(api) {
   const container = $('update-settings');
   if (!container) return;
-  const port = api.runtime.connect({ name: 'breezer-updates' });
   const status = $('update-status'), check = $('update-check'), install = $('update-install');
-  let sequence = 0, pending = null, timer, poll;
+  let sequence = 0, pending = null, timer, poll, port = null, closed = false, available = false, installing = false;
+  const disconnected = () => {
+    const needsCheck = pending !== null || available || installing;
+    clearTimeout(timer); clearInterval(poll); poll = null; pending = null;
+    available = false; installing = false;
+    check.disabled = false; install.disabled = true; install.hidden = true;
+    if (needsCheck) status.textContent = 'Update helper disconnected. Check for updates again.';
+  };
+  const connect = () => {
+    if (port) return port;
+    const connection = api.runtime.connect({ name: 'breezer-updates' });
+    port = connection;
+    connection.onMessage.addListener(message => {
+      if (closed || port !== connection || message.id !== pending) return;
+      clearTimeout(timer); pending = null;
+      check.disabled = false;
+      if (!message.ok) { status.textContent = message.error; return; }
+      const value = message.value;
+      status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
+      if (value.available !== undefined) { available = value.available === true; install.hidden = !available; }
+      install.disabled = !available;
+      if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
+      if (value.installing) {
+        installing = true; available = false; check.disabled = true; install.hidden = true;
+        if (!poll) poll = setInterval(() => request('update-status'), 2000);
+      }
+      if (['installed', 'failed'].includes(value.phase)) { installing = false; clearInterval(poll); poll = null; check.disabled = false; }
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (closed || port !== connection) return;
+      port = null; disconnected();
+    });
+    return connection;
+  };
   const request = type => {
-    if (pending) return;
+    if (closed || pending || (type === 'update-install' && !available)) return;
     pending = String(++sequence);
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
     timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Try again.'; }, 65_000);
-    port.postMessage({ type, id: pending });
+    try { connect().postMessage({ type, id: pending }); }
+    catch {
+      const connection = port; port = null;
+      try { connection?.disconnect(); } catch {}
+      disconnected();
+    }
   };
-  port.onMessage.addListener(message => {
-    if (message.id !== pending) return;
-    clearTimeout(timer); pending = null;
-    check.disabled = false;
-    if (!message.ok) { status.textContent = message.error; return; }
-    const value = message.value;
-    status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
-    if (value.available !== undefined) install.hidden = !value.available;
-    install.disabled = !value.available;
-    if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
-    if (value.installing) { check.disabled = true; install.hidden = true; poll = setInterval(() => request('update-status'), 2000); }
-    if (['installed', 'failed'].includes(value.phase)) { clearInterval(poll); check.disabled = false; }
-  });
-  port.onDisconnect.addListener(() => { clearTimeout(timer); clearInterval(poll); check.disabled = false; install.disabled = true; status.textContent = 'Update helper disconnected. Reopen Settings to retry.'; });
   check.addEventListener('click', () => request('update-check'));
   install.addEventListener('click', () => request('update-install'));
-  const dispose = () => { clearTimeout(timer); clearInterval(poll); port.disconnect(); };
+  const dispose = () => { closed = true; clearTimeout(timer); clearInterval(poll); port?.disconnect(); port = null; };
   window.addEventListener('pagehide', dispose, { once: true });
   request('update-check');
   return { dispose };
 }
 
 export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
-  const port = api.runtime.connect({ name: 'breezer-organato-settings' });
   const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
   const controls = ['organato-connect', 'organato-disconnect', 'organato-key', ...Object.keys(mappings)];
-  let next = 0, pending, timer, closed = false;
+  let next = 0, pending, timer, closed = false, port = null;
   const busy = value => { for (const id of controls) $(id).disabled = value; };
   const finish = text => {
     clearTimeout(timer); pending = null; busy(false);
     if (text) $('organato-status').textContent = text;
+  };
+  const connect = () => {
+    if (port) return port;
+    const connection = api.runtime.connect({ name: 'breezer-organato-settings' });
+    port = connection;
+    connection.onMessage.addListener(message => {
+      if (closed || port !== connection || message.id !== pending?.id) return;
+      if (message.type === 'progress') {
+        $('organato-status').textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…';
+        return;
+      }
+      if (!message.ok) { finish(message.error); return; }
+      for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
+      finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
+    });
+    connection.onDisconnect.addListener(() => {
+      void api.runtime.lastError;
+      if (closed || port !== connection) return;
+      port = null;
+      if (pending) finish('Connection closed. Try again.');
+    });
+    return connection;
   };
   const request = (type, settings) => {
     if (closed || pending?.type === 'configure') return;
@@ -478,27 +523,20 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
     pending = { id: String(++next), type };
     busy(type === 'configure');
     timer = setTimeout(() => finish('Organato connection timed out. Check your connection and try again.'), timeoutMs);
-    try { port.postMessage({ id: pending.id, type, settings }); }
-    catch { finish('Organato helper is unavailable. Reopen Settings to retry.'); }
-  };
-  port.onMessage.addListener(message => {
-    if (closed || message.id !== pending?.id) return;
-    if (message.type === 'progress') {
-      $('organato-status').textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…';
-      return;
+    try { connect().postMessage({ id: pending.id, type, settings }); }
+    catch {
+      const connection = port; port = null;
+      try { connection?.disconnect(); } catch {}
+      finish('Organato helper is unavailable. Try again.');
     }
-    if (!message.ok) { finish(message.error); return; }
-    for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
-    finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
-  });
-  port.onDisconnect.addListener(() => { if (!closed) finish('Connection closed. Reopen Settings to retry.'); });
+  };
   for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));
   $('organato-connect').addEventListener('click', () => {
     const key = $('organato-key').value.trim(); $('organato-key').value = '';
     $('organato-status').textContent = 'Connecting to Organato…'; request('configure', { key });
   });
   $('organato-disconnect').addEventListener('click', () => request('configure', { disconnect: true }));
-  const dispose = () => { closed = true; clearTimeout(timer); port.disconnect(); };
+  const dispose = () => { closed = true; clearTimeout(timer); port?.disconnect(); port = null; };
   window.addEventListener('pagehide', dispose, { once: true });
   request('view');
   return { dispose };
