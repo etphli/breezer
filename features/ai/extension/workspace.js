@@ -247,10 +247,17 @@ function activate(tabId) {
   return api.tabs.update(tabId, { active: true }).catch((error) => showToast(errorText(error)));
 }
 
+const openingEntries = new Map();
 function openEntry(entry, tab) {
-  if (tab) return activate(tab.id);
+  if (openingEntries.has(entry.id)) return openingEntries.get(entry.id);
+  // The rendered tile may predate a tab-created event or an earlier command.
+  const live = (tab && state.tabs.get(tab.id)) || [...state.tabs.values()].find(item => state.records[item.id]?.e === entry.id);
+  if (live) return activate(live.id);
   const found = findNode(state.store, entry.id);
-  return createTab({ url: entry.url, spaceId: found?.space?.id ?? state.activeSpaceId, entryId: entry.id, pinned: true });
+  const opening = createTab({ url: entry.url, spaceId: found?.space?.id ?? state.activeSpaceId, entryId: entry.id, pinned: true })
+    .finally(() => openingEntries.delete(entry.id));
+  openingEntries.set(entry.id, opening);
+  return opening;
 }
 
 // Keeps the space from going empty and keeps focus inside it when the active tab closes.
@@ -1369,6 +1376,18 @@ async function initSidebar(route) {
 }
 
 function bindSidebar() {
+  // Native browser commands reach this window's document even when web content
+  // has focus. Cancel only saved slots; native selection handles other indices.
+  document.addEventListener('breezer-select-numbered-tab', (event) => {
+    const index = event.detail;
+    if (!Number.isInteger(index) || index < 0 || index > 7) return;
+    const model = buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: state.activeSpaceId });
+    const slots = [...model.favorites, ...model.pinned.flatMap(node => node.kind === 'folder' ? node.children : [node])];
+    const item = slots[index];
+    if (!item) return;
+    event.preventDefault();
+    void openEntry(item.entry, item.tab);
+  });
   api.tabs.onCreated.addListener(onCreated);
   api.tabs.onUpdated.addListener(onUpdated);
   api.tabs.onRemoved.addListener(onRemoved);

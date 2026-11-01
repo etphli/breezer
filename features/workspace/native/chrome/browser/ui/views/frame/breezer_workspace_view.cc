@@ -11,13 +11,18 @@
 #include "base/location.h"
 #include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
+#include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
 #include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/extensions/extension_view_host.h"
 #include "chrome/browser/extensions/extension_view_host_factory.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/ui/browser_commands.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
 #include "chrome/browser/ui/helium/breezer_workspace_prefs.h"
+#include "chrome/browser/ui/views/frame/browser_view.h"
+#include "chrome/common/chrome_isolated_world_ids.h"
+#include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/web_contents.h"
 #include "extensions/browser/extension_host.h"
 #include "extensions/browser/unloaded_extension_reason.h"
@@ -27,6 +32,7 @@
 #include "ui/gfx/geometry/rect.h"
 #include "ui/views/controls/native/native_view_host.h"
 #include "ui/views/layout/fill_layout.h"
+#include "ui/views/view_utils.h"
 #include "url/gurl.h"
 
 BreezerWorkspaceView::BreezerWorkspaceView(
@@ -66,6 +72,58 @@ BreezerWorkspaceView::~BreezerWorkspaceView() {
 
 bool BreezerWorkspaceView::is_available() const {
   return extension_host_ && extension_view_;
+}
+
+BreezerWorkspaceView* BreezerWorkspaceView::FromBrowser(
+    BrowserWindowInterface* browser) {
+  if (!browser || browser->GetProfile()->IsOffTheRecord()) {
+    return nullptr;
+  }
+  auto* view = BrowserView::GetBrowserViewForBrowser(browser);
+  if (!view) {
+    return nullptr;
+  }
+  auto* workspace =
+      views::AsViewClass<BreezerWorkspaceView>(view->GetViewByID(kViewId));
+  return workspace && workspace->is_available() ? workspace : nullptr;
+}
+
+bool BreezerWorkspaceView::SelectNumberedTab(
+    int index,
+    TabStripUserGestureDetails gesture) {
+  if (!is_available() || index < 0 || index > 7) {
+    return false;
+  }
+  auto* frame = extension_host_->host_contents()->GetPrimaryMainFrame();
+  const GURL& url = frame->GetLastCommittedURL();
+  if (!frame->IsRenderFrameLive() || !url.SchemeIs("chrome-extension") ||
+      url.GetHost() != breezer_workspace::kExtensionId ||
+      url.GetPath() != "/workspace.html") {
+    return false;
+  }
+  // Only this browser's sidebar receives the command. No page focus, synthetic
+  // key event or extension worker's guess at the current window is involved.
+  frame->ExecuteJavaScriptInIsolatedWorld(
+      base::UTF8ToUTF16(base::StrCat({
+          "!document.dispatchEvent(new CustomEvent('breezer-select-numbered-tab',"
+          "{cancelable:true,detail:",
+          base::NumberToString(index), "}))"})),
+      base::BindOnce(&BreezerWorkspaceView::OnNumberedTabResult,
+                     weak_factory_.GetWeakPtr(), index, gesture),
+      ISOLATED_WORLD_ID_CHROME_INTERNAL);
+  return true;
+}
+
+void BreezerWorkspaceView::OnNumberedTabResult(
+    int index,
+    TabStripUserGestureDetails gesture,
+    const base::Value& handled) {
+  if (!browser_->IsDeleteScheduled() &&
+      (!handled.is_bool() || !handled.GetBool())) {
+    // Missing saved slots and a document still starting up keep the original
+    // native tab/group selection. This bypasses the command hook, avoiding a loop.
+    chrome::SelectNumberedTab(&*browser_, index, gesture);
+  }
 }
 
 views::View* BreezerWorkspaceView::GetFocusableView() const {

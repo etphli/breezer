@@ -150,10 +150,53 @@ def check_overlay(tree, originals):
             "Native settings category navigation changed")
 
     check_peek(tree, added, idl, api)
+    check_numbered_tabs(tree, host)
 
     fingerprint = workspace.fingerprint()
     require(re.fullmatch(r"[0-9a-f]{64}", fingerprint) is not None,
             "Workspace fingerprint is not lowercase SHA-256")
+
+
+def check_numbered_tabs(tree, host):
+    """Native dispatch contract only; physical key acceptance needs a build."""
+    controller = (tree / 'chrome/browser/ui/browser_command_controller.cc').read_text()
+    numbered = controller.split('    case IDC_SELECT_TAB_0:', 1)[1].split(
+        '    case IDC_SELECT_LAST_TAB:', 1)[0]
+    for slot in range(1, 8):
+        require(f'case IDC_SELECT_TAB_{slot}:' in numbered,
+                f'Numbered slot {slot} must share the native command route')
+    require(numbered.index('workspace->SelectNumberedTab(') <
+            numbered.index('\n      SelectNumberedTab('),
+            'Saved slots must be offered the command before native tab indices')
+    reserved = controller.split('  // The custom sidebar owns saved slots', 1)[1].split(
+        '  return command_id == IDC_CLOSE_TAB', 1)[0]
+    require('command_id >= IDC_SELECT_TAB_0 && command_id <= IDC_SELECT_TAB_7' in reserved and
+            'BreezerWorkspaceView::FromBrowser(browser_)' in reserved and
+            'return true;' in reserved,
+            'Saved-slot commands must reach native dispatch while a page has focus')
+    last = controller.split('    case IDC_SELECT_LAST_TAB:', 1)[1].split(
+        '    case IDC_DUPLICATE_TAB:', 1)[0]
+    require('SelectLastTab(' in last and 'workspace' not in last,
+            'Command+9 must keep native last-tab selection')
+    lookup = host.split('BreezerWorkspaceView* BreezerWorkspaceView::FromBrowser(', 1)[1].split(
+        'bool BreezerWorkspaceView::SelectNumberedTab(', 1)[0]
+    require('IsOffTheRecord()' in lookup and 'GetBrowserViewForBrowser(browser)' in lookup and
+            'GetViewByID(kViewId)' in lookup and 'workspace->is_available()' in lookup,
+            'Commands must use only the originating browser\'s available custom sidebar')
+    dispatch = host.split('bool BreezerWorkspaceView::SelectNumberedTab(', 1)[1].split(
+        'void BreezerWorkspaceView::OnNumberedTabResult(', 1)[0]
+    for token in ('index < 0 || index > 7', 'IsRenderFrameLive()', 'url.SchemeIs("chrome-extension")',
+                  'url.GetHost() != breezer_workspace::kExtensionId', 'url.GetPath() != "/workspace.html"',
+                  'ExecuteJavaScriptInIsolatedWorld(', 'breezer-select-numbered-tab',
+                  'cancelable:true', 'ISOLATED_WORLD_ID_CHROME_INTERNAL',
+                  'weak_factory_.GetWeakPtr(), index, gesture'):
+        require(token in dispatch, f'Missing bounded native shortcut dispatch: {token}')
+    fallback = host.split('void BreezerWorkspaceView::OnNumberedTabResult(', 1)[1].split(
+        'views::View* BreezerWorkspaceView::GetFocusableView()', 1)[0]
+    require('!browser_->IsDeleteScheduled()' in fallback and
+            '!handled.GetBool()' in fallback and
+            'chrome::SelectNumberedTab(&*browser_, index, gesture)' in fallback,
+            'Unhandled saved slots must retain native selection without reentering the command hook')
 
 
 def check_peek(tree, added, idl, api):
