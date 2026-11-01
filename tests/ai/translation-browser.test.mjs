@@ -144,6 +144,13 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   assert.equal(saved.apiKey, '', 'changing provider never forwards its credential');
   assert.equal(saved.source, 'es'); assert.equal(saved.target, 'en');
   assert.equal(requests.length, count, 'settings and reopening never translate automatically');
+  const plain = await context.newPage(); await plain.goto('http://127.0.0.1:' + port + '/plain');
+  const plainId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, plain.url());
+  const unsupported = await context.newPage(); await unsupported.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + plainId);
+  await unsupported.locator('#languages').click(); await unsupported.waitForFunction(() => document.getElementById('source').options.length > 1);
+  await unsupported.locator('#consent').check(); await unsupported.locator('#translate').click();
+  await unsupported.waitForFunction(() => document.getElementById('status').textContent.includes('Only HTML pages'));
+  assert.equal(requests.length, count, 'unsupported document sends no text');
 });
 
 test('live local LibreTranslate model translates the actual page in disposable Chromium', { skip: !process.env.BREEZER_TRANSLATION_LIVE && 'Set BREEZER_TRANSLATION_LIVE=1 with your local server running', timeout: 120000 }, async t => {

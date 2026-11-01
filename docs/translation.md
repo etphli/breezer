@@ -51,6 +51,8 @@ Long documents use sequential batches of at most 32 strings and 4,000 UTF-16 cod
 
 `translation-settings.js` exports `async mountTranslationSettings({container, api})`, returning `{dispose}`. The Languages category mounts it in `#translation-settings`. The translation window links to `workspace.html#/settings/languages`.
 
+The integration intentionally leaves inherited translation patches intact. `toggle-translation-via-switch.patch` disables Chromium's standard service without `translate-script-url`; checked-in flags contain empty Google API credentials, and Helium's `remove-translate-section.patch` hides those settings. Chrome's newer [Translator API](https://developer.chrome.com/docs/ai/translator-api) also depends on downloadable browser models; its availability in this ungoogled build is unverified. A documented, explicitly chosen LibreTranslate server gives this feature a testable provider contract without enabling Google endpoints or relying on unavailable model services.
+
 ```sh
 npm ci --ignore-scripts --prefix tests/ai
 npx --prefix tests/ai playwright install chromium
