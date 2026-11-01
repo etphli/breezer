@@ -52,7 +52,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     window.submits = 0; document.getElementById('form').addEventListener('submit', event => { event.preventDefault(); window.submits++; });
   });
   const tabId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, page.url());
-  const ui = await context.newPage();
+  let ui = await context.newPage();
   await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
   const status = ui.locator('#status');
   await ui.locator('#languages').click();
@@ -80,10 +80,20 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   await page.waitForFunction(() => document.getElementById('dynamic').textContent.startsWith('English:'));
   await page.screenshot({ path: join(evidence, 'translation-page-fixture.png'), fullPage: true });
   await ui.screenshot({ path: join(evidence, 'translation-controls-fixture.png') });
+  const beforeClose = requests.length;
+  await ui.close();
+  assert.match(await page.locator('#article').textContent(), /^English:/);
+  ui = await context.newPage(); await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
+  await ui.waitForFunction(() => document.getElementById('status').textContent.includes('remains'));
+  assert.equal(await ui.locator('#languages').isEnabled(), true);
+  assert.equal(await ui.locator('#consent').isChecked(), false, 'sharing confirmation is not persisted');
+  assert.equal(requests.length, beforeClose);
   await ui.locator('#restore').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('restored'));
   assert.equal(await page.locator('#article').textContent(), 'La biblioteca abre por la mañana. Puedes leer junto a la ventana y escuchar los pájaros.');
   assert.equal(await page.locator('#hello').textContent(), ' Hola mundo. ');
   assert.equal(await page.locator('#dynamic').textContent(), 'Texto nuevo');
+  await ui.locator('#languages').click(); await ui.waitForFunction(() => document.getElementById('source').options.length > 1);
+  await ui.locator('#consent').check();
   await page.evaluate(() => {
     const long = document.createElement('p'); long.id = 'long'; long.textContent = 'Documento largo. '.repeat(600); document.body.append(long);
     for (let i = 0; i < 80; i++) { const p = document.createElement('p'); p.className = 'many'; p.textContent = 'Párrafo ' + i; document.body.append(p); }
