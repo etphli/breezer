@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 4: Less</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  #bg { inset: 0; background: #020c10; }
+  #deep { inset: 0; background: radial-gradient(80% 90% at 50% 45%, #0d4652 0%, #05202a 55%, #020c10 100%); opacity: 0; }
+  #seed { left: 0; top: 539px; width: 1920px; height: 2px; background: var(--ribbon); transform-origin: 50% 50%; z-index: 3; }
+  .pair { inset: 0; display: flex; flex-direction: column; justify-content: center; padding-left: 150px; z-index: 5; }
+  .pair div { font-size: 300px; font-weight: 800; letter-spacing: -0.06em; line-height: 0.92; white-space: nowrap; }
+  .pair span { display: inline-block; }
+  #rig { inset: 0; perspective: 2400px; z-index: 6; }
+  .card { position: absolute; border-radius: 26px; overflow: hidden; box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 60px 120px -30px rgb(0 0 0 / .8); }
+  .card img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; }
+  .feat { z-index: 8; width: 620px; }
+  .feat h2 { margin: 0; font-size: 104px; font-weight: 800; letter-spacing: -0.05em; line-height: 0.95; }
+  .feat p { margin: 30px 0 0; font-family: var(--serif); font-size: 44px; color: #cdeee5; line-height: 1.25; }
+  #trio { inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9; }
+  #trio div { font-size: 230px; font-weight: 800; letter-spacing: -0.06em; line-height: 0.95; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, wind, travel } = AD;
+const B = 60 / 124;
+const at = (b) => b * B;
+const END = at(50);
+const kickTimes = []; for (let b = 4; b < 50; b++) kickTimes.push(at(b));
+
+const pairs = [
+  { b: 4, top: "Less", bottom: "waiting.", bg: "#8ff0d0", ink: "#03141a", mode: "slide" },
+  { b: 8, top: "Less", bottom: "weight.", bg: "#03141a", ink: "#eafcf6", mode: "drop" },
+  { b: 12, top: "Less", bottom: "watching.", bg: "#f3ebda", ink: "#0a3440", mode: "fade" },
+  { b: 16, top: "More", bottom: "web.", bg: null, ink: "#eafcf6", mode: "ribbon" },
+];
+const feats = [
+  { b: 20, shot: "sidebar.png", w: 470, h: 1000, side: "left", title: "Tabs down<br>the side.", sub: "Spaces and folders that keep a busy day in order." },
+  { b: 28, shot: "newtab-dark.jpg", w: 980, h: 612, side: "right", title: "Your day on<br>every new tab.", sub: "Shortcuts, plans and to-dos at a glance." },
+  { b: 36, shot: "assistant-dark.png", w: 450, h: 1012, side: "right", title: "An assistant<br>beside the page.", sub: "There when you ask. Out of sight when you don’t." },
+];
+const trio = [["Fast.", "#eafcf6"], ["Light.", "#8ff0d0"], ["Private.", "#5cc4f2"]];
+
+AD.setup({
+  bpm: 124,
+  progression: ["Em", "C", "G", "D"],
+  sections: [
+    { from: 0, to: at(4), pad: true, bright: 0.2 },
+    { from: at(4), to: at(16), kick: "four", clap: true, hats: "8", bass: "8", pad: true, bright: 0.55 },
+    { from: at(16), to: at(20), kick: "four", hats: "16", bass: "8", arp: true, pad: true, bright: 0.9 },
+    { from: at(20), to: at(44), kick: "four", clap: true, hats: "8", bass: "8", arp: true, pad: true, bright: 0.75 },
+    { from: at(44), to: END, kick: "four", clap: true, hats: "16", bass: "8", pad: true, bright: 0.95 },
+    { from: END, to: 29.6, pad: true, bright: 0.5 },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const bg = el("div", "", stage); bg.id = "bg";
+    const deep = el("div", "", stage); deep.id = "deep";
+    const ctx = AD.canvas(stage, 4);
+    const seed = el("div", "", stage); seed.id = "seed";
+
+    const pairNodes = pairs.map((p) => {
+      const n = el("div", "pair", stage);
+      const top = el("div", "", n, p.top);
+      const bottom = el("div", p.mode === "ribbon" ? "ribbon-text" : "", n, [...p.bottom].map((c) => `<span>${c}</span>`).join(""));
+      if (p.mode === "ribbon") [...bottom.children].forEach((s) => s.classList.add("ribbon-text"));
+      bottom.classList.remove("ribbon-text");
+      top.style.color = bottom.style.color = p.ink;
+      if (p.mode === "ribbon") bottom.style.color = "transparent";
+      return { ...p, n, top, letters: [...bottom.children] };
+    });
+
+    const rig = el("div", "", stage); rig.id = "rig";
+    const featNodes = feats.map((f) => {
+      const card = el("div", "card", rig, `<img src="${AD.SHOTS + f.shot}" alt="">`);
+      set(card, { width: f.w + "px", height: f.h + "px", left: (f.side === "left" ? 260 : 1920 - 200 - f.w) + "px", top: (1080 - f.h) / 2 + "px" });
+      const text = el("div", "feat", stage, `<h2>${f.title}</h2><p>${f.sub}</p>`);
+      set(text, { left: (f.side === "left" ? 900 : 150) + "px", top: "330px" });
+      return { ...f, card, text, h2: text.querySelector("h2"), p: text.querySelector("p") };
+    });
+
+    const trioBox = el("div", "", stage); trioBox.id = "trio";
+    const trioNodes = trio.map(([w, c]) => { const n = el("div", "", trioBox, w); n.style.color = c; return n; });
+
+    const endCard = AD.mountEndCard("The web, without the weight.");
+
+    return (t) => {
+      const kp = pulse(t, kickTimes, 0.12);
+      const b = t / B;
+
+      // Pre-roll: a single line gathers itself
+      const pre = ease.inExpo(prog(t, 0.2, at(4)));
+      set(seed, { opacity: t < at(4) ? 0.3 + pre * 0.7 : 0, transform: `scaleX(${lerp(0.02, 1, pre)}) scaleY(${1 + pre * 3})` });
+
+      // Background colour follows the pairs
+      const pi = pairs.findLastIndex((p) => t >= at(p.b));
+      bg.style.background = pi >= 0 && pi < 3 && t < at(20) ? pairs[pi].bg : "#020c10";
+      deep.style.opacity = String(t >= at(16) ? 1 : 0);
+      deep.style.filter = `brightness(${1 + kp * 0.18})`;
+
+      ctx.clearRect(0, 0, 1920, 1080);
+      if (t >= at(16)) {
+        const sp = (s) => (s < at(16) ? 0 : s < at(20) ? 3600 : s < at(44) ? 900 : 2600);
+        wind(ctx, travel(sp, t), { count: 110, alpha: 0.5, len: 380, seed: 5, t, spread: 1.5 });
+      }
+
+      pairNodes.forEach((p, i) => {
+        const on = t >= at(p.b) && t < at(p.b + 4);
+        p.n.style.opacity = on ? 1 : 0;
+        if (!on) return;
+        const local = t - at(p.b);
+        const tp = ease.expo(prog(local, 0, 0.18));
+        set(p.top, { transform: `translateX(${(1 - tp) * -120}px) scale(${1 + kp * 0.015})`, opacity: tp });
+        p.letters.forEach((s, j) => {
+          const start = at(1) + j * 0.03;
+          const q = prog(local, start, start + 0.32);
+          let tr = "", op = q > 0 ? 1 : 0, fl = "none";
+          if (p.mode === "slide") tr = `translateX(${(1 - ease.expo(q)) * 900}px)`;
+          if (p.mode === "drop") {
+            const lift = ease.inOut(prog(local, at(2.5), at(3.6)));
+            tr = `translateY(${(1 - ease.back(q)) * -500 - lift * (40 + j * 14)}px) rotate(${lift * (j % 2 ? 4 : -4)}deg)`;
+            op = q > 0 ? 1 - lift * 0.3 : 0;
+          }
+          if (p.mode === "fade") {
+            const gone = ease.inOut(prog(local, at(2.3) + j * 0.06, at(3.3) + j * 0.06));
+            tr = `translateY(${(1 - ease.expo(q)) * 120}px)`;
+            op = (q > 0 ? ease.out(q) : 0) * (1 - gone);
+            fl = `blur(${gone * 26}px)`;
+          }
+          if (p.mode === "ribbon") {
+            tr = `scale(${lerp(2.2, 1, ease.expo(q)) + kp * 0.03})`;
+            op = ease.out(q);
+            fl = `blur(${(1 - ease.expo(q)) * 30}px)`;
+          }
+          set(s, { transform: tr, opacity: op, filter: fl });
+        });
+        p.n.style.transform = `scale(${1 + local * 0.02})`;
+      });
+
+      // Feature montage, eight beats each
+      featNodes.forEach((f, i) => {
+        const local = t - at(f.b);
+        const len = at(8);
+        const on = local > -0.6 && local < len + 0.4;
+        f.card.style.opacity = on ? 1 : 0;
+        f.text.style.opacity = on ? 1 : 0;
+        if (!on) return;
+        const inP = ease.quint(prog(local, -0.15, 0.85));
+        const outP = ease.inExpo(prog(local, len - 0.45, len + 0.05));
+        const dir = f.side === "left" ? 1 : -1;
+        set(f.card, {
+          transform: `translateZ(${lerp(-2600, 0, inP) + outP * 1800}px) rotateY(${lerp(dir * 50, dir * 10, inP) + Math.sin(local * 0.9) * 2}deg) rotateX(${lerp(-12, 3, inP)}deg) translateX(${outP * -dir * 900}px)`,
+          filter: `blur(${outP * 18}px)`,
+        });
+        const hp = ease.expo(prog(local, at(1), at(1) + 0.5));
+        const pp = ease.out(prog(local, at(3), at(3) + 0.6));
+        set(f.h2, { opacity: hp * (1 - outP), transform: `translateY(${(1 - hp) * 60}px)`, filter: `blur(${(1 - hp) * 10}px)` });
+        set(f.p, { opacity: pp * (1 - outP), transform: `translateY(${(1 - pp) * 20}px)` });
+      });
+
+      // Three words, then the logo
+      trioNodes.forEach((n, i) => {
+        const p = ease.expo(prog(t, at(44 + i), at(44 + i) + 0.25));
+        const out = ease.inExpo(prog(t, at(48), at(50)));
+        set(n, {
+          opacity: p * (1 - out),
+          transform: `translateY(${(1 - p) * 80}px) scale(${1 + out * 0.6 + kp * 0.02})`,
+          filter: `blur(${(1 - p) * 14 + out * 20}px)`,
+        });
+      });
+      trioBox.style.opacity = t >= at(44) && t < END + 0.2 ? 1 : 0;
+
+      AD.flash(pulse(t, [at(4)], 0.2) * 0.6 + pulse(t, [at(16)], 0.3) * 0.8 + pulse(t, [END], 0.3) * 0.6 + pulse(t, [at(20), at(28), at(36), at(44)], 0.15) * 0.25);
+      endCard(t, END);
+    };
+  },
+});
+
+AD.sfx(0.1, "riser", { length: at(4) - 0.1, g: 0.9 });
+AD.sfx(at(4), "impact", { g: 0.8 });
+[4, 8, 12, 16].forEach((b) => AD.sfx(at(b + 1) - 0.1, "whoosh", { length: 0.35, g: 0.55, pan_from: 0.7, pan_to: -0.7 }));
+AD.sfx(at(8) + at(1), "sub", { g: 0.8 });
+AD.sfx(at(12) + at(2.3), "swell", { length: 0.9, g: 0.5 });
+AD.sfx(at(16) - 0.9, "riser", { length: 0.9, g: 0.7 });
+AD.sfx(at(16), "impact");
+AD.sfx(at(16), "shimmer", { g: 0.7 });
+[20, 28, 36].forEach((b) => {
+  AD.sfx(at(b) - 0.3, "whoosh", { length: 0.9, g: 0.9, up: true });
+  AD.sfx(at(b + 8) - 0.45, "whoosh", { length: 0.6, g: 0.6, up: false, pan_from: 0.8, pan_to: -0.8 });
+});
+[44, 45, 46].forEach((b, i) => AD.sfx(at(b), "pop", { pitch: [1, 1.26, 1.5][i], g: 0.6 }));
+AD.sfx(at(48), "riser", { length: at(2), g: 0.9 });
+AD.sfx(END, "impact", { g: 0.9 });
+AD.sfx(END, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>

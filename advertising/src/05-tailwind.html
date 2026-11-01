@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Breezer ad 5: Tailwind</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  #bg { inset: 0; background: radial-gradient(70% 70% at 50% 50%, #0b1c22 0%, #030a0d 80%); }
+  #warpbg { inset: 0; background: radial-gradient(45% 45% at 50% 50%, #0f5563 0%, #05232c 50%, #01080b 100%); opacity: 0; }
+  .cap { left: 0; width: 1920px; text-align: center; z-index: 40; }
+  .cap.serif { top: 500px; font-size: 76px; color: #e6efee; }
+  .cap.heavy { top: 450px; font-size: 150px; font-weight: 800; letter-spacing: -0.055em; }
+  #logo { left: 880px; top: 460px; width: 160px; height: 160px; z-index: 15; }
+  .pg { left: 0; top: 0; width: 380px; height: 236px; border-radius: 20px; z-index: 10; padding: 26px; transform-origin: 50% 50%;
+    background: linear-gradient(160deg, rgb(30 60 70 / .92), rgb(10 28 34 / .92)); box-shadow: 0 0 0 1px rgb(143 240 208 / .22), 0 30px 60px -20px rgb(0 0 0 / .7); }
+  .pg .head { display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .pg .head b { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; font-size: 20px; color: #fff; }
+  .pg i { display: block; height: 14px; border-radius: 7px; background: rgb(255 255 255 / .12); margin-top: 18px; }
+  #rig { inset: 0; perspective: 2000px; z-index: 18; }
+  #rig .win { position: absolute; left: 240px; top: 90px; transform-origin: 50% 50%; }
+  #wincap { top: 968px; font-size: 42px; font-weight: 600; letter-spacing: -0.02em; z-index: 21; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="common.js"></script>
+<script>
+const { el, set, prog, ease, lerp, clamp, pulse, hash, wind, travel } = AD;
+const B = 60 / 120;
+const JUMP = 14 * B;
+const PORTAL = 37 * B;
+const LAND = 40 * B;
+const END = 48 * B;
+const kickTimes = []; for (let b = 14; b < 48; b++) if (b < 37 || b >= 40) kickTimes.push(b * B);
+
+const STARS = 700, ZMAX = 12, FOCAL = 620;
+const stars = Array.from({ length: STARS }, (_, i) => ({
+  x: (hash(i * 1.31) - 0.5) * 16, y: (hash(i * 2.17 + 4) - 0.5) * 10, z0: hash(i * 3.71 + 9) * ZMAX,
+  c: ["#b9ffe6", "#8ff0d0", "#5cc4f2", "#eafcf6"][i % 4],
+}));
+const speedAt = (t) => (t < JUMP - 0.3 ? 0.35 : t < JUMP ? lerp(0.35, 14, ease.inExpo(prog(t, JUMP - 0.3, JUMP))) : t < PORTAL ? 14 + Math.sin(t * 1.3) * 2 : t < LAND ? lerp(14, 0.6, ease.out(prog(t, PORTAL, LAND))) : 0.6);
+
+const sites = [["M", "#7b3fe4", "Mail"], ["D", "#1d6fe0", "Docs"], ["N", "#0f7a6a", "News"], ["C", "#178a3c", "Calendar"],
+  ["W", "#c2410c", "Weather"], ["P", "#db2777", "Photos"], ["F", "#0891b2", "Flights"], ["R", "#b45309", "Recipes"],
+  ["G", "#24292f", "Code"], ["L", "#475569", "Library"], ["S", "#16a34a", "Spreadsheet"], ["V", "#9333ea", "Video"],
+  ["T", "#0369a1", "Travel"], ["B", "#be123c", "Bank"]];
+const cards = sites.map((s, i) => ({
+  s, start: JUMP + 0.4 + i * 0.72,
+  x: (i % 2 ? 1 : -1) * (2.3 + hash(i * 7.7) * 1.5), y: (hash(i * 5.3) - 0.5) * 3.6,
+}));
+const CARD_SPEED = 9;
+
+AD.setup({
+  bpm: 120,
+  progression: ["F#m", "D", "A", "E"],
+  sections: [
+    { from: 0, to: JUMP, pad: true, bright: 0.15 },
+    { from: JUMP, to: PORTAL, kick: "four", clap: true, hats: "16", bass: "8", arp: true, pad: true, bright: 0.9 },
+    { from: PORTAL, to: LAND, pad: true, bright: 0.6 },
+    { from: LAND, to: END, kick: "four", clap: true, hats: "8", bass: "8", pad: true, bright: 0.7 },
+    { from: END, to: 29.6, pad: true, bright: 0.5 },
+  ],
+  frame() {
+    const stage = AD.stage;
+    const bg = el("div", "", stage); bg.id = "bg";
+    const warpbg = el("div", "", stage); warpbg.id = "warpbg";
+    const ctx = AD.canvas(stage, 5);
+
+    const caps = [
+      [0.8, 3.3, "The web got heavy.", "serif"],
+      [3.7, 6.2, "Time to travel light.", "serif"],
+      [JUMP + 1.0, JUMP + 3.9, "Nothing in the way.", "heavy"],
+      [JUMP + 4.3, JUMP + 7.4, "Nothing holding you back.", "heavy"],
+      [JUMP + 7.8, PORTAL - 0.2, "Just you and the web.", "heavy ribbon-text"],
+    ].map(([a, b, text, cls]) => [a, b, el("div", "cap " + cls, stage, text)]);
+
+    const logo = el("img", "", stage); logo.id = "logo"; logo.src = AD.ASSETS + "breezer-logo.png";
+    const cardNodes = cards.map((c) => {
+      const n = el("div", "pg", stage, `<div class="head"><b style="background:${c.s[1]}">${c.s[0]}</b>${c.s[2]}</div><i style="width:90%"></i><i style="width:70%"></i><i style="width:80%"></i>`);
+      return n;
+    });
+
+    const rig = el("div", "", stage); rig.id = "rig";
+    const w = AD.browserWindow(rig, {
+      tabs: [["W", "#1f7a63", "Work"], ["D", "#1d6fe0", "Docs: Q4 plan"], ["M", "#7b3fe4", "Music"], ["N", "#0f7a6a", "News"]],
+      url: "Search or type a URL", shot: "newtab-dark.jpg",
+    });
+    const winCap = el("div", "cap", stage, "The browser that gets out of your way."); winCap.id = "wincap";
+
+    const endCard = AD.mountEndCard("Catch the breeze.");
+
+    return (t) => {
+      const kp = pulse(t, kickTimes, 0.12);
+      const warp = prog(t, JUMP - 0.2, JUMP + 0.3);
+      warpbg.style.opacity = String(warp * (1 - 0.4 * prog(t, PORTAL, LAND)));
+      warpbg.style.filter = `brightness(${1 + kp * 0.25})`;
+
+      // Starfield: drifting dust that becomes streaks at the jump
+      ctx.clearRect(0, 0, 1920, 1080);
+      const dist = travel(speedAt, t, 1 / 60);
+      const v = speedAt(t);
+      const streak = Math.min(2.4, v * 0.06);
+      ctx.lineCap = "round";
+      for (const s of stars) {
+        const z = ((s.z0 - dist) % ZMAX + ZMAX) % ZMAX + 0.05;
+        const z2 = z + streak + 0.02;
+        const x1 = 960 + (s.x / z) * FOCAL, y1 = 540 + (s.y / z) * FOCAL;
+        const x2 = 960 + (s.x / z2) * FOCAL, y2 = 540 + (s.y / z2) * FOCAL;
+        const near = clamp(1 - z / ZMAX);
+        const a = near * (0.25 + warp * 0.75);
+        ctx.strokeStyle = warp > 0.1 ? s.c : "#c9d3d4";
+        ctx.globalAlpha = a;
+        ctx.lineWidth = 0.6 + near * (1.6 + warp * 2);
+        ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x1, y1); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Logo gathers, then the jump
+      const lg = ease.out(prog(t, 5.4, 6.6));
+      const jump = ease.inExpo(prog(t, JUMP - 0.35, JUMP + 0.15));
+      set(logo, {
+        opacity: lg * (1 - prog(t, JUMP - 0.05, JUMP + 0.15)),
+        transform: `scale(${lerp(0.6, 1, lg) + jump * 9}) rotate(${(1 - lg) * -20}deg)`,
+        filter: `blur(${(1 - lg) * 10 + jump * 6}px) drop-shadow(0 0 ${30 + lg * 40}px rgb(143 240 208 / .5))`,
+      });
+
+      // Pages streaming past
+      cards.forEach((c, i) => {
+        const n = cardNodes[i];
+        const z = ZMAX - (t - c.start) * CARD_SPEED;
+        if (t < c.start || z < 0.35 || t > PORTAL + 0.3) { n.style.opacity = 0; return; }
+        const k = 1.4 / z;
+        const sx = 960 + (c.x / z) * FOCAL - 190;
+        const sy = 540 + (c.y / z) * FOCAL - 118;
+        set(n, {
+          opacity: clamp((8 - z) / 2.5) * clamp((z - 0.35) / 0.4),
+          transform: `translate(${sx}px, ${sy}px) scale(${k}) rotateY(${c.x * -4}deg)`,
+          filter: `blur(${z < 1.2 ? (1.2 - z) * 10 : 0}px)`,
+          zIndex: String(10 + Math.round(ZMAX - z)),
+        });
+      });
+
+      caps.forEach(([a, b, n]) => {
+        const p = ease.expo(prog(t, a, a + 0.4)) * (1 - ease.in(prog(t, b - 0.3, b)));
+        const heavy = n.classList.contains("heavy");
+        set(n, {
+          opacity: p,
+          transform: heavy ? `scale(${lerp(1.5, 1, p) + (t - a) * 0.02 + kp * 0.01})` : `translateY(${(1 - p) * 14}px)`,
+          filter: `blur(${(1 - p) * (heavy ? 18 : 6)}px)`,
+        });
+      });
+
+      // The portal opens into Breezer
+      const open = ease.expo(prog(t, PORTAL, LAND));
+      rig.style.opacity = t > PORTAL ? 1 : 0;
+      set(w.win, {
+        transform: `scale(${lerp(0.02, 0.82, open) + prog(t, LAND, END) * 0.04}) rotateX(${(1 - open) * 30}deg) rotateZ(${(1 - open) * -8}deg)`,
+        filter: `blur(${(1 - open) * 10}px)`,
+        opacity: clamp(open * 3),
+      });
+      const cp = ease.out(prog(t, LAND + 0.4, LAND + 1.0));
+      set(winCap, { opacity: cp * (1 - prog(t, END - 0.3, END)), transform: `translateY(${(1 - cp) * 16}px)` });
+
+      AD.flash(pulse(t, [JUMP], 0.35) * 0.9 + pulse(t, [LAND], 0.3) * 0.5 + pulse(t, [END], 0.3) * 0.6);
+      endCard(t, END);
+    };
+  },
+});
+
+AD.sfx(4.2, "swell", { length: JUMP - 4.2 - 0.3 });
+AD.sfx(JUMP - 1.5, "riser", { length: 1.5 });
+AD.sfx(JUMP, "impact");
+AD.sfx(JUMP, "whoosh", { length: 1.4, g: 1.2, pan_from: 0, pan_to: 0 });
+cards.forEach((c) => {
+  const pass = c.start + (ZMAX - 0.6) / CARD_SPEED;
+  if (pass < PORTAL) AD.sfx(pass - 0.35, "whoosh", { length: 0.5, g: 0.55, pan_from: c.x > 0 ? 0.2 : -0.2, pan_to: c.x > 0 ? 1 : -1 });
+});
+AD.sfx(PORTAL, "riser", { length: LAND - PORTAL });
+AD.sfx(LAND, "impact", { g: 0.9 });
+AD.sfx(LAND, "shimmer", { g: 0.6 });
+AD.sfx(END - 1, "swell", { length: 1, g: 0.7 });
+AD.sfx(END, "impact", { g: 0.9 });
+AD.sfx(END, "shimmer", { g: 0.9 });
+</script>
+</body>
+</html>
