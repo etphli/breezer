@@ -2,7 +2,7 @@
 
 Draft for the update page, mainly written for Ethan. It describes a private
 candidate build, not a published 1.2.0 release. The HTML version for the update
-page is `build/benchmark-1.2.0-presentation/efficiency-article.html`.
+page is [`features/ai/extension/efficiency.html`](../features/ai/extension/efficiency.html).
 
 ## Article
 

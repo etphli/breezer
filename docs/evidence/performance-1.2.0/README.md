@@ -18,4 +18,4 @@ Reproduce the browser comparison using the six-round command in [browser-benchma
 
 The benchmark predates the final 1.2.0 version stamp and presentation changes. Full functional acceptance, final versioned build, signing/distribution and publication remain separate release gates. Installed applications and personal profiles were not replaced.
 
-The native-build, repaired-object and Mac-copy verification files preserve the completed23/23pass, six successfully recompiled error targets and matching artifact hashes. Final1.2.0metadata was added to source after this benchmarked candidate; it has unit and packaging checks but was not recompiled here.
+The native-build, repaired-object and Mac-copy verification files preserve the completed 23/23 final incremental pass, six successfully recompiled error targets and matching artifact hashes. Final 1.2.0 metadata was added to source after this benchmarked candidate. It has unit and packaging checks but was not recompiled here.
