@@ -117,3 +117,14 @@ test('clock and payload limits fail without replacing local state', () => {
   const huge = { version: 1, records: { preferences: { closeButton: [1, 'client_alpha', 'x'.repeat(1024 * 1024)] } } };
   assert.throws(() => validateSyncModel(huge), /storage limit/);
 });
+
+test('incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization', () => {
+  const { model } = initial();
+  const incomplete = structuredClone(model);
+  incomplete.records['entry/incomplete'] = { alive: [1000, 'client_alpha', true] };
+  assert.throws(() => validateSyncModel(incomplete), /Incomplete synced record/);
+  const collision = structuredClone(model);
+  const entry = Object.values(collision.records).find(record => record.url);
+  collision.records['entry/space-default'] = structuredClone(entry);
+  assert.throws(() => validateSyncModel(collision), /Conflicting synced identities/);
+});

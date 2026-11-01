@@ -2,6 +2,7 @@
 #ifndef CHROME_BROWSER_SYNC_BREEZER_SYNC_BACKEND_H_
 #define CHROME_BROWSER_SYNC_BREEZER_SYNC_BACKEND_H_
 #include <memory>
+#include <string>
 #include "base/memory/scoped_refptr.h"
 #include "base/values.h"
 #include "components/sync/service/sync_client.h"
@@ -9,7 +10,7 @@ class Profile;
 namespace os_crypt_async { class Encryptor; }
 namespace syncer { class CustomSyncBackend; }
 namespace breezer_sync {
-inline constexpr char kWorkspacePref[] = "breezer.sync.workspace";
+void PrepareProfile(Profile* profile);
 bool IsConfigured(Profile* profile);
 syncer::CustomSyncBackendStatus GetBackendStatus(Profile* profile);
 std::string GetBackendNamespace(Profile* profile);

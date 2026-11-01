@@ -1,0 +1,23 @@
+# Copyright 2026 The Breezer Authors
+source_set("breezer_sync") {
+  sources = [ "breezer_sync_ui.cc", "breezer_sync_ui.h", "setup_resources.h" ]
+  deps = [
+    "//base",
+    "//chrome/browser:browser_process",
+    "//chrome/browser/extensions/api/sync_vault_provider",
+    "//chrome/browser/profiles:profile",
+    "//chrome/browser/sync",
+    "//chrome/browser/ui/helium:helium_layout_state_controller",
+    "//components/os_crypt/async/browser",
+    "//components/os_crypt/async/common",
+    "//components/prefs",
+    "//components/sync/base",
+    "//components/sync/engine",
+    "//components/sync/engine/sync_vault",
+    "//components/sync/service",
+    "//content/public/browser",
+    "//crypto",
+    "//extensions/common",
+    "//extensions/browser",
+  ]
+}

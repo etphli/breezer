@@ -101,8 +101,14 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await page.locator('#settings-crumb').innerText(), 'General');
     await page.screenshot({ path: join(evidence, 'settings-redesign-general-light.png') });
 
-    // Optional categories without a mounted feature stay out of the navigation.
-    assert.equal(await page.locator('.nav-item[data-category="sync"]').isVisible(), false, 'sync is not mounted');
+    // The sync module is mounted, and this browser fixture deliberately lacks
+    // its native bridge. Discovery must explain that limitation without success.
+    await page.locator('.nav-item[data-category="sync"]').waitFor();
+    await page.getByRole('link', { name: 'Sync', exact: true }).click();
+    await page.getByText('This build does not include native sync setup.', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('button', { name: 'Set up or manage sync', exact: true }).isDisabled(), true);
+    await page.screenshot({ path: join(evidence, 'settings-sync-unavailable-fixture.png') });
+    await page.getByRole('link', { name: 'General', exact: true }).click();
     // Feature modules from FEATURE_MOUNTS add their category once rendered.
     await page.locator('.nav-item[data-category="languages"]').waitFor();
     assert.equal(await page.locator('.nav-item[data-category="assistant"]').isVisible(), true, 'context settings mounted');

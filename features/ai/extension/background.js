@@ -1,5 +1,6 @@
 import { prepareResearch, researchSelection } from './research-policy.js';
 import { installReleaseNotes } from './release-notes.js';
+import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
 import { installContextBackground } from './context-background.js';
@@ -25,6 +26,7 @@ export async function saveOrganatoSwitches(api, { enabled, dashboardEnabled }) {
 
 export function installBackground(api) {
   installTranslation(api);
+  installWorkspaceSync(api);
   installUsage(api);
   installReleaseNotes(api);
   api.runtime.onConnect.addListener(port => {

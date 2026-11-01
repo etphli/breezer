@@ -1,135 +1,216 @@
-# Encrypted sync implementation status
+# Encrypted sync candidate
 
-This is unfinished source work. Nothing in this directory is installed, applied
-by preparation, enabled, or connected to the shipped settings page. Do not
-advertise spaces or password sync as shipped from these files.
+**PR #6 is a draft. Native compilation and encrypted browser-profile acceptance
+have not passed. Do not merge this as a completed feature or describe it as
+shipped.** The installed app, personal profile, Keychain and existing browser
+build outputs have not been changed.
 
-## What is implemented
+## Implemented source path
 
-`features/ai/extension/workspace-sync-model.js` defines the persistent workspace
-merge model. It projects an explicit allowlist from `workspace.v1`, uses saved
-entity IDs rather than URLs, merges changes to individual fields with logical
-clocks and a stable device tie-breaker, and retains permanent deletion records.
-Moving or renaming an offline deleted item cannot resurrect it. Deleted folders
-and spaces leave surviving entries in an existing or deterministic recovery
-space. Folder expansion stays local. Malformed data, clock exhaustion, and
-capacity overflow reject without replacing a client's local workspace.
+Settings mounts `sync-settings.js` in the shared Sync category. It shows local
+workspace queue/errors, exposes recovery for concurrent space/favorite limits,
+and opens browser-owned `chrome://breezer-sync/`. Builds without the native API
+show that limitation and disable the setup button. A reconciled local workspace
+is never labeled as a successful remote upload.
 
-The model includes spaces, folders, pins, favorites, the two workspace behavior
-preferences, and the existing bounded appearance fields. It does not include
-`workspace.members.v1`, tab/window IDs, live pages, browser sessions, AI prompts,
-AI memory, provider tokens, passwords, or vault keys. Nothing calls the module
-from the shipped extension yet.
+The native page discovers installed providers, configures the selected provider,
+waits for asynchronous provider sign-in, lists vaults, creates or joins one,
+requires saving a new recovery key, reports native connection/type/error state,
+and supports retry/disconnect. The inherited encrypted vault authenticates a
+joined vault before installing its configuration. Joining never initializes a
+missing vault. Unknown configuration schemas require explicit disconnection
+before recovery; setup does not silently overwrite them.
 
-`native/chrome/browser/sync/breezer_sync/` contains an **uncompiled draft** of
-an adapter for the inherited Helium provider broker and vault backend. It must
-not be wired into preparation until native compilation and lifecycle review.
-It uses the existing `SyncVaultStore`, `SyncVaultCryptographer`,
-`LoopbackServerStateCodec`, `SyncVaultBackend`, protected configuration repository
-and OSCrypt encryptor. It does not implement new encryption or serialize
-passwords in JavaScript. The transport checks the selected provider identity,
-forwards opaque bytes and exact CAS revisions, and supports engine shutdown
-while UI/provider replies are pending. Epoch collection is deliberately
-unsupported in the draft, retaining ciphertext rather than risking deletion.
+A vault uses a native CSPRNG-generated 32-byte key, shown as a recovery key only
+in the browser-owned page. OSCrypt protects the device's saved key and rollback
+checkpoint. The setup hold survives closing the page until the configuration
+flush completes. The provider receives opaque objects and exact revisions, not
+vault keys or credentials. Account-bound provider key wrapping is not used.
 
-## Confirmed inherited gaps
+`ChromeSyncClient` connects the inherited custom backend to the profile. The
+native `PASSWORDS` datatype is enabled for that backend, and native password
+controllers retain credential storage and conflict handling. The setup selects
+only Preferences and/or Passwords, under a setup hold, before starting normal
+sync. `WEBAUTHN_CREDENTIAL` and password-sharing datatypes remain excluded.
+Touch ID, Apple Passwords, iCloud Keychain and security-key passkeys are not
+claimed to sync through this vault.
 
-The imported patches implement vault encryption, journal verification, rollback
-checkpoints, CAS conflict retries, a provider extension broker, a persisted
-configuration repository, and generic `CustomSyncBackend` hooks.
+Workspace metadata uses a fixed, syncable native preference. Its component-only
+API accepts at most 1 MiB and uses provider + vault identity and exact local
+preference comparison to reject stale writes. It exposes no arbitrary preference
+names, password-store access, protected key material or recovery key. With sync
+off, reading state does not construct the Sync service or start provider work.
+The component clears its periodic alarm when disconnected, and a payload-free
+native event wakes it after setup. Connected profiles refresh every 30 seconds,
+including password-only profiles. Native backoff and sticky integrity errors
+still apply; an unavailable provider can resume through the normal refresh path.
 
-They do **not** implement ChromeSyncClient overrides for those hooks or a
-concrete extension-provider `SyncVaultTransport`. The
-`settings/sync-setup-contract.patch` adds Mojo declarations only. There is no
-native setup handler or setup UI implementing that interface in this import.
-`CustomSyncSupportedTypes()` excludes `PASSWORDS`. Restoring local password
-saving does not enable password sync.
+The local roaming backend remains separate. Before that backend starts, the
+new native workspace transport preference is cleared so retained vault metadata
+is not fed into its plain folder store. Saved workspace data and merge metadata
+remain in extension-local storage. Local roaming cannot be configured here.
 
-Those findings come from the actual imported patches under
-`upstream/helium-macos/helium-chromium/patches/helium/core/sync/` and
-`patches/helium/settings/sync-setup-contract.patch`, rather than an assumption
-that the sync engine is absent.
+## Persistent workspace rules
 
-## Work required before usable sync
+`workspace-sync-model.js` projects explicit saved fields from `workspace.v1`:
 
-1. Compile and review the native draft; complete diagnostics, provider changes,
-   cancellation, shutdown and durable checkpoint failure handling. Validate
-   protection availability and recovery after OS key access fails.
-2. Implement browser-owned setup, provider discovery/configuration, create/join,
-   recovery-key confirmation, wrong-key rejection, cancellation, retry and
-   disconnect. Recovery keys must never enter the AI extension or its storage.
-3. Wire the adapter into ChromeSyncClient and the profile service dependency
-   graph. Enable native `PASSWORDS` only after its controllers are confirmed to
-   work with the custom encrypted backend. Keep `WEBAUTHN_CREDENTIAL` excluded.
-4. Add bounded native workspace/status APIs and durable workspace reconciliation
-   using the merge model. Integrate reconnect/restart, opt-in, provider switching
-   and disconnect; keep a recoverable local copy and deletion records. Provide
-   explicit recovery for concurrent capacity overflow and tombstone limits.
-5. Connect the included realistic local CAS provider through the native
-   adapter and setup handler. Do not substitute a local export, invented
-   crypto or a success fixture for this transport.
-6. Add feature-owned `sync-settings.js` to the settings owner's `FEATURE_MOUNTS`
-   with `{ container: 'sync-settings', load: () => import('./sync-settings.js')
-   .then(m => m.mountSyncSettings) }`. Return a dispose handle. The settings peer
-   owns the container, category, search and shared layout. No mount exists yet.
-7. Verify two disposable native profiles through that transport, including
-   encryption at rest/in transit, wrong keys, concurrent updates/deletions,
-   duplicate URLs, restart/reconnect, password add/update/delete, recovery,
-   disabled/disconnected behavior and no extension credential exposure.
+- Space identities, names, colors and order.
+- Folders, saved pins and favorites, including stable IDs, titles, URLs and order.
+- New-tab placement and close-button behavior.
+- The existing bounded appearance fields: layout, sidebar mode, theme/color,
+  light/dark/system mode, bookmark-bar mode, width/font size, address-bar and
+  progress preferences, and frameless/sidebar/top-bar choices.
 
-Platform passkeys remain owned by the passkeys thread. This work makes no claim
-that Touch ID, Apple Passwords, iCloud Keychain or WebAuthn private keys travel
-through Breezer's vault.
+It excludes `workspace.members.v1`, live tab/window IDs, browser sessions, folder
+expansion, AI conversations, AI memory and provider authentication tokens.
+Duplicate URLs retain distinct identities. Per-field logical clocks handle
+concurrent changes without depending on wall-clock time. Deleted identities have
+permanent tombstones; a stale rename or move cannot resurrect them. Surviving
+entries from deleted folders/spaces have a safe remaining/recovery space.
+Malformed, incomplete or conflicting identities reject before normalization can
+silently discard saved data.
 
-## Verification so far
+`workspace-sync.js` shares the workspace Web Lock with local sidebar changes.
+It durably captures local edits before transport, merges remote records, retries
+preference conflicts and only then updates saved UI data. It preserves this
+capture across interruption, restart and provider failure. A first joining
+profile's untouched defaults do not rename the other profile's spaces or reset
+its appearance. A provider change cannot receive a write captured for another
+provider, even if both report the same vault UUID. Managed appearance failures
+preserve native policy and do not block valid saved spaces.
+
+Concurrent edits can exceed the existing nine-space/twelve-favorite display
+limits. Local data and the merged records remain preserved. The Sync card lets
+the user explicitly remove a synced space while keeping its pins, or move a
+favorite into a space, then retries. Deletion records are not automatically
+pruned: doing that safely requires knowing that old offline clients cannot
+return. Reaching the total record/byte limit produces an error, not a truncated
+workspace or an automatic vault reset.
+
+## Transport and platform limits
+
+The included provider is **a disposable local test transport**, not a hosted
+cloud service. `test-provider/server.py` binds only `127.0.0.1`, requires a private
+bearer token file, and stores opaque objects/revisions in a private SQLite file.
+Its transactions enforce IF_ABSENT/IF_REVISION atomically. Create/list/read/write
+are supported. Rename and epoch collection are unsupported, so old ciphertext
+is retained. Its object limit is 64 MiB. It uses loopback HTTP, **not TLS**.
+Native vault payload encryption in transit still requires native verification.
+
+The provider extension uses the inherited `syncVaultProvider` API and only
+`storage` plus that provider permission. Its only network permission is
+`http://127.0.0.1:18765/*`. It has no key wrapping or password permission. The
+native overlay enables the inherited experimental provider API by default;
+actual sync still requires explicit provider/vault setup.
+
+For a private disposable directory, run:
 
 ```sh
-node --test tests/sync.test.mjs
-node --test tests/ai/workspace-store.test.mjs tests/ai/workspace-static.test.mjs
+python3 features/sync/test-provider/server.py --directory /tmp/my-private-sync-test
+# Reopen the same private database/token later:
+python3 features/sync/test-provider/server.py --directory /tmp/my-private-sync-test --resume
 ```
 
-The first command runs nine merge-model tests and three provider tests. They exercise the real shipped
-module as two in-memory clients, with serialized restart state. These are pure
-model tests, **not** encrypted transport, native compilation, browser-profile,
-password-controller, Keychain or cloud-sync acceptance.
+Load `test-provider/extension/` as an unpacked extension in each disposable
+profile. Its options page accepts the token from the named private token file.
+The token is transport authentication, never the vault recovery key. No existing
+directory or database is erased by the server. Do not expose it to other hosts.
+A real remote provider must separately implement secure authentication, TLS,
+revision semantics and the inherited opaque-object contract. No paid service or
+production provider has been provisioned, installed or validated here.
 
-No disposable compiled Breezer browser is available. The release coordinator
-confirmed that the current PC build predates these changes and that the Mac
-output was deleted at the user's request. The installed app and personal profile
-are off limits. No build outputs, prepared source or shared caches were changed.
-The native draft has not been built or run. A complete browser build and the
-acceptance above remain required before this feature can be merged as usable
-sync or included in 1.2.0 release claims.
+Provider-visible metadata includes the vault name/UUID, object identifiers,
+revisions and object sizes. Saved workspace and credential contents belong in
+native encrypted payloads. Disconnect keeps local saved data and the remote
+vault; it does not revoke other connected profiles or erase remote objects.
+Changing a vault key in place and remote device revocation are not implemented.
+Local workspace/appearance metadata keep their existing plaintext extension and
+preference storage. This candidate encrypts the provider vault, rather than
+adding local workspace encryption. Native password storage and the saved sync
+key/checkpoint retain OS protection, subject to native acceptance below.
 
-The imported source fixture used for API inspection was reconstructed only in
-`/tmp` from pinned Chromium `156.0.8078.47` and checked-in Helium patches.
+## Source preparation and checks
 
-## Disposable local provider
+`script/build_and_run.sh` fingerprints/applies sync after the existing overlays.
+`script/apply_breezer_sync.py` validates every target before writes and refuses
+changed installed feature files, anchor drift and output symlinks. It preserves
+compiled output and supports retry after interrupted application. Changed input
+fingerprints require a fresh stage or a separately verified migration; never
+rewrite markers to make old objects appear current.
 
-`test-provider/server.py` and `test-provider/extension/` implement a real loopback
-object transport using the inherited `syncVaultProvider` schema. The server
-binds only `127.0.0.1`, requires an ephemeral bearer token, stores opaque binary
-objects in a private SQLite file, and atomically enforces IF_ABSENT/IF_REVISION.
-It has no password, key, wrapping, plaintext export or vault-decryption API.
-It supports create/list/read/write; rename and epoch collection are unsupported.
-Its HTTP connection is loopback-only and is **not TLS**. It must never be exposed
-as a hosted service. Native vault ciphertext protection remains a separate test
-requirement.
+```sh
+node --test tests/sync.test.mjs tests/sync/setup-browser.test.mjs
+node --test tests/ai/settings-redesign-browser.test.mjs tests/ai/workspace-browser.test.mjs
+python3 -B script/check_breezer_sync.py
+python3 -B script/check_breezer_workspace.py --no-cache
+python3 -B script/check_breezer_preparation.py
+```
 
-For a disposable fixture directory, `server.py --directory /tmp/your-private-dir`
-creates a private token file and listens on port 18765. `--resume` reopens only
-an existing private database/token. No existing directory or database is erased.
-The unpacked provider extension's options page accepts that test token. The
-imported native provider API requires `--enable-features=ApiSyncVaultProvider`
-with a disposable browser profile. That flag alone does not supply the missing
-native setup/backend wiring, so it does not make the currently shipped Breezer
-sync-capable. Do not use a personal profile or real credentials for these tests.
+The merge/worker tests run the shipped modules with independent storage/API
+fixtures. Provider tests run the actual extension provider JavaScript against
+the actual Python HTTP/SQLite server with two independent provider clients.
+They cover CAS, stale revisions, binary round trips, authentication, restart,
+reconnect, cancellation and private file permissions. Their payloads are random
+opaque bytes. They do **not** establish native encryption or password sync.
 
-`tests/sync/provider.test.mjs` runs the actual provider JavaScript against the
-actual Python HTTP/SQLite server, with two independent provider clients. It
-verifies atomic competing writes, stale revision rejection, idempotent vault
-creation, binary round-trip, read size bounds, authentication rejection,
-connection failure, server restart persistence and private file permissions.
-It also checks cancellation/disposal and imported native enum names.
-The fixture data is random opaque bytes. These tests do **not** establish native
-encryption, wrong-vault-key rejection or browser-managed credential sync.
+The setup UI check uses a disposable Chrome context and a message fixture,
+including provider progress, recovery confirmation, key clearing, error display,
+disconnect cancellation, keyboard focus, light/dark and narrow layout. Screenshots
+have `fixture` in their filenames and contain a synthetic key. The settings check
+covers the new category with a missing native bridge and preserves peer routes.
+Source checks reconstruct pinned Chromium `156.0.8078.47` plus Helium only in
+temporary fixtures. None of these checks compiles or launches Breezer.
+
+A broad local browser suite also found an existing new-tab visual assertion:
+wide layout expects eight site tiles but renders nine. It reproduces using
+untouched `origin/main` new-tab assets in an isolated fixture. This feature does
+not change those assets or weaken that test.
+
+## Required native acceptance before readiness/merge
+
+The coordinator confirmed that no disposable compiled Breezer browser is
+available. The PC build is frozen on older source; Mac output was removed at the
+user's request. The allowed standalone slot cannot compile these Chromium
+adapters without their generated headers and dependencies. No competing full
+build, shared-cache migration, installed-app launch or personal-profile test is
+authorized. A combined browser build and a separate GUI/key-protection acceptance
+slot are still required.
+
+Use two newly created disposable profiles and the supplied local provider only
+when that slot and candidate app exist. Real key-protection/authentication work
+must use an isolated OS account if the personal Keychain must remain untouched.
+
+1. Confirm native compilation/linking and provider extension loading. Open Sync
+   from the redesigned settings category; verify the browser-owned page and
+   disabled/private/managed-profile limits. Cancel asynchronous provider setup
+   once; complete it after retry.
+2. Create a vault in profile A, save its recovery key and confirm it. Add dummy
+   spaces, a folder, distinct saved pins/favorites with identical URLs, appearance
+   choices and a dummy credential using the native password manager.
+3. In profile B, join with a wrong 32-byte key first. Verify rejection, no
+   installed configuration and no remote mutation from B. Retry with the saved
+   key; verify actual saved workspace and native credential arrival.
+4. Verify credential bytes only through authenticated native password-manager
+   operations on that dummy entry. Check add/update/delete propagation and
+   native conflict convergence. Never expose plaintext to extension/HTTP pages,
+   AI prompts, logs or a CSV. Check component and ordinary-page API denial.
+5. Check provider object bytes on disk and on the loopback connection for known
+   dummy workspace/credential content and key leakage. They must be native vault
+   ciphertext. Verify that the local saved key/checkpoint are OS-protected and
+   that wrong-key/corrupted-head/rollback/fork failures stop reconciliation.
+   Loopback HTTP is not a TLS acceptance test.
+6. Stop/restart the provider, edit both profiles while offline, reconnect, restart
+   each profile and verify convergence including deletions and duplicate URLs.
+   Check interrupted setup, cancelled authentication, checkpoint failure and
+   cancellation while native work is queued. A request already atomically
+   committed before cancellation may finish; cancelled queued requests must not
+   begin new provider work or install stale checkpoints/diagnostics.
+7. Disconnect A and verify its saved spaces/passwords stay local, no new provider
+   work is initiated by it, its periodic alarm clears, B remains connected and
+   the remote vault is kept. Rejoin and test password-only/workspace-only modes,
+   provider switching and explicit overflow recovery. Confirm no live IDs or AI
+   state crossed profiles. Test unreadable configuration/key recovery explicitly.
+
+Until this passes, native password-controller behavior, encryption at rest/in
+transit, wrong-key rejection, OS key protection and two-browser-profile sync
+remain **unverified**, regardless of source or CI results.

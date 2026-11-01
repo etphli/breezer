@@ -39,6 +39,8 @@ Error MapError(api::SyncVaultProviderError error) {
 class Reply : public base::RefCountedThreadSafe<Reply> {
  public:
   base::WaitableEvent ready;
+  std::atomic<bool> abandoned{false};
+  std::atomic<Service::RequestId> request_id{0};
   std::optional<Service::Response> response;
  private:
   friend class base::RefCountedThreadSafe<Reply>;
@@ -48,9 +50,10 @@ class Reply : public base::RefCountedThreadSafe<Reply> {
 class ProviderTransport final : public syncer::SyncVaultTransport {
  public:
   ProviderTransport(base::WeakPtr<Service> service, std::string provider,
-                    std::string vault)
+                    std::string vault, std::shared_ptr<std::atomic<bool>> active)
       : ui_(content::GetUIThreadTaskRunner({})), service_(service),
-        provider_(std::move(provider)), vault_(std::move(vault)) {}
+        provider_(std::move(provider)), vault_(std::move(vault)), active_(std::move(active)) {}
+  ~ProviderTransport() override { if (active_) active_->store(false); }
 
   void SetCancelationSignal(syncer::CancelationSignal* signal) override {
     signal_ = signal;
@@ -62,7 +65,7 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
     auto response = Call(base::BindOnce(
         [](std::string vault, std::string object, int maximum, Service* service,
            Service::ResponseCallback done) {
-          service->ReadObject(vault, object, maximum, std::move(done));
+          return service->ReadObject(vault, object, maximum, std::move(done));
         }, vault_, object, static_cast<int>(maximum)));
     if (!response) return base::unexpected(response.error());
     if (!response->has_value()) {
@@ -89,7 +92,7 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
         [](std::string vault, std::string object, std::vector<uint8_t> data,
            std::optional<std::string> revision, std::optional<int> epoch,
            Service* service, Service::ResponseCallback done) {
-          service->WriteObject(vault, object, std::move(data), std::move(revision),
+          return service->WriteObject(vault, object, std::move(data), std::move(revision),
                                epoch, std::move(done));
         }, vault_, object, std::move(data), std::move(revision), retention));
     if (!response) return base::unexpected(response.error());
@@ -108,7 +111,7 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
   }
 
  private:
-  using Request = base::OnceCallback<void(Service*, Service::ResponseCallback)>;
+  using Request = base::OnceCallback<Service::RequestId(Service*, Service::ResponseCallback)>;
   base::expected<Service::Response, Error> Call(Request request) {
     CHECK(!content::BrowserThread::CurrentlyOn(content::BrowserThread::UI));
     if (signal_ && signal_->IsSignalled()) return base::unexpected(Error::kAborted);
@@ -116,21 +119,30 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
     ui_->PostTask(FROM_HERE, base::BindOnce(
         [](base::WeakPtr<Service> service, std::string provider,
            scoped_refptr<Reply> reply, Request request) {
-          if (!service || service->selected_provider_id() != provider) {
+          if (reply->abandoned.load() || !service || service->selected_provider_id() != provider) {
             reply->ready.Signal();
             return;
           }
-          std::move(request).Run(service.get(), base::BindOnce(
+          const auto request_id = std::move(request).Run(service.get(), base::BindOnce(
               [](scoped_refptr<Reply> reply, Service::Response response) {
                 reply->response.emplace(std::move(response));
                 reply->ready.Signal();
               }, reply));
+          reply->request_id.store(request_id);
+          if (reply->abandoned.load()) service->CancelRequest(request_id);
         }, service_, provider_, reply, std::move(request)));
+    const auto abandon = [&] {
+      reply->abandoned.store(true);
+      ui_->PostTask(FROM_HERE, base::BindOnce(
+          [](base::WeakPtr<Service> service, scoped_refptr<Reply> reply) {
+            if (service) service->CancelRequest(reply->request_id.load());
+          }, service_, reply));
+    };
     base::ScopedBlockingCall blocking(FROM_HERE, base::BlockingType::MAY_BLOCK);
     const auto deadline = base::TimeTicks::Now() + base::Minutes(3);
     while (!reply->ready.TimedWait(base::Milliseconds(50))) {
-      if (signal_ && signal_->IsSignalled()) return base::unexpected(Error::kAborted);
-      if (base::TimeTicks::Now() >= deadline) return base::unexpected(Error::kTemporaryError);
+      if (signal_ && signal_->IsSignalled()) { abandon(); return base::unexpected(Error::kAborted); }
+      if (base::TimeTicks::Now() >= deadline) { abandon(); return base::unexpected(Error::kTemporaryError); }
     }
     if (!reply->response) return base::unexpected(Error::kAborted);
     return std::move(*reply->response);
@@ -139,12 +151,14 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
   const base::WeakPtr<Service> service_;
   const std::string provider_;
   const std::string vault_;
+  const std::shared_ptr<std::atomic<bool>> active_;
   raw_ptr<syncer::CancelationSignal> signal_ = nullptr;
 };
 }  // namespace
 
 std::unique_ptr<syncer::SyncVaultTransport> CreateProviderTransport(
-    base::WeakPtr<Service> service, std::string provider, std::string vault) {
-  return std::make_unique<ProviderTransport>(service, std::move(provider), std::move(vault));
+    base::WeakPtr<Service> service, std::string provider, std::string vault,
+    std::shared_ptr<std::atomic<bool>> active) {
+  return std::make_unique<ProviderTransport>(service, std::move(provider), std::move(vault), std::move(active));
 }
 }  // namespace breezer_sync

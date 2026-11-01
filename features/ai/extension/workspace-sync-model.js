@@ -44,7 +44,7 @@ export function projectWorkspace(rawStore, rawAppearance) {
 function validField(key, field, value) {
   if (!fields.has(field)) return false;
   if (key.startsWith('appearance/')) {
-    if (field !== 'appearance') return false;
+    if (field !== 'appearance' || key === 'appearance/showBookmarks') return false;
     try { validateAppearancePatch({ [key.slice(11)]: value }); return true; } catch { return false; }
   }
   if (key === 'preferences') return field === 'newTabPosition' ? ['top', 'bottom'].includes(value) : field === 'closeButton' && ['always', 'hover'].includes(value);
@@ -63,12 +63,26 @@ export function validateSyncModel(model) {
   if (new TextEncoder().encode(JSON.stringify(model)).length > MAX_SYNC_BYTES) throw new Error('Workspace sync has reached its storage limit. Local data is preserved.');
   const records = Object.entries(model.records);
   if (records.length > MAX_RECORDS) throw new Error('Workspace sync has too many records.');
+  const identities = new Set();
   for (const [key, record] of records) {
     if (!(key === 'preferences' || /^appearance\/[a-zA-Z]+$/.test(key) || /^(space|entry|folder)\/[a-zA-Z0-9_-]{1,64}$/.test(key))) throw new Error('Invalid workspace identity.');
     if (!record || typeof record !== 'object' || Array.isArray(record) || Object.keys(record).length > 12) throw new Error('Invalid workspace record.');
     for (const [field, register] of Object.entries(record)) {
       if (!Array.isArray(register) || register.length !== 3 || !Number.isSafeInteger(register[0]) || register[0] < 1 || !clientPattern.test(register[1]) || !validField(key, field, register[2])) throw new Error('Invalid workspace sync field.');
     }
+    if (key.startsWith('appearance/') && !record.appearance || key === 'preferences' && (!record.newTabPosition || !record.closeButton)) throw new Error('Incomplete synced preferences. Local data is preserved.');
+    const kind = key.split('/')[0];
+    if (['space', 'folder', 'entry'].includes(kind)) {
+      if (!record.alive) throw new Error('Incomplete synced identity. Local data is preserved.');
+      if (record.alive[2]) {
+        const required = kind === 'space' ? ['name', 'tone', 'index'] : kind === 'folder' ? ['name', 'parent', 'index'] : ['url', 'title', 'parent', 'index'];
+        if (required.some(field => !record[field])) throw new Error('Incomplete synced record. Local data is preserved.');
+        const id = key.slice(kind.length + 1);
+        if (identities.has(id)) throw new Error('Conflicting synced identities. Local data is preserved.');
+        identities.add(id);
+      }
+    }
+
   }
   return model;
 }
@@ -114,22 +128,30 @@ export function recordWorkspaceChanges(model, before, after, client) {
   return validateSyncModel(result);
 }
 
-export function materializeWorkspace(model, localStore = defaultStore()) {
+export function syncModelValues(model) {
   validateSyncModel(model);
   const values = {};
   for (const [key, record] of Object.entries(model.records)) {
     if (record.alive?.[2] === false) continue;
     values[key] = Object.fromEntries(Object.entries(record).map(([field, register]) => [field, register[2]]));
   }
+  return values;
+}
+
+export function recoveredSpace(model) {
+  let id = 'space-default';
+  for (let index = 1; model.records[`space/${id}`]?.alive?.[2] === false || model.records[`entry/${id}`]?.alive?.[2] === true || model.records[`folder/${id}`]?.alive?.[2] === true; index += 1) id = `space-recovery-${index}`;
+  return { ...defaultStore().spaces[0], id };
+}
+
+export function materializeWorkspace(model, localStore = defaultStore()) {
+  validateSyncModel(model);
+  const values = syncModelValues(model);
   const ordered = (prefix) => Object.entries(values).filter(([key, value]) => key.startsWith(prefix) && value.alive === true).sort(([ak, a], [bk, b]) => (a.index || 0) - (b.index || 0) || (ak < bk ? -1 : 1));
   const spaces = ordered('space/').map(([key, s]) => ({ id: key.slice(6), name: s.name || 'Space', tone: s.tone || 'mint', pinned: [] }));
   if (spaces.length > MAX_SPACES) throw new Error(`Synced workspaces exceed ${MAX_SPACES} spaces. Local data is preserved.`);
   // Concurrent removal of the final spaces cannot strand the surviving pins.
-  if (!spaces.length) {
-    let id = 'space-default';
-    for (let index = 1; model.records[`space/${id}`]?.alive?.[2] === false; index += 1) id = `space-recovery-${index}`;
-    spaces.push({ ...defaultStore().spaces[0], id });
-  }
+  if (!spaces.length) spaces.push(recoveredSpace(model));
   const bySpace = new Map(spaces.map(s => [`space/${s.id}`, s]));
   const folders = new Map();
   for (const [key, folder] of ordered('folder/')) {
@@ -161,4 +183,15 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   const appearance = {};
   for (const [key, value] of Object.entries(values)) if (key.startsWith('appearance/')) appearance[key.slice(11)] = value.appearance;
   return { store: normalizeStore({ version: 1, rev: localStore.rev, spaces, favorites, prefs: values.preferences || localStore.prefs }), appearance };
+}
+
+// Stable serialization avoids republishing equivalent maps after opposite merge
+// orders, which would otherwise keep waking both clients indefinitely.
+export function serializeSyncModel(model) {
+  validateSyncModel(model);
+  const records = {};
+  for (const key of Object.keys(model.records).sort()) {
+    records[key] = Object.fromEntries(Object.entries(model.records[key]).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0));
+  }
+  return JSON.stringify({ version: SYNC_MODEL_VERSION, records });
 }

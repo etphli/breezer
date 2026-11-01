@@ -18,6 +18,7 @@ import { mountSettingsNav } from './settings-nav.js';
 // headings, .setting-row labels and descriptions, buttons and data-search-terms.
 //   { container: 'sync-settings', load: () => import('./sync-settings.js').then((m) => m.mountSyncSettings) }
 export const FEATURE_MOUNTS = Object.freeze([
+  { container: 'sync-settings', load: () => import('./sync-settings.js').then((m) => m.mountSyncSettings) },
   { container: 'translation-settings', load: () => import('./translation-settings.js').then((m) => m.mountTranslationSettings) },
 ]);
 

@@ -49,6 +49,7 @@ jobs:
       - name: Verify workspace and full-height assistant overlays
         run: |
           python script/check_breezer_workspace.py
+          python script/check_breezer_sync.py
           python script/check_breezer_sidebar_frame.py
           python script/check_breezer_ai_ui.py
           python script/check_breezer_passwords.py
@@ -68,6 +69,7 @@ jobs:
           node tests/ai/research-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs
           node --test tests/ai/translation.test.mjs tests/ai/translation-browser.test.mjs
+          node --test tests/sync/setup-browser.test.mjs
           node tests/ai/browser-page.mjs
           node tests/ai/docs-editor-browser.mjs
       - name: Verify passkey component and virtual WebAuthn protocol

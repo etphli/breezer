@@ -2,6 +2,7 @@
 #ifndef CHROME_BROWSER_SYNC_BREEZER_SYNC_PROVIDER_TRANSPORT_H_
 #define CHROME_BROWSER_SYNC_BREEZER_SYNC_PROVIDER_TRANSPORT_H_
 
+#include <atomic>
 #include <memory>
 #include <string>
 
@@ -15,6 +16,7 @@ namespace breezer_sync {
 std::unique_ptr<syncer::SyncVaultTransport> CreateProviderTransport(
     base::WeakPtr<extensions::SyncVaultProviderService> service,
     std::string provider_id,
-    std::string vault_uuid);
+    std::string vault_uuid,
+    std::shared_ptr<std::atomic<bool>> active = nullptr);
 }  // namespace breezer_sync
 #endif
