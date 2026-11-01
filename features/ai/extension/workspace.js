@@ -1515,5 +1515,10 @@ async function boot() {
   await initSidebar(route);
 }
 
-addEventListener('hashchange', () => location.reload());
+// Settings switches categories in place (#/settings/<category>); every other route change reloads.
+addEventListener('hashchange', (event) => {
+  const settings = (url) => parseRoute(new URL(url).hash).view === 'settings';
+  if (settings(event.oldURL) && settings(event.newURL)) return;
+  location.reload();
+});
 void boot();

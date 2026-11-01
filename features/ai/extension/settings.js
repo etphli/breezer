@@ -1,4 +1,4 @@
-// Full-page settings route: workspace.html#/settings. Layout and theme go through
+// Full-page settings route: workspace.html#/settings/<category>. Layout and theme go through
 // chrome.breezerPrivate (native prefs); spaces and tab behavior live in the workspace store.
 import {
   APPEARANCE_REV_KEY, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
@@ -9,7 +9,17 @@ import { mountPasswords } from './passwords.js';
 import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
-import { mountTranslationSettings } from './translation-settings.js';
+import { mountSettingsNav } from './settings-nav.js';
+
+// Settings owned by feature modules. Each entry names an empty container in workspace.html
+// and loads a function called as mount({ container, api }). It may be async and may return
+// { dispose }, which runs on pagehide. Categories marked data-optional stay out of the
+// navigation and search until their container has content. Search indexes the rendered
+// headings, .setting-row labels and descriptions, buttons and data-search-terms.
+//   { container: 'sync-settings', load: () => import('./sync-settings.js').then((m) => m.mountSyncSettings) }
+export const FEATURE_MOUNTS = Object.freeze([
+  { container: 'translation-settings', load: () => import('./translation-settings.js').then((m) => m.mountTranslationSettings) },
+]);
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -23,9 +33,9 @@ const FIELD_LABELS = {
 const FIELD_ERRORS = {
   layout: 'layout-error', sidebarMode: 'layout-error', sidebarWidth: 'layout-error',
   showBookmarks: 'layout-error', bookmarkBarMode: 'layout-error', theme: 'theme-error', colorMode: 'theme-error',
-  sidebarFontSize: 'typography-error', centeredAddressBar: 'layout-error',
-  minimalUrl: 'layout-error', showLoadProgress: 'layout-error', frameless: 'layout-error',
-  alwaysShowSidebar: 'layout-error', alwaysShowTopBar: 'layout-error',
+  sidebarFontSize: 'typography-error', centeredAddressBar: 'address-error',
+  minimalUrl: 'address-error', showLoadProgress: 'address-error', frameless: 'frameless-error',
+  alwaysShowSidebar: 'frameless-error', alwaysShowTopBar: 'frameless-error',
 };
 const VALUE_LABELS = { sidebar: 'Sidebar', top: 'Top', expanded: 'Expanded', compact: 'Compact', autoHide: 'Auto-hide', system: 'System', light: 'Light', dark: 'Dark', true: 'On', false: 'Off', ...TONE_NAMES };
 
@@ -71,20 +81,58 @@ function setRadioValue(group, value) {
   }
 }
 
+// Older components render a heading followed by loose content. Keep the heading and its
+// leading notes above, and put the rest in a rounded group like the other settings.
+export function groupSection(container) {
+  const section = container?.querySelector('.settings-section');
+  if (!section || section.querySelector('.setting-group')) return;
+  const group = el('div', 'setting-group panel');
+  let leading = true;
+  for (const child of [...section.children]) {
+    if (child.tagName === 'H2') continue;
+    if (leading && child.matches('.section-note')) continue;
+    leading = false;
+    group.append(child);
+  }
+  section.append(group);
+}
+
+async function mountFeatures(api) {
+  await Promise.all(FEATURE_MOUNTS.map(async ({ container, load }) => {
+    const node = $(container);
+    if (!node) return;
+    try {
+      const handle = await (await load())({ container: node, api });
+      if (typeof handle?.dispose === 'function') addEventListener('pagehide', () => handle.dispose(), { once: true });
+    } catch (failure) {
+      // One feature failing to load must not take the rest of Settings with it.
+      node.replaceChildren();
+      console.error(`Settings: ${container} failed to load.`, failure);
+    }
+  }));
+}
+
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
-  void mountTranslationSettings({ api, container: $('translation-settings') });
   void mountUsageSettings({ api, container: $('usage-settings') });
+  groupSection($('usage-settings'));
   const passwords = mountPasswords({ container: $('password-settings'), api });
-  const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords });
+  groupSection($('password-settings'));
+  let nav = null;
+  // The card's password steps live in the Passwords category; show it before revealing them.
+  const passwordSteps = { showImport() { nav?.open('passwords'); passwords.showImport(); } };
+  const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords: passwordSteps });
   addEventListener('pagehide', () => onboarding.dispose(), { once: true });
   if (typeof api.runtime?.connect === 'function') {
     mountUpdates(api);
     mountOrganato(api);
     const contextSettings = mountContextSettings({ container: $('context-settings'), api });
+    groupSection($('context-settings'));
     window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
   }
+  nav = mountSettingsNav({ api });
+  void mountFeatures(api).then(() => nav.refreshAvailability());
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
 
