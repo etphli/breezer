@@ -62,6 +62,9 @@ def main():
         subprocess.run([sys.executable, str(ROOT / 'tests/passwords_proactive_test.py'), '-v'],
                        env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),
                             'PYTHONDONTWRITEBYTECODE': '1'}, check=True)
+        subprocess.run([sys.executable, str(ROOT / 'tests/passwords_enter_test.py'), '-v'],
+                       env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),
+                            'PYTHONDONTWRITEBYTECODE': '1'}, check=True)
         for suite in ('passwords_native_test.py', 'passkeys_native_test.py'):
             subprocess.run([sys.executable, str(ROOT / 'tests' / suite), '-v'],
                            env={**os.environ, 'BREEZER_PASSWORD_SOURCE': str(tree),

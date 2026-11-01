@@ -76,6 +76,8 @@ jobs:
         run: |
           node tests/passkeys/component.mjs
           node tests/passkeys/virtual.mjs
+      - name: Verify login Enter stock-browser baseline (not native Breezer acceptance)
+        run: node tests/passwords/enter-browser.mjs --baseline
       - name: Verify website, usage calculations, and dashboard access boundaries
         env:
           BREEZER_SITE_EVIDENCE: ${{ runner.temp }}/breezer-site-evidence
