@@ -93,9 +93,9 @@ def package(app, architecture, cache):
         unpack_runtime(archive, staged / "runtime", lock["distributions"][architecture])
         runtime = staged / "runtime/node"
         if platform.system() == "Darwin" and architecture == {"arm64": "arm64", "x86_64": "x64"}.get(platform.machine()):
-            version = subprocess.check_output([str(runtime), "--version"], text=True).strip()
+            runtime_version = subprocess.check_output([str(runtime), "--version"], text=True).strip()
             actual_architecture = subprocess.check_output([str(runtime), "-p", "process.arch"], text=True).strip()
-            if version != f'v{lock["version"]}' or actual_architecture != architecture:
+            if runtime_version != f'v{lock["version"]}' or actual_architecture != architecture:
                 raise ValueError("The bundled Node binary does not match its pinned version and architecture.")
         shutil.copyfile(FEATURE / "runtime.lock.json", staged / "runtime/lock.json")
         # This tool owns only this generated directory inside the build output.

@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import apply_breezer_branding as branding
 from breezer_release import release_version
+import package_breezer_ai as packaging
 from package_breezer_ai import stamp_bundle_version
 
 
@@ -79,6 +80,36 @@ class ReleaseVersionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'symlink'):
             stamp_bundle_version(app, '1.2.0')
         self.assertEqual(outside.read_bytes(), data)
+
+    def test_full_package_keeps_release_version_separate_from_node_version(self):
+        feature = self.root / 'features/ai'
+        (feature / 'host').mkdir()
+        (feature / 'host/launch.sh').write_text('#!/bin/sh\n')
+        (feature / 'integration').mkdir()
+        (feature / 'integration/native-host-manifest.json').write_text('{}')
+        (feature / 'runtime.lock.json').write_text(json.dumps({
+            'version': '24.22.1', 'distributions': {'arm64': {}}}))
+        app = self.root / 'Breezer.app'
+        info = app / 'Contents/Info.plist'
+        info.parent.mkdir(parents=True)
+        info.write_bytes(plistlib.dumps({
+            'CFBundleIdentifier': 'io.github.etphli.breezer',
+            'CFBundleExecutable': 'Breezer', 'CFBundleVersion': '0.20.1.1'}))
+        resources = app / 'Contents/Frameworks/Breezer Framework.framework/Versions/156/Resources'
+        resources.mkdir(parents=True)
+        with patch.object(packaging, 'ROOT', self.root), \
+                patch.object(packaging, 'FEATURE', feature), \
+                patch.object(packaging, 'download_runtime', return_value=self.root / 'node.tar.gz'), \
+                patch.object(packaging, 'unpack_runtime',
+                             side_effect=lambda archive, destination, distribution: destination.mkdir()), \
+                patch.object(packaging.platform, 'system', return_value='Darwin'), \
+                patch.object(packaging.platform, 'machine', return_value='arm64'), \
+                patch.object(packaging.subprocess, 'check_output',
+                             side_effect=['a' * 40, 'v24.22.1\n', 'arm64\n']):
+            packaging.package(app, 'arm64', self.root / 'cache')
+        value = plistlib.loads(info.read_bytes())
+        self.assertEqual(value['CFBundleVersion'], '1.2.0')
+        self.assertEqual(value['CFBundleShortVersionString'], '1.2.0')
 
 
 if __name__ == '__main__':
