@@ -10,6 +10,8 @@ import { fakeChrome, panel } from './browser-api-fixture.mjs';
 // These run the shipped adapters/host/worker, with CLI and Chrome transports replaced.
 // They assert wire data and ordering, not DOM events, gameplay or native hit testing.
 const actions = [
+  { name: 'browser_type', args: { elementId: 'docs-editor', mode: 'insert', text: 'Hello, Docs!' } },
+  { name: 'browser_key', args: { key: 'ArrowLeft', shift: true } },
   { name: 'browser_mouse', args: { action: 'click', x: 300.5, y: 240 } },
   { name: 'browser_key', args: { key: 'Space', holdMs: 1 } },
   { name: 'browser_key', args: { key: 'w', action: 'down' } },
@@ -113,10 +115,13 @@ for (const id of ['codex', 'claude']) test(`${id} adapter routes canvas/game act
     assert.ok(results.every(message => message.result?.url === fake.tab.url && !message.error));
     const input = fake.calls.filter(call => call[0] === 'input');
     assert.ok(input.every(call => call[1].tabId === 7 && Object.keys(call[1]).length === 1));
-    assert.deepEqual(input.map(call => call[3].type), ['mouseMoved', 'mousePressed', 'mouseReleased', 'keyDown', 'keyUp', 'keyDown', 'keyUp', 'mouseMoved', 'mousePressed', 'mouseMoved', 'mouseMoved', 'mouseReleased']);
-    assert.deepEqual(input[0][3], { type: 'mouseMoved', x: 300.5, y: 240, buttons: 0 });
-    assert.equal(input[3][3].code, 'Space');
-    assert.equal(input[5][3].code, 'KeyW');
+    assert.equal(input[0][2], 'Input.insertText');
+    assert.equal(input[0][3].text, 'Hello, Docs!');
+    assert.equal(input[1][3].modifiers, 8);
+    assert.deepEqual(input.slice(3).map(call => call[3].type), ['mouseMoved', 'mousePressed', 'mouseReleased', 'keyDown', 'keyUp', 'keyDown', 'keyUp', 'mouseMoved', 'mousePressed', 'mouseMoved', 'mouseMoved', 'mouseReleased']);
+    assert.deepEqual(input[3][3], { type: 'mouseMoved', x: 300.5, y: 240, buttons: 0 });
+    assert.equal(input[6][3].code, 'Space');
+    assert.equal(input[8][3].code, 'KeyW');
     assert.equal(worker.tools.session, null);
   } finally { host.close(); await worker.cancel(); }
 });

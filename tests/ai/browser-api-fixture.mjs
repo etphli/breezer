@@ -26,6 +26,7 @@ export function fakeChrome() {
       const [operation, args] = options.args;
       calls.push(['script', options.target.tabId, operation, args]);
       if (operation === 'snapshot') return [{ result: { url: tab.url, title: 'Page', text: 'Visible content', viewport: { width: 1000, height: 700 }, elements: [] } }];
+      if (operation === 'editor-focus') return [{ result: { focusId: 'fixture-editor-focus' } }];
       if (operation === 'resolve') return [{ result: { x: 50, y: 60 } }];
       return [{ result: { ok: true } }];
     } },
