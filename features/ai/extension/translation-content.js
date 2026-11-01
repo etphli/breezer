@@ -51,6 +51,8 @@
       return;
     }
     busy = true;
+    // Count attempted input even if a page edits nodes before responses arrive.
+    characters += nodes.reduce((count, node) => count + node.data.length, 0);
     const run = epoch;
     const pending = nodes.map(node => ({ node, original: node.data, parts: [] }));
     // One batch is in flight at a time. Long text nodes retain their identity.
@@ -97,7 +99,7 @@
         const translated = parts.join('');
         if (outputCharacters + translated.length > 4000000) throw new Error('Translation text limit reached. Restore the original or translate a shorter page.');
         outputCharacters += translated.length;
-        originals.set(node, { original, translated }); node.data = translated; total++; characters += original.length;
+        originals.set(node, { original, translated }); node.data = translated; total++;
       }
       observe(); busy = false;
       post({ type: 'status', state: 'loading', total, message: `Translated ${total} text sections…` });
@@ -118,7 +120,7 @@
     stop(); port?.disconnect(); port = connection;
     if (location.href !== url) { restore(); url = location.href; }
     clearInterval(navigationTimer); navigationTimer = setInterval(checkNavigation, 250);
-    post({ type: 'status', state: originals.size ? 'done' : 'ready', total, message: originals.size ? 'Translated text remains on this page. Restore original or translate again.' : 'Ready to translate.' });
+    post({ type: 'status', state: originals.size ? 'paused' : 'ready', total, message: originals.size ? 'Translated text remains on this page. Restore original or translate again.' : 'Ready to translate.' });
     port.onMessage.addListener(message => {
       if (message.type === 'restore') { restore(); post({ type: 'status', state: 'ready', total, message: 'Original text restored.' }); }
       if (message.type === 'cancel') { stop(); post({ type: 'status', state: 'cancelled', total, message: 'Stopped. Translated text remains until you restore the original.' }); }

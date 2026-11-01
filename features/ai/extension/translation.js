@@ -43,7 +43,7 @@ port.onMessage.addListener(message => {
   }
   if (message.type === 'status') {
     running = message.state === 'loading' || (message.state === 'done' && prefs?.dynamic);
-    if (['navigation'].includes(message.state)) { connected = false; ready = false; }
+    if (message.state === 'navigation' || message.unavailable) { connected = false; ready = false; }
     $('translate').textContent = message.state === 'error' || message.state === 'cancelled' ? 'Retry translation' : 'Translate page';
     status(`${message.message}${message.skipped ? ` ${message.skipped} text sections exceed the safety limit and were left unchanged.` : ''}`, message.state);
   }

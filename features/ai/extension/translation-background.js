@@ -59,7 +59,7 @@ export function installTranslation(api) {
         }).finally(() => { inFlight = null; });
       });
       content.onDisconnect.addListener(() => { void api.runtime.lastError; stop(); error('Page connection closed. Open Translate page again after navigation.'); });
-    })().catch(failure => error(`${failure.message} Use the page context menu or translation shortcut to grant access.`));
+    })().catch(failure => post({ type: 'status', state: 'error', unavailable: true, message: `${failure.message} Use the page context menu or translation shortcut to grant access.` }));
     let commands = Promise.resolve();
     ui.onMessage.addListener(message => {
       if (message.type === 'ping') return;
