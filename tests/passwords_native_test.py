@@ -22,6 +22,8 @@ class OverlayBoundaryTest(unittest.TestCase):
         self.assertRegex(overlay.fingerprint(), r'^[0-9a-f]{64}$')
         self.assertEqual(set(overlay.sections()), {
             'chrome/browser/policy/configuration_policy_handler_list_factory.cc',
+            'chrome/browser/resources/settings/route.ts',
+            'chrome/browser/resources/settings/settings_main/settings_main.html',
             'components/password_manager/core/browser/password_suggestion_generator.cc',
             'chrome/browser/ui/browser_actions.cc',
             'chrome/browser/ui/web_applications/app_browser_controller.cc',
@@ -126,7 +128,7 @@ class PinnedSourceTest(unittest.TestCase):
         self.assertIn('profile.services_supported &= ~(user_data_importer::PASSWORDS', profiles)
 
     def test_apply_check_and_retry_on_source_copy_only(self):
-        self.assertEqual(overlay.apply(self.tree), 10)
+        self.assertEqual(overlay.apply(self.tree), 12)
         self.assertEqual(overlay.apply(self.tree), 0)
         self.assertEqual(overlay.apply(self.tree, check=True), 0)
         defaults = (self.tree / 'components/password_manager/core/browser/password_manager.cc').read_text()
@@ -134,7 +136,7 @@ class PinnedSourceTest(unittest.TestCase):
         self.assertIn('prefs::kCredentialsEnableAutosignin, false,', defaults)
         policy = (self.tree / 'chrome/browser/policy/configuration_policy_handler_list_factory.cc').read_text()
         self.assertNotIn('prefs->SetBoolean(password_manager::prefs::kCredentialsEnableService,', policy)
-        self.assertIn('prefs->SetBoolean(password_manager::prefs::kCredentialsEnablePasskeys,', policy)
+        self.assertNotIn('prefs->SetBoolean(password_manager::prefs::kCredentialsEnablePasskeys,', policy)
         actions = (self.tree / 'chrome/browser/ui/browser_actions.cc').read_text()
         self.assertIn('kActionShowPasswordsBubbleOrPage, IDS_VIEW_PASSWORDS', actions)
         self.assertIn('chrome::ManagePasswordsForPage(bwi)', actions)
@@ -157,7 +159,7 @@ class PinnedSourceTest(unittest.TestCase):
     def test_interrupted_apply_converges_and_symlink_refused(self):
         name, section = next(iter(overlay.sections().items()))
         self.assertEqual(overlay.patch(self.tree, section).returncode, 0)
-        self.assertEqual(overlay.apply(self.tree), 9)
+        self.assertEqual(overlay.apply(self.tree), 11)
         self.assertEqual(overlay.apply(self.tree, check=True), 0)
         target = self.tree / name
         other = self.tree / 'redirected.cc'

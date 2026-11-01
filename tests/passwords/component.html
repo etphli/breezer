@@ -59,10 +59,16 @@ try {
   click('settings');
   await settle();
   check(calls.at(-1).url === PASSWORD_ROUTES.settings, 'wrong manager settings route');
+  click('passkeys');
+  await settle();
+  check(calls.at(-1).url === 'chrome://settings/passkeys', 'wrong local passkeys route');
+  check(container.textContent.includes('Local Mac passkeys are not available in this build'), 'missing signing limit');
+  check(container.textContent.includes('Passkeys are not included in CSV import or Breezer sync'), 'missing provider/storage limits');
+  check(container.querySelector('[role="status"]').textContent.includes('Check availability there'), 'opening a page must not claim platform availability');
   const detached = container.querySelector('button');
   view.dispose();
   detached.click();
-  check(!container.children.length && calls.length === 4, 'dispose left a listener or mounted content');
+  check(!container.children.length && calls.length === 5, 'dispose left a listener or mounted content');
   view = mountPasswords({ container, api: null });
   check([...container.querySelectorAll('button')].every(button => button.disabled), 'ordinary browsers must not simulate native availability');
   view.dispose();
@@ -73,7 +79,7 @@ try {
   release();
   release = null;
   await settle();
-  check(!container.children.length && opened.length === 3, 'disposed view updated after await');
+  check(!container.children.length && opened.length === 4, 'disposed view updated after await');
   view = mountPasswords({ container, api });
   view.showImport();
   result.textContent = 'PASS: guide, routes, pending state, errors, retry, missing API, callback and disposal. Dummy tab API only; native import is not exercised.';

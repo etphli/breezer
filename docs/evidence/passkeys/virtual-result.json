@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "resident passkey creation with required user verification",
+    "sign-in signature, challenge, origin, RP hash and UP/UV flags verified",
+    "wrong RP rejected for creation and assertion",
+    "different origin cannot request localhost RP",
+    "creation, sign-in and pending conditional-autofill cancellation",
+    "virtual credential deletion prevents subsequent use"
+  ],
+  "limitations": [
+    "CDP virtual authenticator only; no biometric, Keychain, iCloud, physical key or phone acceptance.",
+    "Deletion uses the virtual authenticator API, not the Mac native manager."
+  ],
+  "browser": {
+    "version": "156.0.8078.4",
+    "executable": "Playwright Chromium"
+  },
+  "status": "passed"
+}
