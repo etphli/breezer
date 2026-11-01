@@ -161,11 +161,6 @@ covers the new category with a missing native bridge and preserves peer routes.
 Source checks reconstruct pinned Chromium `156.0.8078.47` plus Helium only in
 temporary fixtures. None of these checks compiles or launches Breezer.
 
-A broad local browser suite also found an existing new-tab visual assertion:
-wide layout expects eight site tiles but renders nine. It reproduces using
-untouched `origin/main` new-tab assets in an isolated fixture. This feature does
-not change those assets or weaken that test.
-
 ## Required native acceptance before readiness/merge
 
 The coordinator confirmed that no disposable compiled Breezer browser is
