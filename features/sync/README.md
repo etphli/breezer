@@ -65,8 +65,8 @@ that the sync engine is absent.
    using the merge model. Integrate reconnect/restart, opt-in, provider switching
    and disconnect; keep a recoverable local copy and deletion records. Provide
    explicit recovery for concurrent capacity overflow and tombstone limits.
-5. Add an actual supported provider or realistic local CAS test provider using
-   the existing provider contract. Do not substitute a local export, invented
+5. Connect the included realistic local CAS provider through the native
+   adapter and setup handler. Do not substitute a local export, invented
    crypto or a success fixture for this transport.
 6. Add feature-owned `sync-settings.js` to the settings owner's `FEATURE_MOUNTS`
    with `{ container: 'sync-settings', load: () => import('./sync-settings.js')
@@ -88,7 +88,7 @@ node --test tests/sync.test.mjs
 node --test tests/ai/workspace-store.test.mjs tests/ai/workspace-static.test.mjs
 ```
 
-The first command runs nine merge-model tests. They exercise the real shipped
+The first command runs nine merge-model tests and three provider tests. They exercise the real shipped
 module as two in-memory clients, with serialized restart state. These are pure
 model tests, **not** encrypted transport, native compilation, browser-profile,
 password-controller, Keychain or cloud-sync acceptance.
@@ -103,3 +103,33 @@ sync or included in 1.2.0 release claims.
 
 The imported source fixture used for API inspection was reconstructed only in
 `/tmp` from pinned Chromium `156.0.8078.47` and checked-in Helium patches.
+
+## Disposable local provider
+
+`test-provider/server.py` and `test-provider/extension/` implement a real loopback
+object transport using the inherited `syncVaultProvider` schema. The server
+binds only `127.0.0.1`, requires an ephemeral bearer token, stores opaque binary
+objects in a private SQLite file, and atomically enforces IF_ABSENT/IF_REVISION.
+It has no password, key, wrapping, plaintext export or vault-decryption API.
+It supports create/list/read/write; rename and epoch collection are unsupported.
+Its HTTP connection is loopback-only and is **not TLS**. It must never be exposed
+as a hosted service. Native vault ciphertext protection remains a separate test
+requirement.
+
+For a disposable fixture directory, `server.py --directory /tmp/your-private-dir`
+creates a private token file and listens on port 18765. `--resume` reopens only
+an existing private database/token. No existing directory or database is erased.
+The unpacked provider extension's options page accepts that test token. The
+imported native provider API requires `--enable-features=ApiSyncVaultProvider`
+with a disposable browser profile. That flag alone does not supply the missing
+native setup/backend wiring, so it does not make the currently shipped Breezer
+sync-capable. Do not use a personal profile or real credentials for these tests.
+
+`tests/sync/provider.test.mjs` runs the actual provider JavaScript against the
+actual Python HTTP/SQLite server, with two independent provider clients. It
+verifies atomic competing writes, stale revision rejection, idempotent vault
+creation, binary round-trip, read size bounds, authentication rejection,
+connection failure, server restart persistence and private file permissions.
+It also checks cancellation/disposal and imported native enum names.
+The fixture data is random opaque bytes. These tests do **not** establish native
+encryption, wrong-vault-key rejection or browser-managed credential sync.

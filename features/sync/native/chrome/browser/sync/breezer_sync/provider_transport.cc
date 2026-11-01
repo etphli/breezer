@@ -22,7 +22,7 @@ namespace api = extensions::api::sync_vault_provider;
 
 Error MapError(api::SyncVaultProviderError error) {
   switch (error) {
-    case api::SyncVaultProviderError::kAuthenticationRequired: return Error::kAuthenticationRequired;
+    case api::SyncVaultProviderError::kAuthRequired: return Error::kAuthenticationRequired;
     case api::SyncVaultProviderError::kConflict: return Error::kConflict;
     case api::SyncVaultProviderError::kNetworkError: return Error::kNetworkError;
     case api::SyncVaultProviderError::kTemporaryError: return Error::kTemporaryError;
