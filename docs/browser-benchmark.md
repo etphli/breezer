@@ -25,7 +25,18 @@ The output directory must be new and its parent must exist. Store temporary evid
 
 ## Initialized-profile comparison
 
-The current initialized protocol is v8. It retains the v6 foreground endpoints,
+The current protocol is v9. Every app receives `--use-mock-keychain` with its
+temporary profile. An initial 1.2.1 attempt stopped before scoring when a macOS
+credential prompt blocked navigation. A diagnostic reproduced the failure and
+confirmed that the test keychain permits ordinary setup and foreground readiness.
+The failed attempt remains separate. This mode does not measure real Keychain
+access, credential-store behavior or authenticated profiles. It changes no
+installed app, stored password or browser feature setting.
+
+All participants must be rerun with the same v9 flags. Historical v8 measurements
+cannot be pooled with them. Fresh-profile runs also carry a v9 label.
+
+V9 retains the v6 foreground endpoints,
 v7 footprint accounting, workload, flags and balanced orders described below.
 During untimed setup it also handles the new Breezer setup guide: it invokes the
 shipped **Skip setup** button, waits for the guide's own completed state, and
@@ -34,9 +45,9 @@ It never writes fabricated setup/seen values or closes unexpected pages. Older
 bundles still use their actual first-run notes. Setup actions are recorded in
 each setup observation; extension inspection sessions are detached afterward.
 
-The full labels are `installed-browser-v8-initialized-foreground`,
-`installed-browser-v8-initialized-three-way`, and their `-footprint` variants.
-All comparison participants must be rerun under v8. Earlier v6/v7 reports remain
+The full labels are `installed-browser-v9-initialized-foreground`,
+`installed-browser-v9-initialized-three-way`, and their `-footprint` variants.
+All comparison participants must be rerun under v9. Earlier v6/v7/v8 reports remain
 labelled history. The first v7 attempt against the new guide failed before any
 scored launches and is preserved separately from the v8 run.
 

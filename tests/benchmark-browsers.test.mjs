@@ -6,10 +6,10 @@ import * as benchmark from '../script/benchmark_browsers.mjs';
 test('footprint instrumentation has its own initialized protocol and preserves balanced orders', () => {
   assert.throws(() => comparisonPlan({ trials: 6, physicalFootprint: true }), /initialized-profiles/);
   const two = comparisonPlan({ trials: 6, initializedProfiles: true, physicalFootprint: true });
-  assert.equal(two.protocol, 'installed-browser-v8-initialized-foreground-footprint');
+  assert.equal(two.protocol, 'installed-browser-v9-initialized-foreground-footprint');
   assert.deepEqual(two.roundOrders, comparisonPlan({ trials: 6, initializedProfiles: true }).roundOrders);
   const three = comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline', physicalFootprint: true });
-  assert.equal(three.protocol, 'installed-browser-v8-initialized-three-way-footprint');
+  assert.equal(three.protocol, 'installed-browser-v9-initialized-three-way-footprint');
   assert.deepEqual(three.roundOrders, comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline' }).roundOrders);
 });
 
@@ -113,15 +113,15 @@ test('native foreground readiness rejects covered, hidden, wrong-PID and unusabl
 test('two-browser protocols retain their existing alternating order', () => {
   const orders = [['breezer', 'chrome'], ['chrome', 'breezer'], ['breezer', 'chrome']];
   assert.deepEqual(comparisonPlan({ trials: 3 }).roundOrders, orders);
-  assert.equal(comparisonPlan({ trials: 3 }).protocol, 'installed-browser-v3-observed-cpu');
+  assert.equal(comparisonPlan({ trials: 3 }).protocol, 'installed-browser-v9-fresh-profile-observed-cpu');
   const active = comparisonPlan({ trials: 3, initializedProfiles: true });
-  assert.equal(active.protocol, 'installed-browser-v8-initialized-foreground');
+  assert.equal(active.protocol, 'installed-browser-v9-initialized-foreground');
   assert.deepEqual(active.roundOrders, orders);
 });
 
 test('three-browser order balances positions and every pair in each six-round block', () => {
   const plan = comparisonPlan({ trials: 12, initializedProfiles: true, baselineBreezer: '/baseline' });
-  assert.equal(plan.protocol, 'installed-browser-v8-initialized-three-way');
+  assert.equal(plan.protocol, 'installed-browser-v9-initialized-three-way');
   const names = ['breezer', 'baselineBreezer', 'chrome'];
   for (const block of [plan.roundOrders.slice(0, 6), plan.roundOrders.slice(6)]) {
     assert.equal(new Set(block.map(order => order.join(','))).size, 6);
@@ -181,7 +181,7 @@ test('summary preserves small-sample spread and even-count median', () => {
   assert.throws(() => summarize([NaN]));
 });
 test('benchmark does not inject automation flags that disable product functionality', () => {
-  assert.deepEqual(commonFlags, ['--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', '--window-size=1280,900']);
+  assert.deepEqual(commonFlags, ['--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', '--window-size=1280,900', '--use-mock-keychain']);
 });
 
 test('process load retains renderer PID and full command while excluding other browser sessions', () => {

@@ -13,7 +13,7 @@ import { performance } from 'node:perf_hooks';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
-export const commonFlags = ['--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', '--window-size=1280,900'];
+export const commonFlags = ['--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', '--window-size=1280,900', '--use-mock-keychain'];
 export function comparisonPlan({ trials, initializedProfiles, baselineBreezer, physicalFootprint }) {
   if (physicalFootprint) assert.ok(initializedProfiles, '--physical-footprint requires --initialized-profiles');
   if (baselineBreezer) {
@@ -30,8 +30,8 @@ export function comparisonPlan({ trials, initializedProfiles, baselineBreezer, p
   ] : [['breezer', 'chrome'], ['chrome', 'breezer']];
   return {
     protocol: initializedProfiles
-      ? `installed-browser-v8-initialized-${baselineBreezer ? 'three-way' : 'foreground'}${physicalFootprint ? '-footprint' : ''}`
-      : 'installed-browser-v3-observed-cpu',
+      ? `installed-browser-v9-initialized-${baselineBreezer ? 'three-way' : 'foreground'}${physicalFootprint ? '-footprint' : ''}`
+      : 'installed-browser-v9-fresh-profile-observed-cpu',
     roundOrders: Array.from({ length: trials }, (_, index) => [...orders[index % orders.length]]),
   };
 }
@@ -645,7 +645,7 @@ export function aggregateTrials(trials, names = ['breezer', 'chrome']) {
   return result;
 }
 export async function main(argv = process.argv.slice(2)) {
-  const help = `Usage: node script/benchmark_browsers.mjs --prepare|--run --breezer /absolute/Breezer.app --chrome '/Applications/Google Chrome.app' --output NEW_DIRECTORY [--trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5] [--initialized-profiles] [--baseline-breezer /absolute/Previous/Breezer.app] [--physical-footprint]\n--initialized-profiles uses an untimed onboarding pass for each app and verifies each launched PID is active and frontmost at startup readiness. This is protocol v6, not fresh-profile startup.\n--baseline-breezer adds a previous Breezer under protocol v6 three-way. Requires initialized profiles and a multiple of six rounds; every app occupies each order position equally.\n--physical-footprint adds identity-checked macOS footprint probes under protocol v7. Requires initialized profiles and rerunning every comparison participant.\n--prepare verifies bundles, records environment, and compiles the native probes. It never launches a browser.\n--run performs measurements. Run only after builds and competing work have stopped. See docs/browser-benchmark.md.`;
+  const help = `Usage: node script/benchmark_browsers.mjs --prepare|--run --breezer /absolute/Breezer.app --chrome '/Applications/Google Chrome.app' --output NEW_DIRECTORY [--trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5] [--initialized-profiles] [--baseline-breezer /absolute/Previous/Breezer.app] [--physical-footprint]\n--initialized-profiles uses an untimed onboarding pass for each app and verifies each launched PID is active and frontmost at startup readiness. This is credential-isolated protocol v9, not fresh-profile startup.\n--baseline-breezer adds a previous Breezer under protocol v9 three-way. Requires initialized profiles and a multiple of six rounds; every app occupies each order position equally.\n--physical-footprint adds identity-checked macOS footprint probes under protocol v9. Requires initialized profiles and rerunning every comparison participant.\n--prepare verifies bundles, records environment, and compiles the native probes. It never launches a browser.\n--run performs measurements. Run only after builds and competing work have stopped. See docs/browser-benchmark.md.`;
   if (argv.includes('--help') || !argv.length) { console.log(help); return; }
   const options = { trials: 6, repetitions: 3, tabs: 10, settleSeconds: 5, memorySamples: 5 };
   const valueKeys = { '--breezer': 'breezer', '--baseline-breezer': 'baselineBreezer', '--chrome': 'chrome', '--output': 'output', '--trials': 'trials', '--repetitions': 'repetitions', '--tabs': 'tabs', '--settle-seconds': 'settleSeconds', '--memory-samples': 'memorySamples' };
