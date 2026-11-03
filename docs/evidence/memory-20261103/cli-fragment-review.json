@@ -1,0 +1,327 @@
+{
+  "status": "REVIEW COMPLETE; NO REACHABLE PRODUCTION REGRESSION FOUND IN OWNED CHANGE",
+  "reviewer": "gpt-6.1-sol, high reasoning, regular speed; worked independently without subagents",
+  "reviewedAtUtc": "2026-11-03T00:50:19.668100+00:00",
+  "scope": "Current-source independent review of all four assigned files. Shared checkout read-only except this named report and cli-fragment-review-prefixed offline artifacts.",
+  "files": [
+    {
+      "path": "features/ai/host/cli.mjs",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "lines": 108,
+      "readRanges": [
+        [
+          1,
+          108
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "inventoryLines": 108,
+      "drift": false
+    },
+    {
+      "path": "script/verify_cli_fragment_efficiency.mjs",
+      "sha256": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87",
+      "lines": 82,
+      "readRanges": [
+        [
+          1,
+          82
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87",
+      "inventoryLines": 82,
+      "drift": false
+    },
+    {
+      "path": "tests/ai/cli-fragment-buffer.test.mjs",
+      "sha256": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+      "lines": 156,
+      "readRanges": [
+        [
+          1,
+          156
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+      "inventoryLines": 156,
+      "drift": false
+    },
+    {
+      "path": "tests/ai/fixtures/cli-before.mjs",
+      "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+      "lines": 101,
+      "readRanges": [
+        [
+          1,
+          101
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+      "inventoryLines": 101,
+      "drift": false
+    }
+  ],
+  "inventoryDrift": false,
+  "findings": [],
+  "objections": [
+    {
+      "id": "CLI-REVIEW-01",
+      "classification": "introduced difference under artificial synchronous reentry; no production reachability found; nonblocking test limitation",
+      "locations": [
+        {
+          "path": "features/ai/host/cli.mjs",
+          "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+          "lines": [
+            48,
+            56
+          ]
+        },
+        {
+          "path": "tests/ai/cli-fragment-buffer.test.mjs",
+          "sha256": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+          "lines": [
+            116,
+            118
+          ]
+        }
+      ],
+      "observation": "The reentrant write test queues nested data in PassThrough. It does not establish equivalence for arbitrary nested EventEmitter data emission. Direct nested emit while the outer parser has a complete second line in its suffix causes current to parse second-line plus nested-line as one JSON document and close; baseline emits both.",
+      "reproduction": "Run cli-fragment-review-repro.mjs. Outer input is {\"first\":true} newline {\"second\":true} newline. A once-message listener directly emits {\"nested\":true} newline. Output records baseline first/second/nested versus current first/Invalid CLI response. The same action using PassThrough.write produces identical first/second/nested order.",
+      "impactAndReachability": "Requires application code to synchronously inject stdout data while a message callback is on stack, or synchronously read/push the stream from that callback. OS pipe callbacks do not interrupt an executing JavaScript callback. Fully read current Codex and Claude callers use send/request/control/close and message listeners, with no stdout read/push/emit or nested event-loop pump. An ordinary child reply to stdin therefore cannot produce this stack. No reachable production bug demonstrated.",
+      "smallestFix": "No transport change required for current callers. Describe this test as reentrant PassThrough writes or add the out-of-contract counterexample to test documentation if desired. If synchronous injected data becomes a supported transport contract, serialize incoming chunks before parsing rather than blindly assuming the suffix has no newline."
+    }
+  ],
+  "reasoning": [
+    {
+      "location": "features/ai/host/cli.mjs:46-68",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "assessment": "setEncoding utf8 precedes listener registration. At ordinary data-entry the prior suffix has no newline. prefixLength + first newline index from the new decoded string equals the original whole-buffer index. No-newline events append without scanning prior text. The unchanged suffix loop drains all remaining lines, including blank CRLF lines; continue still executes the for update expression. An empty decoded chunk leaves state unchanged. UTF-16 length and indices agree even for astral characters."
+    },
+    {
+      "location": "features/ai/host/cli.mjs:50,67",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "assessment": "The original aggregate UTF-16 limit is checked before any parsing, so an over-limit chunk containing early complete lines is rejected in full. The retained buffer remains over limit and cannot re-enter parsing on later data. Malformed JSON, null shape errors and throwing message listeners still close then continue suffix parsing as before. These are inherited semantics, not new guards or byte-based limits."
+    },
+    {
+      "location": "features/ai/host/cli.mjs:59-67,78-105",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "assessment": "Request/control correlation and notification routing are unchanged. Settlement clears the specific pending timer before deletion. Timeout deletes its own pending entry. send failure and close reject pending work and clear its timers; later responses become ordinary messages. Cancellation retains partial input until actual child close, preserving fragmented in-flight notifications."
+    },
+    {
+      "location": "features/ai/host/cli.mjs:45,73-76,97-106",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "assessment": "The first child-close listener resolves exited. Promise continuations are microtasks, so the later synchronous close listener clears #buffer before exited continuations run. It clears before calling close, hence before first closed notification on natural exit, and also clears when close was already called. The kill-escalation timer closes over child, not this/#buffer, and remains unrefed for at most its existing delay. Its post-exit exitCode check avoids SIGKILL."
+    },
+    {
+      "location": "script/verify_cli_fragment_efficiency.mjs:12-15,20-47,61-82",
+      "sha256": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87",
+      "assessment": "Authored baseline hash is enforced by sources(). Normal imports only read baseline/current source; they neither run measurement main nor touch the receipt. --record explicitly preserves existing receipt fields or creates the receipt when absent. Current tests are independent of an ignored build receipt. VM class instrumentation and fake timers are suitable for differential semantics and logical retained units; direct-import test covers actual constructor."
+    }
+  ],
+  "verification": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/cli-fragment-buffer.test.mjs",
+      "result": "10 passed, 0 failed, 0 skipped; v24.22.1. Includes UTF-16/UTF-8 splits, exact and over-limit cases, requests/control/notifications, errors, cancellation, actual class import and logical retention."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/cli-fragment-review-repro.mjs > build/efficiency-20261103/cli-fragment-review-repro-output.json",
+      "result": "Passed. 800 deterministic differential cases with randomized multi-frame malformed/valid/blank/primitive data and byte chunking; EOF delivery; normal-write and direct-emit reentry challenge; pending close rejection, close listener ordering and post-exit escalation; small 32 KiB counter probe. All fake streams/timers cleaned in finally, no real child or socket created."
+    },
+    {
+      "command": "SHA256 and line counts compared with source-inventory-after-cli.json before and at report creation",
+      "result": "All four owned files match, no drift."
+    }
+  ],
+  "offlineReproduction": {
+    "script": "build/efficiency-20261103/cli-fragment-review-repro.mjs",
+    "output": "build/efficiency-20261103/cli-fragment-review-repro-output.json",
+    "results": {
+      "runtime": "v24.22.1",
+      "comparisons": 800,
+      "reentrancy": {
+        "write": {
+          "baseline": [
+            [
+              "message",
+              {
+                "first": true
+              }
+            ],
+            [
+              "message",
+              {
+                "second": true
+              }
+            ],
+            [
+              "message",
+              {
+                "nested": true
+              }
+            ]
+          ],
+          "current": [
+            [
+              "message",
+              {
+                "first": true
+              }
+            ],
+            [
+              "message",
+              {
+                "second": true
+              }
+            ],
+            [
+              "message",
+              {
+                "nested": true
+              }
+            ]
+          ]
+        },
+        "emit": {
+          "baseline": [
+            [
+              "message",
+              {
+                "first": true
+              }
+            ],
+            [
+              "message",
+              {
+                "second": true
+              }
+            ],
+            [
+              "message",
+              {
+                "nested": true
+              }
+            ]
+          ],
+          "current": [
+            [
+              "message",
+              {
+                "first": true
+              }
+            ],
+            [
+              "closed",
+              "Invalid CLI response: Unexpected non-whitespace character after JSON at position 16 (line 2 column 1)"
+            ]
+          ]
+        }
+      },
+      "closeOrder": [
+        [
+          "closed",
+          0
+        ],
+        [
+          "later-child-close-listener",
+          0
+        ],
+        [
+          "exited-continuation",
+          0
+        ]
+      ],
+      "counters": {
+        "baseline": {
+          "searches": 1059,
+          "searchInputUnits": 17366523,
+          "elapsedMs": 2.964915999999903,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 32780
+        },
+        "current": {
+          "searches": 1059,
+          "searchInputUnits": 32780,
+          "elapsedMs": 0.8152919999999995,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 32780
+        }
+      }
+    }
+  },
+  "evidenceReview": {
+    "read": [
+      "build/efficiency-20261103/cli-fragment-implementation.json",
+      "docs/evidence/memory-20261103/cli-fragment-integration.json"
+    ],
+    "assessment": "Implementation receipt historical helper hash 3ab70941... binds its original measurement, not the current helper. Integration evidence correctly records current 4b59772e... and authored pinned fixture. Earlier receipt text saying the tests require the build receipt is superseded by current sources() and integration evidence. No historical version was counted as current-source coverage.",
+    "contextualReads": [
+      "features/ai/host/codex.mjs, complete current file, for message/close and stdout reentry reachability only",
+      "features/ai/host/claude.mjs, complete current file, for message/close and stdout reentry reachability only",
+      "script/check_efficiency_coverage.py, complete current file, for report schema and range validation"
+    ],
+    "parentReportedNotIndependentlyRepeated": "342 combined checks, eight package checks, fresh checkout ten-case fixture suite, packet resource/module matching. This review independently repeated only the checks listed above."
+  },
+  "knownAcceptedLimits": [
+    "A final non-newline-terminated JSON value is discarded on child close, as baseline already did. New clearing removes the logical retained reference after that close.",
+    "Malformed response handling can still emit valid suffix messages after closed and rejected pending requests, as before. Current provider listeners guard or detach on closure.",
+    "The 16 Mi UTF-16-unit aggregate chunk limit is not a byte limit or a per-frame limit; complete early frames in an oversized chunk are not dispatched.",
+    "Clearing #buffer proves removal of that private logical reference. It does not prove immediate GC, release of OS memory, or removal of other stream/engine references.",
+    "indexOf haystack units and timings are synthetic and engine-specific. String concatenation allocation behavior is unmeasured. No whole-browser RAM/CPU or end-to-end speed claim is supported.",
+    "No real provider, auth, installed-app, browser, PC or release acceptance was run."
+  ],
+  "safety": {
+    "network": false,
+    "realProviderDiscovery": false,
+    "actualAuthPathsInspected": false,
+    "appBuildRunInstallUpdate": false,
+    "sourceTestHelperEdits": false,
+    "sharedEvidenceReceiptInventoryEdits": false,
+    "subagents": false,
+    "gitPublication": false
+  },
+  "coverageValidation": {
+    "checker": "script/check_efficiency_coverage.py",
+    "completeForOwnedFiles": true,
+    "files": [
+      {
+        "path": "features/ai/host/cli.mjs",
+        "owner": "native-host",
+        "lines": 108,
+        "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+        "status": "fully-read"
+      },
+      {
+        "path": "script/verify_cli_fragment_efficiency.mjs",
+        "owner": "build-tools",
+        "lines": 82,
+        "sha256": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87",
+        "status": "fully-read"
+      },
+      {
+        "path": "tests/ai/cli-fragment-buffer.test.mjs",
+        "owner": "verification",
+        "lines": 156,
+        "sha256": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+        "status": "fully-read"
+      },
+      {
+        "path": "tests/ai/fixtures/cli-before.mjs",
+        "owner": "verification",
+        "lines": 101,
+        "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+        "status": "fully-read"
+      }
+    ]
+  },
+  "executionDeviation": {
+    "detail": "Loading the coverage checker with importlib allowed Python to create or refresh its bytecode cache, outside the allowed report/artifact paths. The cache is left intact because compiled-cache deletion was prohibited. Subsequent Python verification used -B. No source/test/helper file was edited.",
+    "path": "script/__pycache__/check_efficiency_coverage.cpython-314.pyc",
+    "mtimeUtc": "2026-11-02T23:35:15.055179+00:00"
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "scope": "Offline actual WorkspaceStore class; deterministic requested-key and serialized-character counts only. No timing, RSS or browser claim.",
+  "sourcePath": "features/ai/extension/workspace-store.js",
+  "sourceSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+  "measurements": [
+    {
+      "savedEntries": 0,
+      "reads": [
+        {
+          "area": "local",
+          "op": "get",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        },
+        {
+          "area": "session",
+          "op": "get",
+          "keys": [
+            "workspace.session"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "area": "local",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        }
+      ],
+      "serializations": [
+        {
+          "kind": "members",
+          "chars": 102
+        },
+        {
+          "kind": "members",
+          "chars": 175
+        }
+      ]
+    },
+    {
+      "savedEntries": 100,
+      "reads": [
+        {
+          "area": "local",
+          "op": "get",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        },
+        {
+          "area": "session",
+          "op": "get",
+          "keys": [
+            "workspace.session"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "area": "local",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        }
+      ],
+      "serializations": [
+        {
+          "kind": "members",
+          "chars": 102
+        },
+        {
+          "kind": "members",
+          "chars": 175
+        }
+      ]
+    },
+    {
+      "savedEntries": 1000,
+      "reads": [
+        {
+          "area": "local",
+          "op": "get",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        },
+        {
+          "area": "session",
+          "op": "get",
+          "keys": [
+            "workspace.session"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "area": "local",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        }
+      ],
+      "serializations": [
+        {
+          "kind": "members",
+          "chars": 102
+        },
+        {
+          "kind": "members",
+          "chars": 175
+        }
+      ]
+    }
+  ],
+  "baselineSha256": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+  "differential": {
+    "cases": 24,
+    "sequentialSteps": 120,
+    "overlappingOperations": 96,
+    "exactPersistedValuesAndWriteSequenceMatch": true
+  }
+}

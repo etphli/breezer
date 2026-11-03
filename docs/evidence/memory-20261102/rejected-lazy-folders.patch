@@ -1,0 +1,18 @@
+--- a/features/ai/extension/workspace.js
++++ b/features/ai/extension/workspace.js
+@@ -657,11 +657,13 @@
+         head.querySelector('.count').textContent = open || !node.children.length ? '' : String(node.children.length);
+         head.classList.toggle('contains-active', !open && node.children.some((child) => child.tab?.active));
+         group.hidden = !open;
+-        reconcile(group, node.children.map((child) => {
++        const rows = node.children.map((child) => {
+           const childKey = `e:${child.entry.id}`;
+           state.items.set(childKey, { type: 'entry', entry: child.entry, tab: child.tab, folder: node.folder });
+           return entryRow(child, childKey);
+-        }));
++        });
++        if (open) reconcile(group, rows);
++        else group.replaceChildren();
+       },
+     };
+   });

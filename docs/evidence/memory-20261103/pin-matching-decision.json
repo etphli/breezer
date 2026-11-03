@@ -1,0 +1,24 @@
+{
+  "status": "Neither initial candidate adopted; follow-up contract and bounded-memory experiment warranted for B.",
+  "initialRecommendation": {
+    "selection": "reject-both-as-written",
+    "A": "Reject: misses predeclared worthwhile CPU gate; changes malformed public error outcomes and sparse-array error messages despite fewer logical wrappers.",
+    "B": "Reject under strict semantic preservation: internal getter/reentrant store changes alter errors/bindings. Strong cold CPU result merits parent investigation only; per-operation live memory rises.",
+    "parentReviewRequiredBeforeAnyAdoption": true,
+    "objectionsToRejection": "B leaves public helper unchanged, passes all ordinary cases and existing tests, and these accessor scenarios are not reachable through inspected application storage/tab callers. Parent may separately choose a narrower application-input contract, but this experiment does not silently assume it."
+  },
+  "baseSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+  "sourceAndPacketUnchanged": true,
+  "reasonForFollowUp": "B passes the CPU gate and ordinary/caller-compatible cases. Accessor/reentrant counterexamples are absent from inspected normalized storage/native-tab callers. Its larger in-operation live state remains unresolved; investigate indexing only requested URLs/paths plus independent caller and browser memory evidence before adoption.",
+  "knownRejectedAlternative": {
+    "path": "docs/evidence/memory-20261102/sidebar-paired.json",
+    "decisionTrail": "docs/evidence/memory-20261102/decisions.tsv",
+    "reason": "Lazy closed-folder rows already rejected for reproducible opening delay. No repeat/adoption planned."
+  },
+  "limits": [
+    "No current source change, no speedup or physical-RAM claim.",
+    "Conditional application-input contract must be independently proven, not silently substituted for arbitrary JS equivalence.",
+    "Source-level/forced-GC mid-operation retention is not measured peak physical RAM.",
+    "PC and installed app untouched."
+  ]
+}

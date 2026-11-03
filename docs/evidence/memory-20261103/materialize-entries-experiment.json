@@ -1,0 +1,2032 @@
+{
+  "recommendation": "reject scratch candidate for adoption under the predeclared gate; no production edits",
+  "reason": "Semantics pass and large-fixture CPU improves, but typical-fixture CPU benefit remains below the required 2% in all four rounds. Fewer returned pair arrays alone do not justify adoption. The shared entries list also prolongs pair lifetimes.",
+  "scope": "Offline scratch-only full frozen modules. No app, browser, native build, install, external provider, network, accounts, credential, cache, PC, git publication or external message operations. Existing modified work preserved.",
+  "runtime": {
+    "nodePath": "build/efficiency-20261103/organato-review-node24",
+    "version": "v24.22.1",
+    "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329",
+    "compatibilityNode": "/Users/likht.ethan/.local/bin/node",
+    "compatibilityVersion": "v22.14.0"
+  },
+  "source": {
+    "originalModelSha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "originalStoreSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "candidateOriginalImportSha256": "a61952a1c5d57b933296651b6573ec6d21c376133906692eddf3f82d3f84cb4e",
+    "diff": "build/efficiency-20261103/materialize-entries/candidate.diff",
+    "baseline": "1590cb7b42c346dbc3e469577f321eb57754b1808c44c5a73dcb206556b6965f",
+    "candidate": "bb91d727afe27524f6d3c9373ed49e5152a88ee9d25449302e9f971f82431efc",
+    "outsideFunctionByteIdentical": true,
+    "unchangedPrefix": "30f71572ad458d575f9c5941646be8c79b08d9d47e9564cb4e59cad478498a7e",
+    "unchangedSuffix": "627000b365e659460d546d699e542779222b6db34d63a68a6e3692a863d3c9cc",
+    "store": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "importRebaseOnly": "'./workspace-store.js' -> './workspace-store.mjs'",
+    "validation": "No validators modified; materializeWorkspace validateSyncModel then syncModelValues validateSyncModel preserved"
+  },
+  "gate": {
+    "declaredBeforeTiming": true,
+    "rounds": 2,
+    "warmupPairs": 8,
+    "measurementPairs": 21,
+    "order": "AB/BA alternates by pair; all samples retained",
+    "metric": "median paired candidate/baseline process.cpuUsage total per batch",
+    "regression": "Reject if any fixture median ratio >1.03 in both independent rounds. Ambiguous one-round regressions require third round; reject if third exceeds 1.03.",
+    "benefit": "Require median ratio <=0.98 for typical and large in both rounds, otherwise repeat ambiguous gate; logical counts alone insufficient.",
+    "noOutlierRemoval": true,
+    "deadlineSeconds": 180
+  },
+  "gateResult": {
+    "repeatableRegressionAboveThreePercent": false,
+    "typicalBenefitGatePassed": false,
+    "largeBenefitGatePassed": true,
+    "decision": "reject after full repeated gate",
+    "allWarmupsAndOutliersRetained": true,
+    "rawMeasuredPairs": 252,
+    "rawWarmupPairs": 96,
+    "rawTimingRecords": 348
+  },
+  "cpu": [
+    {
+      "run": "main",
+      "round": 0,
+      "fixture": "small",
+      "pairs": 21,
+      "medianCpuRatio": 1.0002770960335683,
+      "medianBaselineCpuUsPerBatch": 25187,
+      "medianCandidateCpuUsPerBatch": 25173,
+      "medianBaselineWallMsPerBatch": 22.723707999999988,
+      "medianCandidateWallMsPerBatch": 24.90341599999988
+    },
+    {
+      "run": "main",
+      "round": 0,
+      "fixture": "typical",
+      "pairs": 21,
+      "medianCpuRatio": 0.9981726131631766,
+      "medianBaselineCpuUsPerBatch": 33552,
+      "medianCandidateCpuUsPerBatch": 33434,
+      "medianBaselineWallMsPerBatch": 33.49479199999996,
+      "medianCandidateWallMsPerBatch": 33.352208000000246
+    },
+    {
+      "run": "main",
+      "round": 0,
+      "fixture": "large",
+      "pairs": 21,
+      "medianCpuRatio": 0.9100492651970608,
+      "medianBaselineCpuUsPerBatch": 47984,
+      "medianCandidateCpuUsPerBatch": 43932,
+      "medianBaselineWallMsPerBatch": 47.625332999999955,
+      "medianCandidateWallMsPerBatch": 43.381374999999935
+    },
+    {
+      "run": "main",
+      "round": 1,
+      "fixture": "small",
+      "pairs": 21,
+      "medianCpuRatio": 1.00135814889336,
+      "medianBaselineCpuUsPerBatch": 18349,
+      "medianCandidateCpuUsPerBatch": 18566,
+      "medianBaselineWallMsPerBatch": 18.26574999999866,
+      "medianCandidateWallMsPerBatch": 18.553125000000364
+    },
+    {
+      "run": "main",
+      "round": 1,
+      "fixture": "typical",
+      "pairs": 21,
+      "medianCpuRatio": 0.9963422068685227,
+      "medianBaselineCpuUsPerBatch": 34300,
+      "medianCandidateCpuUsPerBatch": 34404,
+      "medianBaselineWallMsPerBatch": 34.365334000000075,
+      "medianCandidateWallMsPerBatch": 34.50275000000147
+    },
+    {
+      "run": "main",
+      "round": 1,
+      "fixture": "large",
+      "pairs": 21,
+      "medianCpuRatio": 0.9147430612805716,
+      "medianBaselineCpuUsPerBatch": 44784,
+      "medianCandidateCpuUsPerBatch": 40989,
+      "medianBaselineWallMsPerBatch": 44.651583000000755,
+      "medianCandidateWallMsPerBatch": 40.46254100000078
+    },
+    {
+      "run": "repeat",
+      "round": 0,
+      "fixture": "small",
+      "pairs": 21,
+      "medianCpuRatio": 0.988838242169238,
+      "medianBaselineCpuUsPerBatch": 17284,
+      "medianCandidateCpuUsPerBatch": 17009,
+      "medianBaselineWallMsPerBatch": 17.118792000000212,
+      "medianCandidateWallMsPerBatch": 16.917291999999975
+    },
+    {
+      "run": "repeat",
+      "round": 0,
+      "fixture": "typical",
+      "pairs": 21,
+      "medianCpuRatio": 0.9961181993259509,
+      "medianBaselineCpuUsPerBatch": 33232,
+      "medianCandidateCpuUsPerBatch": 33092,
+      "medianBaselineWallMsPerBatch": 33.20337500000005,
+      "medianCandidateWallMsPerBatch": 33.0447079999999
+    },
+    {
+      "run": "repeat",
+      "round": 0,
+      "fixture": "large",
+      "pairs": 21,
+      "medianCpuRatio": 0.9231571784985257,
+      "medianBaselineCpuUsPerBatch": 44759,
+      "medianCandidateCpuUsPerBatch": 41925,
+      "medianBaselineWallMsPerBatch": 44.08495800000037,
+      "medianCandidateWallMsPerBatch": 41.55841700000019
+    },
+    {
+      "run": "repeat",
+      "round": 1,
+      "fixture": "small",
+      "pairs": 21,
+      "medianCpuRatio": 0.9885126634210383,
+      "medianBaselineCpuUsPerBatch": 18599,
+      "medianCandidateCpuUsPerBatch": 18425,
+      "medianBaselineWallMsPerBatch": 18.558624999999665,
+      "medianCandidateWallMsPerBatch": 18.398041999999805
+    },
+    {
+      "run": "repeat",
+      "round": 1,
+      "fixture": "typical",
+      "pairs": 21,
+      "medianCpuRatio": 0.9925050621052314,
+      "medianBaselineCpuUsPerBatch": 33183,
+      "medianCandidateCpuUsPerBatch": 33009,
+      "medianBaselineWallMsPerBatch": 33.16779099999985,
+      "medianCandidateWallMsPerBatch": 32.98841600000014
+    },
+    {
+      "run": "repeat",
+      "round": 1,
+      "fixture": "large",
+      "pairs": 21,
+      "medianCpuRatio": 0.9051788502002308,
+      "medianBaselineCpuUsPerBatch": 44612,
+      "medianCandidateCpuUsPerBatch": 40122,
+      "medianBaselineWallMsPerBatch": 44.13158399999884,
+      "medianCandidateWallMsPerBatch": 39.69295899999997
+    }
+  ],
+  "fixtureInfo": [
+    {
+      "name": "small",
+      "n": 12,
+      "batch": 300,
+      "bytes": [
+        3508,
+        3509,
+        3510,
+        3511
+      ],
+      "records": [
+        19,
+        19,
+        19,
+        19
+      ]
+    },
+    {
+      "name": "typical",
+      "n": 200,
+      "batch": 30,
+      "bytes": [
+        52756,
+        52757,
+        52758,
+        52759
+      ],
+      "records": [
+        229,
+        229,
+        229,
+        229
+      ]
+    },
+    {
+      "name": "large",
+      "n": 3000,
+      "batch": 2,
+      "bytes": [
+        813958,
+        813958,
+        813958,
+        813959
+      ],
+      "records": [
+        3309,
+        3309,
+        3309,
+        3309
+      ]
+    }
+  ],
+  "measurementNotes": [
+    "Full modules, both validations, syncModelValues projection, ordering, folder restoration and normalizeStore included in each timed call. No counter instrumentation in timing.",
+    "Fixed batches of 300/30/2 for 12/200/3000 entries. Four prebuilt valid input variants rotate per call; objects are reused, not cloned inside timing. Input construction, file writes and result serialization are outside timed intervals.",
+    "AB/BA order alternates. Two rounds repeated in a separate process. process.cpuUsage user+system is the gate metric; wall time is also retained. All samples including warmup/outliers are saved.",
+    "This is local Node evidence; shared machine activity was not controlled. Existing tests ran during main run and the short lifetime/adversarial subprocesses overlapped portions of repeat. No discarded samples or post-hoc threshold changes."
+  ],
+  "differential": {
+    "main": 392,
+    "additionalMaterializationCases": 12,
+    "totalIndependentMaterializationComparisons": 404,
+    "additionalPublicApiIdentityCheck": 1,
+    "mainRaw": "build/efficiency-20261103/materialize-entries/differential-results.json",
+    "additionalRaw": "build/efficiency-20261103/materialize-entries/adversarial-results.json",
+    "compatibility": "392-case corpus passed on Node22.14.0, log retained; Node24 corpus passed before and after Node22 run. Extra 12 adversarial comparisons run on Node24.",
+    "existingTests": "26/26 pass across copied baseline/candidate original workspace-model tests; shared original tests unchanged",
+    "existingEfficiency": {
+      "scope": "Offline production JS with synthetic in-memory storage. Operation counts only, not native browser RAM, CPU, IPC or physical disk bytes.",
+      "node": "v24.22.1",
+      "sourceSha256": {
+        "workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+        "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+        "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a"
+      },
+      "noOpCycles": [
+        {
+          "entries": 0,
+          "storageWrites": 0,
+          "serializedStorageBytes": 0,
+          "dataUnchanged": true,
+          "exchanges": 0
+        },
+        {
+          "entries": 1000,
+          "storageWrites": 0,
+          "serializedStorageBytes": 0,
+          "dataUnchanged": true,
+          "exchanges": 0
+        }
+      ],
+      "folders": [
+        {
+          "count": 100,
+          "localPinReads": 100,
+          "expansionPreserved": true
+        },
+        {
+          "count": 1000,
+          "localPinReads": 1000,
+          "expansionPreserved": true
+        }
+      ]
+    },
+    "validation": "Stable records getter read 11 times in each module, explicitly asserting inherited double validation remains. No validators or model limits changed.",
+    "coverage": [
+      "empty/default/mixed/small/200-entry/3000-entry models; 12000 valid tombstones",
+      "180 seeded cases each with reverse record insertion; ties and appearance enumeration order",
+      "removed spaces/folders, orphan folder parents, duplicate local folder IDs preserving first match in last matching space",
+      "recovery IDs colliding with tombstoned spaces and live entries/folders",
+      "appearance/preferences fallback/rev; frozen inputs; fresh output identity and no input aliases",
+      "invalid identity/record/register/field, incomplete preferences/records, cross-kind collision, 9-space/12-favorite overflow and malformed locals",
+      "exact byte boundary -1/0/+1 with ASCII and Unicode; maximum text fields; record limit and byte-limit error precedence",
+      "circular model and BigInt stringify failures, model changing during second validation, toJSON undefined",
+      "local getter access traces, reentry, local getter mutating original model after snapshot, getter throws"
+    ]
+  },
+  "counts": {
+    "scope": "Only materializeWorkspace-level Object.entries(values) calls and their returned container/pair-array counts. These are logical returned objects, not physical allocation bytes. Validators, record projection loops, strings, sort/filter/map allocations excluded.",
+    "baseline": [
+      {
+        "entries": 0,
+        "calls": 4,
+        "pairs": 28,
+        "containers": 4
+      },
+      {
+        "entries": 12,
+        "calls": 4,
+        "pairs": 76,
+        "containers": 4
+      },
+      {
+        "entries": 200,
+        "calls": 4,
+        "pairs": 916,
+        "containers": 4
+      },
+      {
+        "entries": 3000,
+        "calls": 4,
+        "pairs": 13236,
+        "containers": 4
+      }
+    ],
+    "candidate": [
+      {
+        "entries": 0,
+        "calls": 1,
+        "pairs": 7
+      },
+      {
+        "entries": 12,
+        "calls": 1,
+        "pairs": 19
+      },
+      {
+        "entries": 200,
+        "calls": 1,
+        "pairs": 229
+      },
+      {
+        "entries": 3000,
+        "calls": 1,
+        "pairs": 3309
+      }
+    ],
+    "formula": "Successful complete call: 4 containers + 4V pairs becomes 1 container + V pairs. Early throws can perform fewer baseline scans. Filters still create three result containers, and sort those filtered containers; shared entries order is never sorted in place."
+  },
+  "lifetime": {
+    "baseline": {
+      "variant": "baseline",
+      "phase": "first localStore.spaces getter, after folder ordering before entry ordering",
+      "fixture": {
+        "entries": 200,
+        "projectedValues": 229,
+        "folders": 20
+      },
+      "livePairs": 20,
+      "byCategory": {
+        "space/": 0,
+        "folder/": 20,
+        "entry/": 0,
+        "appearance/": 0,
+        "preferences": 0
+      },
+      "pairObjectSelfSizeOnly": 640,
+      "limitations": "V8 heap graph at one phase. Self sizes exclude backing storage and referents; not physical RAM or peak across execution. Engine liveness/GC can differ in browser.",
+      "pairs": [
+        {
+          "key": "folder/f0",
+          "nodeOffset": 298734,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f1",
+          "nodeOffset": 298746,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f2",
+          "nodeOffset": 298758,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f3",
+          "nodeOffset": 298770,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f4",
+          "nodeOffset": 298782,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f5",
+          "nodeOffset": 298794,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f6",
+          "nodeOffset": 298806,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f7",
+          "nodeOffset": 298818,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f8",
+          "nodeOffset": 298830,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f9",
+          "nodeOffset": 298842,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f10",
+          "nodeOffset": 298854,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f11",
+          "nodeOffset": 298866,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f12",
+          "nodeOffset": 298878,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f13",
+          "nodeOffset": 298890,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f14",
+          "nodeOffset": 298902,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f15",
+          "nodeOffset": 298914,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f16",
+          "nodeOffset": 298926,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f17",
+          "nodeOffset": 298938,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f18",
+          "nodeOffset": 298950,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f19",
+          "nodeOffset": 298962,
+          "selfSize": 32
+        }
+      ]
+    },
+    "candidate": {
+      "variant": "candidate",
+      "phase": "first localStore.spaces getter, after folder ordering before entry ordering",
+      "fixture": {
+        "entries": 200,
+        "projectedValues": 229,
+        "folders": 20
+      },
+      "livePairs": 229,
+      "byCategory": {
+        "space/": 5,
+        "folder/": 20,
+        "entry/": 200,
+        "appearance/": 3,
+        "preferences": 1
+      },
+      "pairObjectSelfSizeOnly": 7328,
+      "limitations": "V8 heap graph at one phase. Self sizes exclude backing storage and referents; not physical RAM or peak across execution. Engine liveness/GC can differ in browser.",
+      "pairs": [
+        {
+          "key": "entry/e3",
+          "nodeOffset": 357498,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e87",
+          "nodeOffset": 357582,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e88",
+          "nodeOffset": 357600,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e89",
+          "nodeOffset": 357612,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e90",
+          "nodeOffset": 357624,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e91",
+          "nodeOffset": 357636,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e92",
+          "nodeOffset": 357648,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e93",
+          "nodeOffset": 357660,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e94",
+          "nodeOffset": 357672,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e95",
+          "nodeOffset": 357684,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e96",
+          "nodeOffset": 357696,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e97",
+          "nodeOffset": 357708,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e98",
+          "nodeOffset": 357720,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e99",
+          "nodeOffset": 357732,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e8",
+          "nodeOffset": 357744,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e4",
+          "nodeOffset": 357780,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e17",
+          "nodeOffset": 358104,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e18",
+          "nodeOffset": 358122,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e19",
+          "nodeOffset": 358134,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e20",
+          "nodeOffset": 358146,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e21",
+          "nodeOffset": 358158,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e22",
+          "nodeOffset": 358170,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f0",
+          "nodeOffset": 358284,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f14",
+          "nodeOffset": 358290,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f7",
+          "nodeOffset": 358296,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f1",
+          "nodeOffset": 358302,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f15",
+          "nodeOffset": 358308,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f8",
+          "nodeOffset": 358314,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f16",
+          "nodeOffset": 358320,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f2",
+          "nodeOffset": 358326,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f9",
+          "nodeOffset": 358332,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f10",
+          "nodeOffset": 358338,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f17",
+          "nodeOffset": 358344,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f3",
+          "nodeOffset": 358350,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f11",
+          "nodeOffset": 358356,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f18",
+          "nodeOffset": 358362,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f4",
+          "nodeOffset": 358368,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f12",
+          "nodeOffset": 358374,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f19",
+          "nodeOffset": 358380,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f5",
+          "nodeOffset": 358386,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f13",
+          "nodeOffset": 358392,
+          "selfSize": 32
+        },
+        {
+          "key": "folder/f6",
+          "nodeOffset": 358398,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e11",
+          "nodeOffset": 358416,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e12",
+          "nodeOffset": 358434,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e13",
+          "nodeOffset": 358446,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e14",
+          "nodeOffset": 358458,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e15",
+          "nodeOffset": 358470,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e16",
+          "nodeOffset": 358482,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e191",
+          "nodeOffset": 358518,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e192",
+          "nodeOffset": 358536,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e193",
+          "nodeOffset": 358548,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e194",
+          "nodeOffset": 358560,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e195",
+          "nodeOffset": 358572,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e196",
+          "nodeOffset": 358584,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e197",
+          "nodeOffset": 358596,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e198",
+          "nodeOffset": 358608,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e199",
+          "nodeOffset": 358620,
+          "selfSize": 32
+        },
+        {
+          "key": "preferences",
+          "nodeOffset": 358632,
+          "selfSize": 32
+        },
+        {
+          "key": "appearance/theme",
+          "nodeOffset": 358644,
+          "selfSize": 32
+        },
+        {
+          "key": "appearance/sidebarWidth",
+          "nodeOffset": 358656,
+          "selfSize": 32
+        },
+        {
+          "key": "appearance/bookmarkBarMode",
+          "nodeOffset": 358668,
+          "selfSize": 32
+        },
+        {
+          "key": "space/s0",
+          "nodeOffset": 358674,
+          "selfSize": 32
+        },
+        {
+          "key": "space/s1",
+          "nodeOffset": 358680,
+          "selfSize": 32
+        },
+        {
+          "key": "space/s2",
+          "nodeOffset": 358686,
+          "selfSize": 32
+        },
+        {
+          "key": "space/s3",
+          "nodeOffset": 358692,
+          "selfSize": 32
+        },
+        {
+          "key": "space/s4",
+          "nodeOffset": 358698,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e0",
+          "nodeOffset": 358704,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e1",
+          "nodeOffset": 358710,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e2",
+          "nodeOffset": 358716,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e5",
+          "nodeOffset": 358722,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e6",
+          "nodeOffset": 358728,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e7",
+          "nodeOffset": 358734,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e9",
+          "nodeOffset": 358740,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e10",
+          "nodeOffset": 358746,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e23",
+          "nodeOffset": 358752,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e24",
+          "nodeOffset": 358758,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e25",
+          "nodeOffset": 358764,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e26",
+          "nodeOffset": 358770,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e27",
+          "nodeOffset": 358776,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e28",
+          "nodeOffset": 358782,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e29",
+          "nodeOffset": 358788,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e30",
+          "nodeOffset": 358794,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e31",
+          "nodeOffset": 358800,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e32",
+          "nodeOffset": 358806,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e33",
+          "nodeOffset": 358812,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e34",
+          "nodeOffset": 358818,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e35",
+          "nodeOffset": 358824,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e36",
+          "nodeOffset": 358830,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e37",
+          "nodeOffset": 358836,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e38",
+          "nodeOffset": 358842,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e39",
+          "nodeOffset": 358848,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e40",
+          "nodeOffset": 358854,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e41",
+          "nodeOffset": 358860,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e42",
+          "nodeOffset": 358866,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e43",
+          "nodeOffset": 358872,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e44",
+          "nodeOffset": 358878,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e45",
+          "nodeOffset": 358884,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e46",
+          "nodeOffset": 358890,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e47",
+          "nodeOffset": 358896,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e48",
+          "nodeOffset": 358902,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e49",
+          "nodeOffset": 358908,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e50",
+          "nodeOffset": 358914,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e51",
+          "nodeOffset": 358920,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e52",
+          "nodeOffset": 358926,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e53",
+          "nodeOffset": 358932,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e54",
+          "nodeOffset": 358938,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e55",
+          "nodeOffset": 358944,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e56",
+          "nodeOffset": 358950,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e57",
+          "nodeOffset": 358956,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e58",
+          "nodeOffset": 358962,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e59",
+          "nodeOffset": 358968,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e60",
+          "nodeOffset": 358974,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e61",
+          "nodeOffset": 358980,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e62",
+          "nodeOffset": 358986,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e63",
+          "nodeOffset": 358992,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e64",
+          "nodeOffset": 358998,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e65",
+          "nodeOffset": 359004,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e66",
+          "nodeOffset": 359010,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e67",
+          "nodeOffset": 359016,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e68",
+          "nodeOffset": 359022,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e69",
+          "nodeOffset": 359028,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e70",
+          "nodeOffset": 359034,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e71",
+          "nodeOffset": 359040,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e72",
+          "nodeOffset": 359046,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e73",
+          "nodeOffset": 359052,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e74",
+          "nodeOffset": 359058,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e75",
+          "nodeOffset": 359064,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e76",
+          "nodeOffset": 359070,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e77",
+          "nodeOffset": 359076,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e78",
+          "nodeOffset": 359082,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e79",
+          "nodeOffset": 359088,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e80",
+          "nodeOffset": 359094,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e81",
+          "nodeOffset": 359100,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e82",
+          "nodeOffset": 359106,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e83",
+          "nodeOffset": 359112,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e84",
+          "nodeOffset": 359118,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e85",
+          "nodeOffset": 359124,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e86",
+          "nodeOffset": 359130,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e100",
+          "nodeOffset": 359136,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e101",
+          "nodeOffset": 359142,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e102",
+          "nodeOffset": 359148,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e103",
+          "nodeOffset": 359154,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e104",
+          "nodeOffset": 359160,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e105",
+          "nodeOffset": 359166,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e106",
+          "nodeOffset": 359172,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e107",
+          "nodeOffset": 359178,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e108",
+          "nodeOffset": 359184,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e109",
+          "nodeOffset": 359190,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e110",
+          "nodeOffset": 359196,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e111",
+          "nodeOffset": 359202,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e112",
+          "nodeOffset": 359208,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e113",
+          "nodeOffset": 359214,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e114",
+          "nodeOffset": 359220,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e115",
+          "nodeOffset": 359226,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e116",
+          "nodeOffset": 359232,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e117",
+          "nodeOffset": 359238,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e118",
+          "nodeOffset": 359244,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e119",
+          "nodeOffset": 359250,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e120",
+          "nodeOffset": 359256,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e121",
+          "nodeOffset": 359262,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e122",
+          "nodeOffset": 359268,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e123",
+          "nodeOffset": 359274,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e124",
+          "nodeOffset": 359280,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e125",
+          "nodeOffset": 359286,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e126",
+          "nodeOffset": 359292,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e127",
+          "nodeOffset": 359298,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e128",
+          "nodeOffset": 359304,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e129",
+          "nodeOffset": 359310,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e130",
+          "nodeOffset": 359316,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e131",
+          "nodeOffset": 359322,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e132",
+          "nodeOffset": 359328,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e133",
+          "nodeOffset": 359334,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e134",
+          "nodeOffset": 359340,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e135",
+          "nodeOffset": 359346,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e136",
+          "nodeOffset": 359352,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e137",
+          "nodeOffset": 359358,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e138",
+          "nodeOffset": 359364,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e139",
+          "nodeOffset": 359370,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e140",
+          "nodeOffset": 359376,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e141",
+          "nodeOffset": 359382,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e142",
+          "nodeOffset": 359388,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e143",
+          "nodeOffset": 359394,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e144",
+          "nodeOffset": 359400,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e145",
+          "nodeOffset": 359406,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e146",
+          "nodeOffset": 359412,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e147",
+          "nodeOffset": 359418,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e148",
+          "nodeOffset": 359424,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e149",
+          "nodeOffset": 359430,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e150",
+          "nodeOffset": 359436,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e151",
+          "nodeOffset": 359442,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e152",
+          "nodeOffset": 359448,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e153",
+          "nodeOffset": 359454,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e154",
+          "nodeOffset": 359460,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e155",
+          "nodeOffset": 359466,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e156",
+          "nodeOffset": 359472,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e157",
+          "nodeOffset": 359478,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e158",
+          "nodeOffset": 359484,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e159",
+          "nodeOffset": 359490,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e160",
+          "nodeOffset": 359496,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e161",
+          "nodeOffset": 359502,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e162",
+          "nodeOffset": 359508,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e163",
+          "nodeOffset": 359514,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e164",
+          "nodeOffset": 359520,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e165",
+          "nodeOffset": 359526,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e166",
+          "nodeOffset": 359532,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e167",
+          "nodeOffset": 359538,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e168",
+          "nodeOffset": 359544,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e169",
+          "nodeOffset": 359550,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e170",
+          "nodeOffset": 359556,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e171",
+          "nodeOffset": 359562,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e172",
+          "nodeOffset": 359568,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e173",
+          "nodeOffset": 359574,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e174",
+          "nodeOffset": 359580,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e175",
+          "nodeOffset": 359586,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e176",
+          "nodeOffset": 359592,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e177",
+          "nodeOffset": 359598,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e178",
+          "nodeOffset": 359604,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e179",
+          "nodeOffset": 359610,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e180",
+          "nodeOffset": 359616,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e181",
+          "nodeOffset": 359622,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e182",
+          "nodeOffset": 359628,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e183",
+          "nodeOffset": 359634,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e184",
+          "nodeOffset": 359640,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e185",
+          "nodeOffset": 359646,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e186",
+          "nodeOffset": 359652,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e187",
+          "nodeOffset": 359658,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e188",
+          "nodeOffset": 359664,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e189",
+          "nodeOffset": 359670,
+          "selfSize": 32
+        },
+        {
+          "key": "entry/e190",
+          "nodeOffset": 359676,
+          "selfSize": 32
+        }
+      ]
+    },
+    "assessment": "At the first localStore.spaces getter after folder ordering, a V8 heap graph snapshot retained 20 folder pair arrays in baseline versus all 229 pair arrays in candidate. Candidate keeps the complete pair list through appearance extraction; baseline may discard each full scan container promptly while filtered subsets retain category pairs. Values objects are already retained via values in both versions. Extra longer-lived pairs/container may affect peak/live heap, promotion or GC despite fewer total returned arrays. Neither total allocation work nor this single-phase heap graph proves lower peak memory, physical RAM, or browser performance.",
+    "rawSnapshots": [
+      "build/efficiency-20261103/materialize-entries/baseline.heapsnapshot",
+      "build/efficiency-20261103/materialize-entries/candidate.heapsnapshot"
+    ]
+  },
+  "behaviorReasoning": [
+    "syncModelValues constructs a fresh ordinary values object and fresh per-record objects using native Object.fromEntries. Accepted identity keys cannot be __proto__. No reference to the values object or entries container escapes to model/localStore. Every saved record field is a scalar for stable valid clocked input.",
+    "The initial entries call occurs where the first existing ordered(space/) call enumerated values. Subsequent filters/sorts operate on new filtered containers and do not mutate entries or values. Appearance retains insertion order. Validation and all property access/control-flow order outside the removed enumerations remain unchanged.",
+    "A reachable localStore getter can reenter, mutate original model/local fields, or throw. Those actions cannot access or change private values own keys under standard builtins. Reentry creates separate private values. Mutating original model after projection cannot change captured scalar fields. The saved entries contain the same value references a later native enumeration would return. Getter trace/differential cases exercise these paths.",
+    "Arbitrary getters that patch Object.entries, Array.prototype.filter/sort/iterators, Object.fromEntries, constructors/prototypes or other intrinsics can observe the changed calls or leak private containers. Such patched-builtin contexts are explicitly excluded from equivalence, not claimed supported. Out-of-memory/resource-exhaustion failures and engine introspection timing are also not equivalent guarantees. No actual runtime API callers patch builtins in the read paths."
+  ],
+  "acceptanceGaps": [
+    "No real-browser or native execution by request. Node/V8 evidence cannot accept browser/native CPU, rendering, IPC or persistent storage behavior.",
+    "No physical-memory or complete peak-live-memory acceptance. Heap graph captures one synchronous phase and pair-array object self sizes only; process heap or logical counts are not RAM proof.",
+    "Synthetic fixtures and a finite differential corpus cannot prove arbitrary hostile-JavaScript equivalence; standard builtin stability is an explicit assumption.",
+    "Coordinator independent review required before any adoption. Recommendation is scratch rejection only."
+  ],
+  "commands": [
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/setup.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/count-baseline.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/candidate-setup.mjs",
+    "diff -u build/efficiency-20261103/materialize-entries/baseline.mjs build/efficiency-20261103/materialize-entries/candidate.mjs > build/efficiency-20261103/materialize-entries/candidate.diff  # expected exit 1",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/differential.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/adversarial.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/run-existing.mjs",
+    "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/materialize-entries/existing-baseline.test.mjs build/efficiency-20261103/materialize-entries/existing-candidate.test.mjs",
+    "build/efficiency-20261103/organato-review-node24 script/verify_workspace_sync_efficiency.mjs --expect-optimized --output build/efficiency-20261103/materialize-entries/existing-efficiency.json",
+    "/Users/likht.ethan/.local/bin/node build/efficiency-20261103/materialize-entries/differential.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/benchmark.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/benchmark.mjs repeat",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/lifetime.mjs baseline",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/lifetime.mjs candidate",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/materialize-entries/finalize.mjs"
+  ],
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace-sync-model.js",
+      "sha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "lines": 210,
+      "readRanges": [
+        [
+          1,
+          210
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "lines": 664,
+      "readRanges": [
+        [
+          1,
+          664
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "lines": 204,
+      "readRanges": [
+        [
+          1,
+          204
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/sync-settings.js",
+      "sha256": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+      "lines": 84,
+      "readRanges": [
+        [
+          1,
+          84
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/sync/workspace-model.test.mjs",
+      "sha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+      "lines": 173,
+      "readRanges": [
+        [
+          1,
+          173
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_workspace_sync_efficiency.mjs",
+      "sha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b",
+      "lines": 63,
+      "readRanges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "protectedSourceEndDriftChecks": [
+    {
+      "path": "AGENTS.md",
+      "startSha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "endSha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "unchanged": true
+    },
+    {
+      "path": "features/ai/extension/workspace-sync-model.js",
+      "startSha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "endSha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "unchanged": true
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "startSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "endSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "unchanged": true
+    },
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "startSha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "endSha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "unchanged": true
+    },
+    {
+      "path": "features/ai/extension/sync-settings.js",
+      "startSha256": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+      "endSha256": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+      "unchanged": true
+    },
+    {
+      "path": "tests/sync/workspace-model.test.mjs",
+      "startSha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+      "endSha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+      "unchanged": true
+    },
+    {
+      "path": "script/verify_workspace_sync_efficiency.mjs",
+      "startSha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b",
+      "endSha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b",
+      "unchanged": true
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "build/efficiency-20261103/materialize-entries/adversarial-attempt1.log",
+      "sha256": "24d731f223ce83e2d3713e480f732042ab0066b8c1ed6c42edd9f694929f0369",
+      "bytes": 14
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/adversarial-results.json",
+      "sha256": "5d46ea6c45647ff20be2046c8814a6e8653e7d2b992c874c9ef94d92bd541bc7",
+      "bytes": 2033
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/adversarial.mjs",
+      "sha256": "f767e5011738dfa6eb5dcf9c1278a6428cbfe40e1e4e9ff04b43a829395bd8b0",
+      "bytes": 2565
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/baseline-counted.mjs",
+      "sha256": "3302c52793087975d6b185088a0499fcd8b1fb65860fd2f7c50fcf9a63977e4d",
+      "bytes": 12399
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/baseline-counts.json",
+      "sha256": "c27029c054846e9b408f6f43df8922a4e46ebd3e7bc80321e0145fcb44e90d22",
+      "bytes": 332
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/baseline-source.js",
+      "sha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "bytes": 12380
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/baseline.heapsnapshot",
+      "sha256": "43d679dccf469cdc01b714b8125d715b83d7a26e8cf375b3f8ce2adedf2dd317",
+      "bytes": 5662127
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/baseline.mjs",
+      "sha256": "1590cb7b42c346dbc3e469577f321eb57754b1808c44c5a73dcb206556b6965f",
+      "bytes": 12381
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/benchmark.mjs",
+      "sha256": "8510cf87ed0aedb4abc9b5fea6d0bf3a37205b1a58c817aa18b5825b276b6cb4",
+      "bytes": 1945
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/candidate-counted.mjs",
+      "sha256": "88e3ece0b4a72190c4bd596d37c379ced255492f7d4b53abbabff1272e9efa13",
+      "bytes": 12405
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/candidate-setup.mjs",
+      "sha256": "236b0a702d059cdbedaabb6e3dc247a374a8e8233da9afc5632221b2819422cf",
+      "bytes": 1330
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/candidate-source.js",
+      "sha256": "a61952a1c5d57b933296651b6573ec6d21c376133906692eddf3f82d3f84cb4e",
+      "bytes": 12392
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/candidate.diff",
+      "sha256": "7c92b7e26cf61907bdf04ad781b1c49de4dc131d2ac5451fea9b12dde5a8ac60",
+      "bytes": 1680
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/candidate.heapsnapshot",
+      "sha256": "a2a2ea6ca0ea0db1e0876db15d508b690e567349ddbb2da7e3b92083f0f56be1",
+      "bytes": 5732413
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/candidate.mjs",
+      "sha256": "bb91d727afe27524f6d3c9373ed49e5152a88ee9d25449302e9f971f82431efc",
+      "bytes": 12393
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/count-baseline.mjs",
+      "sha256": "6c4660db3885f2c68f3dfa36720abba53a212d76862a88cc04d6abdc4b6f3b0b",
+      "bytes": 568
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/cpu-main.log",
+      "sha256": "7fc1054974a0220f8b6d731440a8615636b82a1b2a511af324f160a178b992e7",
+      "bytes": 380
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/cpu-repeat.log",
+      "sha256": "816dc99adb18c27226bb0e3627b37ff8f5f55b37eb8dd39088da546d2907fb1c",
+      "bytes": 381
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/cpu-rounds-main.json",
+      "sha256": "e29080d4f508aa24fc3050be43297c4c9a7fe2a358ce165a7b37f2a0b1d55f02",
+      "bytes": 84365
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/cpu-rounds-repeat.json",
+      "sha256": "c04b2d2e41913c14f84862e58d534b298f88c13c7b6bdd6c5800afa7709790ce",
+      "bytes": 84402
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/differential-attempt1.log",
+      "sha256": "da5e7d87ac189e872215f04a118b3affe20eee3931e9a42fd5c7ba5ec0c33d31",
+      "bytes": 205
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/differential-results.json",
+      "sha256": "757c82cee5e2f89e05dfdf3ced6dd80b8d75afacc9931738b53744298153d4be",
+      "bytes": 44743
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/differential.mjs",
+      "sha256": "2de60c09d688470c79abb3d0c96bf34bafec36ed8d5f717310e0c6f41cd46706",
+      "bytes": 6191
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/existing-baseline.test.mjs",
+      "sha256": "ccf0b7f1348d067cc9b2ed13656eb0c4bfb909fe95e610b0d16583e31429b1f4",
+      "bytes": 10778
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/existing-candidate.test.mjs",
+      "sha256": "e59abdf48e7cc01457421f8d532152ca53a73aef88746bc912eb684050f817f3",
+      "bytes": 10779
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/existing-efficiency.json",
+      "sha256": "94bd58cbd97286483daedda1193bdc9d487264f76c9a53a2e60beb81d9a37962",
+      "bytes": 1007
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/existing-efficiency.log",
+      "sha256": "94bd58cbd97286483daedda1193bdc9d487264f76c9a53a2e60beb81d9a37962",
+      "bytes": 1007
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/existing-tests.log",
+      "sha256": "82aa4ced41b2d712e067b56a26ee2109f13ed36f4e30521b8db246592511acf9",
+      "bytes": 2676
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/finalize-attempt1.log",
+      "sha256": "e49567a4b8f44120d0922fe4800c58d347264cc11b397c189031b75dc4d2e87a",
+      "bytes": 5385
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/finalize.mjs",
+      "sha256": "e953a56399ee15c69cd8a63e4fa20c5360d73dff6a6f40c797432fe594ee3688",
+      "bytes": 10714
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/fixtures.mjs",
+      "sha256": "911d61217a56d68c8ee560b7b8c3cfb83c2399185aa4ab9aa25c9d3bea383c4e",
+      "bytes": 1588
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/gate.json",
+      "sha256": "c165aa46d2b9ceebd4275bfc524fed33a956678039f735dd3eab2e6827a639e3",
+      "bytes": 612
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/lifetime-baseline.json",
+      "sha256": "b7e99d2516d381d628544ea4b5ee2defe47ba97ea0c5833cdd5d9bb08945db83",
+      "bytes": 2344
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/lifetime-baseline.log",
+      "sha256": "f6c68b7bbe8aab5f1cc0d2e392d5e858178850ab7ad19d11c61bfd7e401e38f3",
+      "bytes": 158
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/lifetime-candidate.json",
+      "sha256": "224468315c368df63b8800e032b5b6eff30e2cb967229e69035094492967bc3c",
+      "bytes": 20866
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/lifetime-candidate.log",
+      "sha256": "1d4f01d0c0e015f23a6e1067990af0ac4e96e68c38d3275be4e3efebadef664d",
+      "bytes": 162
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/lifetime.mjs",
+      "sha256": "ba25d0cc87127e5d61f60f27506c0e8bfe0b24b313bde2ba17727c127df707fa",
+      "bytes": 2322
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/node22-differential.log",
+      "sha256": "da5e7d87ac189e872215f04a118b3affe20eee3931e9a42fd5c7ba5ec0c33d31",
+      "bytes": 205
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/node24-final-differential.log",
+      "sha256": "da5e7d87ac189e872215f04a118b3affe20eee3931e9a42fd5c7ba5ec0c33d31",
+      "bytes": 205
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/protected-end.json",
+      "sha256": "01c32afa1d4d4ff546a7958bb2a473d68de2781cfab6d8e387efd8f77b0db32e",
+      "bytes": 1969
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/protected-start.json",
+      "sha256": "cff2133d0da59c9416ad36de698712befb70c3ab7d835a85ad8d56ea836e449a",
+      "bytes": 1771
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/run-existing.mjs",
+      "sha256": "bb99afe7c9ad80f585f43f54444bb6e20be7526e44d7d1bd074a3e9628f911f6",
+      "bytes": 439
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/setup.mjs",
+      "sha256": "cb8e279d57900ae52b6695ce5a566f3a61d02c837bc6bf21508ff3f05dd1abd9",
+      "bytes": 1950
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/source-proof.json",
+      "sha256": "76f97893883b65ecc1d14db009471759fa0222ad240bd7e38d7e542236b82350",
+      "bytes": 670
+    },
+    {
+      "path": "build/efficiency-20261103/materialize-entries/workspace-store.mjs",
+      "sha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "bytes": 28536
+    }
+  ]
+}

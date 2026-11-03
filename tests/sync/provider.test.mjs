@@ -4,7 +4,6 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { once } from 'node:events';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { installTestProvider } from '../../features/sync/test-provider/extension/provider.js';
 
@@ -18,21 +17,28 @@ function client(root, token, fetchImpl = fetch) {
   const events = ['Configure', 'ListVaults', 'CreateVault', 'ReadObject', 'WriteObject', 'RenameVault', 'CollectEpochs', 'Cancel'];
   const api = { storage: { local: { get: async () => ({ testProviderToken: token }) } }, syncVaultProvider: {} };
   for (const name of events) api.syncVaultProvider[`on${name}Requested`] = new Event();
-  let serial = 0;
+  let serial = 0, disposed = false;
   const waiting = new Map();
   api.syncVaultProvider.respond = async response => {
-    const done = waiting.get(response.requestId);
+    const request = waiting.get(response.requestId);
     waiting.delete(response.requestId);
-    done?.(response);
+    if (request) { clearTimeout(request.timer); request.resolve(response); }
   };
   const provider = installTestProvider({ api, fetchImpl: (url, options) => fetchImpl(String(url).replace('http://127.0.0.1:18765', root), options) });
   return {
-    api, dispose: () => provider.dispose(),
+    api, dispose() {
+      if (disposed) return;
+      disposed = true;
+      for (const request of waiting.values()) { clearTimeout(request.timer); request.reject(new Error('Provider client disposed')); }
+      waiting.clear();
+      provider.dispose();
+    },
     request(name, data = {}) {
+      if (disposed) return Promise.reject(new Error('Provider client disposed'));
       const requestId = ++serial;
       return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error(`Provider request ${name} timed out`)), 10000);
-        waiting.set(requestId, response => { clearTimeout(timer); resolve(response); });
+        const timer = setTimeout(() => { waiting.delete(requestId); reject(new Error(`Provider request ${name} timed out`)); }, 10000);
+        waiting.set(requestId, { resolve, reject, timer });
         api.syncVaultProvider[`on${name}Requested`].emit({ requestId, ...data });
       });
     },
@@ -40,25 +46,66 @@ function client(root, token, fetchImpl = fetch) {
 }
 async function launch(directory, resume = false) {
   const server = spawn('python3', ['-u', 'features/sync/test-provider/server.py', '--directory', directory, '--port', '0', ...(resume ? ['--resume'] : [])], { stdio: ['ignore', 'pipe', 'pipe'] });
-  const root = await new Promise((resolve, reject) => {
-    let output = '';
-    const timeout = setTimeout(() => reject(new Error('Test server did not start')), 10000);
-    server.once('exit', code => { clearTimeout(timeout); reject(new Error(`Test server exited with ${code}`)); });
-    server.stdout.on('data', chunk => {
-      output += chunk;
-      const found = output.match(/http:\/\/127\.0\.0\.1:\d+/);
-      if (found) { clearTimeout(timeout); resolve(found[0]); }
+  let closed = false;
+  const close = new Promise(resolve => server.once('close', () => { closed = true; resolve(); }));
+  const waitForClose = async () => {
+    let timer;
+    try {
+      return await Promise.race([close.then(() => true), new Promise(resolve => { timer = setTimeout(() => resolve(false), 1000); })]);
+    } finally { clearTimeout(timer); }
+  };
+  const stop = async () => {
+    if (closed) return;
+    server.kill('SIGINT');
+    if (await waitForClose()) return;
+    server.kill('SIGKILL');
+    if (!await waitForClose()) throw new Error('Test server did not close after SIGKILL');
+  };
+  let timeout, onData, onExit, onError;
+  try {
+    const root = await new Promise((resolve, reject) => {
+      let output = '', readyUrl = null;
+      timeout = setTimeout(() => reject(new Error('Test server did not start')), 10000);
+      onError = reject;
+      onExit = code => reject(new Error(`Test server exited with ${code}`));
+      onData = chunk => {
+        const incoming = output + chunk;
+        const end = incoming.lastIndexOf('\n');
+        const found = end < 0 ? null : readyUrl || incoming.slice(0, end + 1).match(/http:\/\/127\.0\.0\.1:\d+/)?.[0];
+        const suffix = incoming.slice(end + 1);
+        readyUrl = suffix.match(/http:\/\/127\.0\.0\.1:\d+(?=\D)/)?.[0] || (end < 0 ? readyUrl : null);
+        output = suffix.slice(-4096);
+        if (found) resolve(found);
+      };
+      server.once('error', onError);
+      server.once('exit', onExit);
+      server.stdout.on('data', onData);
+      server.stderr.resume();
     });
-  });
-  return { root, stop: async () => { if (server.exitCode !== null) return; const exit = once(server, 'exit'); server.kill('SIGINT'); await exit; } };
+    return { root, stop };
+  } catch (error) {
+    await stop();
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+    server.removeListener('error', onError);
+    server.removeListener('exit', onExit);
+    server.stdout.removeListener('data', onData);
+    server.stdout.resume();
+  }
 }
 
 test('two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'breezer-sync-provider-'));
-  let server = await launch(directory);
-  const token = await readFile(join(directory, 'provider-token.txt'), 'utf8');
+  let server;
   const clients = [];
-  t.after(async () => { clients.forEach(c => c.dispose()); await server.stop(); await rm(directory, { recursive: true, force: true }); });
+  t.after(async () => {
+    try { clients.forEach(c => c.dispose()); } finally {
+      try { await server?.stop(); } finally { await rm(directory, { recursive: true, force: true }); }
+    }
+  });
+  server = await launch(directory);
+  const token = await readFile(join(directory, 'provider-token.txt'), 'utf8');
   const a = client(server.root, token), b = client(server.root, token);
   clients.push(a, b);
   assert.deepEqual((await a.request('Configure')).success, { configurationState: 'READY' });

@@ -392,6 +392,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   const shortcuts = new ShortcutPreferences(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
   const siteLimit = () => globalThis.innerWidth <= 400 ? 2 : globalThis.innerWidth <= 700 ? 3 : globalThis.innerWidth <= 920 ? 5 : MAX_SITES;
+  let resizeLimit = siteLimit();
   let allSites = [], siteRevision = 0, undoKey;
   const updateSites = async () => {
     const revision = ++siteRevision;
@@ -431,8 +432,18 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     }
   };
   api?.storage?.onChanged?.addListener?.(changed);
-  globalThis.addEventListener?.('resize', () => void updateSites().catch(() => {}));
-  globalThis.addEventListener?.('pagehide', () => { disposeShortcuts(); api?.storage?.onChanged?.removeListener?.(changed); }, { once: true });
+  const resized = () => {
+    const limit = siteLimit();
+    if (limit === resizeLimit) return;
+    resizeLimit = limit;
+    void updateSites().catch(() => { if (resizeLimit === limit) resizeLimit = null; });
+  };
+  globalThis.addEventListener?.('resize', resized);
+  globalThis.addEventListener?.('pagehide', () => {
+    disposeShortcuts();
+    globalThis.removeEventListener?.('resize', resized);
+    api?.storage?.onChanged?.removeListener?.(changed);
+  }, { once: true });
 
   const paint = () => {
     const at = now();
@@ -461,9 +472,15 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
         return;
       }
       allSites = result.topSites || [];
-      view = normalizeView({ ...result, topSites: await shortcuts.filter(allSites, siteLimit()) });
+      const revision = ++siteRevision;
+      const limit = siteLimit();
+      const sites = await shortcuts.filter(allSites, limit);
+      const stale = revision !== siteRevision;
+      view = normalizeView({ ...result, topSites: stale ? view?.topSites || [] : sites });
+      if (stale || limit !== siteLimit()) await updateSites();
       problem = null;
     } catch (error) {
+      resizeLimit = null;
       problem = text(error?.message, 160) || null;
       if (!view) view = { topSites: [], organato: null };
     } finally {

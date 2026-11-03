@@ -1,0 +1,1056 @@
+{
+  "recommendation": "reject",
+  "scope": "Scratch investigation only; no production candidate or patch created.",
+  "reason": "Reachable redundant checkpoint ownership is confirmed, but normal canonical checkpoint payload saving is only 102\u2013198 bytes across two long-lived captures on the cached macOS v10 CBC path. No measured CPU or physical-RAM benefit justifies a production optimization.",
+  "model": "gpt-6.1-sol",
+  "base": {
+    "git_head": "1ddab549eedeaffbc0eb297ef50b0d85e8625434",
+    "backend_sha256": "b2c4c100f29c6cc30e33158eee31df1c64c8ee2504bad6e43bfff85ed7b0ab77",
+    "working_tree": "Already dirty at entry; baseline hashes reflect current source, including existing provider_transport.cc optimization."
+  },
+  "candidate": {
+    "path": null,
+    "sha256": null,
+    "diff": null,
+    "production_edits": false,
+    "hypothesis": "After checkpoint decrypt/parse succeeds, an identity-only Configuration could omit encrypted_checkpoint. Not implemented. Diagnostic clears a separate fixture copy solely to test identity predicates.",
+    "decision": "Reject as a worthwhile memory optimization; the predicate equivalence test does not establish full native behavioral equivalence."
+  },
+  "actual_types": {
+    "Configuration": "ProviderIdentity provider {ProviderKind kind, std::string id}; std::string vault_uuid; std::vector<uint8_t> encrypted_vault_key; KeyMode key_mode; std::vector<uint8_t> encrypted_checkpoint; default equality includes checkpoint.",
+    "SyncVaultCheckpoint": "std::string vault_uuid; uint64_t generation; std::optional<SyncVaultObjectDigest> commit_digest; digest is std::array<uint8_t,32>. No entity data or vault snapshot."
+  },
+  "size_evidence": {
+    "canonical_plaintext_bytes": {
+      "empty": 42,
+      "committed_small_generation": 76,
+      "maximum_uint64_generation": 85
+    },
+    "schema": "proto2 fields 1 version uint32, 2 UUID string, 3 generation uint64, 4 optional digest bytes. Version=1, canonical lowercase UUID=36 bytes; generation zero requires absent digest; positive generation requires 32-byte digest.",
+    "serializer": "SerializeSyncVaultCheckpoint builds a new proto with only these known fields; SerializeProto enforces metadata ceiling.",
+    "parser_plaintext_limit": 65508,
+    "mac_encryption": "Cached KeychainKeyProvider returns v10 plus AES128CBC. Ciphertext length = 3 + 16*(floor(plaintext_length/16)+1), giving 51, 83, 99 bytes for the sampled canonical checkpoint lengths. This is conditional on that encryption provider, not a runtime account observation.",
+    "accepted_input_caveat": "85 is a canonical serializer-output maximum, not the ParseProto input limit. ParseSyncVaultCheckpoint accepts inputs up to 65508 bytes before format checks. Noncanonical protobuf encodings/unknown fields were not experimentally validated; no populated profile was read. If a valid input approached that ceiling under v10 CBC, ciphertext would be at most 65523 bytes and two captured payloads at most 131046 bytes. This is a conditional envelope, not observed normal retention.",
+    "generic_encryptor": "Encryptor also supports GCM and configurable provider tags; no universal cross-platform ciphertext bound is claimed here. Pref Base64 decoding checks nonempty but does not impose its own ciphertext maximum.",
+    "population": "Unknown; no profiles, credentials, real encrypted checkpoints or providers read. No multi-MiB checkpoint fixture fabricated.",
+    "reproduction": "sizes.py; schema-sizes.json; independent wire encoding and CBC length arithmetic, not native protobuf or crypto execution."
+  },
+  "source_reachability": [
+    "CreateBackend first checks enabled status and encryptor, then copies the optional ReadConfiguration value. ReadConfiguration decodes both protected byte vectors. GetBackendStatus/IsConfigured also read transient Configuration values before this point.",
+    "DecryptData returns a new optional<string>; implementation decrypts to a temporary vector then copies plaintext into the returned string. Key-size, checkpoint parse and vault-UUID validation must succeed before callback construction. Invalid local data reports the existing checkpoint-persistence diagnostic and returns without retaining either callback.",
+    "Two separate BindRepeating calls bind the lvalue Configuration by value. BindState stores decayed bound arguments in a tuple allocated by new; its Repeating invoker forwards stored arguments as const references. The free-function parameters are by value, so each invocation copies Configuration once. std::move(expected) into BindOnce and its invocation move rather than copy the vector payload.",
+    "SyncVaultStore owns persist_checkpoint_callback_. SyncVaultBackend owns the store and diagnostics callback, then moves both into SyncVaultConnectionManager. Callback copies share refcounted bind state; moving or adding a callback reference does not clone the Configuration. Store construction failure destroys the persist callback; diagnostics is only constructed after successful store creation.",
+    "The two captures hold the initial encrypted checkpoint even after repository checkpoints advance. The original CreateBackend Configuration, decrypted strings and parsed-checkpoint temporaries expire on return. Repository configuration and pref Base64 data remain independent authoritative state.",
+    "RecordReconciliation checks SameConfiguration(configuration_, expected) and diagnostic vault UUID, then merges sticky errors and retained health data; WriteDiagnostics repeats the identity/UUID check and writes Diagnostics only. Neither consumes expected.encrypted_checkpoint. SameConfiguration uses optional arguments, so expected implicitly converts to a temporary optional<Configuration> and copies all byte fields per check.",
+    "An accepted diagnostics UI task performs two such optional conversions, sequentially, in RecordReconciliation and WriteDiagnostics. Stale/absent configurations short-circuit earlier. InstallConfiguration also incurs an implicit optional copy of its new configuration in SameConfiguration; that copy contains the NEW checkpoint and must not be removed from authoritative persistence.",
+    "PersistCheckpoint compares expected via SameIdentity, copies the CURRENT repository Configuration into next, replaces only next.encrypted_checkpoint with newly encrypted bytes, installs next and waits for Flush completion. It never uses the callback-captured old checkpoint as the data to write.",
+    "PrepareVault in the setup UI also serializes the same small checkpoint and encrypts it; joining a large vault does not embed its state bytes in this checkpoint."
+  ],
+  "lifecycle_source_audit": [
+    {
+      "path": "success / durability order",
+      "result": "ReadStateForHead authenticates and reconstructs before AdvanceCheckpoint. CommitMutation writes immutable data then head CAS, resolves ambiguous writes, then AdvanceCheckpoint. AdvanceCheckpoint updates checkpoint_ only if persist callback returns true. UI InstallConfiguration precedes Flush; only the flush callback sets persisted and signals. No direct disk/fsync validation performed."
+    },
+    {
+      "path": "failure",
+      "result": "Serialization/encryption failure returns false before posting; missing profile/repository or identity mismatch signals without persisted. Store returns kCheckpointPersistenceFailed and retains its previous checkpoint on callback failure. Sticky error and diagnostic merging paths are unchanged."
+    },
+    {
+      "path": "abandonment / deadline",
+      "result": "50 ms wait checks cancellation and 30 s deadline, sets abandoned and returns false. UI closure owns CheckpointWrite and encrypted vector independently and checks abandoned before install. If install/flush already started, cancellation is not an atomic rollback of that write; this existing behavior was not altered or runtime tested."
+    },
+    {
+      "path": "shutdown / observers",
+      "result": "ProviderTransport destruction sets shared active=false. Queued diagnostic tasks own active and their result, check active and weak Profile before repository access. Persist UI closure independently owns write and encrypted payload; pending flush closure owns write, not expected Configuration. Repository shutdown removes registrars. Configuration transitions notify OnVaultConfigurationChanged; checkpoint-only transitions notify OnVaultCheckpointChanged. No trimmed Configuration was installed, written to prefs, sent to observers or used for decryption."
+    },
+    {
+      "path": "rollback / fork / integrity",
+      "result": "ValidateSyncVaultHistory and AuthenticateHead continue to use parsed checkpoint generation/digest, not the encrypted callback identity field. Full format/store source was inspected; no validation, authentication, history recovery, cancellation or collection logic changed."
+    },
+    {
+      "path": "diagnostics / reconfiguration",
+      "result": "RecordReconciliation preserves blocking failures, prior success and statistics as appropriate; returns true only for newly latched blocking error, which causes ReconfigureBackend. No callback task was removed or coalesced."
+    }
+  ],
+  "diagnostic": {
+    "kind": "Offline C++20 ownership/identity diagnostic; extracted actual declarations and exact predicate function bodies, with namespace/Repository alias scaffolding. std::shared_ptr<tuple<Configuration>> models the reviewed storage/reference category. It does NOT compile Chromium Bind, Repository, Encryptor, SyncVaultStore or backend.cc.",
+    "fixture": "32-byte synthetic extension ID, canonical synthetic UUID, 51-byte synthetic protected key, 51/83/99-byte sentinel checkpoints derived from supported canonical macOS sizes. Sentinels are not real ciphertext.",
+    "checks": [
+      "Two independently retained copies have distinct vector storage.",
+      "Shared ownership adds zero allocations in this diagnostic.",
+      "By-value invocation followed by moving into tuple preserves sentinel bytes exactly.",
+      "Vault UUID, provider ID, encrypted-key bytes and key-mode changes reject under both exact source predicates, with or without checkpoint in the expected fixture.",
+      "Checkpoint-only updates accept under both predicates; absent repository configuration rejects.",
+      "Dropping modeled owner while another reference survives retains its bytes; queued tuple preserves bytes after both modeled callback states are released."
+    ],
+    "results": [
+      {
+        "phase": "two_modeled_bind_states",
+        "checkpoint_size": 51,
+        "allocations": 10,
+        "requested_bytes": 636
+      },
+      {
+        "phase": "shared_state_reference",
+        "checkpoint_size": 51,
+        "allocations": 0,
+        "requested_bytes": 0
+      },
+      {
+        "phase": "by_value_invocation_then_move_to_ui_state",
+        "checkpoint_size": 51,
+        "allocations": 4,
+        "requested_bytes": 182
+      },
+      {
+        "phase": "repository_implicit_optional_argument_copy",
+        "checkpoint_size": 51,
+        "allocations": 4,
+        "requested_bytes": 182
+      },
+      {
+        "phase": "semantic_assertions",
+        "checkpoint_size": 51,
+        "passed": true,
+        "retained_checkpoint_payload_bytes": 102,
+        "one_ui_task_payload_bytes": 51
+      },
+      {
+        "phase": "two_modeled_bind_states",
+        "checkpoint_size": 83,
+        "allocations": 10,
+        "requested_bytes": 700
+      },
+      {
+        "phase": "shared_state_reference",
+        "checkpoint_size": 83,
+        "allocations": 0,
+        "requested_bytes": 0
+      },
+      {
+        "phase": "by_value_invocation_then_move_to_ui_state",
+        "checkpoint_size": 83,
+        "allocations": 4,
+        "requested_bytes": 214
+      },
+      {
+        "phase": "repository_implicit_optional_argument_copy",
+        "checkpoint_size": 83,
+        "allocations": 4,
+        "requested_bytes": 214
+      },
+      {
+        "phase": "semantic_assertions",
+        "checkpoint_size": 83,
+        "passed": true,
+        "retained_checkpoint_payload_bytes": 166,
+        "one_ui_task_payload_bytes": 83
+      },
+      {
+        "phase": "two_modeled_bind_states",
+        "checkpoint_size": 99,
+        "allocations": 10,
+        "requested_bytes": 732
+      },
+      {
+        "phase": "shared_state_reference",
+        "checkpoint_size": 99,
+        "allocations": 0,
+        "requested_bytes": 0
+      },
+      {
+        "phase": "by_value_invocation_then_move_to_ui_state",
+        "checkpoint_size": 99,
+        "allocations": 4,
+        "requested_bytes": 230
+      },
+      {
+        "phase": "repository_implicit_optional_argument_copy",
+        "checkpoint_size": 99,
+        "allocations": 4,
+        "requested_bytes": 230
+      },
+      {
+        "phase": "semantic_assertions",
+        "checkpoint_size": 99,
+        "passed": true,
+        "retained_checkpoint_payload_bytes": 198,
+        "one_ui_task_payload_bytes": 99
+      }
+    ],
+    "allocation_limits": "Global new/new[] counts requested bytes and call counts at O0 with host libc++; no live-heap, allocator usable-size, PartitionAlloc, RSS, physical RAM or CPU measurement. Two modeled shared states allocate 10 times total: eight Configuration string/vector allocations plus two state/control allocations. These 636/700/732-byte totals are model totals, NOT actual base::Bind state sizes. Each copied Configuration allocates four times, requesting 182/214/230 bytes. The checkpoint-only portion is one allocation of 51/83/99 bytes per copied Configuration.",
+    "native_callback_accounting": "Source establishes two actual BindState allocations and two checkpoint data allocations for the initial captures, plus one checkpoint copy per callback invocation. Shared callback references do not add payload copies. Each outstanding UI task can retain one copied initial checkpoint until execution/destruction. Diagnostics UI predicate conversions add up to two temporary checkpoint copies per accepted diagnostic, sequentially. No global queue bound or profiler count is claimed.",
+    "payload_preservation_limit": "Byte-for-byte assertions cover synthetic vector copying/moving only. Real encrypted output, actual scheduler failures, persisted bytes, observer invocations and shutdown races were not executed."
+  },
+  "adjacent_inspection": "Only nearby startup DecryptData vector-to-string and PersistCheckpoint serialized vector-to-string copies were considered. They are short-lived canonical 42\u201385-byte plaintexts here; no unrelated transport refactor or broader optimization pursued.",
+  "cpu": {
+    "measured": false,
+    "reason": "No worthwhile candidate; no CPU speedup claim or benchmark warranted."
+  },
+  "objections": [
+    "Tiny normal payload saving; fixed Configuration and BindState storage would remain even if the vector were empty. vector::clear alone retains capacity and would not release the original allocation; an actually released/constructed identity-only representation is needed for a real retention change.",
+    "A copy-then-trim helper can add startup copies and allocations; testing a huge substitute Configuration would exaggerate benefit.",
+    "Parser ceiling exceeds canonical size and requires care in general bounds. Actual noncanonical checkpoint prevalence is unknown.",
+    "Identity predicate equivalence is necessary but does not substitute for a native threaded durability/shutdown test. No production candidate is approved."
+  ],
+  "gaps": [
+    "No Chromium/native-app compile or native test runner.",
+    "No actual base::Bind, task-runner, repository-pref, disk durability, encryptor, provider, cancellation race or shutdown runtime execution.",
+    "No whole-browser measurement, physical RAM, RSS or CPU effect.",
+    "No actual-user size distribution or cross-platform runtime encryption-provider selection.",
+    "No claim that every possible external observer was exhaustively executed; no trimming was implemented, and repository source shows expected Configuration is not forwarded to observers."
+  ],
+  "provenance": {
+    "prepared_source": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src",
+    "chromium_version": "156.0.8078.47",
+    "preparation_marker": "a08f57c9b865e99c4dfe5d4c4425a941d622dce03fb39629c3d4d9e478db571f",
+    "git_head": "1ddab549eedeaffbc0eb297ef50b0d85e8625434",
+    "patches": [
+      {
+        "patch": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-format.patch",
+        "sha256": "89238d87bc26f613ebce1f8ffaa57088e389dd4830b752e51cb659617080ab2a",
+        "new_files": [
+          {
+            "path": "components/sync/engine/sync_vault/BUILD.gn",
+            "added_sha256": "ea000722bb09eadea36d13ba28891b4b77d77fa103c43a8ec99ba6ff39bf46b5",
+            "prepared_sha256": "d14a62b070c888e8f8eb83b191b78420d066e05acc8b1dbebc16b8ada9ef40f9",
+            "exact_match": false
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault.proto",
+            "added_sha256": "0639ca906e4af68db30e568abafa9c50806bbaf861bb289e9f29895160d0360c",
+            "prepared_sha256": "0639ca906e4af68db30e568abafa9c50806bbaf861bb289e9f29895160d0360c",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_format.cc",
+            "added_sha256": "929dc49add676d4d1aa18e12853c86d308492493c7051a561294eb2f2ddd4330",
+            "prepared_sha256": "929dc49add676d4d1aa18e12853c86d308492493c7051a561294eb2f2ddd4330",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_format.h",
+            "added_sha256": "ed3b51641e19861d1528a3eec88ed568d90cc74e55ef087b3ad9a36961acb790",
+            "prepared_sha256": "ed3b51641e19861d1528a3eec88ed568d90cc74e55ef087b3ad9a36961acb790",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_limits.h",
+            "added_sha256": "6f32ec7cdbf5144b8f013781ba274d07722bf7c3ea046aaaaf367619918752e2",
+            "prepared_sha256": "6f32ec7cdbf5144b8f013781ba274d07722bf7c3ea046aaaaf367619918752e2",
+            "exact_match": true
+          }
+        ]
+      },
+      {
+        "patch": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-store.patch",
+        "sha256": "0da1815c6b71e5178cc1cdc85c7c8b4c3c1e5bb4aa57cee95a48b141aab60279",
+        "new_files": [
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_store.cc",
+            "added_sha256": "dec7483315c3cb5d114a47185187a3c5c480cd3cf7d5b2839ed7ab81840f5f12",
+            "prepared_sha256": "dec7483315c3cb5d114a47185187a3c5c480cd3cf7d5b2839ed7ab81840f5f12",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_store.h",
+            "added_sha256": "2e3299862734c7849c773b7fb9b35d5c3d87a2915861ff5c0b6c89319a041879",
+            "prepared_sha256": "2e3299862734c7849c773b7fb9b35d5c3d87a2915861ff5c0b6c89319a041879",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_state_codec.h",
+            "added_sha256": "97deec86e740edc2d84718b59698e592f8340fca4a1bffcefccf3be6eb915d96",
+            "prepared_sha256": "97deec86e740edc2d84718b59698e592f8340fca4a1bffcefccf3be6eb915d96",
+            "exact_match": true
+          }
+        ]
+      },
+      {
+        "patch": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-engine-backend.patch",
+        "sha256": "e8c7ab963b5991fa1ca729211af31a36300539b027a8db59b93017135ab2e11c",
+        "new_files": [
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_backend.cc",
+            "added_sha256": "ae1d8d51c2823111c263b1ff54a12560425d8cc67109fe132479361891ea997f",
+            "prepared_sha256": "ae1d8d51c2823111c263b1ff54a12560425d8cc67109fe132479361891ea997f",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_backend.h",
+            "added_sha256": "f9887a0df78d93915728f319b42344b00f1de96875a055e4e8017bbd8b5475b3",
+            "prepared_sha256": "f9887a0df78d93915728f319b42344b00f1de96875a055e4e8017bbd8b5475b3",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_connection_manager.cc",
+            "added_sha256": "12c652be835764bfffe475ab5599eaa9cb15baf38f9b176e632193b52730722b",
+            "prepared_sha256": "12c652be835764bfffe475ab5599eaa9cb15baf38f9b176e632193b52730722b",
+            "exact_match": true
+          },
+          {
+            "path": "components/sync/engine/sync_vault/sync_vault_connection_manager.h",
+            "added_sha256": "f3acf75e31c178a351d2a1774dcd51a8c653cc7378ac48cb799ddee65e4f0029",
+            "prepared_sha256": "f3acf75e31c178a351d2a1774dcd51a8c653cc7378ac48cb799ddee65e4f0029",
+            "exact_match": true
+          }
+        ]
+      },
+      {
+        "patch": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/repository.patch",
+        "sha256": "58c57d4f13cc860d6c75f6b3b3ab6ccff191ab6126eef8ffbd4c31aa7eb4e48b",
+        "new_files": [
+          {
+            "path": "chrome/browser/sync/private_sync/private_sync_repository.cc",
+            "added_sha256": "acfc54ee830afa9126c7c3bfbdfbb37a7e6414eebfba757ae61cb030b515d03e",
+            "prepared_sha256": "acfc54ee830afa9126c7c3bfbdfbb37a7e6414eebfba757ae61cb030b515d03e",
+            "exact_match": true
+          },
+          {
+            "path": "chrome/browser/sync/private_sync/private_sync_repository.h",
+            "added_sha256": "086aefef8293afd73543c7aad7685bc599ad4cbcf5755ee7f34816e9014571a8",
+            "prepared_sha256": "086aefef8293afd73543c7aad7685bc599ad4cbcf5755ee7f34816e9014571a8",
+            "exact_match": true
+          },
+          {
+            "path": "chrome/browser/sync/private_sync/private_sync_repository_factory.cc",
+            "added_sha256": "9af053e0f0d2be8431a785c135a33439bbb98aecf1cc19633fd39def724b08e7",
+            "prepared_sha256": "9af053e0f0d2be8431a785c135a33439bbb98aecf1cc19633fd39def724b08e7",
+            "exact_match": true
+          }
+        ]
+      },
+      {
+        "patch": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/profile-prefs.patch",
+        "sha256": "24dd3774300ebbfb8d1cab3e3fc19b3694c0b39542c8b94b9df7959505cb0104",
+        "new_files": [
+          {
+            "path": "chrome/browser/sync/private_sync/private_sync_prefs.cc",
+            "added_sha256": "5185dbdf50c173dd4a2fe5016c4e35ab6cd6bfb09f8d6e926b8717546a5020a8",
+            "prepared_sha256": "29af5520023553179715856f4f1429d36c47cd6cb4215aab98c7d323f03db9af",
+            "exact_match": false
+          },
+          {
+            "path": "chrome/browser/sync/private_sync/private_sync_prefs.h",
+            "added_sha256": "ab4a6e1d2f4f1e6e1ff1aa2135c9a8b1c56dd48a329e742ca7e05b3291a2d61b",
+            "prepared_sha256": "93788d31a722b62366bed6a039c6e5392bf8a3884bebc812a204b6fbcacb458f",
+            "exact_match": false
+          },
+          {
+            "path": "chrome/browser/sync/private_sync/private_sync_provider.h",
+            "added_sha256": "b9f4326c15edd679bff3944800c24bdce279a78ae1ee26f563f8695d2c131665",
+            "prepared_sha256": "b9f4326c15edd679bff3944800c24bdce279a78ae1ee26f563f8695d2c131665",
+            "exact_match": true
+          }
+        ]
+      }
+    ]
+  },
+  "prefs_provenance": {
+    "patches": [
+      {
+        "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/profile-prefs.patch",
+        "sha256": "24dd3774300ebbfb8d1cab3e3fc19b3694c0b39542c8b94b9df7959505cb0104"
+      },
+      {
+        "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/exclude-from-vault.patch",
+        "sha256": "b463b9380c11a81b5b03b6561b8580baba4be39f53b064f677c4a8a7726d1aa7"
+      }
+    ],
+    "files": [
+      {
+        "path": "chrome/browser/sync/private_sync/private_sync_prefs.h",
+        "reconstructed_sha256": "93788d31a722b62366bed6a039c6e5392bf8a3884bebc812a204b6fbcacb458f",
+        "cached_sha256": "93788d31a722b62366bed6a039c6e5392bf8a3884bebc812a204b6fbcacb458f",
+        "exact_match": true
+      },
+      {
+        "path": "chrome/browser/sync/private_sync/private_sync_prefs.cc",
+        "reconstructed_sha256": "29af5520023553179715856f4f1429d36c47cd6cb4215aab98c7d323f03db9af",
+        "cached_sha256": "29af5520023553179715856f4f1429d36c47cd6cb4215aab98c7d323f03db9af",
+        "exact_match": true
+      }
+    ]
+  },
+  "reproduction": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -B build/efficiency-20261103/native-checkpoint-retention/prepare.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -B build/efficiency-20261103/native-checkpoint-retention/extend.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -B build/efficiency-20261103/native-checkpoint-retention/run.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -B build/efficiency-20261103/native-checkpoint-retention/sizes.py",
+    "PYTHONDONTWRITEBYTECODE=1 python3 -B build/efficiency-20261103/native-checkpoint-retention/verify-provenance.py"
+  ],
+  "commands": [
+    {
+      "argv": [
+        "clang++",
+        "--version"
+      ],
+      "timeout_seconds": 45,
+      "returncode": 0,
+      "stdout": "command-0.stdout",
+      "stderr": "command-0.stderr"
+    },
+    {
+      "argv": [
+        "clang++",
+        "-std=c++20",
+        "-O0",
+        "-Wall",
+        "-Wextra",
+        "-pedantic",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-checkpoint-retention/ownership.cc",
+        "-o",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-checkpoint-retention/ownership"
+      ],
+      "timeout_seconds": 45,
+      "returncode": 0,
+      "stdout": "command-1.stdout",
+      "stderr": "command-1.stderr"
+    },
+    {
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-checkpoint-retention/ownership"
+      ],
+      "timeout_seconds": 45,
+      "returncode": 0,
+      "stdout": "command-2.stdout",
+      "stderr": "command-2.stderr"
+    }
+  ],
+  "files": [
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/AGENTS.md"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/sync/native/chrome/browser/sync/breezer_sync/backend.cc",
+      "sha256": "b2c4c100f29c6cc30e33158eee31df1c64c8ee2504bad6e43bfff85ed7b0ab77",
+      "lines": 261,
+      "readRanges": [
+        [
+          1,
+          261
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/backend.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/sync/native/chrome/browser/sync/breezer_sync/backend.h",
+      "sha256": "dd2639e7afd2cdd12ac8cc43a1fb57d8d06842592c36799e4c6f500f5429c4a5",
+      "lines": 21,
+      "readRanges": [
+        [
+          1,
+          21
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/backend.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/sync/native/chrome/browser/sync/breezer_sync/prefs.h",
+      "sha256": "428eebd9477d0256cf1c4a6adb797b7ba94412c0acd4ed0e3df97bfd71bd215f",
+      "lines": 7,
+      "readRanges": [
+        [
+          1,
+          7
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/prefs.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+      "sha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00",
+      "lines": 165,
+      "readRanges": [
+        [
+          1,
+          165
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.h",
+      "sha256": "96494d6343c185f776ff7ed696e77d2ae7c3acb1066cb5e11afbac942effa0d0",
+      "lines": 22,
+      "readRanges": [
+        [
+          1,
+          22
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc",
+      "sha256": "df85a9c191c1f7013e940600b514b2f33a951e94838ee870fc7d0828697114c9",
+      "lines": 353,
+      "readRanges": [
+        [
+          1,
+          353
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/lifetime.test.mjs",
+      "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc",
+      "lines": 72,
+      "readRanges": [
+        [
+          1,
+          72
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/tests/sync/lifetime.test.mjs"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/chrome/browser/sync/private_sync/private_sync_prefs.h",
+      "sha256": "93788d31a722b62366bed6a039c6e5392bf8a3884bebc812a204b6fbcacb458f",
+      "lines": 98,
+      "readRanges": [
+        [
+          1,
+          98
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_prefs.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/chrome/browser/sync/private_sync/private_sync_prefs.cc",
+      "sha256": "29af5520023553179715856f4f1429d36c47cd6cb4215aab98c7d323f03db9af",
+      "lines": 272,
+      "readRanges": [
+        [
+          1,
+          272
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_prefs.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/chrome/browser/sync/private_sync/private_sync_repository.h",
+      "sha256": "086aefef8293afd73543c7aad7685bc599ad4cbcf5755ee7f34816e9014571a8",
+      "lines": 68,
+      "readRanges": [
+        [
+          1,
+          68
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_repository.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/chrome/browser/sync/private_sync/private_sync_repository.cc",
+      "sha256": "acfc54ee830afa9126c7c3bfbdfbb37a7e6414eebfba757ae61cb030b515d03e",
+      "lines": 137,
+      "readRanges": [
+        [
+          1,
+          137
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_repository.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/chrome/browser/sync/private_sync/private_sync_provider.h",
+      "sha256": "b9f4326c15edd679bff3944800c24bdce279a78ae1ee26f563f8695d2c131665",
+      "lines": 25,
+      "readRanges": [
+        [
+          1,
+          25
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_provider.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_format.h",
+      "sha256": "ed3b51641e19861d1528a3eec88ed568d90cc74e55ef087b3ad9a36961acb790",
+      "lines": 159,
+      "readRanges": [
+        [
+          1,
+          159
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_format.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_format.cc",
+      "sha256": "929dc49add676d4d1aa18e12853c86d308492493c7051a561294eb2f2ddd4330",
+      "lines": 406,
+      "readRanges": [
+        [
+          1,
+          406
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_format.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault.proto",
+      "sha256": "0639ca906e4af68db30e568abafa9c50806bbaf861bb289e9f29895160d0360c",
+      "lines": 39,
+      "readRanges": [
+        [
+          1,
+          39
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault.proto"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_limits.h",
+      "sha256": "6f32ec7cdbf5144b8f013781ba274d07722bf7c3ea046aaaaf367619918752e2",
+      "lines": 38,
+      "readRanges": [
+        [
+          1,
+          38
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_limits.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_store.h",
+      "sha256": "2e3299862734c7849c773b7fb9b35d5c3d87a2915861ff5c0b6c89319a041879",
+      "lines": 218,
+      "readRanges": [
+        [
+          1,
+          218
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_store.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_store.cc",
+      "sha256": "dec7483315c3cb5d114a47185187a3c5c480cd3cf7d5b2839ed7ab81840f5f12",
+      "lines": 888,
+      "readRanges": [
+        [
+          1,
+          888
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_store.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_backend.h",
+      "sha256": "f9887a0df78d93915728f319b42344b00f1de96875a055e4e8017bbd8b5475b3",
+      "lines": 39,
+      "readRanges": [
+        [
+          1,
+          39
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_backend.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_backend.cc",
+      "sha256": "ae1d8d51c2823111c263b1ff54a12560425d8cc67109fe132479361891ea997f",
+      "lines": 36,
+      "readRanges": [
+        [
+          1,
+          36
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_backend.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_connection_manager.h",
+      "sha256": "f3acf75e31c178a351d2a1774dcd51a8c653cc7378ac48cb799ddee65e4f0029",
+      "lines": 69,
+      "readRanges": [
+        [
+          1,
+          69
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_connection_manager.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/sync/engine/sync_vault/sync_vault_connection_manager.cc",
+      "sha256": "12c652be835764bfffe475ab5599eaa9cb15baf38f9b176e632193b52730722b",
+      "lines": 221,
+      "readRanges": [
+        [
+          1,
+          221
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_connection_manager.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/os_crypt/async/common/encryptor.h",
+      "sha256": "737da70e05ad14b30aedabc7a59375815360413817f8dba90f8667cffdab6a77",
+      "lines": 211,
+      "readRanges": [
+        [
+          1,
+          211
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/os_crypt/async/common/encryptor.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/os_crypt/async/common/encryptor.cc",
+      "sha256": "3d58a27499e97d059e57ffdbd127e865282986d8e6197b39725b75e99d6ef3d0",
+      "lines": 322,
+      "readRanges": [
+        [
+          1,
+          322
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/os_crypt/async/common/encryptor.cc"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/components/os_crypt/async/browser/keychain_key_provider.mm",
+      "sha256": "d563f5b107618240aef41e7ca61b0ce868655105b1e3e19a9f7c3602f3c3dfc8",
+      "lines": 147,
+      "readRanges": [
+        [
+          1,
+          147
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/os_crypt/async/browser/keychain_key_provider.mm"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/crypto/aes_cbc.h",
+      "sha256": "862cd5c067db3584d7b3a7ba14f1d8eaebbf4bd1d60e7a772becfc74de711a28",
+      "lines": 52,
+      "readRanges": [
+        [
+          1,
+          52
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/crypto/aes_cbc.h"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/crypto/aes_cbc.cc",
+      "sha256": "d0d7c807bccad1da94cf7c6dd9a029967c27be9612811d14912126dc7a1b8ef9",
+      "lines": 71,
+      "readRanges": [
+        [
+          1,
+          71
+        ]
+      ],
+      "status": "fully-read",
+      "frozen": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/crypto/aes_cbc.cc"
+    }
+  ],
+  "partial_sources": [
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/base/functional/bind.h",
+      "sha256": "03b9b91d9afdfe67b1703e4531893239aab11826d4fcf62f0818d3679c3562f5",
+      "readRanges": [
+        [
+          30,
+          72
+        ]
+      ],
+      "status": "partially-read"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/base/functional/callback.h",
+      "sha256": "1f21a284d0b3940e4de2d0afde093b351d99a6bdbd011ab1eec67eac618721ea",
+      "readRanges": [
+        [
+          282,
+          360
+        ]
+      ],
+      "status": "partially-read"
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/base/functional/bind_internal.h",
+      "sha256": "3a5aa6d9db1f273654366acdffa713796cf5fb10e696370d2d0c667f5e2db406",
+      "readRanges": [
+        [
+          870,
+          900
+        ],
+        [
+          900,
+          1205
+        ],
+        [
+          1250,
+          1272
+        ],
+        [
+          1340,
+          1365
+        ]
+      ],
+      "status": "partially-read"
+    }
+  ],
+  "protected_source_end_drift_checks": {
+    "protected_repository_files_checked": 1339,
+    "repository_drift": [],
+    "fully_read_and_partial_sources_checked": 31,
+    "source_drift": [],
+    "scope": "Repository tracked files plus untracked features/script/tests/docs, and exact cached sources inspected. Hash baseline captured before generating diagnostic. No app, profile or compiled-cache inventory.",
+    "passed": true
+  },
+  "provenance_note": "Prepared format/store/backend/repository source matches exact added-file bodies in pinned repository patches. Prefs differs from initial profile-prefs.patch because of later exclude-from-vault.patch; reconstructing both in series yields exact cached hashes, recorded separately. BUILD.gn differs from its initial format patch due to later additions and is not claimed fully reviewed. Encryption implementation is locally cached and hashed, not fetched or executed.",
+  "artifacts": [
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/command-0.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/command-0.stdout",
+      "sha256": "2f695e8ead1d2404c2829c51b53b3e7082de6995b84e1840f2449e4e63dcb286"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/command-1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/command-1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/command-2.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/command-2.stdout",
+      "sha256": "37223bb199710a65522320132b0d0519a67b85de817d8043ddfd7e7f42106e81"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/commands.json",
+      "sha256": "f4f0ed1d4ba186d471547a38b604f7de8d4da38971ac4c17557eadb8b28b56f8"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/extend.py",
+      "sha256": "268dea0726bd0026588c8a877924c292401df2dd0e9cd90a7c1f82706a5c3d36"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/finalize.py",
+      "sha256": "a5c7f4038ec3246f204617ad15b5f3a2f78161ed21dd3fe28fa90a8010bf47ab"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/base/functional/bind.h",
+      "sha256": "03b9b91d9afdfe67b1703e4531893239aab11826d4fcf62f0818d3679c3562f5"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/base/functional/bind_internal.h",
+      "sha256": "3a5aa6d9db1f273654366acdffa713796cf5fb10e696370d2d0c667f5e2db406"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/base/functional/callback.h",
+      "sha256": "1f21a284d0b3940e4de2d0afde093b351d99a6bdbd011ab1eec67eac618721ea"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_prefs.cc",
+      "sha256": "29af5520023553179715856f4f1429d36c47cd6cb4215aab98c7d323f03db9af"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_prefs.h",
+      "sha256": "93788d31a722b62366bed6a039c6e5392bf8a3884bebc812a204b6fbcacb458f"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_provider.h",
+      "sha256": "b9f4326c15edd679bff3944800c24bdce279a78ae1ee26f563f8695d2c131665"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_repository.cc",
+      "sha256": "acfc54ee830afa9126c7c3bfbdfbb37a7e6414eebfba757ae61cb030b515d03e"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/chrome/browser/sync/private_sync/private_sync_repository.h",
+      "sha256": "086aefef8293afd73543c7aad7685bc599ad4cbcf5755ee7f34816e9014571a8"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/os_crypt/async/browser/keychain_key_provider.mm",
+      "sha256": "d563f5b107618240aef41e7ca61b0ce868655105b1e3e19a9f7c3602f3c3dfc8"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/os_crypt/async/common/encryptor.cc",
+      "sha256": "3d58a27499e97d059e57ffdbd127e865282986d8e6197b39725b75e99d6ef3d0"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/os_crypt/async/common/encryptor.h",
+      "sha256": "737da70e05ad14b30aedabc7a59375815360413817f8dba90f8667cffdab6a77"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault.proto",
+      "sha256": "0639ca906e4af68db30e568abafa9c50806bbaf861bb289e9f29895160d0360c"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_backend.cc",
+      "sha256": "ae1d8d51c2823111c263b1ff54a12560425d8cc67109fe132479361891ea997f"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_backend.h",
+      "sha256": "f9887a0df78d93915728f319b42344b00f1de96875a055e4e8017bbd8b5475b3"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_connection_manager.cc",
+      "sha256": "12c652be835764bfffe475ab5599eaa9cb15baf38f9b176e632193b52730722b"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_connection_manager.h",
+      "sha256": "f3acf75e31c178a351d2a1774dcd51a8c653cc7378ac48cb799ddee65e4f0029"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_format.cc",
+      "sha256": "929dc49add676d4d1aa18e12853c86d308492493c7051a561294eb2f2ddd4330"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_format.h",
+      "sha256": "ed3b51641e19861d1528a3eec88ed568d90cc74e55ef087b3ad9a36961acb790"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_limits.h",
+      "sha256": "6f32ec7cdbf5144b8f013781ba274d07722bf7c3ea046aaaaf367619918752e2"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_store.cc",
+      "sha256": "dec7483315c3cb5d114a47185187a3c5c480cd3cf7d5b2839ed7ab81840f5f12"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/components/sync/engine/sync_vault/sync_vault_store.h",
+      "sha256": "2e3299862734c7849c773b7fb9b35d5c3d87a2915861ff5c0b6c89319a041879"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/crypto/aes_cbc.cc",
+      "sha256": "d0d7c807bccad1da94cf7c6dd9a029967c27be9612811d14912126dc7a1b8ef9"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/prepared/crypto/aes_cbc.h",
+      "sha256": "862cd5c067db3584d7b3a7ba14f1d8eaebbf4bd1d60e7a772becfc74de711a28"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/backend.cc",
+      "sha256": "b2c4c100f29c6cc30e33158eee31df1c64c8ee2504bad6e43bfff85ed7b0ab77"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/backend.h",
+      "sha256": "dd2639e7afd2cdd12ac8cc43a1fb57d8d06842592c36799e4c6f500f5429c4a5"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/prefs.h",
+      "sha256": "428eebd9477d0256cf1c4a6adb797b7ba94412c0acd4ed0e3df97bfd71bd215f"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+      "sha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.h",
+      "sha256": "96494d6343c185f776ff7ed696e77d2ae7c3acb1066cb5e11afbac942effa0d0"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc",
+      "sha256": "df85a9c191c1f7013e940600b514b2f33a951e94838ee870fc7d0828697114c9"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/frozen/repo/tests/sync/lifetime.test.mjs",
+      "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/fully-read-sources.json",
+      "sha256": "0f829ffe7d7304877299454f3e3a10bd6f61c9e1ca9082cbf931de6ec960cc4b"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/ownership",
+      "sha256": "ff950a8be2c21f25cc0ac97fb8393fe301845b9f387562504c35d4cd1b127f6a"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/ownership.cc",
+      "sha256": "72d0832305b1ab73980d45ca7d20a06f40aa11a4f4d1437a27640ccafed9f400"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/partial-source-evidence.json",
+      "sha256": "f764580a31b4e9561fc97aaad7dbc1ceaab0853a2082c1524c6d2e27d3be9e58"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/prefs-provenance.json",
+      "sha256": "6243f2ab5ed5b18524d8bda261e15d6b05623059b245d628c00d0fdd2e5cb336"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/prepare.py",
+      "sha256": "da731d89a5fa9b5f478ef91f9ca98c29e7bd5abde6eb20c87ea145eff96e282c"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/protected-before.json",
+      "sha256": "21a0565c042ae76c32719e66bed6500834121f3303bba2a98bafd3fb06f34b95"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/protected-end-drift.json",
+      "sha256": "a35cfc86ba13c46cff908f9b8cd281aac5f223281417d65a4dd45377968c9e14"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/provenance.json",
+      "sha256": "bcfbf95ee34aaa4a8a99e00c3a5bdec833858f139b974c680ffd5eaf478f7815"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/run.py",
+      "sha256": "5e90c99acf8e19bd4b39ba79e61284474af192dd52ccd0eed4fd1fb0019c486b"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/schema-sizes.json",
+      "sha256": "65c9ee0194456866050ad96fd23e769b03198a17aa36b9909808262dd6a2f703"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/sizes.py",
+      "sha256": "c6161b6c7e2a30a496996268a8c2f3c12cb299c77159d7e0eb8c09b63246f95a"
+    },
+    {
+      "path": "build/efficiency-20261103/native-checkpoint-retention/verify-provenance.py",
+      "sha256": "b5d9235e0fa8bf39564baf2c130bd336d05d30dd37ea9be08ecdaa17f3696be4"
+    }
+  ]
+}

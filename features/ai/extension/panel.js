@@ -1,5 +1,5 @@
 import { ResearchSources, maskSecrets } from './research-sources.js';
-import { renderMessage } from './render-message.js';
+import { renderMessage, createMessageStream } from './render-message.js';
 import { latestModels } from './model-catalog.js';
 import { startPanelTheme } from './panel-theme.js';
 
@@ -316,8 +316,17 @@ function appendMessage(message) {
   return body;
 }
 
+function recentMessages(limit) {
+  const messages = [];
+  for (let index = state.messages.length - 1; index >= 0 && messages.length < limit; index--) {
+    const message = state.messages[index];
+    if (message.text) messages.push(message);
+  }
+  return messages.reverse();
+}
+
 function saveConversation() {
-  const messages = state.messages.filter((item) => item.text).slice(-60);
+  const messages = recentMessages(60);
   return chrome.storage.session.set({ [state.sessionKey]: messages }).catch(() => {});
 }
 
@@ -330,12 +339,15 @@ function renderDelta() {
   scheduledRender = true;
   requestAnimationFrame(() => {
     scheduledRender = false;
-    const message = state.messages.find((item) => item.id === state.running?.assistantId);
+    const message = state.running?.message;
     const body = message && messageNodes.get(message.id);
     if (!body) return;
     const scroller = $('conversation');
     const atBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 100;
-    renderMessage(body, message.text);
+    const run = state.running;
+    run.renderer ||= createMessageStream(body);
+    run.renderer.append(message.text.slice(run.renderedLength || 0));
+    run.renderedLength = message.text.length;
     if (atBottom) scrollToBottom();
   });
 }
@@ -372,11 +384,14 @@ function offerRetry(run) {
 
 function finish(label, keepControl = false) {
   if (state.running) {
+    state.running.renderer?.dispose();
+    state.running.renderer = null;
     const message = state.messages.find((item) => item.id === state.running.assistantId);
     if (message && !message.text) {
       message.text = label || 'Response stopped.';
       renderMessage(messageNodes.get(message.id), message.text);
     } else if (message) renderMessage(messageNodes.get(message.id), message.text);
+    state.running.message = null;
   }
   state.running = null;
   if (!keepControl) setControl(false);
@@ -431,13 +446,17 @@ async function send() {
   $('announcer').textContent = '';
   const id = crypto.randomUUID();
   const assistantId = `${id}-reply`;
-  const history = state.messages.filter((item) => item.text).slice(-30).map(({ role, text: content }) => ({ role, content }));
+  const history = recentMessages(30).map(({ role, text: content }) => ({ role, content }));
   const userMessage = { id, role: 'user', text, contextTitle: research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '' };
   const assistantMessage = { id: assistantId, role: 'assistant', text: '' };
   state.messages.push(userMessage, assistantMessage);
   appendMessage(userMessage);
   appendMessage(assistantMessage);
-  state.running = { id, assistantId, control: state.control };
+  state.running = {
+    id, assistantId, control: state.control,
+    // Resolve once while messages only append; retain first-match behavior for duplicate IDs.
+    message: state.messages.find((item) => item.id === assistantId),
+  };
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
@@ -494,7 +513,7 @@ function receive(message) {
     if (!state.running) return notify(reason);
     fail(reason, `Could not finish this response. ${reason}`);
   } else if (message.type === 'delta' && state.running) {
-    const reply = state.messages.find((item) => item.id === state.running.assistantId);
+    const reply = state.running.message;
     reply.text += message.text || '';
     renderDelta();
   } else if (message.type === 'complete') finish(undefined, !message.cancelled);

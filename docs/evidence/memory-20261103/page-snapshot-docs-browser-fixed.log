@@ -1,0 +1,2 @@
+PASS frame restrictions: stale handles, secret fields, detached/navigated/cross-origin frames, site scope, late focus changes, cancellation and frame Escape.
+PASS synthetic Docs workflow: capture, editor hit layer, focused frame typing, selection and follow-up edit. Authenticated Docs/native acceptance NOT tested.

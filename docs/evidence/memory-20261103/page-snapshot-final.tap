@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: large snapshot avoids eager candidate copies and stops after 180 successful targets
+ok 1 - large snapshot avoids eager candidate copies and stops after 180 successful targets
+  ---
+  duration_ms: 14.612625
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":0}
+ok 2 - snapshot ordering and filtering match baseline {"count":0}
+  ---
+  duration_ms: 0.849125
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1}
+ok 3 - snapshot ordering and filtering match baseline {"count":1}
+  ---
+  duration_ms: 0.740958
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":179}
+ok 4 - snapshot ordering and filtering match baseline {"count":179}
+  ---
+  duration_ms: 2.049292
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":180}
+ok 5 - snapshot ordering and filtering match baseline {"count":180}
+  ---
+  duration_ms: 2.195709
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":181}
+ok 6 - snapshot ordering and filtering match baseline {"count":181}
+  ---
+  duration_ms: 2.151291
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+ok 7 - snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+  ---
+  duration_ms: 4.353333
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+ok 8 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+  ---
+  duration_ms: 2.499834
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+ok 9 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+  ---
+  duration_ms: 4.922625
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"rootOutside":true}
+ok 10 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"rootOutside":true}
+  ---
+  duration_ms: 2.138666
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+ok 11 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+  ---
+  duration_ms: 2.012667
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+ok 12 - snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+  ---
+  duration_ms: 1.756292
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 109.288709

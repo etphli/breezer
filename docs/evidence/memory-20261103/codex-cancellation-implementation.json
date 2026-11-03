@@ -1,0 +1,145 @@
+{
+  "task": "NH-03 Codex cancellation through setup boundaries",
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular",
+    "delegation": false
+  },
+  "workspace": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+  "files": [
+    {
+      "path": "features/ai/host/codex.mjs",
+      "beforeSha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+      "beforeState": "existing tracked source",
+      "afterSha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba"
+    },
+    {
+      "path": "tests/ai/codex-cancellation.test.mjs",
+      "beforeSha256": null,
+      "beforeState": "absent",
+      "afterSha256": "d5a2c188f54083bed4bc2aa33b4eb6864db80b1e87703a52d0bb190124b59e94"
+    }
+  ],
+  "reportFile": {
+    "path": "build/efficiency-20261103/codex-cancellation-implementation.json",
+    "beforeState": "absent",
+    "selfHash": "Not embedded to avoid circular hashing; source/test hashes above are exact."
+  },
+  "readEvidence": [
+    "AGENTS.md",
+    "build/efficiency-20261103/native-host-audit.json NH-03",
+    "build/efficiency-20261103/native-host-probe.mjs",
+    "features/ai/host/codex.mjs",
+    "features/ai/host/cli.mjs",
+    "tests/ai/host.test.mjs",
+    "tests/ai/context-memory.test.mjs",
+    "tests/ai/context-integration.test.mjs",
+    "tests/ai/model-catalog.test.mjs"
+  ],
+  "reproduction": {
+    "runtime": "v24.22.1",
+    "command": [
+      "build/efficiency-20261103/organato-review-node24",
+      "--test",
+      "tests/ai/codex-cancellation.test.mjs"
+    ],
+    "beforeSourceSha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+    "initialFixture": "Actual CodexProvider.chat/preflight/start; fake isolate and createProcess; initialize request held behind gate. Abort, then one setImmediate.",
+    "result": "FAILED as expected: active fake probe processes 1, expected 0. Gate released in finally and original chat drained. No real CLI used.",
+    "fullAuditProbeNotExecuted": "Existing probe writes shared results; only read it and reproduced its ordering defect with the owned focused test."
+  },
+  "implementation": [
+    "Per-chat cancellation scope registers before isolation, owns RPC as soon as created, checks abortion before and after setup awaits, and memoizes each RPC close promise.",
+    "Pass optional scope through start and preflight; existing discovery calls and normal options retain default behavior. No discovery code changed.",
+    "Abort closes only owned RPCs and loopback probe server. Server close waits for a bind already in progress; close is memoized.",
+    "Await setup settlement rather than racing detached setup. Late initialize/thread/start/turn/start resolution or rejection is observed and cannot progress setup.",
+    "Remove abort/message/closed listeners and await owned RPC cleanup before isolation removal. Queued tools and late replies suppress activity after cancellation.",
+    "Every noncancelled chat still executes the actual browser-only tool, reasoning, speed and credential-absence checks; no probe caching."
+  ],
+  "verification": [
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--version"
+      ],
+      "exitCode": 0,
+      "stdout": "v24.22.1\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--check",
+        "features/ai/host/codex.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--check",
+        "tests/ai/codex-cancellation.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--test",
+        "--test-skip-pattern=only an explicitly selected Codex Fast request enables",
+        "tests/ai/codex-cancellation.test.mjs",
+        "tests/ai/host.test.mjs",
+        "tests/ai/context-memory.test.mjs",
+        "tests/ai/context-integration.test.mjs",
+        "tests/ai/model-catalog.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "\u2714 abort during probe initialize closes owned setup before gate release (11.725625ms)\n\u2714 cancellation closes setup at probe:thread/start (9.47375ms)\n\u2714 cancellation closes setup at probe:turn/start (1.4035ms)\n\u2714 cancellation closes setup at probe:receive (2.520917ms)\n\u2714 cancellation closes setup at runtime:initialize (34.54975ms)\n\u2714 cancellation closes setup at runtime:thread/start (3.109458ms)\n\u2714 cancellation closes setup at runtime:turn/start (2.880709ms)\n\u2714 cancellation closes setup at runtime:done (2.500125ms)\n\u2714 late resolution after abort at isolate is drained (0.367875ms)\n\u2714 late rejection after abort at isolate is drained (1.1ms)\n\u2714 late resolution after abort at probe:initialize is drained (1.088416ms)\n\u2714 late rejection after abort at probe:initialize is drained (1.276708ms)\n\u2714 late resolution after abort at probe:thread/start is drained (1.662459ms)\n\u2714 late rejection after abort at probe:thread/start is drained (1.330375ms)\n\u2714 late resolution after abort at probe:turn/start is drained (1.296958ms)\n\u2714 late rejection after abort at probe:turn/start is drained (0.747584ms)\n\u2714 late resolution after abort at runtime:initialize is drained (1.93175ms)\n\u2714 late rejection after abort at runtime:initialize is drained (1.890083ms)\n\u2714 late resolution after abort at runtime:thread/start is drained (1.893125ms)\n\u2714 late rejection after abort at runtime:thread/start is drained (1.682583ms)\n\u2714 late resolution after abort at runtime:turn/start is drained (1.762958ms)\n\u2714 late rejection after abort at runtime:turn/start is drained (1.781625ms)\n\u2714 already-aborted chat creates no isolation, probe, or runtime (0.185375ms)\n\u2714 isolation cleanup waits for the owned process exit (0.4195ms)\n\u2714 every standard chat runs the actual security preflight (3.773542ms)\n\u2714 every fast chat runs the actual security preflight (2.048292ms)\n\u2714 noncancelled preflight rejects invalid tools before runtime launch (1.283709ms)\n\u2714 noncancelled preflight rejects invalid reasoning before runtime launch (1.221333ms)\n\u2714 noncancelled preflight rejects invalid speed before runtime launch (1.15175ms)\n\u2714 noncancelled preflight rejects invalid credentials before runtime launch (1.425375ms)\n\u2714 thirty cancelled replacements keep fake owned setup resources bounded (3.61025ms)\n\u2714 abort racing probe:spawn prevents initialize (0.349041ms)\n\u2714 abort racing runtime:spawn prevents initialize (3.722667ms)\n\u2714 cancelling one chat leaves a separately owned runtime running (1.946375ms)\n\u2714 only trusted non-private settings pages can configure/view context (12.467875ms)\n\u2714 tab events respect permissions, never open a helper or read a document, and disposal stops recording (2.304875ms)\n\u2714 summary transport sends only a consented batch and clear cancels/disconnects its helper (8.993083ms)\n\u2714 host wrapper shares normal chat busy/cancel boundaries and suppresses stale summary output (1.556333ms)\n\u2714 host wrapper returns a summary result and preserves ordinary chat behavior (0.433666ms)\n\u2714 cancelling ordinary chat permits its replacement before old provider cleanup finishes (2.067541ms)\n\u2714 an explicit grant records the first sample and a manual summary completes through the real host adapter (4.147917ms)\n\u2714 new profiles are OFF and no browsing events collect or call a provider (3.100083ms)\n\u2714 only explicit allowed sites and permitted normal active tabs count; URL details never persist (1.628333ms)\n\u2714 configuration rejects private/sensitive sites, URLs and oversized lists (0.350167ms)\n\u2714 retention prunes on read and persists the deletion; old/corrupt schema fails closed (0.439084ms)\n\u2714 daily aggregate buckets are bounded and saved data is viewable without provider consent (2.346042ms)\n\u2714 separate provider consent, manual batching, cooldown, and changed-data checks gate summaries (7.790542ms)\n\u2714 clearing, disabling, revoking consent and caller cancellation suppress late results (26.151959ms)\n\u2714 permission revocation and clear during asynchronous observation cannot repopulate memory (7.231541ms)\n\u2714 host uses exact discovered Luna at low reasoning, Standard, and no browser tools or history (0.907167ms)\n\u2714 host rejects missing consent, arbitrary models, and extra/sensitive input before provider execution (0.354417ms)\n\u2714 missing authenticated Luna gives an honest local-only fallback and never chooses an expensive model (0.170209ms)\n\u2714 host enforces cancellation, text limits and a deadline even for an uncooperative provider (6.479792ms)\n\u2714 cancellation settles promptly even if the summary sender never responds (6.076375ms)\n\u2714 summary deduplication persists only a digest, not a second copy of browsing aggregates (0.513875ms)\n\u2714 both providers can advertise validated canvas mouse actions and game keys (1.7ms)\n\u2714 game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions (0.411083ms)\n\u2714 native framing decodes fragmented UTF-8 and multiple messages (0.405958ms)\n\u2714 native framing rejects oversize, zero, invalid UTF-8 and truncated data (0.150125ms)\n\u2714 native framing handles every header/body split with byte-array input and empty chunks (1.110083ms)\n\u2714 native framing keeps rejecting non-byte chunks, including empty arrays (0.116708ms)\n\u2714 native framing owns partial bytes when the caller reuses an input buffer (0.108959ms)\n\u2714 native framing handles repeatable fragmented/coalesced messages without losing the next header (10.644125ms)\n\u2714 native framing accepts the exact input limit and rejects incomplete maximum frames (27.096834ms)\n\u2714 only the exact bundled extension origin is accepted (0.276083ms)\n\u2714 context and action permissions are opt-in and tools reject arbitrary execution (0.297041ms)\n\u2714 chat input rejects invalid providers, histories, ids and image URLs (0.411166ms)\n\u2714 reasoning uses reported defaults and rejects unavailable model levels (0.136875ms)\n\u2714 Codex Fast metadata requires a reported service tier and verified runtime support (0.17175ms)\n\u2714 CLI environment removes inherited executable injection settings (0.103084ms)\n\u2714 profile name reaches the model even when profile context is empty (0.212375ms)\n\u2714 explicit init refreshes login discovery while concurrent inits share the in-flight request (5.427333ms)\n\u2714 JSON-lines child transport correlates requests and carries notifications (1.115625ms)\n\u2714 Codex removes catalog-native execution capabilities and fails closed for foreign tools (0.320792ms)\n\u2714 controller awaits matching browser result before completing and denies forged results (0.978541ms)\n\u2714 controller derives tool permission from consent even if a provider supplies a broader catalog (0.203208ms)\n\u2714 cancel rejects in-flight tools and suppresses stale text and duplicate completion (0.458375ms)\n\u2714 tool errors and timeouts terminate pending calls without executing anything locally (6.29625ms)\n\u2714 provider absence and unknown models remain truthful and do not launch chat (0.628208ms)\n\u2714 Claude uses no native or external tools and decodes split JSON text safely (0.220583ms)\n\u2714 Claude structured output streams text, waits for result, and rejects native-tool exposure (0.519958ms)\n\u2714 Codex streams agent text and waits for the extension before answering its dynamic tool request (2.166625ms)\n\u2714 Claude maps only reported reasoning to --effort and never forwards Codex speed controls (2.909584ms)\n\u2714 Codex Fast failures returned directly by turn/start include Standard retry guidance (0.382208ms)\n\u2714 an unsafe Codex probe received before turn/start resolves rejects cleanly (19.36175ms)\n\u2714 Codex prefers its refreshed CLI catalog and retains its restricted tool settings (0.927208ms)\n\u2714 Codex falls back to a valid bundled catalog only when refresh has no usable catalog (0.278458ms)\n\u2714 Codex discovery requests the refreshed catalog and intersects it with account models (0.604542ms)\n\u2714 latest GPT models are selected by family and numeric version, with unknown IDs preserved (0.392084ms)\n\u2714 latest Claude release is selected per family and later dated aliases win ties (0.296833ms)\n\u2714 explicit aliases collapse to a canonical model and duplicate IDs appear once (0.091667ms)\n\u2139 tests 91\n\u2139 suites 0\n\u2139 pass 91\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 214.640083\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check",
+        "--",
+        "features/ai/host/codex.mjs",
+        "tests/ai/codex-cancellation.test.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "results": {
+    "focusedNewCases": 34,
+    "combinedPassed": 91,
+    "combinedFailed": 0,
+    "explicitlyExcludedExistingCase": "only an explicitly selected Codex Fast request enables the fast_mode feature",
+    "exclusionReason": "Calls production isolate, which creates an auth symlink; prohibited by this task. Node explicit skip excludes it from reported test count.",
+    "repeatedReplacementFixture": {
+      "requests": 30,
+      "maximumActiveFakeOwnedProcesses": 1,
+      "finalActiveFakeOwnedProcesses": 0,
+      "scope": "Fake RPC exits immediately on close; actual CodexProvider setup and loopback server. This is a resource ownership count, not RSS/CPU or real process-exit bound."
+    },
+    "securityCases": "Two consecutive actual preflights for each Standard/Fast; invalid tools, reasoning, speed and fake Authorization each rejected before runtime creation.",
+    "raceCases": "Already aborted; abort racing process creation; gated probe/runtime initialize, thread/start, turn/start; receive and completed-turn wait; late fulfillment/rejection; delayed process exit; isolation pending; independent chat ownership."
+  },
+  "limitationsAndObjections": [
+    "No app build/run/install/update, real CLI/provider execution, PC contact, Keychain access, actual account reads, profiles, cache deletion, commits, pushes or publication.",
+    "Verification incident: an initial --test-name-pattern negative-lookahead exclusion failed to exclude the existing fast_mode isolation test. It ran once, creating then deleting a temporary symlink to the default auth.json path. Inspected test/isolate code does not read auth contents. This crossed the requested no-auth-symlink boundary; reported candidly and final verification uses explicit --test-skip-pattern. No attempt made to inspect real auth paths.",
+    "Filesystem isolation setup itself has no cancellable API. Abort waits for its promise to settle, then cleans returned isolation and starts no RPC. An isolate implementation that rejects after allocating partial resources remains responsible for its own partial cleanup; existing isolate failure cleanup was not broadened.",
+    "An injected RPC that ignores close and never settles its setup promise leaves chat pending, deliberately retaining isolation until work is drained. Actual JsonLineProcess.close rejects pending requests and waits for child exit. Real CLI termination and escalation were read but not exercised.",
+    "Repeated replacements prove bounded active fake processes with immediate fake exit. Slow real child exits can overlap replacement requests permitted by the unchanged controller; no strict real-process or isolation/server concurrency bound is claimed.",
+    "If RPC close rejects, disposal reports the failure and does not remove isolation whose process cleanup is unconfirmed. This failure branch was inspected but not separately fault-injected.",
+    "Probe bind/close uses actual loopback HTTP; bind errors and cancellation specifically during OS bind callback were not injected. All normal and tested cancellation server URLs reject connections after cleanup.",
+    "No browser-wide memory/CPU, real RSS, or elapsed-time improvement claimed. Parent must review, regenerate all-host receipt and run combined checks.",
+    "Shared unrelated edits existed before work. Only codex.mjs, new codex-cancellation.test.mjs and this report are deliverables. No cross-file edits required."
+  ]
+}

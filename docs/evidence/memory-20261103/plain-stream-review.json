@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "role": "independent offline review of frozen prototype",
+  "introducedFindings": [],
+  "verdict": {
+    "decision": "No introduced correctness or security defect found within the append-only string contract. Retain as an offline prototype pending separate browser acceptance; this is not production adoption approval.",
+    "confidence": "Source proof plus exhaustive single-unit and adversarial finite model coverage. Not a proof for all possible streams or browser behavior."
+  },
+  "scope": {
+    "writes": "Only plain-stream-review.json and files under plain-stream-review/. No source, candidate, tests, scripts or docs edited.",
+    "prohibitedActionsPerformed": false,
+    "subagents": false,
+    "python": false,
+    "network": false,
+    "browserAppBuildRunInstall": false,
+    "providersAccountsAuthKeychainProfiles": false,
+    "gitMutationPublication": false,
+    "node": "v24.22.1",
+    "nodeBinary": "build/efficiency-20261103/organato-review-node24",
+    "nodeBinarySha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "sourceVerification": {
+    "inputs": {
+      "features/ai/extension/render-message.js": {
+        "sha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "bytes": 4264
+      },
+      "build/efficiency-20261103/plain-stream-experiment/render-message.candidate.js": {
+        "sha256": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+        "bytes": 4986
+      },
+      "tests/ai/fixtures/render-message-before.js": {
+        "sha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "bytes": 2843
+      },
+      "build/efficiency-20261103/plain-stream-experiment/candidate.diff": {
+        "sha256": "21393362fea546ad1c437cae43b4e8c335fa4688057d268d277a1d718e1dd77d",
+        "bytes": 1313
+      },
+      "features/ai/extension/panel.js": {
+        "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "bytes": 30072
+      },
+      "build/efficiency-20261103/plain-stream-experiment/frozen/panel.js": {
+        "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "bytes": 30072
+      },
+      "build/efficiency-20261103/plain-stream-experiment/fixture.mjs": {
+        "sha256": "61a18a3ee6c6221ce18df1a2a964af08ed482795c2363e8a92ff750edeba1f8a",
+        "bytes": 5152
+      },
+      "build/efficiency-20261103/plain-stream-experiment/fixture-uncounted.mjs": {
+        "sha256": "a700a38f8f1564c515dee2fd8ee9d7e4805027b70cdfb1a3d73e3734cc80b358",
+        "bytes": 4802
+      },
+      "build/efficiency-20261103/plain-stream-experiment/experiment.mjs": {
+        "sha256": "895b7058bbb8760ad57effbdd4572572147697107ed778b31432631461e87340",
+        "bytes": 6599
+      },
+      "build/efficiency-20261103/plain-stream-experiment/original-stream-render.test.mjs": {
+        "sha256": "5f883e2950dd597e0c7f175ef6502236c346bf26541dc9d67a5c638b3bf7a40b",
+        "bytes": 9849
+      },
+      "build/efficiency-20261103/plain-stream-experiment/plain-panel.test.mjs": {
+        "sha256": "b56f5304138cd8693bae85629da2ea69e89a3cf92ae126755de4b2f4cc8edd17",
+        "bytes": 9842
+      },
+      "build/efficiency-20261103/plain-stream-experiment.json": {
+        "sha256": "6552fc35898fa69b04a7fc3264c457c1d62f3edfca5d3510ac53a998ab041770",
+        "bytes": 37434
+      }
+    },
+    "fullRendererAndInlinePrefix": {
+      "pinnedSha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "method": "Buffer byte comparison of complete pinned original against both baseline and candidate prefixes; all bytes equal.",
+      "result": "pass"
+    },
+    "diff": {
+      "sha256": "21393362fea546ad1c437cae43b4e8c335fa4688057d268d277a1d718e1dd77d",
+      "result": "Regenerated from actual baseline/candidate with matching labels; cmp and independent Node equality both pass.",
+      "expectedDiffExit": 1
+    },
+    "panelFrozenEqualsSource": true,
+    "inputDriftAtEnd": false
+  },
+  "readRanges": {
+    "features/ai/extension/render-message.js": "1-134, whole file",
+    "build/efficiency-20261103/plain-stream-experiment/render-message.candidate.js": "1-157, whole file",
+    "build/efficiency-20261103/plain-stream-experiment/candidate.diff": "1-46, whole file",
+    "tests/ai/fixtures/render-message-before.js": "1-83, whole pinned original",
+    "features/ai/extension/panel.js": "Human inspection: 1-55, 270-455, 470-515, 525-570, 625-662; whole file also loaded, hashed and compared to frozen panel. Only source-derived receive/renderDelta/finish/stop/fail/New Chat paths executed in isolated test VM. No initialize/provider/browser calls executed.",
+    "build/efficiency-20261103/plain-stream-experiment/fixture.mjs": "1-68, whole file",
+    "build/efficiency-20261103/plain-stream-experiment/fixture-uncounted.mjs": "1-68, whole file",
+    "build/efficiency-20261103/plain-stream-experiment/experiment.mjs": "1-86, whole file",
+    "build/efficiency-20261103/plain-stream-experiment/original-stream-render.test.mjs": "1-188, whole file",
+    "build/efficiency-20261103/plain-stream-experiment/plain-panel.test.mjs": "1-188, whole file",
+    "build/efficiency-20261103/plain-stream-experiment.json": "Whole JSON parsed and hashed; recommendation/objections extracted. Initial displayed cat output truncated. Performance claims treated as prior evidence, not independently reproduced timing."
+  },
+  "independentExecution": {
+    "script": "build/efficiency-20261103/plain-stream-review/review.mjs",
+    "cases": 156445,
+    "visiblePrefixComparisons": 1035147,
+    "result": "pass",
+    "oracle": "Actual pinned full renderMessage+inline source in common fixture; actual candidate and current baseline independently executed and compared against full render at every tested append, including empty deltas.",
+    "treeEquality": "Includes exact Text-node segmentation, element ordering, raw UTF-16 text and link href/target/rel; not just textContent or normalized HTML.",
+    "coverage": [
+      "Every one of 65,536 UTF-16 code units as first delta, then empty delta, punctuation/CR/U+2028/zero-width/NUL continuation, split whitespace blank boundary and fresh tail; every unit also tested inside an existing plain tail.",
+      "Exhaustive BMP ECMAScript whitespace enumeration and trim agreement, including LF, CR, NBSP, FEFF, U+2028/U+2029. All 25 whitespace units tested before incomplete prefixes. Zero-width/control characters outside that set tested separately.",
+      "All two-cut partitions including empty chunks of 30 incomplete block/inline prefixes with 10 completions; headings 1-6 hashes, digits and dot prefixes, bullets, quote, partial fences, partial bold/code/link.",
+      "1,600 independent deterministic token streams with both every UTF-16 prefix and uneven chunking. Seed 0x7b51e014. Includes Unicode, split surrogate halves, blank boundaries, fences, controls and markup.",
+      "Plain-to-markup, malicious HTML-looking literal text, javascript link-looking text, safe links with quotes, multiple blank commits in one delta, boundary exactly at end, CR/LF and fence markers split across deltas.",
+      "Explicit same-Text identity and one-Text segmentation on eligible appends, permanent fallback until boundary, committed-node identity, retired detached Text never mutated, no duplication/reset loss, repeated disposal and late append.",
+      "12 transition sequences also execute candidate with the uncounted fixture that only strips export keywords, avoiding parser instrumentation.",
+      "Extra diagnostic source copy adds an inspect method in memory only. Confirms plainText=null on fallback, empty boundary and disposal; disposal clears container, mutableNodes and tail. Candidate file remains unchanged."
+    ],
+    "whitespaceCodePoints": [
+      "U+0009",
+      "U+000a",
+      "U+000b",
+      "U+000c",
+      "U+000d",
+      "U+0020",
+      "U+00a0",
+      "U+1680",
+      "U+2000",
+      "U+2001",
+      "U+2002",
+      "U+2003",
+      "U+2004",
+      "U+2005",
+      "U+2006",
+      "U+2007",
+      "U+2008",
+      "U+2009",
+      "U+200a",
+      "U+2028",
+      "U+2029",
+      "U+202f",
+      "U+205f",
+      "U+3000",
+      "U+feff"
+    ]
+  },
+  "existingTests": {
+    "command": "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/plain-stream-experiment/original-stream-render.test.mjs build/efficiency-20261103/plain-stream-experiment/plain-panel.test.mjs",
+    "result": "20 passed, 0 failed",
+    "log": "build/efficiency-20261103/plain-stream-review/panel-tests.tap",
+    "limits": "Tests stub chrome, layout metrics, RAF queue and research sources. Both use byte-identical frozen panel source. They establish model lifecycle behavior, not native event-loop, scrolling or accessibility acceptance."
+  },
+  "reasoning": [
+    {
+      "location": "candidate:130-140",
+      "conclusion": "Eligible initial tail produces exactly one p containing exactly one Text node.",
+      "basis": "First unit excludes every possible block starter and every ECMAScript whitespace unit. No LF means no later block line; no backtick, star or opening square bracket means no inline token. Leading zero-width/control/non-ASCII digits/lone surrogates are ordinary literal text in this exact renderer. Later punctuation/whitespace cannot change the fixed first unit."
+    },
+    {
+      "location": "candidate:131-135",
+      "conclusion": "Checking only new string delta for LF/backtick/star/opening square bracket preserves eligibility.",
+      "basis": "Existing eligible tail already lacks them. Every supported inline token requires one of these openers. CR/U+2028/U+2029 do not split lines in this renderer. UTF-16 append preserves split surrogate units, combining marks and ZWJ verbatim. Empty delta is harmless."
+    },
+    {
+      "location": "candidate:95-99,121-145,147-154",
+      "conclusion": "Reference reset and permanent fallback behavior are correct in the reviewed paths.",
+      "basis": "Target replacement clears reference before node removal. Fallback clears it and disables retry. Stable boundary parses complete prefix, retains committed nodes and resets eligibility before parsing only residual tail. Disposing nulls container/reference and prevents any later write. No boundary can create an eligible text tail while still inside a fence because the fence opener previously disabled eligibility."
+    },
+    {
+      "location": "panel:328-344,376-409,489-506,553-566",
+      "conclusion": "The reachable candidate contract is append-only primitive strings; final full renderer remains authoritative.",
+      "basis": "receive appends to assistant text; renderDelta passes message.text.slice(renderedLength) and updates length. Finish disposes/nulls the stream then renders the whole current message, including a delta queued before RAF. Stop/error/New Chat use finish; stale ids ignored. New Chat clears message nodes after stop. Existing history/storage slice(-30/-60) limits are unchanged; candidate neither truncates transcript text nor removes committed output."
+    },
+    {
+      "location": "candidate:1-83; exact diff",
+      "conclusion": "No introduced escaping, link permission or hidden-output change.",
+      "basis": "Full renderer+inline bytes identical. Safe URLs still require lowercase http(s) in existing regex, links retain _blank and noopener noreferrer. Plain path uses Text.appendData on a parser-created node. No HTML sink, CSS, hidden DOM, permissions or provider path changes."
+    }
+  ],
+  "complexity": {
+    "assessment": "Narrow additional state is understandable, but has reference lifetime and reset obligations. Successful appends scan only the delta for syntax; tail and panel message.text remain full strings. Long-lived plain Text storage may copy accumulated data on each append, so parser-input reductions do not prove linear total cost.",
+    "smallerSafeRule": {
+      "proposal": "For initial eligibility only, require /^[A-Za-z]/ and retain the existing no-LF/backtick/star/opening-square-bracket scan and later delta checks.",
+      "effect": "Strictly narrows eligibility to ASCII-letter starts and simplifies the negative block-prefix/whitespace classification. No broadening and no parser change. Costs coverage for non-Latin, accented, emoji and punctuation starts. Optional experiment, not a correctness fix or recommendation to adopt.",
+      "verification": "Source argument: ASCII letters cannot match any block opener or trim to empty in this exact renderer. No implementation change made."
+    },
+    "rejectedSimplification": "Removing plainAllowed seems logically possible because append-only ambiguity persists until a boundary, but would repeatedly scan a growing plain-start tail containing a later opener. Keep the latch to avoid adding quadratic eligibility rescans. Do not add prefix state machinery to widen coverage."
+  },
+  "modelCounts": {
+    "script": "build/efficiency-20261103/plain-stream-review/counts.mjs",
+    "result": "pass",
+    "plain": {
+      "current": {
+        "nodes": 400,
+        "parsedCharacters": 180900,
+        "renders": 200,
+        "scannedCharacters": 0,
+        "scannedLines": 0,
+        "appendCalls": 0,
+        "appendedCharacters": 0,
+        "priorTextAtAppend": 0
+      },
+      "candidate": {
+        "nodes": 2,
+        "parsedCharacters": 9,
+        "renders": 1,
+        "scannedCharacters": 0,
+        "scannedLines": 0,
+        "appendCalls": 199,
+        "appendedCharacters": 1791,
+        "priorTextAtAppend": 179100
+      }
+    },
+    "otherCases": "formatted, markup fallback and post-ambiguity tail have equal model parser input, renders and explicit node allocations versus current baseline.",
+    "scope": "Explicit model DOM allocations and UTF-16 parser input only; not bytes allocated, real GC, physical RAM, native CPU or UI speed."
+  },
+  "objectionsAndLimits": [
+    "No browser/native/UI acceptance here. Real CharacterData storage, copying, allocation, layout, paint, Find, accessibility announcements, selection/ranges, scroll anchoring and garbage collection remain unmeasured. A model Text append implemented with JS concatenation cannot resolve those questions.",
+    "The prototype timing report suggests possible small formatted-model overhead and much faster plain-model workloads. I did not independently reproduce or validate those timing distributions. Allocation/input checks pass; they do not dismiss fallback latency risk.",
+    "Full tail, panel transcript string, DOM text, initial full parse and final full parse all remain. Peak memory or physical RAM improvement cannot be inferred.",
+    "Reference clearing is verified by source and a diagnostic closure view, and retired node data is stable in the fixture. This is not a native detached-node heap-retention test.",
+    "Contrived non-string or side-effecting toString deltas are outside the reachable API contract: panel passes a primitive string slice. Candidate appendData and baseline tail concatenation may coerce such inputs differently; no introduced production finding assigned.",
+    "Model trees store href as raw properties and do not implement URL canonicalization. Byte-identical full renderer plus literal Text fast path supports no introduced link behavior change; actual browser properties remain separate acceptance work.",
+    "External mutation of the active message body during streaming is not modeled. The inspected panel owns that body until finish. This review does not promise repair of arbitrary external DOM edits."
+  ],
+  "missingRegressionTestsWorthKeeping": [
+    "Keep an explicit lifecycle test for the newly retained Text reference: eligible append, empty delta, opener fallback, further plain append stays fallback, boundary restores a fresh Text, disposal with late append. Check identities and retired node data, not only tree equality.",
+    "Keep a compact exhaustive BMP first-unit/whitespace fixture, or at least its generated whitespace set with controls/zero-width/split-surrogate cases, because a hand-maintained whitespace list can drift.",
+    "Keep a boundary-crossing case where one delta commits multiple blocks and begins the new eligible tail, plus one with split fence close and blank line. Check committed node identity and exact Text segmentation.",
+    "Separate browser reviewer should retain native selection/range, Find, accessibility, scrolling and detached-node acceptance checks and growing-Text append measurements before adoption."
+  ],
+  "commands": [
+    "Read-only inspection used cat, rg -n, sed -n, nl -ba, wc -l, ls, shasum -a 256 and cmp on the paths/ranges above. No git command or Python invocation.",
+    "mkdir -p build/efficiency-20261103/plain-stream-review",
+    "Scratch review.mjs, counts.mjs and finalize.mjs authored using quoted shell heredocs only in the owned directory; exact scripts hashed below.",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/plain-stream-review/review.mjs > build/efficiency-20261103/plain-stream-review/review.log 2>&1",
+    "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/plain-stream-experiment/original-stream-render.test.mjs build/efficiency-20261103/plain-stream-experiment/plain-panel.test.mjs > build/efficiency-20261103/plain-stream-review/panel-tests.tap 2>&1",
+    "diff -u --label frozen/render-message.js --label render-message.candidate.js features/ai/extension/render-message.js build/efficiency-20261103/plain-stream-experiment/render-message.candidate.js > build/efficiency-20261103/plain-stream-review/recomputed.diff",
+    "cmp build/efficiency-20261103/plain-stream-review/recomputed.diff build/efficiency-20261103/plain-stream-experiment/candidate.diff",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/plain-stream-review/counts.mjs > build/efficiency-20261103/plain-stream-review/counts.log 2>&1",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/plain-stream-review/finalize.mjs"
+  ],
+  "commandResults": {
+    "review": 0,
+    "panelTests": 0,
+    "counts": 0,
+    "diff": 1,
+    "cmp": 0,
+    "finalize": "assertions passed before report write"
+  },
+  "scratchHashes": {
+    "build/efficiency-20261103/plain-stream-review/counts.json": "206dfccc7453c7d54605a142dffc639cf77b2e70429e96cbcb025b1e1ecf98a2",
+    "build/efficiency-20261103/plain-stream-review/counts.log": "5d8c1feebc6a4fb7623755276a6edb1fbaf7a0b8e54a359a63d45554440604b0",
+    "build/efficiency-20261103/plain-stream-review/counts.mjs": "02e87dc4053c2ed8aadbb228385828a56c86410ca23e35c315b79010a2f9b9f1",
+    "build/efficiency-20261103/plain-stream-review/finalize.mjs": "cb730cc1654108131244d16c10e0c8288595f4c5f7110155a4ad6aa3477f0bec",
+    "build/efficiency-20261103/plain-stream-review/panel-tests.tap": "e409ea9e8f1edfb1d9521089f0c7ddea9cc8a53d289f0a24211f31b0d1d9d34f",
+    "build/efficiency-20261103/plain-stream-review/recomputed.diff": "21393362fea546ad1c437cae43b4e8c335fa4688057d268d277a1d718e1dd77d",
+    "build/efficiency-20261103/plain-stream-review/results.json": "6ed4393afa07339260cc11bcad64d90ed787e8f3d35c0402ede3e45847b71020",
+    "build/efficiency-20261103/plain-stream-review/review.log": "3485e61033058117a46415a2486528d4c9ca440b3d79d4a9eafa8544a33be99d",
+    "build/efficiency-20261103/plain-stream-review/review.mjs": "231330650f67048716bd4c65a9e87a3bea8749eda793473eb0365b81f6bff439"
+  },
+  "scratchHashScope": "All owned scratch regular files existing at report creation, including this exact finalizer. Report excludes its own hash to avoid self-reference."
+}

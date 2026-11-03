@@ -1,0 +1,676 @@
+{
+  "status": "passed",
+  "runtime": {
+    "path": "/Users/likht.ethan/.t3/projects/breezer/build/performance-20261029/native-blocker-candidate-r5/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Versions/156.0.8078.47/Resources/breezer_ai/runtime/node",
+    "sha256": "cd9da8ecb0ccf4b18048b6d0ce00dc0aa9fb24ab3e54dd10aeff74c255c6f5f5",
+    "version": "v24.22.1"
+  },
+  "otherHostSources": {
+    "claude.mjs": "ed5c48e871aa968cec7041c8fa70fdfec4a655a78144ae9e6481905c591d8733",
+    "cli.mjs": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+    "codex.mjs": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+    "context-controller.mjs": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+    "context-summary.mjs": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+    "controller.mjs": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+    "main.mjs": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+    "organato.mjs": "5805280cdd6a12df299f0a51d9a54d77df358d71eda93fe1642f7fb170c9712c",
+    "update-worker.mjs": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+    "updater.mjs": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+  },
+  "payloadBytes": 4194304,
+  "chunkBytes": 32768,
+  "pairedRounds": 6,
+  "baselineProtocolSha256": "26cf7b4bdd775003e1c303f9d31f3b02a052d382ef797c671c29a00a6351168d",
+  "candidateProtocolSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+  "results": [
+    {
+      "name": "baseline",
+      "round": 0,
+      "replyMs": 20.056041000000008,
+      "before": {
+        "memory": {
+          "rss": 56688640,
+          "heapTotal": 10321920,
+          "heapUsed": 5181944,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 52437,
+          "system": 5322
+        },
+        "pid": 3211,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 206340096,
+          "heapTotal": 14516224,
+          "heapUsed": 5284824,
+          "external": 6767240,
+          "arrayBuffers": 4403615
+        },
+        "cpu": {
+          "user": 80700,
+          "system": 16636
+        },
+        "pid": 3211,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105254279000",
+        "processes": [
+          {
+            "pid": 3211,
+            "status": "ok",
+            "startAbstime": "31505103539267",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 168272832,
+            "residentBytes": 206340096,
+            "lifetimeMaxPhysicalFootprintBytes": 172516416
+          }
+        ],
+        "captureEndedNs": "1383105254291000"
+      },
+      "retainedArrayBufferBytes": 4194421,
+      "cpuUserMicros": 28263,
+      "cpuSystemMicros": 11314
+    },
+    {
+      "name": "candidate",
+      "round": 0,
+      "replyMs": 4.728207999999995,
+      "before": {
+        "memory": {
+          "rss": 56410112,
+          "heapTotal": 10321920,
+          "heapUsed": 5179968,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 51189,
+          "system": 5934
+        },
+        "pid": 3213,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 69025792,
+          "heapTotal": 10321920,
+          "heapUsed": 5277360,
+          "external": 2572835,
+          "arrayBuffers": 209210
+        },
+        "cpu": {
+          "user": 62734,
+          "system": 7572
+        },
+        "pid": 3213,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105329085000",
+        "processes": [
+          {
+            "pid": 3213,
+            "status": "ok",
+            "startAbstime": "31505105771320",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 30366208,
+            "residentBytes": 69042176,
+            "lifetimeMaxPhysicalFootprintBytes": 34576960
+          }
+        ],
+        "captureEndedNs": "1383105329097000"
+      },
+      "retainedArrayBufferBytes": 16,
+      "cpuUserMicros": 11545,
+      "cpuSystemMicros": 1638
+    },
+    {
+      "name": "candidate",
+      "round": 1,
+      "replyMs": 4.489583000000039,
+      "before": {
+        "memory": {
+          "rss": 56803328,
+          "heapTotal": 10321920,
+          "heapUsed": 5179896,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 54521,
+          "system": 5792
+        },
+        "pid": 3215,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 69304320,
+          "heapTotal": 10321920,
+          "heapUsed": 5277288,
+          "external": 2572835,
+          "arrayBuffers": 209210
+        },
+        "cpu": {
+          "user": 66197,
+          "system": 7289
+        },
+        "pid": 3215,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105404956000",
+        "processes": [
+          {
+            "pid": 3215,
+            "status": "ok",
+            "startAbstime": "31505107530202",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 30677696,
+            "residentBytes": 69304320,
+            "lifetimeMaxPhysicalFootprintBytes": 34888448
+          }
+        ],
+        "captureEndedNs": "1383105404967000"
+      },
+      "retainedArrayBufferBytes": 16,
+      "cpuUserMicros": 11676,
+      "cpuSystemMicros": 1497
+    },
+    {
+      "name": "baseline",
+      "round": 1,
+      "replyMs": 18.053832999999997,
+      "before": {
+        "memory": {
+          "rss": 56819712,
+          "heapTotal": 10321920,
+          "heapUsed": 5181944,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 51730,
+          "system": 5757
+        },
+        "pid": 3217,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 206340096,
+          "heapTotal": 14778368,
+          "heapUsed": 5284824,
+          "external": 6767240,
+          "arrayBuffers": 4403615
+        },
+        "cpu": {
+          "user": 77094,
+          "system": 16281
+        },
+        "pid": 3217,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105489886000",
+        "processes": [
+          {
+            "pid": 3217,
+            "status": "ok",
+            "startAbstime": "31505109344030",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 168256384,
+            "residentBytes": 206340096,
+            "lifetimeMaxPhysicalFootprintBytes": 172483520
+          }
+        ],
+        "captureEndedNs": "1383105489897000"
+      },
+      "retainedArrayBufferBytes": 4194421,
+      "cpuUserMicros": 25364,
+      "cpuSystemMicros": 10524
+    },
+    {
+      "name": "baseline",
+      "round": 2,
+      "replyMs": 17.987707999999998,
+      "before": {
+        "memory": {
+          "rss": 56705024,
+          "heapTotal": 10059776,
+          "heapUsed": 5181944,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 52907,
+          "system": 5917
+        },
+        "pid": 3219,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 206241792,
+          "heapTotal": 14516224,
+          "heapUsed": 5284824,
+          "external": 6767240,
+          "arrayBuffers": 4403615
+        },
+        "cpu": {
+          "user": 78658,
+          "system": 15964
+        },
+        "pid": 3219,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105577671000",
+        "processes": [
+          {
+            "pid": 3219,
+            "status": "ok",
+            "startAbstime": "31505111413273",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 168158080,
+            "residentBytes": 206241792,
+            "lifetimeMaxPhysicalFootprintBytes": 172385216
+          }
+        ],
+        "captureEndedNs": "1383105577682000"
+      },
+      "retainedArrayBufferBytes": 4194421,
+      "cpuUserMicros": 25751,
+      "cpuSystemMicros": 10047
+    },
+    {
+      "name": "candidate",
+      "round": 2,
+      "replyMs": 4.711792000000003,
+      "before": {
+        "memory": {
+          "rss": 56508416,
+          "heapTotal": 10321920,
+          "heapUsed": 5179896,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 49147,
+          "system": 5692
+        },
+        "pid": 3221,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 69058560,
+          "heapTotal": 10584064,
+          "heapUsed": 5277288,
+          "external": 2572835,
+          "arrayBuffers": 209210
+        },
+        "cpu": {
+          "user": 61387,
+          "system": 7325
+        },
+        "pid": 3221,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105649026000",
+        "processes": [
+          {
+            "pid": 3221,
+            "status": "ok",
+            "startAbstime": "31505113529837",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 30481280,
+            "residentBytes": 69058560,
+            "lifetimeMaxPhysicalFootprintBytes": 34708416
+          }
+        ],
+        "captureEndedNs": "1383105649038000"
+      },
+      "retainedArrayBufferBytes": 16,
+      "cpuUserMicros": 12240,
+      "cpuSystemMicros": 1633
+    },
+    {
+      "name": "candidate",
+      "round": 3,
+      "replyMs": 4.794959000000063,
+      "before": {
+        "memory": {
+          "rss": 56442880,
+          "heapTotal": 10321920,
+          "heapUsed": 5179896,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 51205,
+          "system": 5618
+        },
+        "pid": 3223,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 69107712,
+          "heapTotal": 10321920,
+          "heapUsed": 5277288,
+          "external": 2572835,
+          "arrayBuffers": 209210
+        },
+        "cpu": {
+          "user": 62928,
+          "system": 7209
+        },
+        "pid": 3223,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105721973000",
+        "processes": [
+          {
+            "pid": 3223,
+            "status": "ok",
+            "startAbstime": "31505115215066",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 30415296,
+            "residentBytes": 69107712,
+            "lifetimeMaxPhysicalFootprintBytes": 34626048
+          }
+        ],
+        "captureEndedNs": "1383105721985000"
+      },
+      "retainedArrayBufferBytes": 16,
+      "cpuUserMicros": 11723,
+      "cpuSystemMicros": 1591
+    },
+    {
+      "name": "baseline",
+      "round": 3,
+      "replyMs": 17.74924999999996,
+      "before": {
+        "memory": {
+          "rss": 56541184,
+          "heapTotal": 10321920,
+          "heapUsed": 5181944,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 50074,
+          "system": 5568
+        },
+        "pid": 3225,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 206077952,
+          "heapTotal": 14516224,
+          "heapUsed": 5284824,
+          "external": 6767240,
+          "arrayBuffers": 4403615
+        },
+        "cpu": {
+          "user": 76255,
+          "system": 15820
+        },
+        "pid": 3225,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105806320000",
+        "processes": [
+          {
+            "pid": 3225,
+            "status": "ok",
+            "startAbstime": "31505116956074",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 167994240,
+            "residentBytes": 206077952,
+            "lifetimeMaxPhysicalFootprintBytes": 172221376
+          }
+        ],
+        "captureEndedNs": "1383105806332000"
+      },
+      "retainedArrayBufferBytes": 4194421,
+      "cpuUserMicros": 26181,
+      "cpuSystemMicros": 10252
+    },
+    {
+      "name": "baseline",
+      "round": 4,
+      "replyMs": 18.962541999999985,
+      "before": {
+        "memory": {
+          "rss": 56492032,
+          "heapTotal": 10321920,
+          "heapUsed": 5181944,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 50744,
+          "system": 5427
+        },
+        "pid": 3227,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 203751424,
+          "heapTotal": 14516224,
+          "heapUsed": 5284888,
+          "external": 6767240,
+          "arrayBuffers": 4403615
+        },
+        "cpu": {
+          "user": 76497,
+          "system": 16058
+        },
+        "pid": 3227,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105893752000",
+        "processes": [
+          {
+            "pid": 3227,
+            "status": "ok",
+            "startAbstime": "31505119020824",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 165667648,
+            "residentBytes": 203767808,
+            "lifetimeMaxPhysicalFootprintBytes": 169878400
+          }
+        ],
+        "captureEndedNs": "1383105893763000"
+      },
+      "retainedArrayBufferBytes": 4194421,
+      "cpuUserMicros": 25753,
+      "cpuSystemMicros": 10631
+    },
+    {
+      "name": "candidate",
+      "round": 4,
+      "replyMs": 4.680082999999968,
+      "before": {
+        "memory": {
+          "rss": 56492032,
+          "heapTotal": 10059776,
+          "heapUsed": 5179968,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 48911,
+          "system": 5308
+        },
+        "pid": 3229,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 69189632,
+          "heapTotal": 10321920,
+          "heapUsed": 5277360,
+          "external": 2572835,
+          "arrayBuffers": 209210
+        },
+        "cpu": {
+          "user": 61484,
+          "system": 6933
+        },
+        "pid": 3229,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383105964991000",
+        "processes": [
+          {
+            "pid": 3229,
+            "status": "ok",
+            "startAbstime": "31505121114025",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 30563008,
+            "residentBytes": 69189632,
+            "lifetimeMaxPhysicalFootprintBytes": 34773760
+          }
+        ],
+        "captureEndedNs": "1383105965003000"
+      },
+      "retainedArrayBufferBytes": 16,
+      "cpuUserMicros": 12573,
+      "cpuSystemMicros": 1625
+    },
+    {
+      "name": "candidate",
+      "round": 5,
+      "replyMs": 4.83558400000004,
+      "before": {
+        "memory": {
+          "rss": 56492032,
+          "heapTotal": 10321920,
+          "heapUsed": 5179896,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 52732,
+          "system": 5504
+        },
+        "pid": 3231,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 68976640,
+          "heapTotal": 10321920,
+          "heapUsed": 5277288,
+          "external": 2572835,
+          "arrayBuffers": 209210
+        },
+        "cpu": {
+          "user": 64810,
+          "system": 7099
+        },
+        "pid": 3231,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383106036396000",
+        "processes": [
+          {
+            "pid": 3231,
+            "status": "ok",
+            "startAbstime": "31505122790928",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 30333568,
+            "residentBytes": 68976640,
+            "lifetimeMaxPhysicalFootprintBytes": 34560704
+          }
+        ],
+        "captureEndedNs": "1383106036408000"
+      },
+      "retainedArrayBufferBytes": 16,
+      "cpuUserMicros": 12078,
+      "cpuSystemMicros": 1595
+    },
+    {
+      "name": "baseline",
+      "round": 5,
+      "replyMs": 19.0011659999999,
+      "before": {
+        "memory": {
+          "rss": 56557568,
+          "heapTotal": 10321920,
+          "heapUsed": 5181944,
+          "external": 2572779,
+          "arrayBuffers": 209194
+        },
+        "cpu": {
+          "user": 50448,
+          "system": 5218
+        },
+        "pid": 3233,
+        "node": "v24.22.1"
+      },
+      "after": {
+        "memory": {
+          "rss": 206077952,
+          "heapTotal": 14516224,
+          "heapUsed": 5284824,
+          "external": 6767240,
+          "arrayBuffers": 4403615
+        },
+        "cpu": {
+          "user": 78101,
+          "system": 15969
+        },
+        "pid": 3233,
+        "node": "v24.22.1"
+      },
+      "usage": {
+        "schema": 1,
+        "captureStartedNs": "1383106120219000",
+        "processes": [
+          {
+            "pid": 3233,
+            "status": "ok",
+            "startAbstime": "31505124497382",
+            "executableUuid": "6caf9c5b1e60382db33c06521a6aeb0f",
+            "physicalFootprintBytes": 167961344,
+            "residentBytes": 206077952,
+            "lifetimeMaxPhysicalFootprintBytes": 172188480
+          }
+        ],
+        "captureEndedNs": "1383106120232000"
+      },
+      "retainedArrayBufferBytes": 4194421,
+      "cpuUserMicros": 27653,
+      "cpuSystemMicros": 10751
+    }
+  ],
+  "limits": "Actual production native host entry over stdin/stdout, synthetic invalid settings only. Diagnostic IPC samples force GC; no credentials, config writes, provider discovery, network requests or browser launch. Not whole-browser RAM or AI latency."
+}

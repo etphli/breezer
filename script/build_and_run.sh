@@ -225,7 +225,11 @@ test -x "$BREEZER_APP/Contents/MacOS/Breezer"
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$BREEZER_APP/Contents/Info.plist")" = io.github.etphli.breezer
 BREEZER_NODE_ARCH=arm64
 if [[ "$_arch" == x86_64 ]]; then BREEZER_NODE_ARCH=x64; fi
-"$BREEZER_PYTHON" "$BREEZER_ROOT/script/package_breezer_ai.py" "$BREEZER_APP" --arch "$BREEZER_NODE_ARCH"
+BREEZER_PACKAGE_ARGS=("$BREEZER_APP" --arch "$BREEZER_NODE_ARCH")
+if [[ -n "${BREEZER_MEMORY_PACKET:-}" ]]; then
+  BREEZER_PACKAGE_ARGS+=(--memory-packet "$BREEZER_MEMORY_PACKET")
+fi
+"$BREEZER_PYTHON" "$BREEZER_ROOT/script/package_breezer_ai.py" "${BREEZER_PACKAGE_ARGS[@]}"
 while IFS= read -r -d '' BREEZER_NODE; do
   codesign --force --sign - "$BREEZER_NODE"
   codesign --verify --strict "$BREEZER_NODE"

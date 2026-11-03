@@ -1,0 +1,40 @@
+{
+  "runtime": "v22.14.0",
+  "scope": "Actual round, fake RPC; deterministic code-unit counts only. No provider or timing measurements.",
+  "differential": {
+    "actualOldAndNewRounds": 800,
+    "structuredBlocks": 1200,
+    "perDeltaComparisons": 22407,
+    "result": "identical events and results"
+  },
+  "measurement": {
+    "path": "features/ai/host/claude.mjs",
+    "sha256": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a",
+    "cases": [
+      {
+        "chunks": 128,
+        "arrivedCodeUnits": 16393,
+        "emittedCodeUnits": 16384,
+        "scanned": 16393,
+        "parsed": 0,
+        "parses": 0
+      },
+      {
+        "chunks": 256,
+        "arrivedCodeUnits": 32777,
+        "emittedCodeUnits": 32768,
+        "scanned": 32777,
+        "parsed": 0,
+        "parses": 0
+      },
+      {
+        "chunks": 512,
+        "arrivedCodeUnits": 65545,
+        "emittedCodeUnits": 65536,
+        "scanned": 65545,
+        "parsed": 0,
+        "parses": 0
+      }
+    ]
+  }
+}

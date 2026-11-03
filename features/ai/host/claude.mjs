@@ -31,6 +31,69 @@ export function partialText(json) {
   try { return JSON.parse(`"${content}"`); } catch { return ''; }
 }
 
+// Match the same first text-field prefix as partialText, then decode only new input.
+class PartialTextStream {
+  key = 0;
+  keyOverlap = false;
+  state = 'key';
+  text = '';
+  unicode = '';
+  trailingBackslashPair = false;
+  suffixUnicodeDigits = -1;
+  push(chunk) {
+    for (const character of chunk) {
+      if (this.state === 'done' || this.state === 'invalid') break;
+      if (this.state === 'key') {
+        if (this.key < 6) {
+          this.key = character === '"text"'[this.key] ? this.key + 1 : character === '"' ? 1 : 0;
+          this.keyOverlap = this.key === 6;
+        } else if (/\s/.test(character)) {
+          this.keyOverlap = false;
+          continue;
+        } else if (this.key === 6 && character === ':') {
+          this.key = 7;
+        } else if (this.key === 7 && character === '"') {
+          this.state = 'text';
+        } else {
+          this.key = this.key === 6 && this.keyOverlap && character === 't' ? 2 : character === '"' ? 1 : 0;
+          this.keyOverlap = false;
+        }
+      } else if (this.state === 'unicode') {
+        if (!/[0-9a-fA-F]/.test(character)) { this.state = 'invalid'; continue; }
+        this.unicode += character;
+        if (this.unicode.length === 4) {
+          this.text += String.fromCharCode(parseInt(this.unicode, 16));
+          this.state = 'text';
+        }
+      } else if (this.state === 'escape') {
+        if (character === 'u') { this.unicode = ''; this.state = 'unicode'; continue; }
+        const escapes = { '"': '"', '\\': '\\', '/': '/', b: '\b', f: '\f', n: '\n', r: '\r', t: '\t' };
+        if (!Object.hasOwn(escapes, character)) { this.state = 'invalid'; continue; }
+        this.text += escapes[character];
+        this.trailingBackslashPair = character === '\\';
+        this.suffixUnicodeDigits = -1;
+        this.state = 'text';
+      } else if (character === '"') {
+        this.state = 'done';
+      } else {
+        if (this.trailingBackslashPair && this.suffixUnicodeDigits === -1 && character === 'u') this.suffixUnicodeDigits = 0;
+        else if (this.trailingBackslashPair && this.suffixUnicodeDigits >= 0 && this.suffixUnicodeDigits < 3 && /[0-9a-fA-F]/.test(character)) this.suffixUnicodeDigits++;
+        else this.trailingBackslashPair = false;
+        if (character === '\\') this.state = 'escape';
+        else if (character < ' ') this.state = 'invalid';
+        else this.text += character;
+      }
+    }
+    // partialText strips a trailing raw backslash even when it belongs to a pair.
+    // Such prefixes fail JSON.parse until more string content arrives.
+    if (this.state === 'invalid') { this.text = ''; return null; }
+    if (this.trailingBackslashPair) return null;
+    const text = this.text;
+    this.text = '';
+    return text;
+  }
+}
+
 function imageContent(context) {
   return contextParts(context).map((part) => {
     if (part.type === 'text') return { type: 'text', text: part.text };
@@ -103,7 +166,7 @@ export class ClaudeProvider {
   }
   round(rpc, content, emit) {
     return new Promise((resolve, reject) => {
-      let json = '', streamed = '', structuredIndex = -1;
+      let decoder = new PartialTextStream(), streamed = '', structuredIndex = -1, matched = 0, mismatched = false;
       const cleanup = () => { clearTimeout(timer); rpc.off('message', onMessage); rpc.off('closed', onClose); };
       const onClose = (error) => { cleanup(); reject(error); };
       const onMessage = (message) => {
@@ -115,11 +178,18 @@ export class ClaudeProvider {
         }
         if (message.type === 'stream_event') {
           const event = message.event;
-          if (event?.type === 'content_block_start' && event.content_block?.type === 'tool_use' && event.content_block.name === 'StructuredOutput') { structuredIndex = event.index; json = ''; }
+          if (event?.type === 'content_block_start' && event.content_block?.type === 'tool_use' && event.content_block.name === 'StructuredOutput') { structuredIndex = event.index; decoder = new PartialTextStream(); matched = 0; mismatched = false; }
           if (event?.type === 'content_block_delta' && event.index === structuredIndex && event.delta?.type === 'input_json_delta') {
-            json += event.delta.partial_json;
-            const text = partialText(json);
-            if (text.startsWith(streamed)) { const delta = text.slice(streamed.length); if (delta) emit({ type: 'delta', text: delta }); streamed = text; }
+            const text = decoder.push(event.delta.partial_json);
+            if (text !== null && !mismatched) {
+              const overlap = Math.min(text.length, Math.max(0, streamed.length - matched));
+              mismatched = overlap > 0 && text.slice(0, overlap) !== streamed.slice(matched, matched + overlap);
+              if (!mismatched) {
+                matched += text.length;
+                const delta = text.slice(overlap);
+                if (delta) { emit({ type: 'delta', text: delta }); streamed += delta; }
+              }
+            }
           }
         }
         if (message.type === 'result') {

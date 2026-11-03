@@ -1,0 +1,20 @@
+{
+  "cases": 12,
+  "nonemptySuccesses": 4,
+  "baseline": {
+    "allocations": 9,
+    "allocatedBytes": 3146665,
+    "dataTransfers": 0
+  },
+  "current": {
+    "allocations": 9,
+    "allocatedBytes": 3146665,
+    "dataTransfers": 0
+  },
+  "valuesAndRejectionsPreserved": true,
+  "sourceSha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+  "baselineSourceSha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+  "conversionBaselineSha256": "73740e4fb244726bd3c8031cfd28f1d28dae510c3509383cf2ab06a96aaf5a42",
+  "compiler": "/usr/bin/clang++",
+  "scope": "Actual conversion text compiled with a small API type model. Not a full generated-header/Chromium/native-provider build; allocation counts are fixture values, not physical RAM or steady-state browser savings."
+}

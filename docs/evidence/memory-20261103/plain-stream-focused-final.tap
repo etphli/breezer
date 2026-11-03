@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+ok 1 - every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+  ---
+  duration_ms: 31.354083
+  type: 'test'
+  ...
+# Subtest: deterministic malformed block combinations match at every chunk
+ok 2 - deterministic malformed block combinations match at every chunk
+  ---
+  duration_ms: 76.762083
+  type: 'test'
+  ...
+# Subtest: the long formatted response matches at each streaming chunk boundary
+ok 3 - the long formatted response matches at each streaming chunk boundary
+  ---
+  duration_ms: 406.100458
+  type: 'test'
+  ...
+# Subtest: committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+ok 4 - committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+  ---
+  duration_ms: 0.690708
+  type: 'test'
+  ...
+# Subtest: formatted work decreases and long single-block work remains explicitly unchanged
+ok 5 - formatted work decreases and long single-block work remains explicitly unchanged
+  ---
+  duration_ms: 192.776791
+  type: 'test'
+  ...
+# Subtest: panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+ok 6 - panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+  ---
+  duration_ms: 2.831541
+  type: 'test'
+  ...
+# Subtest: complete, stop, error and New Chat dispose streams and retain final full output
+ok 7 - complete, stop, error and New Chat dispose streams and retain final full output
+  ---
+  duration_ms: 3.190958
+  type: 'test'
+  ...
+# Subtest: the full renderer remains byte-for-byte the pinned baseline
+ok 8 - the full renderer remains byte-for-byte the pinned baseline
+  ---
+  duration_ms: 0.358042
+  type: 'test'
+  ...
+# Subtest: standalone probe rejects an altered baseline before reporting counts
+ok 9 - standalone probe rejects an altered baseline before reporting counts
+  ---
+  duration_ms: 0.974458
+  type: 'test'
+  ...
+# Subtest: empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+ok 10 - empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+  ---
+  duration_ms: 4.050292
+  type: 'test'
+  ...
+# Subtest: plain tail keeps its Text until fallback, resets after a boundary, and stops after disposal
+ok 11 - plain tail keeps its Text until fallback, resets after a boundary, and stops after disposal
+  ---
+  duration_ms: 0.713709
+  type: 'test'
+  ...
+# Subtest: generated whitespace, control and partial-opener prefixes preserve the full-render tree
+ok 12 - generated whitespace, control and partial-opener prefixes preserve the full-render tree
+  ---
+  duration_ms: 65.552625
+  type: 'test'
+  ...
+# Subtest: one delta can commit multiple blocks and seed a fresh tail without duplication
+ok 13 - one delta can commit multiple blocks and seed a fresh tail without duplication
+  ---
+  duration_ms: 0.789084
+  type: 'test'
+  ...
+# Subtest: plain streams avoid repeated parser/node work while ambiguous single blocks retain it
+ok 14 - plain streams avoid repeated parser/node work while ambiguous single blocks retain it
+  ---
+  duration_ms: 5.72475
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 883.425084

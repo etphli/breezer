@@ -1,0 +1,3256 @@
+{
+  "recommendation": "accept",
+  "scope": "Accept unchanged scratch candidate for coordinator adoption review. No production adoption or packaged acceptance performed.",
+  "productionAdoption": false,
+  "findings": [],
+  "reachableIntroducedRegressionsFound": false,
+  "source": {
+    "productionSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "originalSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "candidateSha256": "448ad4774dcc0983b8d17571fc11dbd62ea4d0f3c32ef714024096634d0dda2c",
+    "outsideNativeDecoderByteIdentical": true
+  },
+  "runtime": {
+    "path": "build/efficiency-20261103/organato-review-node24",
+    "version": "v24.22.1",
+    "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "reasoning": [
+    "Header bytes always copied. A complete header with no body leaves headerBytes=4; empty push does nothing and finish reports truncation. Next nonempty push reads the same header, including size=0 header-copy behavior. Zero and oversized lengths throw before the new branch.",
+    "Only complete unshared bodies use a local subarray, synchronously decoded by a new fatal UTF-8 TextDecoder and JSON.parse. Offset arithmetic advances once per accepted body; coalesced and partial following frames retain original behavior. Fragmented bodies and all real shared-backed input keep the original owned copy path.",
+    "On UTF-8 or JSON failure, the direct path copies the body before throwing the same error object. Follow-up empty input returns []; nonempty input decodes the full poisoned body again without consuming new input; finish always reports truncation. Input mutation after return cannot repair the poison.",
+    "Node stdin calls push synchronously with ordinary Buffer input; no await, reviver or user callback occurs between creating the body view and completing normal decode/parse. Caller mutation cannot interleave on an unshared ArrayBuffer. Shared inputs intentionally bypass the direct path.",
+    "BOM handling, scalar values, fatal UTF-8, exact constructor/name/message/code, negative zero, escaped lone surrogates, normal Uint8Array subclasses, cross-realm/shared/offset views, resizable backing, detached empty views and maximum lengths were checked without narrowing accepted real input types.",
+    "UTF-8/JSON internals may allocate independently. Logical counts show removed explicit allocations/copies for complete unshared successes only. GC weak references establish caller backing release, not whole-process physical memory savings."
+  ],
+  "independentChecks": {
+    "comparisons": 66437,
+    "groups": {
+      "all one-byte bodies": 256,
+      "all two-byte bodies": 65536,
+      "representations/splits/buffer": 119,
+      "representations/splits/uint8": 119,
+      "representations/splits/realm": 119,
+      "representations/splits/shared": 119,
+      "representations/splits/resizable": 119,
+      "finish and invalid calls mid-frame": 26,
+      "invalid length poison": 15,
+      "maximum lengths": 8,
+      "detached view acceptance": 1
+    },
+    "examples": [
+      {
+        "group": "all one-byte bodies",
+        "original": [
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Unexpected token '\u0000', \"\u0000\" is not valid JSON"
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          },
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Unexpected token '\u0000', \"\u0000\" is not valid JSON"
+            }
+          },
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Unexpected token '\u0000', \"\u0000\" is not valid JSON"
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "all two-byte bodies",
+        "original": [
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Unexpected token '\u0000', \"\u0000\u0000\" is not valid JSON"
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          },
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Unexpected token '\u0000', \"\u0000\u0000\" is not valid JSON"
+            }
+          },
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Unexpected token '\u0000', \"\u0000\u0000\" is not valid JSON"
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "representations/splits/buffer",
+        "original": [
+          {
+            "ok": [
+              1,
+              null,
+              false
+            ]
+          },
+          {},
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "ok": [
+              null
+            ]
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "representations/splits/uint8",
+        "original": [
+          {
+            "ok": [
+              1,
+              null,
+              false
+            ]
+          },
+          {},
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "ok": [
+              null
+            ]
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "representations/splits/realm",
+        "original": [
+          {
+            "ok": [
+              1,
+              null,
+              false
+            ]
+          },
+          {},
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "ok": [
+              null
+            ]
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "representations/splits/shared",
+        "original": [
+          {
+            "ok": [
+              1,
+              null,
+              false
+            ]
+          },
+          {},
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "ok": [
+              null
+            ]
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "representations/splits/resizable",
+        "original": [
+          {
+            "ok": [
+              1,
+              null,
+              false
+            ]
+          },
+          {},
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "ok": [
+              null
+            ]
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "finish and invalid calls mid-frame",
+        "original": [
+          {
+            "ok": []
+          },
+          {},
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "SyntaxError",
+              "name": "SyntaxError",
+              "message": "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+            }
+          }
+        ]
+      },
+      {
+        "group": "invalid length poison",
+        "original": [
+          {
+            "ok": []
+          },
+          {
+            "ok": []
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Invalid native message length."
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          },
+          {
+            "error": {
+              "class": "TypeError",
+              "name": "TypeError",
+              "message": "Native input must be a byte array."
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Invalid native message length."
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Invalid native message length."
+            }
+          },
+          {
+            "error": {
+              "class": "Error",
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      },
+      {
+        "group": "maximum lengths",
+        "original": [
+          {
+            "ok": []
+          },
+          {
+            "ok": [
+              16777213
+            ]
+          },
+          {}
+        ]
+      },
+      {
+        "group": "detached view acceptance",
+        "original": [
+          {
+            "ok": []
+          },
+          {},
+          {
+            "ok": [
+              null
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "reproduced": {
+    "differentialComparisons": 698,
+    "supplementComparisons": 2044,
+    "countRows": 18,
+    "gcCases": 8,
+    "fatalUtf8GcCases": 4,
+    "allPassed": true
+  },
+  "rootSuiteCaveat": "370 combined tests passed per coordinator evidence; not independently rerun here. Entry imports redirect to candidate, but explicit subprocesses without forwarded --import may load production. Do not describe every helper as candidate-tested.",
+  "objections": [
+    {
+      "severity": "informational",
+      "location": "candidate.mjs:34-44",
+      "issue": "A custom Uint8Array subclass overriding subarray to return Uint16Array decodes differently: original copies element values into bytes and returns null; candidate decodes the raw 16-bit representation and throws SyntaxError.",
+      "repro": "Pinned Node --expose-gc build/efficiency-20261103/native-complete-frame-review/error-gc.mjs; see error-gc.json subtype rows.",
+      "disposition": "Synthetic overridden-method contract difference, not normal stdin reachability. Plain subclasses pass. Do not generalize this exclusion to cross-realm, offset, resizable, Buffer or shared Uint8Array inputs."
+    },
+    {
+      "severity": "informational",
+      "location": "candidate.mjs:40-44",
+      "issue": "OOM or monkeypatched allocation/parse/subarray failure can change exception timing or poison state. Catch also includes messages.push.",
+      "disposition": "No ordinary-input failure demonstrated. Builtins do not invoke caller callbacks here. No claim of OOM or patched-intrinsic equivalence."
+    },
+    {
+      "severity": "informational",
+      "location": "benchmark-plan.json and experiment.mjs:66-73",
+      "issue": "Two original passes are warmed same-runtime synthetic loops with fixed reused inputs. They measure process CPU rather than isolated decoder CPU. No affinity, confidence interval or cold/error throughput coverage.",
+      "disposition": "Gate recomputed exactly with all measured samples; all seven workloads pass. A pair above 1.10 is not a median gate breach. Additional fresh varied-input sample retained without discarding large outliers."
+    },
+    {
+      "severity": "informational",
+      "location": "trial-1-experiment.mjs:57-65; REPRODUCE.txt",
+      "issue": "Initial GC fixture could lose earlier decoders; old execFileSync runners lacked whole-group timeout cleanup.",
+      "disposition": "Transparent failed trial retained. Corrected fixture holds all eight decoders; this reviewer reproduced it. Owned review supervisor cleans only its detached child group on exit or timeout; no forbidden existing runner executed."
+    }
+  ],
+  "benchmarkGate": {
+    "warmupPairs": 3,
+    "measuredPairs": 9,
+    "gate": "Reject if any workload median paired CPU candidate/original exceeds 1.05 in both initial and independent repeat, or any repeat exceeds 1.10. Require differential and GC parity. Allocation reduction alone is insufficient.",
+    "repeat": "Always run a second full pass, retain all samples including warmups.",
+    "scope": "Full frozen modules; one live decoder reused per sample; owned synthetic memory only. CPU process.cpuUsage and wall performance.now; no instrumentation. Byte sizes are UTF-8 body sizes. Alternating order each pair."
+  },
+  "originalBenchmarkRecalculation": [
+    {
+      "workload": "tiny",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.638110291534949,
+          "allMeasuredRatios": [
+            0.6382875409703395,
+            0.6680729668916747,
+            0.6398543652878913,
+            0.6441298419932016,
+            0.6246131702051098,
+            0.6368364105964888,
+            0.638110291534949,
+            0.6370512373649355,
+            0.6130739091122199
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 0.6371015978808853,
+          "allMeasuredRatios": [
+            0.6371015978808853,
+            0.6303926525109538,
+            0.638921101232659,
+            0.6361820577111045,
+            0.6378549706600419,
+            0.6344206974128234,
+            0.6397099127208331,
+            0.63173144583799,
+            0.6403984739296312
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    },
+    {
+      "workload": "complete4k",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.8159682247294497,
+          "allMeasuredRatios": [
+            0.8271361872081904,
+            0.7932008254588899,
+            0.8035412694088804,
+            0.8453125880827556,
+            0.7785109424832288,
+            0.8543694815485624,
+            0.7872222530060398,
+            0.8557216726618705,
+            0.8159682247294497
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 0.8046966462364851,
+          "allMeasuredRatios": [
+            0.8029034059184813,
+            0.8008510044642857,
+            0.8038762944304506,
+            0.8182070882557332,
+            0.8018240416923815,
+            0.8048763688959295,
+            0.8122443319697705,
+            0.807519834425664,
+            0.8046966462364851
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    },
+    {
+      "workload": "coalesced4k",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.8160208278308116,
+          "allMeasuredRatios": [
+            0.7827461029254751,
+            0.8380305894483588,
+            0.8004737049870608,
+            0.8308597637488642,
+            0.741761144296802,
+            0.8370935367322361,
+            0.7809170575615432,
+            0.8160208278308116,
+            0.8171128251663642
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 0.8006614867702646,
+          "allMeasuredRatios": [
+            0.8011617991899381,
+            0.8058848659617643,
+            0.8000957243139758,
+            0.8086598808079742,
+            0.7998744966793913,
+            0.798123534010946,
+            0.8006614867702646,
+            0.8066617631606599,
+            0.7873193000253614
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    },
+    {
+      "workload": "complete64k",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.8985539918199091,
+          "allMeasuredRatios": [
+            0.9451285233693699,
+            0.8930757054033324,
+            0.9164634146341464,
+            0.8895741271305784,
+            0.8930488951200471,
+            0.8729489570436773,
+            0.9197630836148258,
+            0.919027748461576,
+            0.8985539918199091
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 0.8352608220235416,
+          "allMeasuredRatios": [
+            0.8839331619537275,
+            0.8291692862805128,
+            0.953328852088362,
+            0.881336806764833,
+            0.7808253257455608,
+            0.8125664295642221,
+            0.82168567947724,
+            0.8352608220235416,
+            0.9343268693036684
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    },
+    {
+      "workload": "coalesced64k",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.8985128334879536,
+          "allMeasuredRatios": [
+            0.8945511157239232,
+            0.8707282994702218,
+            0.8673192708260912,
+            0.9023382785924592,
+            0.9476284881799886,
+            0.9170983677943451,
+            0.9124235640559504,
+            0.8985128334879536,
+            0.8396970820314569
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 0.9083484989830094,
+          "allMeasuredRatios": [
+            0.9037261341180819,
+            0.9109806342324753,
+            0.9305486439412789,
+            0.9442402342533176,
+            0.9485551561551748,
+            0.8879363041750719,
+            0.9083484989830094,
+            0.8690935779816513,
+            0.9013292821876187
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    },
+    {
+      "workload": "fragmented1m",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.9911614309877883,
+          "allMeasuredRatios": [
+            1.0650288869049451,
+            0.8999601077091852,
+            0.9570502234311249,
+            0.9911614309877883,
+            0.8974194320791475,
+            1.1362255468978404,
+            1.0673148552493,
+            0.9920303514758166,
+            0.9594022567856054
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 0.9791265907073099,
+          "allMeasuredRatios": [
+            1.0763232088940433,
+            1.0388316941776423,
+            0.9695751188695246,
+            1.0712497686695823,
+            0.9553227174583591,
+            0.9640415503592185,
+            0.9791265907073099,
+            1.0614108674928504,
+            0.9579518171278334
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    },
+    {
+      "workload": "mixed",
+      "passes": [
+        {
+          "passNumber": 1,
+          "medianPairedCpuRatio": 0.9811128407885492,
+          "allMeasuredRatios": [
+            0.9128409004583323,
+            0.987575415300697,
+            1.0127480541336513,
+            0.9668353309085053,
+            0.9752550705134367,
+            0.9911450211628425,
+            1.0090346257283729,
+            0.9811128407885492,
+            0.9255668491008601
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+          "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f"
+        },
+        {
+          "passNumber": 2,
+          "medianPairedCpuRatio": 1.0121830518851078,
+          "allMeasuredRatios": [
+            1.023008544582856,
+            0.918328657736756,
+            1.0132570398549585,
+            0.949906073888541,
+            0.9897494065998698,
+            1.0311790320228347,
+            1.0121830518851078,
+            0.9434429600160662,
+            1.0229633449448017
+          ],
+          "rawPath": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+          "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed"
+        }
+      ],
+      "gatePass": true
+    }
+  ],
+  "independentTiming": {
+    "summary": [
+      {
+        "workload": "tiny",
+        "medianPairedCpuRatio": 0.7203399848940713,
+        "allMeasuredRatios": [
+          0.9492071062358411,
+          0.8522855812096614,
+          0.6379815438699282,
+          0.8026984259182144,
+          1.5077373483897951,
+          0.29708887603624445,
+          0.4978246442002802,
+          0.610814322841467
+        ]
+      },
+      {
+        "workload": "complete4k",
+        "medianPairedCpuRatio": 0.9288829731349926,
+        "allMeasuredRatios": [
+          1.0125089863407621,
+          0.8527296937416777,
+          0.9971164936562861,
+          1.687163720215219,
+          0.718587682414049,
+          0.5773742461395719,
+          0.9307511737089202,
+          0.9270147725610648
+        ]
+      },
+      {
+        "workload": "fragmented64k",
+        "medianPairedCpuRatio": 1.0101017613149672,
+        "allMeasuredRatios": [
+          0.9969200842924298,
+          1.0208683397474119,
+          1.0108182317408017,
+          1.020920730046309,
+          1.0301410623760194,
+          0.7863978563225724,
+          1.0093852908891328,
+          1.0012570366726785
+        ]
+      },
+      {
+        "workload": "mixed",
+        "medianPairedCpuRatio": 0.9786880359146402,
+        "allMeasuredRatios": [
+          0.9836736864496916,
+          1.220267153049729,
+          0.9913639553084688,
+          0.9498576399873457,
+          0.9737023853795888,
+          0.9513653683319221,
+          0.9995741056218058,
+          0.9651387992253067
+        ]
+      }
+    ],
+    "rawPath": "build/efficiency-20261103/native-complete-frame-review/timing.json",
+    "rawSha256": "ffd7563fd3c39b9d6097dc58506df340218ba6bf83d129e2c15ac1eb7a408e14",
+    "allWarmupsAndOutliersRetained": true,
+    "notFullGateRepeat": true,
+    "limitations": "One bounded pass, 8 measured pairs after 3 warmups per workload; freshly generated varied corpus each pair, equivalent separate backing per variant, alternating order, full frozen modules. Several very short pairs have large outliers. No precise speedup or regression-rate claim from this sample."
+  },
+  "openAcceptance": [
+    "Real native stdio and packaged transport",
+    "Whole-browser RAM and CPU",
+    "Node 22 and other supported runtimes; Windows/Linux",
+    "Cold-start, malformed/shared throughput, actual transport chunk distribution",
+    "Concurrent shared writer stress; unchanged shared-copy path alone does not promise atomic snapshots"
+  ],
+  "commands": [
+    {
+      "name": "independent",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/check.mjs"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 50,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "fddb2fa0b141d53295ac47dd4ad626c0f1677ee109e2a801f26930ebb19e84dd",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "gc",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "--expose-gc",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/experiment.mjs",
+        "gc"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 20,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "f4e9f602abe9fb3c43d9848e096ea15d83b42038179f3df4f988e4467c379f49",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "differential",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/experiment.mjs",
+        "differential"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 30,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "9f611dee2f0f01f4f218fc34ca5b5692ef4e7742fd67d5ef4b7f2e22f283b6d8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "supplement",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/supplement.mjs"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 30,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "8fe3aaf88a897fd765d0584874ff1335aa9a1f73c9c70a584874e5924c0aed6c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "counts",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/experiment.mjs",
+        "counts"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 10,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "88e88412a88b5442f0efef22d6b1fb66bddf62b5c3b50a16ca0a0ebac3082761",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "timing",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/timing.mjs"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 50,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "a87c82d4eabfee16ada01ff73597d02ff4787385bec6314a31c17bcf0c0aa203",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "error-gc",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "--expose-gc",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/error-gc.mjs"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 20,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "b75a3aad12800d119792c15ca12769b02f4a01545769bc8496e631a3ab7293cd",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "error-gc",
+      "argv": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "--expose-gc",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/native-complete-frame-review/error-gc.mjs"
+      ],
+      "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+      "timeoutSeconds": 20,
+      "returncode": 0,
+      "ownGroupCleanup": true,
+      "stdoutSha256": "ecf627531cc90c0aa381c3f025333c70b30f147e45d7f267a7a2d680fb80613d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "reproduction": "From repository root: PYTHONDONTWRITEBYTECODE=1 python3 -B build/efficiency-20261103/native-complete-frame-review/run.py. Then run-extra.py for fatal UTF-8 GC and synthetic subclass checks. Each child has its own process group and a 10-50 second timeout. NODE_OPTIONS is cleared for children. Offline, decoder-only imports.",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/host/main.mjs",
+      "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "lines": 60,
+      "readRanges": [
+        [
+          1,
+          60
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/original.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "lines": 162,
+      "readRanges": [
+        [
+          1,
+          162
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/candidate.mjs",
+      "sha256": "448ad4774dcc0983b8d17571fc11dbd62ea4d0f3c32ef714024096634d0dda2c",
+      "lines": 177,
+      "readRanges": [
+        [
+          1,
+          177
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/candidate.diff",
+      "sha256": "1b15c71d3c8550a1afcf0446ac4b1a54a2ab93f48c91f4e7518153a688f67112",
+      "lines": 24,
+      "readRanges": [
+        [
+          1,
+          24
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/experiment.mjs",
+      "sha256": "7c5fedff223a71752869e0d900b890b8b891d1d2ee009228b2de193f6951ac11",
+      "lines": 74,
+      "readRanges": [
+        [
+          1,
+          74
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/supplement.mjs",
+      "sha256": "362c1e67362b5ae15a0b2a3bfca899b880ca08a7b981ba350345ece81500bb95",
+      "lines": 26,
+      "readRanges": [
+        [
+          1,
+          26
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/benchmark-plan.json",
+      "sha256": "c4d481ddb2459fbc5ba6ef6d146b8b1ea3da68001b93a378850ccb85281b6617",
+      "lines": 1,
+      "readRanges": [
+        [
+          1,
+          1
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/REPRODUCE.txt",
+      "sha256": "6d80bd94cfbfbe6a68a65b918e61cbae8856834c11c552b9e39f8f888eac26ea",
+      "lines": 38,
+      "readRanges": [
+        [
+          1,
+          38
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/run.mjs",
+      "sha256": "35bdef0be77f7674fbf294ed568705877301b5a493dc90d93c52bdc9ea3ebae5",
+      "lines": 17,
+      "readRanges": [
+        [
+          1,
+          17
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/final-checks.mjs",
+      "sha256": "cc5892b81bdf082b871a2ced4d4f17d8522db210179f11ecca527e45ed1abd95",
+      "lines": 10,
+      "readRanges": [
+        [
+          1,
+          10
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/report.py",
+      "sha256": "3012073fe898c3cc3f6e62f36924cd6f3c19644df707d8a78d3ada6cbbab0298",
+      "lines": 37,
+      "readRanges": [
+        [
+          1,
+          37
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-run.mjs",
+      "sha256": "5424681b138e354a088ee6ad27d0b94eba5c55b9050233df70a0e199cca86197",
+      "lines": 17,
+      "readRanges": [
+        [
+          1,
+          17
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-final-checks.mjs",
+      "sha256": "e8b69f63f858e406c42ac1ca62889c2b8a25f42b30510d96ba68d467149feaad",
+      "lines": 10,
+      "readRanges": [
+        [
+          1,
+          10
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/loader.mjs",
+      "sha256": "4919d65e4f11bb0589bcef0a993c4a5df3a09f20e8c1649ebce0db01daf22eeb",
+      "lines": 8,
+      "readRanges": [
+        [
+          1,
+          8
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/experiment.mjs",
+      "sha256": "73b5409e1dbc8f0726f5df835e25b9c973059b5e2027326a3751ef12a6f02595",
+      "lines": 74,
+      "readRanges": [
+        [
+          1,
+          74
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/supplement.mjs",
+      "sha256": "403b1c6287c93482f0766adab2cc9c3947491d51f69eb10cc0f4708ecec20473",
+      "lines": 26,
+      "readRanges": [
+        [
+          1,
+          26
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/candidate-loader.mjs",
+      "sha256": "abed207418e3245acb829314e6f11caee48da9caeba4e29593864f9afc1501df",
+      "lines": 10,
+      "readRanges": [
+        [
+          1,
+          10
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/run.py",
+      "sha256": "9fdf6445c54d71ec1c20c1fe62a2cfb3ca5cfaf96e427142015f416648edc5f2",
+      "lines": 18,
+      "readRanges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-coordinator.json",
+      "sha256": "1e423e357f1fa82ab0066fb16f2e445d37bc066304d762e982da1b0056ceeb9a",
+      "lines": 36,
+      "readRanges": [
+        [
+          1,
+          36
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "evidenceInventory": [
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/REPRODUCE.txt",
+      "sha256": "6d80bd94cfbfbe6a68a65b918e61cbae8856834c11c552b9e39f8f888eac26ea",
+      "bytes": 2479,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/bench-1.json",
+      "sha256": "506e50c0c4af54635ba923df608ac199fbec56ab09bbd0eb25c3a0496334c36f",
+      "bytes": 45352,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "config",
+        "workloads",
+        "rows",
+        "sink"
+      ],
+      "rowCount": 168
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/bench-1.log",
+      "sha256": "b7312ca3a5bc2208c7d6fe748e409691e341ec23c7881916029812330c8706ba",
+      "bytes": 30569,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/bench-2.json",
+      "sha256": "89f809c1bfb0f859e097b54c4453a20e1145c6dcae55c1efe68d206e19c28aed",
+      "bytes": 45348,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "config",
+        "workloads",
+        "rows",
+        "sink"
+      ],
+      "rowCount": 168
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/bench-2.log",
+      "sha256": "f915362ac0fda80d331d4e8219336cbc507d5858bdac550c6b456a9844ba0dd4",
+      "bytes": 30565,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/benchmark-plan.json",
+      "sha256": "c4d481ddb2459fbc5ba6ef6d146b8b1ea3da68001b93a378850ccb85281b6617",
+      "bytes": 571,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "warmupPairs",
+        "measuredPairs",
+        "gate",
+        "repeat",
+        "scope"
+      ],
+      "rowCount": null
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/candidate.diff",
+      "sha256": "1b15c71d3c8550a1afcf0446ac4b1a54a2ab93f48c91f4e7518153a688f67112",
+      "bytes": 1168,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/candidate.mjs",
+      "sha256": "448ad4774dcc0983b8d17571fc11dbd62ea4d0f3c32ef714024096634d0dda2c",
+      "bytes": 17430,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/commands.json",
+      "sha256": "dd64fc550569976fb7935bc0befce9037aa56351911f2f031a3639d0f343ffe6",
+      "bytes": 676981,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "list"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/candidate-loader.mjs",
+      "sha256": "abed207418e3245acb829314e6f11caee48da9caeba4e29593864f9afc1501df",
+      "bytes": 654,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/combined-candidate.log",
+      "sha256": "d748c83fd385f19acb1294280799635d4e0a9efdd7b6b95acac968bce77f47dd",
+      "bytes": 83434,
+      "inspection": "byte-inventory",
+      "lines": 2239,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/commands.json",
+      "sha256": "6ec5a704379308c67aa36617065a46a2adcf12243fdcde11c54db4c4d6db0c8e",
+      "bytes": 2731,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "list"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/counts.json",
+      "sha256": "a7a81c8e6fb03f5431a1fc4d04aa562d838b94475bd634b5bef77eb26448863d",
+      "bytes": 6155,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "scope",
+        "rows"
+      ],
+      "rowCount": 18
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/counts.log",
+      "sha256": "88e88412a88b5442f0efef22d6b1fb66bddf62b5c3b50a16ca0a0ebac3082761",
+      "bytes": 4127,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/differential.json",
+      "sha256": "9926bc410f4a8a0c5d9eb7f5d00ad7250da3c85ca7fa1ba7888224ffe897bca0",
+      "bytes": 1054026,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "comparisons",
+        "seed",
+        "rows"
+      ],
+      "rowCount": 698
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/differential.log",
+      "sha256": "9f611dee2f0f01f4f218fc34ca5b5692ef4e7742fd67d5ef4b7f2e22f283b6d8",
+      "bytes": 524750,
+      "inspection": "byte-inventory",
+      "lines": 292,
+      "hasFailureMarker": true
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/experiment.mjs",
+      "sha256": "73b5409e1dbc8f0726f5df835e25b9c973059b5e2027326a3751ef12a6f02595",
+      "bytes": 10026,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/gc.json",
+      "sha256": "dd945e2508d87fe28bc2e479e3473ad897602da806b00d28462ee01daade511e",
+      "bytes": 5449,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "scope",
+        "rows"
+      ],
+      "rowCount": 8
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/gc.log",
+      "sha256": "c0db033b1583b76fae3d4258e4b7a4070223e348bbd1fef5ad5ae05a4675a4ca",
+      "bytes": 3593,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/run.py",
+      "sha256": "9fdf6445c54d71ec1c20c1fe62a2cfb3ca5cfaf96e427142015f416648edc5f2",
+      "bytes": 1126,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/supplement.json",
+      "sha256": "e6a86246e6905603f89329d05b0a2e6247c839f50641669a40e71488b8af421c",
+      "bytes": 2057383,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "comparisons",
+        "seed",
+        "sharedDecode",
+        "rows"
+      ],
+      "rowCount": 2044
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/supplement.log",
+      "sha256": "8fe3aaf88a897fd765d0584874ff1335aa9a1f73c9c70a584874e5924c0aed6c",
+      "bytes": 73,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/coordinator/supplement.mjs",
+      "sha256": "403b1c6287c93482f0766adab2cc9c3947491d51f69eb10cc0f4708ecec20473",
+      "bytes": 3300,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/counts.json",
+      "sha256": "a7a81c8e6fb03f5431a1fc4d04aa562d838b94475bd634b5bef77eb26448863d",
+      "bytes": 6155,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "scope",
+        "rows"
+      ],
+      "rowCount": 18
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/counts.log",
+      "sha256": "88e88412a88b5442f0efef22d6b1fb66bddf62b5c3b50a16ca0a0ebac3082761",
+      "bytes": 4127,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/differential.json",
+      "sha256": "9926bc410f4a8a0c5d9eb7f5d00ad7250da3c85ca7fa1ba7888224ffe897bca0",
+      "bytes": 1054026,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "comparisons",
+        "seed",
+        "rows"
+      ],
+      "rowCount": 698
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/differential.log",
+      "sha256": "9f611dee2f0f01f4f218fc34ca5b5692ef4e7742fd67d5ef4b7f2e22f283b6d8",
+      "bytes": 524750,
+      "inspection": "byte-inventory",
+      "lines": 292,
+      "hasFailureMarker": true
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/existing-framing-candidate-repeat.log",
+      "sha256": "0f5184022a9e5635050ba63c98c2c15731617f047c74a983be9ecc9da7a6ea8d",
+      "bytes": 775,
+      "inspection": "byte-inventory",
+      "lines": 15,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/existing-framing-original.log",
+      "sha256": "a7f3b56a8da51bfcd85194042667825aff4cc4b66b9c6e90c4fe879331719ee1",
+      "bytes": 775,
+      "inspection": "byte-inventory",
+      "lines": 15,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/existing-framing.log",
+      "sha256": "28e9c22b1cdc38d0442fee5a4c942d24c18f30f81d94993d779438114a0e11b6",
+      "bytes": 1385,
+      "inspection": "byte-inventory",
+      "lines": 18,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/existing-memory-candidate.log",
+      "sha256": "aed2d05b1375f7665138ecbb725c3f89b434111db30924c2525f5bc7132408f3",
+      "bytes": 1407,
+      "inspection": "byte-inventory",
+      "lines": 47,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/existing-memory-original.log",
+      "sha256": "a27c10ae3e57339d4ed5169d4fab80e9c49047a78484c5b1ee5b3f4fc1e4586d",
+      "bytes": 1406,
+      "inspection": "byte-inventory",
+      "lines": 47,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/experiment.mjs",
+      "sha256": "7c5fedff223a71752869e0d900b890b8b891d1d2ee009228b2de193f6951ac11",
+      "bytes": 10024,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/final-checks.mjs",
+      "sha256": "cc5892b81bdf082b871a2ced4d4f17d8522db210179f11ecca527e45ed1abd95",
+      "bytes": 1607,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "bytes": 1511,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/features/ai/host/main.mjs",
+      "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "bytes": 3388,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/features/ai/host/protocol.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "bytes": 16858,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/script/verify_native_decoder_memory.mjs",
+      "sha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "bytes": 3852,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/tests/ai/host-discovery.mjs",
+      "sha256": "1233002da7b3d3aed9759d18df278ce6f539a24536073a0fc37c39dd5a45799b",
+      "bytes": 1924,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/tests/ai/host-live.mjs",
+      "sha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391",
+      "bytes": 5226,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/tests/ai/host-loading.test.mjs",
+      "sha256": "de3de2c5cdd9fdf7b73c7521c8ebff79441244156cccd66577a8b5cbdb0774cd",
+      "bytes": 2776,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/tests/ai/host.test.mjs",
+      "sha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+      "bytes": 28161,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/tests/ai/native-frame-memory.test.mjs",
+      "sha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b",
+      "bytes": 755,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/frozen/tests/ai/native-output.test.mjs",
+      "sha256": "eee087070d60d079661d263df4ba009d348907ff236c8d0219b778e43c79ec51",
+      "bytes": 3781,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/gc-corrected.log",
+      "sha256": "ebe68880593809a47ebe10e2806b143745871897de098560ff62b27110739daa",
+      "bytes": 3593,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/gc-retry.log",
+      "sha256": "91042dfa65f11fd6366d28b44986f9711e36d1a9c572cb6eb9165b290daebf75",
+      "bytes": 3593,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/gc.json",
+      "sha256": "1ecdeb89f37eea2cf7970b259f5fff07804c0e83e4c4b0183bc11d414c8b476b",
+      "bytes": 5449,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "scope",
+        "rows"
+      ],
+      "rowCount": 8
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/gc.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inspection": "byte-inventory",
+      "lines": 0,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/initial-drift-manifest.json",
+      "sha256": "23f82ece6df7b9967473767b8d0bc6eb7d24d707bf2eb9660ee029fcb1bb6744",
+      "bytes": 177747,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "upstream/helium-macos/helium-chromium/devutils/check_gn_flags.py",
+        "features/ai/package.json",
+        "docs/evidence/memory-20261103/source-inventory-native-reply.json",
+        "docs/evidence/memory-20261103/conditional-memory-forecast-checks.json",
+        "docs/whats-new.md",
+        "tests/ai/newtab-bridge.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/move-js-optimizer-unfamiliar-sites.patch",
+        "docs/templates/whats-new-release.md",
+        "docs/ai-sidebar.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-touch-ui.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/app-menu-model.patch",
+        "features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.h",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/fix-brave-name.patch",
+        "docs/evidence/performance-1.2.0/article-1280.png",
+        "docs/login-enter.md",
+        "script/benchmark_browsers.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ka.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/ublock-show-in-settings.patch",
+        "docs/evidence/memory-20261102/rejected-lazy-folders.patch",
+        "tests/ai/visual-polish-browser.test.mjs",
+        "docs/workspace.md",
+        "upstream/helium-macos/helium-chromium/i18n/translations/az.json",
+        "script/windows/prepare-efficiency-packet.py",
+        "features/ai/host/updater.mjs",
+        "docs/evidence/memory-20261103/sync-before.json",
+        "upstream/helium-macos/env.sh",
+        "upstream/helium-macos/helium-chromium/i18n/translations/gl.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/tab-strip-controls.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/restyle-ntp-tiles.patch",
+        "upstream/helium-macos/resources/generate_icons.sh",
+        "advertising/src/01-blink.html",
+        "docs/evidence/memory-20261103/workspace-browser-tab-update.tap",
+        "docs/evidence/memory-20261103/plain-stream-package-tests.log",
+        "tests/sync/workspace-model.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/fixups-component-setup.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/network/dns-providers.patch",
+        "tests/ai/fixtures/render-message-before.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/update-cr-components.patch",
+        "docs/evidence/performance-1.2.0/candidate-identity.json",
+        "upstream/helium-macos/.github/actions/do-build/action.yml",
+        "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.h",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/repository.patch",
+        "features/passwords/native-ui/upstream.json",
+        "docs/evidence/release-1.2.0/login-enter.png",
+        "docs/evidence/login-enter-baseline/verification.txt",
+        "docs/evidence/memory-20261103/page-snapshot-docs-browser.log",
+        "docs/evidence/memory-20261103/coordinator-sync-review.json",
+        "upstream/helium-macos/helium-chromium/.github/workflows/lint.yml",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/tab-cycling-mru.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-spoof-webgl-renderer-info.patch",
+        "features/sync/test-provider/extension/background.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/force-paste-action.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/exclude-irrelevant-flags.patch",
+        "features/sync/native/chrome/browser/ui/webui/breezer_sync/BUILD.gn",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_ntp_16.png",
+        "docs/evidence/memory-20261102/native-transport-final-4096.json",
+        "docs/evidence/memory-20261102/decoder-host-tests-pinned.tap",
+        "docs/evidence/memory-20261103/other-harness-cleanup-after.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/custom-profile-avatar.patch",
+        "script/apply_breezer_omnibox.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/disable-safety-hub-page.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/toast.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/network/split-clienthello.patch",
+        "docs/evidence/pc-build-progress/README.md",
+        "docs/evidence/sync/settings-sync-unavailable-fixture.png",
+        "features/ai/extension/translation-settings.js",
+        "upstream/helium-macos/helium-chromium/i18n/translations/zh-TW.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-live-caption-completely.patch",
+        "upstream/helium-macos/helium-chromium/devutils/check_files_exist.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/noise/audio.patch",
+        "script/check_breezer_memory_package.py",
+        "upstream/helium-macos/helium-chromium/utils/generate_resources.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-zen-importer.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-google-host-detection.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/spoof-extension-downloader-platform.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-intranet-redirect-detector.patch",
+        "docs/evidence/memory-20261103/organato-response-pinned.tap",
+        "docs/evidence/memory-20261103/native-output-review.json",
+        "docs/evidence/sync/sync-connected-fixture.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/crashes-webui-fixes.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-credits.patch",
+        "features/ai/host/codex.mjs",
+        "upstream/helium-macos/patches/helium/macos/helium-immersive-fullscreen.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/disable-ink-ripple-effect.patch",
+        "features/ai/host/update-worker.mjs",
+        "docs/evidence/memory-20261103/members-after.json",
+        "site/dashboard.css",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/flags-setup.patch",
+        "tests/ai/overlay_test.py",
+        "upstream/helium-macos/helium-chromium/utils/third_party/__init__.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-ntp-footer.patch",
+        "docs/evidence/memory-20261103/source-inventory-after-cli.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/enable-paste-and-go-new-tab-button.patch",
+        "upstream/helium-macos/helium-chromium/.github/scripts/i18n_notify.py",
+        "docs/evidence/memory-20261103/source-inventory-native-output.json",
+        "upstream/helium-macos/.gitmodules",
+        "tests/ai/package.json",
+        "upstream/helium-macos/sign_and_package_app.sh",
+        "docs/evidence/memory-20261103/native-output-default-write-benchmark.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/page-zoom-indicator.patch",
+        "site/lib/metrics.js",
+        "RELEASE_POLICY.md",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_downloads_16.png",
+        "tests/ai/organato.test.mjs",
+        "tests/passwords/filling.mjs",
+        "LICENSE",
+        "advertising/src/voice/08-light.mp3",
+        "tests/sync/provider.test.mjs",
+        "docs/evidence/organato/onboarding-optout.png",
+        "features/ai/extension/onboarding.css",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/close-tabs-to-left.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-side-panel-flyover.patch",
+        "script/breezer_sidebar_frame.py",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ca.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-search-engine-collection.patch",
+        "docs/evidence/memory-20261103/combined-cli-offline.tap",
+        "upstream/helium-macos/helium-chromium/patches/brave/custom-importer.patch",
+        "features/sync/native/chrome/browser/sync/breezer_sync/prefs.h",
+        "upstream/helium-macos/helium-chromium/devutils/run_utils_pylint.py",
+        "docs/evidence/memory-20261103/sync-all-pinned.tap",
+        "upstream/helium-macos/helium-chromium/resources/branding/app_icon/file.png",
+        "docs/evidence/memory-20261103/panel-efficiency-packet-validation.json",
+        "features/workspace/native/chrome/common/extensions/api/breezer_private.idl",
+        "docs/evidence/memory-20261103/sync-reply-review.json",
+        "upstream/helium-macos/helium-chromium/patches/upstream-fixes/missing-dependencies.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-convert-popups-to-tabs.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/remove-safety-hub-entry-points.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-tab-hover-cards.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/bs.json",
+        "script/install_breezer.py",
+        "features/ai/extension/newtab.js",
+        "script/check_breezer_workspace.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/generate-standard-qr-codes.patch",
+        "docs/evidence/settings/README.md",
+        "site/dashboard.js",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-profile-avatar-downloading.patch",
+        "upstream/helium-macos/helium-chromium/patches/brave/chrome-importer-files.patch",
+        "script/check_breezer_build_profile.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/fix-page-names.patch",
+        "upstream/helium-macos/helium-chromium/README.md",
+        "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.h",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/reduce-accept-language-headers.patch",
+        "tests/ai/fixtures/native-encode-before.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/datatype-policy.patch",
+        "advertising/src/premium.js",
+        "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/rounded-frame-corners.patch",
+        "upstream.lock.json",
+        "upstream/helium-macos/patches/helium/macos/change-product-dir-name.patch",
+        "upstream/helium-macos/helium-chromium/devutils/validate_patches.py",
+        "upstream/helium-macos/helium-chromium/AGENTS.md",
+        "upstream/helium-macos/helium-chromium/devutils/clear-ublock-assets.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/noise/core.patch",
+        "upstream/helium-macos/helium-chromium/devutils/print_tag_version.sh",
+        "features/performance/compiled-filter-context.js",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_conflicts_32.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/af.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-fedcm-bubble.patch",
+        "tests/ai/settings-dom.mjs",
+        "script/check_breezer_sync.py",
+        "docs/evidence/memory-20261103/translation-pruning-prototype.json",
+        "upstream/helium-macos/helium-chromium/utils/make_domsub_script.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/compact.patch",
+        "docs/evidence/memory-20261103/settings-focus-before.tap",
+        "docs/evidence/memory-20261103/cleanup-retry-after.log",
+        "site/.gitignore",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/bookmark-open-all-confirmation-flag.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-close-window-with-last-tab.patch",
+        "docs/evidence/settings/passwords-dark.png",
+        "docs/evidence/settings/layout-narrow.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/remove-translate-section.patch",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_history_16.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/fix-section-separators.patch",
+        "features/ai/extension/context-background.js",
+        "script/check_breezer_installer.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/bangs-ui.patch",
+        "docs/evidence/memory-20261103/organato-response-implementation.json",
+        "docs/evidence/memory-20261103/workspace-review-report.json",
+        ".gitignore",
+        "features/ai/extension/manifest.json",
+        "script/check_breezer_preparation.py",
+        "docs/evidence/performance-1.2.0/verification-visual-tests.tap",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-ai-search-shortcuts.patch",
+        "docs/evidence/passkeys/README.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/disable-google-backed-sync-integrations.patch",
+        "tests/ai/whats-new-browser.test.mjs",
+        "docs/evidence/memory-20261103/plain-stream-packet-validation.json",
+        "docs/evidence/memory-20261103/verification.json",
+        "upstream/helium-macos/helium-chromium/devutils/run_other_yapf.sh",
+        "upstream/helium-macos/helium-chromium/i18n/translations/et.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-user-education-nags.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/privacy-page-tweaks.patch",
+        "docs/evidence/memory-20261103/verification-even-audit.json",
+        "upstream/helium-macos/helium-chromium/revision.txt",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-incognito-themes.patch",
+        "docs/evidence/memory-20261103/organato-response-review.json",
+        "upstream/helium-macos/helium-chromium/utils/downloads.py",
+        "advertising/breezer-08-light.mp4",
+        "docs/evidence/memory-20261103/source-inventory-plain-stream.json",
+        "docs/evidence/memory-20261103/extension-services-audit.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-google-promotional-resources.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/remove-results-help-link.patch",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_settings_16.png",
+        "upstream/helium-macos/helium-chromium/devutils/run_devutils_tests.sh",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/unbreak-chromium-link.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/fix-tab-sync-unreached-error.patch",
+        "tests/passkeys/component.mjs",
+        "upstream/helium-macos/helium-chromium/.gitignore",
+        "upstream/helium-macos/helium-chromium/devutils/i18n_lint.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-transport.patch",
+        "docs/evidence/translation/live.json",
+        "docs/evidence/memory-20261103/workspace-tab-update-coordinator.tap",
+        "upstream/helium-macos/helium-chromium/i18n/translations/fa.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/toolbar-actions.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/enable-glow-up-features.patch",
+        "upstream/helium-macos/patches/helium/macos/chromium-signing.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/services-schema-nag.patch",
+        "docs/evidence/memory-20261103/panel-efficiency-review.json",
+        "script/windows/continue-pc-browser-unattended.ps1",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/horizontal-tabs.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-disable-tls-grease.patch",
+        "script/check_breezer_ai_ui.py",
+        "tests/passwords.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/browser-window-context-menu.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/hide-page-actions-flag.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/nl.json",
+        "docs/upstream-originals/shared-browser.md",
+        "upstream/helium-macos/helium-chromium/.github/ISSUE_TEMPLATE/misc.md",
+        "docs/evidence/memory-20261103/native-output-final-benchmark.json",
+        "advertising/src/premium.css",
+        "docs/evidence/memory-20261103/native-packet-package-tests.log",
+        "upstream/helium-macos/helium-chromium/.github/workflows/release-and-tag.yml",
+        "upstream/helium-macos/dev.sh",
+        "advertising/src/08-light.html",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/toolbar-button-prefs.patch",
+        "upstream/helium-macos/helium-chromium/i18n/owners.yml",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/network/global-privacy-control-pref.patch",
+        "tests/ai/translation-efficiency.test.mjs",
+        "docs/evidence/memory-20261103/windows-tests-final-review-fixes.log",
+        "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.h",
+        "site/api/retention.js",
+        "features/ai/host/context-summary.mjs",
+        "features/ai/extension/top-sites.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/service-backends.patch",
+        "features/omnibox/upstream.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/fix-search-engine-icons.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/reorder-settings-menu.patch",
+        "upstream/helium-macos/helium-chromium/.github/workflows/stale.yml",
+        "features/ai/extension/panel.css",
+        "tests/passwords/enter-browser.mjs",
+        "docs/evidence/performance-1.2.0/whats-new-results.png",
+        "upstream/helium-macos/helium-chromium/version.txt",
+        "docs/evidence/memory-20261103/translation-memory-after.json",
+        "script/summarize_native_transport.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/dynamic.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-hide-window-buttons.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/centered-address-bar.patch",
+        "docs/evidence/memory-20261103/memory-package-review-fixed.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/multi-contents-view.patch",
+        "docs/evidence/memory-20261102/page-targets-after.json",
+        "docs/evidence/memory-20261103/transport-and-settings-coordinator.tap",
+        "upstream/helium-macos/helium-chromium/patches/inox-patchset/disable-rlz.patch",
+        "docs/evidence/memory-20261103/source-inventory-current.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/side-panel.patch",
+        "tests/ai/host-discovery.mjs",
+        "advertising/breezer-07-unseen.mp4",
+        "docs/evidence/memory-20261102/sidebar-paired.json",
+        "upstream/helium-macos/patches/helium/macos/fix-rust-allocator-in-component-builds.patch",
+        "docs/evidence/memory-20261103/cli-fragment-integration.json",
+        "features/performance/README.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/setup-behavior-settings-page.patch",
+        "features/ai/extension/settings-onboarding.js",
+        "tests/workspace_native_test.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/add-kagi-image-search.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-unsupported-importers.patch",
+        "upstream/helium-macos/LICENSE.ungoogled_chromium",
+        "docs/evidence/memory-20261103/sync-reply-before.json",
+        "docs/evidence/memory-20261103/workspace-browser-coordinator.log",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-webstore-urls.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/is.json",
+        "docs/evidence/memory-20261103/build-current-audit.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/lazy-session-restore.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/fix-instance-id-stuck.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-hide-extensions-menu.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/bn.json",
+        "script/check_efficiency_coverage.py",
+        "advertising/breezer-04-less.mp4",
+        "upstream/helium-macos/resources/assets/Assets.xcassets/AppIcon.appiconset/Contents.json",
+        "features/ai/extension/translation-content.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/center-window-on-launch.patch",
+        "tests/ai/panel-efficiency.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/exclude-from-vault.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/be.json",
+        "upstream/helium-macos/helium-chromium/utils/filescfg.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/custom-keyboard-shortcuts.patch",
+        "tests/ai/codex-cancellation.test.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/kn.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sl.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/helium-noise-page-info.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout-provider.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-autofill-link-to-password-manager.patch",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_ntp_32.png",
+        "docs/evidence/memory-20261103/README.md",
+        "tests/ai/overlay_fetch_test.py",
+        "docs/evidence/memory-20261103/combined-codex-offline.tap",
+        "upstream/helium-macos/helium-chromium/devutils/pytest.ini",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/clean-omnibox-suggestions.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-components-ungoogled.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/fr.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/my.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/zh-CN.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/fix-building-without-safebrowsing.patch",
+        "upstream/helium-macos/.vscode/settings.json",
+        "upstream/helium-macos/helium-chromium/utils/replace_resources.py",
+        "upstream/helium-macos/resources/assets/legacy.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/cs.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ky.json",
+        "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.cc",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ru.json",
+        "docs/efficiency-1.2.0.md",
+        "script/apply_breezer_branding.py",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_management_16.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/rbe-nativelink-config.patch",
+        "upstream/helium-macos/helium-chromium/utils/pytest.ini",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_history_32.png",
+        "docs/evidence/memory-20261103/combined-panel-efficiency.tap",
+        "upstream/helium-macos/helium-chromium/utils/_common.py",
+        "docs/evidence/memory-20261103/native-packet-migration-tests.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-helium-versioning.patch",
+        "advertising/src/common.css",
+        "script/check_breezer_filter_lists.py",
+        "upstream/helium-macos/helium-chromium/i18n/translations/lo.json",
+        "features/storage/code-sign-clones/code-sign-clones.patch",
+        "script/windows/BuildProgress.psm1",
+        "script/apply_breezer_sync.py",
+        "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+        "docs/evidence/memory-20261103/combined-plain-stream.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-dead-toolbar-actions.patch",
+        "features/sync/test-provider/extension/provider.js",
+        "docs/evidence/memory-20261102/completion-audit.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/copy-url-tab-context-menu.patch",
+        "docs/evidence/memory-20261103/browser-results.json",
+        "upstream/helium-macos/resources/assets/AppIcon.icon/Assets/logo.svg",
+        "docs/evidence/memory-20261103/runtime-current-audit.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-force-punycode-hostnames.patch",
+        "docs/evidence/memory-20261102/native-transport-final-1048576.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/bg.json",
+        "tests/ai/.gitignore",
+        "upstream/helium-macos/helium-chromium/devutils/set_quilt_vars.sh",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ro.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-privacy-sandbox.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/ublock-helium-services.patch",
+        "site/shots/assistant.png",
+        "docs/evidence/performance-1.2.0/native-build-verification.json",
+        "docs/evidence/organato/README.md",
+        "site/download/index.html",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-update-toast.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sw.json",
+        "docs/evidence/settings/appearance-light.png",
+        "docs/evidence/memory-20261103/native-and-sync-audit.json",
+        "features/ai/extension/settings-nav.js",
+        "docs/evidence/memory-20261103/page-snapshot-final.tap",
+        "upstream/helium-macos/resources/dmg.json",
+        "features/ai/host/context-controller.mjs",
+        "upstream/helium-macos/helium-chromium/patches/inox-patchset/fix-building-without-safebrowsing.patch",
+        "docs/evidence/memory-20261103/combined-native-output-command.json",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_flags_48.png",
+        "upstream/helium-macos/helium-chromium/devutils/_lint_tests.py",
+        "docs/evidence/memory-20261103/codex-cancellation-review-focused-20261103.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/settings.patch",
+        "docs/evidence/memory-20261103/organato-response-baseline.tap",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/fix-building-with-prunned-binaries.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-disable-beforeunload.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-close-confirmation.patch",
+        "upstream/helium-macos/helium-chromium/utils/domain_substitution.py",
+        "upstream/helium-macos/helium-chromium/i18n/translations/uk.json",
+        "docs/upstream-originals/development-tools.md",
+        "tests/ai/host-options.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/lv.json",
+        "docs/evidence/memory-20261103/stream-render-before.json",
+        "upstream/helium-macos/helium-chromium/pruning.list",
+        "tests/ai/model-catalog.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/status-bubble.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/hu.json",
+        "tests/ai/native-lifetime.test.mjs",
+        "tests/passwords_native_test.py",
+        "site/favicon.svg",
+        "upstream/helium-macos/helium-chromium/i18n/translations/mr.json",
+        "tests/passwords/dummy.csv",
+        "tests/passwords/login.html",
+        "advertising/breezer-06-air.mp4",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ne.json",
+        "docs/evidence/performance-1.2.0/verification-page-tests.tap",
+        "tests/ai/docs-editor-browser.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/pdf-viewer.patch",
+        ".github/workflows/macos-builder-check.yml",
+        "upstream/helium-macos/helium-chromium/i18n/translations/he.json",
+        "docs/evidence/memory-20261103/native-reply-sync-tests.tap",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ta.json",
+        "site/shots/sidebar.png",
+        "upstream/helium-macos/helium-chromium/patches/upstream-fixes/wasm-interpreter-fixes.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/am.json",
+        "tests/sync.test.mjs",
+        "docs/evidence/memory-20261103/native-packet-validation.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/default-theme.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-toolbar-dividers.patch",
+        "docs/upstream-originals/macos.md",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo_white_200.png",
+        "features/ai/extension/passwords.js",
+        "docs/evidence/memory-20261103/sync-size-coordinator.json",
+        "features/ai/native-ui/sidebar.patch",
+        "tests/ai/settings-nav.test.mjs",
+        "docs/evidence/sync/sync-recovery-fixture.png",
+        "docs/evidence/organato/after-off-dark.png",
+        "features/ai/extension/render-message.js",
+        "tests/ai/workspace-ui-efficiency.test.mjs",
+        "script/benchmark_workspace.mjs",
+        "docs/evidence/memory-20261103/memory-package-tests.log",
+        "upstream/helium-macos/helium-chromium/i18n/prompt.md",
+        "docs/evidence/memory-20261103/final-audit-fixes.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-reduce-system-info.patch",
+        "script/windows/apply-memory-update.py",
+        "docs/website.md",
+        "docs/evidence/performance-1.2.0/benchmark-report.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/onboarding-page.patch",
+        "tests/ai/harness-cleanup.test.mjs",
+        "upstream/helium-macos/helium-chromium/utils/third_party/schema.py",
+        "site/shots/whats-new.jpg",
+        "docs/evidence/memory-20261103/coverage.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/disable-tab-group-editor-footer.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-network-time-tracker.patch",
+        "docs/evidence/memory-20261103/combined-panel-efficiency-command.json",
+        "docs/evidence/memory-20261103/source-inventory-final-local.json",
+        "features/ai/extension/workspace-sync.js",
+        "tests/ai/native-frame-memory.test.mjs",
+        "site/package-lock.json",
+        "upstream/helium-macos/helium-chromium/.github/workflows/i18n-notify.yml",
+        "docs/evidence/performance-1.2.0/provenance.json",
+        "advertising/src/voice/06-air.mp3",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/helium-color-scheme.patch",
+        "script/windows/prepare-unattended-build.ps1",
+        "upstream/helium-macos/helium-chromium/devutils/__init__.py",
+        "features/ai/host/protocol.mjs",
+        "docs/evidence/memory-20261103/cleanup-retry-before.log",
+        "upstream/helium-macos/helium-chromium/patches/iridium-browser/browser-disable-profile-auto-import-on-first-run.patch",
+        "docs/evidence/pc-build-progress/result.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-hide-tab-close-buttons.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/selected-keyword-view.patch",
+        "upstream/helium-macos/helium-chromium/.github/ISSUE_TEMPLATE/config.yml",
+        "tests/ai/updater.test.mjs",
+        "docs/evidence/memory-20261103/ai-packaging-tests.log",
+        "script/breezer_filter_lists.mjs",
+        "docs/evidence/performance-1.2.0/README.md",
+        "docs/evidence/memory-20261103/native-output-tool-final.tap",
+        "site/legal.css",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ml.json",
+        "docs/evidence/memory-20261103/build-tools-audit.json",
+        "features/ai/host/claude.mjs",
+        "upstream/helium-macos/helium-chromium/.github/ISSUE_TEMPLATE/bug-report.yml",
+        "tests/passkeys/webauthn.js",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-mei-preload.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/extensions-manifestv2.patch",
+        "site/api/dashboard.js",
+        "docs/evidence/memory-20261103/native-output-implementation.json",
+        "advertising/breezer-02-unclutter.mp4",
+        "docs/evidence/memory-20261103/claude-stream-after.json",
+        "upstream/helium-macos/helium-chromium/devutils/update_platform_patches.py",
+        "script/windows/unattended_build.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/toolbar.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-disable-local-history-expiration.patch",
+        "features/ai/runtime.lock.json",
+        "features/ai/host/launch.sh",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/tab-search-in-toolbar.patch",
+        "upstream/helium-macos/.github/scripts/github_pack_resources.sh",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ar.json",
+        "script/check_ai_packaging.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/reduce-text-button-height.patch",
+        "features/ai/extension/icon128.png",
+        "tests/sync/setup-browser.test.mjs",
+        "site/site.js",
+        "tests/ai/host-loading.test.mjs",
+        "site/privacy-policy/index.html",
+        "upstream/helium-macos/helium-chromium/.github/PULL_REQUEST_TEMPLATE.md",
+        "docs/evidence/memory-20261103/plain-stream-integration-coverage.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/bundle-hyphenation-patterns.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/app-menu-style.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/omnibox.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/or.json",
+        "docs/evidence/memory-20261103/transport-summary-after.json",
+        "docs/evidence/memory-20261103/memory-package-codex.log",
+        "docs/evidence/memory-20261103/panel-rendering-experiment-report.json",
+        "docs/evidence/memory-20261103/renderer-pin-before.tap",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_plugins_16.png",
+        "site/shots/newtab-light.jpg",
+        "upstream/helium-macos/helium-chromium/i18n/translations/fil.json",
+        "upstream/helium-macos/helium-chromium/patches/series",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/remove-unused-ai-resources.patch",
+        "docs/evidence/memory-20261103/page-snapshot-before.tap",
+        "docs/evidence/memory-20261103/verification-current-audit.json",
+        "features/ai/extension/newtab.html",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/fix-customize-side-panel.patch",
+        "upstream/helium-macos/helium-chromium/patches/bromite/fingerprinting-flags-client-rects-and-measuretext.patch",
+        "features/storage/code-sign-clones/README.md",
+        ".codex/environments/environment.toml",
+        "upstream/helium-macos/helium-chromium/i18n/translations/el.json",
+        "upstream/helium-macos/helium-chromium/flags.gn",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/square-ntp-monograms.patch",
+        "docs/evidence/memory-20261103/codex-cancellation-review.json",
+        "advertising/breezer-05-tailwind.mp4",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-fonts-googleapis-references.patch",
+        "features/ai/extension/model-catalog.js",
+        "features/ai/integration/identity.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-non-standard-auth-features.patch",
+        "upstream/helium-macos/helium-chromium/utils/name_substitution_utils.py",
+        "advertising/src/04-less.html",
+        "docs/evidence/memory-20261103/sync-after.json",
+        "docs/evidence/memory-20261103/memory-package-cli.log",
+        "assets/branding/logo-prompt.txt",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-hide-fullscreen-exit-ui.patch",
+        "site/tests/browser.test.mjs",
+        "advertising/src/soundtrack.py",
+        "upstream/helium-macos/devutils/print_tag_version.sh",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/enable-menu-on-reload-button.patch",
+        "upstream/helium-macos/patches/helium/macos/native-translation-context-option.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/reenable-update-checks.patch",
+        "tests/ai/newtab.test.mjs",
+        "upstream/helium-macos/.gitattributes",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sq.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/ublock-install-as-component.patch",
+        "tests/windows/unattended_cleanup_test.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/move-search-suggest.patch",
+        "docs/evidence/memory-20261103/native-decoder-after-output.json",
+        "docs/evidence/memory-20261102/sidebar-pruned.json",
+        "script/breezer_preparation.py",
+        "tests/ai/native-output.test.mjs",
+        "upstream/helium-macos/.gitignore",
+        "features/workspace/native/chrome/browser/extensions/api/breezer_private/workspace_sync_api.cc",
+        "features/ai/extension/onboarding.js",
+        "docs/evidence/memory-20261103/overlay-fetch-before.log",
+        "docs/evidence/performance-1.2.0/verification-preparation-check.log",
+        "upstream/helium-macos/helium-chromium/utils/third_party/README.md",
+        "docs/evidence/memory-20261103/codex-cancellation-coordinator.tap",
+        "features/sync/test-provider/extension/manifest.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/proxy-extension-downloads.patch",
+        "upstream/helium-macos/helium-chromium/resources/generate_resources.txt",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-configure-extension-downloading.patch",
+        "tests/ai/package-lock.json",
+        "upstream/helium-macos/helium-chromium/devutils/run_devutils_pylint.py",
+        "advertising/src/02-unclutter.html",
+        "upstream/helium-macos/helium-chromium/devutils/update_lists.py",
+        "tests/ai/browser-tools.test.mjs",
+        "upstream/helium-macos/.github/scripts/github_build.sh",
+        "upstream/helium-macos/helium-chromium/i18n/translations/cy.json",
+        "docs/evidence/memory-20261103/workspace-tab-update-implementation.json",
+        "features/ai/host/organato.mjs",
+        "docs/browser-benchmark.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/frame-radius-helper.patch",
+        "docs/pc-build.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-bookmarks-bar.patch",
+        "docs/evidence/memory-20261103/native-output-explicit-utf8-benchmark.json",
+        "site/shots/settings.jpg",
+        "script/check_breezer_omnibox.py",
+        "upstream/helium-macos/helium-chromium/.requirements.txt",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo_color.icon",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/change-chromium-branding.patch",
+        "upstream/helium-macos/helium-chromium/.github/actions/ci-setup/action.yml",
+        "upstream/helium-macos/patches/helium/macos/clean-main-menu.patch",
+        "upstream/helium-macos/helium-chromium/devutils/run_devutils_yapf.sh",
+        "docs/evidence/memory-20261103/page-harness-cleanup.tap",
+        "docs/evidence/memory-20261103/overlay-fetch-after.log",
+        "upstream/helium-macos/helium-chromium/patches/brave/fix-component-content-settings-store.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-domain-reliability.patch",
+        "docs/evidence/memory-20261103/stream-render-after.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/de.json",
+        "upstream/helium-macos/helium-chromium/utils/clone.py",
+        "site/icon.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sr-Latn.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/km.json",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo_200.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/da.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-clear-data-on-exit.patch",
+        "features/passwords/native-ui/password-manager.patch",
+        "upstream/helium-macos/devutils/check_patch_files.sh",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-store.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/vi.json",
+        "docs/evidence/memory-20261102/sidebar-prune-paired.json",
+        "tests/sync/fixtures/provider-read-before.cc",
+        "upstream/helium-macos/patches/helium/macos/move-macos-settings.patch",
+        "docs/evidence/settings/search-light.png",
+        "upstream/helium-macos/resources/assets/Assets.xcassets/Contents.json",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_flags_16.png",
+        "docs/evidence/organato/onboarding-summary-off.png",
+        "upstream/helium-macos/patches/helium/macos/updater/disable-default-updater.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/remove-profile-page-sections.patch",
+        "tests/ai/settings.test.mjs",
+        "docs/evidence/memory-20261103/review-fixes-after.tap",
+        "docs/evidence/memory-20261103/panel-efficiency-coordinator.json",
+        "docs/evidence/memory-20261102/README.md",
+        "tests/code_sign_clone_sessions_test.cc",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/engine-interface.patch",
+        "upstream/helium-macos/patches/helium/macos/prevent-reset-on-keychain-unavailability.patch",
+        "upstream/helium-macos/helium-chromium/devutils/i18n_clean.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/add-specific-error-for-disabled-extension-downloads.patch",
+        "docs/upstream-originals/translations.md",
+        "features/ai/extension/efficiency.html",
+        "docs/evidence/memory-20261102/decoder-after-pinned.json",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_history_48.png",
+        "upstream/helium-macos/helium-chromium/.github/ISSUE_TEMPLATE/feature-request.yml",
+        "script/package_breezer_ai.py",
+        "advertising/breezer-01-blink.mp4",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/remove-experimental-webui.patch",
+        "docs/evidence/performance-1.2.0/repaired-native-objects.json",
+        "script/verify_workspace_tab_updates.mjs",
+        "docs/evidence/memory-20261103/other-harness-cleanup-before.tap",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/unidiff/patch.py",
+        "docs/evidence/memory-20261103/sync-fixes-review.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-bookmark-bar-ntp.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/shift-right-click-context-menu.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/update-credits.patch",
+        "docs/evidence/memory-20261103/coordinator-transport-coverage.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/enable-fluent-scrollbar.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/remove-autofill.patch",
+        "script/apply_breezer_filter_lists.py",
+        "docs/evidence/memory-20261102/translation-after.json",
+        "features/workspace/native/chrome/browser/ui/views/breezer_peek/BUILD.gn",
+        "tests/ai/browser-input-providers.test.mjs",
+        "script/verify_breezer_filter_lists_native.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/zen-mode-wiring.patch",
+        "tests/ai/translation.test.mjs",
+        "docs/evidence/memory-20261103/memory-package-final-audit-fixes.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/increase-incognito-storage-quota.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/service.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/hr.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/hibernate-tab-context-menu.patch",
+        "advertising/breezer-03-unwatched.mp4",
+        "site/site.css",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/prioritize-platform-policy-loading.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/fix-appearance-page.patch",
+        "upstream/helium-macos/resources/assets/legacy_crop.png",
+        "upstream/helium-macos/helium-chromium/utils/__init__.py",
+        "docs/evidence/memory-20261103/claude-stream-implementation.json",
+        "docs/evidence/performance-1.2.0/raw-results.json.gz",
+        "upstream/helium-macos/patches/helium/macos/fix-history-swiper-lifetime.patch",
+        "upstream/helium-macos/helium-chromium/CONTRIBUTING.md",
+        "script/verify_breezer_update_lifetime.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/enable-tab-hover-cards.patch",
+        "docs/evidence/memory-20261103/codex-cancellation-integration.json",
+        "upstream/helium-macos/helium-chromium/utils/patches.py",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-ungoogled-flag-headers.patch",
+        "upstream/helium-macos/helium-chromium/devutils/tests/test_check_patch_files.py",
+        "upstream/helium-macos/.github/PULL_REQUEST_TEMPLATE.md",
+        "upstream/helium-macos/.github/ISSUE_TEMPLATE/misc.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/loopback-server-in-memory.patch",
+        "tests/ai/newtab-race.test.mjs",
+        "docs/updating.md",
+        "docs/evidence/memory-20261103/combined-final-local.tap",
+        "upstream/helium-macos/helium-chromium/i18n/translations/pa.json",
+        "docs/evidence/memory-20261103/page-context-memory-snapshot-loop.json",
+        "script/build_and_run.sh",
+        "upstream/helium-macos/README.md",
+        "tests/ai/top-sites.test.mjs",
+        "docs/evidence/memory-20261103/panel-efficiency-implementation.json",
+        "site/shots/assistant-dark.png",
+        "upstream/helium-macos/helium-chromium/devutils/check_patch_files.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/webrtc-default-handling-policy.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-ai.patch",
+        "upstream/helium-macos/helium-chromium/.style.yapf",
+        "upstream/helium-macos/.github/scripts/github_prepare_xcode.sh",
+        "features/ai/extension/setup-state.js",
+        "docs/evidence/organato/after-off-narrow.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/tab-icon.patch",
+        "docs/ai-research.md",
+        "upstream/helium-macos/patches/ungoogled-chromium/macos/fix-disabling-safebrowsing.patch",
+        "docs/evidence/docs-control/docs-editor-fixture.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/native-frame-materials.patch",
+        "upstream/helium-macos/helium-chromium/devutils/set_quilt_vars.fish",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/helium-noise-settings.patch",
+        "site/icon128.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/noise/canvas.patch",
+        "tests/passwords_enter_test.py",
+        "upstream/helium-macos/.github/scripts/github_generate_release_note.sh",
+        "script/verify_claude_streaming_efficiency.mjs",
+        "docs/evidence/memory-20261102/decoder-before-pinned.json",
+        "features/ai/extension/panel.html",
+        "features/workspace/native/chrome/browser/extensions/api/breezer_private/BUILD.gn",
+        "script/verify_sync_reply_efficiency.py",
+        "docs/evidence/memory-20261103/streaming-review-report.json",
+        "script/windows/show-build-progress.ps1",
+        "upstream/helium-macos/.github/scripts/github_prepare_artifacts.sh",
+        "tests/ai/context-memory.test.mjs",
+        "docs/evidence/memory-20261103/workspace-page-review.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ko.json",
+        "tests/passwords/enter.html",
+        "upstream/helium-macos/helium-chromium/i18n/translations/as.json",
+        "docs/evidence/performance-1.2.0/component-measure.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/infobar.patch",
+        "upstream/helium-macos/build.sh",
+        "tests/ai/translation-browser.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/break-favicons.patch",
+        "docs/evidence/memory-20261103/combined-native-output-final.tap",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo_22_mono.png",
+        "upstream/helium-macos/downloads.x64.ini",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/ublock-setup-sources.patch",
+        "tests/ai/workspace-members-efficiency.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/engine-defaults.patch",
+        "upstream/helium-macos/helium-chromium/downloads.ini",
+        "upstream/helium-macos/.github/workflows/bump.yml",
+        "docs/evidence/performance-1.2.0/presentation-data.json",
+        "upstream/helium-macos/helium-chromium/patches/inox-patchset/modify-default-prefs.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-untraceable-urls.patch",
+        "upstream/helium-macos/helium-chromium/utils/_extraction.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-devtools-annoyances.patch",
+        "features/ai/extension/panel.js",
+        "tests/ai/workspace-browser-fixture.mjs",
+        "tests/windows/memory_update_test.py",
+        "features/ai/extension/whats-new.html",
+        "docs/evidence/memory-20261103/native-output-portability.tap",
+        "tests/ai/settings-redesign-browser.test.mjs",
+        "docs/evidence/performance-1.2.0/verification-page-browser-tests.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/clean-incognito-guest-ntp.patch",
+        "script/verify_stream_render_efficiency.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/history-expiration-threshold.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/clear-browsing-data-popup.patch",
+        "docs/evidence/memory-20261103/combined-offline-pinned.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-reading-list-from-app-menu.patch",
+        "upstream/helium-macos/revision.txt",
+        "docs/evidence/memory-20261103/workspace-tab-update-counters.json",
+        "site/api/usage.js",
+        "advertising/src/06-air.html",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/remove-uneeded-ui.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-hide-crashed-bubble.patch",
+        "upstream/helium-macos/devutils/generate_dmg_dsstore.sh",
+        "docs/evidence/release-1.2.0/login-enter-runtime.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/ridiculous-google-compat-exceptions.patch",
+        "features/ai/extension/translation.html",
+        "tests/sync/size-guard.test.mjs",
+        "upstream/helium-macos/helium-chromium/devutils/lint.py",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sk.json",
+        "docs/evidence/memory-20261103/panel-browser-coordinator.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/reenable-spellcheck-downloads.patch",
+        "features/ai/DESIGN.md",
+        "tests/ai/whats-new.test.mjs",
+        "features/ai/host/main.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/profile-picker-cleanup.patch",
+        "docs/evidence/memory-20261103/transport-summary-coordinator.log",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_plugins_32.png",
+        "docs/evidence/memory-20261103/workspace-audit.json",
+        "upstream/helium-macos/patches/helium/macos/rust-dep.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/keyboard-shortcuts.patch",
+        "upstream/helium-macos/patches/helium/macos/change-keychain-name.patch",
+        "upstream/helium-macos/helium-chromium/.gitattributes",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/toolbar-overflow.patch",
+        "upstream/helium-macos/helium-chromium/patches/inox-patchset/disable-autofill-download-manager.patch",
+        "docs/evidence/memory-20261103/native-packet-negative-control.log",
+        "docs/evidence/memory-20261103/codex-cancellation-review-host-20261103.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/scan-chrome-native-messaging-hosts.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/profile-customization-cleanup.patch",
+        "features/ai/extension/release-notes.js",
+        "script/generate_breezer_filter_lists.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/fix-building-without-safebrowsing.patch",
+        "features/passwords/README.md",
+        "upstream/helium-macos/resources/dmg_dsstore",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/side-panel-webui-customize.patch",
+        "features/storage/code-sign-clones/apply.py",
+        "docs/evidence/memory-20261103/audit-fixes-final.tap",
+        "docs/evidence/memory-20261103/workspace-ui-after.tap",
+        "script/verify_workspace_members_efficiency.mjs",
+        "upstream/helium-macos/helium-chromium/devutils/README.md",
+        "docs/building-breezer.md",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ja.json",
+        "docs/evidence/memory-20261103/workspace-ui-startup-race-before.tap",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/improve-flags-webui.patch",
+        "tests/ai/workspace-tab-update-efficiency.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/restore-google.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/replace-default-profile-name.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/enable-certificate-transparency-and-add-flag.patch",
+        "upstream/helium-macos/patches/helium/macos/updater/fixup-sparkle-glue.patch",
+        "upstream/helium-macos/patches/helium/macos/lockdown-mode-imageio.patch",
+        "docs/evidence/memory-20261103/cli-fragment-implementation.json",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_management_32.png",
+        ".github/workflows/checks.yml",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/progress-bar.patch",
+        "advertising/src/common.js",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/README.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/update-search-suggest-text.patch",
+        "docs/evidence/memory-20261102/native-transport-summary.json",
+        "upstream/helium-macos/helium-chromium/devutils/run_utils_tests.sh",
+        "upstream/helium-macos/helium-chromium/.github/workflows/ci.yml",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/crash-reporting-settings.patch",
+        "docs/passkeys.md",
+        "advertising/src/voice/07-unseen.js",
+        "features/sync/test-provider/extension/options.js",
+        "upstream/helium-macos/helium-chromium/i18n/translations/th.json",
+        "tests/ai/organato-settings.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/block-requests.patch",
+        "tests/passwords/component.html",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/zen-mode.patch",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/unidiff/__version__.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/context-menu.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/prefer-https-by-default.patch",
+        "script/verify_breezer_filter_lists.mjs",
+        "docs/passwords.md",
+        "tests/ai/organato-response.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/crash-reporting-prefs.patch",
+        "docs/evidence/performance-1.2.0/whats-new-results-narrow.png",
+        "docs/evidence/ai-research/research-picker.png",
+        "README.md",
+        "script/check_helium.py",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/fix-learn-doubleclick-hsts.patch",
+        "upstream/helium-macos/helium-chromium/utils/tests/__init__.py",
+        "advertising/src/05-tailwind.html",
+        "docs/evidence/memory-20261102/decisions.tsv",
+        "features/ai/extension/context-settings.js",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-dial-repeating-discovery.patch",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/unidiff/constants.py",
+        "upstream/helium-macos/.github/actions/prepare-environment/action.yml",
+        "upstream/helium-macos/.github/ISSUE_TEMPLATE/config.yml",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-scroll-tabs.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-component-managed-schema-support.patch",
+        "docs/evidence/performance-1.2.0/article-390.png",
+        "docs/evidence/memory-20261103/page-snapshot-combined-final.tap",
+        "docs/omnibox-suggestions.md",
+        "docs/performance.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/core.patch",
+        "upstream/helium-macos/devutils/shared.sh",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/fix-building-without-mdns-and-service-discovery.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/es-419.json",
+        "features/ai/extension/whats-new.css",
+        "tests/ai/stream-render.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/side-panel-webui-general.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/compact-debugger-warning.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/es.json",
+        "features/ai/extension/workspace.html",
+        "docs/evidence/organato/after-off-light.png",
+        "upstream/helium-macos/devutils/set_quilt_vars.sh",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/square-interstitial-buttons.patch",
+        "upstream/helium-macos/.github/workflows/build-phase.yml",
+        "docs/evidence/memory-20261103/workspace-route-cleanup-browser.tap",
+        "tests/ai/fixtures/cli-before.mjs",
+        "docs/evidence/memory-20261103/translation-browser-coordinator.log",
+        "tests/ai/native-transport-lifecycle.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/frame-grab-handle.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/si.json",
+        "features/ai/extension/translation-provider.js",
+        "script/verify_native_decoder_memory.mjs",
+        "docs/evidence/memory-20261103/native-output-package-tests.log",
+        "docs/evidence/memory-20261103/workspace-cleanup-before.tap",
+        "docs/evidence/memory-20261103/cli-fragment-review-repro-output.json",
+        "upstream/helium-macos/LICENSE",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flags-for-existing-switches.patch",
+        "docs/evidence/memory-20261103/combined-plain-stream-command.json",
+        "docs/evidence/memory-20261102/page-targets-before.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/pwa-toolbar.patch",
+        "script/verify_breezer_helper_lifetime.mjs",
+        "script/windows/windows-command.py",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/__init__.py",
+        "docs/evidence/translation/page-live.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/mute-tab-context-menu.patch",
+        "script/breezer_release.py",
+        "upstream/helium-macos/.github/ISSUE_TEMPLATE/feature-request.yml",
+        "upstream/helium-macos/helium-chromium/.python-version",
+        "tests/ai/bookmarks-native.mjs",
+        "docs/evidence/memory-20261103/folder-small-case-before.tap",
+        "features/ai/extension/research-policy.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/clean-up-installed-extension-bubble.patch",
+        "tests/ai/research-providers.test.mjs",
+        "docs/evidence/settings/general-dark.png",
+        "upstream/helium-macos/patches/helium/macos/rbe-linux-clang-wrapper.patch",
+        "tests/ai/workspace-peek.test.mjs",
+        "upstream/helium-macos/.github/scripts/github_unpack_archive.sh",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo.icon",
+        "tests/passkeys/virtual.mjs",
+        "docs/evidence/memory-20261102/native-transport-final-65536.json",
+        "docs/evidence/memory-20261102/native-transport-final-4194304.json",
+        "docs/evidence/memory-20261103/translation-work-implementation.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/profile-prefs.patch",
+        "upstream/helium-macos/resources/platform_resources.txt",
+        "tests/ai/installed-chat.mjs",
+        "docs/evidence/performance-1.2.0/verification-version-cache-check.json",
+        "advertising/src/07-unseen.html",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/spoof-chrome-ua-brand.patch",
+        "upstream/helium-macos/patches/helium/macos/applescript-tab-select-command.patch",
+        "docs/evidence/memory-20261103/cli-fragment-fresh-checkout.tap",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_bookmarks_32.png",
+        "docs/evidence/memory-20261102/verification.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/toolbar-layout.patch",
+        "features/ai/extension/panel-theme.js",
+        "tests/ai/browser-input-regression.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-format.patch",
+        "features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc",
+        "upstream/helium-macos/helium-chromium/.github/.well-known/funding-manifest-urls",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout-constants.patch",
+        "advertising/src/voice/06-air.js",
+        "docs/evidence/memory-20261103/combined-cli-command.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/tab-favicon-retention.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-password-manager.patch",
+        "features/ai/extension/sync-settings.js",
+        "docs/evidence/memory-20261103/workspace-page-integration.json",
+        "tests/sync/reconcile.test.mjs",
+        "features/ai/extension/workspace.css",
+        "features/passwords/native-ui/.gitattributes",
+        "docs/evidence/memory-20261102/ai-packaging-tests.log",
+        "upstream/helium-macos/patches/helium/macos/disable-chromium-immersive-fullscreen.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/mk.json",
+        "features/ai/extension/settings.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/toolbar-window-frame-hit-test.patch",
+        "tests/ai/usage.test.mjs",
+        "upstream/helium-macos/helium-chromium/devutils/.coveragerc",
+        "upstream/helium-macos/helium-chromium/patches/brave/tab-cycling-mru-impl.patch",
+        "features/sync/native/chrome/browser/sync/breezer_sync/backend.cc",
+        "upstream/helium-macos/helium-chromium/patches/inox-patchset/disable-update-pings.patch",
+        "docs/ai-docs-control.md",
+        "docs/evidence/memory-20261103/codex-process-cancellation.tap",
+        "upstream/helium-macos/helium-chromium/devutils/run_utils_yapf.sh",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-ipv6-probing-option.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/clean-new-tab-page.patch",
+        "upstream/helium-macos/helium-chromium/utils/i18n_apply.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/custom-keyboard-shortcuts-wiring.patch",
+        "tests/passkeys_native_test.py",
+        "docs/evidence/performance-1.2.0/verification-version-tests.log",
+        "docs/newtab.md",
+        "features/workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h",
+        "docs/evidence/memory-20261103/streaming-review-adversarial-fixed.log",
+        "upstream/helium-macos/helium-chromium/devutils/i18n.py",
+        "tests/ai/cli-fragment-buffer.test.mjs",
+        "upstream/helium-macos/helium-chromium/devutils/run_other_pylint.py",
+        "docs/evidence/memory-20261103/windows-cleanup-complete.log",
+        "tests/compiled-filter-lists.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-increase-incognito-storage-quota.patch",
+        "docs/evidence/memory-20261102/translation-before.json",
+        "upstream/helium-macos/helium-chromium/patches/bromite/flag-max-connections-per-host.patch",
+        "docs/evidence/memory-20261103/plain-stream-integration.json",
+        "tests/ai/panel-browser.mjs",
+        "docs/evidence/memory-20261103/transport-validation-implementation.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/gu.json",
+        "script/breezer_build_profile.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-toolbar-corners.patch",
+        "docs/evidence/release-1.2.0/download.png",
+        "script/verify_sidebar_memory.mjs",
+        "upstream/helium-macos/helium-chromium/devutils/tests/__init__.py",
+        "docs/evidence/memory-20261103/native-output-counts.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/simplify-context-menu.patch",
+        "docs/evidence/memory-20261103/native-output-final-negative-control.tap",
+        "upstream/helium-macos/helium-chromium/domain_regex.list",
+        "features/storage/code-sign-clones/clone_session.h",
+        "features/sync/test-provider/extension/package.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/frame-background.patch",
+        "upstream/helium-macos/helium-chromium/devutils/tests/test_validate_patches.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/api.patch",
+        "docs/evidence/memory-20261103/protocol-output-explicit-utf8.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-suggestions-url-field.patch",
+        "docs/evidence/memory-20261102/native-transport-final-8388608.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/noise/hardware-concurrency.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/pl.json",
+        "tests/ai/claude-streaming.test.mjs",
+        "site/shots/browser-control.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-middle-click-autoscroll-flag.patch",
+        "tests/ai/browser-api-fixture.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/enable-back-to-opener.patch",
+        "docs/evidence/organato/onboarding-optout-failed-narrow.png",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-custom-ntp.patch",
+        "docs/evidence/memory-20261103/coordinator-final-fixes-coverage.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-history-clusters.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/ublock-dns-uncloaking.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-split-view-mini-toolbar.patch",
+        "tests/code_sign_clones_test.py",
+        "docs/evidence/memory-20261103/native-backpressure-experiment.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/sync-setup-contract.patch",
+        "docs/evidence/login-enter-baseline/login-enter.png",
+        "docs/evidence/performance-1.2.0/comparison.png",
+        "docs/evidence/release-1.2.0/README.md",
+        "features/passwords/native-ui/apply.py",
+        "script/verify_breezer_filter_behavior.mjs",
+        "script/verify_upstream.py",
+        "upstream/helium-macos/.github/scripts/sanity-check.sh",
+        "tests/windows/unattended_build_test.py",
+        "upstream/helium-macos/resources/assets/Assets.car",
+        "upstream/helium-macos/helium-chromium/i18n/translations/hy.json",
+        "features/ai/extension/newtab.css",
+        "docs/evidence/memory-20261103/plain-stream-review.json",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/unidiff/errors.py",
+        "upstream/helium-macos/helium-chromium/resources/helium_resources.txt",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/settings-page-icons.patch",
+        "features/ai/UPDATES.md",
+        "tests/ai/research.test.mjs",
+        "site/lib/dashboard-page.js",
+        "features/ai/extension/research-sources.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/show-tabs-from-non-account-backends.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/crash-reporter-privacy-tweaks.patch",
+        "tests/sync/lifetime.test.mjs",
+        "upstream/helium-macos/helium-chromium/chromium_version.txt",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-native-bangs.patch",
+        "features/ai/extension/workspace.js",
+        "script/verify_workspace_sync_efficiency.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-engine-backend.patch",
+        "script/native_transport_diagnostic.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/shortcuts.patch",
+        "docs/evidence/memory-20261103/conversation-lifetime-experiment.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/vertical.patch",
+        "docs/evidence/memory-20261102/memory-package-tests.log",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-gaia.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-change-http-accept-header.patch",
+        "features/ai/extension/translation.css",
+        "upstream/helium-macos/patches/helium/macos/updater/sparkle2-integration.patch",
+        "upstream/helium-macos/.github/workflows/sanity.yml",
+        "upstream/helium-macos/patches/rebel/macos/sparkle-integration.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/pt-PT.json",
+        "docs/evidence/memory-20261103/codex-cancellation-review-faults-20261103.tap",
+        "script/check_breezer_sidebar_frame.py",
+        "upstream/helium-macos/helium-chromium/i18n/translations/lt.json",
+        "upstream/helium-macos/helium-chromium/resources/branding/app_icon/raw.png",
+        "advertising/src/voice/08-light.js",
+        "script/inventory_efficiency_sources.py",
+        "docs/translation.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-ad-topics-and-etc.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-encryption.patch",
+        "features/ai/extension/whats-new.js",
+        "tests/ai/release-notes.test.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/nb.json",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-omnibox-autocomplete-filtering.patch",
+        "upstream/helium-macos/helium-chromium/shell.nix",
+        "tests/ai/settings-onboarding.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-for-disabling-link-drag.patch",
+        "upstream/helium-macos/docs/building.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/app-menu-button.patch",
+        "upstream/helium-macos/helium-chromium/devutils/i18n_generate.py",
+        "script/verify_translation_memory.mjs",
+        "docs/evidence/memory-20261103/cleanup-retry-real-after.log",
+        "features/ai/extension/context-memory.js",
+        "docs/evidence/translation/controls.png",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/toggle-translation-via-switch.patch",
+        "upstream/helium-macos/devutils/update_patches.sh",
+        "docs/evidence/memory-20261103/claude-stream-before.json",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_settings_32.png",
+        "tests/ai/peek-native.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ms.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/id.json",
+        "features/ai/extension/page-context.js",
+        "features/ai/extension/translation.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/add-search-engine-button.patch",
+        "tests/ai/workspace-native.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/uz.json",
+        "upstream/helium-macos/helium-chromium/i18n/translations/mn.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/use-system-python3.patch",
+        "script/verify_native_output_efficiency.mjs",
+        "tests/passkeys/webauthn.html",
+        "docs/evidence/memory-20261103/page-snapshot-docs-browser-fixed.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/crash-dialog.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/pt-BR.json",
+        "docs/evidence/translation/README.md",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-gcm.patch",
+        "tests/ai/codex-process-cancellation.test.mjs",
+        "upstream/helium-macos/helium-chromium/LICENSE",
+        "docs/evidence/memory-20261103/windows-tests.log",
+        "script/macos_process_usage.c",
+        "script/verify_breezer_settings_lifetime.mjs",
+        "upstream/helium-macos/patches/series",
+        "docs/evidence/memory-20261103/source-inventory-panel-efficiency.json",
+        "tests/ai/context-settings.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-annoying-infobars.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/degoogle-context-menu.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/zen-caption-buttons.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/ublock-reconfigure-defaults.patch",
+        "upstream/helium-macos/patches/helium/macos/open-shortcuts-settings-action.patch",
+        "docs/evidence/memory-20261103/provider-helper-before.tap",
+        "docs/evidence/memory-20261103/combined-audit-fixes.tap",
+        "docs/evidence/memory-20261103/provider-helper-complete.tap",
+        "features/sync/setup/setup.css",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/location-bar-page-action.patch",
+        "docs/evidence/ai-research/research-partial-failure.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/services-prefs.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/network/quic-v2-flag.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/remove-dead-toolbar-actions.patch",
+        "docs/evidence/memory-20261103/combined-offline-pinned-review-fixed.tap",
+        "upstream/helium-macos/helium-chromium/i18n/translations/en-GB.json",
+        "upstream/helium-macos/helium-chromium/devutils/check_downloads_ini.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/fix-windows-ui-position.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/network-and-security-page.patch",
+        "upstream/helium-macos/resources/dmg_background.png",
+        "upstream/helium-macos/.github/scripts/github_prepare_release.sh",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/minimal-location-bar.patch",
+        "tests/passwords/installed.mjs",
+        "upstream/helium-macos/helium-chromium/devutils/validate_config.py",
+        "docs/evidence/favorite-shortcuts/lazy-fixture.png",
+        "script/apply_breezer_ai.py",
+        "docs/evidence/memory-20261103/native-output-packet-validation.json",
+        "upstream/helium-macos/helium-chromium/patches/iridium-browser/updater-disable-auto-update.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/remove-navigation-source-param.patch",
+        "upstream/helium-macos/helium-chromium/patches/inox-patchset/disable-battery-status-service.patch",
+        "docs/evidence/memory-20261103/sync-reply-negative-control.log",
+        "docs/evidence/memory-20261103/codex-cancellation-implementation.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/exclusive-access-bubble.patch",
+        "features/sync/test-provider/extension/options.html",
+        "docs/evidence/organato/reenabled-loading.png",
+        "tests/ai/newtab-browser.test.mjs",
+        "tests/passwords_proactive_test.py",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flags-for-referrer-customization.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/open-new-tabs-next-to-active-tab-option.patch",
+        "script/check_branding.py",
+        "LICENSE.ungoogled_chromium",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/bookmark-button-bg-fix.patch",
+        "upstream/helium-macos/helium-chromium/utils/tests/test_patches.py",
+        "docs/evidence/memory-20261103/plain-stream-integrated-counts.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/fixups-chrome-webstore-script.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-low-power-framerate-flag.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/remove-dead-profile-actions.patch",
+        "upstream/helium-macos/resources/assets/AppIcon.icon/icon.json",
+        "docs/evidence/memory-20261103/panel-efficiency-package-tests.log",
+        "tests/ai/installed-control.mjs",
+        "tests/native_transport_summary_test.py",
+        ".gitattributes",
+        "upstream/helium-macos/flags.macos.gn",
+        "upstream/helium-macos/helium-chromium/i18n/translations/hi.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/layout/min-window-width.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/hide-pip-live-caption-button.patch",
+        "tests/ai/docs-editor.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/tabs.patch",
+        "upstream/helium-macos/helium-chromium/devutils/third_party/unidiff/__init__.py",
+        "docs/evidence/settings/languages-dark.png",
+        "docs/evidence/memory-20261103/folder-model-before.tap",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/remove-pac-size-limit.patch",
+        "docs/evidence/memory-20261103/source-inventory-next.json",
+        "site/vercel.json",
+        "tests/ai/onboarding-browser.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/infinite-tab-freezing.patch",
+        "tests/ai/context-integration.test.mjs",
+        "features/ai/extension/workspace-store.js",
+        "features/sync/test-provider/server.py",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo.png",
+        "docs/evidence/performance-1.2.0/mac-copy-verification.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/network/disable-ech-flag.patch",
+        "docs/evidence/memory-20261102/windows-tests-final.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/multi-contents-drop-target.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/network/ignore-system-proxy-server-flag.patch",
+        "assets/branding/breezer-logo.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/ur.json",
+        "upstream/helium-macos/devutils/generate_sparkle_deltas.py",
+        "advertising/src/voice/07-unseen.mp3",
+        "docs/evidence/passkeys/settings-fixture.png",
+        "docs/evidence/memory-20261103/harness-cleanup-after-pinned.tap",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/prepopulated-search-engines.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-component-l10n-support.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/manifest-handler.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/always-use-better-ntp.patch",
+        "script/check_breezer_release.py",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_downloads_32.png",
+        "docs/evidence/memory-20261103/sync-writes-before.tap",
+        "upstream/helium-macos/.github/workflows/build.yml",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/about-page-tweaks.patch",
+        "docs/evidence/memory-20261103/page-snapshot-browser-control.log",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/override-chrome-protocol.patch",
+        "tests/ai/host-live.mjs",
+        "docs/evidence/memory-20261103/transport-and-audit-integration.json",
+        "features/ai/integration/native-host-manifest.json",
+        "docs/evidence/memory-20261103/stream-render-implementation.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-arc-importer.patch",
+        "features/sync/setup/setup.js",
+        "upstream/helium-macos/helium-chromium/i18n/source.gen.json",
+        "upstream/helium-macos/helium-chromium/patches/iridium-browser/safe-browsing-disable-reporting.patch",
+        "script/verify_page_context_memory.mjs",
+        "tests/ai/panel-theme.test.mjs",
+        "docs/evidence/memory-20261103/cli-fragment-review.json",
+        "tests/memory_package_test.py",
+        "upstream/helium-macos/helium-chromium/utils/tests/test_domain_substitution.py",
+        ".github/workflows/build-breezer-macos.yml",
+        "script/apply_breezer_workspace.py",
+        "docs/evidence/ai-research/research-selected-tabs.png",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_bookmarks_16.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sv.json",
+        "docs/evidence/performance-1.2.0/component-results.json",
+        "docs/evidence/organato/before-off-light.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/remove-description-snippet-deps.patch",
+        "docs/evidence/memory-20261103/overlay-offline-review-fixed.log",
+        "advertising/src/premium_score.py",
+        "features/ai/extension/browser-tools.js",
+        "tests/ai/research-browser.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-default-browser-reject-button.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/dont-antialias-rects.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/bookmarks-bar-padding.patch",
+        "upstream/helium-macos/helium-chromium/LICENSE.ungoogled_chromium",
+        "advertising/README.md",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/helium-logo-icons.patch",
+        "tests/ai/host.test.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/tr.json",
+        "features/ai/extension/usage.js",
+        "features/performance/compiled-filter-lists.mjs",
+        "upstream/helium-macos/helium-chromium/patches/bromite/disable-fetching-field-trials.patch",
+        "script/package_breezer_dmg.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/update-default-browser-prefs.patch",
+        "features/ai/extension/release-info.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/custom-profile-avatar-ui.patch",
+        "tests/ai/workspace-frame.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-updater-preference.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-remove-client-hints.patch",
+        "tests/ai/workspace-store.test.mjs",
+        "docs/evidence/memory-20261103/transport-summary-final.log",
+        "docs/evidence/memory-20261103/sync-lifetime-before.tap",
+        "script/check_breezer_passwords.py",
+        "features/sync/native/chrome/browser/sync/breezer_sync/backend.h",
+        "upstream/helium-macos/.github/workflows/building.yml",
+        "upstream/helium-macos/helium-chromium/domain_substitution.list",
+        "docs/evidence/favorite-shortcuts/README.md",
+        "upstream/helium-macos/helium-chromium/devutils/i18n_forage.py",
+        "docs/evidence/memory-20261103/sync-all-after.tap",
+        "upstream/helium-macos/helium-chromium/devutils/check_all_code.sh",
+        "docs/evidence/memory-20261103/sync-reply-after.json",
+        "tests/benchmark-browsers.test.mjs",
+        "script/check_ai_overlay.py",
+        "AGENTS.md",
+        "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.cc",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/component-updates.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-webrtc-log-uploader.patch",
+        "docs/evidence/memory-20261103/source-inventory-post-review.json",
+        "docs/evidence/memory-20261103/review-resolutions.json",
+        "docs/evidence/memory-20261103/sync-size-review.json",
+        "upstream/helium-macos/.github/workflows/lint.yml",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/add-more-zoom-presets.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/disable-tos-dialog.patch",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/add-flag-to-show-avatar-button.patch",
+        "docs/evidence/settings/no-results-light.png",
+        "upstream/helium-macos/downloads.arm64.ini",
+        "upstream/helium-macos/.github/ISSUE_TEMPLATE/bug-report.yml",
+        "upstream/helium-macos/helium-chromium/i18n/translations/kk.json",
+        "docs/evidence/memory-20261103/plain-stream-focused-final.tap",
+        "script/verify_cli_fragment_efficiency.mjs",
+        "features/ai/extension/workspace-sync-model.js",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/find-bar.patch",
+        "docs/evidence/memory-20261103/native-host-audit.json",
+        "tests/ai/workspace-browser.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/reenable-update-status.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/disable-outdated-build-detector.patch",
+        "tests/sync/provider-lifecycle.test.mjs",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/remove-unused-preferences-fields.patch",
+        "tests/ai/settings-onboarding-browser.test.mjs",
+        "features/ai/extension/shortcut-add.js",
+        "docs/evidence/memory-20261103/plain-stream-experiment.json",
+        "docs/evidence/memory-20261103/provider-cleanup-before.tap",
+        "docs/evidence/memory-20261103/combined-audit-fixes-clock-fixed.tap",
+        "advertising/src/render.mjs",
+        "features/ai/CONTEXT-MEMORY.md",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_conflicts_16.png",
+        "tests/ai/page-snapshot-efficiency.test.mjs",
+        "docs/evidence/memory-20261103/transport-summary-before.json",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo_white.png",
+        "upstream/helium-macos/helium-chromium/i18n/translations/te.json",
+        "docs/evidence/memory-20261103/sync-reply-implementation.json",
+        "upstream/helium-macos/helium-chromium/utils/.coveragerc",
+        "advertising/src/03-unwatched.html",
+        "docs/evidence/sync/sync-recovery-narrow-fixture.png",
+        "site/api/metrics.js",
+        "upstream/helium-macos/helium-chromium/patches/debian/disable-google-api-warning.patch",
+        "site/lib/storage.js",
+        "tests/windows/build-progress.test.ps1",
+        "docs/evidence/memory-20261103/newtab-browser-review-fixed.log",
+        "features/sync/README.md",
+        "tests/ai/workspace-static.test.mjs",
+        "upstream/helium-macos/helium-chromium/i18n/translations/it.json",
+        "upstream/helium-macos/helium-chromium/resources/branding/product_logo.svg",
+        "docs/evidence/memory-20261103/workspace-ui-before.tap",
+        "features/ai/host/cli.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/licenses-in-credits.patch",
+        "script/apply_breezer_ai_ui.py",
+        "upstream/helium-macos/helium-chromium/i18n/translations/zu.json",
+        "upstream/helium-macos/.github/scripts/github_unpack_resources.sh",
+        "features/ai/host/controller.mjs",
+        "docs/evidence/memory-20261103/decoder-reuse-experiment.json",
+        "upstream/helium-macos/downloads.ini",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/force-eu-search-features.patch",
+        "assets/icon.svg",
+        "features/storage/code-sign-clones/upstream.json",
+        "docs/upstream-originals/development-dependencies.md",
+        "upstream/helium-macos/helium-chromium/resources/favicons/favicon_flags_32.png",
+        "docs/evidence/memory-20261103/staged-cleanup-tests.log",
+        "upstream/helium-macos/.github/scripts/github_setup_env_toolchain.sh",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/search/omnibox-default-search-icon.patch",
+        "site/shots/newtab-dark.jpg",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/block-trk-and-subdomains.patch",
+        "upstream/helium-macos/patches/ungoogled-chromium/macos/fix-dsymutil.patch",
+        "upstream/helium-macos/helium-chromium/utils/name_substitution.py",
+        "docs/evidence/memory-20261103/combined-codex-command.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/split-view.patch",
+        "docs/evidence/memory-20261103/page-content-audit.json",
+        "upstream/helium-macos/patches/ungoogled-chromium/macos/no-unknown-warnings.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/fi.json",
+        "docs/evidence/memory-20261103/protocol-output-default-write.mjs",
+        "docs/upstream-originals/build-dependencies.md",
+        "upstream/helium-macos/helium-chromium/i18n/translations/zh-HK.json",
+        "tests/ai/update-lifetime.test.mjs",
+        "upstream/helium-macos/helium-chromium/utils/helium_version.py",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/fix-layout-separators.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/eu.json",
+        "tests/ai/browser-page.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/fix-caption-button-bounds.patch",
+        "site/index.html",
+        "features/ai/extension/translation-background.js",
+        "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.h",
+        "features/omnibox/omnibox-suggestions.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/memory-saving-by-default.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/sr.json",
+        "docs/evidence/memory-20261103/newtab-browser-coordinator.log",
+        "upstream/helium-macos/helium-chromium/deps.ini",
+        "features/ai/extension/usage-settings.js",
+        "docs/evidence/memory-20261103/members-before.json",
+        "site/package.json",
+        "features/ai/extension/background.js",
+        "docs/release-1.2.0-inventory.md",
+        "upstream/helium-macos/helium-chromium/i18n/languages.json",
+        "docs/evidence/memory-20261103/verification-odd-audit.json",
+        "docs/evidence/passkeys/virtual-result.json",
+        "script/benchmark_native_transport.mjs",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/custom-keyboard-shortcuts-page.patch",
+        "docs/evidence/memory-20261103/members-implementation.json",
+        "upstream/helium-macos/resources/assets/app.icns",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/location-bar.patch",
+        "upstream/helium-macos/helium-chromium/i18n/README.md",
+        "features/workspace/native/chrome/browser/ui/helium/breezer_workspace_prefs.h",
+        "upstream/helium-macos/helium-chromium/.github/actions/bump-platform/action.yml",
+        "docs/evidence/performance-1.2.0/whats-new-results-full.png",
+        "upstream/helium-macos/helium-chromium/patches/helium/settings/fix-text-on-cookies-page.patch",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/add-update-channel-flag.patch",
+        "upstream/helium-macos/helium-chromium/devutils/i18n_translate.py",
+        "docs/evidence/performance-1.2.0/harness-provenance.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/ui/helium-color-mixers.patch",
+        "docs/evidence/memory-20261103/source-inventory-latest.json",
+        "docs/evidence/memory-20261103/sync-size-implementation.json",
+        "upstream/helium-macos/helium-chromium/patches/helium/core/enable-screenshots.patch",
+        "site/tests/metrics.test.mjs",
+        "upstream/helium-macos/helium-chromium/utils/prune_binaries.py",
+        "features/sync/setup/setup.html",
+        "upstream/helium-macos/helium-chromium/patches/ungoogled-chromium/remove-f1-shortcut.patch",
+        "upstream/helium-macos/helium-chromium/i18n/translations/fr-CA.json"
+      ],
+      "rowCount": null
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/initial-status.txt",
+      "sha256": "9ab0b74c676720e64225c7bed285365f52d25b8477cd395a18f046e99d0aa103",
+      "bytes": 3446,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/loader.mjs",
+      "sha256": "4919d65e4f11bb0589bcef0a993c4a5df3a09f20e8c1649ebce0db01daf22eeb",
+      "bytes": 439,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/original.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "bytes": 16858,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/read-files.json",
+      "sha256": "73212917e8b87dfe9e05b33d9bb8b1f25b12b1ef279297a115fe2e38e2c3588e",
+      "bytes": 2206,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "list"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/report-internal.json",
+      "sha256": "2574e82f629ff871ec5e5e6ae78513bc4a67dcb14d0b4d7a891329fc74c5e1f0",
+      "bytes": 1000099,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "recommendation",
+        "productionAdoption",
+        "reason",
+        "ownership",
+        "source",
+        "runtime",
+        "tests",
+        "allocationCounts",
+        "gc",
+        "benchmarkPlan",
+        "benchmarkSummary",
+        "rawEvidence",
+        "failedTrials",
+        "behavior",
+        "cpuObjectionsAndLimits",
+        "acceptanceGaps",
+        "commands",
+        "files",
+        "artifacts",
+        "endDriftChecks"
+      ],
+      "rowCount": null
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/report-summary.log",
+      "sha256": "9edd50b3aa441f529c5c344db4f9e3d2ec9b6ff0dc65b020a190a26337662c94",
+      "bytes": 10345,
+      "inspection": "byte-inventory",
+      "lines": 330,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/report.py",
+      "sha256": "3012073fe898c3cc3f6e62f36924cd6f3c19644df707d8a78d3ada6cbbab0298",
+      "bytes": 8476,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/run.mjs",
+      "sha256": "35bdef0be77f7674fbf294ed568705877301b5a493dc90d93c52bdc9ea3ebae5",
+      "bytes": 2107,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/runtime.log",
+      "sha256": "249baf635bb43877fcb9422efa1a4904b702d0ddf14d3949b7cd0950d5229c81",
+      "bytes": 9,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/supplement.json",
+      "sha256": "e6a86246e6905603f89329d05b0a2e6247c839f50641669a40e71488b8af421c",
+      "bytes": 2057383,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "dict",
+      "keys": [
+        "comparisons",
+        "seed",
+        "sharedDecode",
+        "rows"
+      ],
+      "rowCount": 2044
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/supplement.log",
+      "sha256": "8fe3aaf88a897fd765d0584874ff1335aa9a1f73c9c70a584874e5924c0aed6c",
+      "bytes": 73,
+      "inspection": "byte-inventory",
+      "lines": 1,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/supplement.mjs",
+      "sha256": "362c1e67362b5ae15a0b2a3bfca899b880ca08a7b981ba350345ece81500bb95",
+      "bytes": 3297,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-commands.json",
+      "sha256": "8f59459a6bf738d73f72645d7b0d2324e298912cec6626655241d93d46dedf02",
+      "bytes": 660490,
+      "inspection": "complete JSON parsed; structure/counts inspected, not a manual full-text read",
+      "rootType": "list"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-experiment.mjs",
+      "sha256": "a16dd56889e689d2195ed17a20a1d64bce4b10f0ab2bfeb1b6855a8150579ab5",
+      "bytes": 9966,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-final-checks.mjs",
+      "sha256": "e8b69f63f858e406c42ac1ca62889c2b8a25f42b30510d96ba68d467149feaad",
+      "bytes": 1279,
+      "inspection": "byte-inventory"
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-gc.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "inspection": "byte-inventory",
+      "lines": 0,
+      "hasFailureMarker": false
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame/trial-1-run.mjs",
+      "sha256": "5424681b138e354a088ee6ad27d0b94eba5c55b9050233df70a0e199cca86197",
+      "bytes": 1803,
+      "inspection": "byte-inventory"
+    }
+  ],
+  "evidenceInventoryNote": "JSON and log evidence structurally inspected and original artifact hashes all verified. Large reports/raw JSON are not labelled manual fully-read files. Full source modules were independently read in full. trial-1-experiment differs only in corrected GC keeper logic, as inspected by diff.",
+  "endDriftChecks": {
+    "checkedFiles": 1399,
+    "changedFiles": [],
+    "allOriginalExperimentArtifactHashesMatch": true,
+    "allOwnedModuleCopiesMatchFrozen": true,
+    "productionUnchanged": true,
+    "scope": "Initially existing tracked/nonignored untracked regular files outside build plus every original scratch file and both reports. Hashing is not full-read evidence. Extensive unrelated changes preserved."
+  },
+  "ownedArtifacts": [
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/benchmark-plan.json",
+      "sha256": "c4d481ddb2459fbc5ba6ef6d146b8b1ea3da68001b93a378850ccb85281b6617",
+      "bytes": 571
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/candidate.mjs",
+      "sha256": "448ad4774dcc0983b8d17571fc11dbd62ea4d0f3c32ef714024096634d0dda2c",
+      "bytes": 17430
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/check.mjs",
+      "sha256": "55ef4767941dc3e805a97e5568297bc220b88e3fe43479407d4c1d0cd4425819",
+      "bytes": 4295
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/commands.json",
+      "sha256": "37ab10980c02b36a4d1245f7e118d3d2021d70015f632168b6077dfbc68ce957",
+      "bytes": 5014
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/counts.json",
+      "sha256": "a7a81c8e6fb03f5431a1fc4d04aa562d838b94475bd634b5bef77eb26448863d",
+      "bytes": 6155
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/counts.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/counts.stdout",
+      "sha256": "88e88412a88b5442f0efef22d6b1fb66bddf62b5c3b50a16ca0a0ebac3082761",
+      "bytes": 4127
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/differential.json",
+      "sha256": "9926bc410f4a8a0c5d9eb7f5d00ad7250da3c85ca7fa1ba7888224ffe897bca0",
+      "bytes": 1054026
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/differential.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/differential.stdout",
+      "sha256": "9f611dee2f0f01f4f218fc34ca5b5692ef4e7742fd67d5ef4b7f2e22f283b6d8",
+      "bytes": 524750
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/error-gc.json",
+      "sha256": "2d0d3b9835deb25a820b98e65fbbc78ea6143a450c9f738e470d28e99d00487b",
+      "bytes": 2597
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/error-gc.mjs",
+      "sha256": "fd5468a41c23d99dbcec8d385681fb5970a761662b3df4134ae026e018af489e",
+      "bytes": 1856
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/error-gc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/error-gc.stdout",
+      "sha256": "ecf627531cc90c0aa381c3f025333c70b30f147e45d7f267a7a2d680fb80613d",
+      "bytes": 1662
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/evidence-inspection.json",
+      "sha256": "5605daaf62f674a86526d8fa1b65925020ef3df2cf149dfe36bfc598373f563c",
+      "bytes": 111737
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/experiment.mjs",
+      "sha256": "7c5fedff223a71752869e0d900b890b8b891d1d2ee009228b2de193f6951ac11",
+      "bytes": 10024
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/gc.json",
+      "sha256": "358e472ababfbdbe7e2e56f43c4049c804671886b0d5a408248ce45f17a5887a",
+      "bytes": 5449
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/gc.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/gc.stdout",
+      "sha256": "f4e9f602abe9fb3c43d9848e096ea15d83b42038179f3df4f988e4467c379f49",
+      "bytes": 3593
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/independent-checks.json",
+      "sha256": "df6d319ad50dc811795f88111bbee635ed697481e5ca39dcdef04bc42820b813",
+      "bytes": 8733
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/independent.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/independent.stdout",
+      "sha256": "fddb2fa0b141d53295ac47dd4ad626c0f1677ee109e2a801f26930ebb19e84dd",
+      "bytes": 384
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/initial-hashes.json",
+      "sha256": "80cc330e3d118da762af2e712ea02d0fadc2ec355a86e709f9c181deca60cebd",
+      "bytes": 187440
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/original.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "bytes": 16858
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/report.py",
+      "sha256": "84582301185900d871d4b28bc1591d14756ff9102576c72abac2549b89ed1205",
+      "bytes": 11969
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/run-extra.py",
+      "sha256": "06c81b2cdfe7e29e1dfffbfae6956a67057d31cc9af768704f948c67f573875c",
+      "bytes": 1305
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/run.py",
+      "sha256": "f2c2cc536da13e54f758f6cfd417ffe4304f010b85670bb227d8a3e679aeb718",
+      "bytes": 1460
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/supplement.json",
+      "sha256": "e6a86246e6905603f89329d05b0a2e6247c839f50641669a40e71488b8af421c",
+      "bytes": 2057383
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/supplement.mjs",
+      "sha256": "362c1e67362b5ae15a0b2a3bfca899b880ca08a7b981ba350345ece81500bb95",
+      "bytes": 3297
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/supplement.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/supplement.stdout",
+      "sha256": "8fe3aaf88a897fd765d0584874ff1335aa9a1f73c9c70a584874e5924c0aed6c",
+      "bytes": 73
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/timing.json",
+      "sha256": "ffd7563fd3c39b9d6097dc58506df340218ba6bf83d129e2c15ac1eb7a408e14",
+      "bytes": 25334
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/timing.mjs",
+      "sha256": "a60f60fa0f469ac979796f3d58dce6e53839b17ab3ceb89242e903d9265e708f",
+      "bytes": 1949
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/timing.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/native-complete-frame-review/timing.stdout",
+      "sha256": "a87c82d4eabfee16ada01ff73597d02ff4787385bec6314a31c17bcf0c0aa203",
+      "bytes": 15
+    }
+  ],
+  "commandsNote": "Two error-gc invocations are recorded. The first used an intermediate synthetic subclass fixture; the second corrected that synthetic probe to call push on the subclass itself and demonstrate the contract difference. Both exited 0. error-gc.stdout and error-gc.json contain the final invocation. All timing raw samples are preserved unchanged.",
+  "reviewer": "gpt-6.1-sol, independent review, no subagents"
+}

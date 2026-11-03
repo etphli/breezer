@@ -1,0 +1,424 @@
+{
+  "area": "native-host",
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular"
+  },
+  "files": [
+    {
+      "path": "features/ai/host/claude.mjs",
+      "sha256": "ed5c48e871aa968cec7041c8fa70fdfec4a655a78144ae9e6481905c591d8733",
+      "lines": 142,
+      "readRanges": [
+        [
+          1,
+          142
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Per-chat process and 30 action-round cap; round timer/listeners cleaned. Accumulated structured JSON is reparsed per delta. Discovery process closes in finally."
+    },
+    {
+      "path": "features/ai/host/cli.mjs",
+      "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+      "lines": 101,
+      "readRanges": [
+        [
+          1,
+          101
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. JSON-line buffer capped at 16 Mi characters, pending requests expire and reject on close; SIGTERM escalates after one second. stdout JSON-line concatenation and ignored stdin backpressure merit separate bounded probes. No provider executed."
+    },
+    {
+      "path": "features/ai/host/codex.mjs",
+      "sha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+      "lines": 242,
+      "readRanges": [
+        [
+          1,
+          242
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete in overlapping chunks 1-180 and 180-242. Discovery catalog retained intentionally; model pagination capped around 500. Ephemeral isolation and per-chat tool-verification preserved. Abort not connected until after preflight and start."
+    },
+    {
+      "path": "features/ai/host/context-controller.mjs",
+      "sha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "lines": 46,
+      "readRanges": [
+        [
+          1,
+          46
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Summary and ordinary-chat mutual exclusion; identity guards suppress stale output; inherited close dispatches overridden cancel."
+    },
+    {
+      "path": "features/ai/host/context-summary.mjs",
+      "sha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "lines": 76,
+      "readRanges": [
+        [
+          1,
+          76
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Aggregates bounded to 20 sites, output 4000 characters, 45-second abort race with cleanup. Underlying provider abort responsiveness is separate."
+    },
+    {
+      "path": "features/ai/host/controller.mjs",
+      "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "lines": 94,
+      "readRanges": [
+        [
+          1,
+          94
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Single active run; cached discovery; tool request timers removed on result/cancel/finally. Cancel permits replacement before old discovery/preflight cleanup completes."
+    },
+    {
+      "path": "features/ai/host/launch.sh",
+      "sha256": "431732c907e70cf5ec066742fdb4b51d02015e3c8362a0ede30b168b4e2d6b2a",
+      "lines": 12,
+      "readRanges": [
+        [
+          1,
+          12
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. exec replaces shell, bundled runtime required and inherited Node injection settings removed. Not run."
+    },
+    {
+      "path": "features/ai/host/main.mjs",
+      "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "lines": 60,
+      "readRanges": [
+        [
+          1,
+          60
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Providers/controllers lazy-loaded; decoder fix already verified elsewhere. Native output has per-frame bound but ignores stream pressure. EOF closes controller, not outstanding Organato/discovery requests."
+    },
+    {
+      "path": "features/ai/host/organato.mjs",
+      "sha256": "5805280cdd6a12df299f0a51d9a54d77df358d71eda93fe1642f7fb170c9712c",
+      "lines": 105,
+      "readRanges": [
+        [
+          1,
+          105
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Configuration queue serializes operations; request deadline 10 seconds, list at most 10 pages, but response text length checked after consumption. Default secrets/config never accessed."
+    },
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "sha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+      "lines": 161,
+      "readRanges": [
+        [
+          1,
+          161
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Existing decoder fix preserved and excluded as a new finding. Input/output/history bounds present; context JSON serializes before text truncation. No periodic work."
+    },
+    {
+      "path": "features/ai/host/update-worker.mjs",
+      "sha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+      "lines": 108,
+      "readRanges": [
+        [
+          1,
+          108
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete after docs/updating.md. Download streams through checksum/size validator; signature/identity verification retained, process polling bounded to 120 iterations. No worker or update operations invoked."
+    },
+    {
+      "path": "features/ai/host/updater.mjs",
+      "sha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6",
+      "lines": 109,
+      "readRanges": [
+        [
+          1,
+          109
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete after docs/updating.md. Busy gate bounds concurrent update operations; exact candidate retained for install. Response size check follows full text read. No changes or updater calls."
+    },
+    {
+      "path": "features/ai/integration/identity.json",
+      "sha256": "5edf973b0dc8efcea27b7f62a3754ba2085533b9989a8ec5390d866c67ec11f0",
+      "lines": 5,
+      "readRanges": [
+        [
+          1,
+          5
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Static public extension identity; no dynamic allocation issue."
+    },
+    {
+      "path": "features/ai/integration/native-host-manifest.json",
+      "sha256": "1ce539c8987f93a3de6eb6896f3cb53ec862d005d3c9ff319c27be4f8ff2de49",
+      "lines": 9,
+      "readRanges": [
+        [
+          1,
+          9
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. stdio transport and one allowed extension origin."
+    },
+    {
+      "path": "features/ai/native-ui/sidebar.patch",
+      "sha256": "114aaead2cbcf04028dad3d144575f6762d2447bc1e9c9ed3bd24cfc0a0aabf4",
+      "lines": 147,
+      "readRanges": [
+        [
+          1,
+          147
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all 147 lines. Weak coordinator callback; deliberate activeTab grants; fixed-width opening suppresses repeated animation layout. No new heap ownership or recurring timer introduced. Native integration not built or run."
+    },
+    {
+      "path": "features/ai/package.json",
+      "sha256": "bf95b25a7c19b6edd12c10400d6253df1a93e38d1da878726973d6fda2253b72",
+      "lines": 5,
+      "readRanges": [
+        [
+          1,
+          5
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Static module-mode declaration; no dependencies or startup hooks."
+    },
+    {
+      "path": "features/ai/runtime.lock.json",
+      "sha256": "e87f7debf1c745c20ae085c14ad3489be15f429d02be12848b765798d14d7cc8",
+      "lines": 16,
+      "readRanges": [
+        [
+          1,
+          16
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete. Static runtime digest declarations; no download, installed runtime or compiled cache access."
+    }
+  ],
+  "findings": [
+    {
+      "id": "NH-01",
+      "pathsAndLines": [
+        "features/ai/host/claude.mjs:18-31",
+        "features/ai/host/claude.mjs:118-122"
+      ],
+      "hypothesis": "Each StructuredOutput delta rescans and JSON-parses the entire accumulated text prefix, giving quadratic total work for fixed-size deltas.",
+      "whyReachable": "Every streamed input_json_delta in a Claude round calls partialText(json), which loops over all text accumulated so far and decodes it again. This is an ordinary streaming path.",
+      "expectedScope": "Claude structured-output streaming only. Executed real ClaudeProvider.round with fake RPC: 128 x 128-character chunks emitted 16384 correct characters while parsing 1057024 characters; 256 chunks emitted 32768 characters while parsing 4211200. Counts exclude additional regex/loop work. No wall-time or browser CPU gain measured.",
+      "risk": "Medium implementation risk. Incremental decoding must preserve split backslash/unicode escape handling, text-first schema, monotonic streaming, final output fallback and action boundaries.",
+      "cheapReproduction": "node build/efficiency-20261103/native-host-probe.mjs; claudeStreaming uses actual round and temporarily counts global JSON.parse input synchronously. No providers.",
+      "smallestFix": "Keep per-round incremental text extraction state and scan only new JSON characters; emit complete decoded escapes only. Keep final structured_output validation. Alternatively coalesce parsing at a documented small interval while preserving final flush, but measure latency before choosing.",
+      "relevantExistingTests": [
+        "tests/ai/host.test.mjs:294-315 split escapes, streaming and native-tool refusal",
+        "tests/ai/host.test.mjs:354-369 reported reasoning"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NH-02",
+      "pathsAndLines": [
+        "features/ai/host/main.mjs:25-29",
+        "features/ai/host/cli.mjs:71-74"
+      ],
+      "hypothesis": "The native output writer has no aggregate queue bound or drain handling; slow readers can retain arbitrarily many individually valid encoded frames.",
+      "whyReachable": "All host replies and provider deltas use send, which ignores stdout.write false. Individual 1 MiB output limit does not cap the Writable queue. JsonLineProcess.send has the same missing pressure handling toward child stdin, but that secondary path was not reproduced.",
+      "expectedScope": "Host under slow/stalled native output consumption. Exact extracted production send closure plus a blocked Node Writable queued 8394624 bytes for 128 messages with 65536-character payloads despite highWaterMark=1024 and writableNeedDrain=true. Synthetic blocked-reader result; normal Chrome consumption and actual provider rate may keep queues small.",
+      "risk": "Medium-high. Dropping deltas or tools changes semantics. Queue ownership, bounded admission and orderly cancellation must preserve response order, pending tool replies and error delivery.",
+      "cheapReproduction": "node build/efficiency-20261103/native-host-probe.mjs; nativeOutput executes unchanged send closure with production encodeMessage and Node Writable. No real pipe or browser used.",
+      "smallestFix": "Introduce a bounded ordered native writer that waits for drain and stops/cancels request production when its limit is reached. Propagate async admission to producers rather than adding another unbounded JS queue. Validate on a real disposable stdio pipe before implementation approval.",
+      "relevantExistingTests": [
+        "tests/ai/host.test.mjs:33-109 framing/limits",
+        "tests/ai/host-loading.test.mjs EOF loading",
+        "tests/ai/host.test.mjs:208-221 child request correlation"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NH-03",
+      "pathsAndLines": [
+        "features/ai/host/codex.mjs:147-178",
+        "features/ai/host/codex.mjs:187-194",
+        "features/ai/host/controller.mjs:85-91"
+      ],
+      "hypothesis": "Cancelling a Codex chat during preflight leaves preflight work and isolation alive until the probe finishes or its own timeout fires; rapid cancelled replacements can overlap helpers.",
+      "whyReachable": "chat awaits isolate/preflight/start before registering abort. preflight has no signal parameter. Controller clears the active run immediately on cancellation, permitting another request while old setup continues.",
+      "expectedScope": "Actual CodexProvider.chat with injected gated preflight remained unsettled and had not cleaned isolation after abort; releasing preflight produced Cancelled and cleaned up. This proves cancellation ordering only. No real process lifetime, RSS, duration or repeated replacement measured. Real preflight already has request deadlines and a later 15-second receive deadline; it is delayed cleanup, not a permanent leak.",
+      "risk": "Medium. Cancellation must close only owned probe/runtime/server and remove temporary isolation after process exit, while retaining tool-registry, effort and speed validation for every noncancelled chat.",
+      "cheapReproduction": "node build/efficiency-20261103/native-host-probe.mjs; codexCancellation overrides isolate/preflight/start and calls real chat with AbortController. Exact next test: fake JsonLineProcess with deferred initialize/thread/start/turn/start at each boundary and assert immediate close, listener cleanup and no later real-chat start.",
+      "smallestFix": "Pass signal through preflight/start, register abort before setup awaits, check already-aborted signals and await owned process/server cleanup before removing isolation. Do not cache away or skip the security probe.",
+      "relevantExistingTests": [
+        "tests/ai/host.test.mjs:265-276 cancellation suppresses stale output",
+        "tests/ai/host.test.mjs:317-352 Codex streaming",
+        "tests/ai/host.test.mjs:380-392 unsafe preflight response",
+        "tests/ai/context-integration.test.mjs:132-146 cancelled replacement"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NH-04",
+      "pathsAndLines": [
+        "features/ai/host/organato.mjs:78-83"
+      ],
+      "hypothesis": "The response-size guard rejects only after response.text has consumed and assembled the complete body, so it does not bound peak allocation for oversized bodies.",
+      "whyReachable": "Every successful Organato API response reaches response.text before the 2000000-character check. A timeout limits time, not bytes. An anomalous server response can exceed the intended bound.",
+      "expectedScope": "Actual Organato.request using fake secrets and a synthetic streaming Response consumed all 4194304 bytes before reporting response too large. This confirms post-consumption enforcement, not occurrence with the real Organato service or ordinary dashboard overhead.",
+      "risk": "Low-medium. Preserve UTF-8 correctness, cancellation, existing errors, request authorization, no write retries and reasonable legitimate response sizes. Byte and JS-character limits differ.",
+      "cheapReproduction": "node build/efficiency-20261103/native-host-probe.mjs; organatoResponse supplies Response over a 4 MiB ReadableStream. No config, secrets or network accessed.",
+      "smallestFix": "Read response.body incrementally with an explicit byte ceiling and cancel its reader at the ceiling; decode/parse only bounded data. Choose the byte policy explicitly while retaining the existing character validation.",
+      "relevantExistingTests": [
+        "tests/ai/organato.test.mjs API contract, invalid credentials and item links; no oversized streaming-response case found"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NH-05",
+      "pathsAndLines": [
+        "features/ai/host/cli.mjs:47-52"
+      ],
+      "hypothesis": "Long JSON lines fragmented into many small chunks may trigger repeated prefix scanning/flattening, even though the line buffer is capped.",
+      "whyReachable": "Each stdout chunk appends then indexOf scans for newline from the beginning. A long incomplete line revisits its entire prefix until newline arrives.",
+      "expectedScope": "CLI stdio parsing of large fragmented lines only. Maximum 16 Mi characters bounds retained state; string rope behavior and transport chunk sizes determine copying. No timing/copy-count probe executed.",
+      "risk": "Medium. Must preserve UTF-8 setEncoding, coalesced lines, pending correlation, parse errors and limits.",
+      "cheapReproduction": "Next test: instantiate actual JsonLineProcess with injected EventEmitter child and UTF-8 PassThrough, feed one valid near-limit line in fixed 1 KiB chunks, instrument searched-character counts in an isolated VM or measure sequentially with coordinator permission. Check identical notifications and errors.",
+      "smallestFix": "Track the already-searched prefix offset between chunks or collect segments until newline, preserving the existing bound and exact ordering. Require measured benefit before replacing parser.",
+      "relevantExistingTests": [
+        "tests/ai/host.test.mjs:208-221 JSON-lines child transport"
+      ],
+      "verdict": "SUSPECTED"
+    },
+    {
+      "id": "NH-06",
+      "pathsAndLines": [
+        "features/ai/host/updater.mjs:18-23"
+      ],
+      "hypothesis": "GitHub JSON response length is also checked after response.text has fully buffered the body.",
+      "whyReachable": "Release, metadata and comparison fetches share githubJSON; no streaming byte bound is applied before full text read.",
+      "expectedScope": "Updater check with anomalously large successful response. Static hypothesis only; no updater method invoked. Ordinary release response sizes not measured.",
+      "risk": "Updater changes require separate approval by coordinator, existing security checks and startup/rollback coverage. This review makes no updater behavior changes.",
+      "cheapReproduction": "Next test only: inject a fetcher returning a synthetic streaming Response into githubJSON and count bytes consumed before rejection. Do not call checkRelease or use real URLs/config.",
+      "smallestFix": "Consider a bounded body reader only after a separate updater review; preserve checksum, source ancestry, identity/signature checks and handoff rules.",
+      "relevantExistingTests": [
+        "tests/ai/updater.test.mjs",
+        "tests/ai/update-lifetime.test.mjs"
+      ],
+      "verdict": "SUSPECTED"
+    }
+  ],
+  "excludedIdeas": [
+    "Existing native decoder allocation/copy fix, page-context/translation weak retention and sidebar route pruning are prior verified work, not new findings.",
+    "Lazy folder child creation was rejected for slower opening; do not reintroduce it.",
+    "Disabling preflight, permissions, provider isolation, validation, checksum or signature checks is excluded.",
+    "Discovery catalog/status promises and up to 100 bounded history entries serve live functionality. No evidence that removing or caching across incompatible models is safe.",
+    "Host tool pending entries expire and are rejected on completion/cancel. No permanent map leak established.",
+    "Claude round listeners/timer have explicit cleanup; per-chat temporary dirs and process have finally cleanup. Native sidebar uses a weak callback. No leak proved there.",
+    "Updater streams its DMG with pipeline backpressure and validates byte count/hash. Its 500ms process polling is bounded, active-update-only and necessary for safe replacement.",
+    "Eager static updater/Organato imports impose bounded startup cost; no measurement justifies a lazy-import refactor.",
+    "Organato list retains full objects for at most 10 accepted pages before projecting display fields. Earlier projection might save bounded memory but no representative payload measured.",
+    "contextParts serializes before slicing to 180000 characters; native frame size bounds source data. No real large-context workload measured.",
+    "No end-to-end efficiency claims, no production fixes, installation, app launch, PC access or timings."
+  ],
+  "actualCommandsAndResults": [
+    {
+      "command": "cat AGENTS.md; cat /Users/likht.ethan/.codex/skills/unslop/SKILL.md; cat build/efficiency-20261103/source-inventory.json",
+      "result": "Read instructions; initial broad inventory output truncated, then selected exact native-host entries with Python. Applied unslop writing guidance."
+    },
+    {
+      "command": "python3 inventory selection; cat docs/evidence/memory-20261102/README.md; cat docs/evidence/memory-20261102/decisions.tsv; cat docs/updating.md",
+      "result": "17 owned files, 1438 source lines selected. Prior fixes, measurement limitations and updater safeguards read."
+    },
+    {
+      "command": "Python numbered full reads of inventory native-host files, then nl -ba features/ai/host/codex.mjs | sed -n 1,180p; nl -ba features/ai/host/protocol.mjs; nl -ba features/ai/host/codex.mjs | sed -n 180,242p",
+      "result": "All owned source lines read. First six-file output truncated within Codex; its complete contents were reread in explicit overlapping chunks. Other displayed source files complete."
+    },
+    {
+      "command": "cat tests/ai/host-loading.test.mjs; cat tests/ai/native-lifetime.test.mjs; rg -n test/cancel/preflight/parser references in named host/Organato/context/updater tests",
+      "result": "Read loading and extension lifetime tests completely; other tests searched for relevant existing cases only. Did not run broad suites because some touch config/create isolation or launch providers."
+    },
+    {
+      "command": "node build/efficiency-20261103/native-host-probe.mjs",
+      "result": {
+        "runtime": "v22.14.0",
+        "scope": "Synthetic injected fixtures; no providers, network, Keychain, configuration or app access; operation counts, no timing benchmark.",
+        "claudeStreaming": [
+          {
+            "chunks": 128,
+            "textCharacters": 16384,
+            "parseCalls": 128,
+            "parseCharacters": 1057024
+          },
+          {
+            "chunks": 256,
+            "textCharacters": 32768,
+            "parseCalls": 256,
+            "parseCharacters": 4211200
+          }
+        ],
+        "nativeOutput": {
+          "messages": 128,
+          "textCharactersPerMessage": 65536,
+          "highWaterMark": 1024,
+          "queuedBytes": 8394624,
+          "needDrain": true,
+          "scope": "Exact extracted production send closure with Node Writable blocked by fixture; no real browser pipe."
+        },
+        "codexCancellation": {
+          "abortedDuringPreflight": true,
+          "settledBeforePreflightReleased": false,
+          "isolationCleanedBeforePreflightReleased": false,
+          "scope": "Actual chat method with injected deferred preflight; no real CLI launch or elapsed-time claim."
+        },
+        "organatoResponse": {
+          "bytesFullyConsumedBeforeRejection": 4194304,
+          "declaredCharacterLimit": 2000000,
+          "scope": "Actual request method with injected stream Response and fake secrets; no actual network or Keychain."
+        }
+      }
+    },
+    {
+      "command": "Python SHA-256/line-count comparison of 17 owned files and node --check of every owned .mjs",
+      "result": "All 17 hashes/line counts match inventory. All 11 owned MJS modules pass syntax check. Earlier terminal success message mistakenly said 12 MJS; actual inventory count is 11."
+    }
+  ],
+  "remainingGaps": [
+    "No owned source read gaps: 17/17 files, 1438/1438 lines. Coverage uses current bytes matching inventory; no claim to review other ownership areas.",
+    "No real provider/CLI, Keychain, configuration, installed/private runtime or app, browser UI, network or PC use. Default module constructors were not invoked on protected I/O paths; all probe boundaries injected.",
+    "Probes ran system Node v22.14.0, not packaged v24.22.1. Confirm operation-count/queue behavior on intended runtime before implementation acceptance.",
+    "Blocked-pipe growth demonstrated using exact extracted main send closure and Node Writable, not actual native-host/Chrome transport. Real reader stalls, demand rates and memory peaks remain unmeasured.",
+    "Cancellation reproduction demonstrates await ordering with deferred fake preflight, not measured real subprocess shutdown. Discovery and Organato EOF cancellation also merit future injected tests.",
+    "No production changes applied; no regression/no-regression claim. Coordinator owns implementation and independent verification.",
+    "Whole-browser RAM/CPU, native patch integration, feature acceptance and PC build remain open until explicitly available and authorized."
+  ]
+}

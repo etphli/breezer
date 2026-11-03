@@ -1,0 +1,27 @@
+{
+  "browser": "156.0.8078.4",
+  "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/ai/extension/page-context.js",
+  "isolatedWorld": true,
+  "sourceSha256": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+  "empty": {
+    "documents": 1,
+    "nodes": 8,
+    "jsEventListeners": 0,
+    "usedHeapBytes": 829056
+  },
+  "attached": {
+    "documents": 1,
+    "nodes": 72188,
+    "jsEventListeners": 0,
+    "usedHeapBytes": 1259932
+  },
+  "detached": {
+    "documents": 1,
+    "nodes": 8,
+    "jsEventListeners": 0,
+    "usedHeapBytes": 1129316
+  },
+  "retainedExtraNodes": 0,
+  "released": true,
+  "limits": "Synthetic isolated-world page-control retention check after forced GC. Not whole-browser RAM, CPU or browsing speed."
+}

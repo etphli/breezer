@@ -1,0 +1,301 @@
+{
+  "status": "review-complete; no actionable introduced defects found within focused offline scope",
+  "reviewer_model": "gpt-6.1-sol",
+  "findings": [],
+  "verdict": "The focused change preserves the observed controller semantics for ordinary dense transcript records. Cache ownership and release match all production transcript/run mutation paths found. Selected result arrays are bounded; traversal and run-start work are not universally reduced.",
+  "files": [
+    {
+      "path": "features/ai/extension/panel.js",
+      "absolutePath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/ai/extension/panel.js",
+      "sha256": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2",
+      "lines": 676,
+      "readRanges": [
+        [
+          1,
+          240
+        ],
+        [
+          241,
+          480
+        ],
+        [
+          481,
+          676
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/panel-efficiency.test.mjs",
+      "absolutePath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/panel-efficiency.test.mjs",
+      "sha256": "c35f86a645bdfa74b2c84676fea35a44788c1c2ef16face37eaffdf1b76d6f7c",
+      "lines": 257,
+      "readRanges": [
+        [
+          1,
+          257
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "absolutePath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/stream-render.test.mjs",
+      "sha256": "9fa2ceb8dc92558991ed9d9fafadd0be9a298b3814e570b9821bc459efaa971c",
+      "lines": 264,
+      "readRanges": [
+        [
+          1,
+          264
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "pins": {
+    "baseline": {
+      "path": "build/efficiency-20261103/panel-efficiency/panel-before.js",
+      "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+      "verifiedBeforeComparison": true,
+      "comparison": "diff -u build/efficiency-20261103/panel-efficiency/panel-before.js features/ai/extension/panel.js",
+      "baselineWholeFileRead": false
+    },
+    "renderer": {
+      "path": "features/ai/extension/render-message.js",
+      "sha256": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "status": "hash-verified against accepted unchanged renderer; not independently fully read in this review"
+    },
+    "runtime": {
+      "path": "build/efficiency-20261103/organato-review-node24",
+      "version": "v24.22.1",
+      "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+    },
+    "packet": {
+      "path": "build/efficiency-20261102/pc-packet/panel.js",
+      "sha256": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2",
+      "matchesReviewedSource": true,
+      "scope": "Only panel.js bytes checked; packet metadata and all checksums not independently audited."
+    }
+  },
+  "reportsRead": [
+    "build/efficiency-20261103/panel-efficiency-implementation.json",
+    "build/efficiency-20261103/panel-efficiency-coordinator.json"
+  ],
+  "lifecycleTrace": [
+    {
+      "lines": "7-23, 639-676",
+      "assessment": "State starts empty. initialize filters role/string-text records and takes last60 before connecting/listening for provider messages. Private transcript replacement occurs here and New Chat only. selectedModel gates sending until provider discovery; session-load ordering itself is unchanged."
+    },
+    {
+      "lines": "431-459",
+      "assessment": "send while running calls stop. Valid send snapshots history30 values before appending user+assistant records. First assistant-ID match is cached after push and before the first await; duplicate IDs loaded with ordinary records select the same first object as baseline find. A duplicate can match an old user record too; role is not part of either predicate."
+    },
+    {
+      "lines": "319-330,449",
+      "assessment": "Backward truthy selection returns chronological selected references; only selected array is reversed. Whitespace stays truthy; empty strings are omitted. save60 takes the same references at the storage call. History map copies values before async authorization/capture. No truncation of live transcript is added."
+    },
+    {
+      "lines": "337-352,505-523",
+      "assessment": "Only hot delta and RAF lookup use cached object. Stale truthy run IDs are rejected. RAF callback consults current run when it executes, preserving old-frame/new-run coalescing; it does not close over the old cached reply. scheduledRender resets before early return. No active transcript removal or ID reassignment found."
+    },
+    {
+      "lines": "355-420",
+      "assessment": "finish retains cold find, disposes renderer, clears renderer and cached message, then nulls state.running and saves. stop retains cold replied lookup; fail/stop can retain run in retry button closure. Cached reply is explicitly nulled before closure retention. Retry still finds first original-user ID and protects an existing draft."
+    },
+    {
+      "lines": "36-45,467-502",
+      "assessment": "Synchronous post failure calls finish, releasing cache. Async authorization/research continuations gate by current run ID before sending or failure. Late resolved/rejected capture after cancellation/replacement preserves the newer run in independent cases. No new await/reentrancy boundary introduced by selection/find/reverse on ordinary records."
+    },
+    {
+      "lines": "24-27,532-615,658-662",
+      "assessment": "Research revocation, close, Escape, activity-stop and hidden visibility route through stop. Port disconnect routes through finish. New Chat stops first, then clears messages/nodes/DOM and saves empty state. Old frame after finish is harmless; after a subsequent run it uses that run. Research onChange updates controls; profile/storage events do not mutate transcript/run."
+    }
+  ],
+  "independentVerification": [
+    {
+      "command": "PANEL_EFFICIENCY_SAMPLES=build/efficiency-20261103/panel-efficiency-review/permanent-counters.json build/efficiency-20261103/organato-review-node24 --test tests/ai/panel-efficiency.test.mjs tests/ai/stream-render.test.mjs",
+      "result": "22 pass; 0 fail; 0 skipped",
+      "log": "build/efficiency-20261103/panel-efficiency-review/permanent-tests.tap"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/panel-efficiency-review/independent.mjs",
+      "result": "228 checks pass",
+      "log": "build/efficiency-20261103/panel-efficiency-review/independent.log",
+      "scriptSha256": "dd45e579d4e3ccc2917d48699d33bae2af3348d3333f0d83632573c644c82e09",
+      "coverage": [
+        "200 source-bound selection/history fixtures across baseline/current, lengths 0..1287, all empty and mixed truthy/empty/Unicode whitespace, exact selected references/order, history30 values and live array identity/length",
+        "20 differential lifecycle scenarios: complete/cancelled/error/stop/New Chat/visibility/close/disconnect/revocation/cancel-post failure, each with and without duplicate assistant IDs; release/disposal and old queued RAF checked",
+        "For 7 ending types old RAF crosses into subsequent run; close/hidden/disconnect instead flush after finish without fabricating production reconnect",
+        "4 delayed research success/failure cases across baseline/current: stopped old run cannot send or finish replacement",
+        "Sparse-hole incompatibility demonstrated as excluded fabricated state; missing-ID loaded old RAF baseline crash demonstrated as removed",
+        "Packet panel.js hash matches reviewed source"
+      ]
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/panel-efficiency-review/negative-controls.mjs",
+      "result": "Both expected failures confirmed: exact baseline substituted as current produces 6 pass/2 fail; unrelated appended comment fails full-baseline reconstruction hash",
+      "log": "build/efficiency-20261103/panel-efficiency-review/negative-controls.log",
+      "evidence": [
+        "build/efficiency-20261103/panel-efficiency-review/baseline.tap",
+        "build/efficiency-20261103/panel-efficiency-review/unrelated-change.tap"
+      ],
+      "scriptSha256": "3b85c57ab3027adc32a870af219d4c63ce472f23dc8daa0a6a7e7a8f370d97de"
+    }
+  ],
+  "permanentTestAssessment": {
+    "truthfulness": "Inverse patch reconstructs whole baseline controller and checks its exact SHA before execution. Independent baseline bytes verified before comparison. Existing test runs actual send, receive, finish, stop, initialize and extracted New Chat handlers with synthetic dependencies. It is not just a helper reimplementation. Existing stream test manually constructs runs and now includes the cached message field; new test exercises actual send to avoid that fixture bypass.",
+    "negativeControl": "Baseline substituted as candidate fails hot-path scan check at 15400 callbacks versus zero and sparse-result-slot check at 12 versus 6. This proves these efficiency assertions are not vacuous. Behavioral differential assertions alone can compare identical baseline sources, so the efficiency assertions are essential.",
+    "maintenance": "Whole-file hash pin deliberately rejects any unrelated panel edit, including an appended comment verified independently. Regex/string inverse edits and source slicing depend on exact formatting and marker strings. This is a real maintenance cost, not a production regression. Refresh original pin/patch only with a reviewed baseline; do not merely relax or remove the SHA assertion.",
+    "limits": [
+      "8 permanent panel tests and 14 renderer/stream tests are a focused suite, not all 288 authored files or repository/upstream/browser coverage.",
+      "UI control/model/profile functions and DOM/API operations are stubbed. Storage snapshot assertions prove values handed to a synchronous fixture, not independent Chrome serialization behavior.",
+      "Proxy counters count numeric-index reads and intercepted Array.find/filter callbacks; result-array/slot counts cover explicitly instrumented selection arrays, excluding map outputs, renderer allocations, engine backing stores and retained transcript.",
+      "Name-based instrumentation can miss a future scan implemented through another API; loop index reads are caught for this current source, but counters are not a general allocation profiler.",
+      "Permanent complete collision scenario uses cancelled:true; uncancelled complete is exercised by independent fixture and other permanent paths.",
+      "Sparse truthy tails mean dense records with mostly empty text, not arrays with holes. Holes/accessors/proxies/private ID reassignment are not ordinary reachable production state."
+    ]
+  },
+  "performance": {
+    "samplesFile": "build/efficiency-20261103/panel-efficiency-review/permanent-counters.json",
+    "samples": [
+      {
+        "before": {
+          "size": 12,
+          "start": {
+            "reads": 12,
+            "findCallbacks": 0,
+            "filterCallbacks": 12,
+            "resultArrays": 2,
+            "resultSlots": 20,
+            "frames": 0
+          },
+          "streaming": {
+            "reads": 15400,
+            "findCallbacks": 15400,
+            "filterCallbacks": 0,
+            "resultArrays": 0,
+            "resultSlots": 0,
+            "frames": 100
+          },
+          "save": {
+            "reads": 14,
+            "findCallbacks": 0,
+            "filterCallbacks": 14,
+            "resultArrays": 2,
+            "resultSlots": 24,
+            "frames": 0
+          }
+        },
+        "after": {
+          "size": 12,
+          "start": {
+            "reads": 26,
+            "findCallbacks": 14,
+            "filterCallbacks": 0,
+            "resultArrays": 1,
+            "resultSlots": 10,
+            "frames": 0
+          },
+          "streaming": {
+            "reads": 0,
+            "findCallbacks": 0,
+            "filterCallbacks": 0,
+            "resultArrays": 0,
+            "resultSlots": 0,
+            "frames": 100
+          },
+          "save": {
+            "reads": 14,
+            "findCallbacks": 0,
+            "filterCallbacks": 0,
+            "resultArrays": 1,
+            "resultSlots": 12,
+            "frames": 0
+          }
+        }
+      },
+      {
+        "before": {
+          "size": 1200,
+          "start": {
+            "reads": 1200,
+            "findCallbacks": 0,
+            "filterCallbacks": 1200,
+            "resultArrays": 2,
+            "resultSlots": 1058,
+            "frames": 0
+          },
+          "streaming": {
+            "reads": 1322200,
+            "findCallbacks": 1322200,
+            "filterCallbacks": 0,
+            "resultArrays": 0,
+            "resultSlots": 0,
+            "frames": 100
+          },
+          "save": {
+            "reads": 1202,
+            "findCallbacks": 0,
+            "filterCallbacks": 1202,
+            "resultArrays": 2,
+            "resultSlots": 1090,
+            "frames": 0
+          }
+        },
+        "after": {
+          "size": 1200,
+          "start": {
+            "reads": 1237,
+            "findCallbacks": 1202,
+            "filterCallbacks": 0,
+            "resultArrays": 1,
+            "resultSlots": 30,
+            "frames": 0
+          },
+          "streaming": {
+            "reads": 0,
+            "findCallbacks": 0,
+            "filterCallbacks": 0,
+            "resultArrays": 0,
+            "resultSlots": 0,
+            "frames": 100
+          },
+          "save": {
+            "reads": 70,
+            "findCallbacks": 0,
+            "filterCallbacks": 0,
+            "resultArrays": 1,
+            "resultSlots": 60,
+            "frames": 0
+          }
+        }
+      }
+    ],
+    "assessment": "Short 12-record case adds a 14-predicate run-start scan and 26 total indexed reads versus 12 baseline history reads. Long 1200-record case uses 1202 find predicates plus 35 tail reads, versus 1200 baseline history reads. For the measured 1000 deltas/100 frames, later scans fall from 15400/1322200 to zero. Save selected-result arrays fall from two to one. Sparse truthy tails may still require O(n) traversal; active run creation and cold finish/stop/retry scans remain O(n). Empty/tiny replies may not amortize added run-start work. No universal latency win is claimed."
+  },
+  "objectionsAndInheritedIssues": [
+    {
+      "kind": "excluded fabricated state",
+      "assessment": "True sparse arrays previously skipped holes in filter; current recentMessages reads message.text and throws at a hole. Independently demonstrated. Production push and initialize filter produce dense ordinary records, so this is not an actionable introduced production defect without a reachable hole-producing path."
+    },
+    {
+      "kind": "intentional safety improvement",
+      "assessment": "Loaded missing-ID record can match undefined running?.assistantId in old queued RAF after finish and reach null run.renderer. Independent fixture confirms old throw and new no-op. Removing this malformed-record crash is not a regression."
+    },
+    {
+      "kind": "inherited behavior",
+      "assessment": "Duplicate IDs can target old user/assistant text and map to the latest body with that ID. New cache preserves first-ID match; no role repair is introduced. Cold lookups, retry original-ID collisions and cancellation/post ordering remain inherited."
+    },
+    {
+      "kind": "scope limit",
+      "assessment": "Counter evidence supports removed controller traversal and smaller explicit result arrays, not physical RAM, CPU time, total browser speed or memory pressure. Long transcript objects remain retained intentionally."
+    }
+  ],
+  "reviewLimits": [
+    "No browser/app/Chromium/native build, run, install, PC contact, network, actual providers/CLI/accounts/auth/Keychain or user profiles accessed.",
+    "Coordinator reports 364 combined tests, eight packaging tests and canonical synthetic-provider browser fixture pass; these are reported external evidence, not independently rerun or validated here. Browser log was not needed/read.",
+    "Imported offline renderer fixture/probe source was read before execution. Renderer itself accepted unchanged by hash. No claim of whole-file baseline review or all repository coverage.",
+    "Owned fixture initially needed stub repairs for disconnect continuation, maskSecrets and sparse-hole node setup; after correcting fixture only, final 228 checks passed. Negative-control driver initially expected one failure; actual baseline has two expected efficiency failures and final driver verifies both. No production changes resulted."
+  ],
+  "writeScope": "Only this report and owned scratch/logs beneath build/efficiency-20261103/panel-efficiency-review/. No fixes, source/test/script/docs/packet edits, git mutations, publication, or subagents."
+}

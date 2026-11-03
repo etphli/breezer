@@ -88,8 +88,9 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
-  const browser = await chromium.launch({ executablePath, headless: true });
+  let browser;
   try {
+    browser = await chromium.launch({ executablePath, headless: true });
     await withPage(browser, base, {}, async (page) => {
       assert.equal(await page.textContent('#release-name'), 'Breezer 1.2.0');
       assert.equal(await page.title(), 'What\'s new in Breezer 1.2.0');
@@ -237,7 +238,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       assert.equal(await page.$$eval('.release img', (images) => images.length), 1);
     });
   } finally {
-    await browser.close();
-    server.close();
+    try { await browser?.close(); } finally {
+      await new Promise(done => server.close(done));
+    }
   }
 });

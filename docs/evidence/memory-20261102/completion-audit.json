@@ -1,0 +1,75 @@
+{
+  "objectiveStatus": "NOT ACHIEVED",
+  "requirements": [
+    {
+      "requirement": "Reduce whole-browser RAM as much as possible",
+      "verdict": "INCOMPLETE",
+      "evidence": [
+        "page-targets-after.json",
+        "translation-after.json",
+        "sidebar-prune-paired.json",
+        "native-transport-summary.json",
+        "decoder-after-pinned.json"
+      ],
+      "reason": "Component retention and the actual native helper improve in controlled workloads. The changed whole-browser candidate has not been built and profiled against matching browsing or Chrome."
+    },
+    {
+      "requirement": "Preserve speed, privacy, features and customisation without regressions",
+      "verdict": "PARTIAL",
+      "evidence": [
+        "verification.json",
+        "rejected-lazy-folders.patch"
+      ],
+      "reason": "Affected source and browser fixtures pass, and a measured folder-opening regression was rejected. Native representative browsing and broad feature acceptance remain required."
+    },
+    {
+      "requirement": "Reduce CPU overhead without regressions",
+      "verdict": "HELPER PROOF; APP INCOMPLETE",
+      "evidence": [
+        "native-transport-summary.json",
+        "verification.json"
+      ],
+      "reason": "Six balanced pairs at each of five message sizes show large-input helper CPU reductions including validation and forced GC. Small-input ranges overlap; no small-input improvement is claimed. App-wide CPU efficiency, representative browsing and native regressions remain unverified."
+    },
+    {
+      "requirement": "Build unattended and continue after failures",
+      "verdict": "LOCAL PROOF ONLY",
+      "evidence": [
+        "verification.json",
+        "../../../script/windows/unattended_build.py"
+      ],
+      "reason": "Real independent Ninja work continues after an action failure, recoverable interruptions retry with bounds, and a failed action prevents success. Windows/WSL launch and Linux orphan adoption require the configured PC."
+    },
+    {
+      "requirement": "Autosave every 10,000 build steps and resume completed work",
+      "verdict": "LOCAL PROOF ONLY",
+      "evidence": [
+        "verification.json",
+        "../../../tests/windows/unattended_build_test.py"
+      ],
+      "reason": "A real 10,001-action graph uses the CLI default, confirms a live checkpoint and 10,000 journaled outputs, then verifies controlled interruption, successful resume and unchanged completed-output mtimes. Native Windows/WSL execution remains unverified."
+    },
+    {
+      "requirement": "Do not contact or start the PC until the user says it is available",
+      "verdict": "SATISFIED THIS RUN",
+      "evidence": [
+        "../../../docs/pc-build.md",
+        "decisions.tsv"
+      ],
+      "reason": "All work after the instruction has been local. No PC access, deployment, start or schedule was attempted."
+    },
+    {
+      "requirement": "Keep installed app, profiles, passwords and compiled caches unchanged",
+      "verdict": "SATISFIED THIS RUN",
+      "evidence": [
+        "decisions.tsv",
+        "../../../script/windows/apply-memory-update.py"
+      ],
+      "reason": "Changes are source and local disposable fixtures. The PC migration remains prepared and undeployed; it does not delete compiled outputs."
+    }
+  ],
+  "nextRequiredAction": "When Ethan declares the PC available and requests start, run the WSL fixtures and receipt checks, migrate the three Chromium resources and run the supervised native build. After retrieval, package the private host with --memory-packet and verify it, then measure matching whole-browser RAM, CPU, speed and feature acceptance.",
+  "blocker": "The configured PC is explicitly unavailable until the user says otherwise. No local Linux VM exists and no local PowerShell is installed; neither would establish acceptance on that configured PC.",
+  "limits": "Source optimisation is not exhausted. These controlled helper results do not establish ordinary browsing savings or completion of the full objective.",
+  "localProgressAfterResume": "Native decoder repeated-copy cost and backing-buffer retention reproduced, fixed and measured on the actual host with packaged Node. Automatic packaging receipt check added. Local optimisation resumed at the user request; no PC connection attempted."
+}

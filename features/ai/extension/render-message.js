@@ -81,3 +81,77 @@ function inline(parent, text) {
   }
   parent.append(document.createTextNode(text.slice(start)));
 }
+
+// Append-only streaming input. A complete blank line outside a fence ends all
+// parser context, so earlier nodes can stay attached while the tail is rebuilt.
+export function createMessageStream(container) {
+  let tail = '';
+  let lineStart = 0;
+  let fenced = false;
+  let started = false;
+  let mutableNodes = [];
+  let plainText = null;
+  let plainAllowed = true;
+  const target = {
+    replaceChildren() {
+      plainText = null;
+      for (const node of mutableNodes) node.remove();
+      mutableNodes = [];
+    },
+    append(node) {
+      container.append(node);
+      mutableNodes.push(node);
+    },
+  };
+  return {
+    append(delta) {
+      if (!container) return;
+      if (!started) { container.replaceChildren(); started = true; }
+      let searchFrom = tail.length;
+      tail += delta;
+      let boundary = 0;
+      let end;
+      while ((end = tail.indexOf('\n', searchFrom)) !== -1) {
+        const line = tail.slice(lineStart, end);
+        if (/^\s*```/.test(line)) fenced = !fenced;
+        else if (!fenced && !line.trim()) boundary = end + 1;
+        lineStart = end + 1;
+        searchFrom = lineStart;
+      }
+      if (boundary) {
+        renderMessage(target, tail.slice(0, boundary));
+        mutableNodes = [];
+        tail = tail.slice(boundary);
+        lineStart -= boundary;
+        plainText = null;
+        plainAllowed = true;
+      }
+      // Once ambiguous, use the unchanged parser until the next stable boundary.
+      if (plainAllowed && tail) {
+        const safe = plainText
+          ? !/[\n`*\[]/.test(delta)
+          : /^[^\s#>0-9\-`*\[]/.test(tail) && !/[\n`*\[]/.test(tail);
+        if (safe) {
+          if (plainText) plainText.appendData(delta);
+          else {
+            renderMessage(target, tail);
+            plainText = mutableNodes[0].lastChild;
+          }
+          return;
+        }
+        plainAllowed = false;
+        plainText = null;
+      }
+      renderMessage(target, tail);
+    },
+    dispose() {
+      container = null;
+      plainText = null;
+      plainAllowed = false;
+      tail = '';
+      mutableNodes = [];
+      lineStart = 0;
+      fenced = false;
+    },
+  };
+}

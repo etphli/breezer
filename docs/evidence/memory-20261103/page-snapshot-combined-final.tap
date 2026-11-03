@@ -1,0 +1,346 @@
+TAP version 13
+# Subtest: canvas coordinate clicks use tab-scoped mouse input instead of DOM click emulation
+ok 1 - canvas coordinate clicks use tab-scoped mouse input instead of DOM click emulation
+  ---
+  duration_ms: 3.571792
+  type: 'test'
+  ...
+# Subtest: game start and direction keys send physical code and bounded key down/up
+ok 2 - game start and direction keys send physical code and bounded key down/up
+  ---
+  duration_ms: 5.268792
+  type: 'test'
+  ...
+# Subtest: Stop interrupts a key hold, releases it only in the original tab, and rejects queued input
+ok 3 - Stop interrupts a key hold, releases it only in the original tab, and rejects queued input
+  ---
+  duration_ms: 1.503375
+  type: 'test'
+  ...
+# Subtest: holdMs keeps a direction down for the requested duration using a virtual clock
+ok 4 - holdMs keeps a direction down for the requested duration using a virtual clock
+  ---
+  duration_ms: 1.282709
+  type: 'test'
+  ...
+# Subtest: a held mouse button expires and is released even while its acknowledgement hangs
+ok 5 - a held mouse button expires and is released even while its acknowledgement hangs
+  ---
+  duration_ms: 0.786792
+  type: 'test'
+  ...
+# Subtest: a failed key release or missing indicator stops control and cleans up held input
+ok 6 - a failed key release or missing indicator stops control and cleans up held input
+  ---
+  duration_ms: 0.949125
+  type: 'test'
+  ...
+# Subtest: explicit keydown has a five second fail-safe even while its transport acknowledgement hangs
+ok 7 - explicit keydown has a five second fail-safe even while its transport acknowledgement hangs
+  ---
+  duration_ms: 1.623875
+  type: 'test'
+  ...
+# Subtest: navigation while a key is held stops control and releases the key
+ok 8 - navigation while a key is held stops control and releases the key
+  ---
+  duration_ms: 0.508083
+  type: 'test'
+  ...
+# Subtest: navigation requested during a held input sends no navigation after stopping control
+ok 9 - navigation requested during a held input sends no navigation after stopping control
+  ---
+  duration_ms: 0.383166
+  type: 'test'
+  ...
+# Subtest: canvas mouse down/move/up preserves drag button state and release position
+ok 10 - canvas mouse down/move/up preserves drag button state and release position
+  ---
+  duration_ms: 0.738
+  type: 'test'
+  ...
+# Subtest: Stop releases a held mouse at its last drag position and a new session gets no stale release
+ok 11 - Stop releases a held mouse at its last drag position and a new session gets no stale release
+  ---
+  duration_ms: 4.924958
+  type: 'test'
+  ...
+# Subtest: invalid game inputs and refused canvas targets send no input
+ok 12 - invalid game inputs and refused canvas targets send no input
+  ---
+  duration_ms: 3.087209
+  type: 'test'
+  ...
+# Subtest: cancelling during canvas validation prevents late mouse input
+ok 13 - cancelling during canvas validation prevents late mouse input
+  ---
+  duration_ms: 1.25975
+  type: 'test'
+  ...
+# Subtest: isolated coordinate validation accepts only visible top-level canvas CSS points
+ok 14 - isolated coordinate validation accepts only visible top-level canvas CSS points
+  ---
+  duration_ms: 7.288292
+  type: 'test'
+  ...
+# Subtest: page access requires an explicit gesture for the active HTTP(S) origin
+ok 15 - page access requires an explicit gesture for the active HTTP(S) origin
+  ---
+  duration_ms: 0.318292
+  type: 'test'
+  ...
+# Subtest: only the authorized current tab is captured, and a switch discards context
+ok 16 - only the authorized current tab is captured, and a switch discards context
+  ---
+  duration_ms: 0.537834
+  type: 'test'
+  ...
+# Subtest: browser tools allow only scoped trusted input and refuse arbitrary execution
+ok 17 - browser tools allow only scoped trusted input and refuse arbitrary execution
+  ---
+  duration_ms: 0.666208
+  type: 'test'
+  ...
+# Subtest: cancelling while debugger attaches detaches it and sends no late input
+ok 18 - cancelling while debugger attaches detaches it and sends no late input
+  ---
+  duration_ms: 1.8065
+  type: 'test'
+  ...
+# Subtest: cancelling during target resolution prevents all input
+ok 19 - cancelling during target resolution prevents all input
+  ---
+  duration_ms: 0.938458
+  type: 'test'
+  ...
+# Subtest: Stop detaches while a page protocol request is hung and rejects its late result
+ok 20 - Stop detaches while a page protocol request is hung and rejects its late result
+  ---
+  duration_ms: 0.638833
+  type: 'test'
+  ...
+# Subtest: Stop bounds cleanup and still attempts detach if a cleanup command never returns
+ok 21 - Stop bounds cleanup and still attempts detach if a cleanup command never returns
+  ---
+  duration_ms: 751.989167
+  type: 'test'
+  ...
+# Subtest: a new control session waits for the previous asynchronous detach
+ok 22 - a new control session waits for the previous asynchronous detach
+  ---
+  duration_ms: 1.124041
+  type: 'test'
+  ...
+# Subtest: expired cleanup cannot remove a new session binding or reused script ID when its command resolves late
+ok 23 - expired cleanup cannot remove a new session binding or reused script ID when its command resolves late
+  ---
+  duration_ms: 752.56425
+  type: 'test'
+  ...
+# Subtest: late bootstrap installation acknowledgement cannot remove the new session script
+ok 24 - late bootstrap installation acknowledgement cannot remove the new session script
+  ---
+  duration_ms: 753.856458
+  type: 'test'
+  ...
+# Subtest: a timed-out detach blocks reattachment until the original detach settles
+ok 25 - a timed-out detach blocks reattachment until the original detach settles
+  ---
+  duration_ms: 753.643667
+  type: 'test'
+  ...
+# Subtest: only the controlled tab and named isolated world can use the Stop binding
+ok 26 - only the controlled tab and named isolated world can use the Stop binding
+  ---
+  duration_ms: 1.092666
+  type: 'test'
+  ...
+# Subtest: worker toggles the panel and forwards context only on an opted-in chat
+ok 27 - worker toggles the panel and forwards context only on an opted-in chat
+  ---
+  duration_ms: 9.279833
+  type: 'test'
+  ...
+# Subtest: inactive tab updates do not query the active page or start the native host
+ok 28 - inactive tab updates do not query the active page or start the native host
+  ---
+  duration_ms: 2.008625
+  type: 'test'
+  ...
+# Subtest: a delayed metadata query cannot overwrite a newer active page
+ok 29 - a delayed metadata query cannot overwrite a newer active page
+  ---
+  duration_ms: 0.98975
+  type: 'test'
+  ...
+# Subtest: hiding and reopening a cached panel discards pending metadata
+ok 30 - hiding and reopening a cached panel discards pending metadata
+  ---
+  duration_ms: 1.657083
+  type: 'test'
+  ...
+# Subtest: worker forwards reasoning and only Codex speed to the native host
+ok 31 - worker forwards reasoning and only Codex speed to the native host
+  ---
+  duration_ms: 0.881083
+  type: 'test'
+  ...
+# Subtest: worker rejects tools without control and cancels on disconnect and tab switches
+ok 32 - worker rejects tools without control and cancels on disconnect and tab switches
+  ---
+  duration_ms: 2.033667
+  type: 'test'
+  ...
+# Subtest: same-origin navigation retains control and restores its visible overlay
+ok 33 - same-origin navigation retains control and restores its visible overlay
+  ---
+  duration_ms: 1.405459
+  type: 'test'
+  ...
+# Subtest: new-origin navigation revokes read-only grants while attached control continues
+ok 34 - new-origin navigation revokes read-only grants while attached control continues
+  ---
+  duration_ms: 1.11175
+  type: 'test'
+  ...
+# Subtest: context preview reads metadata without page text or screenshot
+ok 35 - context preview reads metadata without page text or screenshot
+  ---
+  duration_ms: 0.544375
+  type: 'test'
+  ...
+# Subtest: native Cmd+K can establish access through a successful permission probe without a command event
+ok 36 - native Cmd+K can establish access through a successful permission probe without a command event
+  ---
+  duration_ms: 0.670458
+  type: 'test'
+  ...
+# Subtest: visible context chips follow active-tab metadata without granting page access
+ok 37 - visible context chips follow active-tab metadata without granting page access
+  ---
+  duration_ms: 0.750667
+  type: 'test'
+  ...
+# Subtest: context-only chats may refresh their original tab snapshot but cannot act or switch tabs
+ok 38 - context-only chats may refresh their original tab snapshot but cannot act or switch tabs
+  ---
+  duration_ms: 603.169541
+  type: 'test'
+  ...
+# Subtest: hiding a cached panel cancels control and the toolbar can reopen it
+ok 39 - hiding a cached panel cancels control and the toolbar can reopen it
+  ---
+  duration_ms: 5.86475
+  type: 'test'
+  ...
+# Subtest: control survives focus moving to another app but stops for another browser window
+ok 40 - control survives focus moving to another app but stops for another browser window
+  ---
+  duration_ms: 1.842292
+  type: 'test'
+  ...
+# Subtest: isolated page targets exclude secret fields and reject covered or stale elements
+ok 41 - isolated page targets exclude secret fields and reject covered or stale elements
+  ---
+  duration_ms: 4.633
+  type: 'test'
+  ...
+# Subtest: editor insertion is schema-bounded and unavailable to research or read-only requests
+ok 42 - editor insertion is schema-bounded and unavailable to research or read-only requests
+  ---
+  duration_ms: 0.745208
+  type: 'test'
+  ...
+# Subtest: selection extends only a navigation press, in both host and worker
+ok 43 - selection extends only a navigation press, in both host and worker
+  ---
+  duration_ms: 3.677166
+  type: 'test'
+  ...
+# Subtest: editor insertion preserves the caret and revalidates focus before trusted input
+ok 44 - editor insertion preserves the caret and revalidates focus before trusted input
+  ---
+  duration_ms: 0.82625
+  type: 'test'
+  ...
+# Subtest: large snapshot avoids eager candidate copies and stops after 180 successful targets
+ok 45 - large snapshot avoids eager candidate copies and stops after 180 successful targets
+  ---
+  duration_ms: 21.7755
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":0}
+ok 46 - snapshot ordering and filtering match baseline {"count":0}
+  ---
+  duration_ms: 0.902208
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1}
+ok 47 - snapshot ordering and filtering match baseline {"count":1}
+  ---
+  duration_ms: 1.065625
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":179}
+ok 48 - snapshot ordering and filtering match baseline {"count":179}
+  ---
+  duration_ms: 2.8235
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":180}
+ok 49 - snapshot ordering and filtering match baseline {"count":180}
+  ---
+  duration_ms: 2.704333
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":181}
+ok 50 - snapshot ordering and filtering match baseline {"count":181}
+  ---
+  duration_ms: 2.462708
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+ok 51 - snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+  ---
+  duration_ms: 4.396708
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+ok 52 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+  ---
+  duration_ms: 2.167125
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+ok 53 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+  ---
+  duration_ms: 4.150375
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"rootOutside":true}
+ok 54 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"rootOutside":true}
+  ---
+  duration_ms: 1.846292
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+ok 55 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+  ---
+  duration_ms: 1.780166
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+ok 56 - snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+  ---
+  duration_ms: 1.616833
+  type: 'test'
+  ...
+1..56
+# tests 56
+# suites 0
+# pass 56
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3785.569708

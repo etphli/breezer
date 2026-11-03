@@ -1,0 +1,562 @@
+TAP version 13
+# Subtest: abort during probe initialize closes owned setup before gate release
+ok 1 - abort during probe initialize closes owned setup before gate release
+  ---
+  duration_ms: 15.913042
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at probe:thread/start
+ok 2 - cancellation closes setup at probe:thread/start
+  ---
+  duration_ms: 10.855375
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at probe:turn/start
+ok 3 - cancellation closes setup at probe:turn/start
+  ---
+  duration_ms: 2.686958
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at probe:receive
+ok 4 - cancellation closes setup at probe:receive
+  ---
+  duration_ms: 1.305375
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at runtime:initialize
+ok 5 - cancellation closes setup at runtime:initialize
+  ---
+  duration_ms: 37.922667
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at runtime:thread/start
+ok 6 - cancellation closes setup at runtime:thread/start
+  ---
+  duration_ms: 4.462583
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at runtime:turn/start
+ok 7 - cancellation closes setup at runtime:turn/start
+  ---
+  duration_ms: 2.916125
+  type: 'test'
+  ...
+# Subtest: cancellation closes setup at runtime:done
+ok 8 - cancellation closes setup at runtime:done
+  ---
+  duration_ms: 3.866542
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at isolate is drained
+ok 9 - late resolution after abort at isolate is drained
+  ---
+  duration_ms: 0.431417
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at isolate is drained
+ok 10 - late rejection after abort at isolate is drained
+  ---
+  duration_ms: 0.494666
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at probe:initialize is drained
+ok 11 - late resolution after abort at probe:initialize is drained
+  ---
+  duration_ms: 1.033083
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at probe:initialize is drained
+ok 12 - late rejection after abort at probe:initialize is drained
+  ---
+  duration_ms: 0.780334
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at probe:thread/start is drained
+ok 13 - late resolution after abort at probe:thread/start is drained
+  ---
+  duration_ms: 0.886958
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at probe:thread/start is drained
+ok 14 - late rejection after abort at probe:thread/start is drained
+  ---
+  duration_ms: 0.866416
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at probe:turn/start is drained
+ok 15 - late resolution after abort at probe:turn/start is drained
+  ---
+  duration_ms: 1.549625
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at probe:turn/start is drained
+ok 16 - late rejection after abort at probe:turn/start is drained
+  ---
+  duration_ms: 1.050709
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at runtime:initialize is drained
+ok 17 - late resolution after abort at runtime:initialize is drained
+  ---
+  duration_ms: 2.149625
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at runtime:initialize is drained
+ok 18 - late rejection after abort at runtime:initialize is drained
+  ---
+  duration_ms: 2.197666
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at runtime:thread/start is drained
+ok 19 - late resolution after abort at runtime:thread/start is drained
+  ---
+  duration_ms: 2.956916
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at runtime:thread/start is drained
+ok 20 - late rejection after abort at runtime:thread/start is drained
+  ---
+  duration_ms: 1.940417
+  type: 'test'
+  ...
+# Subtest: late resolution after abort at runtime:turn/start is drained
+ok 21 - late resolution after abort at runtime:turn/start is drained
+  ---
+  duration_ms: 1.990042
+  type: 'test'
+  ...
+# Subtest: late rejection after abort at runtime:turn/start is drained
+ok 22 - late rejection after abort at runtime:turn/start is drained
+  ---
+  duration_ms: 2.775833
+  type: 'test'
+  ...
+# Subtest: already-aborted chat creates no isolation, probe, or runtime
+ok 23 - already-aborted chat creates no isolation, probe, or runtime
+  ---
+  duration_ms: 0.172459
+  type: 'test'
+  ...
+# Subtest: isolation cleanup waits for the owned process exit
+ok 24 - isolation cleanup waits for the owned process exit
+  ---
+  duration_ms: 0.362708
+  type: 'test'
+  ...
+# Subtest: every standard chat runs the actual security preflight
+ok 25 - every standard chat runs the actual security preflight
+  ---
+  duration_ms: 3.165625
+  type: 'test'
+  ...
+# Subtest: every fast chat runs the actual security preflight
+ok 26 - every fast chat runs the actual security preflight
+  ---
+  duration_ms: 2.092292
+  type: 'test'
+  ...
+# Subtest: noncancelled preflight rejects invalid tools before runtime launch
+ok 27 - noncancelled preflight rejects invalid tools before runtime launch
+  ---
+  duration_ms: 1.196667
+  type: 'test'
+  ...
+# Subtest: noncancelled preflight rejects invalid reasoning before runtime launch
+ok 28 - noncancelled preflight rejects invalid reasoning before runtime launch
+  ---
+  duration_ms: 1.39225
+  type: 'test'
+  ...
+# Subtest: noncancelled preflight rejects invalid speed before runtime launch
+ok 29 - noncancelled preflight rejects invalid speed before runtime launch
+  ---
+  duration_ms: 1.437291
+  type: 'test'
+  ...
+# Subtest: noncancelled preflight rejects invalid credentials before runtime launch
+ok 30 - noncancelled preflight rejects invalid credentials before runtime launch
+  ---
+  duration_ms: 1.519167
+  type: 'test'
+  ...
+# Subtest: thirty cancelled replacements keep fake owned setup resources bounded
+ok 31 - thirty cancelled replacements keep fake owned setup resources bounded
+  ---
+  duration_ms: 5.079125
+  type: 'test'
+  ...
+# Subtest: abort racing probe:spawn prevents initialize
+ok 32 - abort racing probe:spawn prevents initialize
+  ---
+  duration_ms: 0.471542
+  type: 'test'
+  ...
+# Subtest: abort racing runtime:spawn prevents initialize
+ok 33 - abort racing runtime:spawn prevents initialize
+  ---
+  duration_ms: 3.478625
+  type: 'test'
+  ...
+# Subtest: cancelling one chat leaves a separately owned runtime running
+ok 34 - cancelling one chat leaves a separately owned runtime running
+  ---
+  duration_ms: 1.849208
+  type: 'test'
+  ...
+# Subtest: only trusted non-private settings pages can configure/view context
+ok 35 - only trusted non-private settings pages can configure/view context
+  ---
+  duration_ms: 26.776542
+  type: 'test'
+  ...
+# Subtest: tab events respect permissions, never open a helper or read a document, and disposal stops recording
+ok 36 - tab events respect permissions, never open a helper or read a document, and disposal stops recording
+  ---
+  duration_ms: 7.1855
+  type: 'test'
+  ...
+# Subtest: summary transport sends only a consented batch and clear cancels/disconnects its helper
+ok 37 - summary transport sends only a consented batch and clear cancels/disconnects its helper
+  ---
+  duration_ms: 10.894292
+  type: 'test'
+  ...
+# Subtest: host wrapper shares normal chat busy/cancel boundaries and suppresses stale summary output
+ok 38 - host wrapper shares normal chat busy/cancel boundaries and suppresses stale summary output
+  ---
+  duration_ms: 3.012375
+  type: 'test'
+  ...
+# Subtest: host wrapper returns a summary result and preserves ordinary chat behavior
+ok 39 - host wrapper returns a summary result and preserves ordinary chat behavior
+  ---
+  duration_ms: 1.300167
+  type: 'test'
+  ...
+# Subtest: cancelling ordinary chat permits its replacement before old provider cleanup finishes
+ok 40 - cancelling ordinary chat permits its replacement before old provider cleanup finishes
+  ---
+  duration_ms: 1.458333
+  type: 'test'
+  ...
+# Subtest: an explicit grant records the first sample and a manual summary completes through the real host adapter
+ok 41 - an explicit grant records the first sample and a manual summary completes through the real host adapter
+  ---
+  duration_ms: 4.274833
+  type: 'test'
+  ...
+# Subtest: new profiles are OFF and no browsing events collect or call a provider
+ok 42 - new profiles are OFF and no browsing events collect or call a provider
+  ---
+  duration_ms: 6.834958
+  type: 'test'
+  ...
+# Subtest: only explicit allowed sites and permitted normal active tabs count; URL details never persist
+ok 43 - only explicit allowed sites and permitted normal active tabs count; URL details never persist
+  ---
+  duration_ms: 1.886417
+  type: 'test'
+  ...
+# Subtest: configuration rejects private/sensitive sites, URLs and oversized lists
+ok 44 - configuration rejects private/sensitive sites, URLs and oversized lists
+  ---
+  duration_ms: 0.9915
+  type: 'test'
+  ...
+# Subtest: retention prunes on read and persists the deletion; old/corrupt schema fails closed
+ok 45 - retention prunes on read and persists the deletion; old/corrupt schema fails closed
+  ---
+  duration_ms: 1.238625
+  type: 'test'
+  ...
+# Subtest: daily aggregate buckets are bounded and saved data is viewable without provider consent
+ok 46 - daily aggregate buckets are bounded and saved data is viewable without provider consent
+  ---
+  duration_ms: 3.456542
+  type: 'test'
+  ...
+# Subtest: separate provider consent, manual batching, cooldown, and changed-data checks gate summaries
+ok 47 - separate provider consent, manual batching, cooldown, and changed-data checks gate summaries
+  ---
+  duration_ms: 12.567583
+  type: 'test'
+  ...
+# Subtest: clearing, disabling, revoking consent and caller cancellation suppress late results
+ok 48 - clearing, disabling, revoking consent and caller cancellation suppress late results
+  ---
+  duration_ms: 26.407375
+  type: 'test'
+  ...
+# Subtest: permission revocation and clear during asynchronous observation cannot repopulate memory
+ok 49 - permission revocation and clear during asynchronous observation cannot repopulate memory
+  ---
+  duration_ms: 5.430959
+  type: 'test'
+  ...
+# Subtest: host uses exact discovered Luna at low reasoning, Standard, and no browser tools or history
+ok 50 - host uses exact discovered Luna at low reasoning, Standard, and no browser tools or history
+  ---
+  duration_ms: 1.067
+  type: 'test'
+  ...
+# Subtest: host rejects missing consent, arbitrary models, and extra/sensitive input before provider execution
+ok 51 - host rejects missing consent, arbitrary models, and extra/sensitive input before provider execution
+  ---
+  duration_ms: 0.339167
+  type: 'test'
+  ...
+# Subtest: missing authenticated Luna gives an honest local-only fallback and never chooses an expensive model
+ok 52 - missing authenticated Luna gives an honest local-only fallback and never chooses an expensive model
+  ---
+  duration_ms: 0.166958
+  type: 'test'
+  ...
+# Subtest: host enforces cancellation, text limits and a deadline even for an uncooperative provider
+ok 53 - host enforces cancellation, text limits and a deadline even for an uncooperative provider
+  ---
+  duration_ms: 7.012541
+  type: 'test'
+  ...
+# Subtest: cancellation settles promptly even if the summary sender never responds
+ok 54 - cancellation settles promptly even if the summary sender never responds
+  ---
+  duration_ms: 6.540125
+  type: 'test'
+  ...
+# Subtest: summary deduplication persists only a digest, not a second copy of browsing aggregates
+ok 55 - summary deduplication persists only a digest, not a second copy of browsing aggregates
+  ---
+  duration_ms: 0.715125
+  type: 'test'
+  ...
+# Subtest: both providers can advertise validated canvas mouse actions and game keys
+ok 56 - both providers can advertise validated canvas mouse actions and game keys
+  ---
+  duration_ms: 1.813416
+  type: 'test'
+  ...
+# Subtest: game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions
+ok 57 - game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions
+  ---
+  duration_ms: 0.429209
+  type: 'test'
+  ...
+# Subtest: native framing decodes fragmented UTF-8 and multiple messages
+ok 58 - native framing decodes fragmented UTF-8 and multiple messages
+  ---
+  duration_ms: 0.386458
+  type: 'test'
+  ...
+# Subtest: native framing rejects oversize, zero, invalid UTF-8 and truncated data
+ok 59 - native framing rejects oversize, zero, invalid UTF-8 and truncated data
+  ---
+  duration_ms: 0.147584
+  type: 'test'
+  ...
+# Subtest: native framing handles every header/body split with byte-array input and empty chunks
+ok 60 - native framing handles every header/body split with byte-array input and empty chunks
+  ---
+  duration_ms: 0.998083
+  type: 'test'
+  ...
+# Subtest: native framing keeps rejecting non-byte chunks, including empty arrays
+ok 61 - native framing keeps rejecting non-byte chunks, including empty arrays
+  ---
+  duration_ms: 0.115833
+  type: 'test'
+  ...
+# Subtest: native framing owns partial bytes when the caller reuses an input buffer
+ok 62 - native framing owns partial bytes when the caller reuses an input buffer
+  ---
+  duration_ms: 0.102833
+  type: 'test'
+  ...
+# Subtest: native framing handles repeatable fragmented/coalesced messages without losing the next header
+ok 63 - native framing handles repeatable fragmented/coalesced messages without losing the next header
+  ---
+  duration_ms: 13.005375
+  type: 'test'
+  ...
+# Subtest: native framing accepts the exact input limit and rejects incomplete maximum frames
+ok 64 - native framing accepts the exact input limit and rejects incomplete maximum frames
+  ---
+  duration_ms: 29.258875
+  type: 'test'
+  ...
+# Subtest: only the exact bundled extension origin is accepted
+ok 65 - only the exact bundled extension origin is accepted
+  ---
+  duration_ms: 0.316167
+  type: 'test'
+  ...
+# Subtest: context and action permissions are opt-in and tools reject arbitrary execution
+ok 66 - context and action permissions are opt-in and tools reject arbitrary execution
+  ---
+  duration_ms: 0.313208
+  type: 'test'
+  ...
+# Subtest: chat input rejects invalid providers, histories, ids and image URLs
+ok 67 - chat input rejects invalid providers, histories, ids and image URLs
+  ---
+  duration_ms: 0.51475
+  type: 'test'
+  ...
+# Subtest: reasoning uses reported defaults and rejects unavailable model levels
+ok 68 - reasoning uses reported defaults and rejects unavailable model levels
+  ---
+  duration_ms: 0.151958
+  type: 'test'
+  ...
+# Subtest: Codex Fast metadata requires a reported service tier and verified runtime support
+ok 69 - Codex Fast metadata requires a reported service tier and verified runtime support
+  ---
+  duration_ms: 0.179209
+  type: 'test'
+  ...
+# Subtest: only an explicitly selected Codex Fast request enables the fast_mode feature
+ok 70 - only an explicitly selected Codex Fast request enables the fast_mode feature
+  ---
+  duration_ms: 12.457916
+  type: 'test'
+  ...
+# Subtest: CLI environment removes inherited executable injection settings
+ok 71 - CLI environment removes inherited executable injection settings
+  ---
+  duration_ms: 0.135708
+  type: 'test'
+  ...
+# Subtest: profile name reaches the model even when profile context is empty
+ok 72 - profile name reaches the model even when profile context is empty
+  ---
+  duration_ms: 0.282041
+  type: 'test'
+  ...
+# Subtest: explicit init refreshes login discovery while concurrent inits share the in-flight request
+ok 73 - explicit init refreshes login discovery while concurrent inits share the in-flight request
+  ---
+  duration_ms: 1.14375
+  type: 'test'
+  ...
+# Subtest: JSON-lines child transport correlates requests and carries notifications
+ok 74 - JSON-lines child transport correlates requests and carries notifications
+  ---
+  duration_ms: 1.081667
+  type: 'test'
+  ...
+# Subtest: Codex removes catalog-native execution capabilities and fails closed for foreign tools
+ok 75 - Codex removes catalog-native execution capabilities and fails closed for foreign tools
+  ---
+  duration_ms: 0.507958
+  type: 'test'
+  ...
+# Subtest: controller awaits matching browser result before completing and denies forged results
+ok 76 - controller awaits matching browser result before completing and denies forged results
+  ---
+  duration_ms: 2.002666
+  type: 'test'
+  ...
+# Subtest: controller derives tool permission from consent even if a provider supplies a broader catalog
+ok 77 - controller derives tool permission from consent even if a provider supplies a broader catalog
+  ---
+  duration_ms: 0.260959
+  type: 'test'
+  ...
+# Subtest: cancel rejects in-flight tools and suppresses stale text and duplicate completion
+ok 78 - cancel rejects in-flight tools and suppresses stale text and duplicate completion
+  ---
+  duration_ms: 0.529208
+  type: 'test'
+  ...
+# Subtest: tool errors and timeouts terminate pending calls without executing anything locally
+ok 79 - tool errors and timeouts terminate pending calls without executing anything locally
+  ---
+  duration_ms: 5.721709
+  type: 'test'
+  ...
+# Subtest: provider absence and unknown models remain truthful and do not launch chat
+ok 80 - provider absence and unknown models remain truthful and do not launch chat
+  ---
+  duration_ms: 0.599875
+  type: 'test'
+  ...
+# Subtest: Claude uses no native or external tools and decodes split JSON text safely
+ok 81 - Claude uses no native or external tools and decodes split JSON text safely
+  ---
+  duration_ms: 0.212625
+  type: 'test'
+  ...
+# Subtest: Claude structured output streams text, waits for result, and rejects native-tool exposure
+ok 82 - Claude structured output streams text, waits for result, and rejects native-tool exposure
+  ---
+  duration_ms: 0.48825
+  type: 'test'
+  ...
+# Subtest: Codex streams agent text and waits for the extension before answering its dynamic tool request
+ok 83 - Codex streams agent text and waits for the extension before answering its dynamic tool request
+  ---
+  duration_ms: 1.113333
+  type: 'test'
+  ...
+# Subtest: Claude maps only reported reasoning to --effort and never forwards Codex speed controls
+ok 84 - Claude maps only reported reasoning to --effort and never forwards Codex speed controls
+  ---
+  duration_ms: 1.970875
+  type: 'test'
+  ...
+# Subtest: Codex Fast failures returned directly by turn/start include Standard retry guidance
+ok 85 - Codex Fast failures returned directly by turn/start include Standard retry guidance
+  ---
+  duration_ms: 0.411583
+  type: 'test'
+  ...
+# Subtest: an unsafe Codex probe received before turn/start resolves rejects cleanly
+ok 86 - an unsafe Codex probe received before turn/start resolves rejects cleanly
+  ---
+  duration_ms: 22.156208
+  type: 'test'
+  ...
+# Subtest: Codex prefers its refreshed CLI catalog and retains its restricted tool settings
+ok 87 - Codex prefers its refreshed CLI catalog and retains its restricted tool settings
+  ---
+  duration_ms: 1.154708
+  type: 'test'
+  ...
+# Subtest: Codex falls back to a valid bundled catalog only when refresh has no usable catalog
+ok 88 - Codex falls back to a valid bundled catalog only when refresh has no usable catalog
+  ---
+  duration_ms: 0.271625
+  type: 'test'
+  ...
+# Subtest: Codex discovery requests the refreshed catalog and intersects it with account models
+ok 89 - Codex discovery requests the refreshed catalog and intersects it with account models
+  ---
+  duration_ms: 0.607416
+  type: 'test'
+  ...
+# Subtest: latest GPT models are selected by family and numeric version, with unknown IDs preserved
+ok 90 - latest GPT models are selected by family and numeric version, with unknown IDs preserved
+  ---
+  duration_ms: 0.384541
+  type: 'test'
+  ...
+# Subtest: latest Claude release is selected per family and later dated aliases win ties
+ok 91 - latest Claude release is selected per family and later dated aliases win ties
+  ---
+  duration_ms: 0.276208
+  type: 'test'
+  ...
+# Subtest: explicit aliases collapse to a canonical model and duplicate IDs appear once
+ok 92 - explicit aliases collapse to a canonical model and duplicate IDs appear once
+  ---
+  duration_ms: 0.098042
+  type: 'test'
+  ...
+1..92
+# tests 92
+# suites 0
+# pass 92
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 303.189709

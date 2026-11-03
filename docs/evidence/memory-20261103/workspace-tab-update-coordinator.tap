@@ -1,0 +1,244 @@
+TAP version 13
+# Subtest: patchMembers never requests, reads, normalizes or stringifies the saved store
+ok 1 - patchMembers never requests, reads, normalizes or stringifies the saved store
+  ---
+  duration_ms: 5.001833
+  type: 'test'
+  ...
+# Subtest: overlapping windows share the exact named FIFO lock with general transactions
+ok 2 - overlapping windows share the exact named FIFO lock with general transactions
+  ---
+  duration_ms: 1.078875
+  type: 'test'
+  ...
+# Subtest: unchanged writes are suppressed and removals win over sets
+ok 3 - unchanged writes are suppressed and removals win over sets
+  ---
+  duration_ms: 0.419416
+  type: 'test'
+  ...
+# Subtest: malformed stored members use existing normalization without persisting cleanup alone
+ok 4 - malformed stored members use existing normalization without persisting cleanup alone
+  ---
+  duration_ms: 0.697208
+  type: 'test'
+  ...
+# Subtest: session rollover retains previous and current records, resets quarantine, and stays fresh across windows
+ok 5 - session rollover retains previous and current records, resets quarantine, and stays fresh across windows
+  ---
+  duration_ms: 0.995084
+  type: 'test'
+  ...
+# Subtest: a failed membership write rejects and releases the lock for the next writer
+ok 6 - a failed membership write rejects and releases the lock for the next writer
+  ---
+  duration_ms: 0.474083
+  type: 'test'
+  ...
+# Subtest: workspace files never parse HTML from strings or load remote resources
+ok 7 - workspace files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 7.905583
+  type: 'test'
+  ...
+# Subtest: every tone keeps text readable on sidebar surfaces in light and dark
+ok 8 - every tone keeps text readable on sidebar surfaces in light and dark
+  ---
+  duration_ms: 3.040417
+  type: 'test'
+  ...
+# Subtest: routes parse the explicit native window id
+ok 9 - routes parse the explicit native window id
+  ---
+  duration_ms: 2.012334
+  type: 'test'
+  ...
+# Subtest: appearance defaults and validation match the native contract
+ok 10 - appearance defaults and validation match the native contract
+  ---
+  duration_ms: 0.563875
+  type: 'test'
+  ...
+# Subtest: appearance font bounds and native booleans reject an entire invalid patch
+ok 11 - appearance font bounds and native booleans reject an entire invalid patch
+  ---
+  duration_ms: 0.430667
+  type: 'test'
+  ...
+# Subtest: store normalization survives corrupt data and keeps at least one space
+ok 12 - store normalization survives corrupt data and keeps at least one space
+  ---
+  duration_ms: 0.872958
+  type: 'test'
+  ...
+# Subtest: space, folder, entry and favorite operations
+ok 13 - space, folder, entry and favorite operations
+  ---
+  duration_ms: 7.15775
+  type: 'test'
+  ...
+# Subtest: sidebar model splits favorites, pinned and today tabs per space
+ok 14 - sidebar model splits favorites, pinned and today tabs per space
+  ---
+  duration_ms: 0.452875
+  type: 'test'
+  ...
+# Subtest: moveIndex places a tab before a neighbor or at the end of the visible list
+ok 15 - moveIndex places a tab before a neighbor or at the end of the visible list
+  ---
+  duration_ms: 0.086167
+  type: 'test'
+  ...
+# Subtest: restart: previous-session records restore spaces and pinned bindings by URL
+ok 16 - restart: previous-session records restore spaces and pinned bindings by URL
+  ---
+  duration_ms: 0.651083
+  type: 'test'
+  ...
+# Subtest: restart: ambiguous exact URL records fall back independent of window restore order
+ok 17 - restart: ambiguous exact URL records fall back independent of window restore order
+  ---
+  duration_ms: 0.668083
+  type: 'test'
+  ...
+# Subtest: restart: ambiguous path-only URL records fall back independent of window restore order
+ok 18 - restart: ambiguous path-only URL records fall back independent of window restore order
+  ---
+  duration_ms: 0.262875
+  type: 'test'
+  ...
+# Subtest: restart: unique and same-assignment URL candidates keep their space
+ok 19 - restart: unique and same-assignment URL candidates keep their space
+  ---
+  duration_ms: 0.145541
+  type: 'test'
+  ...
+# Subtest: restart: path match, pinned entry match, orphan pinned and reload with stable ids
+ok 20 - restart: path match, pinned entry match, orphan pinned and reload with stable ids
+  ---
+  duration_ms: 0.239125
+  type: 'test'
+  ...
+# Subtest: optional per-tab hints win when available
+ok 21 - optional per-tab hints win when available
+  ---
+  duration_ms: 0.0765
+  type: 'test'
+  ...
+# Subtest: rollSession keeps only the previous session for matching
+ok 22 - rollSession keeps only the previous session for matching
+  ---
+  duration_ms: 0.077334
+  type: 'test'
+  ...
+# Subtest: WorkspaceStore serializes concurrent writers from different windows
+ok 23 - WorkspaceStore serializes concurrent writers from different windows
+  ---
+  duration_ms: 32.221833
+  type: 'test'
+  ...
+# Subtest: WorkspaceStore: browser restart restores today tabs to their spaces
+ok 24 - WorkspaceStore: browser restart restores today tabs to their spaces
+  ---
+  duration_ms: 13.106167
+  type: 'test'
+  ...
+# Subtest: WorkspaceStore persists URL quarantine before another window restores the same page
+ok 25 - WorkspaceStore persists URL quarantine before another window restores the same page
+  ---
+  duration_ms: 6.020875
+  type: 'test'
+  ...
+# Subtest: duplicate saved pins never borrow another space or multiply during restore
+ok 26 - duplicate saved pins never borrow another space or multiply during restore
+  ---
+  duration_ms: 0.250958
+  type: 'test'
+  ...
+# Subtest: restoring a large session parses each saved URL once instead of rescanning the session per tab
+ok 27 - restoring a large session parses each saved URL once instead of rescanning the session per tab
+  ---
+  duration_ms: 2.489834
+  type: 'test'
+  ...
+# Subtest: actual autoDiscardable events avoid scheduled frames and full draws, preserving state and DOM
+ok 28 - actual autoDiscardable events avoid scheduled frames and full draws, preserving state and DOM
+  ---
+  duration_ms: 26.689791
+  type: 'test'
+  ...
+# Subtest: visual, membership, sorting and unknown changes retain baseline work and snapshots
+ok 29 - visual, membership, sorting and unknown changes retain baseline work and snapshots
+  ---
+  duration_ms: 21.250042
+  type: 'test'
+  ...
+# Subtest: first-seen tabs and full-snapshot differences redraw even with autoDiscardable-only changeInfo
+ok 30 - first-seen tabs and full-snapshot differences redraw even with autoDiscardable-only changeInfo
+  ---
+  duration_ms: 20.938625
+  type: 'test'
+  ...
+# Subtest: flat cloned mutedInfo can be equivalent; mutable aliases and unknown nested data default to redraw
+ok 31 - flat cloned mutedInfo can be equivalent; mutable aliases and unknown nested data default to redraw
+  ---
+  duration_ms: 13.411834
+  type: 'test'
+  ...
+# Subtest: skipped events invalidate in-flight queries at the exact event version and trigger recovery
+ok 32 - skipped events invalidate in-flight queries at the exact event version and trigger recovery
+  ---
+  duration_ms: 3.502417
+  type: 'test'
+  ...
+# Subtest: newer queries win and mixed bursts coalesce without dropping visual state
+ok 33 - newer queries win and mixed bursts coalesce without dropping visual state
+  ---
+  duration_ms: 3.450875
+  type: 'test'
+  ...
+# Subtest: deterministic mixed stream preserves snapshots after every event and activation
+ok 34 - deterministic mixed stream preserves snapshots after every event and activation
+  ---
+  duration_ms: 108.85425
+  type: 'test'
+  ...
+# Subtest: same-bucket new-tab resizes skip shortcut storage, filtering and painting
+ok 35 - same-bucket new-tab resizes skip shortcut storage, filtering and painting
+  ---
+  duration_ms: 46.675
+  type: 'test'
+  ...
+# Subtest: shortcut changes and explicit Reset still refresh at the same width
+ok 36 - shortcut changes and explicit Reset still refresh at the same width
+  ---
+  duration_ms: 1.890125
+  type: 'test'
+  ...
+# Subtest: resize during initial shortcut filtering cannot leave the wrong number of sites
+ok 37 - resize during initial shortcut filtering cannot leave the wrong number of sites
+  ---
+  duration_ms: 1.35725
+  type: 'test'
+  ...
+# Subtest: failed resize refreshes can retry and pagehide releases the resize listener
+ok 38 - failed resize refreshes can retry and pagehide releases the resize listener
+  ---
+  duration_ms: 2.910375
+  type: 'test'
+  ...
+# Subtest: expired Undo releases its action and clicking active Undo still invokes it once
+ok 39 - expired Undo releases its action and clicking active Undo still invokes it once
+  ---
+  duration_ms: 1.135709
+  type: 'test'
+  ...
+1..39
+# tests 39
+# suites 0
+# pass 39
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 355.028834

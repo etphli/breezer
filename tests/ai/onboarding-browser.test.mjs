@@ -91,7 +91,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}/workspace.html#/welcome`;
-  const browser = await chromium.launch({ executablePath, headless: true });
+  let browser;
   const errors = [];
   // A tester pauses to read; automated runs only wait for animations to settle.
   const pause = (ms) => new Promise((done) => setTimeout(done, videoDir ? ms : 60));
@@ -115,6 +115,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
   };
 
   try {
+    browser = await chromium.launch({ executablePath, headless: true });
     const { context, page } = await open({ record: Boolean(videoDir) });
     const next = page.locator('#wl-next');
     const heading = () => page.locator('.wl-step:not([hidden]) h1').innerText();
@@ -342,7 +343,8 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     assert.deepEqual(errors, []);
   } finally {
-    await browser.close();
-    server.close();
+    try { await browser?.close(); } finally {
+      await new Promise(done => server.close(done));
+    }
   }
 });

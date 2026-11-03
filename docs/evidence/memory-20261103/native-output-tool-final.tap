@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: output frames preserve JSON values, Unicode and control characters
+ok 1 - output frames preserve JSON values, Unicode and control characters
+  ---
+  duration_ms: 2.857042
+  type: 'test'
+  ...
+# Subtest: deterministic mixed UTF-16 strings produce identical complete frames
+ok 2 - deterministic mixed UTF-16 strings produce identical complete frames
+  ---
+  duration_ms: 13.37925
+  type: 'test'
+  ...
+# Subtest: output limit remains a UTF-8 byte limit including exact boundaries
+ok 3 - output limit remains a UTF-8 byte limit including exact boundaries
+  ---
+  duration_ms: 18.981917
+  type: 'test'
+  ...
+# Subtest: JSON hooks run once and serialization errors preserve their error class
+ok 4 - JSON hooks run once and serialization errors preserve their error class
+  ---
+  duration_ms: 0.829834
+  type: 'test'
+  ...
+# Subtest: valid output removes the temporary header buffer; oversized rejection remains unchanged
+ok 5 - valid output removes the temporary header buffer; oversized rejection remains unchanged
+  ---
+  duration_ms: 7.694166
+  type: 'test'
+  ...
+# Subtest: prefilled allocation exposes any unwritten frame bytes
+ok 6 - prefilled allocation exposes any unwritten frame bytes
+  ---
+  duration_ms: 3.814458
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 123.483041

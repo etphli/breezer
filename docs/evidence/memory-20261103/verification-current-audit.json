@@ -1,0 +1,342 @@
+{
+  "schema": 1,
+  "task": "verification-current current-source read-only audit",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "execution": "Self only; no subagents. Regular service speed requested; service tier not independently observable.",
+  "checkedAtUtc": "2026-11-03T00:52:01.660111+00:00",
+  "scope": "Exactly eleven assigned changed test files, 3415 authored lines fully read in current checkout. Extra helper reads are context only. No repository-wide review claim.",
+  "inventory": {
+    "path": "build/efficiency-20261103/source-inventory-after-cli.json",
+    "sha256": "82089938c92c799c362d577857afc583ce4951008257d1346ce77b2adeab0ea8",
+    "allOwnedHashesMatchInventory": true,
+    "drift": []
+  },
+  "files": [
+    {
+      "path": "tests/ai/claude-streaming.test.mjs",
+      "sha256": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874",
+      "lines": 133,
+      "readRanges": [
+        [
+          1,
+          133
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874",
+      "inventoryLines": 133,
+      "matchesInventory": true,
+      "notes": "Read all 133 lines. Actual round plus actual chat with injected EventEmitter RPC and explicit fake authenticated model state. No discover call. Oracle partialText is unchanged one-shot semantics, including its intentionally permissive nested/malformed key behavior. Literal final output cases, every split and character, rejection, close and abort listener removal. compare has failure cleanup. Other immediate success/error cases lack a broad finally and rely on expected settlement; not browser or paid-provider evidence. Chat cancellation performs two close calls by current contract."
+    },
+    {
+      "path": "tests/ai/newtab-browser.test.mjs",
+      "sha256": "430347bf565e7463821083ec5be175cfdc44c897ffb63e5ea42352fef5074f5f",
+      "lines": 522,
+      "readRanges": [
+        [
+          1,
+          522
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "430347bf565e7463821083ec5be175cfdc44c897ffb63e5ea42352fef5074f5f",
+      "inventoryLines": 522,
+      "matchesInventory": true,
+      "notes": "Read all 522 lines. Three real-browser declarations, local static server, fake Chrome ports/storage and synthetic Organato data. Exact lane/title/count expectations anchor generic every checks. Context setup before withPage try is still covered by outer browser finally. Launch and browser-close failures now close the server. Finite waits and canned replies do not prove long-term idle behavior or transport cancellation; never executed as a browser suite here."
+    },
+    {
+      "path": "tests/ai/onboarding-browser.test.mjs",
+      "sha256": "654b5967e94ee0edd25904316ebb7fbfcbd486774ee0b96e20d7438e53acacd4",
+      "lines": 350,
+      "readRanges": [
+        [
+          1,
+          350
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "654b5967e94ee0edd25904316ebb7fbfcbd486774ee0b96e20d7438e53acacd4",
+      "inventoryLines": 350,
+      "matchesInventory": true,
+      "notes": "Read all 350 lines. Actual welcome document when run, synthetic bridge/layout/storage and delayed Organato replies. Explicit opt-out success/failure/retry and unrelated settings assertions. Port listener removal/disconnect are no-ops, so this fixture does not demonstrate transport disposal. Browser launch and all page/context startup are inside outer try, nested server cleanup survives close errors. No import, saved key or account action performed."
+    },
+    {
+      "path": "tests/ai/panel-browser.mjs",
+      "sha256": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+      "lines": 406,
+      "readRanges": [
+        [
+          1,
+          406
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+      "inventoryLines": 406,
+      "matchesInventory": true,
+      "notes": "Read all 406 lines. Real rendered panel when run, synthetic status/accounts/context and recording postMessage. Stream additions check node identity, scrolling and equality with CURRENT renderMessage; historical renderer integrity comes separately from stream-render tests. Close assistant records a fake API call and does not actually close the page, intentionally allowing later checks. Startup cleanup fixed. No provider acceptance implied."
+    },
+    {
+      "path": "tests/ai/research-browser.mjs",
+      "sha256": "0169039ebd5332f09755afcadfef874d69fc5ca3740a15e168e63dbaa1e24f06",
+      "lines": 166,
+      "readRanges": [
+        [
+          1,
+          166
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "0169039ebd5332f09755afcadfef874d69fc5ca3740a15e168e63dbaa1e24f06",
+      "inventoryLines": 166,
+      "matchesInventory": true,
+      "notes": "Read all 166 lines. Fake tabs/capture responses test picker sharing, cancellation and late results. Actual native header extractor text is evaluated in synthetic browser documents when this suite runs; that does not exercise native API permission checks. Event/request arrays are synthetic. Startup protected and server cleanup survives close failure. Thirty-millisecond late-result window is bounded evidence only."
+    },
+    {
+      "path": "tests/ai/settings.test.mjs",
+      "sha256": "4eb295c4b44d73c7f755e091cb4909d8797ce280dff3a0103a251759a833c181",
+      "lines": 372,
+      "readRanges": [
+        [
+          1,
+          372
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "4eb295c4b44d73c7f755e091cb4909d8797ce280dff3a0103a251759a833c181",
+      "inventoryLines": 372,
+      "matchesInventory": true,
+      "notes": "Read all 372 lines. Handwritten DOM, storage and FIFO locks, actual settings mounting. Focus helper now uses reference identity with short labels only for diagnostics, with a regression distinguishing equal-label inputs. Native bridge normalizes/validates with production utility; explicit rejected/ignored bridge writes exercise failure behavior. Globals are replaced per case, not restored; fake-DOM keyboard semantics do not establish physical focus or native behavior."
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "sha256": "a7be3fb27be6eecd2fa7f3fc56eeb119f9acbf36b6ce17dd36965cb63cd824b0",
+      "lines": 176,
+      "readRanges": [
+        [
+          1,
+          176
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "a7be3fb27be6eecd2fa7f3fc56eeb119f9acbf36b6ce17dd36965cb63cd824b0",
+      "inventoryLines": 176,
+      "matchesInventory": true,
+      "notes": "Read all 176 lines. Baseline now required via readFileSync, has fixed SHA256 and byte-prefix equality, so missing or substituted baseline cannot silently pass. Deterministic malformed prefixes, explicit committed-node identity, disposed renderer, RAF coalescing and stale run tests. Fake node tree captures selected markup properties, not every browser DOM semantic. Counts constrain modeled parser input/allocation work and preserve the long single-block non-win; no elapsed time or browser footprint measured."
+    },
+    {
+      "path": "tests/ai/whats-new-browser.test.mjs",
+      "sha256": "f95c359da6207b443588b8a74d7cf3e32366f2e8d8945f95a198f7cd0ce5f924",
+      "lines": 245,
+      "readRanges": [
+        [
+          1,
+          245
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "f95c359da6207b443588b8a74d7cf3e32366f2e8d8945f95a198f7cd0ce5f924",
+      "inventoryLines": 245,
+      "matchesInventory": true,
+      "notes": "Read all 245 lines. Synthetic release-info, recording close/tab APIs, layout/color/keyboard contracts in a browser if run. Fixed feature lists and counts anchor many every checks; standalone .plate .art every lacks its own minimum count and would accept an empty list, so illustration-presence coverage alone is limited. Hardcoded bar ratio verifies displayed geometry, not raw benchmark provenance. Outer cleanup covers withPage setup failures; foreign request observer records rather than blocks requests. Never run here."
+    },
+    {
+      "path": "tests/ai/workspace-browser.test.mjs",
+      "sha256": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37",
+      "lines": 685,
+      "readRanges": [
+        [
+          1,
+          685
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37",
+      "inventoryLines": 685,
+      "matchesInventory": true,
+      "notes": "Read all 685 lines. Nine browser callbacks with shipped route documents plus separately imported synthetic Chrome fixture. Route pruning checks both absence and successful later route loading. MutationObserver zero-mutation check is accompanied by actual later title/audio updates, but row count observed is not separately asserted. CDP numbered-command tests dispatch a synthetic native command into an isolated world, not a physical accelerator. All nine launch paths protected by nested browser/server cleanup. No real discarded-tab restoration, browser restart or native-memory measurement."
+    },
+    {
+      "path": "tests/ai/workspace-frame.test.mjs",
+      "sha256": "2e852d6becbc8ebbc92596a2a1593f752f0afb2a22d8564bc3dc792431985615",
+      "lines": 174,
+      "readRanges": [
+        [
+          1,
+          174
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "2e852d6becbc8ebbc92596a2a1593f752f0afb2a22d8564bc3dc792431985615",
+      "inventoryLines": 174,
+      "matchesInventory": true,
+      "notes": "Read all 174 lines. Fake appearance/tabs and hand-drawn window controls, injected titlebar CSS variable. Size/band geometry expectations use actual browser metrics when run. Explicitly does not establish native drag/resize/controls behavior. Launch, newContext and newPage now inside try; server close survives browser close rejection."
+    },
+    {
+      "path": "tests/sync/provider.test.mjs",
+      "sha256": "f0ffe9639292786570f3dc2e084e0a547627befd37b6db6fca8f5aee31c80a4e",
+      "lines": 186,
+      "readRanges": [
+        [
+          1,
+          186
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "f0ffe9639292786570f3dc2e084e0a547627befd37b6db6fca8f5aee31c80a4e",
+      "inventoryLines": 186,
+      "matchesInventory": true,
+      "notes": "Read all 186 lines. Dummy local Python provider integration test is not executed. Extracted current helpers only exercised by safe fake/process lifecycle checks. CAS winner counts, exact opaque byte readback, revisions, restart and unauthorized responses are concrete local-provider assertions when run. Native error spellings loop has no minimum-match assertion; it would pass vacuously if native enum regex stopped matching, a coverage limit rather than a currently observed schema mismatch. Startup now drains output, bounds retained tail, removes listeners/timers and reaps failed readiness; token read now follows registered cleanup. Pending request timer/disposal and split readiness weaknesses reproduced below."
+    }
+  ],
+  "priorFindings": [
+    {
+      "id": "EVEN-1",
+      "status": "resolved in current bytes",
+      "evidence": "stream-render.test.mjs:7-8 requires baseline and :147-149 verifies fixed hash plus exact prefix. Focused suite passed, no fallback or conditional assertion remains."
+    },
+    {
+      "id": "EVEN-2 / VODD-1",
+      "status": "resolved for assigned files",
+      "evidence": "Current workspace nine callbacks, newtab three, onboarding, whats-new, workspace-frame, panel and research put launch/page creation under outer cleanup; nested finally guarantees server close after browser-close rejection. Fourteen checker cases for these assigned harnesses passed; four additional context harness checks passed."
+    },
+    {
+      "id": "EVEN-3",
+      "status": "resolved for original readiness/token cleanup issue",
+      "evidence": "provider.test.mjs:39-85 stop escalates/reaps; :92-98 registers cleanup before launch/token read. Four current extracted lifecycle tests passed, including synthetic missing executable and token failure."
+    },
+    {
+      "id": "VODD-2",
+      "status": "resolved",
+      "evidence": "settings.test.mjs:14-24 checks identity and equal-label regression. All 18 settings tests passed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "VCUR-1",
+      "severity": "low",
+      "title": "Readiness accepts an incomplete port at a stdout chunk boundary",
+      "origin": "Inherited relative to HEAD: the same unanchored URL regex existed before this cleanup change. Not introduced by optimisation.",
+      "references": [
+        {
+          "path": "tests/sync/provider.test.mjs",
+          "sha256": "f0ffe9639292786570f3dc2e084e0a547627befd37b6db6fca8f5aee31c80a4e",
+          "lines": [
+            64,
+            68
+          ]
+        }
+      ],
+      "impact": "Dummy local provider harness can resolve a truncated root URL and fail its subsequent local requests. Pipe data chunks have no line-boundary guarantee. This is a test startup reliability weakness, not a production transport finding.",
+      "reachability": "Provider startup prints one readiness line; OS stdout events may split after some port digits. No actual split observed from Python in this review.",
+      "faithfulReproduction": "verification-current-repro.mjs evaluates the exact current launch helper with an owned fake EventEmitter child. Emit http://127.0.0.1:12, then 345 newline. launch returns port 12 rather than 12345. Fake stop closes and all fake timers are cleared.",
+      "smallestFix": "Only parse complete newline-terminated readiness lines, preserving a bounded incomplete suffix until the next chunk. Add this exact split-output fixture."
+    },
+    {
+      "id": "VCUR-2",
+      "severity": "low",
+      "title": "Disposing a test client leaves pending request timers active",
+      "origin": "Inherited relative to HEAD: request timer/map and dispose forwarding are unchanged by startup fixes.",
+      "references": [
+        {
+          "path": "tests/sync/provider.test.mjs",
+          "sha256": "f0ffe9639292786570f3dc2e084e0a547627befd37b6db6fca8f5aee31c80a4e",
+          "lines": [
+            21,
+            35
+          ]
+        }
+      ],
+      "impact": "After an earlier assertion fails with a request pending, fixture disposal aborts adapter work but leaves its wrapper promise/timer pending for up to ten seconds. Failed or suppressed requests retain waiting entries until the helper is collected. No persistent production leak shown.",
+      "reachability": "Failure cleanup during an outstanding request, or a deliberately cancelled request whose adapter suppresses its reply. Normal integration path awaits each request, so that path is not affected.",
+      "faithfulReproduction": "Exact current client helper evaluated with fake adapter and recorded timers. Start Configure, dispose client. Adapter dispose runs but one ten-second timeout remains; firing that fake timer rejects the still-pending request. No wall-clock wait or real request.",
+      "smallestFix": "Store timer and reject function for each waiting entry; on timeout delete the entry, and on dispose clear timers, reject pending requests, and clear the map before adapter disposal."
+    }
+  ],
+  "introducedActionableFindings": 0,
+  "inheritedLowSeverityFindings": 2,
+  "checks": {
+    "command": "env -i PATH=/usr/bin:/bin TMPDIR=<owned verification-current-tmp> build/efficiency-20261103/organato-review-node24 --test tests/ai/claude-streaming.test.mjs tests/ai/settings.test.mjs tests/ai/stream-render.test.mjs tests/ai/harness-cleanup.test.mjs tests/sync/provider-lifecycle.test.mjs",
+    "exitCode": 0,
+    "passed": 55,
+    "failed": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "log": "build/efficiency-20261103/verification-current-tests.tap",
+    "reproductionCommand": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/verification-current-repro.mjs",
+    "reproductionExitCode": 0,
+    "reproductionResults": "build/efficiency-20261103/verification-current-repro-results.json",
+    "meaning": "Focused tests include fake DOM, actual pure renderer/provider-round code, extracted browser callbacks using owned loopback servers and owned dummy Node children. No browser or real provider launched. Claude chat creates an owned temporary directory with fake RPC; env cleared to avoid inherited account settings. No discovery invoked."
+  },
+  "contextArtifacts": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "use": "Read first"
+    },
+    {
+      "path": "build/efficiency-20261103/verification-even-audit.json",
+      "sha256": "461e08dcc0751fe02b53d57711275cb829a2a9a9cc6ad48fd1af8fd6307b7635",
+      "use": "Parsed prior audit; read findings and relevant scope/notes"
+    },
+    {
+      "path": "build/efficiency-20261103/verification-odd-audit.json",
+      "sha256": "912a63f17cb546bd5f758fb7c32f98e9f628128d2e619ef42346b39802e14a5a",
+      "use": "Parsed prior audit; read findings, objections and limitations"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/transport-and-audit-integration.json",
+      "sha256": "6bfc78940c1fc6eb6fc9db5eb8e0892b99635f3901007288c2edc9327430c3f3",
+      "use": "Read integration and claimed fixes"
+    },
+    {
+      "path": "script/check_efficiency_coverage.py",
+      "sha256": "16edbf6d64f53db55360cd8d2a590980ecd73fb02d505225b911fab3bd1128be",
+      "use": "Read full checker to validate report compatibility"
+    },
+    {
+      "path": "script/verify_stream_render_efficiency.mjs",
+      "sha256": "6cf4f6e0327d63d9ade66a20c53d502155f9a21662783aaca994d6300516c5b3",
+      "use": "Read full fake renderer fixture and invocation guard before safe tests"
+    },
+    {
+      "path": "tests/ai/harness-cleanup.test.mjs",
+      "sha256": "b944db3a18dabb39a8d2b3d8192302d4c9d7de0739660f38ce93408b6beeb54f",
+      "use": "Read full safe extracted callback checker before execution"
+    },
+    {
+      "path": "tests/sync/provider-lifecycle.test.mjs",
+      "sha256": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886",
+      "use": "Read full owned-child/fake token checker before execution"
+    }
+  ],
+  "acceptedLimits": [
+    "The compatibility oracle partialText preserves existing malformed-prefix behavior rather than specifying independent JSON correctness.",
+    "Panel stream browser expectations use current renderer; historical fidelity is separately pinned by the pure stream-render suite.",
+    "Illustration every(), native enum match loop and zero MutationObserver counts lack independent nonempty checks in the individual assertions noted in files; no current missing art/enum/observer rows demonstrated. These inherited coverage limits are not presented as production defects.",
+    "Fake Chrome events and storage do not enforce native permissions, process lifecycle, physical keyboard semantics or real provider authentication.",
+    "Browser suites, native integration, UI, performance and full dummy Python provider integration remain unrun. Missing optional dependencies were not treated as acceptance.",
+    "Cleanup error precedence can mask the original failure if browser close fails, while still closing the server. Hanging browser.close is not covered by rejection checks.",
+    "No external network, installed app, auth paths, profiles, Keychain, PC, SSH, scheduling, dependencies, compiled caches, builds, installation, commits, publication or shared report/inventory edits.",
+    "Fixture allocation/parser counts and passing semantics cannot establish browser-wide CPU or RAM savings."
+  ],
+  "coverageValidation": {
+    "checker": "script/check_efficiency_coverage.py check()",
+    "completeForOwnedScope": true,
+    "statuses": {
+      "tests/ai/claude-streaming.test.mjs": "fully-read",
+      "tests/ai/newtab-browser.test.mjs": "fully-read",
+      "tests/ai/onboarding-browser.test.mjs": "fully-read",
+      "tests/ai/panel-browser.mjs": "fully-read",
+      "tests/ai/research-browser.mjs": "fully-read",
+      "tests/ai/settings.test.mjs": "fully-read",
+      "tests/ai/stream-render.test.mjs": "fully-read",
+      "tests/ai/whats-new-browser.test.mjs": "fully-read",
+      "tests/ai/workspace-browser.test.mjs": "fully-read",
+      "tests/ai/workspace-frame.test.mjs": "fully-read",
+      "tests/sync/provider.test.mjs": "fully-read"
+    },
+    "meaning": "Checks the consistency of reviewer coverage claims and current source bytes; does not prove correctness or runtime performance."
+  }
+}

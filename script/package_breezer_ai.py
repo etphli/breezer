@@ -77,7 +77,29 @@ def framework_resources(app):
     return result
 
 
-def package(app, architecture, cache):
+def verify_memory_host(app, packet):
+    manifest = json.loads((packet / 'host-update.json').read_text())
+    if manifest.get('resource') != 'breezer_ai/host/protocol.mjs':
+        raise ValueError('Unexpected host resource in memory packet')
+    resources = manifest.get('hostResources')
+    names = {path.name for path in (FEATURE / 'host').glob('*.mjs')}
+    if not isinstance(resources, dict) or set(resources) != names or resources.get('protocol.mjs') != manifest['after']:
+        raise ValueError('Unexpected native host resource set in memory packet')
+    host = framework_resources(app) / 'breezer_ai/host'
+    checked = {}
+    for name in sorted(names):
+        if hashlib.sha256((packet / ('host-' + name)).read_bytes()).hexdigest() != resources[name]:
+            raise ValueError('Host memory packet checksum mismatch: ' + name)
+        installed = host / name
+        if installed.is_symlink() or not installed.resolve().is_relative_to(app.resolve()):
+            raise ValueError('Native host resource must remain inside the app')
+        if hashlib.sha256(installed.read_bytes()).hexdigest() != resources[name]:
+            raise ValueError('Packaged native host does not match the tested memory change: ' + name)
+        checked[name] = {'resource': str(installed), 'sha256': resources[name]}
+    return {'resources': checked}
+
+
+def package(app, architecture, cache, memory_packet=None):
     version = release_version(ROOT)
     lock = json.loads((FEATURE / "runtime.lock.json").read_text())
     archive = download_runtime(lock["distributions"][architecture], cache)
@@ -105,6 +127,8 @@ def package(app, architecture, cache):
         if target.exists():
             shutil.rmtree(target)
         staged.replace(target)
+    if memory_packet is not None:
+        verify_memory_host(app, memory_packet)
     stamp_bundle_version(app, version)
     print(f"Bundled Breezer {version}, private AI host and Node {lock['version']} for {architecture}: {target}")
     return target
@@ -129,10 +153,11 @@ def main():
     parser.add_argument("app", type=Path)
     parser.add_argument("--arch", choices=("arm64", "x64"), default={"arm64": "arm64", "x86_64": "x64"}.get(platform.machine()))
     parser.add_argument("--cache", type=Path, default=ROOT / "build/ai-runtime")
+    parser.add_argument("--memory-packet", type=Path, help="Require the tested native host receipt after packaging")
     args = parser.parse_args()
     if args.arch is None:
         parser.error("Specify the target app architecture with --arch.")
-    package(args.app.resolve(), args.arch, args.cache.resolve())
+    package(args.app.resolve(), args.arch, args.cache.resolve(), args.memory_packet.resolve() if args.memory_packet else None)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,192 @@
+{
+  "status": "Implemented, coordinator-verified and independently reviewed; local packet refreshed; native/browser-wide acceptance pending.",
+  "files": [
+    {
+      "path": "features/ai/extension/panel.js",
+      "sha256": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2",
+      "lines": 676,
+      "readRanges": [
+        [
+          319,
+          365
+        ],
+        [
+          380,
+          470
+        ],
+        [
+          500,
+          530
+        ]
+      ],
+      "status": "partial",
+      "notes": "Coordinator inspected exact panel diff and lifecycle; fresh whole-file independent read pending."
+    },
+    {
+      "path": "tests/ai/panel-efficiency.test.mjs",
+      "sha256": "c35f86a645bdfa74b2c84676fea35a44788c1c2ef16face37eaffdf1b76d6f7c",
+      "lines": 257,
+      "readRanges": [
+        [
+          1,
+          257
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read current test; existing stream test differs only in the verified run-initializer field."
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "sha256": "9fa2ceb8dc92558991ed9d9fafadd0be9a298b3814e570b9821bc459efaa971c",
+      "lines": 264,
+      "readRanges": [
+        [
+          1,
+          264
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read current test; existing stream test differs only in the verified run-initializer field."
+    }
+  ],
+  "source": {
+    "panel_baseline_sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "panel_current_sha256": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2",
+    "renderer_unchanged_sha256": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "stream_test_baseline_sha256": "b5c1057e06a3b202d71720364477efe3ad0c88a32f6408bd35a8557bdd379c32",
+    "stream_test_current_sha256": "9fa2ceb8dc92558991ed9d9fafadd0be9a298b3814e570b9821bc459efaa971c",
+    "new_test_sha256": "c35f86a645bdfa74b2c84676fea35a44788c1c2ef16face37eaffdf1b76d6f7c",
+    "read_ranges": {
+      "baseline_panel": [
+        "1-100",
+        "270-580",
+        "600-670"
+      ],
+      "current_panel_additional": [
+        "100-270",
+        "315-365",
+        "380-420",
+        "445-470",
+        "510-530",
+        "580-645"
+      ],
+      "baseline_stream_test": "1-EOF"
+    },
+    "changed_current_panel_ranges": [
+      "319-330 recentMessages and save",
+      "342 current-run reference in RAF",
+      "394 release reply reference",
+      "449 history30",
+      "455-459 run-owned first matching reply",
+      "516 delta reference"
+    ],
+    "fixture_adjustment": "stream-render.test.mjs panelHarness start initializer adds only message field; inverse edit verified against exact initial SHA; 14 tests retained"
+  },
+  "implementation": "panel-efficiency-implementation.json",
+  "checks": [
+    {
+      "commandFile": "combined-panel-efficiency-command.json",
+      "log": "combined-panel-efficiency.tap",
+      "result": "364 pass, zero skips."
+    },
+    {
+      "command": "python3 -B tests/memory_package_test.py",
+      "log": "panel-efficiency-package-tests.log",
+      "result": "8 pass."
+    },
+    {
+      "command": "Copied canonical tests/ai/panel-browser.mjs with explicit absolute root, synthetic API, fresh owned Chrome profile and external-network blocking",
+      "script": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-panel-efficiency-browser-uhumqtpj/panel-browser.mjs",
+      "log": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-panel-efficiency-browser-uhumqtpj/browser.log",
+      "result": "Full original fixture assertions pass: layout/rendering/settings/chat/history/streaming/keyboard/control/cancel/retry/sign-out/no-page/injection/dark/narrow/reduced motion.",
+      "sourceHashes": {
+        "features/ai/extension/panel.js": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2",
+        "features/ai/extension/render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+        "tests/ai/panel-browser.mjs": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463"
+      },
+      "exitCode": 0,
+      "scope": "Disposable Chrome156 and Playwright fixture; actual provider/app/native and physical RAM not tested. Browser plugin not available; existing Playwright used."
+    },
+    {
+      "command": "SHA256SUMS, FILES byte compare, memory-update.json before/after pins against cached worker plan and host-update.json hashes",
+      "result": "29 checksums,10 compiled resources and11 host modules match; local packet only."
+    },
+    {
+      "command": "git diff --check",
+      "result": "Pass."
+    }
+  ],
+  "packet": {
+    "packet": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/pc-packet",
+    "checksumFiles": 29,
+    "compiledResources": {
+      "page-context.js": {
+        "before": "5f2d2162e260103aea561da9f83bc95b6c2608105db718f66b410fe2c8747790",
+        "after": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4"
+      },
+      "translation-content.js": {
+        "before": "b7b5284f1a0f7db0a88ff9f95893dabc0c10c256a7629c244dfed7e4a86a215f",
+        "after": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d"
+      },
+      "workspace.js": {
+        "before": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+        "after": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670"
+      },
+      "workspace-sync.js": {
+        "before": "a8d3fc3064758b6f1d7814a616bdbb82ba19d6df5dd71e65a31b9dccc073f1ea",
+        "after": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+      },
+      "workspace-sync-model.js": {
+        "before": "f97e326df1b1ab8add1bcefa8c1aacbc0da08cc0adb9f0492c4e0264b55537f9",
+        "after": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c"
+      },
+      "workspace-store.js": {
+        "before": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+        "after": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81"
+      },
+      "newtab.js": {
+        "before": "9be0e837b86f877f2c1aa25867f9ef017e61a4e76044fc2ea3a0f5f29b0d5d75",
+        "after": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62"
+      },
+      "panel.js": {
+        "before": "dc0f37319f2a650997d944a9ba0804b0f281501d61f122144759c61dae9495ca",
+        "after": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2"
+      },
+      "render-message.js": {
+        "before": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "after": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35"
+      },
+      "native-provider-transport.cc": {
+        "before": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+        "after": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00"
+      }
+    },
+    "hostModules": {
+      "claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "codex.mjs": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "context-controller.mjs": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "context-summary.mjs": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "controller.mjs": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "main.mjs": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "organato.mjs": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+      "protocol.mjs": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "update-worker.mjs": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+      "updater.mjs": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+    },
+    "allPacketBytesMatchCurrentSources": true,
+    "beforePinsMatchCachedPlan": true,
+    "pcContacted": false,
+    "deployed": false
+  },
+  "limits": [
+    "Synthetic Proxy/callback/result-array counters are not physical allocation bytes, RSS or CPU timings.",
+    "Run creation adds one first-match scan; hot delta/frame scans are removed. Cold finish/stop/retry lookups remain.",
+    "Recent-message traversal may still read all messages if fewer than limit truthy texts exist; selected result size stays bounded, full transcript untruncated.",
+    "History30 and persistence60, object identities, write ordering and live transcript are preserved in source-bound scenarios.",
+    "Inline inverse-patch baseline requires maintenance when unrelated panel source changes.",
+    "Independent review, packaged/native acceptance and whole-browser CPU/RAM/speed comparisons remain pending.",
+    "No PC contact/probe/deploy/start/schedule, installed app/profile/credential/cache edits, commit or push."
+  ],
+  "review": "panel-efficiency-review.json"
+}

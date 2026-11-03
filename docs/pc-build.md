@@ -29,9 +29,14 @@ has no login trigger and can be opened explicitly for future builds.
 
 The output is an experimental Linux-to-macOS arm64 browser build. A successful
 compile does not establish packaging, signing, Mac runtime or feature acceptance.
-The latest combined pass includes the merged feature batch and completed at
+The previous combined pass included the merged feature batch and completed at
 23/23 actions with no failures. Its native artifacts were copied and hash-verified
-on the Mac. Never inject source changes or regenerate the graph during a live pass.
+on the Mac. The incremental memory-optimization pass started on November 3 at
+16:38 Sydney time and completed at 16:46 with task result zero and an output
+hash recorded in the worker state. The new app was retrieved, packaged and
+passed headless Mac smoke checks. The DMG payload and signatures were verified
+on a read-only mount. Physical-input and whole-browser RAM/CPU acceptance remain
+open. Never inject source changes or regenerate the graph during a live pass.
 
 Never reformat this drive. Preserve source, objects, caches, profiles and failure
 logs. The Mac build and its automations remain stopped by the user's instruction.
@@ -121,8 +126,9 @@ Do not use unbounded PowerShell log-tail pipelines. The scheduled health check
 uses `pc-bounded-health-snapshot.ps1` and `.py`, already in the local build-support
 directory. It checks actual processes, useful CPU work, memory, paging, I/O,
 errors and disk space. A live task or unchanged counter alone proves no health
-verdict. The agent check uses a 30-minute interval when enabled; it is currently disabled
-because compilation and artifact retrieval finished. The square is independent.
+verdict. The agent check uses a 30-minute interval when enabled. It is disabled
+after the November 3 compile completed. The new output was retrieved and packaged
+after Ethan's explicit packaging request. The square is independent.
 
 Do not change `.wslconfig` or restart WSL during owned work. Keep the old
 `Breezer-Prepare-Linux` and `Breezer-Prepare-Cross-Toolchain` tasks disabled,
@@ -219,3 +225,118 @@ the configured PC. Dragging and other DPI configurations remain separate checks.
 The reader uses Microsoft's [shared-file access](https://learn.microsoft.com/en-us/dotnet/api/system.io.fileshare),
 [stateful text decoding](https://learn.microsoft.com/en-us/dotnet/api/system.text.decoder)
 and [Windows Forms timer](https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.timer).
+
+## Prepare the unattended memory build
+
+Ethan confirmed the PC was on and authorized starting the build on November 3.
+The accepted packet was verified on Windows, all 14 supervisor and five cleanup
+tests passed in WSL, and preparation migrated the ten pinned resources. The existing
+graph, arguments, Ninja journals and compiled output passed before/after
+preservation checks. The existing task started at 16:38:21 Sydney time with
+`--resume-build-graph`; no clean or graph regeneration was requested.
+
+The latest bounded observation and exact deployed hashes are recorded in
+`build/efficiency-20261103/pc-start/handoff.json` in the active worktree. The
+30-minute PC monitor was enabled for this build and disabled after completion was
+confirmed at 16:56 Sydney time. Its planned 17:12 check was cancelled. The counter
+was opened in the logged-in desktop session at Ethan's request and shows
+`9/9`, `Compiled`, for the final dynamically reduced Ninja total. Mac and
+dual-machine monitors remain disabled.
+Use the current bounded health wrapper rather than reading the whole live log:
+
+```sh
+python3 -B script/windows/windows-command.py --probe build/efficiency-20261103/pc-start/health.ps1
+```
+
+The following preparation procedure is retained for recovery. Do not rerun it
+while a build is active.
+
+Generate the checked packet from the current source:
+
+```sh
+python3 script/windows/prepare-efficiency-packet.py
+```
+
+Using the pinned SFTP connection above, copy the packet's files from
+`build/efficiency-20261102/pc-packet` to
+`/B:/BreezerBuild/setup/unattended-preparation/`. Verify its `SHA256SUMS` against
+the received files. Leave any active compilation alone. When the task is stopped
+and Ready, test the supervisor in disposable fixtures before preparing the build:
+
+```powershell
+wsl.exe -d BreezerBuild -u breezer --exec env BREEZER_SUPERVISOR_SCRIPT=/mnt/b/BreezerBuild/setup/unattended-preparation/unattended_build.py python3 -B /mnt/b/BreezerBuild/setup/unattended-preparation/unattended_build_test.py
+if ($LASTEXITCODE -ne 0) { throw 'Supervisor tests failed; do not prepare or start' }
+wsl.exe -d BreezerBuild -u breezer --exec env BREEZER_SUPERVISOR_SCRIPT=/mnt/b/BreezerBuild/setup/unattended-preparation/unattended_build.py python3 -B /mnt/b/BreezerBuild/setup/unattended-preparation/unattended_cleanup_test.py
+if ($LASTEXITCODE -ne 0) { throw 'Cleanup fault tests failed; do not prepare or start' }
+& 'B:\BreezerBuild\setup\unattended-preparation\prepare-unattended-build.ps1'
+```
+
+Preparation requires the audited worker and launcher hashes. It migrates only
+`components/breezer_ai/page-context.js`, `translation-content.js`,
+`workspace.js`, `workspace-sync.js`, `workspace-sync-model.js`,
+`workspace-store.js`, `newtab.js`, `panel.js` and `render-message.js`, and
+`chrome/browser/sync/breezer_sync/provider_transport.cc`, plus their
+existing source hashes in `combined-1.2.0-inputs.json`, retaining recovery backups.
+It validates all ten resources before any writes and preserves already-migrated
+resource mtimes on repeated runs. The migration is safe to
+rerun after interruption and refuses unknown source or pins. It does not
+regenerate the graph or delete objects. It then replaces the task's existing
+launcher with the supervised launcher. Neither preparation nor tests start the
+browser compilation. Inspect any hash mismatch before proceeding.
+
+After preparation has succeeded and Ethan requests the start, use the existing
+`Breezer-PC-Build-Trial` start command earlier in this document. The supervisor
+appends to the existing log and retains the worker state path, so the optional progress square
+still reads its current-pass counters.
+
+Checkpoint and supervisor files are under the Linux output's
+`.breezer-checkpoints` directory:
+
+- `checkpoint-000000010000.json`, then one record per 10,000 observed finished
+  actions, plus a final or controlled-stop checkpoint.
+- `unattended-state.json` contains the current phase, attempt, counters, recent
+  errors, hashes and the exact supervised resume command.
+
+The runner flushes completed work at checkpoints and retries confirmed resource
+interruptions at most three times with five minutes between attempts. A failed
+compile action still permits independent Ninja work to finish and prevents
+success. Deterministic source, dependency, disk or integrity failures produce a
+failure report; they are not automatically repaired or ignored. Manual
+SIGINT/SIGTERM of the supervisor stops its owned worker and driver without a
+retry. Cleanup escalates interrupt to termination and then kill after bounded
+grace periods, preserving completed Ninja outputs. Linux orphan adoption must
+pass its PC fixture before deployment. Do not use a forceful Windows task kill as a graceful pause.
+
+Detailed evidence and limits are in
+[evidence/memory-20261102](evidence/memory-20261102/README.md) and the
+[November 3 handoff](evidence/memory-20261103/README.md#authorized-pc-build).
+The Windows launch path and WSL fixtures have been exercised. Compilation,
+packaging, signature validation, and headless Mac startup/component smoke checks
+have passed. Physical interaction, real integrations and whole-browser RAM/CPU
+measurements remain separate checks. The current artifact and exact evidence are
+in [the package receipt](evidence/memory-20261103/package-verification.json).
+
+## Package the tested native decoder after compilation
+
+The packet also contains the `host-*.mjs` modules and `host-update.json`. These are
+for the private Node helper packaged on the Mac after the native output is
+retrieved. The ten-resource Chromium migration does not install this helper.
+
+Package only the generated candidate app, before signing and acceptance checks:
+
+```sh
+python3 script/package_breezer_ai.py /path/to/generated/Breezer.app --arch arm64 --memory-packet build/efficiency-20261102/pc-packet
+python3 script/check_breezer_memory_package.py --app /path/to/generated/Breezer.app --packet build/efficiency-20261102/pc-packet
+```
+
+Use `--arch x64` for an Intel candidate. The memory-packet option makes packaging
+fail if any bundled host module differs from the tested receipt. The standalone
+checker repeats the byte comparison without modifying the app. Existing runtime
+checksum, bundle identity and architecture checks still apply. A later regular
+source build can pass the same gate with `BREEZER_MEMORY_PACKET` set to the
+packet directory. None of these commands have been run against the installed app.
+
+The local helper measurements use synthetic rejected requests and forced garbage
+collection. They establish the decoder's transport savings, not whole-browser
+RAM, normal AI latency or broad native acceptance. Keep matching browser RAM,
+CPU, speed and feature comparisons as separate gates after the candidate exists.

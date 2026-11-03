@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: actual class matches baseline at every UTF-16 split and every UTF-8 byte boundary
+ok 1 - actual class matches baseline at every UTF-16 split and every UTF-8 byte boundary
+  ---
+  duration_ms: 95.934458
+  type: 'test'
+  ...
+# Subtest: blank lines, malformed JSON and listener errors preserve error and message order
+ok 2 - blank lines, malformed JSON and listener errors preserve error and message order
+  ---
+  duration_ms: 2.827125
+  type: 'test'
+  ...
+# Subtest: whole incoming chunk limit remains UTF-16 based before any lines are dispatched
+ok 3 - whole incoming chunk limit remains UTF-16 based before any lines are dispatched
+  ---
+  duration_ms: 1234.281625
+  type: 'test'
+  ...
+# Subtest: requests, controls, notifications, failures, sends and timers retain correlations
+ok 4 - requests, controls, notifications, failures, sends and timers retain correlations
+  ---
+  duration_ms: 1.807125
+  type: 'test'
+  ...
+# Subtest: cancellation preserves fragmented in-flight output, pending rejection and confirmed exit
+ok 5 - cancellation preserves fragmented in-flight output, pending rejection and confirmed exit
+  ---
+  duration_ms: 4.483542
+  type: 'test'
+  ...
+# Subtest: error and close races preserve first error, reject pending once and avoid kill after exit
+ok 6 - error and close races preserve first error, reject pending once and avoid kill after exit
+  ---
+  duration_ms: 2.049709
+  type: 'test'
+  ...
+# Subtest: reentrant output callbacks retain baseline ordering and suffix handling
+ok 7 - reentrant output callbacks retain baseline ordering and suffix handling
+  ---
+  duration_ms: 0.779541
+  type: 'test'
+  ...
+# Subtest: confirmed child exit releases retained partial text while transport is still reachable
+ok 8 - confirmed child exit releases retained partial text while transport is still reachable
+  ---
+  duration_ms: 1.544333
+  type: 'test'
+  ...
+# Subtest: fragment fixture searches each arriving chunk instead of the repeated prefix
+ok 9 - fragment fixture searches each arriving chunk instead of the repeated prefix
+  ---
+  duration_ms: 79.155875
+  type: 'test'
+  ...
+# Subtest: directly imported production class preserves fragmented replies and cancellation exit promise
+ok 10 - directly imported production class preserves fragmented replies and cancellation exit promise
+  ---
+  duration_ms: 1.619417
+  type: 'test'
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1511.8625

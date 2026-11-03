@@ -1,0 +1,9 @@
+{
+  "status": "PINNED RUNTIME TESTS PASS; INDEPENDENT REVIEW PENDING",
+  "beforeSha256": "5805280cdd6a12df299f0a51d9a54d77df358d71eda93fe1642f7fb170c9712c",
+  "afterSha256": "d28adb5eea698d25fd8a0372f43e92d92b28a47ba81828832f4624b680e1d92f",
+  "beforeEvidence": "organato-response-baseline.tap",
+  "afterEvidence": "organato-response-pinned.tap",
+  "scope": "Synthetic streaming Response with injected fake key store/fetch. No real provider, network or Keychain. Counts decoded/read bytes, not physical RAM or CPU.",
+  "change": "Keep existing 2000000 decoded UTF-16 character limit, enforce while streaming in <=65536-byte decode pieces, cancel rejected bodies and release reader lock. Valid JSON, UTF8 replacement/BOM/splits, exact ASCII/BMP/astral limits, final decoder flush, errors and aborts checked."
+}

@@ -1,0 +1,826 @@
+{
+  "schema": 1,
+  "task": "verification-even read-only test-source audit",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "execution": "self only; no subagents; service tier not independently observable",
+  "scope": "Even zero-based indices after filtering build inventory to owner verification, preserving order. Test-source audit only; no browser efficiency claim.",
+  "inventory": {
+    "path": "build/efficiency-20261103/source-inventory-current.json",
+    "sha256": "28ef41f889615274623b3e2ca377791604c628c707734e1229271225ab15de01",
+    "owner": "verification",
+    "totalVerificationFiles": 94,
+    "selectedIndices": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32,
+      34,
+      36,
+      38,
+      40,
+      42,
+      44,
+      46,
+      48,
+      50,
+      52,
+      54,
+      56,
+      58,
+      60,
+      62,
+      64,
+      66,
+      68,
+      70,
+      72,
+      74,
+      76,
+      78,
+      80,
+      82,
+      84,
+      86,
+      88,
+      90,
+      92
+    ],
+    "ownedFiles": 47,
+    "ownedLines": 7735,
+    "allOwnedHashesMatchInventory": true
+  },
+  "contextArtifacts": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ]
+    },
+    {
+      "path": "docs/evidence/memory-20261103/README.md",
+      "sha256": "7755fc8c912849c02d2bfa61e9eb2314fe51d9067aaffe3e6c1a363138358172",
+      "lines": 137,
+      "readRanges": [
+        [
+          1,
+          137
+        ]
+      ]
+    },
+    {
+      "path": "docs/evidence/memory-20261103/verification.json",
+      "sha256": "0f938fa73dcf800897de5c1d9d60d0bbc91c08c8b88530c816b92943c7c4ca59",
+      "lines": 78,
+      "readRanges": [
+        [
+          1,
+          78
+        ]
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "tests/ai/bookmarks-native.mjs",
+      "sha256": "d76609c093b12d2c815890bcea49c258b83b61a0c28cbc11409ed4e5da1a2883",
+      "lines": 32,
+      "readRanges": [
+        [
+          1,
+          32
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Installed-app native UI test with disposable profile; not executed. WebSocket open has no timeout and cleanup chains can prevent profile removal on close failure."
+    },
+    {
+      "path": "tests/ai/browser-input-providers.test.mjs",
+      "sha256": "c3a8750eb1a27c1a073d9d38749789754f1b55e0700feda8c07dc1d69113d86a",
+      "lines": 127,
+      "readRanges": [
+        [
+          1,
+          127
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake provider transports and Chrome API. Wire payload/order assertions only, as documented; no native input or provider acceptance."
+    },
+    {
+      "path": "tests/ai/browser-page.mjs",
+      "sha256": "03ca8a0034ffd4f689361f07c7cf8cc7a20c3534c6194d9a2eaf682b3a7c1a1b",
+      "lines": 208,
+      "readRanges": [
+        [
+          1,
+          208
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Real DOM/CDP with fake Chrome permission transport. Two loopback servers and browser created before try; startup failure cleanup gap. Not executed."
+    },
+    {
+      "path": "tests/ai/claude-streaming.test.mjs",
+      "sha256": "12659c4f7a1cbab33343f3f08c4b7824abe27e94e3eb9b19f0f1fe9e4cd2cff0",
+      "lines": 119,
+      "readRanges": [
+        [
+          1,
+          119
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Current round compared at every split against unchanged one-shot partialText reference, with explicit final outputs and listener cleanup. Compatibility oracle is intentionally existing semantics, not independent correctness or runtime performance."
+    },
+    {
+      "path": "tests/ai/context-memory.test.mjs",
+      "sha256": "6165a5bb67cbcc22f184cbf6648840bcae17815d206c6ea0e78c321fed9c7df9",
+      "lines": 232,
+      "readRanges": [
+        [
+          1,
+          232
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "In-memory storage, fake time, fake provider and cancellation. Failed imports become missing exports but tests assert exports and fail rather than silently skip."
+    },
+    {
+      "path": "tests/ai/docs-editor-browser.mjs",
+      "sha256": "8df0c34331712ac2677e3036c981a4787de65e96ab038582654956f72c67971e",
+      "lines": 162,
+      "readRanges": [
+        [
+          1,
+          162
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Synthetic Docs page with catch-all route fulfillment. Explicitly excludes authenticated Docs/native acceptance. Browser/page creation precedes try."
+    },
+    {
+      "path": "tests/ai/host-discovery.mjs",
+      "sha256": "1233002da7b3d3aed9759d18df278ce6f539a24536073a0fc37c39dd5a45799b",
+      "lines": 30,
+      "readRanges": [
+        [
+          1,
+          30
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Real native helper init/discovery, not an offline fake. Forbidden to execute in current task. Timeout kills child but provider descendants not audited."
+    },
+    {
+      "path": "tests/ai/host-loading.test.mjs",
+      "sha256": "de3de2c5cdd9fdf7b73c7521c8ebff79441244156cccd66577a8b5cbdb0774cd",
+      "lines": 51,
+      "readRanges": [
+        [
+          1,
+          51
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Real Node helper with V8 coverage for idle/invalid-message lazy loading. Environment inherited; does not prove discovery is credential-free. Child spawn precedes try."
+    },
+    {
+      "path": "tests/ai/host.test.mjs",
+      "sha256": "593235ac9f5dccb311fc16afa5d66efb8f3f25de3446132bebe8f59e34e776b4",
+      "lines": 392,
+      "readRanges": [
+        [
+          1,
+          392
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Native framing expected decoded objects are independent literals. Provider chat transports mostly stubbed. isolate() test is real isolation implementation, so do not treat entire file as config/credential-free without auditing dependencies."
+    },
+    {
+      "path": "tests/ai/installed-control.mjs",
+      "sha256": "88ea8b0132a4b3a8d0034b7f71f803ef0153ca8b24e1850c471f43eab10ba8b6",
+      "lines": 228,
+      "readRanges": [
+        [
+          1,
+          228
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Explicit --run-live guard; installed app and signed-in provider. Disposable browser profile does not imply provider credential isolation. Forbidden to run."
+    },
+    {
+      "path": "tests/ai/native-frame-memory.test.mjs",
+      "sha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b",
+      "lines": 14,
+      "readRanges": [
+        [
+          1,
+          14
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Wrapper trusts subprocess probe counters/retainedArrayBufferBytes. Probe implementation outside owned scope. One MiB frame/three rounds threshold, not total browser RAM."
+    },
+    {
+      "path": "tests/ai/newtab-bridge.test.mjs",
+      "sha256": "0d2268a8c8f96389b9ef6e9f89996e47d320bf45f1fdbe26d9fe8a82f9242dda",
+      "lines": 136,
+      "readRanges": [
+        [
+          1,
+          136
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake native transport and Chrome storage; validates actual worker/frontend protocol. Helper count is fake connect count, not OS process lifetime measurement."
+    },
+    {
+      "path": "tests/ai/newtab.test.mjs",
+      "sha256": "3c06362cf4553d6d54e4f613e34932115ead905e48926808e5d7283899928ba6",
+      "lines": 214,
+      "readRanges": [
+        [
+          1,
+          214
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Static resource contracts and explicit normalization/date/port results; no resize/DOM acceptance."
+    },
+    {
+      "path": "tests/ai/organato-settings.test.mjs",
+      "sha256": "9af71f29afd84414dd850fefeb4ec8563e2139ebdd8a39e236652eb6527b9b3b",
+      "lines": 71,
+      "readRanges": [
+        [
+          1,
+          71
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake DOM/ports; reconnect and stale-channel assertions. Most cleanup not in finally; failure can retain fixture timeout briefly. No real account/key."
+    },
+    {
+      "path": "tests/ai/overlay_test.py",
+      "sha256": "e5214141a5ec1d1e93b9e8c422a72e8eb355e4a5c9ba4e472c48224a8e5570dc",
+      "lines": 38,
+      "readRanges": [
+        [
+          1,
+          38
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Static packaged identity/manifest assertions. Does not execute browser permission enforcement."
+    },
+    {
+      "path": "tests/ai/package.json",
+      "sha256": "4158ee7013995d2aa083b7b522d4ae926a1f348db796a307a5714829c24e4c3d",
+      "lines": 9,
+      "readRanges": [
+        [
+          1,
+          9
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Pinned test-only dependencies; no scripts or lifecycle command here. No install/download performed."
+    },
+    {
+      "path": "tests/ai/panel-theme.test.mjs",
+      "sha256": "29ca2d929c56d85aa2b71ceb11bcf679bf437b0e7b0857126895800d0702fdbf",
+      "lines": 171,
+      "readRanges": [
+        [
+          1,
+          171
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake root/media/storage plus CSS token contrast checks. No actual layout/compositing or memory measurement."
+    },
+    {
+      "path": "tests/ai/release-notes.test.mjs",
+      "sha256": "6e25ac10a3352ffbbcd31e6adb11812d3b4ac12ab58ba5ce0c4838a567e75f19",
+      "lines": 52,
+      "readRanges": [
+        [
+          1,
+          52
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake storage/tabs/window startup state, including concurrent calls and failed creation. Publication/runtime opening not exercised."
+    },
+    {
+      "path": "tests/ai/research-providers.test.mjs",
+      "sha256": "6ea491403a2a3676e8f7c0af9cccc718c46921d08159c7fc73310623d6070985",
+      "lines": 56,
+      "readRanges": [
+        [
+          1,
+          56
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake provider RPC and literal text-only/no-tool expectations. Paid adapters never started by fixture transports."
+    },
+    {
+      "path": "tests/ai/settings-dom.mjs",
+      "sha256": "e73b3664ae8eac7be8bee35531b4e348bcf259aafd5eeb2cd5bba9f2fec42409",
+      "lines": 292,
+      "readRanges": [
+        [
+          1,
+          292
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Handwritten partial DOM, selector parser and event/focus/range helpers. No layout; removeListener support limited to own listener class. userType lacks disabled guard despite header generalization. Broader DOM semantics not proved."
+    },
+    {
+      "path": "tests/ai/settings-onboarding-browser.test.mjs",
+      "sha256": "b1e54d6363b9e851b636b83ed94fb6cf001af7cb621a16badac35bfc40b09fc0",
+      "lines": 193,
+      "readRanges": [
+        [
+          1,
+          193
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Real rendered shipped page against fake APIs/keys/update responses. Explicit dependency skip; launch-before-try cleanup gap. No native import/update acceptance."
+    },
+    {
+      "path": "tests/ai/settings-redesign-browser.test.mjs",
+      "sha256": "694d51011800cd5188a0d98def0af558850beab5f3ea0d88412e2e3b46dc0760",
+      "lines": 245,
+      "readRanges": [
+        [
+          1,
+          245
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Real layout and navigation with fake bridges/storage; explicit dependency skip. Launch-before-try cleanup gap."
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "sha256": "57d7000249ae5ea0147887f635ce4b386034d68625a710340a05a2f9b3eea2c1",
+      "lines": 180,
+      "readRanges": [
+        [
+          1,
+          180
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Incremental/full-render differential, malformed deterministic samples, RAF and disposal checks. Conditional baseline gate may pass with zero assertions; fixture operation counts do not establish CPU/RSS savings."
+    },
+    {
+      "path": "tests/ai/translation-browser.test.mjs",
+      "sha256": "9d1a826841ac1b07368564661f740c4c0bffe7a66366e872ec2015ac52152ad2",
+      "lines": 186,
+      "readRanges": [
+        [
+          1,
+          186
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Disposable extension with fixture-only host grants. Fixed-port skip and separate live case explicitly gated. Waiting 35s does not assert worker termination. No browser run in audit."
+    },
+    {
+      "path": "tests/ai/translation.test.mjs",
+      "sha256": "7140a9aa30f3ad2846f48c008b833cbae869f0c84c037a98e69a905904710109",
+      "lines": 104,
+      "readRanges": [
+        [
+          1,
+          104
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake fetch injection or mock for valid requests; invalid requests without fetcher depend on rejection before network. Literal response/privacy expectations. No provider run."
+    },
+    {
+      "path": "tests/ai/updater.test.mjs",
+      "sha256": "352949f4dafe4d285f22cb95dce7a5e799423287017c6a8d69f7d5c937432719",
+      "lines": 178,
+      "readRanges": [
+        [
+          1,
+          178
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake apps under temporary directories, fake fetch/verify/launch, synthetic child workers. Success case leaves returned handoff work outside fixture-root cleanup if implementation allocates it elsewhere; dependency path not audited. Does not prove signing/real startup rollback."
+    },
+    {
+      "path": "tests/ai/visual-polish-browser.test.mjs",
+      "sha256": "4bba092884d8629adaf54e7f9c3f79b0d9d759611f6aa62a4e853f5af7b1ac30",
+      "lines": 452,
+      "readRanges": [
+        [
+          1,
+          452
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Geometry/pixels and keyboard behavior with fake Chrome API, dummy URLs/icons. Explicit dependency skip; launch-before-try cleanup gap. No resize efficiency benchmark."
+    },
+    {
+      "path": "tests/ai/whats-new.test.mjs",
+      "sha256": "67ea0d7c1c8ab04f1276e779fc75223ee4dbd9eab97980e207479f842fe42957",
+      "lines": 254,
+      "readRanges": [
+        [
+          1,
+          254
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Static copy/data contracts, conditional local benchmark comparison. Hardcoded historic numbers not independently remeasured. Optional missing benchmark is an explicit skip."
+    },
+    {
+      "path": "tests/ai/workspace-browser.test.mjs",
+      "sha256": "014e1727bcf3714836a59d4d0e4bd795231bfcaa83e04564847596d6228ab391",
+      "lines": 667,
+      "readRanges": [
+        [
+          1,
+          667
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual shipped DOM with fake tabs/storage/native bridge. New route-markup test repeats inherited launch-before-try cleanup gap. Extracted fixture dependency belongs to reserved half and was not audited."
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Production patchMembers driven by fake storage/FIFO locks. Includes literal writes, session and failure expectations; normalization reused for malformed-data expectations. Exact two-serialization assertion is implementation-coupled, not memory measurement."
+    },
+    {
+      "path": "tests/ai/workspace-peek.test.mjs",
+      "sha256": "bf7c5042a56abdbea905f47bc18f9f4e8a36665c06bef400ac6c4e013ba04602",
+      "lines": 243,
+      "readRanges": [
+        [
+          1,
+          243
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "DOM/peek bridge recording fixture; explicitly excludes native peek. Launch-before-try cleanup gap; no full native acceptance."
+    },
+    {
+      "path": "tests/ai/workspace-store.test.mjs",
+      "sha256": "e6a9d40dbbb020e6a8ffd7945186e6909e0c412293933b69f57c39898061f952",
+      "lines": 430,
+      "readRanges": [
+        [
+          1,
+          430
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake deep-copy storage/FIFO locks and literal sidebar/session expectations. URL constructor counts constrain work for 250 records, not elapsed time or RAM; random short delay is scheduling noise only."
+    },
+    {
+      "path": "tests/benchmark-browsers.test.mjs",
+      "sha256": "ee5b9af2eb82b2847ed905442cf26a41dc47306a2de8776ca7291587af1e1672",
+      "lines": 450,
+      "readRanges": [
+        [
+          1,
+          450
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Fake process tables, CPU counters, physical-footprint records and CDP. Literal independent arithmetic and fail-closed missing-data cases. No live CPU/RSS collection here; benchmark implementation not in owned scope."
+    },
+    {
+      "path": "tests/code_sign_clones_test.py",
+      "sha256": "85b6cea8cb824d6716c13d28b3c5ed2d9faa376a1485cf469c22880e7afe5744",
+      "lines": 94,
+      "readRanges": [
+        [
+          1,
+          94
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Optional pinned prepared source copied to temporary tree before patching. Lifecycle assertions mostly source strings; does not prove runtime clone cleanup."
+    },
+    {
+      "path": "tests/memory_package_test.py",
+      "sha256": "2dbde9f7861df8f73ae7a116f48dc1b684310ffb2a0be2268dae54ef6445d9b1",
+      "lines": 95,
+      "readRanges": [
+        [
+          1,
+          95
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Synthetic host files/receipt hashes; package runtime download/unpack/subprocess mocked. Tests checksum/resource set/path boundaries, not JavaScript semantics or actual archive build."
+    },
+    {
+      "path": "tests/passkeys/virtual.mjs",
+      "sha256": "8321c88ea5e3d468523c86d123743c4274c915e595d05f236d32852ee9d7906e",
+      "lines": 104,
+      "readRanges": [
+        [
+          1,
+          104
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Virtual CDP authenticator with signature/origin/challenge verification; explicitly no native biometrics/Keychain/iCloud acceptance. Browser guarded by finally."
+    },
+    {
+      "path": "tests/passkeys/webauthn.js",
+      "sha256": "452ae08fac0c422b69737d860da31c4f68630947eb033034b7eb7410255a37ed",
+      "lines": 47,
+      "readRanges": [
+        [
+          1,
+          47
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Dummy credential request fixture exposes public responses only. Uses browser credential APIs intentionally; never executed in this audit."
+    },
+    {
+      "path": "tests/passwords.test.mjs",
+      "sha256": "5c7957cb5e2b2f5281d6c76ed03cd89abf2a12c118f2501befbd8df6ebc6cd4d",
+      "lines": 44,
+      "readRanges": [
+        [
+          1,
+          44
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Proxy limits production route action to tabs API, literals validate pinned destinations and dummy CSV. No credentials read."
+    },
+    {
+      "path": "tests/passwords/enter-browser.mjs",
+      "sha256": "97418170ad980f227a2b7493af9672e69713c718849a4c57b85d956552bb5014",
+      "lines": 165,
+      "readRanges": [
+        [
+          1,
+          165
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Trusted input on synthetic login DOM; --baseline alters expected compiled enhancement behavior. Site picker is synthetic, not native saved-password picker. Server/browser created before try."
+    },
+    {
+      "path": "tests/passwords/filling.mjs",
+      "sha256": "4d78eef512256bb45494aaeaa42acfb7c7e4b21daecbb662833a89c43f55c2e5",
+      "lines": 44,
+      "readRanges": [
+        [
+          1,
+          44
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Native password store with disposable profile but removes mock-keychain/basic-password flags; can access macOS Keychain. Forbidden to run. WebSocket cleanup only on success."
+    },
+    {
+      "path": "tests/passwords/login.html",
+      "sha256": "0411d79a9ab20902dafc12c95d804e3019ef269ca063b653e67d64f985b5c096",
+      "lines": 12,
+      "readRanges": [
+        [
+          1,
+          12
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Static dummy form; no remote asset/script or submit button. Real credentials not present."
+    },
+    {
+      "path": "tests/passwords_native_test.py",
+      "sha256": "8c511e0512c8c42d4b445f0e384cb99873b284a0332b1e715a4f357db126c538",
+      "lines": 181,
+      "readRanges": [
+        [
+          1,
+          181
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Prepared source read, patches only temporary copies; source-string/hash contracts do not prove native credential runtime. Environment-controlled prepared-source cases explicitly skipped when absent."
+    },
+    {
+      "path": "tests/sync.test.mjs",
+      "sha256": "436207b3c33bdabd108e646423deb6489e39c9a43a517325148d1fc80895a1f2",
+      "lines": 4,
+      "readRanges": [
+        [
+          1,
+          4
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Discovery imports only model/provider/reconcile. lifetime.test.mjs is absent from this aggregate entry point; whole sync coverage requires explicit lifetime inclusion. Existing aggregate limitation."
+    },
+    {
+      "path": "tests/sync/provider.test.mjs",
+      "sha256": "7247465797ef17f633144b9879c8433d8ace8199d0238d32af846dac18573482",
+      "lines": 149,
+      "readRanges": [
+        [
+          1,
+          149
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Real disposable Python loopback provider with random opaque bytes/CAS/restart, plus fake cancellation fetch. Not safe under current no-network restriction. Cleanup registered after startup/token read; startup timeout lacks child termination."
+    },
+    {
+      "path": "tests/sync/setup-browser.test.mjs",
+      "sha256": "49f4b788e2edf9ab45b7e19ac412152834d095233d5ed73ddbde82033fee0328",
+      "lines": 95,
+      "readRanges": [
+        [
+          1,
+          95
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Rendered setup UI with fake chrome.send replies and synthetic recovery key; explicit native vault/password exclusion. Launch-before-try cleanup gap."
+    },
+    {
+      "path": "tests/windows/build-progress.test.ps1",
+      "sha256": "7f8360e7e11efb6763cbfd7c0f481f975be1819ebe800d9f84a784ddcb22a88d",
+      "lines": 80,
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Disposable uniquely named log/state files. Encoding/partial write/pass-boundary/bounded-read checks; no build or PC contact. Not executed."
+    },
+    {
+      "path": "tests/windows/unattended_build_test.py",
+      "sha256": "c5f4a743b10df3729c02b734be30fab73c2bf88e9236818c89742a9abb391545",
+      "lines": 287,
+      "readRanges": [
+        [
+          1,
+          287
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Disposable workers and real Ninja, no browser/native build. Missing Ninja and Linux-only orphan test explicitly skipped. Several failure-path cleanup lambdas kill parent only, descendants rely on code under test; not executed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "EVEN-1",
+      "severity": "medium",
+      "classification": "introduced test evidence defect; file untracked relative to HEAD",
+      "path": "tests/ai/stream-render.test.mjs",
+      "lines": [
+        7,
+        9,
+        149,
+        153
+      ],
+      "title": "Missing baseline silently passes the baseline-integrity test",
+      "evidence": "oldSource falls back to current source when beforePath is absent. The named baseline-integrity test asserts only when oldSource !== source. Running the exact registered test block with equal sources registers one test and executes zero assertions.",
+      "impact": "A green test does not certify preservation of the pinned audited baseline on fresh checkouts. Differential incremental/full-current-render tests still execute and remain useful; no demonstrated false CPU/RSS win.",
+      "suggestedAction": "Report an explicit skip when the pinned baseline is unavailable, or require a fixed expected hash of the preserved renderer prefix without optional local state. No source edited."
+    },
+    {
+      "id": "EVEN-2",
+      "severity": "medium",
+      "classification": "new test copies an inherited cleanup defect",
+      "path": "tests/ai/workspace-browser.test.mjs",
+      "lines": [
+        55,
+        58,
+        59,
+        75,
+        78
+      ],
+      "title": "Browser launch failure bypasses loopback server cleanup",
+      "evidence": "startServer resolves before chromium.launch, and try/finally begins afterward. Exact new test callback with fake server and rejecting fake launch starts one server and closes zero. HEAD diff confirms this route-markup test is new; surrounding old tests already use this pattern.",
+      "impact": "Failed launch can retain a listening fixture server and keep the Node process alive. Similar inherited patterns exist in browser-page, settings onboarding/redesign, visual-polish, workspace-peek, passwords/enter-browser and sync/setup-browser. No actual server/browser was launched.",
+      "suggestedAction": "Register cleanup immediately after server creation, before awaiting browser launch; guard optional browser cleanup and keep independent cleanup steps robust."
+    },
+    {
+      "id": "EVEN-3",
+      "severity": "medium",
+      "classification": "inherited test harness cleanup defect; file unchanged relative to HEAD",
+      "path": "tests/sync/provider.test.mjs",
+      "lines": [
+        41,
+        53,
+        56,
+        61
+      ],
+      "title": "Provider startup failure is outside registered cleanup",
+      "evidence": "launch spawns Python then rejects on its ten-second readiness timeout without killing the child. The test registers t.after only after launch and token read succeed.",
+      "impact": "A child that stays alive without publishing readiness can outlive failed test startup; a missing token after startup can likewise bypass server cleanup. No production credentials involved in these dummy fixtures.",
+      "suggestedAction": "Make launch terminate and reap on failed readiness, then register fixture cleanup before token read. Static finding only; did not start a provider."
+    }
+  ],
+  "commandsAndResults": [
+    {
+      "command": "Read AGENTS.md, docs/evidence/memory-20261103/README.md and verification.json; read required unslop skill",
+      "result": "Complete context reads. README/verification are context, not accepted proof that previous checks passed."
+    },
+    {
+      "command": "Python inventory selection and complete source reads using cat, sed and numbered Python output",
+      "result": "47 owned files, 7735 lines fully read. Initial oversized output was truncated; subsequent bounded reads repaired coverage, including browser-page lines 21-38 and host.test first 196 lines. host.test lines 197-392 were available intact in the initial output. No coverage inferred from grep."
+    },
+    {
+      "command": "git diff --numstat -- tests; git diff -- tests/ai/host.test.mjs tests/ai/translation-browser.test.mjs tests/ai/workspace-browser.test.mjs",
+      "result": "Reviewed local changes to distinguish added tests from inherited patterns. No source edits performed."
+    },
+    {
+      "command": "git ls-files --error-unmatch for stream-render, claude-streaming, workspace-members-efficiency, native-frame-memory and memory_package tests",
+      "result": "Exit 1: all five are untracked relative to HEAD. This is provenance evidence, not a test failure."
+    },
+    {
+      "command": "Offline node --input-type=module VM reproduction using exact extracted registered test blocks",
+      "result": {
+        "baselineTest": {
+          "registered": 1,
+          "assertions": 0,
+          "outcome": "passes with absent-baseline fallback"
+        },
+        "workspaceLaunchFailure": {
+          "startedFakeServers": 1,
+          "closedFakeServers": 0,
+          "outcome": "cleanup not reached after fake launch rejection"
+        },
+        "networkOrBrowserStarted": false
+      }
+    },
+    {
+      "command": "Python SHA-256 and line-count validation against selected build inventory entries",
+      "result": "All 47 hashes and line counts match inventory; no owned source drift detected."
+    },
+    {
+      "command": "Final Python JSON/schema-field, ownership-order, SHA-256, line-count and full-range validation",
+      "result": "Report parses, ordered selection matches the inventory, 47 hashes unchanged and 7735 lines covered. Source references checked against current numbered lines."
+    }
+  ],
+  "excludedIdeas": [
+    "No production optimizations or test fixes: this assignment authorizes source audit and own report only.",
+    "No browser/performance/full-suite execution. Prior 143 offline checks and browser acceptance were not rerun or certified by this audit.",
+    "Operation counts and synthetic allocation checks are not whole-browser CPU, RSS, energy, or RAM measurements.",
+    "Existing parser/full-render compatibility oracles intentionally preserve current behavior. Their shared bugs, if any, are outside the narrower compatibility claim; none invented here.",
+    "Did not treat explicit dependency/prepared-source/live-provider skips as proof the skipped behavior passed.",
+    "No installed app, profile, password, cache, config, Keychain, provider, PC, publishing, download or scheduling action."
+  ],
+  "remainingGaps": [
+    "No unread lines within owned files. Odd verification indices are reserved for another worker and excluded from this audit.",
+    "Imported fake API fixtures, efficiency probe scripts, production modules and vendored dependencies are not transitively fully audited by this report. In particular, workspace-browser-fixture and verify_* scripts need their assigned review before stronger safety/measurement claims.",
+    "Runtime cleanup failures and real process termination were not exercised. Offline reproductions use exact test callback logic with fake resources.",
+    "Translation 35-second inactivity wait does not prove the MV3 worker actually terminated; dynamic behavior may pass in a worker kept alive by the environment. This inherited acceptance limit does not invalidate DOM behavior assertions.",
+    "Translation fixed localhost:5000 collision causes an explicit skip rather than acceptance failure. CI/coordinator must inspect skip counts. Inherited, not introduced by the import override.",
+    "Native frame memory wrapper trusts external probe accounting and narrow threshold; whole-browser measurements remain open.",
+    "sync.test aggregate omits lifetime tests; dedicated commands must include them. Full parser baseline availability, missing local benchmark artifacts and prepared-source requirements remain explicit gates.",
+    "Context verification.json packet field says five resources while later packaging field says nine. No shared evidence updated and no packaging freshness inferred from those counts.",
+    "No introduced production defect established by this test-source audit."
+  ]
+}

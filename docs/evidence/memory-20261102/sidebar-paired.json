@@ -1,0 +1,393 @@
+{
+  "rows": [
+    {
+      "count": 100,
+      "round": 0,
+      "name": "baseline",
+      "expandReadyMs": 29,
+      "document": {
+        "documents": 3,
+        "nodes": 2225,
+        "jsEventListeners": 145,
+        "elements": 1393,
+        "folderRows": 100,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1878656,
+        "scriptDurationSeconds": 0.003668,
+        "taskDurationSeconds": 0.109936,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-100-0-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 0,
+      "name": "lazy",
+      "expandReadyMs": 62.200000047683716,
+      "document": {
+        "documents": 2,
+        "nodes": 1320,
+        "jsEventListeners": 45,
+        "elements": 593,
+        "folderRows": 0,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1788464,
+        "scriptDurationSeconds": 0.001621,
+        "taskDurationSeconds": 0.045738,
+        "faviconRequests": 0
+      },
+      "sourceSha256": "ab4ca25df5284c29caa14a4e042856ddb30c22eb4038c5e8304df73bd4a918d6",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/lazy-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-100-0-lazy.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 1,
+      "name": "lazy",
+      "expandReadyMs": 56.799999952316284,
+      "document": {
+        "documents": 2,
+        "nodes": 1320,
+        "jsEventListeners": 45,
+        "elements": 593,
+        "folderRows": 0,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1788504,
+        "scriptDurationSeconds": 0.001685,
+        "taskDurationSeconds": 0.046654,
+        "faviconRequests": 0
+      },
+      "sourceSha256": "ab4ca25df5284c29caa14a4e042856ddb30c22eb4038c5e8304df73bd4a918d6",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/lazy-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-100-1-lazy.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 1,
+      "name": "baseline",
+      "expandReadyMs": 27.59999990463257,
+      "document": {
+        "documents": 3,
+        "nodes": 2225,
+        "jsEventListeners": 145,
+        "elements": 1393,
+        "folderRows": 100,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1878656,
+        "scriptDurationSeconds": 0.00197,
+        "taskDurationSeconds": 0.064223,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-100-1-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 2,
+      "name": "baseline",
+      "expandReadyMs": 27.5,
+      "document": {
+        "documents": 3,
+        "nodes": 2225,
+        "jsEventListeners": 145,
+        "elements": 1393,
+        "folderRows": 100,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1878656,
+        "scriptDurationSeconds": 0.002056,
+        "taskDurationSeconds": 0.05829,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-100-2-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 2,
+      "name": "lazy",
+      "expandReadyMs": 52.700000047683716,
+      "document": {
+        "documents": 2,
+        "nodes": 1320,
+        "jsEventListeners": 45,
+        "elements": 593,
+        "folderRows": 0,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1788464,
+        "scriptDurationSeconds": 0.001725,
+        "taskDurationSeconds": 0.045896,
+        "faviconRequests": 0
+      },
+      "sourceSha256": "ab4ca25df5284c29caa14a4e042856ddb30c22eb4038c5e8304df73bd4a918d6",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/lazy-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-100-2-lazy.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 1000,
+      "round": 0,
+      "name": "baseline",
+      "expandReadyMs": 81.20000004768372,
+      "document": {
+        "documents": 3,
+        "nodes": 10325,
+        "jsEventListeners": 1045,
+        "elements": 8593,
+        "folderRows": 1000,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 2885408,
+        "scriptDurationSeconds": 0.006741,
+        "taskDurationSeconds": 0.172251,
+        "faviconRequests": 999
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-1000-0-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 1000,
+      "round": 0,
+      "name": "lazy",
+      "expandReadyMs": 470,
+      "document": {
+        "documents": 2,
+        "nodes": 1320,
+        "jsEventListeners": 45,
+        "elements": 593,
+        "folderRows": 0,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 2208208,
+        "scriptDurationSeconds": 0.002189,
+        "taskDurationSeconds": 0.053224,
+        "faviconRequests": 0
+      },
+      "sourceSha256": "ab4ca25df5284c29caa14a4e042856ddb30c22eb4038c5e8304df73bd4a918d6",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/lazy-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-1000-0-lazy.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 1000,
+      "round": 1,
+      "name": "lazy",
+      "expandReadyMs": 199.60000014305115,
+      "document": {
+        "documents": 2,
+        "nodes": 1320,
+        "jsEventListeners": 45,
+        "elements": 593,
+        "folderRows": 0,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 2208208,
+        "scriptDurationSeconds": 0.002221,
+        "taskDurationSeconds": 0.051959,
+        "faviconRequests": 0
+      },
+      "sourceSha256": "ab4ca25df5284c29caa14a4e042856ddb30c22eb4038c5e8304df73bd4a918d6",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/lazy-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-1000-1-lazy.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 1000,
+      "round": 1,
+      "name": "baseline",
+      "expandReadyMs": 76.90000009536743,
+      "document": {
+        "documents": 3,
+        "nodes": 10325,
+        "jsEventListeners": 1045,
+        "elements": 8593,
+        "folderRows": 1000,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 2878080,
+        "scriptDurationSeconds": 0.006212,
+        "taskDurationSeconds": 0.1675,
+        "faviconRequests": 999
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-1000-1-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 1000,
+      "round": 2,
+      "name": "baseline",
+      "expandReadyMs": 81.10000014305115,
+      "document": {
+        "documents": 3,
+        "nodes": 10325,
+        "jsEventListeners": 1045,
+        "elements": 8593,
+        "folderRows": 1000,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 2885012,
+        "scriptDurationSeconds": 0.006158,
+        "taskDurationSeconds": 0.160471,
+        "faviconRequests": 999
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-1000-2-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 1000,
+      "round": 2,
+      "name": "lazy",
+      "expandReadyMs": 415.39999985694885,
+      "document": {
+        "documents": 2,
+        "nodes": 1320,
+        "jsEventListeners": 45,
+        "elements": 593,
+        "folderRows": 0,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 2208160,
+        "scriptDurationSeconds": 0.00222,
+        "taskDurationSeconds": 0.05173,
+        "faviconRequests": 0
+      },
+      "sourceSha256": "ab4ca25df5284c29caa14a4e042856ddb30c22eb4038c5e8304df73bd4a918d6",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/lazy-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-pair-1000-2-lazy.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    }
+  ],
+  "summary": {
+    "100": {
+      "baseline": {
+        "expandReadyMedianMs": 27.59999990463257,
+        "expandReadyRangeMs": [
+          27.5,
+          29
+        ]
+      },
+      "lazy": {
+        "expandReadyMedianMs": 56.799999952316284,
+        "expandReadyRangeMs": [
+          52.700000047683716,
+          62.200000047683716
+        ]
+      }
+    },
+    "1000": {
+      "baseline": {
+        "expandReadyMedianMs": 81.10000014305115,
+        "expandReadyRangeMs": [
+          76.90000009536743,
+          81.20000004768372
+        ]
+      },
+      "lazy": {
+        "expandReadyMedianMs": 415.39999985694885,
+        "expandReadyRangeMs": [
+          199.60000014305115,
+          470
+        ]
+      }
+    }
+  },
+  "protocol": {
+    "roundsPerCase": 3,
+    "order": "alternating within each entry count",
+    "faviconFixture": "32px opaque PNG; two seed data SVGs unchanged across candidates",
+    "samples": "Forced-GC collapsed document and JS heap; browser-observed expansion readiness",
+    "limits": "Synthetic sidebar API fixture; not native app footprint or browsing CPU/speed"
+  }
+}

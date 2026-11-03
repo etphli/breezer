@@ -1,0 +1,8 @@
+test_failed_download_is_not_reused_and_retry_publishes_complete_bytes (overlay_fetch_test.FixtureDownloadTest.test_failed_download_is_not_reused_and_retry_publishes_complete_bytes) ... ok
+test_manifest_key_and_native_host_are_bound_to_the_same_extension (overlay_test.BundledIdentityTest.test_manifest_key_and_native_host_are_bound_to_the_same_extension) ... ok
+test_packaged_extension_requires_an_explicit_page_grant (overlay_test.BundledIdentityTest.test_packaged_extension_requires_an_explicit_page_grant) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.017s
+
+OK

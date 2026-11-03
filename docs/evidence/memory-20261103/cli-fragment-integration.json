@@ -1,0 +1,65 @@
+{
+  "status": "COMBINED CHECKS PASS; INDEPENDENT REVIEW FOUND NO REACHABLE PRODUCTION REGRESSION",
+  "checkedAtUtc": "2026-11-03T00:47:20.212326+00:00",
+  "sourceHashes": {
+    "features/ai/host/cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+    "script/verify_cli_fragment_efficiency.mjs": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87",
+    "tests/ai/cli-fragment-buffer.test.mjs": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+    "tests/ai/fixtures/cli-before.mjs": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b"
+  },
+  "implementation": "cli-fragment-implementation.json",
+  "change": "Search arriving decoded chunk before inspecting accumulated string; preserve suffix loop and whole-chunk limit. Clear retained partial text only on confirmed child exit.",
+  "fixtureBaseline": {
+    "path": "tests/ai/fixtures/cli-before.mjs",
+    "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+    "authored": true
+  },
+  "fixtureEvidenceScope": "Recorded search-input lengths and VM timings describe fixtures. They are not direct character-comparison/copy counts, real RSS, CPU utilisation, browser-wide memory, or end-to-end speed. Historical measurement harness hash remains bound to its original receipt.",
+  "checks": {
+    "combinedPassed": 342,
+    "combinedFailed": 0,
+    "combinedSkipped": 0,
+    "runtime": "v24.22.1",
+    "command": "combined-cli-command.json",
+    "log": "combined-cli-offline.tap",
+    "fixtureOnlyFreshCheckoutPassed": 10,
+    "freshCheckoutLog": "cli-fragment-fresh-checkout.tap",
+    "packagingPassed": 8,
+    "packagingLog": "memory-package-cli.log",
+    "transportSummaryPassed": 6,
+    "transportSummaryLog": "transport-summary-final.log"
+  },
+  "workspacePageReview": {
+    "report": "workspace-page-review.json",
+    "findings": [],
+    "allEightHashesMatch": true
+  },
+  "packet": {
+    "hostModules": 11,
+    "extensionResources": 9,
+    "allFileChecksumsVerified": true,
+    "allHashesMatchCurrentSources": true,
+    "deployed": false
+  },
+  "limits": [
+    "Engine-dependent rope/flattening behavior; no engine-independent allocation bound claimed.",
+    "Clearing private text proves a removed logical reference; immediate GC/physical RAM release unmeasured.",
+    "Real providers, native app/PC acceptance and browser-wide RAM/CPU remain unverified.",
+    "Remaining exact current source coverage must be refreshed; earlier reviewed versions do not certify later edits."
+  ],
+  "pcContact": false,
+  "installedAppUnchanged": true,
+  "review": {
+    "report": "cli-fragment-review.json",
+    "findings": [],
+    "focusedPassed": 10,
+    "additionalDifferentialCases": 800,
+    "allFourHashesMatch": true,
+    "limit": "Artificial synchronous stdout data emission can differ; current real callers cannot trigger it. Reentrant PassThrough writes remain covered.",
+    "executionDeviation": {
+      "detail": "Loading the coverage checker with importlib allowed Python to create or refresh its bytecode cache, outside the allowed report/artifact paths. The cache is left intact because compiled-cache deletion was prohibited. Subsequent Python verification used -B. No source/test/helper file was edited.",
+      "path": "script/__pycache__/check_efficiency_coverage.cpython-314.pyc",
+      "mtimeUtc": "2026-11-02T23:35:15.055179+00:00"
+    }
+  }
+}

@@ -1,0 +1,48 @@
+TAP version 13
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=false
+not ok 1 - provider fixture reaps a child that ignores SIGINT, readiness=false
+  ---
+  duration_ms: 547.100959
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/provider-lifecycle.test.mjs:13:3'
+  failureType: 'testCodeFailure'
+  error: 'owned child must be reaped'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/provider-lifecycle.test.mjs:32:14)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: provider fixture registers cleanup before reading its token
+not ok 2 - provider fixture registers cleanup before reading its token
+  ---
+  duration_ms: 2.90475
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/provider-lifecycle.test.mjs:43:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/provider-lifecycle.test.mjs:55:10)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 773.706917

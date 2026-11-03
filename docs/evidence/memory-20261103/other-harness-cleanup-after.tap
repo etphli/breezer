@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: workspace-browser.test.mjs closes its server after launch failure
+ok 1 - workspace-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 15.408416
+  type: 'test'
+  ...
+# Subtest: workspace-browser.test.mjs closes its server after browser close failure
+ok 2 - workspace-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 2.053292
+  type: 'test'
+  ...
+# Subtest: newtab-browser.test.mjs closes its server after launch failure
+ok 3 - newtab-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.586833
+  type: 'test'
+  ...
+# Subtest: newtab-browser.test.mjs closes its server after browser close failure
+ok 4 - newtab-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 1.65725
+  type: 'test'
+  ...
+# Subtest: onboarding-browser.test.mjs closes its server after launch failure
+ok 5 - onboarding-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.283166
+  type: 'test'
+  ...
+# Subtest: onboarding-browser.test.mjs closes its server after browser close failure
+ok 6 - onboarding-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.701667
+  type: 'test'
+  ...
+# Subtest: whats-new-browser.test.mjs closes its server after launch failure
+ok 7 - whats-new-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 0.952125
+  type: 'test'
+  ...
+# Subtest: whats-new-browser.test.mjs closes its server after browser close failure
+ok 8 - whats-new-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.736542
+  type: 'test'
+  ...
+# Subtest: workspace-frame.test.mjs closes its server after launch failure
+ok 9 - workspace-frame.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.040292
+  type: 'test'
+  ...
+# Subtest: workspace-frame.test.mjs closes its server after browser close failure
+ok 10 - workspace-frame.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.921792
+  type: 'test'
+  ...
+# Subtest: panel-browser.mjs closes its server after launch failure
+ok 11 - panel-browser.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.288417
+  type: 'test'
+  ...
+# Subtest: panel-browser.mjs closes its server after browser close failure
+ok 12 - panel-browser.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.663083
+  type: 'test'
+  ...
+# Subtest: research-browser.mjs closes its server after launch failure
+ok 13 - research-browser.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.347167
+  type: 'test'
+  ...
+# Subtest: research-browser.mjs closes its server after browser close failure
+ok 14 - research-browser.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.668459
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 130.115583

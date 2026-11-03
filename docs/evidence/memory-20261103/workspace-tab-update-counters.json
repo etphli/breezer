@@ -1,0 +1,20 @@
+{
+  "baselineSha256": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+  "currentSha256": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+  "baseline": {
+    "scheduled": 20,
+    "drawn": 20,
+    "queries": 0,
+    "refreshScheduled": 0,
+    "writes": [],
+    "eventVersion": 20
+  },
+  "current": {
+    "scheduled": 0,
+    "drawn": 0,
+    "queries": 0,
+    "refreshScheduled": 0,
+    "writes": [],
+    "eventVersion": 20
+  }
+}

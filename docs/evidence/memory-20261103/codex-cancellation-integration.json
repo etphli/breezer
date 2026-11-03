@@ -1,0 +1,67 @@
+{
+  "status": "COORDINATOR CHECKS PASS; INDEPENDENT REVIEW PENDING",
+  "checkedAtUtc": "2026-11-03T00:27:01.257315+00:00",
+  "files": {
+    "features/ai/host/codex.mjs": {
+      "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "lines": 312
+    },
+    "tests/ai/codex-cancellation.test.mjs": {
+      "sha256": "d5a2c188f54083bed4bc2aa33b4eb6864db80b1e87703a52d0bb190124b59e94",
+      "lines": 171
+    },
+    "tests/ai/codex-process-cancellation.test.mjs": {
+      "sha256": "b5ed3c9326b6a9c1cc3c89da7ac4817b806bede91da83810067ad550904c1606",
+      "lines": 50
+    },
+    "tests/ai/host.test.mjs": {
+      "sha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+      "lines": 404
+    },
+    "features/ai/host/cli.mjs": {
+      "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+      "lines": 101
+    }
+  },
+  "verification": {
+    "focusedCases": 92,
+    "ownedRealTransportChildCases": 1,
+    "combinedOfflinePassed": 220,
+    "combinedOfflineFailed": 0,
+    "combinedOfflineSkipped": 0,
+    "memoryReceiptPassed": 8,
+    "runtime": "v24.22.1",
+    "logs": [
+      "codex-cancellation-coordinator.tap",
+      "codex-process-cancellation.tap",
+      "combined-codex-offline.tap",
+      "memory-package-codex.log"
+    ]
+  },
+  "changes": [
+    "Cancellation ownership begins before isolate/preflight/start awaits; owned RPCs close and settle before isolation cleanup.",
+    "Each normal chat retains its real tool, reasoning, speed and credential-absence preflight.",
+    "Added actual JsonLineProcess test using an owned disposable Node child, empty environment, no CLI/account/config, ignored SIGTERM and verified SIGKILL/reap before isolation cleanup.",
+    "Existing Fast feature-isolation test now explicitly points CODEX_HOME at an owned dummy auth fixture and verifies the symlink target; original environment is restored."
+  ],
+  "incident": {
+    "description": "The delegate initially ran the inherited Fast-isolation test, which created and removed a temporary symlink to the default auth path.",
+    "confirmedFromCode": "That test reads generated config only; isolate creates the symlink and writes catalog/config but never reads the symlink target.",
+    "authContentsRead": false,
+    "correction": "Parent made the fixture hermetic rather than relying on test-name exclusion. Full coordinator run includes the case against dummy auth."
+  },
+  "limitations": [
+    "Real Codex/provider behavior and physical RAM/CPU are unmeasured.",
+    "A pending filesystem-isolation promise is drained before cleanup; no cancellable filesystem API was introduced.",
+    "Repeated replacement resource count uses fake processes with immediate close; slow real exits can overlap.",
+    "OS-bind-specific cancellation, partial isolate allocation failure and RPC close rejection are not fault-injected in this parent check."
+  ],
+  "packet": {
+    "hostModules": 11,
+    "extensionResources": 9,
+    "allHashesMatch": true,
+    "deployed": false
+  },
+  "pcContact": false,
+  "installedAppUnchanged": true
+}

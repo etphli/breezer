@@ -153,8 +153,9 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
-  const browser = await chromium.launch({ executablePath, headless: true });
+  let browser;
   try {
+    browser = await chromium.launch({ executablePath, headless: true });
     await withPage(browser, base, { view: CONNECTED, appearance: { theme: 'mint', colorMode: 'light' } }, async (page) => {
       await page.waitForSelector('html[data-loaded="true"]');
       await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 8);
@@ -347,16 +348,19 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.$$eval('main script, main img, main b', (nodes) => nodes.length), 0);
     });
   } finally {
-    await browser.close();
-    server.close();
+    try { await browser?.close(); } finally {
+      await new Promise(done => server.close(done));
+    }
   }
 });
 
 
 test('add shortcuts by URL and open tab, persist across reload and keep Add visible on narrow screens', { skip }, async () => {
  const server = await startServer(); const base = `http://127.0.0.1:${server.address().port}`;
- const browser = await chromium.launch({ executablePath, headless: true });
- try { await withPage(browser, base, { view: CONNECTED }, async page => {
+ let browser;
+ try {
+   browser = await chromium.launch({ executablePath, headless: true });
+   await withPage(browser, base, { view: CONNECTED }, async page => {
   await page.waitForSelector('html[data-loaded="true"]');
   await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
   await page.getByRole('combobox').fill('javascript:alert(1)');
@@ -382,7 +386,7 @@ test('add shortcuts by URL and open tab, persist across reload and keep Add visi
   await page.getByRole('combobox').fill('project');
   await page.getByRole('option', {name: /Open project/}).waitFor();
   await page.screenshot({path:`${evidence}/newtab-add-popover.png`});
- }); } finally { await browser.close(); await new Promise(done=>server.close(done)); }
+ }); } finally { try { await browser?.close(); } finally { await new Promise(done => server.close(done)); } }
 });
 
 
@@ -419,8 +423,9 @@ test('Organato off removes the whole section and follows the switch live', { ski
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
-  const browser = await chromium.launch({ executablePath, headless: true });
+  let browser;
   try {
+    browser = await chromium.launch({ executablePath, headless: true });
     // An "off" answer that still carries cached items, a connection and an error.
     await withPage(browser, base, { view: CACHED_OFF, appearance: { theme: 'mint', colorMode: 'light' } }, async (page) => {
       await page.waitForSelector('html[data-loaded="true"]');
@@ -510,7 +515,8 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await other.close();
     });
   } finally {
-    await browser.close();
-    server.close();
+    try { await browser?.close(); } finally {
+      await new Promise(done => server.close(done));
+    }
   }
 });

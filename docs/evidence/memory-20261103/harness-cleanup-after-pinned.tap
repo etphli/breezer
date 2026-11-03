@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: workspace fixtures close their server after launch failure
+ok 1 - workspace fixtures close their server after launch failure
+  ---
+  duration_ms: 65.403834
+  type: 'test'
+  ...
+# Subtest: workspace fixtures close their server after browser close failure
+ok 2 - workspace fixtures close their server after browser close failure
+  ---
+  duration_ms: 17.357542
+  type: 'test'
+  ...
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=false
+ok 3 - provider fixture reaps a child that ignores SIGINT, readiness=false
+  ---
+  duration_ms: 1379.440625
+  type: 'test'
+  ...
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=true
+ok 4 - provider fixture reaps a child that ignores SIGINT, readiness=true
+  ---
+  duration_ms: 508.193917
+  type: 'test'
+  ...
+# Subtest: provider fixture reports spawn failure and observes child close
+ok 5 - provider fixture reports spawn failure and observes child close
+  ---
+  duration_ms: 333.849875
+  type: 'test'
+  ...
+# Subtest: provider fixture registers cleanup before reading its token
+ok 6 - provider fixture registers cleanup before reading its token
+  ---
+  duration_ms: 3.473
+  type: 'test'
+  ...
+# Subtest: two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+ok 7 - two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+  ---
+  duration_ms: 2903.118292
+  type: 'test'
+  ...
+# Subtest: provider permission, key boundaries, and native enum spellings match imported API
+ok 8 - provider permission, key boundaries, and native enum spellings match imported API
+  ---
+  duration_ms: 8.633042
+  type: 'test'
+  ...
+# Subtest: cancel and dispose abort in-flight provider work without stale replies
+ok 9 - cancel and dispose abort in-flight provider work without stale replies
+  ---
+  duration_ms: 1.324
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3202.81725

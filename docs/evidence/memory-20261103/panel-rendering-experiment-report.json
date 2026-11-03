@@ -1,0 +1,4289 @@
+{
+  "disposable": true,
+  "question": "Can browser-native off-screen rendering reduce long-conversation resource cost without losing transcript content/accessibility or changing behavior?",
+  "model": "gpt-6.1-sol high; regular speed; no delegation",
+  "sourceHashesBefore": {
+    "features/ai/extension/background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "features/ai/extension/browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "features/ai/extension/context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "features/ai/extension/context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "features/ai/extension/context-settings.js": "aef2ab4366e03ad24ce6f09d71c450c055d399bfdd39a4ae97171f6a28138ddd",
+    "features/ai/extension/efficiency.html": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583",
+    "features/ai/extension/icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "features/ai/extension/model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "features/ai/extension/newtab.css": "8cb4956de440b8f2b19004e8c45cd23b1d4a2a6e6e91727ebe52d51302c63515",
+    "features/ai/extension/newtab.html": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
+    "features/ai/extension/newtab.js": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+    "features/ai/extension/onboarding.css": "c531c5a275791a22c8821d4e209fe2eea9eddc62bf8db3ac61be1d5199f7ecc8",
+    "features/ai/extension/onboarding.js": "fb3755f786c8b846ab2bfbef2019067a7349f48662f0ee7da32402ef8107f6ec",
+    "features/ai/extension/page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "features/ai/extension/panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "features/ai/extension/panel.css": "60ed6d66b3c003715ab48b07b12b9e9b4ed8aa2c6c21b49578ae9d181a448bd8",
+    "features/ai/extension/panel.html": "905e0cca4b2fa08f96b1202713f2e595683c2d4a91474e69168b8bb9e73a1a94",
+    "features/ai/extension/panel.js": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "features/ai/extension/passwords.js": "3979b082536176acfc177b63ee1b0d5189ae2333747ea21d698c799fcbd54685",
+    "features/ai/extension/release-info.js": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf",
+    "features/ai/extension/release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "features/ai/extension/render-message.js": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+    "features/ai/extension/research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "features/ai/extension/research-sources.js": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4",
+    "features/ai/extension/settings-nav.js": "38600a1e45f189d613a59d84b195058568911ecfa3f52e26205b4c7d4117381d",
+    "features/ai/extension/settings-onboarding.js": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae",
+    "features/ai/extension/settings.js": "676a570b36fa8906babf21f669b9932131d89d2d65bab8a4e121fcca44e15697",
+    "features/ai/extension/setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "features/ai/extension/shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "features/ai/extension/sync-settings.js": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+    "features/ai/extension/top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "features/ai/extension/translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "features/ai/extension/translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "features/ai/extension/translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "features/ai/extension/translation-settings.js": "52c2bc5f07850d7655980ddf7b24b9b0bf220987cd616ded83d573f725f614d5",
+    "features/ai/extension/translation.css": "d06c697dd99e6ec0521bdcb1fa5f04000f0d20db1c793c504f6fc46d3c48c44f",
+    "features/ai/extension/translation.html": "081b8d10030b90ba203e4ccb8636868ce9e524833827e247ba6a0e717cbac59f",
+    "features/ai/extension/translation.js": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
+    "features/ai/extension/usage-settings.js": "96fd12e6109982522a695554c569e1911738b30b3deb6fa96d640a92948d3d27",
+    "features/ai/extension/usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "features/ai/extension/whats-new.css": "324bdec4f90c813ce51f143280af4c936399d8798fa06a5d67a36c8e97798c1d",
+    "features/ai/extension/whats-new.html": "e71fcd8ac23120dcb4f76c014b22bba8e3884b8dd218c009a4d5314921b94391",
+    "features/ai/extension/whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+    "features/ai/extension/workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "features/ai/extension/workspace-sync-model.js": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+    "features/ai/extension/workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "features/ai/extension/workspace.css": "5b2007277a3cbd5fdd3ac2c26fff5a044d9282451841231110deb5fb767a08c9",
+    "features/ai/extension/workspace.html": "8ed520d8ac4d2df8d22dec5b79a7ad6868e87bdca2275833d53f9b0a8197dcf5",
+    "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "AGENTS.md": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+    "tests/ai/panel-browser.mjs": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+    "docs/evidence/memory-20261103/extension-services-audit.json": "ffcd38053e61ffbe98fa61e5f258235cee798a29d5a7102a924971767ff3c62a",
+    "docs/evidence/memory-20261103/verification.json": "758de3474daf52022ece0cc4ef7dbf125feb150b4d51fb45856f5f12c022ae9c",
+    "docs/evidence/memory-20261103/README.md": "9a47313e8d0d149ed5edf269a3acbb8cc8c443c385b1464d0af7007e6318606b"
+  },
+  "candidateCSS": {
+    "baseline": "",
+    "auto600": ".message.experiment-completed { content-visibility:auto; contain-intrinsic-size:auto 600px; }",
+    "roleSizes": ".message.experiment-completed { content-visibility:auto; contain-intrinsic-size:auto 600px; } .message.user.experiment-completed { contain-intrinsic-size:auto 80px; }"
+  },
+  "trials": [
+    {
+      "order": 1,
+      "countExchanges": 4,
+      "candidateComparison": "auto600",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1078,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2226584
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1185,
+        "LayoutCount": 5,
+        "RecalcStyleCount": 5,
+        "LayoutDuration": 0.000425,
+        "RecalcStyleDuration": 0.000652,
+        "JSHeapUsedSize": 2241468
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 28,
+        "RecalcStyleCount": 30,
+        "LayoutDuration": 0.005775,
+        "RecalcStyleDuration": 0.002712,
+        "JSHeapUsedSize": 2307392
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 25,
+        "LayoutDuration": 0.00535,
+        "RecalcStyleDuration": 0.00206,
+        "JSHeapUsedSize": 65924
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 36,
+        "RecalcStyleCount": 38,
+        "LayoutDuration": 0.01252,
+        "RecalcStyleDuration": 0.004179,
+        "JSHeapUsedSize": 2347300
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.006745,
+        "RecalcStyleDuration": 0.0014670000000000004,
+        "JSHeapUsedSize": 39908
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1285,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 2,
+      "countExchanges": 4,
+      "candidateComparison": "auto600",
+      "variant": "auto600",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1079,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2250556
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1186,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000352,
+        "RecalcStyleDuration": 0.000566,
+        "JSHeapUsedSize": 2266912
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 33,
+        "RecalcStyleCount": 35,
+        "LayoutDuration": 0.006645,
+        "RecalcStyleDuration": 0.003001,
+        "JSHeapUsedSize": 2325516
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 27,
+        "RecalcStyleCount": 29,
+        "LayoutDuration": 0.006293,
+        "RecalcStyleDuration": 0.002435,
+        "JSHeapUsedSize": 58604
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 41,
+        "RecalcStyleCount": 43,
+        "LayoutDuration": 0.009692,
+        "RecalcStyleDuration": 0.003903,
+        "JSHeapUsedSize": 2366176
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.0030469999999999994,
+        "RecalcStyleDuration": 0.0009019999999999996,
+        "JSHeapUsedSize": 40660
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1286,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 3,
+      "countExchanges": 4,
+      "candidateComparison": "auto600",
+      "variant": "auto600",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1079,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2250556
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1186,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000404,
+        "RecalcStyleDuration": 0.000557,
+        "JSHeapUsedSize": 2266924
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 32,
+        "RecalcStyleCount": 34,
+        "LayoutDuration": 0.009069,
+        "RecalcStyleDuration": 0.003689,
+        "JSHeapUsedSize": 2325576
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 26,
+        "RecalcStyleCount": 28,
+        "LayoutDuration": 0.008665,
+        "RecalcStyleDuration": 0.0031320000000000002,
+        "JSHeapUsedSize": 58652
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 40,
+        "RecalcStyleCount": 42,
+        "LayoutDuration": 0.013691,
+        "RecalcStyleDuration": 0.004976,
+        "JSHeapUsedSize": 2366272
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.004621999999999999,
+        "RecalcStyleDuration": 0.0012870000000000004,
+        "JSHeapUsedSize": 40696
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1286,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 4,
+      "countExchanges": 4,
+      "candidateComparison": "auto600",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1078,
+        "LayoutCount": 1,
+        "RecalcStyleCount": 1,
+        "LayoutDuration": 0.000049,
+        "RecalcStyleDuration": 0.000067,
+        "JSHeapUsedSize": 2226584
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1185,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000429,
+        "RecalcStyleDuration": 0.000565,
+        "JSHeapUsedSize": 2241456
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 30,
+        "RecalcStyleCount": 32,
+        "LayoutDuration": 0.003027,
+        "RecalcStyleDuration": 0.00166,
+        "JSHeapUsedSize": 2307428
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 24,
+        "RecalcStyleCount": 26,
+        "LayoutDuration": 0.002598,
+        "RecalcStyleDuration": 0.001095,
+        "JSHeapUsedSize": 65972
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 38,
+        "RecalcStyleCount": 40,
+        "LayoutDuration": 0.008582,
+        "RecalcStyleDuration": 0.00283,
+        "JSHeapUsedSize": 2347336
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.005554999999999999,
+        "RecalcStyleDuration": 0.00117,
+        "JSHeapUsedSize": 39908
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1285,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 5,
+      "countExchanges": 4,
+      "candidateComparison": "auto600",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1077,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2226584
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1184,
+        "LayoutCount": 7,
+        "RecalcStyleCount": 7,
+        "LayoutDuration": 0.000423,
+        "RecalcStyleDuration": 0.00067,
+        "JSHeapUsedSize": 2241468
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1284,
+        "LayoutCount": 30,
+        "RecalcStyleCount": 31,
+        "LayoutDuration": 0.005368,
+        "RecalcStyleDuration": 0.002407,
+        "JSHeapUsedSize": 2309580
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 24,
+        "LayoutDuration": 0.004945000000000001,
+        "RecalcStyleDuration": 0.0017369999999999998,
+        "JSHeapUsedSize": 68112
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1284,
+        "LayoutCount": 38,
+        "RecalcStyleCount": 39,
+        "LayoutDuration": 0.01155,
+        "RecalcStyleDuration": 0.003685,
+        "JSHeapUsedSize": 2349524
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.006181999999999999,
+        "RecalcStyleDuration": 0.001278,
+        "JSHeapUsedSize": 39944
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1284,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 6,
+      "countExchanges": 4,
+      "candidateComparison": "auto600",
+      "variant": "auto600",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1079,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2250556
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1186,
+        "LayoutCount": 5,
+        "RecalcStyleCount": 5,
+        "LayoutDuration": 0.000406,
+        "RecalcStyleDuration": 0.00056,
+        "JSHeapUsedSize": 2266924
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 32,
+        "RecalcStyleCount": 34,
+        "LayoutDuration": 0.007361,
+        "RecalcStyleDuration": 0.002893,
+        "JSHeapUsedSize": 2325612
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 27,
+        "RecalcStyleCount": 29,
+        "LayoutDuration": 0.006955,
+        "RecalcStyleDuration": 0.002333,
+        "JSHeapUsedSize": 58688
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 40,
+        "RecalcStyleCount": 42,
+        "LayoutDuration": 0.012723,
+        "RecalcStyleDuration": 0.004309,
+        "JSHeapUsedSize": 2366320
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.005362,
+        "RecalcStyleDuration": 0.0014160000000000002,
+        "JSHeapUsedSize": 40708
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1286,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 7,
+      "countExchanges": 4,
+      "candidateComparison": "roleSizes",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1078,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2226584
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1185,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.000425,
+        "RecalcStyleDuration": 0.000715,
+        "JSHeapUsedSize": 2241468
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 33,
+        "RecalcStyleCount": 35,
+        "LayoutDuration": 0.003454,
+        "RecalcStyleDuration": 0.001881,
+        "JSHeapUsedSize": 2307560
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 25,
+        "RecalcStyleCount": 27,
+        "LayoutDuration": 0.003029,
+        "RecalcStyleDuration": 0.001166,
+        "JSHeapUsedSize": 66092
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 41,
+        "RecalcStyleCount": 43,
+        "LayoutDuration": 0.009644,
+        "RecalcStyleDuration": 0.003166,
+        "JSHeapUsedSize": 2347516
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.006189999999999999,
+        "RecalcStyleDuration": 0.001285,
+        "JSHeapUsedSize": 39956
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1285,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 8,
+      "countExchanges": 4,
+      "candidateComparison": "roleSizes",
+      "variant": "roleSizes",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1079,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2250992
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1186,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000449,
+        "RecalcStyleDuration": 0.000668,
+        "JSHeapUsedSize": 2267360
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 32,
+        "RecalcStyleCount": 34,
+        "LayoutDuration": 0.009209,
+        "RecalcStyleDuration": 0.003623,
+        "JSHeapUsedSize": 2325988
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 26,
+        "RecalcStyleCount": 28,
+        "LayoutDuration": 0.00876,
+        "RecalcStyleDuration": 0.002955,
+        "JSHeapUsedSize": 58628
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 40,
+        "RecalcStyleCount": 42,
+        "LayoutDuration": 0.014565,
+        "RecalcStyleDuration": 0.005098,
+        "JSHeapUsedSize": 2366696
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.005356,
+        "RecalcStyleDuration": 0.0014750000000000002,
+        "JSHeapUsedSize": 40708
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1286,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 9,
+      "countExchanges": 4,
+      "candidateComparison": "roleSizes",
+      "variant": "roleSizes",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1079,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2250992
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1186,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000398,
+        "RecalcStyleDuration": 0.0006,
+        "JSHeapUsedSize": 2267360
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 33,
+        "RecalcStyleCount": 35,
+        "LayoutDuration": 0.006998,
+        "RecalcStyleDuration": 0.002962,
+        "JSHeapUsedSize": 2326060
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 27,
+        "RecalcStyleCount": 29,
+        "LayoutDuration": 0.0066,
+        "RecalcStyleDuration": 0.002362,
+        "JSHeapUsedSize": 58700
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 41,
+        "RecalcStyleCount": 43,
+        "LayoutDuration": 0.011837,
+        "RecalcStyleDuration": 0.004344,
+        "JSHeapUsedSize": 2366768
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.004839,
+        "RecalcStyleDuration": 0.001382,
+        "JSHeapUsedSize": 40708
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1286,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 10,
+      "countExchanges": 4,
+      "candidateComparison": "roleSizes",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1078,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2226584
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1185,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000333,
+        "RecalcStyleDuration": 0.000502,
+        "JSHeapUsedSize": 2241468
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 31,
+        "RecalcStyleCount": 32,
+        "LayoutDuration": 0.00884,
+        "RecalcStyleDuration": 0.003107,
+        "JSHeapUsedSize": 2307464
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 25,
+        "RecalcStyleCount": 26,
+        "LayoutDuration": 0.008507,
+        "RecalcStyleDuration": 0.002605,
+        "JSHeapUsedSize": 65996
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 39,
+        "RecalcStyleCount": 40,
+        "LayoutDuration": 0.013909,
+        "RecalcStyleDuration": 0.004215,
+        "JSHeapUsedSize": 2347408
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.005068999999999999,
+        "RecalcStyleDuration": 0.001108,
+        "JSHeapUsedSize": 39944
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1285,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 11,
+      "countExchanges": 4,
+      "candidateComparison": "roleSizes",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1078,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2226584
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1185,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.000428,
+        "RecalcStyleDuration": 0.000638,
+        "JSHeapUsedSize": 2241456
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 33,
+        "RecalcStyleCount": 35,
+        "LayoutDuration": 0.008986,
+        "RecalcStyleDuration": 0.00356,
+        "JSHeapUsedSize": 2307548
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 25,
+        "RecalcStyleCount": 27,
+        "LayoutDuration": 0.008558,
+        "RecalcStyleDuration": 0.0029219999999999997,
+        "JSHeapUsedSize": 66092
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1285,
+        "LayoutCount": 41,
+        "RecalcStyleCount": 43,
+        "LayoutDuration": 0.016159,
+        "RecalcStyleDuration": 0.005026,
+        "JSHeapUsedSize": 2347516
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.0071730000000000006,
+        "RecalcStyleDuration": 0.0014660000000000003,
+        "JSHeapUsedSize": 39968
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1285,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 12,
+      "countExchanges": 4,
+      "candidateComparison": "roleSizes",
+      "variant": "roleSizes",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 1079,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2250980
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 1186,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000389,
+        "RecalcStyleDuration": 0.000583,
+        "JSHeapUsedSize": 2267348
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 34,
+        "RecalcStyleCount": 36,
+        "LayoutDuration": 0.009515,
+        "RecalcStyleDuration": 0.003577,
+        "JSHeapUsedSize": 2326000
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 28,
+        "RecalcStyleCount": 30,
+        "LayoutDuration": 0.009125999999999999,
+        "RecalcStyleDuration": 0.002994,
+        "JSHeapUsedSize": 58652
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 1286,
+        "LayoutCount": 42,
+        "RecalcStyleCount": 44,
+        "LayoutDuration": 0.01493,
+        "RecalcStyleDuration": 0.005064,
+        "JSHeapUsedSize": 2366684
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.005415000000000001,
+        "RecalcStyleDuration": 0.001487,
+        "JSHeapUsedSize": 40684
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 1286,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 13,
+      "countExchanges": 100,
+      "candidateComparison": "auto600",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 17110,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2631168
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17217,
+        "LayoutCount": 5,
+        "RecalcStyleCount": 5,
+        "LayoutDuration": 0.00047,
+        "RecalcStyleDuration": 0.000563,
+        "JSHeapUsedSize": 2648956
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17317,
+        "LayoutCount": 25,
+        "RecalcStyleCount": 26,
+        "LayoutDuration": 0.014308,
+        "RecalcStyleDuration": 0.002726,
+        "JSHeapUsedSize": 2709528
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 20,
+        "RecalcStyleCount": 21,
+        "LayoutDuration": 0.013838,
+        "RecalcStyleDuration": 0.002163,
+        "JSHeapUsedSize": 60572
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17317,
+        "LayoutCount": 33,
+        "RecalcStyleCount": 34,
+        "LayoutDuration": 0.043608,
+        "RecalcStyleDuration": 0.005201,
+        "JSHeapUsedSize": 2755108
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.0293,
+        "RecalcStyleDuration": 0.0024749999999999998,
+        "JSHeapUsedSize": 45580
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17317,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 14,
+      "countExchanges": 100,
+      "candidateComparison": "auto600",
+      "variant": "auto600",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 16919,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2692236
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17026,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.000785,
+        "RecalcStyleDuration": 0.000747,
+        "JSHeapUsedSize": 2710916
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 30,
+        "RecalcStyleCount": 31,
+        "LayoutDuration": 0.018864,
+        "RecalcStyleDuration": 0.003313,
+        "JSHeapUsedSize": 2772984
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 22,
+        "RecalcStyleCount": 23,
+        "LayoutDuration": 0.018078999999999998,
+        "RecalcStyleDuration": 0.0025659999999999997,
+        "JSHeapUsedSize": 62068
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 38,
+        "RecalcStyleCount": 39,
+        "LayoutDuration": 0.026095,
+        "RecalcStyleDuration": 0.006805,
+        "JSHeapUsedSize": 2810752
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.007231000000000001,
+        "RecalcStyleDuration": 0.0034920000000000003,
+        "JSHeapUsedSize": 37768
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17126,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 15,
+      "countExchanges": 100,
+      "candidateComparison": "auto600",
+      "variant": "auto600",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 16919,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2680504
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17026,
+        "LayoutCount": 7,
+        "RecalcStyleCount": 7,
+        "LayoutDuration": 0.000708,
+        "RecalcStyleDuration": 0.000731,
+        "JSHeapUsedSize": 2699196
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 29,
+        "RecalcStyleCount": 31,
+        "LayoutDuration": 0.026369,
+        "RecalcStyleDuration": 0.00445,
+        "JSHeapUsedSize": 2761480
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 22,
+        "RecalcStyleCount": 24,
+        "LayoutDuration": 0.025661,
+        "RecalcStyleDuration": 0.003719,
+        "JSHeapUsedSize": 62284
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 37,
+        "RecalcStyleCount": 39,
+        "LayoutDuration": 0.034298,
+        "RecalcStyleDuration": 0.008286,
+        "JSHeapUsedSize": 2799284
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.007929000000000002,
+        "RecalcStyleDuration": 0.003836,
+        "JSHeapUsedSize": 37804
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17126,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 16,
+      "countExchanges": 100,
+      "candidateComparison": "auto600",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 17110,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2641540
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17217,
+        "LayoutCount": 5,
+        "RecalcStyleCount": 5,
+        "LayoutDuration": 0.000523,
+        "RecalcStyleDuration": 0.000532,
+        "JSHeapUsedSize": 2659316
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17317,
+        "LayoutCount": 25,
+        "RecalcStyleCount": 27,
+        "LayoutDuration": 0.0172,
+        "RecalcStyleDuration": 0.003068,
+        "JSHeapUsedSize": 2719756
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 20,
+        "RecalcStyleCount": 22,
+        "LayoutDuration": 0.016677,
+        "RecalcStyleDuration": 0.002536,
+        "JSHeapUsedSize": 60440
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17317,
+        "LayoutCount": 33,
+        "RecalcStyleCount": 35,
+        "LayoutDuration": 0.064419,
+        "RecalcStyleDuration": 0.006508,
+        "JSHeapUsedSize": 2765360
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.047219000000000004,
+        "RecalcStyleDuration": 0.00344,
+        "JSHeapUsedSize": 45604
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17317,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 17,
+      "countExchanges": 100,
+      "candidateComparison": "auto600",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 17110,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2636188
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17217,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000597,
+        "RecalcStyleDuration": 0.000605,
+        "JSHeapUsedSize": 2653976
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17317,
+        "LayoutCount": 26,
+        "RecalcStyleCount": 28,
+        "LayoutDuration": 0.01552,
+        "RecalcStyleDuration": 0.002901,
+        "JSHeapUsedSize": 2714500
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 20,
+        "RecalcStyleCount": 22,
+        "LayoutDuration": 0.014923,
+        "RecalcStyleDuration": 0.002296,
+        "JSHeapUsedSize": 60524
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17317,
+        "LayoutCount": 34,
+        "RecalcStyleCount": 36,
+        "LayoutDuration": 0.062907,
+        "RecalcStyleDuration": 0.006358,
+        "JSHeapUsedSize": 2760096
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.047387000000000006,
+        "RecalcStyleDuration": 0.003457,
+        "JSHeapUsedSize": 45596
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17317,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 18,
+      "countExchanges": 100,
+      "candidateComparison": "auto600",
+      "variant": "auto600",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 16918,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2653200
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17025,
+        "LayoutCount": 6,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000659,
+        "RecalcStyleDuration": 0.00062,
+        "JSHeapUsedSize": 2671868
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17125,
+        "LayoutCount": 29,
+        "RecalcStyleCount": 32,
+        "LayoutDuration": 0.019824,
+        "RecalcStyleDuration": 0.003392,
+        "JSHeapUsedSize": 2734108
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 26,
+        "LayoutDuration": 0.019165,
+        "RecalcStyleDuration": 0.002772,
+        "JSHeapUsedSize": 62240
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17125,
+        "LayoutCount": 37,
+        "RecalcStyleCount": 40,
+        "LayoutDuration": 0.025433,
+        "RecalcStyleDuration": 0.006316,
+        "JSHeapUsedSize": 2771924
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.005608999999999999,
+        "RecalcStyleDuration": 0.0029240000000000004,
+        "JSHeapUsedSize": 37816
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17125,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 19,
+      "countExchanges": 100,
+      "candidateComparison": "roleSizes",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 17109,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2635228
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17216,
+        "LayoutCount": 4,
+        "RecalcStyleCount": 5,
+        "LayoutDuration": 0.000368,
+        "RecalcStyleDuration": 0.000501,
+        "JSHeapUsedSize": 2653016
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17316,
+        "LayoutCount": 24,
+        "RecalcStyleCount": 26,
+        "LayoutDuration": 0.015301,
+        "RecalcStyleDuration": 0.002667,
+        "JSHeapUsedSize": 2713564
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 20,
+        "RecalcStyleCount": 21,
+        "LayoutDuration": 0.014933,
+        "RecalcStyleDuration": 0.002166,
+        "JSHeapUsedSize": 60548
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17316,
+        "LayoutCount": 32,
+        "RecalcStyleCount": 34,
+        "LayoutDuration": 0.061203,
+        "RecalcStyleDuration": 0.005948,
+        "JSHeapUsedSize": 2759136
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.045902,
+        "RecalcStyleDuration": 0.003281,
+        "JSHeapUsedSize": 45572
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17316,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 20,
+      "countExchanges": 100,
+      "candidateComparison": "roleSizes",
+      "variant": "roleSizes",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 16919,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2663452
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17026,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.000718,
+        "RecalcStyleDuration": 0.000752,
+        "JSHeapUsedSize": 2682120
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 31,
+        "RecalcStyleCount": 33,
+        "LayoutDuration": 0.022078,
+        "RecalcStyleDuration": 0.003844,
+        "JSHeapUsedSize": 2744716
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 25,
+        "LayoutDuration": 0.02136,
+        "RecalcStyleDuration": 0.003092,
+        "JSHeapUsedSize": 62596
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 39,
+        "RecalcStyleCount": 41,
+        "LayoutDuration": 0.029302,
+        "RecalcStyleDuration": 0.007477,
+        "JSHeapUsedSize": 2782520
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.007224000000000001,
+        "RecalcStyleDuration": 0.003633,
+        "JSHeapUsedSize": 37804
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17126,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 21,
+      "countExchanges": 100,
+      "candidateComparison": "roleSizes",
+      "variant": "roleSizes",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 16919,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2662712
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17026,
+        "LayoutCount": 7,
+        "RecalcStyleCount": 7,
+        "LayoutDuration": 0.000725,
+        "RecalcStyleDuration": 0.000721,
+        "JSHeapUsedSize": 2681380
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 30,
+        "RecalcStyleCount": 32,
+        "LayoutDuration": 0.011939,
+        "RecalcStyleDuration": 0.00251,
+        "JSHeapUsedSize": 2743680
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 25,
+        "LayoutDuration": 0.011214,
+        "RecalcStyleDuration": 0.0017890000000000002,
+        "JSHeapUsedSize": 62300
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 38,
+        "RecalcStyleCount": 40,
+        "LayoutDuration": 0.017939,
+        "RecalcStyleDuration": 0.005538,
+        "JSHeapUsedSize": 2781484
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.006,
+        "RecalcStyleDuration": 0.0030280000000000003,
+        "JSHeapUsedSize": 37804
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17126,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    },
+    {
+      "order": 22,
+      "countExchanges": 100,
+      "candidateComparison": "roleSizes",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 17109,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2636916
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17216,
+        "LayoutCount": 5,
+        "RecalcStyleCount": 6,
+        "LayoutDuration": 0.000631,
+        "RecalcStyleDuration": 0.000776,
+        "JSHeapUsedSize": 2654680
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17316,
+        "LayoutCount": 31,
+        "RecalcStyleCount": 34,
+        "LayoutDuration": 0.016839,
+        "RecalcStyleDuration": 0.003745,
+        "JSHeapUsedSize": 2715348
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 26,
+        "RecalcStyleCount": 28,
+        "LayoutDuration": 0.016208,
+        "RecalcStyleDuration": 0.0029690000000000003,
+        "JSHeapUsedSize": 60668
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17316,
+        "LayoutCount": 39,
+        "RecalcStyleCount": 42,
+        "LayoutDuration": 0.049568,
+        "RecalcStyleDuration": 0.006266,
+        "JSHeapUsedSize": 2761016
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.032729,
+        "RecalcStyleDuration": 0.002521,
+        "JSHeapUsedSize": 45668
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17316,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 23,
+      "countExchanges": 100,
+      "candidateComparison": "roleSizes",
+      "variant": "baseline",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 17109,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2660312
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17216,
+        "LayoutCount": 3,
+        "RecalcStyleCount": 5,
+        "LayoutDuration": 0.000423,
+        "RecalcStyleDuration": 0.00054,
+        "JSHeapUsedSize": 2678076
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17316,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 27,
+        "LayoutDuration": 0.015322,
+        "RecalcStyleDuration": 0.002701,
+        "JSHeapUsedSize": 2738608
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 20,
+        "RecalcStyleCount": 22,
+        "LayoutDuration": 0.014899,
+        "RecalcStyleDuration": 0.0021609999999999997,
+        "JSHeapUsedSize": 60532
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17316,
+        "LayoutCount": 31,
+        "RecalcStyleCount": 35,
+        "LayoutDuration": 0.067324,
+        "RecalcStyleDuration": 0.006575,
+        "JSHeapUsedSize": 2784212
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.05200199999999999,
+        "RecalcStyleDuration": 0.0038740000000000003,
+        "JSHeapUsedSize": 45604
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17316,
+        "jsEventListeners": 43
+      },
+      "errors": []
+    },
+    {
+      "order": 24,
+      "countExchanges": 100,
+      "candidateComparison": "roleSizes",
+      "variant": "roleSizes",
+      "initial": {
+        "Documents": 4,
+        "Nodes": 16919,
+        "LayoutCount": 0,
+        "RecalcStyleCount": 0,
+        "LayoutDuration": 0,
+        "RecalcStyleDuration": 0,
+        "JSHeapUsedSize": 2653344
+      },
+      "streamBefore": {
+        "Documents": 4,
+        "Nodes": 17026,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.000762,
+        "RecalcStyleDuration": 0.000831,
+        "JSHeapUsedSize": 2672012
+      },
+      "streamAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 31,
+        "RecalcStyleCount": 32,
+        "LayoutDuration": 0.027093,
+        "RecalcStyleDuration": 0.004463,
+        "JSHeapUsedSize": 2734204
+      },
+      "streamDelta": {
+        "Documents": 0,
+        "Nodes": 100,
+        "LayoutCount": 23,
+        "RecalcStyleCount": 24,
+        "LayoutDuration": 0.026331,
+        "RecalcStyleDuration": 0.003632,
+        "JSHeapUsedSize": 62192
+      },
+      "resizeAfter": {
+        "Documents": 4,
+        "Nodes": 17126,
+        "LayoutCount": 39,
+        "RecalcStyleCount": 40,
+        "LayoutDuration": 0.035192,
+        "RecalcStyleDuration": 0.008418,
+        "JSHeapUsedSize": 2771996
+      },
+      "resizeDelta": {
+        "Documents": 0,
+        "Nodes": 0,
+        "LayoutCount": 8,
+        "RecalcStyleCount": 8,
+        "LayoutDuration": 0.008099000000000002,
+        "RecalcStyleDuration": 0.003955,
+        "JSHeapUsedSize": 37792
+      },
+      "counters": {
+        "documents": 4,
+        "nodes": 17126,
+        "jsEventListeners": 45
+      },
+      "errors": []
+    }
+  ],
+  "behavior": [
+    {
+      "variant": "baseline",
+      "countExchanges": 4,
+      "width": 400,
+      "reducedMotion": false,
+      "errors": [],
+      "initial": {
+        "articles": 8,
+        "bottomGap": 561,
+        "overflow": true,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 4,
+          "top": 61.59375,
+          "bottom": 111.28125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 7,
+          "top": 62.109375,
+          "bottom": 724.9375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 2192,
+        "after": 2192,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 1796,
+        "textContentLength": 1730,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 8,
+          "heading": 4,
+          "link": 4,
+          "list": 4,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": true,
+        "lastHeadingExposed": true,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 62.28125,
+        "after": 62.28125,
+        "scrollBefore": 1198,
+        "scrollAfter": 1198
+      },
+      "resizeReader": {
+        "top": 135.78125,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": null
+      }
+    },
+    {
+      "variant": "auto600",
+      "countExchanges": 4,
+      "width": 400,
+      "reducedMotion": false,
+      "errors": [],
+      "initial": {
+        "articles": 8,
+        "bottomGap": 540,
+        "overflow": true,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 4,
+          "top": 61.59375,
+          "bottom": 111.28125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 7,
+          "top": 62.109375,
+          "bottom": 724.9375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 2192,
+        "after": 2192,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 1796,
+        "textContentLength": 1730,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 8,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 62.28125,
+        "after": 62.28125,
+        "scrollBefore": 1198,
+        "scrollAfter": 1198
+      },
+      "resizeReader": {
+        "top": 135.78125,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": null
+      }
+    },
+    {
+      "variant": "roleSizes",
+      "countExchanges": 4,
+      "width": 400,
+      "reducedMotion": false,
+      "errors": [],
+      "initial": {
+        "articles": 8,
+        "bottomGap": 540,
+        "overflow": true,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 4,
+          "top": 61.59375,
+          "bottom": 111.28125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 7,
+          "top": 62.109375,
+          "bottom": 724.9375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 2192,
+        "after": 2192,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 1796,
+        "textContentLength": 1730,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 8,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 62.28125,
+        "after": 62.28125,
+        "scrollBefore": 1198,
+        "scrollAfter": 1198
+      },
+      "resizeReader": {
+        "top": 135.78125,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": null
+      }
+    },
+    {
+      "variant": "baseline",
+      "countExchanges": 4,
+      "width": 320,
+      "reducedMotion": true,
+      "errors": [],
+      "initial": {
+        "articles": 8,
+        "bottomGap": 659,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 4,
+          "top": 62.09375,
+          "bottom": 111.78125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 7,
+          "top": 62.109375,
+          "bottom": 822.9375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 2437,
+        "after": 2437,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 1796,
+        "textContentLength": 1730,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 8,
+          "heading": 4,
+          "link": 4,
+          "list": 4,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": true,
+        "lastHeadingExposed": true,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 61.78125,
+        "after": 61.78125,
+        "scrollBefore": 1272,
+        "scrollAfter": 1272
+      },
+      "resizeReader": {
+        "top": -11.71875,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": 0
+      }
+    },
+    {
+      "variant": "auto600",
+      "countExchanges": 4,
+      "width": 320,
+      "reducedMotion": true,
+      "errors": [],
+      "initial": {
+        "articles": 8,
+        "bottomGap": 711,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 4,
+          "top": 62.09375,
+          "bottom": 111.78125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 7,
+          "top": 62.109375,
+          "bottom": 822.9375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 2437,
+        "after": 2437,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 1796,
+        "textContentLength": 1730,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 8,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 61.78125,
+        "after": 61.78125,
+        "scrollBefore": 1272,
+        "scrollAfter": 1272
+      },
+      "resizeReader": {
+        "top": -11.71875,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": 0
+      }
+    },
+    {
+      "variant": "roleSizes",
+      "countExchanges": 4,
+      "width": 320,
+      "reducedMotion": true,
+      "errors": [],
+      "initial": {
+        "articles": 8,
+        "bottomGap": 711,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 4,
+          "top": 62.09375,
+          "bottom": 111.78125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 7,
+          "top": 62.109375,
+          "bottom": 822.9375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 2437,
+        "after": 2437,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 1796,
+        "textContentLength": 1730,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 8,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 61.78125,
+        "after": 61.78125,
+        "scrollBefore": 1272,
+        "scrollAfter": 1272
+      },
+      "resizeReader": {
+        "top": -11.71875,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": 0
+      }
+    },
+    {
+      "variant": "baseline",
+      "countExchanges": 100,
+      "width": 400,
+      "reducedMotion": false,
+      "errors": [],
+      "initial": {
+        "articles": 200,
+        "bottomGap": 560,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 100,
+          "top": 61.84375,
+          "bottom": 111.53125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 199,
+          "top": 61.609375,
+          "bottom": 724.4375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 65712,
+        "after": 65712,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 47414,
+        "textContentLength": 45716,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 200,
+          "heading": 100,
+          "link": 100,
+          "list": 100,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": true,
+        "lastHeadingExposed": true,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 61.53125,
+        "after": 61.53125,
+        "scrollBefore": 32959,
+        "scrollAfter": 32959
+      },
+      "resizeReader": {
+        "top": 3075.03125,
+        "viewportTop": 62,
+        "visible": false
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": null
+      }
+    },
+    {
+      "variant": "auto600",
+      "countExchanges": 100,
+      "width": 400,
+      "reducedMotion": false,
+      "errors": [],
+      "initial": {
+        "articles": 200,
+        "bottomGap": 540,
+        "overflow": true,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 100,
+          "top": 62.28125,
+          "bottom": 111.96875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 199,
+          "top": 62.1875,
+          "bottom": 725.015625,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 119277,
+        "after": 119277,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 47414,
+        "textContentLength": 45716,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 200,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 61.53125,
+        "after": 61.53125,
+        "scrollBefore": 32959,
+        "scrollAfter": 32959
+      },
+      "resizeReader": {
+        "top": 135.03125,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": null
+      }
+    },
+    {
+      "variant": "roleSizes",
+      "countExchanges": 100,
+      "width": 400,
+      "reducedMotion": false,
+      "errors": [],
+      "initial": {
+        "articles": 200,
+        "bottomGap": 540,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 100,
+          "top": 62.421875,
+          "bottom": 112.109375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 199,
+          "top": 62.328125,
+          "bottom": 725.15625,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 71936,
+        "after": 71936,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 47414,
+        "textContentLength": 45716,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 200,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 61.53125,
+        "after": 61.53125,
+        "scrollBefore": 32959,
+        "scrollAfter": 32959
+      },
+      "resizeReader": {
+        "top": 135.03125,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": null
+      }
+    },
+    {
+      "variant": "baseline",
+      "countExchanges": 100,
+      "width": 320,
+      "reducedMotion": true,
+      "errors": [],
+      "initial": {
+        "articles": 200,
+        "bottomGap": 658,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 100,
+          "top": 62.34375,
+          "bottom": 112.03125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 199,
+          "top": 61.609375,
+          "bottom": 822.4375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 71837,
+        "after": 71837,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 47414,
+        "textContentLength": 45716,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 200,
+          "heading": 100,
+          "link": 100,
+          "list": 100,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": true,
+        "lastHeadingExposed": true,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 62.03125,
+        "after": 62.03125,
+        "scrollBefore": 35972,
+        "scrollAfter": 35972
+      },
+      "resizeReader": {
+        "top": -2951.46875,
+        "viewportTop": 62,
+        "visible": false
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": 0
+      }
+    },
+    {
+      "variant": "auto600",
+      "countExchanges": 100,
+      "width": 320,
+      "reducedMotion": true,
+      "errors": [],
+      "initial": {
+        "articles": 200,
+        "bottomGap": 711,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 100,
+          "top": 61.78125,
+          "bottom": 111.46875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 199,
+          "top": 61.5,
+          "bottom": 822.328125,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 120366,
+        "after": 120366,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 47414,
+        "textContentLength": 45716,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 200,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 62.03125,
+        "after": 62.03125,
+        "scrollBefore": 35972,
+        "scrollAfter": 35972
+      },
+      "resizeReader": {
+        "top": -11.46875,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": 0
+      }
+    },
+    {
+      "variant": "roleSizes",
+      "countExchanges": 100,
+      "width": 320,
+      "reducedMotion": true,
+      "errors": [],
+      "initial": {
+        "articles": 200,
+        "bottomGap": 711,
+        "overflow": false,
+        "cv": true,
+        "intrinsic": true
+      },
+      "scroll": [
+        {
+          "index": 0,
+          "top": 62,
+          "bottom": 111.6875,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 100,
+          "top": 62.421875,
+          "bottom": 112.109375,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        },
+        {
+          "index": 199,
+          "top": 61.828125,
+          "bottom": 822.65625,
+          "viewportTop": 62,
+          "viewportBottom": 461.703125,
+          "visible": true
+        }
+      ],
+      "find": {
+        "found": true,
+        "selection": "FINDTOKEN1END",
+        "before": 72549,
+        "after": 72549,
+        "revealed": false
+      },
+      "selection": {
+        "selectedLength": 47414,
+        "textContentLength": 45716,
+        "allTokens": true,
+        "containsFirstAndLast": true
+      },
+      "accessibility": {
+        "roles": {
+          "article": 200,
+          "heading": 3,
+          "link": 3,
+          "list": 3,
+          "log": 1,
+          "main": 1,
+          "textbox": 1
+        },
+        "lastLinkExposed": false,
+        "lastHeadingExposed": false,
+        "log": [
+          {
+            "name": "Messages",
+            "properties": [
+              {
+                "name": "live",
+                "value": {
+                  "type": "token",
+                  "value": "polite"
+                }
+              },
+              {
+                "name": "atomic",
+                "value": {
+                  "type": "boolean",
+                  "value": false
+                }
+              },
+              {
+                "name": "relevant",
+                "value": {
+                  "type": "tokenList",
+                  "value": "additions"
+                }
+              }
+            ]
+          }
+        ],
+        "note": "CDP semantics only; no screen-reader/VoiceOver session."
+      },
+      "focus": {
+        "linkFocused": true,
+        "revealed": true,
+        "tabLeavesLink": true,
+        "menuEscape": true
+      },
+      "reader": {
+        "before": 62.03125,
+        "after": 62.03125,
+        "scrollBefore": 35972,
+        "scrollAfter": 35972
+      },
+      "resizeReader": {
+        "top": -11.46875,
+        "viewportTop": 62,
+        "visible": true
+      },
+      "bottomAndFinal": {
+        "streamGap": 0,
+        "finalGap": 0,
+        "finalMatches": true,
+        "overflow": false,
+        "animations": 0
+      }
+    }
+  ],
+  "failures": [],
+  "externalRequests": [],
+  "commands": [
+    "node build/efficiency-20261103/panel-rendering-experiment.mjs",
+    "PANEL_EXPERIMENT_FOLLOWUP=1 node build/efficiency-20261103/panel-rendering-experiment.mjs",
+    "node build/efficiency-20261103/panel-rendering-experiment-summarize.mjs"
+  ],
+  "scope": "Shipped panel and imported modules served unchanged from in-memory byte snapshot. Fake chrome APIs, generated supported Markdown, no provider/native/browser-wide benchmark. Only completed articles get a fixture class. Current streaming article remains uncontained.",
+  "cleanup": {
+    "browserClosed": true,
+    "serverClosed": true,
+    "finalOwnedProfileRemoved": true,
+    "finalOwnedServerClosed": true
+  },
+  "runtime": {
+    "node": "v22.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "browser": {
+      "protocolVersion": "1.3",
+      "product": "Chrome/156.0.8078.47",
+      "revision": "@1d17a2e2ee147bb7d6ae2ab6abdb3a2510c17775",
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "jsVersion": "15.6.75.19"
+    },
+    "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/panel-rendering-experiment-resources/profile"
+  },
+  "sourceHashesAfter": {
+    "features/ai/extension/background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "features/ai/extension/browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "features/ai/extension/context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "features/ai/extension/context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "features/ai/extension/context-settings.js": "aef2ab4366e03ad24ce6f09d71c450c055d399bfdd39a4ae97171f6a28138ddd",
+    "features/ai/extension/efficiency.html": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583",
+    "features/ai/extension/icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "features/ai/extension/model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "features/ai/extension/newtab.css": "8cb4956de440b8f2b19004e8c45cd23b1d4a2a6e6e91727ebe52d51302c63515",
+    "features/ai/extension/newtab.html": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
+    "features/ai/extension/newtab.js": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+    "features/ai/extension/onboarding.css": "c531c5a275791a22c8821d4e209fe2eea9eddc62bf8db3ac61be1d5199f7ecc8",
+    "features/ai/extension/onboarding.js": "fb3755f786c8b846ab2bfbef2019067a7349f48662f0ee7da32402ef8107f6ec",
+    "features/ai/extension/page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "features/ai/extension/panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "features/ai/extension/panel.css": "60ed6d66b3c003715ab48b07b12b9e9b4ed8aa2c6c21b49578ae9d181a448bd8",
+    "features/ai/extension/panel.html": "905e0cca4b2fa08f96b1202713f2e595683c2d4a91474e69168b8bb9e73a1a94",
+    "features/ai/extension/panel.js": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "features/ai/extension/passwords.js": "3979b082536176acfc177b63ee1b0d5189ae2333747ea21d698c799fcbd54685",
+    "features/ai/extension/release-info.js": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf",
+    "features/ai/extension/release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "features/ai/extension/render-message.js": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+    "features/ai/extension/research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "features/ai/extension/research-sources.js": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4",
+    "features/ai/extension/settings-nav.js": "38600a1e45f189d613a59d84b195058568911ecfa3f52e26205b4c7d4117381d",
+    "features/ai/extension/settings-onboarding.js": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae",
+    "features/ai/extension/settings.js": "676a570b36fa8906babf21f669b9932131d89d2d65bab8a4e121fcca44e15697",
+    "features/ai/extension/setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "features/ai/extension/shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "features/ai/extension/sync-settings.js": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+    "features/ai/extension/top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "features/ai/extension/translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "features/ai/extension/translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "features/ai/extension/translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "features/ai/extension/translation-settings.js": "52c2bc5f07850d7655980ddf7b24b9b0bf220987cd616ded83d573f725f614d5",
+    "features/ai/extension/translation.css": "d06c697dd99e6ec0521bdcb1fa5f04000f0d20db1c793c504f6fc46d3c48c44f",
+    "features/ai/extension/translation.html": "081b8d10030b90ba203e4ccb8636868ce9e524833827e247ba6a0e717cbac59f",
+    "features/ai/extension/translation.js": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
+    "features/ai/extension/usage-settings.js": "96fd12e6109982522a695554c569e1911738b30b3deb6fa96d640a92948d3d27",
+    "features/ai/extension/usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "features/ai/extension/whats-new.css": "324bdec4f90c813ce51f143280af4c936399d8798fa06a5d67a36c8e97798c1d",
+    "features/ai/extension/whats-new.html": "e71fcd8ac23120dcb4f76c014b22bba8e3884b8dd218c009a4d5314921b94391",
+    "features/ai/extension/whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+    "features/ai/extension/workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "features/ai/extension/workspace-sync-model.js": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+    "features/ai/extension/workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "features/ai/extension/workspace.css": "5b2007277a3cbd5fdd3ac2c26fff5a044d9282451841231110deb5fb767a08c9",
+    "features/ai/extension/workspace.html": "8ed520d8ac4d2df8d22dec5b79a7ad6868e87bdca2275833d53f9b0a8197dcf5",
+    "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "AGENTS.md": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+    "tests/ai/panel-browser.mjs": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+    "docs/evidence/memory-20261103/extension-services-audit.json": "ffcd38053e61ffbe98fa61e5f258235cee798a29d5a7102a924971767ff3c62a",
+    "docs/evidence/memory-20261103/verification.json": "758de3474daf52022ece0cc4ef7dbf125feb150b4d51fb45856f5f12c022ae9c",
+    "docs/evidence/memory-20261103/README.md": "9a47313e8d0d149ed5edf269a3acbb8cc8c443c385b1464d0af7007e6318606b"
+  },
+  "sourceBytesUnchanged": true,
+  "summary": [
+    {
+      "countExchanges": 4,
+      "candidate": "auto600",
+      "baseline": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 4.945,
+          "min": 2.598,
+          "max": 5.35
+        },
+        "streamStyleMs": {
+          "median": 1.7369999999999999,
+          "min": 1.095,
+          "max": 2.06
+        },
+        "resizeLayoutMs": {
+          "median": 6.1819999999999995,
+          "min": 5.554999999999999,
+          "max": 6.745
+        },
+        "resizeStyleMs": {
+          "median": 1.278,
+          "min": 1.17,
+          "max": 1.4670000000000005
+        },
+        "streamHeapUsedBytes": {
+          "median": 2307428,
+          "min": 2307392,
+          "max": 2309580
+        }
+      },
+      "auto600": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 6.955,
+          "min": 6.293,
+          "max": 8.665000000000001
+        },
+        "streamStyleMs": {
+          "median": 2.435,
+          "min": 2.333,
+          "max": 3.132
+        },
+        "resizeLayoutMs": {
+          "median": 4.621999999999999,
+          "min": 3.0469999999999993,
+          "max": 5.361999999999999
+        },
+        "resizeStyleMs": {
+          "median": 1.2870000000000004,
+          "min": 0.9019999999999996,
+          "max": 1.4160000000000001
+        },
+        "streamHeapUsedBytes": {
+          "median": 2325576,
+          "min": 2325516,
+          "max": 2325612
+        }
+      }
+    },
+    {
+      "countExchanges": 4,
+      "candidate": "roleSizes",
+      "baseline": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 8.507000000000001,
+          "min": 3.029,
+          "max": 8.558
+        },
+        "streamStyleMs": {
+          "median": 2.605,
+          "min": 1.166,
+          "max": 2.9219999999999997
+        },
+        "resizeLayoutMs": {
+          "median": 6.1899999999999995,
+          "min": 5.068999999999999,
+          "max": 7.173000000000001
+        },
+        "resizeStyleMs": {
+          "median": 1.285,
+          "min": 1.108,
+          "max": 1.4660000000000002
+        },
+        "streamHeapUsedBytes": {
+          "median": 2307548,
+          "min": 2307464,
+          "max": 2307560
+        }
+      },
+      "roleSizes": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 8.76,
+          "min": 6.6,
+          "max": 9.126
+        },
+        "streamStyleMs": {
+          "median": 2.955,
+          "min": 2.362,
+          "max": 2.994
+        },
+        "resizeLayoutMs": {
+          "median": 5.356,
+          "min": 4.839,
+          "max": 5.415000000000002
+        },
+        "resizeStyleMs": {
+          "median": 1.475,
+          "min": 1.382,
+          "max": 1.487
+        },
+        "streamHeapUsedBytes": {
+          "median": 2326000,
+          "min": 2325988,
+          "max": 2326060
+        }
+      }
+    },
+    {
+      "countExchanges": 100,
+      "candidate": "auto600",
+      "baseline": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 14.923,
+          "min": 13.838,
+          "max": 16.677
+        },
+        "streamStyleMs": {
+          "median": 2.296,
+          "min": 2.163,
+          "max": 2.536
+        },
+        "resizeLayoutMs": {
+          "median": 47.219,
+          "min": 29.3,
+          "max": 47.38700000000001
+        },
+        "resizeStyleMs": {
+          "median": 3.44,
+          "min": 2.4749999999999996,
+          "max": 3.457
+        },
+        "streamHeapUsedBytes": {
+          "median": 2714500,
+          "min": 2709528,
+          "max": 2719756
+        }
+      },
+      "auto600": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 19.165000000000003,
+          "min": 18.078999999999997,
+          "max": 25.661
+        },
+        "streamStyleMs": {
+          "median": 2.7720000000000002,
+          "min": 2.566,
+          "max": 3.7190000000000003
+        },
+        "resizeLayoutMs": {
+          "median": 7.231000000000002,
+          "min": 5.608999999999999,
+          "max": 7.929000000000002
+        },
+        "resizeStyleMs": {
+          "median": 3.4920000000000004,
+          "min": 2.9240000000000004,
+          "max": 3.836
+        },
+        "streamHeapUsedBytes": {
+          "median": 2761480,
+          "min": 2734108,
+          "max": 2772984
+        }
+      }
+    },
+    {
+      "countExchanges": 100,
+      "candidate": "roleSizes",
+      "baseline": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 14.933,
+          "min": 14.899000000000001,
+          "max": 16.208
+        },
+        "streamStyleMs": {
+          "median": 2.166,
+          "min": 2.1609999999999996,
+          "max": 2.9690000000000003
+        },
+        "resizeLayoutMs": {
+          "median": 45.902,
+          "min": 32.729,
+          "max": 52.001999999999995
+        },
+        "resizeStyleMs": {
+          "median": 3.281,
+          "min": 2.521,
+          "max": 3.874
+        },
+        "streamHeapUsedBytes": {
+          "median": 2715348,
+          "min": 2713564,
+          "max": 2738608
+        }
+      },
+      "roleSizes": {
+        "trials": 3,
+        "streamLayoutMs": {
+          "median": 21.36,
+          "min": 11.214,
+          "max": 26.331
+        },
+        "streamStyleMs": {
+          "median": 3.092,
+          "min": 1.7890000000000001,
+          "max": 3.6319999999999997
+        },
+        "resizeLayoutMs": {
+          "median": 7.224000000000001,
+          "min": 6,
+          "max": 8.099000000000002
+        },
+        "resizeStyleMs": {
+          "median": 3.633,
+          "min": 3.0280000000000005,
+          "max": 3.955
+        },
+        "streamHeapUsedBytes": {
+          "median": 2743680,
+          "min": 2734204,
+          "max": 2744716
+        }
+      }
+    }
+  ],
+  "followup": {
+    "artifact": "build/efficiency-20261103/panel-rendering-experiment-followup.json",
+    "purpose": "Six long-transcript behavior trials after waiting 160ms before transcript construction to exclude the shipped 120ms entry animation; additionally hash complete selected text and inspect meaningful AX link after focus.",
+    "results": [
+      {
+        "variant": "baseline",
+        "countExchanges": 100,
+        "width": 400,
+        "reducedMotion": false,
+        "errors": [],
+        "initial": {
+          "articles": 200,
+          "bottomGap": 560,
+          "overflow": false,
+          "cv": true,
+          "intrinsic": true
+        },
+        "scroll": [
+          {
+            "index": 0,
+            "top": 62,
+            "bottom": 111.6875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 100,
+            "top": 61.84375,
+            "bottom": 111.53125,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 199,
+            "top": 61.609375,
+            "bottom": 724.4375,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          }
+        ],
+        "find": {
+          "found": true,
+          "selection": "FINDTOKEN1END",
+          "before": 65712,
+          "after": 65712,
+          "revealed": false
+        },
+        "selection": {
+          "selectedSHA256": "881c565360e7e1d5d690632f3f85dca1a6f7bf47b380394b6b0bb4f34bd05cbf",
+          "selectedLength": 47414,
+          "textContentLength": 45716,
+          "allTokens": true,
+          "containsFirstAndLast": true
+        },
+        "accessibility": {
+          "roles": {
+            "article": 200,
+            "heading": 100,
+            "link": 100,
+            "list": 100,
+            "log": 1,
+            "main": 1,
+            "textbox": 1
+          },
+          "lastLinkExposed": true,
+          "lastHeadingExposed": true,
+          "log": [
+            {
+              "name": "Messages",
+              "properties": [
+                {
+                  "name": "live",
+                  "value": {
+                    "type": "token",
+                    "value": "polite"
+                  }
+                },
+                {
+                  "name": "atomic",
+                  "value": {
+                    "type": "boolean",
+                    "value": false
+                  }
+                },
+                {
+                  "name": "relevant",
+                  "value": {
+                    "type": "tokenList",
+                    "value": "additions"
+                  }
+                }
+              ]
+            }
+          ],
+          "note": "CDP semantics only; no screen-reader/VoiceOver session.",
+          "lastLinkExposedAfterFocus": true
+        },
+        "focus": {
+          "linkFocused": true,
+          "revealed": true,
+          "tabLeavesLink": true,
+          "menuEscape": true
+        },
+        "reader": {
+          "before": 61.53125,
+          "after": 61.53125,
+          "scrollBefore": 32959,
+          "scrollAfter": 32959
+        },
+        "resizeReader": {
+          "top": 3075.03125,
+          "viewportTop": 62,
+          "visible": false
+        },
+        "bottomAndFinal": {
+          "streamGap": 0,
+          "finalGap": 0,
+          "finalMatches": true,
+          "overflow": false,
+          "animations": null
+        }
+      },
+      {
+        "variant": "auto600",
+        "countExchanges": 100,
+        "width": 400,
+        "reducedMotion": false,
+        "errors": [],
+        "initial": {
+          "articles": 200,
+          "bottomGap": 540,
+          "overflow": false,
+          "cv": true,
+          "intrinsic": true
+        },
+        "scroll": [
+          {
+            "index": 0,
+            "top": 62,
+            "bottom": 111.6875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 100,
+            "top": 62.28125,
+            "bottom": 111.96875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 199,
+            "top": 62.1875,
+            "bottom": 725.015625,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          }
+        ],
+        "find": {
+          "found": true,
+          "selection": "FINDTOKEN1END",
+          "before": 119277,
+          "after": 119277,
+          "revealed": false
+        },
+        "selection": {
+          "selectedSHA256": "881c565360e7e1d5d690632f3f85dca1a6f7bf47b380394b6b0bb4f34bd05cbf",
+          "selectedLength": 47414,
+          "textContentLength": 45716,
+          "allTokens": true,
+          "containsFirstAndLast": true
+        },
+        "accessibility": {
+          "roles": {
+            "article": 200,
+            "heading": 3,
+            "link": 3,
+            "list": 3,
+            "log": 1,
+            "main": 1,
+            "textbox": 1
+          },
+          "lastLinkExposed": false,
+          "lastHeadingExposed": false,
+          "log": [
+            {
+              "name": "Messages",
+              "properties": [
+                {
+                  "name": "live",
+                  "value": {
+                    "type": "token",
+                    "value": "polite"
+                  }
+                },
+                {
+                  "name": "atomic",
+                  "value": {
+                    "type": "boolean",
+                    "value": false
+                  }
+                },
+                {
+                  "name": "relevant",
+                  "value": {
+                    "type": "tokenList",
+                    "value": "additions"
+                  }
+                }
+              ]
+            }
+          ],
+          "note": "CDP semantics only; no screen-reader/VoiceOver session.",
+          "lastLinkExposedAfterFocus": true
+        },
+        "focus": {
+          "linkFocused": true,
+          "revealed": true,
+          "tabLeavesLink": true,
+          "menuEscape": true
+        },
+        "reader": {
+          "before": 61.53125,
+          "after": 61.53125,
+          "scrollBefore": 32959,
+          "scrollAfter": 32959
+        },
+        "resizeReader": {
+          "top": 135.03125,
+          "viewportTop": 62,
+          "visible": true
+        },
+        "bottomAndFinal": {
+          "streamGap": 0,
+          "finalGap": 0,
+          "finalMatches": true,
+          "overflow": false,
+          "animations": null
+        }
+      },
+      {
+        "variant": "roleSizes",
+        "countExchanges": 100,
+        "width": 400,
+        "reducedMotion": false,
+        "errors": [],
+        "initial": {
+          "articles": 200,
+          "bottomGap": 540,
+          "overflow": false,
+          "cv": true,
+          "intrinsic": true
+        },
+        "scroll": [
+          {
+            "index": 0,
+            "top": 62,
+            "bottom": 111.6875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 100,
+            "top": 62.421875,
+            "bottom": 112.109375,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 199,
+            "top": 62.328125,
+            "bottom": 725.15625,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          }
+        ],
+        "find": {
+          "found": true,
+          "selection": "FINDTOKEN1END",
+          "before": 71936,
+          "after": 71936,
+          "revealed": false
+        },
+        "selection": {
+          "selectedSHA256": "881c565360e7e1d5d690632f3f85dca1a6f7bf47b380394b6b0bb4f34bd05cbf",
+          "selectedLength": 47414,
+          "textContentLength": 45716,
+          "allTokens": true,
+          "containsFirstAndLast": true
+        },
+        "accessibility": {
+          "roles": {
+            "article": 200,
+            "heading": 3,
+            "link": 3,
+            "list": 3,
+            "log": 1,
+            "main": 1,
+            "textbox": 1
+          },
+          "lastLinkExposed": false,
+          "lastHeadingExposed": false,
+          "log": [
+            {
+              "name": "Messages",
+              "properties": [
+                {
+                  "name": "live",
+                  "value": {
+                    "type": "token",
+                    "value": "polite"
+                  }
+                },
+                {
+                  "name": "atomic",
+                  "value": {
+                    "type": "boolean",
+                    "value": false
+                  }
+                },
+                {
+                  "name": "relevant",
+                  "value": {
+                    "type": "tokenList",
+                    "value": "additions"
+                  }
+                }
+              ]
+            }
+          ],
+          "note": "CDP semantics only; no screen-reader/VoiceOver session.",
+          "lastLinkExposedAfterFocus": true
+        },
+        "focus": {
+          "linkFocused": true,
+          "revealed": true,
+          "tabLeavesLink": true,
+          "menuEscape": true
+        },
+        "reader": {
+          "before": 61.53125,
+          "after": 61.53125,
+          "scrollBefore": 32959,
+          "scrollAfter": 32959
+        },
+        "resizeReader": {
+          "top": 135.03125,
+          "viewportTop": 62,
+          "visible": true
+        },
+        "bottomAndFinal": {
+          "streamGap": 0,
+          "finalGap": 0,
+          "finalMatches": true,
+          "overflow": false,
+          "animations": null
+        }
+      },
+      {
+        "variant": "baseline",
+        "countExchanges": 100,
+        "width": 320,
+        "reducedMotion": true,
+        "errors": [],
+        "initial": {
+          "articles": 200,
+          "bottomGap": 658,
+          "overflow": false,
+          "cv": true,
+          "intrinsic": true
+        },
+        "scroll": [
+          {
+            "index": 0,
+            "top": 62,
+            "bottom": 111.6875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 100,
+            "top": 62.34375,
+            "bottom": 112.03125,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 199,
+            "top": 61.609375,
+            "bottom": 822.4375,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          }
+        ],
+        "find": {
+          "found": true,
+          "selection": "FINDTOKEN1END",
+          "before": 71837,
+          "after": 71837,
+          "revealed": false
+        },
+        "selection": {
+          "selectedSHA256": "881c565360e7e1d5d690632f3f85dca1a6f7bf47b380394b6b0bb4f34bd05cbf",
+          "selectedLength": 47414,
+          "textContentLength": 45716,
+          "allTokens": true,
+          "containsFirstAndLast": true
+        },
+        "accessibility": {
+          "roles": {
+            "article": 200,
+            "heading": 100,
+            "link": 100,
+            "list": 100,
+            "log": 1,
+            "main": 1,
+            "textbox": 1
+          },
+          "lastLinkExposed": true,
+          "lastHeadingExposed": true,
+          "log": [
+            {
+              "name": "Messages",
+              "properties": [
+                {
+                  "name": "live",
+                  "value": {
+                    "type": "token",
+                    "value": "polite"
+                  }
+                },
+                {
+                  "name": "atomic",
+                  "value": {
+                    "type": "boolean",
+                    "value": false
+                  }
+                },
+                {
+                  "name": "relevant",
+                  "value": {
+                    "type": "tokenList",
+                    "value": "additions"
+                  }
+                }
+              ]
+            }
+          ],
+          "note": "CDP semantics only; no screen-reader/VoiceOver session.",
+          "lastLinkExposedAfterFocus": true
+        },
+        "focus": {
+          "linkFocused": true,
+          "revealed": true,
+          "tabLeavesLink": true,
+          "menuEscape": true
+        },
+        "reader": {
+          "before": 62.03125,
+          "after": 62.03125,
+          "scrollBefore": 35972,
+          "scrollAfter": 35972
+        },
+        "resizeReader": {
+          "top": -2951.46875,
+          "viewportTop": 62,
+          "visible": false
+        },
+        "bottomAndFinal": {
+          "streamGap": 0,
+          "finalGap": 0,
+          "finalMatches": true,
+          "overflow": false,
+          "animations": 0
+        }
+      },
+      {
+        "variant": "auto600",
+        "countExchanges": 100,
+        "width": 320,
+        "reducedMotion": true,
+        "errors": [],
+        "initial": {
+          "articles": 200,
+          "bottomGap": 711,
+          "overflow": false,
+          "cv": true,
+          "intrinsic": true
+        },
+        "scroll": [
+          {
+            "index": 0,
+            "top": 62,
+            "bottom": 111.6875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 100,
+            "top": 61.78125,
+            "bottom": 111.46875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 199,
+            "top": 61.5,
+            "bottom": 822.328125,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          }
+        ],
+        "find": {
+          "found": true,
+          "selection": "FINDTOKEN1END",
+          "before": 120366,
+          "after": 120366,
+          "revealed": false
+        },
+        "selection": {
+          "selectedSHA256": "881c565360e7e1d5d690632f3f85dca1a6f7bf47b380394b6b0bb4f34bd05cbf",
+          "selectedLength": 47414,
+          "textContentLength": 45716,
+          "allTokens": true,
+          "containsFirstAndLast": true
+        },
+        "accessibility": {
+          "roles": {
+            "article": 200,
+            "heading": 3,
+            "link": 3,
+            "list": 3,
+            "log": 1,
+            "main": 1,
+            "textbox": 1
+          },
+          "lastLinkExposed": false,
+          "lastHeadingExposed": false,
+          "log": [
+            {
+              "name": "Messages",
+              "properties": [
+                {
+                  "name": "live",
+                  "value": {
+                    "type": "token",
+                    "value": "polite"
+                  }
+                },
+                {
+                  "name": "atomic",
+                  "value": {
+                    "type": "boolean",
+                    "value": false
+                  }
+                },
+                {
+                  "name": "relevant",
+                  "value": {
+                    "type": "tokenList",
+                    "value": "additions"
+                  }
+                }
+              ]
+            }
+          ],
+          "note": "CDP semantics only; no screen-reader/VoiceOver session.",
+          "lastLinkExposedAfterFocus": true
+        },
+        "focus": {
+          "linkFocused": true,
+          "revealed": true,
+          "tabLeavesLink": true,
+          "menuEscape": true
+        },
+        "reader": {
+          "before": 62.03125,
+          "after": 62.03125,
+          "scrollBefore": 35972,
+          "scrollAfter": 35972
+        },
+        "resizeReader": {
+          "top": -11.46875,
+          "viewportTop": 62,
+          "visible": true
+        },
+        "bottomAndFinal": {
+          "streamGap": 0,
+          "finalGap": 0,
+          "finalMatches": true,
+          "overflow": false,
+          "animations": 0
+        }
+      },
+      {
+        "variant": "roleSizes",
+        "countExchanges": 100,
+        "width": 320,
+        "reducedMotion": true,
+        "errors": [],
+        "initial": {
+          "articles": 200,
+          "bottomGap": 711,
+          "overflow": false,
+          "cv": true,
+          "intrinsic": true
+        },
+        "scroll": [
+          {
+            "index": 0,
+            "top": 62,
+            "bottom": 111.6875,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 100,
+            "top": 62.421875,
+            "bottom": 112.109375,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          },
+          {
+            "index": 199,
+            "top": 61.828125,
+            "bottom": 822.65625,
+            "viewportTop": 62,
+            "viewportBottom": 461.703125,
+            "visible": true
+          }
+        ],
+        "find": {
+          "found": true,
+          "selection": "FINDTOKEN1END",
+          "before": 72549,
+          "after": 72549,
+          "revealed": false
+        },
+        "selection": {
+          "selectedSHA256": "881c565360e7e1d5d690632f3f85dca1a6f7bf47b380394b6b0bb4f34bd05cbf",
+          "selectedLength": 47414,
+          "textContentLength": 45716,
+          "allTokens": true,
+          "containsFirstAndLast": true
+        },
+        "accessibility": {
+          "roles": {
+            "article": 200,
+            "heading": 3,
+            "link": 3,
+            "list": 3,
+            "log": 1,
+            "main": 1,
+            "textbox": 1
+          },
+          "lastLinkExposed": false,
+          "lastHeadingExposed": false,
+          "log": [
+            {
+              "name": "Messages",
+              "properties": [
+                {
+                  "name": "live",
+                  "value": {
+                    "type": "token",
+                    "value": "polite"
+                  }
+                },
+                {
+                  "name": "atomic",
+                  "value": {
+                    "type": "boolean",
+                    "value": false
+                  }
+                },
+                {
+                  "name": "relevant",
+                  "value": {
+                    "type": "tokenList",
+                    "value": "additions"
+                  }
+                }
+              ]
+            }
+          ],
+          "note": "CDP semantics only; no screen-reader/VoiceOver session.",
+          "lastLinkExposedAfterFocus": true
+        },
+        "focus": {
+          "linkFocused": true,
+          "revealed": true,
+          "tabLeavesLink": true,
+          "menuEscape": true
+        },
+        "reader": {
+          "before": 62.03125,
+          "after": 62.03125,
+          "scrollBefore": 35972,
+          "scrollAfter": 35972
+        },
+        "resizeReader": {
+          "top": -11.46875,
+          "viewportTop": 62,
+          "visible": true
+        },
+        "bottomAndFinal": {
+          "streamGap": 0,
+          "finalGap": 0,
+          "finalMatches": true,
+          "overflow": false,
+          "animations": 0
+        }
+      }
+    ],
+    "failures": [],
+    "sourceBytesUnchanged": true,
+    "cleanup": {
+      "browserClosed": true,
+      "serverClosed": true,
+      "disposableProfileRemoved": true
+    }
+  },
+  "method": {
+    "initialPerformanceTrials": 24,
+    "behaviorCases": 12,
+    "followupBehaviorCases": 6,
+    "trialOrder": "For each of 4/100 exchanges and each candidate: baseline, candidate, candidate, baseline, baseline, candidate. Three baseline and three candidate measurements per comparison. One process; fresh page per trial; no parallel trials.",
+    "transcript": "Each exchange goes through actual composer submit, fake chat port, delta and complete. 4 and 100 exchanges retain 8 and 200 articles. Supported headings, emphasis, links, paragraphs, lists, quote, code fence. No transcript truncation or DOM virtualization. Stored fixture session data is in memory only.",
+    "stream": "20 incoming deltas, each containing one formatted paragraph, separated by two animation frames. CDP Performance counters bracket stream after new send settles. Current streaming article is never marked completed.",
+    "resize": "8 alternating 360/400px viewport changes, two animation frames per step. Timings are renderer layout/style durations, not elapsed browsing speed.",
+    "units": {
+      "LayoutDuration": "seconds of CDP renderer layout work; summary converts to ms",
+      "RecalcStyleDuration": "seconds of CDP renderer style recalculation; summary converts to ms",
+      "JSHeapUsedSize": "V8 used heap bytes at sampling time; no forced GC; excludes native memory",
+      "Nodes": "CDP node counter includes more than attached transcript nodes; GC timing can differ"
+    },
+    "animationCaveat": "Initial run waited two frames after fixture construction but did not explicitly wait for entry animation. It may overlap the beginning of streaming trials. Long-transcript follow-up waited 160ms before construction and confirmed initial overflow was transient. Final reproducible harness includes that settling wait; raw historical timing run is retained, not represented as a rerun of the revised harness.",
+    "noClaims": [
+      "No physical RAM measurement or RSS/physical-footprint inference. Audited native probe not invoked.",
+      "No browser-wide CPU, memory, energy or browsing-speed claim.",
+      "No cold-load or transcript construction timing claim.",
+      "No elimination of retained transcript, message map, JS text or DOM. ES-01 ownership growth remains."
+    ]
+  },
+  "featureAssessment": {
+    "content": "All original articles remain attached. Both candidates retained all tokens across selection spanning the entire transcript. Follow-up full selected-text SHA256 is identical across baseline and both candidates at 320 and 400px. Selection serialization approximates copy text; no clipboard access or real copy/paste test.",
+    "markdown": "All 18 behavior cases match exact shipped final renderer innerHTML including headings, code and lists.",
+    "scrolling": "Top/middle/bottom article scrollIntoView succeeds for every variant. Reader target top stays unchanged during incoming deltas. Bottom-following and final bottom gap are zero once explicitly positioned at bottom. Initial completed-restore-like construction does not stay at bottom in baseline either, because finish performs final full render after last send scroll; not classified as candidate regression.",
+    "resize": "Both candidates keep the selected middle target visible on long-conversation width changes; baseline target moves out of view. The position is not pixel-identical after resize even with candidates. Short-case relative positions match baseline. Native content-size estimates change the scrollbar extent; e.g. initial auto600 long extent differs substantially from baseline. This is not proof that arbitrary scrollbar dragging or every resize preserves location.",
+    "find": "window.find finds and selects unique old off-screen text in all 18 cases. It does not scroll/reveal the match in this headless Chrome nested scroller, including unchanged baseline. Native browser Find UI was not exercised. Match reachability passes; automatic reveal acceptance remains unverified. Do not claim full find-in-page acceptance.",
+    "keyboard": "Off-screen last transcript link can receive focus and is revealed; Tab leaves the link to a focusable control; keyboard model menu Escape returns focus. Full sequential traversal of every link and screen-reader browse navigation were not performed.",
+    "accessibility": "Conversation main, labeled live log, and all named articles remain exposed. Candidate snapshots omit off-screen descendant headings/links/lists while baseline exposes them; a focused last off-screen link is then meaningfully exposed in follow-up. Raw AX counts alone do not establish a regression. VoiceOver reading order, browse navigation of skipped text and live announcements were not exercised, so equivalent accessibility is not proven.",
+    "views": "320px reduced motion and 400px ordinary view tested, with resize to opposite width and 620px height. Reduced-motion cases have zero running animations at final capture. Settled long follow-up has no horizontal page overflow in any variant. Initial overflow observations are retained as transient entry-animation observations, not attributed to containment.",
+    "errors": "No page errors or fixture external requests in either run."
+  },
+  "priorEvidence": {
+    "ES01": "Initial extension-services audit confirms 200 live messages/map entries/articles after 100 exchanges vs 60 persisted. It measures ownership/count growth, not a native memory leak. Native off-screen rendering leaves those ownership structures intact.",
+    "currentVerification": "Current README/verification claim incremental streaming stable-block reuse, final safe full rendering, reader-position/bottom-following checks and 320/400px reduced-motion coverage. They explicitly leave native/browser-wide performance unmeasured. This experiment uses those current source bytes and does not retest provider/native integration."
+  },
+  "documentation": [
+    {
+      "url": "https://drafts.csswg.org/css-contain-2/",
+      "version": "Editor draft 15 October 2026, read 3 November 2026",
+      "sections": [
+        "content-visibility auto",
+        "relevant to the user",
+        "accessibility implications"
+      ],
+      "finding": "Auto is intended to preserve find/tab/focus/selection availability; selection/focus can force relevance. Draft permits omission of skipped AX contents when required to avoid revealing assistive-technology timing. Therefore tree-size differences are not sufficient evidence of a user regression."
+    },
+    {
+      "url": "https://www.w3.org/TR/css-contain-2/",
+      "version": "Published working draft 17 September 2022",
+      "finding": "Describes off-screen layout/paint skipping. These are draft expectations, not a guarantee of behavior in this browser."
+    },
+    {
+      "url": "https://developer.chrome.com/blog/content-visibility",
+      "status": "404 from documentation fetch; not used as evidence"
+    }
+  ],
+  "recommendation": {
+    "decision": "reject",
+    "appliesTo": "Adopting either tested CSS variant as a general panel resource optimization",
+    "reason": "The resize-only layout benefit is real within this component fixture, but streaming layout medians worsen in all four comparisons and no heap reduction is established. More importantly, full find reveal and assistive reading reachability are unresolved. This does not meet the required unchanged-behavior acceptance gate. No production change authorized or implemented.",
+    "qualifiedAnswer": "Browser-native skipping can reduce repeated width-change layout work while retaining DOM/text, but this bounded experiment does not establish a safe overall resource improvement. It cannot fix ES-01 live text/map/DOM retention.",
+    "furtherEvidenceIfRevisited": "Only revisit for a measured resize-heavy workload with explicit scroll extent/location acceptance and native Find plus VoiceOver browse/live-log tests. No broad rewrite is warranted from these data."
+  },
+  "limitations": [
+    "One installed headless Google Chrome 156 build on macOS arm64, not native Breezer extension integration.",
+    "Three samples per comparison; no statistical population inference. Initial animation overlap and scheduler noise limit small streaming differences.",
+    "Synthetic repetitive supported Markdown; ordinary 4-exchange case included, but user content and prolonged interactive sessions vary.",
+    "No real provider, APIs, login, profile, Keychain, app build, install, PC, SSH, publication, dependency changes or native helper benchmark.",
+    "Completion marking is fixture-owned, outside measured streaming segment; a production mechanism and its runtime overhead were not implemented.",
+    "No mouse-drag selection, actual clipboard copy, native Find UI, screen-reader session, link navigation, giant single message, or arbitrary scrollbar dragging check.",
+    "Only relevant extension resources and read instruction/test/evidence inputs are hash-checked. This is not a claim to have hashed every file in the repository. Existing user changes were preserved."
+  ],
+  "finalSourceHashes": {
+    "features/ai/extension/background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "features/ai/extension/browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "features/ai/extension/context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "features/ai/extension/context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "features/ai/extension/context-settings.js": "aef2ab4366e03ad24ce6f09d71c450c055d399bfdd39a4ae97171f6a28138ddd",
+    "features/ai/extension/efficiency.html": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583",
+    "features/ai/extension/icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "features/ai/extension/model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "features/ai/extension/newtab.css": "8cb4956de440b8f2b19004e8c45cd23b1d4a2a6e6e91727ebe52d51302c63515",
+    "features/ai/extension/newtab.html": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
+    "features/ai/extension/newtab.js": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+    "features/ai/extension/onboarding.css": "c531c5a275791a22c8821d4e209fe2eea9eddc62bf8db3ac61be1d5199f7ecc8",
+    "features/ai/extension/onboarding.js": "fb3755f786c8b846ab2bfbef2019067a7349f48662f0ee7da32402ef8107f6ec",
+    "features/ai/extension/page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "features/ai/extension/panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "features/ai/extension/panel.css": "60ed6d66b3c003715ab48b07b12b9e9b4ed8aa2c6c21b49578ae9d181a448bd8",
+    "features/ai/extension/panel.html": "905e0cca4b2fa08f96b1202713f2e595683c2d4a91474e69168b8bb9e73a1a94",
+    "features/ai/extension/panel.js": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "features/ai/extension/passwords.js": "3979b082536176acfc177b63ee1b0d5189ae2333747ea21d698c799fcbd54685",
+    "features/ai/extension/release-info.js": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf",
+    "features/ai/extension/release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "features/ai/extension/render-message.js": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+    "features/ai/extension/research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "features/ai/extension/research-sources.js": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4",
+    "features/ai/extension/settings-nav.js": "38600a1e45f189d613a59d84b195058568911ecfa3f52e26205b4c7d4117381d",
+    "features/ai/extension/settings-onboarding.js": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae",
+    "features/ai/extension/settings.js": "676a570b36fa8906babf21f669b9932131d89d2d65bab8a4e121fcca44e15697",
+    "features/ai/extension/setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "features/ai/extension/shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "features/ai/extension/sync-settings.js": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+    "features/ai/extension/top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "features/ai/extension/translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "features/ai/extension/translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "features/ai/extension/translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "features/ai/extension/translation-settings.js": "52c2bc5f07850d7655980ddf7b24b9b0bf220987cd616ded83d573f725f614d5",
+    "features/ai/extension/translation.css": "d06c697dd99e6ec0521bdcb1fa5f04000f0d20db1c793c504f6fc46d3c48c44f",
+    "features/ai/extension/translation.html": "081b8d10030b90ba203e4ccb8636868ce9e524833827e247ba6a0e717cbac59f",
+    "features/ai/extension/translation.js": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
+    "features/ai/extension/usage-settings.js": "96fd12e6109982522a695554c569e1911738b30b3deb6fa96d640a92948d3d27",
+    "features/ai/extension/usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "features/ai/extension/whats-new.css": "324bdec4f90c813ce51f143280af4c936399d8798fa06a5d67a36c8e97798c1d",
+    "features/ai/extension/whats-new.html": "e71fcd8ac23120dcb4f76c014b22bba8e3884b8dd218c009a4d5314921b94391",
+    "features/ai/extension/whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+    "features/ai/extension/workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "features/ai/extension/workspace-sync-model.js": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+    "features/ai/extension/workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "features/ai/extension/workspace.css": "5b2007277a3cbd5fdd3ac2c26fff5a044d9282451841231110deb5fb767a08c9",
+    "features/ai/extension/workspace.html": "8ed520d8ac4d2df8d22dec5b79a7ad6868e87bdca2275833d53f9b0a8197dcf5",
+    "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "AGENTS.md": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+    "tests/ai/panel-browser.mjs": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+    "docs/evidence/memory-20261103/extension-services-audit.json": "ffcd38053e61ffbe98fa61e5f258235cee798a29d5a7102a924971767ff3c62a",
+    "docs/evidence/memory-20261103/verification.json": "758de3474daf52022ece0cc4ef7dbf125feb150b4d51fb45856f5f12c022ae9c",
+    "docs/evidence/memory-20261103/README.md": "9a47313e8d0d149ed5edf269a3acbb8cc8c443c385b1464d0af7007e6318606b"
+  },
+  "sourceBytesUnchangedThroughFinalCheck": true,
+  "reproducibility": {
+    "harnessSHA256": "c039787e777663e947f91e451c5523bc0a51c80039fcc038019df5066ee6a96a",
+    "summarizerSHA256": "0dc042531d5d480a897651699e9a240ee5203fadf55f1677a51ffcb653612a06",
+    "playwrightModule": "/Users/likht.ethan/.t3/projects/breezer/tests/ai/node_modules/playwright/index.mjs",
+    "browserStat": {
+      "size": 367696,
+      "mtime": "2026-10-19T19:04:06.000Z"
+    },
+    "allOutputs": "Only build/efficiency-20261103/panel-rendering-experiment* paths. Profile removed after context.close; servers closed in nested finally."
+  }
+}

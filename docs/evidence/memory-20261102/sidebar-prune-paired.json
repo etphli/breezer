@@ -1,0 +1,203 @@
+{
+  "rows": [
+    {
+      "count": 100,
+      "round": 0,
+      "name": "baseline",
+      "expandReadyMs": 39.60000014305115,
+      "document": {
+        "documents": 3,
+        "nodes": 2225,
+        "jsEventListeners": 145,
+        "elements": 1393,
+        "folderRows": 100,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1878656,
+        "scriptDurationSeconds": 0.002156,
+        "taskDurationSeconds": 0.065827,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-prune-pair-100-0-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 0,
+      "name": "pruned",
+      "expandReadyMs": 27.200000047683716,
+      "document": {
+        "documents": 3,
+        "nodes": 1043,
+        "jsEventListeners": 145,
+        "elements": 874,
+        "folderRows": 100,
+        "unusedRouteElements": 0,
+        "usedHeapBytes": 1838356,
+        "scriptDurationSeconds": 0.002218,
+        "taskDurationSeconds": 0.066456,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "01a12badcf462d9770e855107764a07936eefeec4560a2dd0edbea7ee6d5eab5",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/prune-only-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-prune-pair-100-0-pruned.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 1,
+      "name": "pruned",
+      "expandReadyMs": 29.299999952316284,
+      "document": {
+        "documents": 3,
+        "nodes": 1043,
+        "jsEventListeners": 145,
+        "elements": 874,
+        "folderRows": 100,
+        "unusedRouteElements": 0,
+        "usedHeapBytes": 1832700,
+        "scriptDurationSeconds": 0.002091,
+        "taskDurationSeconds": 0.062302,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "01a12badcf462d9770e855107764a07936eefeec4560a2dd0edbea7ee6d5eab5",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/prune-only-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-prune-pair-100-1-pruned.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 1,
+      "name": "baseline",
+      "expandReadyMs": 50.90000009536743,
+      "document": {
+        "documents": 3,
+        "nodes": 2225,
+        "jsEventListeners": 145,
+        "elements": 1393,
+        "folderRows": 100,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1878656,
+        "scriptDurationSeconds": 0.002129,
+        "taskDurationSeconds": 0.055545,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-prune-pair-100-1-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 2,
+      "name": "baseline",
+      "expandReadyMs": 32.200000047683716,
+      "document": {
+        "documents": 3,
+        "nodes": 2225,
+        "jsEventListeners": 145,
+        "elements": 1393,
+        "folderRows": 100,
+        "unusedRouteElements": 519,
+        "usedHeapBytes": 1878656,
+        "scriptDurationSeconds": 0.002054,
+        "taskDurationSeconds": 0.060952,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-prune-pair-100-2-baseline.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    },
+    {
+      "count": 100,
+      "round": 2,
+      "name": "pruned",
+      "expandReadyMs": 27.90000009536743,
+      "document": {
+        "documents": 3,
+        "nodes": 1043,
+        "jsEventListeners": 145,
+        "elements": 874,
+        "folderRows": 100,
+        "unusedRouteElements": 0,
+        "usedHeapBytes": 1838356,
+        "scriptDurationSeconds": 0.002204,
+        "taskDurationSeconds": 0.058714,
+        "faviconRequests": 99
+      },
+      "sourceSha256": "01a12badcf462d9770e855107764a07936eefeec4560a2dd0edbea7ee6d5eab5",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/prune-only-workspace.js",
+      "rawArtifact": "build/efficiency-20261102/sidebar-prune-pair-100-2-pruned.json",
+      "behavior": {
+        "folderKeyboard": true,
+        "savedSlotWhileClosed": true,
+        "latestLiveTitleOnReopen": true,
+        "savedEntriesUnchanged": true,
+        "noNewLiveTabs": true
+      },
+      "browser": "156.0.8078.4"
+    }
+  ],
+  "summary": {
+    "100": {
+      "baseline": {
+        "expandReadyMedianMs": 39.60000014305115,
+        "expandReadyRangeMs": [
+          32.200000047683716,
+          50.90000009536743
+        ]
+      },
+      "pruned": {
+        "expandReadyMedianMs": 27.90000009536743,
+        "expandReadyRangeMs": [
+          27.200000047683716,
+          29.299999952316284
+        ]
+      }
+    }
+  },
+  "protocol": {
+    "roundsPerCase": 3,
+    "order": "alternating within each entry count",
+    "faviconFixture": "32px opaque PNG; two seed data SVGs unchanged across candidates",
+    "samples": "Forced-GC collapsed document and JS heap; browser-observed expansion readiness",
+    "limits": "Synthetic sidebar API fixture; not native app footprint or browsing CPU/speed"
+  }
+}

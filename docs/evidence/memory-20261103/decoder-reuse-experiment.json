@@ -1,0 +1,1523 @@
+{
+  "status": "rejected-cpu-gate",
+  "time": "2026-11-03T01:42:18.646Z",
+  "scope": "Research only. Source-derived lazy per-NativeDecoder TextDecoder reuse. No production edits. Baseline means frozen current production; candidate means copied lazy reuse module.",
+  "decision": {
+    "reason": "Reject this candidate on current evidence under the requested CPU gate: confirmation run 64 KiB coalesced-16 candidate CPU median is 4.4827% higher, elapsed median 4.5023% higher. Initial run had a smaller 64 KiB fragmented CPU regression of 0.6613%, which did not repeat. Do not treat reductions in other cases as proof of no regression.",
+    "behavior": "pass",
+    "completedFrameRetention": "pass in local Node tests",
+    "cpu": "fail conservative acceptance gate; mixed results and overlapping ranges, not proof of a universal underlying slowdown",
+    "promotion": "Not accepted for production. No further candidates or tuning attempted."
+  },
+  "runtime": {
+    "node": "v24.22.1",
+    "execPath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+    "platform": "darwin",
+    "arch": "arm64",
+    "authorizedNodeSha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329",
+    "runtimeLimits": "Local Node v24.22.1 synthetic component checks only. No native or packaged runtime, provider, browser or whole-browser gain claim."
+  },
+  "sources": {
+    "time": "2026-11-03T01:36:57.348Z",
+    "sources": [
+      {
+        "path": "features/ai/host/protocol.mjs",
+        "copy": "frozen-0.txt",
+        "bytes": 16858,
+        "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e"
+      },
+      {
+        "path": "tests/ai/host.test.mjs",
+        "copy": "frozen-1.txt",
+        "bytes": 28161,
+        "sha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb"
+      },
+      {
+        "path": "tests/ai/native-frame-memory.test.mjs",
+        "copy": "frozen-2.txt",
+        "bytes": 755,
+        "sha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b"
+      },
+      {
+        "path": "script/verify_native_decoder_memory.mjs",
+        "copy": "frozen-3.txt",
+        "bytes": 3852,
+        "sha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712"
+      },
+      {
+        "path": "docs/efficiency-1.2.0.md",
+        "copy": "frozen-4.txt",
+        "bytes": 9341,
+        "sha256": "d94f2e89c9708234d1f256f91e11c5bb9f96e8841e7c58ae1dfa9be1dedf51d6"
+      },
+      {
+        "path": "build/efficiency-20261103/native-packet-validation.json",
+        "copy": "frozen-5.txt",
+        "bytes": 332,
+        "sha256": "7c55cdf94dd0834edf2757c9ea9c641a8a208f907f78ec9aa5834d97c6fa635a"
+      },
+      {
+        "path": "build/efficiency-20261103/native-output-implementation.json",
+        "copy": "frozen-6.txt",
+        "bytes": 9973,
+        "sha256": "e4e4f9f5567cf7c68bb55f1c8f97fcf2c972df0ec6f029de0914b22a139b6be1"
+      }
+    ],
+    "baselineSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "candidateSha256": "9ed7eeab06975a4d2b61168226af71c718d7b2e13bb3b17f1e59833830d5b098"
+  },
+  "packet": {
+    "time": "2026-11-03T01:39:21.911Z",
+    "rows": [
+      {
+        "path": "build/efficiency-20261102/pc-packet/host-protocol.mjs",
+        "copy": "packet-frozen-0.txt",
+        "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+        "bytes": 16858
+      },
+      {
+        "path": "build/efficiency-20261102/pc-packet/host-update.json",
+        "copy": "packet-frozen-1.txt",
+        "sha256": "b5157d484a85bdce2b029d4283318a686d096e96798112146d1eafa0307beecb",
+        "bytes": 1342
+      },
+      {
+        "path": "build/efficiency-20261102/pc-packet/SHA256SUMS",
+        "copy": "packet-frozen-2.txt",
+        "sha256": "c9547c24afcedb47d48cc8b6188a4ef6edbfdacf1520e2a09e02d878d69050e2",
+        "bytes": 2495
+      }
+    ],
+    "matchesFrozenBaseline": true,
+    "note": "Read-only local packet inspection after initial source freeze. Packet never executed or modified."
+  },
+  "sourceEndDrift": [
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "beforeSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "afterSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "frozenCopySha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "unchanged": true
+    },
+    {
+      "path": "tests/ai/host.test.mjs",
+      "beforeSha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+      "afterSha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+      "frozenCopySha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+      "unchanged": true
+    },
+    {
+      "path": "tests/ai/native-frame-memory.test.mjs",
+      "beforeSha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b",
+      "afterSha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b",
+      "frozenCopySha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b",
+      "unchanged": true
+    },
+    {
+      "path": "script/verify_native_decoder_memory.mjs",
+      "beforeSha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "afterSha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "frozenCopySha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "unchanged": true
+    },
+    {
+      "path": "docs/efficiency-1.2.0.md",
+      "beforeSha256": "d94f2e89c9708234d1f256f91e11c5bb9f96e8841e7c58ae1dfa9be1dedf51d6",
+      "afterSha256": "d94f2e89c9708234d1f256f91e11c5bb9f96e8841e7c58ae1dfa9be1dedf51d6",
+      "frozenCopySha256": "d94f2e89c9708234d1f256f91e11c5bb9f96e8841e7c58ae1dfa9be1dedf51d6",
+      "unchanged": true
+    },
+    {
+      "path": "build/efficiency-20261103/native-packet-validation.json",
+      "beforeSha256": "7c55cdf94dd0834edf2757c9ea9c641a8a208f907f78ec9aa5834d97c6fa635a",
+      "afterSha256": "7c55cdf94dd0834edf2757c9ea9c641a8a208f907f78ec9aa5834d97c6fa635a",
+      "frozenCopySha256": "7c55cdf94dd0834edf2757c9ea9c641a8a208f907f78ec9aa5834d97c6fa635a",
+      "unchanged": true
+    },
+    {
+      "path": "build/efficiency-20261103/native-output-implementation.json",
+      "beforeSha256": "e4e4f9f5567cf7c68bb55f1c8f97fcf2c972df0ec6f029de0914b22a139b6be1",
+      "afterSha256": "e4e4f9f5567cf7c68bb55f1c8f97fcf2c972df0ec6f029de0914b22a139b6be1",
+      "frozenCopySha256": "e4e4f9f5567cf7c68bb55f1c8f97fcf2c972df0ec6f029de0914b22a139b6be1",
+      "unchanged": true
+    },
+    {
+      "path": "build/efficiency-20261102/pc-packet/host-protocol.mjs",
+      "beforeSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "afterSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "frozenCopySha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "unchanged": true
+    },
+    {
+      "path": "build/efficiency-20261102/pc-packet/host-update.json",
+      "beforeSha256": "b5157d484a85bdce2b029d4283318a686d096e96798112146d1eafa0307beecb",
+      "afterSha256": "b5157d484a85bdce2b029d4283318a686d096e96798112146d1eafa0307beecb",
+      "frozenCopySha256": "b5157d484a85bdce2b029d4283318a686d096e96798112146d1eafa0307beecb",
+      "unchanged": true
+    },
+    {
+      "path": "build/efficiency-20261102/pc-packet/SHA256SUMS",
+      "beforeSha256": "c9547c24afcedb47d48cc8b6188a4ef6edbfdacf1520e2a09e02d878d69050e2",
+      "afterSha256": "c9547c24afcedb47d48cc8b6188a4ef6edbfdacf1520e2a09e02d878d69050e2",
+      "frozenCopySha256": "c9547c24afcedb47d48cc8b6188a4ef6edbfdacf1520e2a09e02d878d69050e2",
+      "unchanged": true
+    }
+  ],
+  "artifacts": {
+    "baseline": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/baseline.mjs",
+    "candidate": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/candidate.mjs",
+    "exactDiff": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/candidate.diff",
+    "sourceManifest": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/freeze.json",
+    "scratchManifest": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/scratch-manifest.json",
+    "scratchManifestSha256": "d1095a9da20e069c6b4954bd25fd8e5be6c0c94750999d4c8227164ce95555e1"
+  },
+  "restrictedDiff": {
+    "privateField": "  #decoder = null;",
+    "decode": "      const text = (this.#decoder ??= new TextDecoder('utf-8', { fatal: true })).decode(this.#body);",
+    "unchangedRemainderByteForByte": true,
+    "lazy": true,
+    "perInstance": true,
+    "nonStreamingDefault": true,
+    "globalDecoder": false
+  },
+  "coverage": {
+    "read": [
+      {
+        "path": "features/ai/host/protocol.mjs",
+        "range": "entire file, 162 lines"
+      },
+      {
+        "path": "tests/ai/host.test.mjs",
+        "range": "native framing tests lines 34-110; other test/provider imports read but not executed"
+      },
+      {
+        "path": "script/verify_native_decoder_memory.mjs",
+        "range": "entire file"
+      },
+      {
+        "path": "tests/ai/native-frame-memory.test.mjs",
+        "range": "entire file"
+      },
+      {
+        "path": "docs/efficiency-1.2.0.md",
+        "range": "entire file"
+      },
+      {
+        "path": "current packet",
+        "range": "local host protocol copy, host-update.json and checksum manifest; not whole packet validation"
+      }
+    ],
+    "behavior": {
+      "pass": true,
+      "comparisons": 6796,
+      "unicodeScalars": 1112064,
+      "surrogateSpellings": 6144,
+      "resultDigest": "5d50f558d44d08f9dc77e9bc515149f296a901628fb94bd6091f8a067cafa123",
+      "invalidUtf8ContractExamples": [
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ],
+        [
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "TypeError",
+              "message": "The encoded data was not valid for encoding utf-8"
+            }
+          },
+          {
+            "error": {
+              "name": "Error",
+              "message": "Truncated native message."
+            }
+          }
+        ]
+      ],
+      "errorStacks": "Not compared: baseline and candidate module URLs differ; candidate private field adds a source line. Stacks are diagnostic locations, not values exposed by framing. Error name/message compared. Failed frame remains held; push(empty) does not recover, next nonempty push retries failed body, finish throws Truncated. Discard instance to recover."
+    },
+    "checks": [
+      "Independent multiple valid messages, coalesced and single-byte chunks",
+      "All 1,112,064 Unicode scalar values through JSON/UTF-8, bounded exhaustive batches",
+      "6,144 lone/paired escaped surrogate JSON spellings",
+      "Every split of multi-message UTF-8 fixture and each BOM/invalid UTF-8 fixture",
+      "Initial BOM removed independently for successive messages, double initial BOM rejected by JSON parser, BOM inside string preserved",
+      "Invalid UTF-8 including continuation/overlong/surrogate/out-of-range/truncation, fatal TypeError and stuck-frame contract compared",
+      "Malformed JSON and error name/message compared; empty chunks, incomplete headers/bodies and finish checked",
+      "Non-Uint8Array and Uint8Array including zero-length, reused caller buffers, eight interleaved independent instances",
+      "Copied existing tests exercise exact 16 MiB input size and oversize/zero rejection, 50 deterministic fragmented/coalesced patterns",
+      "encodeMessage bytes compared for representative values; all other module bytes identical"
+    ],
+    "tests": {
+      "framing": 14,
+      "memory": 2,
+      "skips": 0
+    },
+    "errors": "Failure preserves filled #body in both modules. Nonempty subsequent push retries same body, so a failed decoder must be discarded; no new recovery behavior. Error stacks are excluded from value/name/message comparison: copied module URLs differ and the added field shifts source locations, including decode and JSON.parse call sites. No error-stack equality claim. Callback/instrumentation stacks are not production semantics."
+  },
+  "counts": {
+    "rows": [
+      {
+        "name": "baseline",
+        "idleInstances": 1000,
+        "idleConstructors": 0,
+        "after100MessagesOneInstance": 100,
+        "after109MessagesTenInstances": 109,
+        "largeCompletedBodyWeakRefsAlive": 0,
+        "liveTextDecodersAfterGCWithTenInstancesHeld": 0,
+        "afterThreeFatalAttempts": {
+          "constructors": 113,
+          "decodes": 113
+        },
+        "finalConstructors": 114,
+        "finalDecodes": 114
+      },
+      {
+        "name": "candidate",
+        "idleInstances": 1000,
+        "idleConstructors": 0,
+        "after100MessagesOneInstance": 1,
+        "after109MessagesTenInstances": 10,
+        "largeCompletedBodyWeakRefsAlive": 0,
+        "liveTextDecodersAfterGCWithTenInstancesHeld": 10,
+        "afterThreeFatalAttempts": {
+          "constructors": 11,
+          "decodes": 113
+        },
+        "finalConstructors": 11,
+        "finalDecodes": 114
+      }
+    ],
+    "scope": "Actual TextDecoder subclass constructor/decode invocations in separate full-source copies changing only import target. Real node:util decoder runs. Counters are calls, not physical RAM savings. WeakRefs verify completed body wrappers collected while decoder instances stay alive. Uninstrumented forced GC separately checks backing storage and large string heap."
+  },
+  "incompleteCounts": [
+    {
+      "name": "baseline",
+      "frameBytes": 15,
+      "constructorsAfterEachByte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "name": "candidate",
+      "frameBytes": 15,
+      "constructorsAfterEachByte": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    }
+  ],
+  "memory": {
+    "baseline": {
+      "completedFrameRounds": 10,
+      "arrayBufferDeltas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "heapUsedDeltas": [
+        14512,
+        34216,
+        49424,
+        69200,
+        69536,
+        70016,
+        70504,
+        82960,
+        111720,
+        112440
+      ],
+      "rssDeltas": [
+        17989632,
+        56786944,
+        56983552,
+        70975488,
+        71008256,
+        73809920,
+        73809920,
+        73957376,
+        73990144,
+        73990144
+      ],
+      "failedFrameReleasedArrayBufferBytes": [
+        8388608,
+        8388608,
+        8388608,
+        8388608
+      ],
+      "idle": {
+        "count": 100000,
+        "before": {
+          "rss": 131203072,
+          "heapTotal": 72712192,
+          "heapUsed": 4627040,
+          "external": 2285290,
+          "arrayBuffers": 137491
+        },
+        "after": {
+          "rss": 228524032,
+          "heapTotal": 168673280,
+          "heapUsed": 33440816,
+          "external": 2285290,
+          "arrayBuffers": 137491
+        },
+        "released": {
+          "rss": 227721216,
+          "heapTotal": 139821056,
+          "heapUsed": 4639968,
+          "external": 2285290,
+          "arrayBuffers": 137491
+        },
+        "heapDelta": 28813776
+      },
+      "existingScript": {
+        "node": "v24.22.1",
+        "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/baseline.mjs",
+        "sourceSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+        "payloadBytes": 8388608,
+        "chunkBytes": 32768,
+        "rounds": 10,
+        "before": {
+          "rss": 55574528,
+          "heapTotal": 7962624,
+          "heapUsed": 4986784,
+          "external": 2517138,
+          "arrayBuffers": 143635
+        },
+        "after": {
+          "rss": 163119104,
+          "heapTotal": 73236480,
+          "heapUsed": 5169344,
+          "external": 2578646,
+          "arrayBuffers": 143651
+        },
+        "retainedArrayBufferBytes": 16,
+        "observations": [
+          {
+            "elapsedMs": 7.614832999999997,
+            "cpuUserMicros": 13435,
+            "cpuSystemMicros": 3004,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 9.084165999999996,
+            "cpuUserMicros": 13005,
+            "cpuSystemMicros": 3597,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.818541999999994,
+            "cpuUserMicros": 10646,
+            "cpuSystemMicros": 1528,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.929709000000003,
+            "cpuUserMicros": 12282,
+            "cpuSystemMicros": 1219,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.92925000000001,
+            "cpuUserMicros": 4498,
+            "cpuSystemMicros": 664,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.879875000000027,
+            "cpuUserMicros": 3988,
+            "cpuSystemMicros": 914,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.28125,
+            "cpuUserMicros": 4268,
+            "cpuSystemMicros": 1032,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.365958000000006,
+            "cpuUserMicros": 4387,
+            "cpuSystemMicros": 1085,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 6.6825000000000045,
+            "cpuUserMicros": 9731,
+            "cpuSystemMicros": 1568,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.78204199999999,
+            "cpuUserMicros": 4122,
+            "cpuSystemMicros": 667,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          }
+        ],
+        "limits": "Production native frame decoder with synthetic JSON, fragmented input and forced GC. Buffer.concat and Buffer.set instrumentation count decoder assembly bytes. Not whole-browser RAM, unique memory or AI/provider latency."
+      }
+    },
+    "candidate": {
+      "completedFrameRounds": 10,
+      "arrayBufferDeltas": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "heapUsedDeltas": [
+        14944,
+        34448,
+        48896,
+        68960,
+        69240,
+        69664,
+        70208,
+        71560,
+        107256,
+        107976
+      ],
+      "rssDeltas": [
+        17956864,
+        56705024,
+        57114624,
+        71122944,
+        71139328,
+        73990144,
+        74006528,
+        74104832,
+        74153984,
+        74153984
+      ],
+      "failedFrameReleasedArrayBufferBytes": [
+        8388608,
+        8388608,
+        8388608,
+        8388608
+      ],
+      "idle": {
+        "count": 100000,
+        "before": {
+          "rss": 131334144,
+          "heapTotal": 72712192,
+          "heapUsed": 4611088,
+          "external": 2285290,
+          "arrayBuffers": 137491
+        },
+        "after": {
+          "rss": 200818688,
+          "heapTotal": 169459712,
+          "heapUsed": 34229720,
+          "external": 2285290,
+          "arrayBuffers": 137491
+        },
+        "released": {
+          "rss": 200015872,
+          "heapTotal": 139821056,
+          "heapUsed": 4629760,
+          "external": 2285290,
+          "arrayBuffers": 137491
+        },
+        "heapDelta": 29618632
+      },
+      "existingScript": {
+        "node": "v24.22.1",
+        "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/candidate.mjs",
+        "sourceSha256": "9ed7eeab06975a4d2b61168226af71c718d7b2e13bb3b17f1e59833830d5b098",
+        "payloadBytes": 8388608,
+        "chunkBytes": 32768,
+        "rounds": 10,
+        "before": {
+          "rss": 55590912,
+          "heapTotal": 8224768,
+          "heapUsed": 4987040,
+          "external": 2517138,
+          "arrayBuffers": 143635
+        },
+        "after": {
+          "rss": 163168256,
+          "heapTotal": 73236480,
+          "heapUsed": 5162232,
+          "external": 2578646,
+          "arrayBuffers": 143651
+        },
+        "retainedArrayBufferBytes": 16,
+        "observations": [
+          {
+            "elapsedMs": 7.101458999999998,
+            "cpuUserMicros": 12666,
+            "cpuSystemMicros": 2352,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 6.965791000000003,
+            "cpuUserMicros": 10001,
+            "cpuSystemMicros": 2450,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.504708999999991,
+            "cpuUserMicros": 11154,
+            "cpuSystemMicros": 1165,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.621875000000003,
+            "cpuUserMicros": 11218,
+            "cpuSystemMicros": 1166,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.3218749999999915,
+            "cpuUserMicros": 4012,
+            "cpuSystemMicros": 534,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.358667000000011,
+            "cpuUserMicros": 3774,
+            "cpuSystemMicros": 604,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.385875000000013,
+            "cpuUserMicros": 3847,
+            "cpuSystemMicros": 553,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 4.54358400000001,
+            "cpuUserMicros": 3990,
+            "cpuSystemMicros": 563,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 6.314458999999999,
+            "cpuUserMicros": 9164,
+            "cpuSystemMicros": 1611,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          },
+          {
+            "elapsedMs": 5.1423750000000155,
+            "cpuUserMicros": 4310,
+            "cpuSystemMicros": 837,
+            "concatCopiedBytes": 0,
+            "assemblySetBytes": 8388640
+          }
+        ],
+        "limits": "Production native frame decoder with synthetic JSON, fragmented input and forced GC. Buffer.concat and Buffer.set instrumentation count decoder assembly bytes. Not whole-browser RAM, unique memory or AI/provider latency."
+      }
+    }
+  },
+  "memoryInterpretation": [
+    "Completed-frame ArrayBuffer delta is zero in all ten uninstrumented rounds for both modules. Large parsed strings do not remain as multi-MiB heap deltas after GC. Real decoder stays observably alive through final check.",
+    "Additional instrumented real TextDecoder subclass finds zero completed-body WeakRefs alive while ten NativeDecoder instances remain held. Candidate retains ten TextDecoder instances, baseline zero.",
+    "RSS rises about 74 MB in both modules despite zero completed ArrayBuffer delta; allocator/process residency is not retained-buffer evidence or RAM savings.",
+    "Four 8 MiB invalid UTF-8 frame cycles release 8 MiB backing stores after failed NativeDecoder discarded in each module; body retention before discard is existing contract.",
+    "100,000 synthetic idle NativeDecoder instances: baseline heap delta 28813776 bytes, candidate 29618632 bytes. Approximate 8.05 bytes extra per idle object in this single paired process measurement, not universal object sizing. No idle TextDecoder allocated.",
+    "Constructor call reduction is not physical RAM savings. An active candidate retains a decoder object as long as its NativeDecoder lives."
+  ],
+  "benchmarks": {
+    "initial": {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/benchmark.json",
+      "rawTrials": 216,
+      "warmups": 72,
+      "summary": [
+        {
+          "bytes": 64,
+          "mode": "one-frame-push",
+          "baseline": {
+            "elapsedMs": {
+              "median": 108.17250000000013,
+              "min": 105.15000000000009,
+              "max": 116.33687499999996
+            },
+            "cpuMicros": {
+              "median": 124016,
+              "min": 120766,
+              "max": 136728
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 98.74783300000036,
+              "min": 96.43941699999982,
+              "max": 109.33112500000004
+            },
+            "cpuMicros": {
+              "median": 114735,
+              "min": 112243,
+              "max": 130233
+            }
+          },
+          "elapsedMedianRatio": 0.9128737248376458,
+          "cpuMedianRatio": 0.9251628822087472
+        },
+        {
+          "bytes": 64,
+          "mode": "coalesced-16",
+          "baseline": {
+            "elapsedMs": {
+              "median": 141.89804099999947,
+              "min": 115.97087499999998,
+              "max": 174.24924999999985
+            },
+            "cpuMicros": {
+              "median": 164420,
+              "min": 133221,
+              "max": 204137
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 130.69079200000033,
+              "min": 105.67212500000005,
+              "max": 167.7837500000005
+            },
+            "cpuMicros": {
+              "median": 152780,
+              "min": 123060,
+              "max": 195981
+            }
+          },
+          "elapsedMedianRatio": 0.9210190012418904,
+          "cpuMedianRatio": 0.9292056927381097
+        },
+        {
+          "bytes": 64,
+          "mode": "fragmented",
+          "baseline": {
+            "elapsedMs": {
+              "median": 395.1927909999995,
+              "min": 295.6438330000019,
+              "max": 423.56141600000046
+            },
+            "cpuMicros": {
+              "median": 422671,
+              "min": 316216,
+              "max": 453341
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 354.06737500000054,
+              "min": 293.2842500000006,
+              "max": 380.38195799999994
+            },
+            "cpuMicros": {
+              "median": 382318,
+              "min": 316493,
+              "max": 409854
+            }
+          },
+          "elapsedMedianRatio": 0.8959358142745094,
+          "cpuMedianRatio": 0.9045285813315794
+        },
+        {
+          "bytes": 4096,
+          "mode": "one-frame-push",
+          "baseline": {
+            "elapsedMs": {
+              "median": 12.092000000000553,
+              "min": 12.03374999999869,
+              "max": 12.134208999999828
+            },
+            "cpuMicros": {
+              "median": 12510,
+              "min": 12416,
+              "max": 12549
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 11.869542000000365,
+              "min": 11.799416000001656,
+              "max": 11.913249999997788
+            },
+            "cpuMicros": {
+              "median": 12306,
+              "min": 12219,
+              "max": 12350
+            }
+          },
+          "elapsedMedianRatio": 0.9816028779358107,
+          "cpuMedianRatio": 0.9836930455635492
+        },
+        {
+          "bytes": 4096,
+          "mode": "coalesced-16",
+          "baseline": {
+            "elapsedMs": {
+              "median": 12.074917000001733,
+              "min": 12.007249999998749,
+              "max": 13.307874999998603
+            },
+            "cpuMicros": {
+              "median": 12492,
+              "min": 12395,
+              "max": 13778
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 11.856833000001643,
+              "min": 11.820040999999037,
+              "max": 11.957290999998804
+            },
+            "cpuMicros": {
+              "median": 12266,
+              "min": 12204,
+              "max": 12438
+            }
+          },
+          "elapsedMedianRatio": 0.9819390891051211,
+          "cpuMedianRatio": 0.9819084213896894
+        },
+        {
+          "bytes": 4096,
+          "mode": "fragmented",
+          "baseline": {
+            "elapsedMs": {
+              "median": 14.182249999998021,
+              "min": 14.110125000002881,
+              "max": 14.822083000002749
+            },
+            "cpuMicros": {
+              "median": 14608,
+              "min": 14452,
+              "max": 15283
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 13.677915999996912,
+              "min": 13.568916000000172,
+              "max": 15.101540999999997
+            },
+            "cpuMicros": {
+              "median": 14111,
+              "min": 13912,
+              "max": 19588
+            }
+          },
+          "elapsedMedianRatio": 0.9644390699641328,
+          "cpuMedianRatio": 0.9659775465498357
+        },
+        {
+          "bytes": 65536,
+          "mode": "one-frame-push",
+          "baseline": {
+            "elapsedMs": {
+              "median": 10.518541999997979,
+              "min": 10.415291999997862,
+              "max": 11.158332999999402
+            },
+            "cpuMicros": {
+              "median": 10615,
+              "min": 10499,
+              "max": 11327
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 10.475542000000132,
+              "min": 10.421999999998661,
+              "max": 10.789499999998952
+            },
+            "cpuMicros": {
+              "median": 10579,
+              "min": 10512,
+              "max": 11413
+            }
+          },
+          "elapsedMedianRatio": 0.9959119809572605,
+          "cpuMedianRatio": 0.9966085727743759
+        },
+        {
+          "bytes": 65536,
+          "mode": "coalesced-16",
+          "baseline": {
+            "elapsedMs": {
+              "median": 39.92937499999971,
+              "min": 38.71941700000025,
+              "max": 42.49091599999883
+            },
+            "cpuMicros": {
+              "median": 40282,
+              "min": 39066,
+              "max": 42910
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 39.21045800000138,
+              "min": 38.54541700000118,
+              "max": 49.83104100000128
+            },
+            "cpuMicros": {
+              "median": 39538,
+              "min": 38894,
+              "max": 49594
+            }
+          },
+          "elapsedMedianRatio": 0.9819952854258718,
+          "cpuMedianRatio": 0.9815302120053622
+        },
+        {
+          "bytes": 65536,
+          "mode": "fragmented",
+          "baseline": {
+            "elapsedMs": {
+              "median": 9.751749999999447,
+              "min": 9.644167000002199,
+              "max": 10.63941700000214
+            },
+            "cpuMicros": {
+              "median": 9829,
+              "min": 9723,
+              "max": 10736
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 9.814833000000363,
+              "min": 9.637624999999389,
+              "max": 10.388041000001976
+            },
+            "cpuMicros": {
+              "median": 9894,
+              "min": 9713,
+              "max": 10820
+            }
+          },
+          "elapsedMedianRatio": 1.0064688901992893,
+          "cpuMedianRatio": 1.0066130837318141
+        }
+      ]
+    },
+    "confirmation": {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment/benchmark-confirm.json",
+      "rawTrials": 216,
+      "warmups": 72,
+      "summary": [
+        {
+          "bytes": 64,
+          "mode": "one-frame-push",
+          "baseline": {
+            "elapsedMs": {
+              "median": 152.46687499999985,
+              "min": 132.92879199999993,
+              "max": 170.57158299999992
+            },
+            "cpuMicros": {
+              "median": 174665,
+              "min": 152142,
+              "max": 194869
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 139.60295800000017,
+              "min": 128.7311669999999,
+              "max": 156.49312499999996
+            },
+            "cpuMicros": {
+              "median": 161744,
+              "min": 149039,
+              "max": 181187
+            }
+          },
+          "elapsedMedianRatio": 0.9156281192226201,
+          "cpuMedianRatio": 0.9260241032834283
+        },
+        {
+          "bytes": 64,
+          "mode": "coalesced-16",
+          "baseline": {
+            "elapsedMs": {
+              "median": 149.62133300000005,
+              "min": 146.64025000000038,
+              "max": 159.0400840000002
+            },
+            "cpuMicros": {
+              "median": 171897,
+              "min": 168425,
+              "max": 182510
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 141.0783339999998,
+              "min": 136.5236249999998,
+              "max": 146.05654099999992
+            },
+            "cpuMicros": {
+              "median": 165186,
+              "min": 159455,
+              "max": 170285
+            }
+          },
+          "elapsedMedianRatio": 0.9429025338251716,
+          "cpuMedianRatio": 0.9609591790432643
+        },
+        {
+          "bytes": 64,
+          "mode": "fragmented",
+          "baseline": {
+            "elapsedMs": {
+              "median": 296.033958,
+              "min": 286.39450000000215,
+              "max": 409.2081659999985
+            },
+            "cpuMicros": {
+              "median": 316753,
+              "min": 307092,
+              "max": 438150
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 270.16879100000006,
+              "min": 255.85108300000138,
+              "max": 399.0931669999991
+            },
+            "cpuMicros": {
+              "median": 290973,
+              "min": 276138,
+              "max": 427655
+            }
+          },
+          "elapsedMedianRatio": 0.9126277026637601,
+          "cpuMedianRatio": 0.9186116627151124
+        },
+        {
+          "bytes": 4096,
+          "mode": "one-frame-push",
+          "baseline": {
+            "elapsedMs": {
+              "median": 97.13154199999917,
+              "min": 96.97808400000213,
+              "max": 106.28854199999842
+            },
+            "cpuMicros": {
+              "median": 100633,
+              "min": 100533,
+              "max": 110096
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 95.70258299999841,
+              "min": 95.34045799999876,
+              "max": 100.02574999999706
+            },
+            "cpuMicros": {
+              "median": 99238,
+              "min": 98732,
+              "max": 103690
+            }
+          },
+          "elapsedMedianRatio": 0.9852884143443252,
+          "cpuMedianRatio": 0.986137748054813
+        },
+        {
+          "bytes": 4096,
+          "mode": "coalesced-16",
+          "baseline": {
+            "elapsedMs": {
+              "median": 98.61116700000275,
+              "min": 96.4742920000026,
+              "max": 104.0197909999988
+            },
+            "cpuMicros": {
+              "median": 102165,
+              "min": 99834,
+              "max": 107563
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 97.09558300000208,
+              "min": 95.66983400000026,
+              "max": 100.06929200000013
+            },
+            "cpuMicros": {
+              "median": 100578,
+              "min": 99149,
+              "max": 103598
+            }
+          },
+          "elapsedMedianRatio": 0.984630706175492,
+          "cpuMedianRatio": 0.9844663045074145
+        },
+        {
+          "bytes": 4096,
+          "mode": "fragmented",
+          "baseline": {
+            "elapsedMs": {
+              "median": 109.12095800000316,
+              "min": 85.93787499999962,
+              "max": 118.29508300000089
+            },
+            "cpuMicros": {
+              "median": 107048,
+              "min": 88771,
+              "max": 122009
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 99.80720800000199,
+              "min": 82.85820799999783,
+              "max": 311.3876249999994
+            },
+            "cpuMicros": {
+              "median": 100681,
+              "min": 85616,
+              "max": 121965
+            }
+          },
+          "elapsedMedianRatio": 0.91464746854586,
+          "cpuMedianRatio": 0.9405220088184739
+        },
+        {
+          "bytes": 65536,
+          "mode": "one-frame-push",
+          "baseline": {
+            "elapsedMs": {
+              "median": 57.633834000000206,
+              "min": 57.15504200000214,
+              "max": 59.35516700000153
+            },
+            "cpuMicros": {
+              "median": 58159,
+              "min": 57601,
+              "max": 59830
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 57.57841700000063,
+              "min": 57.11895800000275,
+              "max": 58.77579100000003
+            },
+            "cpuMicros": {
+              "median": 58048,
+              "min": 57545,
+              "max": 59313
+            }
+          },
+          "elapsedMedianRatio": 0.9990384641077396,
+          "cpuMedianRatio": 0.9980914389862274
+        },
+        {
+          "bytes": 65536,
+          "mode": "coalesced-16",
+          "baseline": {
+            "elapsedMs": {
+              "median": 75.7087079999983,
+              "min": 62.082665999998426,
+              "max": 165.52495900000213
+            },
+            "cpuMicros": {
+              "median": 76404,
+              "min": 62521,
+              "max": 115644
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 79.11737500000163,
+              "min": 63.21204200000284,
+              "max": 97.28108299999803
+            },
+            "cpuMicros": {
+              "median": 79829,
+              "min": 63654,
+              "max": 98188
+            }
+          },
+          "elapsedMedianRatio": 1.0450234469726178,
+          "cpuMedianRatio": 1.0448274959426207
+        },
+        {
+          "bytes": 65536,
+          "mode": "fragmented",
+          "baseline": {
+            "elapsedMs": {
+              "median": 78.8427920000031,
+              "min": 73.07600000000093,
+              "max": 94.80341600000247
+            },
+            "cpuMicros": {
+              "median": 79497,
+              "min": 73697,
+              "max": 95662
+            }
+          },
+          "candidate": {
+            "elapsedMs": {
+              "median": 77.52304200000071,
+              "min": 73.03312500000175,
+              "max": 109.30791599999793
+            },
+            "cpuMicros": {
+              "median": 78187,
+              "min": 73656,
+              "max": 107364
+            }
+          },
+          "elapsedMedianRatio": 0.9832609935984721,
+          "cpuMedianRatio": 0.9835213907443048
+        }
+      ]
+    },
+    "design": "Complete uninstrumented modules, ASCII JSON-string bodies of exactly 64/4096/65536 bytes plus four-byte headers, one frame per push / 16 coalesced / approximately eight body fragments. Four warmup AB/BA pairs and twelve timed AB/BA pairs each. Fresh NativeDecoder per trial, retained across messages. Inputs built before timing; CPU user and system and all durations saved. Initial target 16 MiB/trial with minimum 64 outer iterations; confirmation uses 128 MiB for 4 KiB/64 KiB fixtures, 16 MiB for 64-byte. Coalesced 64 KiB initial minimum means 64 MiB/trial.",
+    "limits": [
+      "Shared local machine, no CPU affinity/thermal/background control. Short existing-memory script probes overlapped beginning of initial benchmark; copied memory tests and partial-constructor checks may overlap confirmation. Timings include allocator/GC cost and are not isolated instruction costs.",
+      "Ranges and all observations retained, including slow candidate outliers. Initial and confirmation results disagree on some large cases. No no-regression promise.",
+      "No single-message short-lived connection benchmark; performance is measured for repeated frames per NativeDecoder. Unicode correctness is exhaustive for scalars but timings use ASCII fixtures."
+    ]
+  },
+  "commands": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --version",
+      "result": "v24.22.1"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/prepare.mjs",
+      "result": "pass; exact frozen bytes and expected protocol hash asserted"
+    },
+    {
+      "command": "diff -u build/efficiency-20261103/decoder-reuse-experiment/baseline.mjs build/efficiency-20261103/decoder-reuse-experiment/candidate.mjs > build/efficiency-20261103/decoder-reuse-experiment/candidate.diff",
+      "result": "exit 1, expected two restricted hunks"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/behavior.mjs > build/efficiency-20261103/decoder-reuse-experiment/behavior.log",
+      "result": "pass"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/decoder-reuse-experiment/framing-baseline.test.mjs build/efficiency-20261103/decoder-reuse-experiment/framing-candidate.test.mjs > build/efficiency-20261103/decoder-reuse-experiment/framing.tap",
+      "result": "14 pass, no skips"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc build/efficiency-20261103/decoder-reuse-experiment/retention.mjs baseline > build/efficiency-20261103/decoder-reuse-experiment/retention-baseline.log",
+      "result": "pass; ten completed large-frame rounds, four failed-frame release cycles, idle-instance measurement"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc build/efficiency-20261103/decoder-reuse-experiment/retention.mjs candidate > build/efficiency-20261103/decoder-reuse-experiment/retention-candidate.log",
+      "result": "pass; ten completed large-frame rounds, four failed-frame release cycles, idle-instance measurement"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/benchmark.mjs",
+      "result": "initial invocation failed SyntaxError before any timing; missing brace fixed only in scratch; recorded in harness-corrections.log"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/benchmark.mjs > build/efficiency-20261103/decoder-reuse-experiment/benchmark.log 2> build/efficiency-20261103/decoder-reuse-experiment/benchmark.stderr",
+      "result": "pass; all raw warmups/trials preserved"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc build/efficiency-20261103/decoder-reuse-experiment/memory-script.mjs --source build/efficiency-20261103/decoder-reuse-experiment/baseline.mjs --rounds 10 --expect-bounded --output build/efficiency-20261103/decoder-reuse-experiment/existing-memory-baseline.json > build/efficiency-20261103/decoder-reuse-experiment/existing-memory-baseline.log",
+      "result": "pass"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc build/efficiency-20261103/decoder-reuse-experiment/memory-script.mjs --source build/efficiency-20261103/decoder-reuse-experiment/candidate.mjs --rounds 10 --expect-bounded --output build/efficiency-20261103/decoder-reuse-experiment/existing-memory-candidate.json > build/efficiency-20261103/decoder-reuse-experiment/existing-memory-candidate.log",
+      "result": "pass"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc build/efficiency-20261103/decoder-reuse-experiment/counts.mjs > build/efficiency-20261103/decoder-reuse-experiment/counts.log",
+      "result": "pass; isolated import-instrumented source copies, real TextDecoder subclass"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/incomplete-counts.mjs",
+      "result": "pass; no TextDecoder until final body byte"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/decoder-reuse-experiment/memory-baseline.test.mjs build/efficiency-20261103/decoder-reuse-experiment/memory-candidate.test.mjs > build/efficiency-20261103/decoder-reuse-experiment/memory-tests.tap",
+      "result": "2 pass, no skips; copied source-bound versions of existing native-frame-memory test"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/benchmark-confirm.mjs > build/efficiency-20261103/decoder-reuse-experiment/benchmark-confirm.log 2> build/efficiency-20261103/decoder-reuse-experiment/benchmark-confirm.stderr",
+      "result": "pass; acceptance CPU gate failed for 64 KiB coalesced fixture"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/decoder-reuse-experiment/finalize.mjs",
+      "result": "pass; exact diff assertion, source/copy end drift, manifest and report"
+    }
+  ],
+  "cleanup": {
+    "writesOnly": [
+      "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment",
+      "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/decoder-reuse-experiment.json"
+    ],
+    "retained": "Frozen bytes, full candidate, scripts, raw timing/GC logs and manifests retained as review evidence. No external scratch or processes left running.",
+    "deleted": "none",
+    "productionTestsScriptsDocsAndPacketChanged": false
+  },
+  "acceptanceGaps": [
+    "CPU gate failed; do not promote this candidate. Any future reconsideration needs independent reproducible performance evidence.",
+    "No physical RAM savings established. Only object/call counts, forced-GC backing-store and heap observations.",
+    "No native/packaged runtime or browser acceptance. No provider/CLI/account/auth/profile/Keychain access; no network/PC contact; no app/browser/Chromium build/run/install; no git mutation/publication.",
+    "This report freezes only explicitly listed source and packet files; it does not assert all concurrently edited repository files remained unchanged."
+  ]
+}

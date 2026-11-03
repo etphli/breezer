@@ -21,15 +21,16 @@ const server = createServer(async (request, response) => {
   } catch { response.writeHead(404).end(); }
 });
 await new Promise((done) => server.listen(0, '127.0.0.1', done));
-const browser = await chromium.launch({
-  executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined),
-  headless: true,
-});
-const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
-const errors = [];
-page.on('pageerror', (error) => errors.push(error.message));
-page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
+let browser;
 try {
+  browser = await chromium.launch({
+    executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined),
+    headless: true,
+  });
+  const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
   await page.addInitScript(() => {
     const storage = { local: JSON.parse(localStorage.getItem('breezer-fixture-local') || '{}'), session: {} };
     const callbacks = [];
@@ -159,6 +160,7 @@ try {
   console.log('PASS: shipped picker keyboard selection, max-six limit, loading state, chips/removal/clear, precise sharing hint, two origins, no active-page grant/screenshot/control, truncation, partial failure, cancellation/late-result rejection, navigation revocation, real fixed-script extraction/redaction. Native API transport and paid providers remain unverified.');
   console.log(`Screenshots: ${evidence}/research-{selected-tabs,picker,partial-failure}.png`);
 } finally {
-  await browser.close();
-  await new Promise(done => server.close(done));
+  try { await browser?.close(); } finally {
+    await new Promise(done => server.close(done));
+  }
 }

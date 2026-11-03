@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, cp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 let chromium;
-try { ({ chromium } = await import('playwright')); } catch {}
+try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch {}
 
 const fixture = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Cuaderno de viaje</title><style>
 body{max-width:760px;margin:60px auto;font:18px/1.6 Georgia;color:#17302c;background:#eff8f4}h1{font-size:38px}input,button{padding:9px}pre{background:white;padding:12px}iframe{height:40px} .hidden{display:none}

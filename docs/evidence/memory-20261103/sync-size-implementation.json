@@ -1,0 +1,189 @@
+{
+  "status": "implementation verified offline; coordinator packet and combined verification pending",
+  "baselineSha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+  "candidateSha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+  "sourceOutsideGuardByteIdentical": true,
+  "runtime": {
+    "version": "v24.22.1",
+    "executable": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24"
+  },
+  "sourceReadRanges": {
+    "baseline-model.js": "1-206 full",
+    "features/ai/extension/workspace-sync-model.js": "1-210 full",
+    "features/ai/extension/workspace-sync.js": "1-204 full",
+    "features/ai/extension/workspace-store.js": "import/side-effect scan and full read attempted with truncated output; no imports, API access only in called methods",
+    "tests/sync/workspace-model.test.mjs": "1-173 full",
+    "tests/sync/reconcile.test.mjs": "1-232 full",
+    "tests/sync/lifetime.test.mjs": "1-72 full"
+  },
+  "commands": [
+    {
+      "label": "verification",
+      "command": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24 --test tests/sync/size-guard.test.mjs tests/sync/workspace-model.test.mjs tests/sync/reconcile.test.mjs tests/sync/lifetime.test.mjs",
+      "exit": 0,
+      "expectedExit": 0
+    },
+    {
+      "label": "negative-baseline",
+      "command": "SYNC_SIZE_MUTANT=baseline /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24 --import ./build/efficiency-20261103/sync-size/mutant-hook.mjs --test tests/sync/size-guard.test.mjs",
+      "exit": 1,
+      "expectedExit": 1
+    },
+    {
+      "label": "negative-skip-ambiguous",
+      "command": "SYNC_SIZE_MUTANT=skip-ambiguous /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24 --import ./build/efficiency-20261103/sync-size/mutant-hook.mjs --test tests/sync/size-guard.test.mjs",
+      "exit": 1,
+      "expectedExit": 1
+    },
+    {
+      "label": "negative-reject-equality",
+      "command": "SYNC_SIZE_MUTANT=reject-equality /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24 --import ./build/efficiency-20261103/sync-size/mutant-hook.mjs --test tests/sync/size-guard.test.mjs",
+      "exit": 1,
+      "expectedExit": 1
+    },
+    {
+      "label": "syntax-model",
+      "command": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24 --check features/ai/extension/workspace-sync-model.js",
+      "exit": 0,
+      "expectedExit": 0
+    },
+    {
+      "label": "syntax-tests",
+      "command": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24 --check tests/sync/size-guard.test.mjs",
+      "exit": 0,
+      "expectedExit": 0
+    }
+  ],
+  "tests": {
+    "passed": 36,
+    "failed": 0,
+    "newTests": 6,
+    "negatives": "Pinned old guard fails intended short-model zero-encode assertion. Bypassing ambiguous check fails multibyte limits; >= fails exact byte limit."
+  },
+  "measurements": [
+    {
+      "label": "short valid",
+      "units": 375,
+      "nativeBytes": 375,
+      "baseline": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 375
+      },
+      "candidate": {
+        "constructors": 0,
+        "calls": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "label": "upper bound fits",
+      "units": 349525,
+      "nativeBytes": 349525,
+      "baseline": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 349525
+      },
+      "candidate": {
+        "constructors": 0,
+        "calls": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "label": "just ambiguous",
+      "units": 349526,
+      "nativeBytes": 349526,
+      "baseline": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 349526
+      },
+      "candidate": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 349526
+      }
+    },
+    {
+      "label": "exact limit",
+      "units": 1048576,
+      "nativeBytes": 1048576,
+      "baseline": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 1048576
+      },
+      "candidate": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 1048576
+      }
+    },
+    {
+      "label": "lower bound exceeds limit",
+      "units": 1048577,
+      "nativeBytes": 1048577,
+      "baseline": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 1048577
+      },
+      "candidate": {
+        "constructors": 0,
+        "calls": 0,
+        "bytes": 0
+      }
+    },
+    {
+      "label": "multibyte oversized in ambiguous range",
+      "units": 350525,
+      "nativeBytes": 1050799,
+      "baseline": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 1050799
+      },
+      "candidate": {
+        "constructors": 1,
+        "calls": 1,
+        "bytes": 1050799
+      }
+    }
+  ],
+  "measurementMeaning": "Logical TextEncoder constructor/encode calls and returned Uint8Array lengths, not physical RAM, CPU or browser-wide savings. No timing claims or optional benchmark.",
+  "fixtureAssumptions": "Baseline accepts unknown top-level metadata; padding only there. Clocked space/entry fields respect existing schema. Exact sizes come from independent native TextEncoder. Frozen success identity and malformed fields covered.",
+  "behavior": "Unsupported guard first, one JSON.stringify, undefined from toJSON treated as zero bytes, same strict > size limit, native fallback in ambiguous range, every schema check and caller unchanged.",
+  "objectionsAndLimits": [
+    "JSON.stringify still allocates a string on every validation.",
+    "Ambiguous sizes retain native byte-array work.",
+    "Custom TextEncoder replacement side effects differ on skipped branches by design; native encoder semantics are the compatibility target.",
+    "No native transport, installed app, browser, Chromium build, provider or network exercise. No browser-wide or physical-memory acceptance claim.",
+    "Coordinator must stage packet and run combined verification; neither performed here."
+  ],
+  "hashes": {
+    "features/ai/extension/workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "tests/sync/size-guard.test.mjs": "d48a4586a1aad06976c70b4575fd552df4d5f7e805c6a94d5ab9319221fdba23",
+    "AGENTS.md": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+    "features/ai/extension/workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "features/ai/extension/workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "tests/sync/workspace-model.test.mjs": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+    "tests/sync/reconcile.test.mjs": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd",
+    "tests/sync/lifetime.test.mjs": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc",
+    "build/efficiency-20261103/organato-review-node24": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "scratchHashes": {
+    "baseline-model.js": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+    "baseline-tests.log": "8f8dbc5cb184db3f4da3e5a61eac799151486889e91a75eb3f23661cdcbd3fa0",
+    "guard.diff": "4c34844d26746c1bacff288d7bfbc45be93ab0c2642af439b15223289bbdaa9e",
+    "mutant-hook.mjs": "561f5cc0edc7117c2bc0e05742c6eaaee8c8beefcca801066618ab9fb54fbfc2",
+    "negative-baseline.log": "5ee96823d22e9608a162d959fb142880f67c2b057819c3e5341b89a55bfbebee",
+    "negative-reject-equality.log": "fd3b2f8d69c67460dae4adc7bfb0d0b7fe35644ca1092c0d2f52190f3aa7b989",
+    "negative-skip-ambiguous.log": "588241407a6338511d7b451f53487a4305cc57391ddf7fce9e55f23d1c8ddfe1",
+    "syntax-model.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "syntax-tests.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "verification.log": "4e5c1dc5c155273590a6ed6d606a1a3778bb2ceef98d69b61707aa937f321892",
+    "verify.mjs": "8ee97273170b17928874b7b84ddfa10cc26c64578840e62c7db5619ff1393e31"
+  }
+}

@@ -1,0 +1,1375 @@
+{
+  "scope": "Scratch prototype only. No adoption, production/shared test/doc/packet edits, browser/native/physical-memory acceptance or goal-wide completion.",
+  "recommendation": {
+    "selection": "reject-both-as-written",
+    "A": "Reject: misses predeclared worthwhile CPU gate; changes malformed public error outcomes and sparse-array error messages despite fewer logical wrappers.",
+    "B": "Reject under strict semantic preservation: internal getter/reentrant store changes alter errors/bindings. Strong cold CPU result merits parent investigation only; per-operation live memory rises.",
+    "parentReviewRequiredBeforeAnyAdoption": true,
+    "objectionsToRejection": "B leaves public helper unchanged, passes all ordinary cases and existing tests, and these accessor scenarios are not reachable through inspected application storage/tab callers. Parent may separately choose a narrower application-input contract, but this experiment does not silently assume it."
+  },
+  "base": {
+    "path": "features/ai/extension/workspace-store.js",
+    "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "independentlyAcceptedDirectSpaceIndex": "preserved byte-for-byte in both candidates"
+  },
+  "candidates": {
+    "candidate-a": {
+      "sha256": "3e730b5a0e934db6013aaec337f22a4dfe55089e0786b3a36e50fec643999a3c",
+      "outsideListedRegionsByteIdentical": true,
+      "regions": [
+        "findEntriesByUrl helper"
+      ]
+    },
+    "candidate-b": {
+      "sha256": "cb7d7418c6d7d86518c8c2f9504da9b119ce3aed13b8351de27029513b610635",
+      "outsideListedRegionsByteIdentical": true,
+      "regions": [
+        "new savedUrlBuckets adjacent to public helper",
+        "reconcile pending local and pinned fallback call"
+      ]
+    }
+  },
+  "diffs": {
+    "candidate-a": {
+      "path": "build/efficiency-20261103/pin-matching/candidate-a.diff",
+      "sha256": "66b17cef2aec84c0b11f061acf422e302c4ef19acb1af6e7def7991968c47a45",
+      "text": "--- /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching/baseline.mjs\t2026-11-03 15:19:58\n+++ /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching/candidate-a.mjs\t2026-11-03 15:19:58\n@@ -242,10 +242,21 @@\n \n export function findEntriesByUrl(store, url, exclude = new Set()) {\n   const keys = urlKeys(url);\n-  const all = [...store.favorites.map((entry) => ({ entry, space: null })), ...store.spaces.flatMap((space) => entriesOf(space).map((entry) => ({ entry, space })))]\n-    .filter(({ entry }) => !exclude.has(entry.id));\n-  const exact = all.filter(({ entry }) => urlKeys(entry.url).exact === keys.exact);\n-  return exact.length ? exact : all.filter(({ entry }) => urlKeys(entry.url).path === keys.path);\n+  const groups = [{ space: null, entries: [...store.favorites] },\n+    ...store.spaces.map((space) => ({ space, entries: entriesOf(space) }))];\n+  // Finish exclusion before any saved URL reads, as in the original helper.\n+  for (const group of groups) group.entries = group.entries.filter((entry) => !exclude.has(entry.id));\n+  const match = (kind) => {\n+    const result = [];\n+    for (const { space, entries } of groups) {\n+      for (const entry of entries) {\n+        if (urlKeys(entry.url)[kind] === keys[kind]) result.push({ entry, space });\n+      }\n+    }\n+    return result;\n+  };\n+  const exact = match('exact');\n+  return exact.length ? exact : match('path');\n }\n \n export const displayTitle = (entry, tab) => entry?.customTitle || tab?.title || entry?.title || hostLabel(entry?.url || tab?.url || '') || 'New tab';\n"
+    },
+    "candidate-b": {
+      "path": "build/efficiency-20261103/pin-matching/candidate-b.diff",
+      "sha256": "7c3190fc2522e2b2b22354081c8065b10baf8f2c887579389ed167732993e3ca",
+      "text": "--- /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching/baseline.mjs\t2026-11-03 15:19:58\n+++ /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching/candidate-b.mjs\t2026-11-03 15:19:58\n@@ -248,6 +248,26 @@\n   return exact.length ? exact : all.filter(({ entry }) => urlKeys(entry.url).path === keys.path);\n }\n \n+function savedUrlBuckets(store) {\n+  const exact = new Map(), path = new Map();\n+  const add = (entry, space) => {\n+    const keys = urlKeys(entry.url), match = { entry, space };\n+    for (const [index, key] of [[exact, keys.exact], [path, keys.path]]) {\n+      let bucket = index.get(key);\n+      if (!bucket) index.set(key, bucket = []);\n+      bucket.push(match);\n+    }\n+  };\n+  for (const entry of store.favorites) add(entry, null);\n+  for (const space of store.spaces) for (const entry of entriesOf(space)) add(entry, space);\n+  return (url, exclude) => {\n+    const keys = urlKeys(url);\n+    const available = (index, key) => (index.get(key) || []).filter(({ entry }) => !exclude.has(entry.id));\n+    const matches = available(exact, keys.exact);\n+    return matches.length ? matches : available(path, keys.path);\n+  };\n+}\n+\n export const displayTitle = (entry, tab) => entry?.customTitle || tab?.title || entry?.title || hostLabel(entry?.url || tab?.url || '') || 'New tab';\n \n // ---------------------------------------------------------------- store operations (mutate a draft)\n@@ -405,6 +425,7 @@\n   const orphanPinned = [];\n   const urlOf = (tab) => tab.url || tab.pendingUrl || '';\n   const pending = [];\n+  let savedMatches;\n \n   const accept = (tab, record) => {\n     const clean = { s: resolveSpaceId(store, record.s), u: urlOf(tab), k: session };\n@@ -491,7 +512,7 @@\n     if (record) { accept(tab, record); continue; }\n     // 3. Chromium-pinned tabs bind to an entry with the same URL.\n     if (tab.pinned) {\n-      const matches = findEntriesByUrl(store, urlOf(tab), boundEntries);\n+      const matches = (savedMatches ||= savedUrlBuckets(store))(urlOf(tab), boundEntries);\n       if (matches.length === 1) {\n         const match = matches[0];\n         accept(tab, { s: match.space?.id ?? fallback, e: match.entry.id });\n"
+    }
+  },
+  "callerReachability": [
+    "WorkspaceStore.read normalizes storage.local copies into fresh plain store/member objects. normalizeEntry emits validated string URLs and IDs; normalizeStore removes duplicate IDs and emits dense arrays. normalizeMembers emits plain records and quarantine arrays.",
+    "WorkspaceStore.reconcile runs inside locked transact, normalizes each operation, rolls session, then synchronously reconciles browser tabs and returns a structuredClone(store). No callback awaits inside matching. Native API tabs are data snapshots; no user-defined getters are installed in inspected caller.",
+    "Actual other public helper caller is adoptPinned at workspace.js:1369, not a function named adoptTabsInSpace. It calls findEntriesByUrl inside workspace.update/mutate then filters for null favorite space or requested space; it may add entries between sequential helper calls. Public helper B stays byte-identical and no cross-call cache exists.",
+    "Getter/exclude callback/proxy/reentrant fixtures are valid exported-function JavaScript inputs; stored accessors are removed by normalization/cloning. Saved-store mutation via tab.url getters and excluded throwing URLs is not reachable through inspected application callers, but is observably different at the exported reconcile boundary.",
+    "Raw duplicate IDs and URLs are still covered without normalization in corpus. indexNodes remains byte-identical, including favorite null and last duplicate ID ownership. Dynamic boundEntries filtering occurs on every B lookup, including after previous-session claims following bucket creation."
+  ],
+  "differential": {
+    "cases": 494,
+    "equalCounts": {
+      "candidate-a": 493,
+      "candidate-b": 494
+    },
+    "failures": [
+      {
+        "variant": "candidate-a",
+        "case": "malformed-helper-486",
+        "base": {
+          "error": {
+            "name": "TypeError",
+            "message": "Cannot read properties of undefined (reading 'map')"
+          }
+        },
+        "candidate": {
+          "error": {
+            "name": "TypeError",
+            "message": "store.favorites is not iterable"
+          }
+        }
+      }
+    ],
+    "adversarial": [
+      {
+        "name": "helper-reentrant-exclude-mutates-earlier-entry",
+        "results": [
+          {
+            "matches": [],
+            "log": [
+              "e0",
+              "e1"
+            ]
+          },
+          {
+            "matches": [],
+            "log": [
+              "e0",
+              "e1"
+            ]
+          },
+          {
+            "matches": [],
+            "log": [
+              "e0",
+              "e1"
+            ]
+          }
+        ],
+        "differences": []
+      },
+      {
+        "name": "helper-url-getter-path-second-read",
+        "results": [
+          {
+            "matches": [
+              "e0"
+            ],
+            "reads": 2
+          },
+          {
+            "matches": [
+              "e0"
+            ],
+            "reads": 2
+          },
+          {
+            "matches": [
+              "e0"
+            ],
+            "reads": 2
+          }
+        ],
+        "differences": []
+      },
+      {
+        "name": "helper-sparse-favorites",
+        "results": [
+          {
+            "error": "TypeError",
+            "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+          },
+          {
+            "error": "TypeError",
+            "message": "Cannot read properties of undefined (reading 'id')"
+          },
+          {
+            "error": "TypeError",
+            "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+          }
+        ],
+        "differences": [
+          "candidate-a"
+        ]
+      },
+      {
+        "name": "reconcile-excluded-getter-throws",
+        "results": [
+          {
+            "assigned": {
+              "1": {
+                "s": "a",
+                "u": "https://example.test/p/0?q=1",
+                "k": "now",
+                "e": "e0"
+              },
+              "2": {
+                "s": "a",
+                "u": "https://example.test/p/1?q=1",
+                "k": "now",
+                "e": "e1"
+              }
+            },
+            "orphanPinned": []
+          },
+          {
+            "assigned": {
+              "1": {
+                "s": "a",
+                "u": "https://example.test/p/0?q=1",
+                "k": "now",
+                "e": "e0"
+              },
+              "2": {
+                "s": "a",
+                "u": "https://example.test/p/1?q=1",
+                "k": "now",
+                "e": "e1"
+              }
+            },
+            "orphanPinned": []
+          },
+          {
+            "error": "Error",
+            "message": "excluded URL read"
+          }
+        ],
+        "differences": [
+          "candidate-b"
+        ]
+      },
+      {
+        "name": "reconcile-getter-changes-between-lookups",
+        "results": [
+          {
+            "result": {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://example.test/p/1?q=1",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            },
+            "reads": 2
+          },
+          {
+            "result": {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://example.test/p/1?q=1",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            },
+            "reads": 2
+          },
+          {
+            "result": {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://example.test/p/1?q=1",
+                  "k": "now"
+                }
+              },
+              "orphanPinned": [
+                2
+              ]
+            },
+            "reads": 1
+          }
+        ],
+        "differences": [
+          "candidate-b"
+        ]
+      },
+      {
+        "name": "reconcile-tab-url-getter-mutates-store",
+        "results": [
+          {
+            "assigned": {
+              "1": {
+                "s": "a",
+                "u": "https://example.test/p/0?q=1",
+                "k": "now",
+                "e": "e0"
+              },
+              "2": {
+                "s": "a",
+                "u": "https://changed.test/",
+                "k": "now",
+                "e": "e1"
+              }
+            },
+            "orphanPinned": []
+          },
+          {
+            "assigned": {
+              "1": {
+                "s": "a",
+                "u": "https://example.test/p/0?q=1",
+                "k": "now",
+                "e": "e0"
+              },
+              "2": {
+                "s": "a",
+                "u": "https://changed.test/",
+                "k": "now",
+                "e": "e1"
+              }
+            },
+            "orphanPinned": []
+          },
+          {
+            "assigned": {
+              "1": {
+                "s": "a",
+                "u": "https://example.test/p/0?q=1",
+                "k": "now",
+                "e": "e0"
+              },
+              "2": {
+                "s": "a",
+                "u": "https://changed.test/",
+                "k": "now"
+              }
+            },
+            "orphanPinned": [
+              2
+            ]
+          }
+        ],
+        "differences": [
+          "candidate-b"
+        ]
+      }
+    ],
+    "negative": [
+      {
+        "name": "ignore-exclusions",
+        "caught": true,
+        "message": "Expected values to be strictly equal:\n\n1 !== 0\n"
+      },
+      {
+        "name": "wrong-exact-precedence",
+        "caught": true,
+        "message": "Expected values to be strictly equal:\n\n2 !== 1\n"
+      },
+      {
+        "name": "reuse-bound-entry",
+        "caught": true,
+        "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   2\n- ]\n"
+      }
+    ],
+    "identityChecks": "entry/space references, original store/tabs JSON, members.tabs and assigned record ownership; frozen snapshots; sequential store mutation",
+    "exclusions": "Not exhaustive JS proxy/prototype/Array method monkeypatch equivalence. Errors compared including engine message."
+  },
+  "snapshotSequences": [
+    {
+      "variant": "baseline",
+      "passed": true,
+      "claimsAfterIndexAndFrozenRecordIdentity": true,
+      "publicSequentialMutationAndFavoriteNull": true,
+      "orphanPinnedOrder": [
+        1,
+        3
+      ]
+    },
+    {
+      "variant": "candidate-a",
+      "passed": true,
+      "claimsAfterIndexAndFrozenRecordIdentity": true,
+      "publicSequentialMutationAndFavoriteNull": true,
+      "orphanPinnedOrder": [
+        1,
+        3
+      ]
+    },
+    {
+      "variant": "candidate-b",
+      "passed": true,
+      "claimsAfterIndexAndFrozenRecordIdentity": true,
+      "publicSequentialMutationAndFavoriteNull": true,
+      "orphanPinnedOrder": [
+        1,
+        3
+      ]
+    }
+  ],
+  "compatibility": {
+    "node24": "v24.22.1",
+    "node24Path": "build/efficiency-20261103/organato-review-node24",
+    "node24Sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329",
+    "node22": "v22.14.0",
+    "node22Path": "/Users/likht.ethan/.local/bin/node",
+    "tests": "87/87 pass per runtime: 29 unchanged assertions/tests per baseline/A/B; import-only scratch copies of workspace store/member/index suites. Shared tests unchanged.",
+    "node22DifferentialLog": "{\"cases\":494,\"equalCounts\":{\"candidate-a\":493,\"candidate-b\":494},\"failures\":1,\"adversarialDifferences\":[{\"name\":\"helper-sparse-favorites\",\"variants\":[\"candidate-a\"]},{\"name\":\"reconcile-excluded-getter-throws\",\"variants\":[\"candidate-b\"]},{\"name\":\"reconcile-getter-changes-between-lookups\",\"variants\":[\"candidate-b\"]},{\"name\":\"reconcile-tab-url-getter-mutates-store\",\"variants\":[\"candidate-b\"]}],\"negative\":[{\"name\":\"ignore-exclusions\",\"caught\":true,\"message\":\"Expected values to be strictly equal:\\n\\n1 !== 0\\n\"},{\"name\":\"wrong-exact-precedence\",\"caught\":true,\"message\":\"Expected values to be strictly equal:\\n\\n2 !== 1\\n\"},{\"name\":\"reuse-bound-entry\",\"caught\":true,\"message\":\"Expected values to be strictly deep-equal:\\n+ actual - expected\\n\\n+ []\\n- [\\n-   2\\n- ]\\n\"}]}\n",
+    "notRun": "Browser/native builds and UI checks prohibited; no dependencies downloaded; no broad unrelated test suites."
+  },
+  "counts": {
+    "logical": {
+      "scope": "source-expression/getter counts only, not physical allocations or RAM; instrumented imports excluded from CPU benchmark",
+      "rows": [
+        {
+          "variant": "baseline",
+          "wrapperConstructionExpressions": 2000,
+          "savedUrlReads": 1810,
+          "bindings": 20
+        },
+        {
+          "variant": "candidate-a",
+          "wrapperConstructionExpressions": 20,
+          "savedUrlReads": 1810,
+          "bindings": 20
+        },
+        {
+          "variant": "candidate-b",
+          "wrapperConstructionExpressions": 100,
+          "savedUrlReads": 100,
+          "bindings": 20
+        }
+      ]
+    },
+    "reachability": [
+      {
+        "variant": "baseline",
+        "mode": "cold",
+        "savedUrlReads": 1810,
+        "urlConstructorCalls": 1850,
+        "bindings": 20,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "baseline",
+        "mode": "current",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 0,
+        "bindings": 20,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "baseline",
+        "mode": "no-pinned",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 20,
+        "bindings": 0,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "baseline",
+        "mode": "no-saved",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 40,
+        "bindings": 0,
+        "orphanPinned": 20
+      },
+      {
+        "variant": "candidate-a",
+        "mode": "cold",
+        "savedUrlReads": 1810,
+        "urlConstructorCalls": 1850,
+        "bindings": 20,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "candidate-a",
+        "mode": "current",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 0,
+        "bindings": 20,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "candidate-a",
+        "mode": "no-pinned",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 20,
+        "bindings": 0,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "candidate-a",
+        "mode": "no-saved",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 40,
+        "bindings": 0,
+        "orphanPinned": 20
+      },
+      {
+        "variant": "candidate-b",
+        "mode": "cold",
+        "savedUrlReads": 100,
+        "urlConstructorCalls": 140,
+        "bindings": 20,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "candidate-b",
+        "mode": "current",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 0,
+        "bindings": 20,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "candidate-b",
+        "mode": "no-pinned",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 20,
+        "bindings": 0,
+        "orphanPinned": 0
+      },
+      {
+        "variant": "candidate-b",
+        "mode": "no-saved",
+        "savedUrlReads": 0,
+        "urlConstructorCalls": 40,
+        "bindings": 0,
+        "orphanPinned": 20
+      }
+    ],
+    "freshStateProof": "Each timed call executes makeMembers() producing a fresh tabs object and fresh current-session records when required; no previous invocation members is reused. Instrumented cold probes before timing assert all bindings and count saved reads. Instrumented modules never enter timing."
+  },
+  "timing": {
+    "gate": {
+      "minimumBatchMs": 200,
+      "rounds": 9,
+      "order": "alternating baseline/candidate each round",
+      "warmupBatches": 3,
+      "calibration": "each variant doubles independently to >=200ms; compare CPU per exported call; process.cpuUsage user+system primary and wall times retained",
+      "retain": "every warmup/calibration/raw round; no removed outliers",
+      "cpuGate": "median candidate/baseline <=0.80 typical and large cold; <=1.10 every other scenario; at least 7/9 cold pairs faster",
+      "correctnessGate": "ordinary corpus and existing tests pass; raw semantic differences block unconditional adoption",
+      "membersReset": "fresh members and records for EVERY invocation; reset included in timing",
+      "scope": "complete exported functions, no counters in timing",
+      "runEligibility": "exploratory initial run excluded: candidate batches too short and retention probe overlap; raw retained",
+      "minimumRounds": 9
+    },
+    "gatePredeclaredBeforeFinalTiming": true,
+    "summaries": [
+      {
+        "name": "small-cold",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 0.9877881477478226,
+            "fasterPairs": 7,
+            "ratios": [
+              0.9830851947998646,
+              0.985186861569164,
+              1.0409214812844891,
+              1.008394709134323,
+              0.9607731021314969,
+              0.9909904289553992,
+              0.9881279631329695,
+              0.9808767466497577,
+              0.9877881477478226
+            ],
+            "baselineMedianCpuUs": 23.67901611328125,
+            "candidateMedianCpuUs": 23.28033447265625,
+            "gatePass": true
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.6599155088928448,
+            "fasterPairs": 9,
+            "ratios": [
+              0.6590010650011733,
+              0.6625139572391547,
+              0.6469152348834171,
+              0.6522726692698365,
+              0.6715872888527721,
+              0.655723896943778,
+              0.6599155088928448,
+              0.6631201248049922,
+              0.6769328214474994
+            ],
+            "baselineMedianCpuUs": 23.60870361328125,
+            "candidateMedianCpuUs": 15.599365234375,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 251.45379200000025
+      },
+      {
+        "name": "typical-cold",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 0.9884768772657576,
+            "fasterPairs": 7,
+            "ratios": [
+              0.9872122854561879,
+              0.985569896829646,
+              0.9967665277182596,
+              0.9622974282884769,
+              1.0396421985443032,
+              1.0105767753872972,
+              0.9884768772657576,
+              0.9895168511156478,
+              0.9831764827642816
+            ],
+            "baselineMedianCpuUs": 1093.56640625,
+            "candidateMedianCpuUs": 1079.23046875,
+            "gatePass": false
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.12018809718712131,
+            "fasterPairs": 9,
+            "ratios": [
+              0.12070074395782676,
+              0.12080664781634329,
+              0.11921686424337642,
+              0.12436694027299544,
+              0.11816899854501824,
+              0.11928386079441297,
+              0.12018809718712131,
+              0.12081589770941542,
+              0.11877154246728028
+            ],
+            "baselineMedianCpuUs": 1093.984375,
+            "candidateMedianCpuUs": 130.9033203125,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 266.84812500000044
+      },
+      {
+        "name": "large-cold",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 0.9907606619833392,
+            "fasterPairs": 7,
+            "ratios": [
+              0.9907606619833392,
+              0.9863705030999957,
+              1.0006088148723407,
+              0.9873572146795462,
+              0.9957668950970148,
+              1.009579639037372,
+              0.9874954548244972,
+              0.9820550834370229,
+              0.9957784194326119
+            ],
+            "baselineMedianCpuUs": 52460.75,
+            "candidateMedianCpuUs": 52182.25,
+            "gatePass": false
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.02106261890528853,
+            "fasterPairs": 9,
+            "ratios": [
+              0.02135528201694809,
+              0.021662318824924504,
+              0.021027000286950908,
+              0.02106261890528853,
+              0.021029474507573066,
+              0.02197821618667427,
+              0.02103648000627031,
+              0.02095530053905798,
+              0.02124880816398708
+            ],
+            "baselineMedianCpuUs": 52605.0,
+            "candidateMedianCpuUs": 1109.015625,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 204.91958299999533
+      },
+      {
+        "name": "current",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 1.0044722800723591,
+            "fasterPairs": 2,
+            "ratios": [
+              1.0202081228162019,
+              0.9253681000210282,
+              1.024954990383611,
+              1.0044722800723591,
+              1.0014366351083792,
+              1.0347570221731897,
+              1.006125378264964,
+              0.9874731874731875,
+              1.002401911738158
+            ],
+            "baselineMedianCpuUs": 10.026412963867188,
+            "candidateMedianCpuUs": 10.075469970703125,
+            "gatePass": true
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.002813720646941,
+            "fasterPairs": 2,
+            "ratios": [
+              0.9973360447689951,
+              1.002813720646941,
+              1.0021783894593466,
+              1.0032195485006452,
+              1.0108094420155658,
+              1.0020983972429727,
+              1.0062212460210298,
+              1.003797354367339,
+              0.9968182267545761
+            ],
+            "baselineMedianCpuUs": 10.002716064453125,
+            "candidateMedianCpuUs": 10.037124633789062,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 651.0000409999993
+      },
+      {
+        "name": "no-pinned",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 1.0003938848457405,
+            "fasterPairs": 4,
+            "ratios": [
+              1.0102638757159348,
+              0.9984525358563248,
+              1.0008113277507131,
+              0.9688368534367716,
+              0.996380623091919,
+              1.0081182040091723,
+              1.0003938848457405,
+              1.003184290342339,
+              0.9890213493984676
+            ],
+            "baselineMedianCpuUs": 33.205810546875,
+            "candidateMedianCpuUs": 33.1885986328125,
+            "gatePass": true
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.0056591909452945,
+            "fasterPairs": 2,
+            "ratios": [
+              0.9925019703115623,
+              1.0056591909452945,
+              1.0096619419916943,
+              1.0049922192014658,
+              1.0082566982049694,
+              1.0064832745506622,
+              1.0352609723892645,
+              0.9897982165354053,
+              1.0041954790668841
+            ],
+            "baselineMedianCpuUs": 33.1893310546875,
+            "candidateMedianCpuUs": 33.4053955078125,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 270.3783340000082
+      },
+      {
+        "name": "no-saved",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 1.0233719177011074,
+            "fasterPairs": 1,
+            "ratios": [
+              1.035035875072025,
+              0.9770328219191968,
+              1.0368592087789796,
+              1.0280307788944725,
+              1.0084272907906289,
+              1.0334641944943714,
+              1.0233719177011074,
+              1.0184698897570186,
+              1.0143445754522906
+            ],
+            "baselineMedianCpuUs": 41.9765625,
+            "candidateMedianCpuUs": 42.623779296875,
+            "gatePass": true
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.0161523286126963,
+            "fasterPairs": 3,
+            "ratios": [
+              0.9683382646056916,
+              1.0161523286126963,
+              0.9911426066207649,
+              0.985849149017753,
+              1.0163706436291207,
+              1.0123521336565704,
+              1.017443829572931,
+              1.0189087011481532,
+              1.0187384153696786
+            ],
+            "baselineMedianCpuUs": 41.793212890625,
+            "candidateMedianCpuUs": 42.2679443359375,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 338.28429199999664
+      },
+      {
+        "name": "helper-exact",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 0.986684095545233,
+            "fasterPairs": 8,
+            "ratios": [
+              0.9926552957756659,
+              0.9827257156838757,
+              0.9653673958895159,
+              0.9882818857483862,
+              1.071044087673238,
+              0.9678028293545535,
+              0.9858164952901416,
+              0.9893425985517095,
+              0.986684095545233
+            ],
+            "baselineMedianCpuUs": 54.32421875,
+            "candidateMedianCpuUs": 53.65185546875,
+            "gatePass": true
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.9987390685377263,
+            "fasterPairs": 6,
+            "ratios": [
+              0.9970081004563763,
+              0.995455031547428,
+              0.9987390685377263,
+              0.9964000054135257,
+              0.9794919741705478,
+              1.0372418053702692,
+              1.0086531463127533,
+              0.9993564037823655,
+              1.025438763226256
+            ],
+            "baselineMedianCpuUs": 54.34033203125,
+            "candidateMedianCpuUs": 54.5419921875,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 218.14216599999054
+      },
+      {
+        "name": "helper-path",
+        "summaries": [
+          {
+            "variant": "candidate-a",
+            "medianRatio": 1.0081430974265144,
+            "fasterPairs": 2,
+            "ratios": [
+              1.0028078505403564,
+              1.0131442423144015,
+              0.9259174109794276,
+              1.2510912550365618,
+              0.9988086785385821,
+              1.0081430974265144,
+              1.01829024888782,
+              1.0041325892427595,
+              1.0118303528367767
+            ],
+            "baselineMedianCpuUs": 102.46630859375,
+            "candidateMedianCpuUs": 103.310546875,
+            "gatePass": true
+          },
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.0105169895356911,
+            "fasterPairs": 1,
+            "ratios": [
+              1.0001714391843304,
+              1.0119645434306552,
+              1.015198452393018,
+              1.083994598893883,
+              1.0105169895356911,
+              1.0157597412003283,
+              0.9999183497034172,
+              1.0000913747084426,
+              1.00198822470309
+            ],
+            "baselineMedianCpuUs": 101.95556640625,
+            "candidateMedianCpuUs": 102.7216796875,
+            "gatePass": true
+          }
+        ],
+        "minimumTimedWallMs": 207.10645900000236
+      }
+    ],
+    "raw": "pin-matching/timings.json",
+    "excludedRun": "pin-matching/timings-exploratory-contaminated.json: retained, not used for acceptance; B batches too short and initial retention probe overlapped portions. Final CPU run has no own test/retention workload overlap. Other system load uncontrolled.",
+    "outliers": "Initial current-session row repeated at 400ms calibration target because some warmed batches fell below declared 200ms floor. Original full run retained in timings-before-current-repeat.json, repeat raw in timings-current-repeat.json. No statistical outliers trimmed. CPU per complete exported call is process.cpuUsage user+system/count; wall durations also retained. Reset cost included; source loading and fixture construction excluded; lazy index construction included.",
+    "allocationClaim": "No physical allocation, RSS or whole-browser claim. A logical wrappers improve but parsing remains dominant; B CPU gain is not proof of lower live RAM."
+  },
+  "retention": {
+    "summary": [
+      {
+        "size": 100,
+        "variant": "baseline",
+        "medianLiveHeapDeltaBytes": 39728,
+        "liveHeapDeltaRangeBytes": [
+          39728,
+          39728
+        ],
+        "medianAfterHeapDeltaBytes": 45728,
+        "logicalLiveStructure": {
+          "maps": 0,
+          "buckets": 0,
+          "distinctWrappers": 0,
+          "storedKeyCharacters": 0
+        }
+      },
+      {
+        "size": 100,
+        "variant": "candidate-a",
+        "medianLiveHeapDeltaBytes": 40320,
+        "liveHeapDeltaRangeBytes": [
+          40320,
+          40320
+        ],
+        "medianAfterHeapDeltaBytes": 45296,
+        "logicalLiveStructure": {
+          "maps": 0,
+          "buckets": 0,
+          "distinctWrappers": 0,
+          "storedKeyCharacters": 0
+        }
+      },
+      {
+        "size": 100,
+        "variant": "candidate-b",
+        "medianLiveHeapDeltaBytes": 123416,
+        "liveHeapDeltaRangeBytes": [
+          123416,
+          123816
+        ],
+        "medianAfterHeapDeltaBytes": 50304,
+        "logicalLiveStructure": {
+          "maps": 2,
+          "buckets": 200,
+          "distinctWrappers": 100,
+          "storedKeyCharacters": 5380
+        }
+      },
+      {
+        "size": 1000,
+        "variant": "baseline",
+        "medianLiveHeapDeltaBytes": 104040,
+        "liveHeapDeltaRangeBytes": [
+          102184,
+          104072
+        ],
+        "medianAfterHeapDeltaBytes": 79688,
+        "logicalLiveStructure": {
+          "maps": 0,
+          "buckets": 0,
+          "distinctWrappers": 0,
+          "storedKeyCharacters": 0
+        }
+      },
+      {
+        "size": 1000,
+        "variant": "candidate-a",
+        "medianLiveHeapDeltaBytes": 103504,
+        "liveHeapDeltaRangeBytes": [
+          103504,
+          103600
+        ],
+        "medianAfterHeapDeltaBytes": 78984,
+        "logicalLiveStructure": {
+          "maps": 0,
+          "buckets": 0,
+          "distinctWrappers": 0,
+          "storedKeyCharacters": 0
+        }
+      },
+      {
+        "size": 1000,
+        "variant": "candidate-b",
+        "medianLiveHeapDeltaBytes": 832336,
+        "liveHeapDeltaRangeBytes": [
+          832096,
+          832336
+        ],
+        "medianAfterHeapDeltaBytes": 87000,
+        "logicalLiveStructure": {
+          "maps": 2,
+          "buckets": 2000,
+          "distinctWrappers": 1000,
+          "storedKeyCharacters": 55780
+        }
+      }
+    ],
+    "raw": "pin-matching/retention.json",
+    "scope": "42 separate local Node processes; forced-GC V8 heap at before/second-pending-tab/after-return. Includes whole reconcile state and probe perturbation. After-return GC follows a new event-loop task to clear WeakRef keep-alive. Not peak physical RAM or whole-browser memory. Structural counts are logical live bucket ownership, not physical allocations.",
+    "limitations": "Two-tab intermediate observation is live state, not a measured peak bound. Forced GC and Map WeakRef instrumentation perturb heap. After-return observation uses a new event-loop task; no index is persistently cached. Repeated isolated process phases are V8 heap evidence only; browser peak/RSS and realistic live memory acceptance remain pending.",
+    "exploratory": "Original same-job after-return WeakRef probe retained in retention-exploratory.json and excluded from release-after-return inference."
+  },
+  "harnessFailuresAndCorrections": [
+    "Initial python command failed because python binary absent; all subsequent Python uses python3 -B, no imports producing bytecode.",
+    "First bound-entry negative control checked binding only, but accept independently prevents duplicate e. Changed control to orphanPinned ordering, which detects fallback bypass; initial caught:false retained here, final all three caught:true.",
+    "Initial logical wrapper instrumenter broad text replacement also rewrote result.push into result.pushwrap and failed. Corrected to arrow construction expressions; full failure retained in logical-instrumentation-failure.txt. No candidate source changed.",
+    "Initial CPU run excluded for insufficient fast-candidate batch durations and retention overlap; retained all raw calibration/warmup/round samples. Final gate amended before new timings, with independent >=200ms calibration and CPU-per-call primary metric.",
+    "Current-session timing calibration initially exceeded 200ms but warmed rounds reached 163ms. Repeated entire scenario with 400ms calibration margin, no threshold change; retained all original samples.",
+    "Initial retention after-return phase could keep WeakRef targets until end of current job; retained initial data and reran after a new event-loop task. Live between-tab observation remains intentionally retained state."
+  ],
+  "commands": [
+    "build/efficiency-20261103/organato-review-node24 --version",
+    "/Users/likht.ethan/.local/bin/node --version",
+    "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/pin-matching/*.test.mjs",
+    "/Users/likht.ethan/.local/bin/node --test build/efficiency-20261103/pin-matching/*.test.mjs",
+    "/Users/likht.ethan/.local/bin/node build/efficiency-20261103/pin-matching/experiment.mjs --differential",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/pin-matching/logical-counts.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/pin-matching/experiment.mjs [python3 -B subprocess.run timeout=240 seconds]",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/pin-matching/retention.mjs [42 own synchronous child processes each timeout=15 seconds]",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/pin-matching/experiment-current-repeat.mjs [python3 -B subprocess.run timeout=90 seconds]",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/pin-matching/snapshot-sequences.mjs",
+    "/Users/likht.ethan/.local/bin/node build/efficiency-20261103/pin-matching/snapshot-sequences.mjs",
+    "python3 -B build/efficiency-20261103/pin-matching/report.py"
+  ],
+  "artifactFiles": [
+    {
+      "path": "build/efficiency-20261103/pin-matching/baseline-workspace-index-efficiency.test.mjs",
+      "sha256": "3102ff13f367b2c740b857f4d1d44506659439b801f29710d372da9d12604782",
+      "bytes": 4951
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/baseline-workspace-members-efficiency.test.mjs",
+      "sha256": "4929117d5775e2e0406863b571ed07a154e895b8368d423bcf9e10379f55b6e0",
+      "bytes": 6163
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/baseline-workspace-store.test.mjs",
+      "sha256": "27af1c0c2640565880576070c5b0c5b7d4e63d89863d078f1d19456fcefe0238",
+      "bytes": 24926
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/baseline.mjs",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "bytes": 28499
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-a-workspace-index-efficiency.test.mjs",
+      "sha256": "66d61a21e1f630c35d9ee2da557d6a02b36f4a4ea706507d3bc56cea83bdf2c3",
+      "bytes": 4954
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-a-workspace-members-efficiency.test.mjs",
+      "sha256": "cbe7e30da9d1e311685a9966797b0825579bae61e2f1b5face9667c516ecadba",
+      "bytes": 6166
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-a-workspace-store.test.mjs",
+      "sha256": "0f829762d259e39680e56e5b23426dd5af3dbe7f903beabbddf63b8e241741e6",
+      "bytes": 24929
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-a.diff",
+      "sha256": "66b17cef2aec84c0b11f061acf422e302c4ef19acb1af6e7def7991968c47a45",
+      "bytes": 1617
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-a.mjs",
+      "sha256": "3e730b5a0e934db6013aaec337f22a4dfe55089e0786b3a36e50fec643999a3c",
+      "bytes": 28759
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-b-workspace-index-efficiency.test.mjs",
+      "sha256": "00c0d5bc6a9e6d240f363d979b0969f9631afefee1e1109bdda89e7d32b361b0",
+      "bytes": 4954
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-b-workspace-members-efficiency.test.mjs",
+      "sha256": "bb9752fd54cac2e334b64618a50144df5e3b15d694ae1993b45f011ac14be203",
+      "bytes": 6166
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-b-workspace-store.test.mjs",
+      "sha256": "bd7fd1373c990178622bcd7ab376bb660aef7543dbd2aa01160b6365d331864e",
+      "bytes": 24929
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-b.diff",
+      "sha256": "7c3190fc2522e2b2b22354081c8065b10baf8f2c887579389ed167732993e3ca",
+      "bytes": 2227
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/candidate-b.mjs",
+      "sha256": "cb7d7418c6d7d86518c8c2f9504da9b119ce3aed13b8351de27029513b610635",
+      "bytes": 29350
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/counts.json",
+      "sha256": "8a62c935e9caeed9c5d6d57121231dab19afe546457f6469310ef62c48548752",
+      "bytes": 1906
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/current-repeat.log",
+      "sha256": "357834055ace27c80b3fad1188fc38fc0ceed398d45bdf87c5df31bdddb77ab6",
+      "bytes": 197
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/differential-node22.log",
+      "sha256": "0aa5598ebe9fa4c7e8275328f7bbb310f4f3b48414ee36e526766edb5a4a1047",
+      "bytes": 771
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/differential.json",
+      "sha256": "ee37a951ec78bf50ab82d00e6d4d2396ee9edc829a4fc52308af72973068118b",
+      "bytes": 6723
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/experiment-current-repeat.mjs",
+      "sha256": "7589b773250d4b3928dc0a45a9ece2f502af7223681b18f0667df185949a48ef",
+      "bytes": 12301
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/experiment-final.log",
+      "sha256": "05457329b37b1569f894b83f89318a3450878f16e5d8ade0dc114b6fe2cfb625",
+      "bytes": 1342
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/experiment.log",
+      "sha256": "db8b5a64038d39c3f2bda8b12d3b323b6ef31d459bc0d192903db206a3e38117",
+      "bytes": 1341
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/experiment.mjs",
+      "sha256": "7a149d9577c4d5bd68cea3dfb9fb72890bb43c20636d8bfc955c4a39d29feaa9",
+      "bytes": 12254
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/logical-counts.json",
+      "sha256": "dffd8b7a276c074baebc2f39a9454c58d37dc133a886304b38cd5cd3f99b4f41",
+      "bytes": 569
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/logical-counts.log",
+      "sha256": "1b6e84fa74f014252874adfa439f47cae25d3e955e97098c785bd7e3de215a86",
+      "bytes": 359
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/logical-counts.mjs",
+      "sha256": "4416de515be809c7e132f0bbafff88da1ad43bf2af20fa402787307ee978a5c7",
+      "bytes": 1733
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/logical-instrumentation-failure.txt",
+      "sha256": "edd0da3dc81b7aa09b3c8d182c42e81d1f6d142eac3580c9370aa8b3eb1f9f52",
+      "bytes": 154735
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/logical-instrumentation-negative.mjs",
+      "sha256": "1181cc9cad223c36a430d7651884716f38382a9fa515e865713c7f32e045c8d6",
+      "bytes": 1721
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/parent-baseline.json",
+      "sha256": "abcfea131918ed9e5b2869852351c8de6b4230bfbfc5bf186f90fbf2383b9e7f",
+      "bytes": 296
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/parent-baseline.mjs",
+      "sha256": "07640b53b1e75331a610a02edb6acd2b07dba4f6b7ed19fea3011b154b890fff",
+      "bytes": 1745
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/report.py",
+      "sha256": "aca9e0be17d362621227afc71013865880aa45e3dee6594da9a5ae60122e684b",
+      "bytes": 12014
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/retention-exploratory.json",
+      "sha256": "c655a4f132a90631d8fa23551c2d743f83d381e89da2bd8b40f7bd0cc2e546cb",
+      "bytes": 16213
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/retention-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/retention.json",
+      "sha256": "acccfdf4c64b58f04cc2c77475d9dbd823613233c72ace2c910a64d29f6c78d8",
+      "bytes": 16260
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/retention.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/retention.mjs",
+      "sha256": "93842e00a043851bdc121b50cc16c5f308a6a9d31140e771bc6ae28dd964bded",
+      "bytes": 2559
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/snapshot-sequences-node22.log",
+      "sha256": "2a02653aefe807681ec2c74dce9f429a3519dc29fc13a3bab21fa8b713232335",
+      "bytes": 567
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/snapshot-sequences-node24.log",
+      "sha256": "2a02653aefe807681ec2c74dce9f429a3519dc29fc13a3bab21fa8b713232335",
+      "bytes": 567
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/snapshot-sequences.json",
+      "sha256": "1bda13285e76c36d079a81acd06b4eb1c489bb8a006b9bb032c7ebe15e3438dc",
+      "bytes": 645
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/snapshot-sequences.mjs",
+      "sha256": "31f711e65dbff5b70d257549ab74f86b25ceffef39f55d2f0f7c329481357fd0",
+      "bytes": 2208
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/source-manifest.json",
+      "sha256": "c75caef23a70540e1fe3556c1f1d6ecdf8748ddf68a4f649412e0984ec1505bf",
+      "bytes": 499
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/tests-node22.log",
+      "sha256": "f94e33188e10a1b7dd0f0b4d94ef7a975414bf5d1bc97eba530cd80e639da1ed",
+      "bytes": 17670
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/tests-node24.log",
+      "sha256": "433b8e89b2fa135faad04da778f401eca1a518be12beb53acf07fb26ee2bdfe8",
+      "bytes": 7971
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/timing-gate-final.json",
+      "sha256": "03f2997e82364c0ed72ec9e927910efbc32f13038af4ae73e5fdbf3d46a34983",
+      "bytes": 911
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/timing-gate.json",
+      "sha256": "826042e160e2e3a11f5f17835c5049c83d8ff4401c0b4d45c1582e38d5888f55",
+      "bytes": 678
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/timings-before-current-repeat.json",
+      "sha256": "37df6ed01f694da22d195ad506274c1855c1bce9f20663e9b762c530506ddbc7",
+      "bytes": 140223
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/timings-current-repeat.json",
+      "sha256": "f48ff687249a2cdb3a220a7b0b68784430435339f8f2b7255383d8afaa7e66b9",
+      "bytes": 20637
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/timings-exploratory-contaminated.json",
+      "sha256": "6f9b90c5637bf5994239e67acb1f4ab0be0c3fd9493529782cc8245450ec436d",
+      "bytes": 95147
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/timings.json",
+      "sha256": "7ecab40ed354d4e308b9b6bb483b03c52d187c632c64c2abeafded6507c10a65",
+      "bytes": 140972
+    }
+  ],
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "lines": 664,
+      "readRanges": [
+        [
+          1,
+          664
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace.js",
+      "sha256": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+      "lines": 1586,
+      "readRanges": [
+        [
+          1,
+          1586
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-store.test.mjs",
+      "sha256": "e6a9d40dbbb020e6a8ffd7945186e6909e0c412293933b69f57c39898061f952",
+      "lines": 430,
+      "readRanges": [
+        [
+          1,
+          430
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-index-efficiency.test.mjs",
+      "sha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/parent-baseline.mjs",
+      "sha256": "07640b53b1e75331a610a02edb6acd2b07dba4f6b7ed19fea3011b154b890fff",
+      "lines": 15,
+      "readRanges": [
+        [
+          1,
+          15
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/pin-matching/parent-baseline.json",
+      "sha256": "abcfea131918ed9e5b2869852351c8de6b4230bfbfc5bf186f90fbf2383b9e7f",
+      "lines": 8,
+      "readRanges": [
+        [
+          1,
+          8
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "protectedSourceEndDrift": {
+    "expectedSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "actualSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "changed": false,
+    "parentProbe": "No execution/rewrite of parent-baseline.mjs/json; independently reproduced via own script. Current hashes in files[].",
+    "writeScope": "Only pin-matching scratch and this final pin-matching-experiment.json. All pre-existing unrelated git changes left intact."
+  },
+  "pendingAcceptance": [
+    "Parent independent source/experiment review",
+    "Browser/native behavior acceptance if ever adopted",
+    "Physical peak/live memory and whole-browser CPU acceptance",
+    "Resolve or explicitly reject exported getter/reentrant semantic differences before adoption"
+  ]
+}

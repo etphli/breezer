@@ -1,0 +1,218 @@
+{
+  "status": "CURRENT AUTHORED SOURCE READ COVERAGE COMPLETE; LOCAL CHECKS PASS; NATIVE ACCEPTANCE OPEN",
+  "sourceHashes": {
+    "features/ai/extension/newtab.js": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+    "features/ai/extension/workspace-sync-model.js": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+    "features/ai/extension/workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "features/ai/host/claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+    "features/ai/host/organato.mjs": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+    "script/check_ai_overlay.py": "da31357b31935e60c5f6073ec667da6f7e01708f1a88b2156282932d7d9784da",
+    "script/inventory_efficiency_sources.py": "7417cf86df38299eedb23a3d8556c0505b6a011c09537016d38b6f85f52132e2",
+    "script/verify_stream_render_efficiency.mjs": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+    "script/windows/apply-memory-update.py": "e93e3f4965bd2cd5304bad49bd4d72cef7992f04a1acf9a7ddab19ad081c91d9",
+    "script/windows/unattended_build.py": "4671e199ba69e206de82f0f57f60873fbfdd82fef357149f25a5255696efaceb",
+    "tests/ai/claude-streaming.test.mjs": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874",
+    "tests/ai/fixtures/render-message-before.js": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+    "tests/ai/harness-cleanup.test.mjs": "b944db3a18dabb39a8d2b3d8192302d4c9d7de0739660f38ce93408b6beeb54f",
+    "tests/ai/newtab-race.test.mjs": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea",
+    "tests/ai/organato-response.test.mjs": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5",
+    "tests/ai/overlay_fetch_test.py": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a",
+    "tests/ai/stream-render.test.mjs": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+    "tests/ai/workspace-browser.test.mjs": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37",
+    "tests/sync/provider-lifecycle.test.mjs": "9905219d310b0f9a6a7c873f4c266f7c1997666745047c66fba4e111fe1ca608",
+    "tests/sync/provider.test.mjs": "3a10b38160a5d5ac83937ffeec101cfe2fea1262df3e7bc7e938d48fb29ee8a0",
+    "tests/windows/memory_update_test.py": "80fa75ad2e4bfad707f55cfcb1aa115c86180dc6e70b1a67a1d4b5e1b106d1ac",
+    "tests/windows/unattended_build_test.py": "28320571935d461cf8065dc2c4f08609da03d064affd94e475afe389b1c26143",
+    "features/ai/host/codex.mjs": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+    "tests/ai/codex-cancellation.test.mjs": "d5a2c188f54083bed4bc2aa33b4eb6864db80b1e87703a52d0bb190124b59e94",
+    "tests/ai/codex-process-cancellation.test.mjs": "b5ed3c9326b6a9c1cc3c89da7ac4817b806bede91da83810067ad550904c1606",
+    "tests/ai/host.test.mjs": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+    "features/ai/host/cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+    "script/summarize_native_transport.py": "d74d995257f998428972f206693f8bf1c910fa338d9d6d921797eea308d8d83a",
+    "script/benchmark_native_transport.mjs": "02bf990ce3b2aa9ba2e70ab2a0449f94f0a89cfd0b646824da39ae7c550d4a76",
+    "script/native_transport_diagnostic.mjs": "8c5bae242b736b48d5a04fd0db0df091d802235ad91cbf88f8332730d67adcf3",
+    "script/macos_process_usage.c": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+    "tests/native_transport_summary_test.py": "fd9711a768291ead5ffe46ad2f538f054d12465d6677a1990081ba9608b06491",
+    "tests/ai/native-transport-lifecycle.test.mjs": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925",
+    "tests/ai/settings.test.mjs": "4eb295c4b44d73c7f755e091cb4909d8797ce280dff3a0103a251759a833c181",
+    "tests/ai/newtab-browser.test.mjs": "430347bf565e7463821083ec5be175cfdc44c897ffb63e5ea42352fef5074f5f",
+    "tests/ai/onboarding-browser.test.mjs": "654b5967e94ee0edd25904316ebb7fbfcbd486774ee0b96e20d7438e53acacd4",
+    "tests/ai/whats-new-browser.test.mjs": "f95c359da6207b443588b8a74d7cf3e32366f2e8d8945f95a198f7cd0ce5f924",
+    "tests/ai/workspace-frame.test.mjs": "2e852d6becbc8ebbc92596a2a1593f752f0afb2a22d8564bc3dc792431985615",
+    "tests/ai/panel-browser.mjs": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+    "tests/ai/research-browser.mjs": "0169039ebd5332f09755afcadfef874d69fc5ca3740a15e168e63dbaa1e24f06",
+    "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "features/ai/extension/page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "script/verify_workspace_tab_updates.mjs": "22f3e1a2a9daff54923db48febaedce7dba234b8123057a4084db89534774cf4",
+    "tests/ai/workspace-tab-update-efficiency.test.mjs": "f5cb182c6c8433501068beea3a243cc6d210e4ce7f85c6582f815344155c0bcf",
+    "tests/ai/page-snapshot-efficiency.test.mjs": "6504cd51534735045d190e1a4aa0cbcfe607c111229e80f2aa99c33ab2a7621d",
+    "tests/ai/browser-page.mjs": "9b48da7fd9e3b8005a8b49e2196658cd611038d85283835e7498fcd721caf096",
+    "tests/ai/docs-editor-browser.mjs": "5010842cdb1a8f369cf63cb8edea97083cc826d7dc8f7e57c81e3b10916ed774",
+    "script/verify_cli_fragment_efficiency.mjs": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87",
+    "tests/ai/cli-fragment-buffer.test.mjs": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+    "tests/ai/fixtures/cli-before.mjs": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+    "script/windows/prepare-efficiency-packet.py": "dd73e9d39901a2414266fe8e381f0670154a83de6f037d457d2f4f3397af538e",
+    "tests/windows/unattended_cleanup_test.py": "a2809528cb0876d50e40d1d5ac0d78da94b06d6ad91f5ab337c31be976319342"
+  },
+  "syncTests": {
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0,
+    "runtimes": [
+      "v22.14.0",
+      "v24.22.1"
+    ],
+    "logs": [
+      "sync-all-after.tap",
+      "sync-all-pinned.tap"
+    ]
+  },
+  "windowsTests": {
+    "passed": 30,
+    "skipped": 1,
+    "failed": 0,
+    "skipReason": "Linux orphan adoption awaits PC",
+    "log": "windows-cleanup-complete.log"
+  },
+  "evidenceScope": "Operation counts, deterministic fake bridge/storage, fault injection and local supervisor fixtures. Not native browser RAM/CPU or whole-feature acceptance.",
+  "packet": {
+    "resources": 9,
+    "baselineSource": "Cached latest-combined-1.2.0-inputs.json only; no PC contact",
+    "allHashesChecked": true,
+    "deployed": false,
+    "hostModules": 11,
+    "includesCleanupFaultTests": true
+  },
+  "objections": [
+    "No native whole-browser RAM/CPU or broad native acceptance",
+    "Remaining source/changed-file reviews pending",
+    "Large single render blocks remain expensive",
+    "Quadratic translation pruning retained after a rejected behavior-changing candidate",
+    "Recovery guard CPU/peak-memory tradeoff remains unmeasured"
+  ],
+  "syncReview": {
+    "model": "GPT-6.1 Sol high, serviceTier default",
+    "report": "sync-fixes-review.json",
+    "introducedCorrectnessFindings": [],
+    "evidenceCorrection": "README byte count corrected to reusable probe result",
+    "objections": [
+      "Storage submission/serialization tradeoff unmeasured",
+      "Inherited artificial partial multi-key write recovery limitation; Chrome reachability unproved"
+    ]
+  },
+  "combinedOffline": {
+    "passed": 346,
+    "failed": 0,
+    "skipped": 0,
+    "runtime": "v24.22.1",
+    "log": "combined-final-local.tap",
+    "command": "combined-cli-command.json"
+  },
+  "browserFixtures": {
+    "report": "browser-results.json",
+    "allCommandsExitZero": true,
+    "scope": "Sequential disposable Chrome/Chromium fixtures and real isolated-world GC; no native app or whole-browser efficiency claim",
+    "liveTranslationProvider": "Skipped",
+    "additionalLogs": [
+      "newtab-browser-review-fixed.log",
+      "workspace-route-cleanup-browser.tap"
+    ],
+    "newtabAfterFreshnessFix": {
+      "passed": 3,
+      "failed": 0
+    },
+    "routeAfterCleanupFix": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "packaging": {
+    "memoryReceiptTests": 8,
+    "archiveTests": 5,
+    "hostModules": 11,
+    "extensionResources": 9,
+    "allPacketHashesMatchCurrentSources": true,
+    "deployed": false,
+    "log": "memory-package-final-audit-fixes.log"
+  },
+  "coordinatorChanges": [
+    "New-tab same-bucket resize guard with retry and delayed-initial-filter coverage",
+    "Expired toast callback release preserving active Undo",
+    "Actual panel streaming prefix/scroll/final-output browser assertions",
+    "Host receipt expanded from decoder only to every host JavaScript module"
+  ],
+  "checkedAtUtc": "2026-11-03T01:10:40.806418+00:00",
+  "cleanupChecks": {
+    "runtime": "v24.22.1",
+    "nodePassed": 9,
+    "pythonPassed": 3,
+    "failed": 0,
+    "logs": [
+      "harness-cleanup-after-pinned.tap",
+      "overlay-fetch-after.log"
+    ],
+    "scope": "Fault injection into actual registered test callbacks, owned loopback servers, disposable children, fake curl, and existing local dummy-provider CAS test."
+  },
+  "reviewResolutions": "review-resolutions.json",
+  "blockedVerification": [
+    {
+      "check": "python3 script/check_ai_overlay.py --offline",
+      "reason": "Pinned offline source fixture absent in this checkout",
+      "log": "overlay-offline-review-fixed.log",
+      "networkAttempted": false
+    }
+  ],
+  "coverage": {
+    "snapshot": "source-inventory-final-local.json",
+    "snapshotSha256": "f72667d6d54c2fdf6dbeff3b6f77227641065364c4ff46dff95f3b8e5644efe1",
+    "report": "coverage.json",
+    "complete": true,
+    "statusCounts": {
+      "fully-read": 282
+    },
+    "meaning": "Checks the consistency of reviewer coverage claims and current source bytes; does not prove correctness or runtime performance.",
+    "scope": "Breezer-authored feature, script and test sources in this checkout, including current uncommitted files. Excludes vendored upstream code, generated build trees, binary assets, documentation and marketing sites."
+  },
+  "codexCancellation": {
+    "record": "codex-cancellation-integration.json",
+    "implementation": "codex-cancellation-implementation.json",
+    "independentReview": "75 focused checks pass; no actionable introduced correctness finding",
+    "securityPreflightRetained": true,
+    "wholeBrowserGainMeasured": false,
+    "review": "codex-cancellation-review.json"
+  },
+  "transportValidation": {
+    "record": "transport-and-audit-integration.json",
+    "rawTrialsValidated": 60,
+    "historicalSummaryUnchanged": true,
+    "passed": 15,
+    "newPerformanceMeasurements": false
+  },
+  "auditFollowup": {
+    "nodePassed": 27,
+    "browserHarnessCleanupPassed": 14,
+    "record": "transport-and-audit-integration.json"
+  },
+  "workspacePage": {
+    "record": "workspace-page-integration.json",
+    "workspaceOfflinePassed": 39,
+    "workspaceBrowserPassed": 9,
+    "pageOfflinePassed": 56,
+    "pageDifferentialCases": 12,
+    "harnessCleanupPassed": 18,
+    "independentReview": "No actionable introduced findings",
+    "review": "workspace-page-review.json"
+  },
+  "cliFragment": {
+    "record": "cli-fragment-integration.json",
+    "independentReview": "No reachable production regression; ten tests and 800 differential cases passed",
+    "fixtureOnlyFreshCheckoutPassed": 10,
+    "review": "cli-fragment-review.json"
+  },
+  "finalAuditFixes": "final-audit-fixes.json",
+  "panelExperiment": {
+    "report": "panel-rendering-experiment-report.json",
+    "decision": "rejected",
+    "productionChange": false
+  }
+}

@@ -1,0 +1,1764 @@
+{
+  "scope": "Breezer-authored feature, script and test sources in this checkout, including current uncommitted files. Excludes vendored upstream code, generated build trees, binary assets, documentation and marketing sites.",
+  "files": [
+    {
+      "path": "features/ai/extension/background.js",
+      "owner": "extension-services",
+      "lines": 450,
+      "sha256": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1"
+    },
+    {
+      "path": "features/ai/extension/browser-tools.js",
+      "owner": "page-content",
+      "lines": 445,
+      "sha256": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9"
+    },
+    {
+      "path": "features/ai/extension/context-background.js",
+      "owner": "extension-services",
+      "lines": 113,
+      "sha256": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c"
+    },
+    {
+      "path": "features/ai/extension/context-memory.js",
+      "owner": "extension-services",
+      "lines": 182,
+      "sha256": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff"
+    },
+    {
+      "path": "features/ai/extension/context-settings.js",
+      "owner": "extension-services",
+      "lines": 148,
+      "sha256": "aef2ab4366e03ad24ce6f09d71c450c055d399bfdd39a4ae97171f6a28138ddd"
+    },
+    {
+      "path": "features/ai/extension/efficiency.html",
+      "owner": "extension-services",
+      "lines": 56,
+      "sha256": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583"
+    },
+    {
+      "path": "features/ai/extension/manifest.json",
+      "owner": "extension-services",
+      "lines": 80,
+      "sha256": "1af101cafd9affa491dbc6793537bd5e86199c74d56edfb4d656b21173157036"
+    },
+    {
+      "path": "features/ai/extension/model-catalog.js",
+      "owner": "extension-services",
+      "lines": 88,
+      "sha256": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae"
+    },
+    {
+      "path": "features/ai/extension/newtab.css",
+      "owner": "workspace",
+      "lines": 379,
+      "sha256": "8cb4956de440b8f2b19004e8c45cd23b1d4a2a6e6e91727ebe52d51302c63515"
+    },
+    {
+      "path": "features/ai/extension/newtab.html",
+      "owner": "workspace",
+      "lines": 58,
+      "sha256": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91"
+    },
+    {
+      "path": "features/ai/extension/newtab.js",
+      "owner": "workspace",
+      "lines": 518,
+      "sha256": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62"
+    },
+    {
+      "path": "features/ai/extension/onboarding.css",
+      "owner": "workspace",
+      "lines": 452,
+      "sha256": "c531c5a275791a22c8821d4e209fe2eea9eddc62bf8db3ac61be1d5199f7ecc8"
+    },
+    {
+      "path": "features/ai/extension/onboarding.js",
+      "owner": "workspace",
+      "lines": 447,
+      "sha256": "fb3755f786c8b846ab2bfbef2019067a7349f48662f0ee7da32402ef8107f6ec"
+    },
+    {
+      "path": "features/ai/extension/page-context.js",
+      "owner": "page-content",
+      "lines": 236,
+      "sha256": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4"
+    },
+    {
+      "path": "features/ai/extension/panel-theme.js",
+      "owner": "extension-services",
+      "lines": 64,
+      "sha256": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d"
+    },
+    {
+      "path": "features/ai/extension/panel.css",
+      "owner": "extension-services",
+      "lines": 1049,
+      "sha256": "60ed6d66b3c003715ab48b07b12b9e9b4ed8aa2c6c21b49578ae9d181a448bd8"
+    },
+    {
+      "path": "features/ai/extension/panel.html",
+      "owner": "extension-services",
+      "lines": 100,
+      "sha256": "905e0cca4b2fa08f96b1202713f2e595683c2d4a91474e69168b8bb9e73a1a94"
+    },
+    {
+      "path": "features/ai/extension/panel.js",
+      "owner": "extension-services",
+      "lines": 676,
+      "sha256": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2"
+    },
+    {
+      "path": "features/ai/extension/passwords.js",
+      "owner": "extension-services",
+      "lines": 140,
+      "sha256": "3979b082536176acfc177b63ee1b0d5189ae2333747ea21d698c799fcbd54685"
+    },
+    {
+      "path": "features/ai/extension/release-info.js",
+      "owner": "extension-services",
+      "lines": 3,
+      "sha256": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf"
+    },
+    {
+      "path": "features/ai/extension/release-notes.js",
+      "owner": "extension-services",
+      "lines": 39,
+      "sha256": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d"
+    },
+    {
+      "path": "features/ai/extension/render-message.js",
+      "owner": "extension-services",
+      "lines": 157,
+      "sha256": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35"
+    },
+    {
+      "path": "features/ai/extension/research-policy.js",
+      "owner": "page-content",
+      "lines": 28,
+      "sha256": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c"
+    },
+    {
+      "path": "features/ai/extension/research-sources.js",
+      "owner": "page-content",
+      "lines": 97,
+      "sha256": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4"
+    },
+    {
+      "path": "features/ai/extension/settings-nav.js",
+      "owner": "workspace",
+      "lines": 393,
+      "sha256": "38600a1e45f189d613a59d84b195058568911ecfa3f52e26205b4c7d4117381d"
+    },
+    {
+      "path": "features/ai/extension/settings-onboarding.js",
+      "owner": "workspace",
+      "lines": 149,
+      "sha256": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae"
+    },
+    {
+      "path": "features/ai/extension/settings.js",
+      "owner": "workspace",
+      "lines": 543,
+      "sha256": "676a570b36fa8906babf21f669b9932131d89d2d65bab8a4e121fcca44e15697"
+    },
+    {
+      "path": "features/ai/extension/setup-state.js",
+      "owner": "workspace",
+      "lines": 15,
+      "sha256": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b"
+    },
+    {
+      "path": "features/ai/extension/shortcut-add.js",
+      "owner": "extension-services",
+      "lines": 83,
+      "sha256": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d"
+    },
+    {
+      "path": "features/ai/extension/sync-settings.js",
+      "owner": "native-and-sync",
+      "lines": 84,
+      "sha256": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12"
+    },
+    {
+      "path": "features/ai/extension/top-sites.js",
+      "owner": "extension-services",
+      "lines": 99,
+      "sha256": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1"
+    },
+    {
+      "path": "features/ai/extension/translation-background.js",
+      "owner": "page-content",
+      "lines": 97,
+      "sha256": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9"
+    },
+    {
+      "path": "features/ai/extension/translation-content.js",
+      "owner": "page-content",
+      "lines": 146,
+      "sha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d"
+    },
+    {
+      "path": "features/ai/extension/translation-provider.js",
+      "owner": "page-content",
+      "lines": 67,
+      "sha256": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c"
+    },
+    {
+      "path": "features/ai/extension/translation-settings.js",
+      "owner": "page-content",
+      "lines": 55,
+      "sha256": "52c2bc5f07850d7655980ddf7b24b9b0bf220987cd616ded83d573f725f614d5"
+    },
+    {
+      "path": "features/ai/extension/translation.css",
+      "owner": "page-content",
+      "lines": 22,
+      "sha256": "d06c697dd99e6ec0521bdcb1fa5f04000f0d20db1c793c504f6fc46d3c48c44f"
+    },
+    {
+      "path": "features/ai/extension/translation.html",
+      "owner": "page-content",
+      "lines": 33,
+      "sha256": "081b8d10030b90ba203e4ccb8636868ce9e524833827e247ba6a0e717cbac59f"
+    },
+    {
+      "path": "features/ai/extension/translation.js",
+      "owner": "page-content",
+      "lines": 70,
+      "sha256": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a"
+    },
+    {
+      "path": "features/ai/extension/usage-settings.js",
+      "owner": "extension-services",
+      "lines": 36,
+      "sha256": "96fd12e6109982522a695554c569e1911738b30b3deb6fa96d640a92948d3d27"
+    },
+    {
+      "path": "features/ai/extension/usage.js",
+      "owner": "extension-services",
+      "lines": 73,
+      "sha256": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3"
+    },
+    {
+      "path": "features/ai/extension/whats-new.css",
+      "owner": "extension-services",
+      "lines": 795,
+      "sha256": "324bdec4f90c813ce51f143280af4c936399d8798fa06a5d67a36c8e97798c1d"
+    },
+    {
+      "path": "features/ai/extension/whats-new.html",
+      "owner": "extension-services",
+      "lines": 628,
+      "sha256": "e71fcd8ac23120dcb4f76c014b22bba8e3884b8dd218c009a4d5314921b94391"
+    },
+    {
+      "path": "features/ai/extension/whats-new.js",
+      "owner": "extension-services",
+      "lines": 48,
+      "sha256": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25"
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "owner": "workspace",
+      "lines": 664,
+      "sha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81"
+    },
+    {
+      "path": "features/ai/extension/workspace-sync-model.js",
+      "owner": "native-and-sync",
+      "lines": 206,
+      "sha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c"
+    },
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "owner": "native-and-sync",
+      "lines": 204,
+      "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+    },
+    {
+      "path": "features/ai/extension/workspace.css",
+      "owner": "workspace",
+      "lines": 1092,
+      "sha256": "5b2007277a3cbd5fdd3ac2c26fff5a044d9282451841231110deb5fb767a08c9"
+    },
+    {
+      "path": "features/ai/extension/workspace.html",
+      "owner": "workspace",
+      "lines": 507,
+      "sha256": "8ed520d8ac4d2df8d22dec5b79a7ad6868e87bdca2275833d53f9b0a8197dcf5"
+    },
+    {
+      "path": "features/ai/extension/workspace.js",
+      "owner": "workspace",
+      "lines": 1586,
+      "sha256": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670"
+    },
+    {
+      "path": "features/ai/host/claude.mjs",
+      "owner": "native-host",
+      "lines": 212,
+      "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384"
+    },
+    {
+      "path": "features/ai/host/cli.mjs",
+      "owner": "native-host",
+      "lines": 108,
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9"
+    },
+    {
+      "path": "features/ai/host/codex.mjs",
+      "owner": "native-host",
+      "lines": 312,
+      "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba"
+    },
+    {
+      "path": "features/ai/host/context-controller.mjs",
+      "owner": "native-host",
+      "lines": 46,
+      "sha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de"
+    },
+    {
+      "path": "features/ai/host/context-summary.mjs",
+      "owner": "native-host",
+      "lines": 76,
+      "sha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337"
+    },
+    {
+      "path": "features/ai/host/controller.mjs",
+      "owner": "native-host",
+      "lines": 94,
+      "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51"
+    },
+    {
+      "path": "features/ai/host/launch.sh",
+      "owner": "native-host",
+      "lines": 12,
+      "sha256": "431732c907e70cf5ec066742fdb4b51d02015e3c8362a0ede30b168b4e2d6b2a"
+    },
+    {
+      "path": "features/ai/host/main.mjs",
+      "owner": "native-host",
+      "lines": 60,
+      "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d"
+    },
+    {
+      "path": "features/ai/host/organato.mjs",
+      "owner": "native-host",
+      "lines": 136,
+      "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7"
+    },
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "owner": "native-host",
+      "lines": 162,
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e"
+    },
+    {
+      "path": "features/ai/host/update-worker.mjs",
+      "owner": "native-host",
+      "lines": 108,
+      "sha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f"
+    },
+    {
+      "path": "features/ai/host/updater.mjs",
+      "owner": "native-host",
+      "lines": 109,
+      "sha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+    },
+    {
+      "path": "features/ai/integration/identity.json",
+      "owner": "native-host",
+      "lines": 5,
+      "sha256": "5edf973b0dc8efcea27b7f62a3754ba2085533b9989a8ec5390d866c67ec11f0"
+    },
+    {
+      "path": "features/ai/integration/native-host-manifest.json",
+      "owner": "native-host",
+      "lines": 9,
+      "sha256": "1ce539c8987f93a3de6eb6896f3cb53ec862d005d3c9ff319c27be4f8ff2de49"
+    },
+    {
+      "path": "features/ai/native-ui/sidebar.patch",
+      "owner": "native-host",
+      "lines": 147,
+      "sha256": "114aaead2cbcf04028dad3d144575f6762d2447bc1e9c9ed3bd24cfc0a0aabf4"
+    },
+    {
+      "path": "features/ai/package.json",
+      "owner": "native-host",
+      "lines": 5,
+      "sha256": "bf95b25a7c19b6edd12c10400d6253df1a93e38d1da878726973d6fda2253b72"
+    },
+    {
+      "path": "features/ai/runtime.lock.json",
+      "owner": "native-host",
+      "lines": 16,
+      "sha256": "e87f7debf1c745c20ae085c14ad3489be15f429d02be12848b765798d14d7cc8"
+    },
+    {
+      "path": "features/omnibox/omnibox-suggestions.patch",
+      "owner": "native-and-sync",
+      "lines": 552,
+      "sha256": "6332f94dad6c29eec2e6e29708a256f3afc759b0ded64d7a94ece48849060bf8"
+    },
+    {
+      "path": "features/omnibox/upstream.json",
+      "owner": "native-and-sync",
+      "lines": 17,
+      "sha256": "ef5f46b821ba7209d3e4d6cced3c15abcc589e06b2665057863b2bec1bce705c"
+    },
+    {
+      "path": "features/passwords/native-ui/apply.py",
+      "owner": "native-and-sync",
+      "lines": 139,
+      "sha256": "e238cde7c0d26bb8dfaa69103bd351784ec3de58ed38d606ac31a2ca843838dd"
+    },
+    {
+      "path": "features/passwords/native-ui/password-manager.patch",
+      "owner": "native-and-sync",
+      "lines": 607,
+      "sha256": "624a3e5dfce066fc9b4cfc1dd37a607f89ea4f341f28801b4ede44923690c5b5"
+    },
+    {
+      "path": "features/passwords/native-ui/upstream.json",
+      "owner": "native-and-sync",
+      "lines": 66,
+      "sha256": "b1e7151130bf42f53232ba321a95f8a197a98accf80a5185c7ad36e0f253f58f"
+    },
+    {
+      "path": "features/performance/compiled-filter-context.js",
+      "owner": "native-and-sync",
+      "lines": 48,
+      "sha256": "9ef7c5d20c23dc95b1a66c254cfd0463a89aca59a85117de603b928261e89cda"
+    },
+    {
+      "path": "features/performance/compiled-filter-lists.mjs",
+      "owner": "native-and-sync",
+      "lines": 77,
+      "sha256": "98166a03e1141733b3a62f458d65021fc221bb38bd062e3a7c8429b77ada8b6a"
+    },
+    {
+      "path": "features/storage/code-sign-clones/apply.py",
+      "owner": "native-and-sync",
+      "lines": 117,
+      "sha256": "1d5e12a270444629e8bc05fcfa6d6f0abf0e1183f1f001b5654b7e4afa99f37e"
+    },
+    {
+      "path": "features/storage/code-sign-clones/clone_session.h",
+      "owner": "native-and-sync",
+      "lines": 267,
+      "sha256": "55e35e55a0aab36f1501cefbf7541b9b791090ca9537d00bc5646385fc88894c"
+    },
+    {
+      "path": "features/storage/code-sign-clones/code-sign-clones.patch",
+      "owner": "native-and-sync",
+      "lines": 167,
+      "sha256": "3ae2d630a830ef3487a392a5be2d763418e76e1c699d35baf00f22fba720f4f3"
+    },
+    {
+      "path": "features/storage/code-sign-clones/upstream.json",
+      "owner": "native-and-sync",
+      "lines": 10,
+      "sha256": "8a600940bece5559f08bb70780c3002d9323b5b246c04893cddfb37273067eea"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/backend.cc",
+      "owner": "native-and-sync",
+      "lines": 261,
+      "sha256": "b2c4c100f29c6cc30e33158eee31df1c64c8ee2504bad6e43bfff85ed7b0ab77"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/backend.h",
+      "owner": "native-and-sync",
+      "lines": 21,
+      "sha256": "dd2639e7afd2cdd12ac8cc43a1fb57d8d06842592c36799e4c6f500f5429c4a5"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/prefs.h",
+      "owner": "native-and-sync",
+      "lines": 7,
+      "sha256": "428eebd9477d0256cf1c4a6adb797b7ba94412c0acd4ed0e3df97bfd71bd215f"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+      "owner": "native-and-sync",
+      "lines": 165,
+      "sha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.h",
+      "owner": "native-and-sync",
+      "lines": 22,
+      "sha256": "96494d6343c185f776ff7ed696e77d2ae7c3acb1066cb5e11afbac942effa0d0"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/ui/webui/breezer_sync/BUILD.gn",
+      "owner": "native-and-sync",
+      "lines": 23,
+      "sha256": "c27b27e4949991d23eceef05e7f0cf908d63bca8c2232d891c41e562656e8b03"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc",
+      "owner": "native-and-sync",
+      "lines": 353,
+      "sha256": "df85a9c191c1f7013e940600b514b2f33a951e94838ee870fc7d0828697114c9"
+    },
+    {
+      "path": "features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.h",
+      "owner": "native-and-sync",
+      "lines": 18,
+      "sha256": "c66861770eaaad8d445f192e7d85613e6ab9db6c05ea048bdfc7e0956a683615"
+    },
+    {
+      "path": "features/sync/setup/setup.css",
+      "owner": "native-and-sync",
+      "lines": 3,
+      "sha256": "496e0141ea78da17e470060b647997b2fedda4c84ebdbb11621a1b447c4ac3eb"
+    },
+    {
+      "path": "features/sync/setup/setup.html",
+      "owner": "native-and-sync",
+      "lines": 35,
+      "sha256": "0d2052759a8af17ca7395341da08eb086a903201d0733ca3508478dc14a26e67"
+    },
+    {
+      "path": "features/sync/setup/setup.js",
+      "owner": "native-and-sync",
+      "lines": 79,
+      "sha256": "8f851cde549caf1e50e2a1acf50d39b62c114b8771133e1e97bdfd631108fe91"
+    },
+    {
+      "path": "features/sync/test-provider/extension/background.js",
+      "owner": "native-and-sync",
+      "lines": 2,
+      "sha256": "20c5914b7f099d29f49f05b0fb54025f11c5cfc67c73c18c96bb1743b9561740"
+    },
+    {
+      "path": "features/sync/test-provider/extension/manifest.json",
+      "owner": "native-and-sync",
+      "lines": 14,
+      "sha256": "43a538bcd0f3e88e7aa30710b9264b30bce84a4a410bd9a4f52998d99a207526"
+    },
+    {
+      "path": "features/sync/test-provider/extension/options.html",
+      "owner": "native-and-sync",
+      "lines": 9,
+      "sha256": "9b79519921a6c258916b47f82360b90619d6dd460761b96dd8121400559ff916"
+    },
+    {
+      "path": "features/sync/test-provider/extension/options.js",
+      "owner": "native-and-sync",
+      "lines": 14,
+      "sha256": "ec43efb88c1ef79d2d24335f2ba27005684cea4204c167ea2d1ce80f8593d6a8"
+    },
+    {
+      "path": "features/sync/test-provider/extension/package.json",
+      "owner": "native-and-sync",
+      "lines": 1,
+      "sha256": "ad91c9ac9136396f5249a45e093bab863e9a23646620d911af827986f6180283"
+    },
+    {
+      "path": "features/sync/test-provider/extension/provider.js",
+      "owner": "native-and-sync",
+      "lines": 84,
+      "sha256": "632c3f757ad70b14404ae68f2a5fc64b2d776443536183e885527f4033b1f601"
+    },
+    {
+      "path": "features/sync/test-provider/server.py",
+      "owner": "native-and-sync",
+      "lines": 199,
+      "sha256": "abc1caae982deeefa24d4522539b938cde7eb108c61dc3a38b0efb4b2eca5951"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/BUILD.gn",
+      "owner": "native-and-sync",
+      "lines": 41,
+      "sha256": "22b1ed9487c4410d0a61b938414ba7c03064ac5ee128c8661e3c36fc7d9c6be3"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+      "owner": "native-and-sync",
+      "lines": 712,
+      "sha256": "6939c92cc59887708166f10cc035f7b06d9af53ca294a7ae76a6d2767d50b79d"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.h",
+      "owner": "native-and-sync",
+      "lines": 122,
+      "sha256": "0766a16f80936831b332165f095eae78573acd152edcbc8bb7bc3154e1aec3ba"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h",
+      "owner": "native-and-sync",
+      "lines": 29,
+      "sha256": "b065a29cff92c5980e86bb037fb77aa1519d5b0b31642d5b0dd185d6d1640efb"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/workspace_sync_api.cc",
+      "owner": "native-and-sync",
+      "lines": 80,
+      "sha256": "a278785364fa904271f3923f55071590ef30d79785414a1f594803994b527ec6"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/helium/breezer_workspace_prefs.h",
+      "owner": "native-and-sync",
+      "lines": 50,
+      "sha256": "e9c54f58f281395fef004d25ba5b8332ebddc529afb5b9e6896481d8f335e422"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/BUILD.gn",
+      "owner": "native-and-sync",
+      "lines": 38,
+      "sha256": "5b39b93ab3413b9c85d0569f8ecfa469135be3f209df854b98738b8e8b3a77ad"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.cc",
+      "owner": "native-and-sync",
+      "lines": 725,
+      "sha256": "4cbf8c741c40b4e63d475b89b6f309f9c24a45500c746bb7fc248371fcab6309"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.h",
+      "owner": "native-and-sync",
+      "lines": 63,
+      "sha256": "622e738a7e56d976f59162569878ec2f97f90c93d4939e03bffa7afa51440c79"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.cc",
+      "owner": "native-and-sync",
+      "lines": 349,
+      "sha256": "cd7899e086166a97f4c7d528a665d180d2543ae54c901e1cbcbecdab07af2c62"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.h",
+      "owner": "native-and-sync",
+      "lines": 142,
+      "sha256": "7ee35eb7194873c1ee69a89cded3c49a3d2fb3bc10a09b84900686d00f230b3b"
+    },
+    {
+      "path": "features/workspace/native/chrome/common/extensions/api/breezer_private.idl",
+      "owner": "native-and-sync",
+      "lines": 131,
+      "sha256": "56c0c2caddb728f19216fbe2abbe5749f8e7cb9cdae3392fb925d7ad36507d97"
+    },
+    {
+      "path": "script/apply_breezer_ai.py",
+      "owner": "build-tools",
+      "lines": 223,
+      "sha256": "1df165d8aac3efdba5e90af242e09f176f4bd66d4ccb25d00d50a447b862ce08"
+    },
+    {
+      "path": "script/apply_breezer_ai_ui.py",
+      "owner": "build-tools",
+      "lines": 137,
+      "sha256": "46e6a197bd55c808d83277ac192722d30170f9e44f96fdc9447bd36cfdd4dbc0"
+    },
+    {
+      "path": "script/apply_breezer_branding.py",
+      "owner": "build-tools",
+      "lines": 224,
+      "sha256": "7da097870b000a4007122ae184ceba50c86a6b4ba1ef0818d29d40a39fafb388"
+    },
+    {
+      "path": "script/apply_breezer_filter_lists.py",
+      "owner": "build-tools",
+      "lines": 180,
+      "sha256": "ca115e5941f73d407e3dd7199a2096a7fda606b859bc092b0dd40918ed222fb0"
+    },
+    {
+      "path": "script/apply_breezer_omnibox.py",
+      "owner": "build-tools",
+      "lines": 138,
+      "sha256": "47a5caffadb0a0f84b3e631ecf7d84d641ce47c54d34e5956a472fa9cbd5b741"
+    },
+    {
+      "path": "script/apply_breezer_sync.py",
+      "owner": "build-tools",
+      "lines": 191,
+      "sha256": "2c755747907b4eac2d4d39b6de18eff9d9b9e2edb27558b05e2cc7aeb9891dfc"
+    },
+    {
+      "path": "script/apply_breezer_workspace.py",
+      "owner": "build-tools",
+      "lines": 864,
+      "sha256": "d7adbda10683608f2fcbf01a62e7deacd511672fecedb4e620a375656393e0e4"
+    },
+    {
+      "path": "script/benchmark_browsers.mjs",
+      "owner": "build-tools",
+      "lines": 774,
+      "sha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112"
+    },
+    {
+      "path": "script/benchmark_native_transport.mjs",
+      "owner": "build-tools",
+      "lines": 101,
+      "sha256": "02bf990ce3b2aa9ba2e70ab2a0449f94f0a89cfd0b646824da39ae7c550d4a76"
+    },
+    {
+      "path": "script/benchmark_workspace.mjs",
+      "owner": "build-tools",
+      "lines": 28,
+      "sha256": "6e13431151c7e1e56766e52e80d83135790154d632099a6889ab5e801cc6e202"
+    },
+    {
+      "path": "script/breezer_build_profile.py",
+      "owner": "build-tools",
+      "lines": 74,
+      "sha256": "100cb5d2c181f6713ab26d044eb521d0b7a94e87144e45b15692bff9f433e06a"
+    },
+    {
+      "path": "script/breezer_filter_lists.mjs",
+      "owner": "build-tools",
+      "lines": 92,
+      "sha256": "29e66bf5031cdcb5b3b5d20566592347874ebe66aca9fb0f08c788c4bc0059cb"
+    },
+    {
+      "path": "script/breezer_preparation.py",
+      "owner": "build-tools",
+      "lines": 88,
+      "sha256": "0045977701aa606815002854b1bf92cf37026b591818327014569dfd997ddfe7"
+    },
+    {
+      "path": "script/breezer_release.py",
+      "owner": "build-tools",
+      "lines": 17,
+      "sha256": "cef6d49cb0b74ef33562a962b9f5f2954d83e4c50a64ac9451a31ee0ff3c468b"
+    },
+    {
+      "path": "script/breezer_sidebar_frame.py",
+      "owner": "build-tools",
+      "lines": 527,
+      "sha256": "99305e5af919beef8426e054549bee377d7aac5356bec80455f40bc295761640"
+    },
+    {
+      "path": "script/build_and_run.sh",
+      "owner": "build-tools",
+      "lines": 267,
+      "sha256": "50fb628b73fac02379c18cf1b459cb1abf4c1d792dc7e256edf51c852c6c1259"
+    },
+    {
+      "path": "script/check_ai_overlay.py",
+      "owner": "build-tools",
+      "lines": 188,
+      "sha256": "da31357b31935e60c5f6073ec667da6f7e01708f1a88b2156282932d7d9784da"
+    },
+    {
+      "path": "script/check_ai_packaging.py",
+      "owner": "build-tools",
+      "lines": 84,
+      "sha256": "8a49930fcd155236b66136832d98031c810599f18c35dd8c64a4cc4d69537103"
+    },
+    {
+      "path": "script/check_branding.py",
+      "owner": "build-tools",
+      "lines": 91,
+      "sha256": "8cca7924300e1b466d0d0a0e73149ed3a5a0f4b459e4f055852de07d0b4dabfc"
+    },
+    {
+      "path": "script/check_breezer_ai_ui.py",
+      "owner": "build-tools",
+      "lines": 53,
+      "sha256": "d40bedb6c340b69af9ebe59d21e8ffd41ead51040ed9393dc99fb3df9d997984"
+    },
+    {
+      "path": "script/check_breezer_build_profile.py",
+      "owner": "build-tools",
+      "lines": 196,
+      "sha256": "edf1252ec26fd0f9454ae8346ab67f33c02dccd31742145d0558a8afe2cadff2"
+    },
+    {
+      "path": "script/check_breezer_filter_lists.py",
+      "owner": "build-tools",
+      "lines": 93,
+      "sha256": "e3c296993ef1907e17e71f4546a6b9622f6a325dae7305e7246804846dea8eff"
+    },
+    {
+      "path": "script/check_breezer_installer.py",
+      "owner": "build-tools",
+      "lines": 215,
+      "sha256": "00fef9dbfec6f7294c22661cd88f94c07ea20a2b40ab625171377ad6773efd0b"
+    },
+    {
+      "path": "script/check_breezer_memory_package.py",
+      "owner": "build-tools",
+      "lines": 18,
+      "sha256": "136e50b4421547f944da9181414ad04edbf015325238ee7f2e563ac705296f1b"
+    },
+    {
+      "path": "script/check_breezer_omnibox.py",
+      "owner": "build-tools",
+      "lines": 189,
+      "sha256": "e8ad12659f6b97044d1a4886429dbb991dbc0c052f6a686ff555d203c1b42a19"
+    },
+    {
+      "path": "script/check_breezer_passwords.py",
+      "owner": "build-tools",
+      "lines": 86,
+      "sha256": "15d8b12eb72922d7f7f7ff1ff43a997f57dc715e660afc82a471b90c2cb1ed0f"
+    },
+    {
+      "path": "script/check_breezer_preparation.py",
+      "owner": "build-tools",
+      "lines": 210,
+      "sha256": "3a681ea7f90752a950cdc55721a3d9bb5d1129f05410213ec28401beb78fdb85"
+    },
+    {
+      "path": "script/check_breezer_release.py",
+      "owner": "build-tools",
+      "lines": 116,
+      "sha256": "6081f61829d1f385593a2e21cf973ed7a934588a020032f5817387292816adcc"
+    },
+    {
+      "path": "script/check_breezer_sidebar_frame.py",
+      "owner": "build-tools",
+      "lines": 399,
+      "sha256": "e2d9fb0cd8d893e7f6b77cd78843ad091fab61fe2bdf5a48cba4720c7b640768"
+    },
+    {
+      "path": "script/check_breezer_sync.py",
+      "owner": "build-tools",
+      "lines": 77,
+      "sha256": "0cde36f7c9ec572638f4a3177360b313f36957b1e1835e12132195c8f8dd6477"
+    },
+    {
+      "path": "script/check_breezer_workspace.py",
+      "owner": "build-tools",
+      "lines": 300,
+      "sha256": "7b0be6ad9eb0baea872c18887c8a53e08c7c57a74e8fbaa7d5fbea287c6b8b38"
+    },
+    {
+      "path": "script/check_efficiency_coverage.py",
+      "owner": "build-tools",
+      "lines": 55,
+      "sha256": "16edbf6d64f53db55360cd8d2a590980ecd73fb02d505225b911fab3bd1128be"
+    },
+    {
+      "path": "script/check_helium.py",
+      "owner": "build-tools",
+      "lines": 37,
+      "sha256": "8dcc5725abeafdf183938bc1686d834c6639fb536268a8d0fccf6109c832a4af"
+    },
+    {
+      "path": "script/generate_breezer_filter_lists.mjs",
+      "owner": "build-tools",
+      "lines": 57,
+      "sha256": "b8875d41f0c1ff5ea0edd13a111e071e5cb594367f760c6697cf1c0636089325"
+    },
+    {
+      "path": "script/install_breezer.py",
+      "owner": "build-tools",
+      "lines": 364,
+      "sha256": "cf5b0bcf561b9012792b11579ba06a40474b5cd6fe383c876c5216650e051fa0"
+    },
+    {
+      "path": "script/inventory_efficiency_sources.py",
+      "owner": "build-tools",
+      "lines": 59,
+      "sha256": "7417cf86df38299eedb23a3d8556c0505b6a011c09537016d38b6f85f52132e2"
+    },
+    {
+      "path": "script/macos_process_usage.c",
+      "owner": "build-tools",
+      "lines": 63,
+      "sha256": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27"
+    },
+    {
+      "path": "script/native_transport_diagnostic.mjs",
+      "owner": "build-tools",
+      "lines": 103,
+      "sha256": "8c5bae242b736b48d5a04fd0db0df091d802235ad91cbf88f8332730d67adcf3"
+    },
+    {
+      "path": "script/package_breezer_ai.py",
+      "owner": "build-tools",
+      "lines": 164,
+      "sha256": "67ec259e345ee1f50dcd3b1f15934e0c9fc129f0dbb7f51f78f86ba584239b61"
+    },
+    {
+      "path": "script/package_breezer_dmg.py",
+      "owner": "build-tools",
+      "lines": 142,
+      "sha256": "1b646e60a83440d5866c55f5492a9ffdae58533950a5f8153b9249d9858de897"
+    },
+    {
+      "path": "script/summarize_native_transport.py",
+      "owner": "build-tools",
+      "lines": 172,
+      "sha256": "d74d995257f998428972f206693f8bf1c910fa338d9d6d921797eea308d8d83a"
+    },
+    {
+      "path": "script/verify_breezer_filter_behavior.mjs",
+      "owner": "build-tools",
+      "lines": 248,
+      "sha256": "3cd51935f3d83be1a9e8d785bd7cb3a9e2a34de165503c31df7467ad9c359a93"
+    },
+    {
+      "path": "script/verify_breezer_filter_lists.mjs",
+      "owner": "build-tools",
+      "lines": 95,
+      "sha256": "c0406356fc674e1339da46c472212e3ff583f695cdb6ba5085f0db1aa461f69f"
+    },
+    {
+      "path": "script/verify_breezer_filter_lists_native.mjs",
+      "owner": "build-tools",
+      "lines": 122,
+      "sha256": "e63f337745b4fc549e816b46049ece10ea3145ec82c703e009322e9776f4dbec"
+    },
+    {
+      "path": "script/verify_breezer_helper_lifetime.mjs",
+      "owner": "build-tools",
+      "lines": 78,
+      "sha256": "ecc86eb543549825ee17ebe4af4ca0180f87490092a44c8ba1c04bffa4785df1"
+    },
+    {
+      "path": "script/verify_breezer_settings_lifetime.mjs",
+      "owner": "build-tools",
+      "lines": 145,
+      "sha256": "49a48757129baf6b8340be2ec8d11b0a48938aa1e9689567d68c3417d97d1844"
+    },
+    {
+      "path": "script/verify_breezer_update_lifetime.mjs",
+      "owner": "build-tools",
+      "lines": 115,
+      "sha256": "e23ddc70dfded5c0adf53a629c50e0be0cfc823970509756e277e3e036bdf8c9"
+    },
+    {
+      "path": "script/verify_claude_streaming_efficiency.mjs",
+      "owner": "build-tools",
+      "lines": 83,
+      "sha256": "dc5bd56cd0d51311bc10edae9cc5ee584c204d8deeaaf7caddc848f85f53cd29"
+    },
+    {
+      "path": "script/verify_cli_fragment_efficiency.mjs",
+      "owner": "build-tools",
+      "lines": 82,
+      "sha256": "4b59772ead80b1c6e150c218c6c44c6b45488202a95c9b360de005bd6777eb87"
+    },
+    {
+      "path": "script/verify_native_decoder_memory.mjs",
+      "owner": "build-tools",
+      "lines": 60,
+      "sha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712"
+    },
+    {
+      "path": "script/verify_native_output_efficiency.mjs",
+      "owner": "build-tools",
+      "lines": 114,
+      "sha256": "b5714d8867124601b2ac098c10d22446ca5d0959636ee086f44f5d0f8786b895"
+    },
+    {
+      "path": "script/verify_page_context_memory.mjs",
+      "owner": "build-tools",
+      "lines": 71,
+      "sha256": "d4ce5c8918728f2d77de496c7663bb3946a3ddc1ab78afd943129a91d9403ec4"
+    },
+    {
+      "path": "script/verify_sidebar_memory.mjs",
+      "owner": "build-tools",
+      "lines": 102,
+      "sha256": "74683f63c1f3f635703483f8621f9eadd41a5896c0733fba95c535ed380ce931"
+    },
+    {
+      "path": "script/verify_stream_render_efficiency.mjs",
+      "owner": "build-tools",
+      "lines": 68,
+      "sha256": "053a793bce8b61f00709b6a247829b7528c9db8b2de41de6a67284f4828e2054"
+    },
+    {
+      "path": "script/verify_sync_reply_efficiency.py",
+      "owner": "build-tools",
+      "lines": 162,
+      "sha256": "e51125979de696c6a83ca9c8e086da9c0a9f73774e6b7c911e4a3f518e9970b4"
+    },
+    {
+      "path": "script/verify_translation_memory.mjs",
+      "owner": "build-tools",
+      "lines": 106,
+      "sha256": "75c28bd913c5fdb194fef2434976e23d63ef9f5260452478eb8fbae0e053b85c"
+    },
+    {
+      "path": "script/verify_upstream.py",
+      "owner": "build-tools",
+      "lines": 82,
+      "sha256": "be97b872b2e193d619d6d836ab028e930a27c1341d3bed22139283b27807e2e1"
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "owner": "build-tools",
+      "lines": 135,
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9"
+    },
+    {
+      "path": "script/verify_workspace_sync_efficiency.mjs",
+      "owner": "build-tools",
+      "lines": 63,
+      "sha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b"
+    },
+    {
+      "path": "script/verify_workspace_tab_updates.mjs",
+      "owner": "build-tools",
+      "lines": 100,
+      "sha256": "22f3e1a2a9daff54923db48febaedce7dba234b8123057a4084db89534774cf4"
+    },
+    {
+      "path": "script/windows/BuildProgress.psm1",
+      "owner": "build-tools",
+      "lines": 137,
+      "sha256": "52e247777c33e0731d5475c6179ffba5b5597cc36d78d3230fd8a1d29c7400a8"
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "owner": "build-tools",
+      "lines": 86,
+      "sha256": "cbd1ee521887ef559e7faf3f4e695e81970dcdd1b04a0883ea50cb444a4567e6"
+    },
+    {
+      "path": "script/windows/continue-pc-browser-unattended.ps1",
+      "owner": "build-tools",
+      "lines": 14,
+      "sha256": "d316069f194bdac3ec05061ad5c25822772bc650e84919f1083e1a9e8f20fbdb"
+    },
+    {
+      "path": "script/windows/prepare-efficiency-packet.py",
+      "owner": "build-tools",
+      "lines": 72,
+      "sha256": "1d29fab04b0905b705f85750af9c7e571073687f9eddec616178b48958b03030"
+    },
+    {
+      "path": "script/windows/prepare-unattended-build.ps1",
+      "owner": "build-tools",
+      "lines": 34,
+      "sha256": "99020149515a67c6cb9f3c5dd2dc25f903b4f47ed0c01c24bfb5a84d62db5126"
+    },
+    {
+      "path": "script/windows/show-build-progress.ps1",
+      "owner": "build-tools",
+      "lines": 100,
+      "sha256": "cb1cf010c603b63752d0b1a4b64d312eefef0d503a3298b482dd0b1304f8fb1e"
+    },
+    {
+      "path": "script/windows/unattended_build.py",
+      "owner": "build-tools",
+      "lines": 390,
+      "sha256": "4671e199ba69e206de82f0f57f60873fbfdd82fef357149f25a5255696efaceb"
+    },
+    {
+      "path": "script/windows/windows-command.py",
+      "owner": "build-tools",
+      "lines": 49,
+      "sha256": "26769e7e2de585bd4b0fb5f77e1d653ad0e0105899a7ac39e4f4b3fe0cc07343"
+    },
+    {
+      "path": "tests/ai/bookmarks-native.mjs",
+      "owner": "verification",
+      "lines": 32,
+      "sha256": "d76609c093b12d2c815890bcea49c258b83b61a0c28cbc11409ed4e5da1a2883"
+    },
+    {
+      "path": "tests/ai/browser-api-fixture.mjs",
+      "owner": "verification",
+      "lines": 52,
+      "sha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef"
+    },
+    {
+      "path": "tests/ai/browser-input-providers.test.mjs",
+      "owner": "verification",
+      "lines": 127,
+      "sha256": "c3a8750eb1a27c1a073d9d38749789754f1b55e0700feda8c07dc1d69113d86a"
+    },
+    {
+      "path": "tests/ai/browser-input-regression.mjs",
+      "owner": "verification",
+      "lines": 41,
+      "sha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d"
+    },
+    {
+      "path": "tests/ai/browser-page.mjs",
+      "owner": "verification",
+      "lines": 210,
+      "sha256": "9b48da7fd9e3b8005a8b49e2196658cd611038d85283835e7498fcd721caf096"
+    },
+    {
+      "path": "tests/ai/browser-tools.test.mjs",
+      "owner": "verification",
+      "lines": 805,
+      "sha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1"
+    },
+    {
+      "path": "tests/ai/claude-streaming.test.mjs",
+      "owner": "verification",
+      "lines": 133,
+      "sha256": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874"
+    },
+    {
+      "path": "tests/ai/cli-fragment-buffer.test.mjs",
+      "owner": "verification",
+      "lines": 156,
+      "sha256": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4"
+    },
+    {
+      "path": "tests/ai/codex-cancellation.test.mjs",
+      "owner": "verification",
+      "lines": 171,
+      "sha256": "d5a2c188f54083bed4bc2aa33b4eb6864db80b1e87703a52d0bb190124b59e94"
+    },
+    {
+      "path": "tests/ai/codex-process-cancellation.test.mjs",
+      "owner": "verification",
+      "lines": 50,
+      "sha256": "b5ed3c9326b6a9c1cc3c89da7ac4817b806bede91da83810067ad550904c1606"
+    },
+    {
+      "path": "tests/ai/context-integration.test.mjs",
+      "owner": "verification",
+      "lines": 168,
+      "sha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d"
+    },
+    {
+      "path": "tests/ai/context-memory.test.mjs",
+      "owner": "verification",
+      "lines": 232,
+      "sha256": "6165a5bb67cbcc22f184cbf6648840bcae17815d206c6ea0e78c321fed9c7df9"
+    },
+    {
+      "path": "tests/ai/context-settings.test.mjs",
+      "owner": "verification",
+      "lines": 120,
+      "sha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726"
+    },
+    {
+      "path": "tests/ai/docs-editor-browser.mjs",
+      "owner": "verification",
+      "lines": 163,
+      "sha256": "5010842cdb1a8f369cf63cb8edea97083cc826d7dc8f7e57c81e3b10916ed774"
+    },
+    {
+      "path": "tests/ai/docs-editor.test.mjs",
+      "owner": "verification",
+      "lines": 52,
+      "sha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06"
+    },
+    {
+      "path": "tests/ai/fixtures/cli-before.mjs",
+      "owner": "verification",
+      "lines": 101,
+      "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b"
+    },
+    {
+      "path": "tests/ai/fixtures/native-encode-before.mjs",
+      "owner": "verification",
+      "lines": 7,
+      "sha256": "6733bc93ca7976a213ac6fbfc950546c07f259216fcada59e5be5b27feb5e5a1"
+    },
+    {
+      "path": "tests/ai/fixtures/render-message-before.js",
+      "owner": "verification",
+      "lines": 83,
+      "sha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830"
+    },
+    {
+      "path": "tests/ai/harness-cleanup.test.mjs",
+      "owner": "verification",
+      "lines": 90,
+      "sha256": "b944db3a18dabb39a8d2b3d8192302d4c9d7de0739660f38ce93408b6beeb54f"
+    },
+    {
+      "path": "tests/ai/host-discovery.mjs",
+      "owner": "verification",
+      "lines": 30,
+      "sha256": "1233002da7b3d3aed9759d18df278ce6f539a24536073a0fc37c39dd5a45799b"
+    },
+    {
+      "path": "tests/ai/host-live.mjs",
+      "owner": "verification",
+      "lines": 81,
+      "sha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391"
+    },
+    {
+      "path": "tests/ai/host-loading.test.mjs",
+      "owner": "verification",
+      "lines": 51,
+      "sha256": "de3de2c5cdd9fdf7b73c7521c8ebff79441244156cccd66577a8b5cbdb0774cd"
+    },
+    {
+      "path": "tests/ai/host-options.mjs",
+      "owner": "verification",
+      "lines": 36,
+      "sha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282"
+    },
+    {
+      "path": "tests/ai/host.test.mjs",
+      "owner": "verification",
+      "lines": 404,
+      "sha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb"
+    },
+    {
+      "path": "tests/ai/installed-chat.mjs",
+      "owner": "verification",
+      "lines": 256,
+      "sha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c"
+    },
+    {
+      "path": "tests/ai/installed-control.mjs",
+      "owner": "verification",
+      "lines": 228,
+      "sha256": "88ea8b0132a4b3a8d0034b7f71f803ef0153ca8b24e1850c471f43eab10ba8b6"
+    },
+    {
+      "path": "tests/ai/model-catalog.test.mjs",
+      "owner": "verification",
+      "lines": 101,
+      "sha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8"
+    },
+    {
+      "path": "tests/ai/native-frame-memory.test.mjs",
+      "owner": "verification",
+      "lines": 14,
+      "sha256": "ed042c772e3b0638daca4afa92748582eb037d1a5607648ce4f691ce9c51872b"
+    },
+    {
+      "path": "tests/ai/native-lifetime.test.mjs",
+      "owner": "verification",
+      "lines": 128,
+      "sha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026"
+    },
+    {
+      "path": "tests/ai/native-output.test.mjs",
+      "owner": "verification",
+      "lines": 80,
+      "sha256": "eee087070d60d079661d263df4ba009d348907ff236c8d0219b778e43c79ec51"
+    },
+    {
+      "path": "tests/ai/native-transport-lifecycle.test.mjs",
+      "owner": "verification",
+      "lines": 82,
+      "sha256": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925"
+    },
+    {
+      "path": "tests/ai/newtab-bridge.test.mjs",
+      "owner": "verification",
+      "lines": 136,
+      "sha256": "0d2268a8c8f96389b9ef6e9f89996e47d320bf45f1fdbe26d9fe8a82f9242dda"
+    },
+    {
+      "path": "tests/ai/newtab-browser.test.mjs",
+      "owner": "verification",
+      "lines": 522,
+      "sha256": "430347bf565e7463821083ec5be175cfdc44c897ffb63e5ea42352fef5074f5f"
+    },
+    {
+      "path": "tests/ai/newtab-race.test.mjs",
+      "owner": "verification",
+      "lines": 59,
+      "sha256": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea"
+    },
+    {
+      "path": "tests/ai/newtab.test.mjs",
+      "owner": "verification",
+      "lines": 214,
+      "sha256": "3c06362cf4553d6d54e4f613e34932115ead905e48926808e5d7283899928ba6"
+    },
+    {
+      "path": "tests/ai/onboarding-browser.test.mjs",
+      "owner": "verification",
+      "lines": 350,
+      "sha256": "654b5967e94ee0edd25904316ebb7fbfcbd486774ee0b96e20d7438e53acacd4"
+    },
+    {
+      "path": "tests/ai/organato-response.test.mjs",
+      "owner": "verification",
+      "lines": 150,
+      "sha256": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5"
+    },
+    {
+      "path": "tests/ai/organato-settings.test.mjs",
+      "owner": "verification",
+      "lines": 71,
+      "sha256": "9af71f29afd84414dd850fefeb4ec8563e2139ebdd8a39e236652eb6527b9b3b"
+    },
+    {
+      "path": "tests/ai/organato.test.mjs",
+      "owner": "verification",
+      "lines": 58,
+      "sha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97"
+    },
+    {
+      "path": "tests/ai/overlay_fetch_test.py",
+      "owner": "verification",
+      "lines": 43,
+      "sha256": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a"
+    },
+    {
+      "path": "tests/ai/overlay_test.py",
+      "owner": "verification",
+      "lines": 38,
+      "sha256": "e5214141a5ec1d1e93b9e8c422a72e8eb355e4a5c9ba4e472c48224a8e5570dc"
+    },
+    {
+      "path": "tests/ai/package-lock.json",
+      "owner": "verification",
+      "lines": 53,
+      "sha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4"
+    },
+    {
+      "path": "tests/ai/package.json",
+      "owner": "verification",
+      "lines": 9,
+      "sha256": "4158ee7013995d2aa083b7b522d4ae926a1f348db796a307a5714829c24e4c3d"
+    },
+    {
+      "path": "tests/ai/page-snapshot-efficiency.test.mjs",
+      "owner": "verification",
+      "lines": 79,
+      "sha256": "6504cd51534735045d190e1a4aa0cbcfe607c111229e80f2aa99c33ab2a7621d"
+    },
+    {
+      "path": "tests/ai/panel-browser.mjs",
+      "owner": "verification",
+      "lines": 406,
+      "sha256": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463"
+    },
+    {
+      "path": "tests/ai/panel-efficiency.test.mjs",
+      "owner": "verification",
+      "lines": 257,
+      "sha256": "c35f86a645bdfa74b2c84676fea35a44788c1c2ef16face37eaffdf1b76d6f7c"
+    },
+    {
+      "path": "tests/ai/panel-theme.test.mjs",
+      "owner": "verification",
+      "lines": 171,
+      "sha256": "29ca2d929c56d85aa2b71ceb11bcf679bf437b0e7b0857126895800d0702fdbf"
+    },
+    {
+      "path": "tests/ai/peek-native.mjs",
+      "owner": "verification",
+      "lines": 419,
+      "sha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47"
+    },
+    {
+      "path": "tests/ai/release-notes.test.mjs",
+      "owner": "verification",
+      "lines": 52,
+      "sha256": "6e25ac10a3352ffbbcd31e6adb11812d3b4ac12ab58ba5ce0c4838a567e75f19"
+    },
+    {
+      "path": "tests/ai/research-browser.mjs",
+      "owner": "verification",
+      "lines": 166,
+      "sha256": "0169039ebd5332f09755afcadfef874d69fc5ca3740a15e168e63dbaa1e24f06"
+    },
+    {
+      "path": "tests/ai/research-providers.test.mjs",
+      "owner": "verification",
+      "lines": 56,
+      "sha256": "6ea491403a2a3676e8f7c0af9cccc718c46921d08159c7fc73310623d6070985"
+    },
+    {
+      "path": "tests/ai/research.test.mjs",
+      "owner": "verification",
+      "lines": 126,
+      "sha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9"
+    },
+    {
+      "path": "tests/ai/settings-dom.mjs",
+      "owner": "verification",
+      "lines": 292,
+      "sha256": "e73b3664ae8eac7be8bee35531b4e348bcf259aafd5eeb2cd5bba9f2fec42409"
+    },
+    {
+      "path": "tests/ai/settings-nav.test.mjs",
+      "owner": "verification",
+      "lines": 47,
+      "sha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa"
+    },
+    {
+      "path": "tests/ai/settings-onboarding-browser.test.mjs",
+      "owner": "verification",
+      "lines": 193,
+      "sha256": "b1e54d6363b9e851b636b83ed94fb6cf001af7cb621a16badac35bfc40b09fc0"
+    },
+    {
+      "path": "tests/ai/settings-onboarding.test.mjs",
+      "owner": "verification",
+      "lines": 154,
+      "sha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2"
+    },
+    {
+      "path": "tests/ai/settings-redesign-browser.test.mjs",
+      "owner": "verification",
+      "lines": 245,
+      "sha256": "694d51011800cd5188a0d98def0af558850beab5f3ea0d88412e2e3b46dc0760"
+    },
+    {
+      "path": "tests/ai/settings.test.mjs",
+      "owner": "verification",
+      "lines": 372,
+      "sha256": "4eb295c4b44d73c7f755e091cb4909d8797ce280dff3a0103a251759a833c181"
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "owner": "verification",
+      "lines": 264,
+      "sha256": "9fa2ceb8dc92558991ed9d9fafadd0be9a298b3814e570b9821bc459efaa971c"
+    },
+    {
+      "path": "tests/ai/top-sites.test.mjs",
+      "owner": "verification",
+      "lines": 33,
+      "sha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871"
+    },
+    {
+      "path": "tests/ai/translation-browser.test.mjs",
+      "owner": "verification",
+      "lines": 186,
+      "sha256": "9d1a826841ac1b07368564661f740c4c0bffe7a66366e872ec2015ac52152ad2"
+    },
+    {
+      "path": "tests/ai/translation-efficiency.test.mjs",
+      "owner": "verification",
+      "lines": 226,
+      "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8"
+    },
+    {
+      "path": "tests/ai/translation.test.mjs",
+      "owner": "verification",
+      "lines": 104,
+      "sha256": "7140a9aa30f3ad2846f48c008b833cbae869f0c84c037a98e69a905904710109"
+    },
+    {
+      "path": "tests/ai/update-lifetime.test.mjs",
+      "owner": "verification",
+      "lines": 119,
+      "sha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97"
+    },
+    {
+      "path": "tests/ai/updater.test.mjs",
+      "owner": "verification",
+      "lines": 178,
+      "sha256": "352949f4dafe4d285f22cb95dce7a5e799423287017c6a8d69f7d5c937432719"
+    },
+    {
+      "path": "tests/ai/usage.test.mjs",
+      "owner": "verification",
+      "lines": 63,
+      "sha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3"
+    },
+    {
+      "path": "tests/ai/visual-polish-browser.test.mjs",
+      "owner": "verification",
+      "lines": 452,
+      "sha256": "4bba092884d8629adaf54e7f9c3f79b0d9d759611f6aa62a4e853f5af7b1ac30"
+    },
+    {
+      "path": "tests/ai/whats-new-browser.test.mjs",
+      "owner": "verification",
+      "lines": 245,
+      "sha256": "f95c359da6207b443588b8a74d7cf3e32366f2e8d8945f95a198f7cd0ce5f924"
+    },
+    {
+      "path": "tests/ai/whats-new.test.mjs",
+      "owner": "verification",
+      "lines": 254,
+      "sha256": "67ea0d7c1c8ab04f1276e779fc75223ee4dbd9eab97980e207479f842fe42957"
+    },
+    {
+      "path": "tests/ai/workspace-browser-fixture.mjs",
+      "owner": "verification",
+      "lines": 201,
+      "sha256": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01"
+    },
+    {
+      "path": "tests/ai/workspace-browser.test.mjs",
+      "owner": "verification",
+      "lines": 685,
+      "sha256": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37"
+    },
+    {
+      "path": "tests/ai/workspace-frame.test.mjs",
+      "owner": "verification",
+      "lines": 174,
+      "sha256": "2e852d6becbc8ebbc92596a2a1593f752f0afb2a22d8564bc3dc792431985615"
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "owner": "verification",
+      "lines": 118,
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c"
+    },
+    {
+      "path": "tests/ai/workspace-native.mjs",
+      "owner": "verification",
+      "lines": 703,
+      "sha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298"
+    },
+    {
+      "path": "tests/ai/workspace-peek.test.mjs",
+      "owner": "verification",
+      "lines": 243,
+      "sha256": "bf7c5042a56abdbea905f47bc18f9f4e8a36665c06bef400ac6c4e013ba04602"
+    },
+    {
+      "path": "tests/ai/workspace-static.test.mjs",
+      "owner": "verification",
+      "lines": 58,
+      "sha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf"
+    },
+    {
+      "path": "tests/ai/workspace-store.test.mjs",
+      "owner": "verification",
+      "lines": 430,
+      "sha256": "e6a9d40dbbb020e6a8ffd7945186e6909e0c412293933b69f57c39898061f952"
+    },
+    {
+      "path": "tests/ai/workspace-tab-update-efficiency.test.mjs",
+      "owner": "verification",
+      "lines": 135,
+      "sha256": "f5cb182c6c8433501068beea3a243cc6d210e4ce7f85c6582f815344155c0bcf"
+    },
+    {
+      "path": "tests/ai/workspace-ui-efficiency.test.mjs",
+      "owner": "verification",
+      "lines": 111,
+      "sha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654"
+    },
+    {
+      "path": "tests/benchmark-browsers.test.mjs",
+      "owner": "verification",
+      "lines": 450,
+      "sha256": "ee5b9af2eb82b2847ed905442cf26a41dc47306a2de8776ca7291587af1e1672"
+    },
+    {
+      "path": "tests/code_sign_clone_sessions_test.cc",
+      "owner": "verification",
+      "lines": 212,
+      "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5"
+    },
+    {
+      "path": "tests/code_sign_clones_test.py",
+      "owner": "verification",
+      "lines": 94,
+      "sha256": "85b6cea8cb824d6716c13d28b3c5ed2d9faa376a1485cf469c22880e7afe5744"
+    },
+    {
+      "path": "tests/compiled-filter-lists.test.mjs",
+      "owner": "verification",
+      "lines": 117,
+      "sha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d"
+    },
+    {
+      "path": "tests/memory_package_test.py",
+      "owner": "verification",
+      "lines": 95,
+      "sha256": "2dbde9f7861df8f73ae7a116f48dc1b684310ffb2a0be2268dae54ef6445d9b1"
+    },
+    {
+      "path": "tests/native_transport_summary_test.py",
+      "owner": "verification",
+      "lines": 105,
+      "sha256": "fd9711a768291ead5ffe46ad2f538f054d12465d6677a1990081ba9608b06491"
+    },
+    {
+      "path": "tests/passkeys/component.mjs",
+      "owner": "verification",
+      "lines": 39,
+      "sha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877"
+    },
+    {
+      "path": "tests/passkeys/virtual.mjs",
+      "owner": "verification",
+      "lines": 104,
+      "sha256": "8321c88ea5e3d468523c86d123743c4274c915e595d05f236d32852ee9d7906e"
+    },
+    {
+      "path": "tests/passkeys/webauthn.html",
+      "owner": "verification",
+      "lines": 15,
+      "sha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d"
+    },
+    {
+      "path": "tests/passkeys/webauthn.js",
+      "owner": "verification",
+      "lines": 47,
+      "sha256": "452ae08fac0c422b69737d860da31c4f68630947eb033034b7eb7410255a37ed"
+    },
+    {
+      "path": "tests/passkeys_native_test.py",
+      "owner": "verification",
+      "lines": 118,
+      "sha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f"
+    },
+    {
+      "path": "tests/passwords.test.mjs",
+      "owner": "verification",
+      "lines": 44,
+      "sha256": "5c7957cb5e2b2f5281d6c76ed03cd89abf2a12c118f2501befbd8df6ebc6cd4d"
+    },
+    {
+      "path": "tests/passwords/component.html",
+      "owner": "verification",
+      "lines": 94,
+      "sha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5"
+    },
+    {
+      "path": "tests/passwords/enter-browser.mjs",
+      "owner": "verification",
+      "lines": 165,
+      "sha256": "97418170ad980f227a2b7493af9672e69713c718849a4c57b85d956552bb5014"
+    },
+    {
+      "path": "tests/passwords/enter.html",
+      "owner": "verification",
+      "lines": 21,
+      "sha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0"
+    },
+    {
+      "path": "tests/passwords/filling.mjs",
+      "owner": "verification",
+      "lines": 44,
+      "sha256": "4d78eef512256bb45494aaeaa42acfb7c7e4b21daecbb662833a89c43f55c2e5"
+    },
+    {
+      "path": "tests/passwords/installed.mjs",
+      "owner": "verification",
+      "lines": 97,
+      "sha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615"
+    },
+    {
+      "path": "tests/passwords/login.html",
+      "owner": "verification",
+      "lines": 12,
+      "sha256": "0411d79a9ab20902dafc12c95d804e3019ef269ca063b653e67d64f985b5c096"
+    },
+    {
+      "path": "tests/passwords_enter_test.py",
+      "owner": "verification",
+      "lines": 93,
+      "sha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de"
+    },
+    {
+      "path": "tests/passwords_native_test.py",
+      "owner": "verification",
+      "lines": 181,
+      "sha256": "8c511e0512c8c42d4b445f0e384cb99873b284a0332b1e715a4f357db126c538"
+    },
+    {
+      "path": "tests/passwords_proactive_test.py",
+      "owner": "verification",
+      "lines": 198,
+      "sha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3"
+    },
+    {
+      "path": "tests/sync.test.mjs",
+      "owner": "verification",
+      "lines": 4,
+      "sha256": "436207b3c33bdabd108e646423deb6489e39c9a43a517325148d1fc80895a1f2"
+    },
+    {
+      "path": "tests/sync/fixtures/provider-read-before.cc",
+      "owner": "verification",
+      "lines": 5,
+      "sha256": "73740e4fb244726bd3c8031cfd28f1d28dae510c3509383cf2ab06a96aaf5a42"
+    },
+    {
+      "path": "tests/sync/lifetime.test.mjs",
+      "owner": "verification",
+      "lines": 72,
+      "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc"
+    },
+    {
+      "path": "tests/sync/provider-lifecycle.test.mjs",
+      "owner": "verification",
+      "lines": 118,
+      "sha256": "9905219d310b0f9a6a7c873f4c266f7c1997666745047c66fba4e111fe1ca608"
+    },
+    {
+      "path": "tests/sync/provider.test.mjs",
+      "owner": "verification",
+      "lines": 196,
+      "sha256": "3a10b38160a5d5ac83937ffeec101cfe2fea1262df3e7bc7e938d48fb29ee8a0"
+    },
+    {
+      "path": "tests/sync/reconcile.test.mjs",
+      "owner": "verification",
+      "lines": 232,
+      "sha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd"
+    },
+    {
+      "path": "tests/sync/setup-browser.test.mjs",
+      "owner": "verification",
+      "lines": 95,
+      "sha256": "49f4b788e2edf9ab45b7e19ac412152834d095233d5ed73ddbde82033fee0328"
+    },
+    {
+      "path": "tests/sync/workspace-model.test.mjs",
+      "owner": "verification",
+      "lines": 173,
+      "sha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387"
+    },
+    {
+      "path": "tests/windows/build-progress.test.ps1",
+      "owner": "verification",
+      "lines": 80,
+      "sha256": "7f8360e7e11efb6763cbfd7c0f481f975be1819ebe800d9f84a784ddcb22a88d"
+    },
+    {
+      "path": "tests/windows/memory_update_test.py",
+      "owner": "verification",
+      "lines": 264,
+      "sha256": "c34e36c147d96b5b565c2b0770c4c7fae5dcddc2572f6862e3ed6e68e2bf2e7e"
+    },
+    {
+      "path": "tests/windows/unattended_build_test.py",
+      "owner": "verification",
+      "lines": 322,
+      "sha256": "28320571935d461cf8065dc2c4f08609da03d064affd94e475afe389b1c26143"
+    },
+    {
+      "path": "tests/windows/unattended_cleanup_test.py",
+      "owner": "verification",
+      "lines": 182,
+      "sha256": "a2809528cb0876d50e40d1d5ac0d78da94b06d6ad91f5ab337c31be976319342"
+    },
+    {
+      "path": "tests/workspace_native_test.py",
+      "owner": "verification",
+      "lines": 79,
+      "sha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff"
+    }
+  ],
+  "totals": {
+    "extension-services": {
+      "files": 22,
+      "lines": 5107
+    },
+    "page-content": {
+      "files": 11,
+      "lines": 1296
+    },
+    "workspace": {
+      "files": 13,
+      "lines": 6803
+    },
+    "native-and-sync": {
+      "files": 44,
+      "lines": 6353
+    },
+    "native-host": {
+      "files": 17,
+      "lines": 1617
+    },
+    "build-tools": {
+      "files": 68,
+      "lines": 10369
+    },
+    "verification": {
+      "files": 113,
+      "lines": 18171
+    }
+  },
+  "reviewed": false
+}

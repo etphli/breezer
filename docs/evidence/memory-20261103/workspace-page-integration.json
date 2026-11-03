@@ -1,0 +1,85 @@
+{
+  "status": "LOCAL WORKSPACE/PAGE CHECKS PASS; INDEPENDENT REVIEW PENDING",
+  "checkedAtUtc": "2026-11-03T00:42:27.857711+00:00",
+  "sourceHashes": {
+    "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "features/ai/extension/page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "script/verify_workspace_tab_updates.mjs": "6725c2cacff0418f4e8055fd3bd53b3f3f8aa5cab894e97f7fdc935269621779",
+    "tests/ai/workspace-tab-update-efficiency.test.mjs": "f5cb182c6c8433501068beea3a243cc6d210e4ce7f85c6582f815344155c0bcf",
+    "tests/ai/page-snapshot-efficiency.test.mjs": "6504cd51534735045d190e1a4aa0cbcfe607c111229e80f2aa99c33ab2a7621d",
+    "tests/ai/browser-page.mjs": "9b48da7fd9e3b8005a8b49e2196658cd611038d85283835e7498fcd721caf096",
+    "tests/ai/docs-editor-browser.mjs": "5010842cdb1a8f369cf63cb8edea97083cc826d7dc8f7e57c81e3b10916ed774",
+    "tests/ai/harness-cleanup.test.mjs": "b944db3a18dabb39a8d2b3d8192302d4c9d7de0739660f38ce93408b6beeb54f"
+  },
+  "workspace": {
+    "implementation": "workspace-tab-update-implementation.json",
+    "offlinePassed": 39,
+    "browserPassed": 9,
+    "change": "Suppress only autoDiscardable-only updates with equivalent remaining full snapshots; preserve state replacement/event version and all membership/refresh behavior.",
+    "fixtureCounters": {
+      "sequentialEvents": 20,
+      "baselineScheduled": 20,
+      "candidateScheduled": 0,
+      "baselineDrawn": 20,
+      "candidateDrawn": 0,
+      "candidateEventVersion": 20
+    },
+    "scope": "VM operation counts. Real browser suite validates behavior, not whole-browser CPU/RAM or actual event frequency."
+  },
+  "pageSnapshot": {
+    "baselineSha256": "7bfd98c6dcfba67134097a88455c158625693151d965393fc4baa1ef1ce086f7",
+    "newSourceSha256": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "change": "Iterate original static querySelectorAll NodeList directly; prioritize Docs editor separately and skip its duplicate; retain 180 successful-target cap and all exclusion/WeakRef behavior.",
+    "candidateReadsIn10000ControlFixture": {
+      "before": 10000,
+      "after": 180,
+      "returnedTargets": 180
+    },
+    "offlineCombinedPassed": 56,
+    "newDifferentialCases": 12,
+    "browserControlExitCode": 0,
+    "syntheticDocsBrowserExitCode": 0,
+    "realGc": {
+      "browser": "156.0.8078.4",
+      "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/ai/extension/page-context.js",
+      "isolatedWorld": true,
+      "sourceSha256": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "empty": {
+        "documents": 1,
+        "nodes": 8,
+        "jsEventListeners": 0,
+        "usedHeapBytes": 829056
+      },
+      "attached": {
+        "documents": 1,
+        "nodes": 72188,
+        "jsEventListeners": 0,
+        "usedHeapBytes": 1259932
+      },
+      "detached": {
+        "documents": 1,
+        "nodes": 8,
+        "jsEventListeners": 0,
+        "usedHeapBytes": 1129316
+      },
+      "retainedExtraNodes": 0,
+      "released": true,
+      "limits": "Synthetic isolated-world page-control retention check after forced GC. Not whole-browser RAM, CPU or browsing speed."
+    },
+    "scope": "Eliminates eager Array/Set containers and unnecessary candidate reads. querySelectorAll still materializes its complete static NodeList. No measured physical RAM/CPU or whole-browser gain."
+  },
+  "harness": {
+    "cleanupCasesPassed": 18,
+    "change": "Browser-page protects both fixture servers during startup; Docs protects browser startup; independent cleanup survives earlier errors. External Playwright path also resolves existing pngjs dependency consistently.",
+    "initialDocsFailure": "Harness resolved pngjs relative to worktree rather than supplied Playwright package; corrected and complete fixture rerun passes. No download/install."
+  },
+  "verificationLimits": [
+    "Real native app/PC/provider integration unverified.",
+    "Independent review of new workspace guard and snapshot loop pending.",
+    "Native helper CLI buffering delegate still in progress; packet refresh deferred until its source changes settle.",
+    "Current 220-check combined result predates these workspace/page changes; relevant component checks listed above pass."
+  ],
+  "packetRefreshPending": true,
+  "pcContact": false,
+  "installedAppUnchanged": true
+}

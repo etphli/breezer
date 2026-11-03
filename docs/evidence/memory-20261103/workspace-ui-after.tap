@@ -1,0 +1,110 @@
+TAP version 13
+# Subtest: new tab files never parse HTML from strings or load remote resources
+ok 1 - new tab files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 2.152708
+  ...
+# Subtest: tone tokens stay identical to the workspace palette
+ok 2 - tone tokens stay identical to the workspace palette
+  ---
+  duration_ms: 1.200458
+  ...
+# Subtest: only http(s) URLs survive
+ok 3 - only http(s) URLs survive
+  ---
+  duration_ms: 0.127083
+  ...
+# Subtest: normalizeView drops unsafe and duplicate sites and caps the row
+ok 4 - normalizeView drops unsafe and duplicate sites and caps the row
+  ---
+  duration_ms: 0.3145
+  ...
+# Subtest: normalizeView keeps Organato enabled by default and sorts by due date
+ok 5 - normalizeView keeps Organato enabled by default and sorts by due date
+  ---
+  duration_ms: 0.436083
+  ...
+# Subtest: an item classified as both exam and assignment shows once in Upcoming
+ok 6 - an item classified as both exam and assignment shows once in Upcoming
+  ---
+  duration_ms: 0.26175
+  ...
+# Subtest: to-dos stay in To-dos and never repeat in Upcoming
+ok 7 - to-dos stay in To-dos and never repeat in Upcoming
+  ---
+  duration_ms: 0.103042
+  ...
+# Subtest: different IDs are never merged, even with the same title
+ok 8 - different IDs are never merged, even with the same title
+  ---
+  duration_ms: 0.097458
+  ...
+# Subtest: Upcoming is chronological across exams and assignments with local all-day dates
+ok 9 - Upcoming is chronological across exams and assignments with local all-day dates
+  ---
+  duration_ms: 0.340708
+  ...
+# Subtest: organatoState covers every state the section can show
+ok 10 - organatoState covers every state the section can show
+  ---
+  duration_ms: 0.376916
+  ...
+# Subtest: date-only due values are local days and relative labels read plainly
+ok 11 - date-only due values are local days and relative labels read plainly
+  ---
+  duration_ms: 0.168959
+  ...
+# Subtest: requestView sends one view request on the breezer-newtab port and closes it
+ok 12 - requestView sends one view request on the breezer-newtab port and closes it
+  ---
+  duration_ms: 4.24525
+  ...
+# Subtest: requestView fails cleanly on disconnect, timeout or a missing runtime
+ok 13 - requestView fails cleanly on disconnect, timeout or a missing runtime
+  ---
+  duration_ms: 21.695875
+  ...
+# Subtest: workspace files never parse HTML from strings or load remote resources
+ok 14 - workspace files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 8.917416
+  ...
+# Subtest: every tone keeps text readable on sidebar surfaces in light and dark
+ok 15 - every tone keeps text readable on sidebar surfaces in light and dark
+  ---
+  duration_ms: 1.18275
+  ...
+# Subtest: same-bucket new-tab resizes skip shortcut storage, filtering and painting
+ok 16 - same-bucket new-tab resizes skip shortcut storage, filtering and painting
+  ---
+  duration_ms: 19.263875
+  ...
+# Subtest: shortcut changes and explicit Reset still refresh at the same width
+ok 17 - shortcut changes and explicit Reset still refresh at the same width
+  ---
+  duration_ms: 1.725042
+  ...
+# Subtest: resize during initial shortcut filtering cannot leave the wrong number of sites
+ok 18 - resize during initial shortcut filtering cannot leave the wrong number of sites
+  ---
+  duration_ms: 1.488334
+  ...
+# Subtest: failed resize refreshes can retry and pagehide releases the resize listener
+ok 19 - failed resize refreshes can retry and pagehide releases the resize listener
+  ---
+  duration_ms: 1.15025
+  ...
+# Subtest: expired Undo releases its action and clicking active Undo still invokes it once
+ok 20 - expired Undo releases its action and clicking active Undo still invokes it once
+  ---
+  duration_ms: 0.870333
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 117.570125

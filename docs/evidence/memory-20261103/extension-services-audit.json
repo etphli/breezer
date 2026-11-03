@@ -1,0 +1,409 @@
+{
+  "area": "extension-services",
+  "model": {
+    "name": "gpt-6.1-sol",
+    "reasoning": "high",
+    "requestedSpeed": "regular",
+    "delegation": "none"
+  },
+  "files": [
+    {
+      "path": "features/ai/extension/background.js",
+      "sha256": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "lines": 450,
+      "readRanges": [
+        [
+          1,
+          450
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-300 then overlapping 301-450. One active AI run; cancellation stops browser tools. Panels deleted on port disconnect. Organato shared pending entries have 65/90s deadlines and 250ms idle disconnect; close rejects only owner requests. Update candidate intentionally keeps helper alive. Research draft contains selection metadata. Native AI connection lifetime additionally depends on host behavior outside ownership. Metadata revision rejects stale queries. History sliced to 40 on outbound chat, not a byte bound."
+    },
+    {
+      "path": "features/ai/extension/context-background.js",
+      "sha256": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "lines": 113,
+      "readRanges": [
+        [
+          1,
+          113
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Summary transport removes abort/message/disconnect listeners, clears 60s timer and disconnects on completion/error/abort. Settings ports removed on disconnect; dispose removes registered global listeners. Event path observes metadata only; disabled activation still reads memory.view. No polling timer."
+    },
+    {
+      "path": "features/ai/extension/context-memory.js",
+      "sha256": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "lines": 182,
+      "readRanges": [
+        [
+          1,
+          182
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Normalized retained state is at most 20 sites, 140 daily buckets and one summary fingerprint; seven-day pruning on read. Serialized queue can temporarily grow with event arrival but no permanent event history. Reads clone/normalize and stringify bounded state; no evidence these small operations dominate. Summary controllers removed in finally and cancel aborts active requests. Provider uploads remain explicitly consented/manual."
+    },
+    {
+      "path": "features/ai/extension/context-settings.js",
+      "sha256": "aef2ab4366e03ad24ce6f09d71c450c055d399bfdd39a4ae97171f6a28138ddd",
+      "lines": 148,
+      "readRanges": [
+        [
+          1,
+          148
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Pending request timers 65s; disconnect/dispose rejects and clears map. Mount aborts DOM listeners, unsubscribes changes and disposes client. Revision suppresses stale paint but not redundant concurrent view work. UI habits bounded by 20 sites."
+    },
+    {
+      "path": "features/ai/extension/efficiency.html",
+      "sha256": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583",
+      "lines": 56,
+      "readRanges": [
+        [
+          1,
+          56
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Static article with shared stylesheet, links and no JavaScript; no polling or dynamic retention. Text references prior measurements and was not revalidated as a performance result."
+    },
+    {
+      "path": "features/ai/extension/manifest.json",
+      "sha256": "1af101cafd9affa491dbc6793537bd5e86199c74d56edfb4d656b21173157036",
+      "lines": 80,
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "MV3 module worker, panel and newtab declared; no global content script injection. Permissions/features intentionally preserved."
+    },
+    {
+      "path": "features/ai/extension/model-catalog.js",
+      "sha256": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "One linear pass plus retained-model sort per catalogue update. Maps/Sets local to call. No persistent catalogue cache beyond panel provider state."
+    },
+    {
+      "path": "features/ai/extension/panel-theme.js",
+      "sha256": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "lines": 64,
+      "readRanges": [
+        [
+          1,
+          64
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Event-driven appearance refresh with 1.5s deadline, stale-request guard. Document-lifetime listeners have no disposer, but current caller mounts once. Import loads workspace-store as static dependency; dependency cost not measured."
+    },
+    {
+      "path": "features/ai/extension/panel.css",
+      "sha256": "60ed6d66b3c003715ab48b07b12b9e9b4ed8aa2c6c21b49578ae9d181a448bd8",
+      "lines": 1049,
+      "readRanges": [
+        [
+          1,
+          1049
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-360,361-720,721-1049. Static styles, scoped transitions and thinking-only infinite opacity animation; reduced motion covered. No idle animation in completed transcript found. CSS/layout physical costs not measured."
+    },
+    {
+      "path": "features/ai/extension/panel.html",
+      "sha256": "905e0cca4b2fa08f96b1202713f2e595683c2d4a91474e69168b8bb9e73a1a94",
+      "lines": 100,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "100 lines complete. Textarea capped 24000 characters and profile 80/6000. Live transcript log, script module and bounded static dialogs. HTML does not cap assistant output."
+    },
+    {
+      "path": "features/ai/extension/panel.js",
+      "sha256": "dc0f37319f2a650997d944a9ba0804b0f281501d61f122144759c61dae9495ca",
+      "lines": 657,
+      "readRanges": [
+        [
+          1,
+          657
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-340,341-657. Live array, messageNodes map and attached article history grow until New Chat or document teardown. Restore/save capped at 60 messages; provider history last 30; no character cap on received assistant text in this module. Delta RAF coalesces within a frame but reparses full accumulated response. New Chat clears all three owners. Session keys per window have no cleanup found. Initialization/profile/theme/catalogue work event-driven, not polling. Every composer input rebuilds settings options through updateControls; small bounded cost, not a high-impact finding."
+    },
+    {
+      "path": "features/ai/extension/passwords.js",
+      "sha256": "3979b082536176acfc177b63ee1b0d5189ae2333747ea21d698c799fcbd54685",
+      "lines": 140,
+      "readRanges": [
+        [
+          1,
+          140
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Only opens native routes; no credential access. One pending action at a time; mount abort controller and disposal release listeners and DOM. No caches/timers."
+    },
+    {
+      "path": "features/ai/extension/release-info.js",
+      "sha256": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf",
+      "lines": 3,
+      "readRanges": [
+        [
+          1,
+          3
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Three static export lines."
+    },
+    {
+      "path": "features/ai/extension/release-notes.js",
+      "sha256": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "lines": 39,
+      "readRanges": [
+        [
+          1,
+          39
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Single pending check coalesces startup/install/window events; reads small stored seen/setup markers each check. Releases promise on finish. Repeated seen reads not established as meaningful overhead. No periodic work."
+    },
+    {
+      "path": "features/ai/extension/render-message.js",
+      "sha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "lines": 83,
+      "readRanges": [
+        [
+          1,
+          83
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "83 lines complete. Clears and reconstructs full subtree per render; splits text into lines, buffers paragraphs/fenced code and creates text/link nodes safely. Temporary arrays limited to current text; all parsing repeats on streaming frames. Does not interpret provider HTML."
+    },
+    {
+      "path": "features/ai/extension/shortcut-add.js",
+      "sha256": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "lines": 83,
+      "readRanges": [
+        [
+          1,
+          83
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "All open regular web tab records queried and sorted when popover opens. Every input rebuilds all matching options; close only increments revision and retains tabs/shown/list until next open or document teardown. Tab population bound by current open tabs, not historically cumulative. Async query assigns tabs even after close, paint guarded by revision. Candidate scoped cleanup is low priority; no measured impact."
+    },
+    {
+      "path": "features/ai/extension/top-sites.js",
+      "sha256": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "lines": 99,
+      "readRanges": [
+        [
+          1,
+          99
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Hidden preference set capped at 500 and custom shortcuts at 100 on load. Normal add allows at most eight visible saved shortcuts. Local arrays/sets and async digest work bounded by supplied top sites plus custom records. load normalizes the entire raw custom array before slicing, but normal writes already cap it. Promise queue serializes mutations and navigator lock coordinates pages. Context-menu teardown aborts listeners and removes menu. No periodic work."
+    },
+    {
+      "path": "features/ai/extension/usage-settings.js",
+      "sha256": "96fd12e6109982522a695554c569e1911738b30b3deb6fa96d640a92948d3d27",
+      "lines": 36,
+      "readRanges": [
+        [
+          1,
+          36
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Mount reads flag once, one change listener; disabled during save, no recurring timer. No disposal return but document-lifetime usage."
+    },
+    {
+      "path": "features/ai/extension/usage.js",
+      "sha256": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "lines": 73,
+      "readRanges": [
+        [
+          1,
+          73
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "One-minute alarm intentionally measures focused active usage. State one month with daily counts, no page metadata. Serialized samples, 10s abort deadline, 30-minute successful-send cadence. Aborts on opt-out and removes alarm/counter. No network run in this audit. Reducing/disabling reporting is excluded as feature loss."
+    },
+    {
+      "path": "features/ai/extension/whats-new.css",
+      "sha256": "324bdec4f90c813ce51f143280af4c936399d8798fa06a5d67a36c8e97798c1d",
+      "lines": 795,
+      "readRanges": [
+        [
+          1,
+          795
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-400,401-795. Static layout, filters/shadows and one finite breeze animation with reduced motion. Full-page grain/filter may have raster cost, but no live renderer proof; do not delete artwork on speculation."
+    },
+    {
+      "path": "features/ai/extension/whats-new.html",
+      "sha256": "e71fcd8ac23120dcb4f76c014b22bba8e3884b8dd218c009a4d5314921b94391",
+      "lines": 628,
+      "readRanges": [
+        [
+          1,
+          628
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-210,211-420,421-628. Static SVG artwork/table and finite animated title path; no continuous SVG animation or embedded remote asset fetch found. Full-page turbulence filter is static. No dynamic cache/history."
+    },
+    {
+      "path": "features/ai/extension/whats-new.js",
+      "sha256": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+      "lines": 48,
+      "readRanges": [
+        [
+          1,
+          48
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "48 lines complete. One release-info import and continue-button handlers. On failed close schedules one 300ms reset, no recurring polling."
+    }
+  ],
+  "findings": [
+    {
+      "id": "ES-01",
+      "pathsAndLines": [
+        "features/ai/extension/panel.js:280-321",
+        "features/ai/extension/panel.js:434-441",
+        "features/ai/extension/panel.js:534-547",
+        "features/ai/extension/panel.js:630-634"
+      ],
+      "hypothesis": "An uninterrupted conversation grows attached message DOM, the messageNodes Map and the in-memory transcript without a count or character bound; the 60-message persistence limit does not limit the live panel.",
+      "whyReachable": "Production send pushes two messages and appendMessage adds two articles and map entries per exchange. Only New Chat clears these structures. Production send/receive/finish executed in a fake DOM/API fixture retained 200 messages, 200 map entries and 200 article nodes after 100 exchanges, versus 60 saved messages.",
+      "expectedScope": "Sustained AI conversations in one live panel only. Confirmed ownership/count growth, not a measured leak or physical memory size. Existing transcript is user-visible functionality; the text itself is not automatically disposable waste.",
+      "risk": "High if fixed by silently dropping old messages. Preserve transcript access, retry buttons, current streamed message, keyboard/assistive log behavior, scroll position and last-30 provider history. No blanket 60-message in-memory truncation without a product retention decision.",
+      "cheapReproduction": "node build/efficiency-20261103/extension-services-probe.mjs. Retention assertions execute production panel functions, replacing imports with stubs and stopping before event-registration/bootstrap code. No browser layout/GC/native transport is exercised.",
+      "smallestFix": "First bound rendered offscreen history with reversible transcript paging/windowing while preserving access to all conversation text. If bounding text is also desired, define explicit archival/retention behavior first. Avoid silently changing provider history. Independently replace repeated full-array find/filter work with current reply lookup/tail selection where behavior is identical.",
+      "relevantExistingTests": [
+        "tests/ai/panel-browser.mjs (history, retry, New Chat, safe rendering; searched relevant assertions, not executed)",
+        "Need long-conversation fixture checking old-message access and scroll/focus before accepting a DOM window"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "ES-02",
+      "pathsAndLines": [
+        "features/ai/extension/panel.js:328-339",
+        "features/ai/extension/panel.js:496-499",
+        "features/ai/extension/render-message.js:2-54"
+      ],
+      "hypothesis": "Each rendered streaming frame reparses all text received so far and replaces the complete reply subtree, so cumulative parse and allocation work grows with response length times rendered frame count.",
+      "whyReachable": "Production receive appends text then schedules renderDelta; its RAF invokes production renderMessage on the entire reply. With one 27-character line per synthetic frame, 100 frames produced a 2700-character final reply but parsed 136350 cumulative characters and created 10200 nodes.",
+      "expectedScope": "Active streaming replies, especially long formatted replies delivered over many frames. RAF already merges deltas arriving within one frame. This is operation/allocation count evidence using a synthetic DOM; it does not establish CPU time, paint cost, whole-browser RAM or battery gain.",
+      "risk": "Medium to high for incremental Markdown. A later chunk can close a code fence, complete inline syntax or change list grouping. Preserve final safe DOM output, chunk-boundary behavior, reduced motion, cancellation/error rendering and scroll anchoring. Simply delaying all rendering can regress responsiveness.",
+      "cheapReproduction": "node build/efficiency-20261103/extension-services-probe.mjs. Production renderer executed via vm and synthetic requestAnimationFrame queue; callbacks drained once per delta. No timing benchmark. Probe output records exact operation counts.",
+      "smallestFix": "Prototype committing complete stable blocks while reparsing only the unfinished tail, with a final full render for exact equivalence. Compare against current renderMessage across every chunk boundary before adopting. Alternatively evaluate a carefully bounded render cadence with explicit responsiveness acceptance; no current gain claimed.",
+      "relevantExistingTests": [
+        "tests/ai/panel-browser.mjs safe HTML/link and streamed reply cases, not executed",
+        "Need differential DOM tests for split inline tokens, lists, quotes and open/closed code fences, plus real renderer scrolling acceptance"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "ES-03",
+      "pathsAndLines": [
+        "features/ai/extension/panel.js:319-321",
+        "features/ai/extension/panel.js:629-634"
+      ],
+      "hypothesis": "Per-window conversation records may accumulate in in-memory storage.session after windows close; no repository cleanup path was found.",
+      "whyReachable": "Each window ID writes a distinct breezer-conversation-ID key. Search across features/ai and tests/ai found the key only in panel.js and no windows.onRemoved or storage.session.remove cleanup. Session lifetime/quota and actual window destruction behavior were not exercised.",
+      "expectedScope": "Repeated windows with AI conversations within one browser session, bounded by platform storage capacity. No cross-session persistent disk leak or exact memory amount established.",
+      "risk": "Cleaning on panel close would lose intended reopen history. A closed window cleanup must distinguish full window removal from temporarily hidden/closed side panel and avoid save/cleanup races.",
+      "cheapReproduction": "Next: disposable extension API fixture implementing storage.session merge semantics and windows.onRemoved; save conversations under several window IDs, remove windows and inspect exact keys. Then verify panel reopen within an existing window restores history and app-session restart behavior in an allowed disposable browser.",
+      "smallestFix": "If reproduced, remove only the exact per-window conversation key on confirmed window removal, with race-safe handling of final panel save. Do not clear on visibility change.",
+      "relevantExistingTests": [
+        "tests/ai/panel-browser.mjs, existing conversation restore scenario; not executed",
+        "No dedicated per-window conversation cleanup test found by scoped search"
+      ],
+      "verdict": "SUSPECTED"
+    }
+  ],
+  "excludedIdeas": [
+    "Already verified page-context weak references, translation restore records, sidebar route pruning and native decoder: not new findings and outside this ownership.",
+    "Lazy folder-child rendering was rejected for slower opening and is not proposed again.",
+    "Context aggregates are deliberately bounded to 20 sites / 140 daily buckets. No unbounded learned-history finding.",
+    "Organato requests have explicit deadlines, owner cleanup and idle release. Update candidates intentionally retain their helper so verified candidates remain installable; do not drop checksum/signature identity state to save resources.",
+    "AI helper connection lifetime needs host-side evidence; this audit did not infer an idle native-process leak solely from the extension port.",
+    "Usage sampling alarms perform a requested feature. Disabling reporting, privacy checks, provider consent, security controls or features is excluded.",
+    "Panel input rebuilds a bounded settings select and shortcut popover rebuilds matching tabs. These are reachable small costs, but no measured user impact and no timing claim. Avoid caching unbounded tab data or imposing arbitrary result truncation.",
+    "Static release SVG/filter/shadow costs and eager theme workspace-store import are unmeasured. Preserve appearance until profiler evidence supports a change.",
+    "Document-lifetime event listeners in one-time panel/theme mounts are not evidence of cross-document leaks. Context/password mounts provide explicit disposal."
+  ],
+  "actualCommandsAndResults": [
+    {
+      "command": "cat AGENTS.md; cat /Users/likht.ethan/.codex/skills/unslop/SKILL.md; cat build/efficiency-20261103/source-inventory.json",
+      "result": "Read project rules and writing skill. Initial inventory output truncated; exact ownership subsequently selected by Python JSON parse, 22 files / 5014 lines."
+    },
+    {
+      "command": "cat docs/evidence/memory-20261102/README.md; cat docs/evidence/memory-20261102/decisions.tsv",
+      "result": "Read prior evidence and rejected experiment; native/whole-browser gates remain open."
+    },
+    {
+      "command": "cat/sed complete owned sources, split as recorded in file notes; overlapping rereads after output truncation",
+      "result": "All 22 owned files, all 5014 source lines read. Truncated model-catalog/release snippet reread completely. Background remainder reread from line 301."
+    },
+    {
+      "command": "rg scoped conversation/renderDelta/history/window-removal/session-cleanup references in features/ai and tests/ai; read tests/ai/native-lifetime.test.mjs",
+      "result": "Located existing panel history assertions and native lifetime coverage. No per-window conversation removal implementation found. Tests not executed."
+    },
+    {
+      "command": "git status --short",
+      "result": "Observed pre-existing edits and untracked evidence; preserved them. No production mutation made."
+    },
+    {
+      "command": "node build/efficiency-20261103/extension-services-probe.mjs",
+      "result": "First run failed because synthetic reasoning-select parentElement was missing. Fixed only diagnostic fake DOM. Second run failed incorrect fixture expectation of 26 characters, actual literal is 27; corrected diagnostic assertion. Final run exit 0, all assertions pass. Node v22.14.0. Results in extension-services-probe-results.json."
+    },
+    {
+      "command": "Python SHA-256/line-count comparison for exact inventory owner extension-services",
+      "result": "22/22 hashes and line counts match inventory after read. Report generator reasserts them. Initial report generation failed on a missing top-sites.js note entry; added that read-coverage note and regenerated successfully; JSON syntax validated."
+    }
+  ],
+  "remainingGaps": [
+    "No owned-file read gaps. Cross-owner imports and host/runtime implementations were not fully audited by this report.",
+    "Native app, PC, production profiles/caches, network/providers/Keychain/config were not accessed. No build/run/install/push/publish performed.",
+    "No timing, physical-memory, energy or whole-browser profiling. Fixture DOM counts are synthetic execution evidence, not actual renderer GC/DOM counters.",
+    "No implementation changes or regression acceptance; coordinator owns implementation and independent verification. Panel browser tests identified but not run.",
+    "ES-03 needs storage lifecycle reproduction; ES-01 DOM windowing must preserve full transcript access; ES-02 optimization needs differential rendering and real scrolling tests."
+  ],
+  "diagnosticArtifacts": [
+    "build/efficiency-20261103/extension-services-probe.mjs",
+    "build/efficiency-20261103/extension-services-probe-results.json",
+    "build/efficiency-20261103/extension-services-write-report.py"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "browser": "156.0.8078.4",
+  "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/ai/extension/translation-content.js",
+  "isolatedWorld": true,
+  "sourceSha256": "22c76bd6c734a24a5a2e2a2f5fcaa56b085322e4f62cd494f37256c16155a1d0",
+  "empty": {
+    "documents": 1,
+    "nodes": 10,
+    "jsEventListeners": 3,
+    "usedHeapBytes": 808056
+  },
+  "attached": {
+    "documents": 1,
+    "nodes": 20011,
+    "jsEventListeners": 16,
+    "usedHeapBytes": 1984468
+  },
+  "detached": {
+    "documents": 1,
+    "nodes": 10,
+    "jsEventListeners": 16,
+    "usedHeapBytes": 1661820
+  },
+  "restored": {
+    "documents": 1,
+    "nodes": 11,
+    "jsEventListeners": 16,
+    "usedHeapBytes": 1666324
+  },
+  "retainedExtraNodes": 0,
+  "released": true,
+  "limits": "Synthetic real-DOM retention check with production content script and fixture translation port in an isolated world. Forced GC; no provider calls or whole-browser RAM/CPU claim."
+}

@@ -1,0 +1,155 @@
+{
+  "summary": {
+    "verdict": "No introduced correctness defect found in the three sync changes or five-resource migration extension. One confirmed evidence typo; native efficiency acceptance remains open.",
+    "reviewScope": "Read AGENTS.md and the complete nine requested source/test files, tracked diff, isolated baseline, initial sync audit findings, current README/verification and canonical decisions. Production source left unchanged. Offline fake-API tests only; no PC contact, providers, network, Keychain, app builds/launches/installs or native measurements.",
+    "sourceFilesRead": [
+      {
+        "path": "features/ai/extension/workspace-sync.js",
+        "lines": 204,
+        "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+      },
+      {
+        "path": "features/ai/extension/workspace-sync-model.js",
+        "lines": 206,
+        "sha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c"
+      },
+      {
+        "path": "tests/sync/reconcile.test.mjs",
+        "lines": 232,
+        "sha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd"
+      },
+      {
+        "path": "tests/sync/workspace-model.test.mjs",
+        "lines": 173,
+        "sha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387"
+      },
+      {
+        "path": "tests/sync/lifetime.test.mjs",
+        "lines": 72,
+        "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc"
+      },
+      {
+        "path": "script/verify_workspace_sync_efficiency.mjs",
+        "lines": 63,
+        "sha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b"
+      },
+      {
+        "path": "script/windows/apply-memory-update.py",
+        "lines": 84,
+        "sha256": "13be0d181ef045c0b6db3187c64125ae82364a79a3cb767e21f873ef47d37346"
+      },
+      {
+        "path": "script/windows/prepare-efficiency-packet.py",
+        "lines": 58,
+        "sha256": "f6c2ef9815a91a5a41c14e7d72783c2dc6e5feba01301d69076e59cf0b3aa57f"
+      },
+      {
+        "path": "tests/windows/memory_update_test.py",
+        "lines": 196,
+        "sha256": "3b51eade17f25fec607ab7b633cf24b470a85ac32db16ef2d7359aa1366d6162"
+      }
+    ],
+    "checks": "33 Node sync checks pass on system Node v22.14.0; 23 Python checks pass and 1 Linux-only case skips. Additional deterministic differential/fault checks pass.",
+    "recommendation": "Keep the current correctness-preserving implementation for further evaluation. No safer smaller replacement is warranted by this review. Treat the recovery guard as a storage-submission optimisation pending CPU/peak-memory measurement, not as proved RAM/CPU improvement."
+  },
+  "findings": [
+    {
+      "id": "SR-01",
+      "severity": "low",
+      "category": "evidence accuracy",
+      "file": "docs/evidence/memory-20261103/README.md",
+      "line": 43,
+      "description": "The README reports 1,158,924 submitted bytes for the linked 1,000-entry fixture, but sync-before.json and an independent rerun both report 1,158,807. The former number belongs to the initial audit fixture, whose empty case also differs from the reusable verifier.",
+      "reproduction": "node script/verify_workspace_sync_efficiency.mjs --source-dir build/efficiency-20261103/sync-baseline --output build/efficiency-20261103/sync-review-independent-baseline.json",
+      "actual": "noOpCycles[1].serializedStorageBytes = 1158807; storageWrites = 3. docs/evidence/memory-20261103/sync-before.json agrees.",
+      "smallestFix": "Change README.md:43 to 1,158,807, or explicitly attribute 1,158,924 to the distinct initial audit fixture. No source change needed."
+    }
+  ],
+  "objections": [
+    {
+      "topic": "Serialized recovery snapshot and comparison work",
+      "location": "features/ai/extension/workspace-sync.js:81-89",
+      "status": "Confirmed tradeoff; no correctness defect",
+      "evidence": "The source-local probe observes four complete recovery JSON.stringify calls in an unchanged 1,000-entry cycle, each returning 422,107 UTF-16 code units, 1,688,428 code units in total for this fixture. persistedLocal retains one snapshot across awaits and each capture creates a candidate string. These counts do not measure physical allocations, GC, CPU or peak memory.",
+      "assessment": "String snapshots avoid the mutable shallow-alias bug that an object reference or shallow copy would introduce. persistedLocal changes only after a successful awaited storage write. The cycle-local value is not an instance/global cache. Removing snapshots, adding hashes or restructuring validated-model contracts would add risk or move costs without measurement. Keep the guard provisionally; measure before calling it an overall efficiency win.",
+      "diagnostic": "build/efficiency-20261103/sync-review-focused-results.json"
+    },
+    {
+      "topic": "Partial final multi-key writes",
+      "location": "features/ai/extension/workspace-sync.js:125-129",
+      "status": "Inherited boundary assumption, not a regression from this diff",
+      "evidence": "Synthetic rejection-before-write, recovery-only partial write, store-only partial write and both-written-then-rejected produce identical baseline/candidate outcomes. All preserve Remote edit after retry except recovery-only: if the final recovery baseline commits but STORE_KEY does not, the next cycle interprets the old store as a new local edit and publishes Personal. This behavior also exists in isolated git HEAD.",
+      "assessment": "The submitted failed-apply test models rejection before either key writes and passes. It does not prove crash atomicity across storage keys. Do not describe that test as proof of arbitrary partial-write recovery. If actual Chrome storage semantics permit recovery-only commit, a separate journal/commit protocol or explicit storage transaction guarantee is required. This review did not establish that the artificial failure is reachable in Chrome.",
+      "diagnostic": "build/efficiency-20261103/sync-review-partial-writes-results.json"
+    },
+    {
+      "topic": "Alarm API ordering",
+      "location": "features/ai/extension/workspace-sync.js:173-179",
+      "status": "No introduced defect found under awaited completion semantics",
+      "assessment": "A post-cycle check prevents creation after disposal; the post-create check clears late creation. Serial drain prevents overlapping cycle alarm changes. The tests cover three cycle completion phases and pending creation. A Promise that resolves before its underlying alarm operation takes effect would violate the assumed API completion contract; the fixture and source review cannot establish native IPC ordering. Cross-install ownership of a shared alarm name and ignored alarm rejections predate these edits."
+    },
+    {
+      "topic": "Folder-state semantics and transient index cost",
+      "location": "features/ai/extension/workspace-sync-model.js:156-175",
+      "status": "No correctness mismatch found",
+      "assessment": "400 seeded differential cases match baseline, including duplicate folder IDs across and within spaces and unusual expansion values. remaining.delete preserves first match within each space, and later spaces overwrite earlier matches. The zero-folder branch skips scanning; scanning stops when every relevant folder is found. folderIds, per-space Set and localExpansion add temporary JS objects; fewer pin reads are established, lower native RAM/CPU is not."
+    }
+  ],
+  "commandsAndResults": [
+    {
+      "command": "node --test tests/sync/lifetime.test.mjs tests/sync/reconcile.test.mjs tests/sync/workspace-model.test.mjs tests/sync/provider.test.mjs",
+      "result": "33/33 pass, Node v22.14.0",
+      "artifact": "build/efficiency-20261103/sync-review-independent-tests.tap"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/windows -p '*_test.py' -v",
+      "result": "24 run, 23 pass, 1 Linux-only skip; migration/resume/mtime tests pass",
+      "artifact": "build/efficiency-20261103/sync-review-independent-windows.log"
+    },
+    {
+      "command": "node script/verify_workspace_sync_efficiency.mjs --expect-optimized --output build/efficiency-20261103/sync-review-independent-counts.json",
+      "result": "Pass: unchanged 0/1000-entry cases write zero bytes/calls and exchange zero times; folder reads 100/1000; expansion preserved",
+      "artifact": "build/efficiency-20261103/sync-review-independent-counts.json"
+    },
+    {
+      "command": "node script/verify_workspace_sync_efficiency.mjs --source-dir build/efficiency-20261103/sync-baseline --output build/efficiency-20261103/sync-review-independent-baseline.json",
+      "result": "Baseline 3 writes per unchanged cycle, 6603/1158807 submitted bytes; folder reads 5050/500500",
+      "artifact": "build/efficiency-20261103/sync-review-independent-baseline.json"
+    },
+    {
+      "command": "node --test build/efficiency-20261103/sync-review-baseline-lifetime.test.mjs",
+      "result": "Expected exit 1: 1 pass, 3 fail; independently reproduces baseline regressions",
+      "artifact": "build/efficiency-20261103/sync-review-baseline-lifetime.tap"
+    },
+    {
+      "command": "node build/efficiency-20261103/sync-review-focused.mjs",
+      "result": "Pass: four CAS misses terminate and recover; appearance policy refusal retries then recovers; remote model and final baseline are separately captured; subsequent no-op writes nothing; 400 differential folder cases; recovery serialization counts recorded",
+      "artifact": "build/efficiency-20261103/sync-review-focused-results.json"
+    },
+    {
+      "command": "node build/efficiency-20261103/sync-review-partial-writes.mjs",
+      "result": "All four artificial failure modes match baseline. Recovery-only partial commit limitation is inherited, not a new defect.",
+      "artifact": "build/efficiency-20261103/sync-review-partial-writes-results.json"
+    },
+    {
+      "command": "Python SHA-256 comparisons of git HEAD/isolated baseline, verification source hashes, all five staged packet resources and SHA256SUMS",
+      "result": "All comparisons pass; staged candidate sources match live source; no packet regeneration or deployment",
+      "artifact": "build/efficiency-20261103/sync-review-artifact-validation.json"
+    }
+  ],
+  "evidenceGaps": [
+    "No browser CPU, peak heap, RSS, IPC, physical disk or native alarm-operation measurements. Operation-count reduction cannot establish those outcomes. No timing benchmark run.",
+    "Final multi-key local storage crash/partial-write atomicity is not established. Existing tests reject the whole apply; differential artificial partial writes expose an inherited limitation only.",
+    "Packaged Node v24.22.1 checks are recorded in supplied evidence, not independently rerun here. Avoided private installed app bundles.",
+    "The cached PC plan comparison is coordinator evidence. This review independently verifies isolated baselines against git HEAD and staged packet hashes, not a new cached-plan read or live PC state.",
+    "The Linux orphan-adoption case remains skipped. Migration tests establish fake-source idempotence, validation-before-writes, backups and unchanged object/source mtimes on repeat; they do not establish WSL/native build acceptance or crash-durable directory metadata.",
+    "No whole-browser acceptance, Windows build, provider behavior or broader feature audit completion claimed. Earlier unrelated fixes were not re-reviewed as new changes.",
+    "Report model and configured reasoning are known; regular versus priority serving speed cannot be independently observed from this runtime."
+  ],
+  "reportModel": {
+    "name": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "serviceSpeed": "Requested regular speed; not independently observable",
+    "subagents": 0
+  }
+}

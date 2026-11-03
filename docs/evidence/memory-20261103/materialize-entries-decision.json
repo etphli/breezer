@@ -1,0 +1,64 @@
+{
+  "decision": "Reject list-reuse candidate; production unchanged.",
+  "reason": "Semantics pass and large-fixture CPU improves, but typical-fixture CPU benefit remains below the required 2% in all four rounds. Fewer returned pair arrays alone do not justify adoption. The shared entries list also prolongs pair lifetimes.",
+  "gateResult": {
+    "repeatableRegressionAboveThreePercent": false,
+    "typicalBenefitGatePassed": false,
+    "largeBenefitGatePassed": true,
+    "decision": "reject after full repeated gate",
+    "allWarmupsAndOutliersRetained": true,
+    "rawMeasuredPairs": 252,
+    "rawWarmupPairs": 96,
+    "rawTimingRecords": 348
+  },
+  "differential": {
+    "comparisons": 404,
+    "existingTests": "26/26 pass across copied baseline/candidate original workspace-model tests; shared original tests unchanged",
+    "compatibility": "392-case corpus passed on Node22.14.0, log retained; Node24 corpus passed before and after Node22 run. Extra 12 adversarial comparisons run on Node24."
+  },
+  "lifetime": {
+    "baseline": {
+      "phase": "first localStore.spaces getter, after folder ordering before entry ordering",
+      "livePairs": 20,
+      "byCategory": {
+        "space/": 0,
+        "folder/": 20,
+        "entry/": 0,
+        "appearance/": 0,
+        "preferences": 0
+      },
+      "limitations": "V8 heap graph at one phase. Self sizes exclude backing storage and referents; not physical RAM or peak across execution. Engine liveness/GC can differ in browser."
+    },
+    "candidate": {
+      "phase": "first localStore.spaces getter, after folder ordering before entry ordering",
+      "livePairs": 229,
+      "byCategory": {
+        "space/": 5,
+        "folder/": 20,
+        "entry/": 200,
+        "appearance/": 3,
+        "preferences": 1
+      },
+      "limitations": "V8 heap graph at one phase. Self sizes exclude backing storage and referents; not physical RAM or peak across execution. Engine liveness/GC can differ in browser."
+    }
+  },
+  "source": {
+    "originalModelSha256": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "originalStoreSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "candidateOriginalImportSha256": "a61952a1c5d57b933296651b6573ec6d21c376133906692eddf3f82d3f84cb4e",
+    "diff": "build/efficiency-20261103/materialize-entries/candidate.diff",
+    "baseline": "1590cb7b42c346dbc3e469577f321eb57754b1808c44c5a73dcb206556b6965f",
+    "candidate": "bb91d727afe27524f6d3c9373ed49e5152a88ee9d25449302e9f971f82431efc",
+    "outsideFunctionByteIdentical": true,
+    "unchangedPrefix": "30f71572ad458d575f9c5941646be8c79b08d9d47e9564cb4e59cad478498a7e",
+    "unchangedSuffix": "627000b365e659460d546d699e542779222b6db34d63a68a6e3692a863d3c9cc",
+    "store": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "importRebaseOnly": "'./workspace-store.js' -> './workspace-store.mjs'",
+    "validation": "No validators modified; materializeWorkspace validateSyncModel then syncModelValues validateSyncModel preserved"
+  },
+  "limits": [
+    "Coordinator verified current hashes, gate decision and source-end records, without rerunning timings or heap captures.",
+    "Node heap graph at one phase does not establish peak or physical RAM.",
+    "All scratch/evidence preserved. Installed app/PC untouched."
+  ]
+}

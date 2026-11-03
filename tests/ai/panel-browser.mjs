@@ -21,15 +21,16 @@ const server = createServer(async (request, response) => {
   } catch { response.writeHead(404).end(); }
 });
 await new Promise((done) => server.listen(0, '127.0.0.1', done));
-const browser = await chromium.launch({
-  executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined),
-  headless: true,
-});
-const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
-const errors = [];
-page.on('pageerror', (error) => errors.push(error.message));
-page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
+let browser;
 try {
+  browser = await chromium.launch({
+    executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined),
+    headless: true,
+  });
+  const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
   await page.addInitScript(() => {
     const storage = { local: JSON.parse(localStorage.getItem('breezer-fixture-local') || '{}'), session: {} };
     const callbacks = [];
@@ -330,6 +331,46 @@ try {
   assert.equal(await page.evaluate(() => document.getAnimations().filter(animation => animation.playState === 'running').length), 0);
   await page.keyboard.press('Escape');
 
+  for (const width of [320, 400]) {
+    await page.setViewportSize({ width, height: 640 });
+    await page.emulateMedia({ reducedMotion: width === 320 ? 'reduce' : 'no-preference' });
+    await page.getByRole('button', { name: 'New conversation' }).click();
+    await page.getByLabel('Message Breezer').fill('Exercise streamed scroll anchoring');
+    await page.getByLabel('Message Breezer').press('Enter');
+    const streamed = await page.evaluate(async () => {
+      const { renderMessage } = await import('./render-message.js');
+      const id = window.sent.filter(message => message.type === 'chat').at(-1).id;
+      const scroller = document.getElementById('conversation');
+      const body = [...document.querySelectorAll('.assistant .message-body')].at(-1);
+      let text = '';
+      const append = async delta => {
+        text += delta;
+        window.emit({ type: 'delta', id, text: delta });
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const expected = document.createElement('div');
+        renderMessage(expected, text);
+        return body.innerHTML === expected.innerHTML;
+      };
+      const first = await append(Array.from({ length: 24 }, (_, i) => `## Section ${i}\n\nA **formatted** paragraph with a [safe link](https://example.com/) and enough text to wrap in this narrow view.\n\n`).join(''));
+      const committed = body.firstChild;
+      scroller.scrollTop = 0;
+      const beforeTop = committed.getBoundingClientRect().top;
+      const second = await append('More **unfinished');
+      const staysAbove = Math.abs(scroller.scrollTop) < 2 && Math.abs(committed.getBoundingClientRect().top - beforeTop) < 2;
+      const keptNode = body.firstChild === committed;
+      scroller.scrollTop = scroller.scrollHeight;
+      const third = await append(' emphasis**\n\n```js\n' + 'const value = "long code tail";\n'.repeat(100));
+      const followsBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 3;
+      const fourth = await append('```\n\n- First\n- Second\n');
+      window.emit({ type: 'complete', id });
+      const expected = document.createElement('div');
+      renderMessage(expected, text);
+      return { prefixesMatch: first && second && third && fourth, staysAbove, keptNode, followsBottom, finalMatches: body.innerHTML === expected.innerHTML };
+    });
+    assert.deepEqual(streamed, { prefixesMatch: true, staysAbove: true, keptNode: true, followsBottom: true, finalMatches: true });
+    await page.screenshot({ path: `${evidence}/sidebar-stream-scroll-${width}.png` });
+  }
+
   // Signed out everywhere: the empty state says how to connect, and Enter opens the model menu instead of failing silently.
   await page.evaluate(() => {
     window.testProviders = [
@@ -359,6 +400,7 @@ try {
   console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {
-  await browser.close();
-  await new Promise((done) => server.close(done));
+  try { await browser?.close(); } finally {
+    await new Promise(done => server.close(done));
+  }
 }

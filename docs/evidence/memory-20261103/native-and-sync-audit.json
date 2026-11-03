@@ -1,0 +1,745 @@
+{
+  "area": "native-and-sync",
+  "model": "gpt-6.1-sol, high reasoning; runtime serving speed not independently observable",
+  "files": [
+    {
+      "path": "features/ai/extension/sync-settings.js",
+      "sha256": "c29004157f581197bc5697f2520e6a4afdfa9f0b81e1a8824b319c3aa99f9a12",
+      "lines": 84,
+      "readRanges": [
+        [
+          1,
+          84
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Recovery rendering is revision-guarded, buttons capped at 50 per category, listener removed by dispose. Existing DOM is bounded; no new retention proof."
+    },
+    {
+      "path": "features/ai/extension/workspace-sync-model.js",
+      "sha256": "f97e326df1b1ab8add1bcefa8c1aacbc0da08cc0adb9f0492c4e0264b55537f9",
+      "lines": 197,
+      "readRanges": [
+        [
+          1,
+          197
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read validation, projection, clocks, tombstones, merge, materialization and canonical serialization. Model bounded to 1 MiB/12000 records. Folder restoration repeatedly scans local pinned arrays; see NS-02. Tombstones preserve offline deletion semantics."
+    },
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "sha256": "a8d3fc3064758b6f1d7814a616bdbb82ba19d6df5dd71e65a31b9dccc073f1ea",
+      "lines": 191,
+      "readRanges": [
+        [
+          1,
+          191
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read bridge timeout, locks, repair, capture-before-exchange, four-attempt merge, storage writes, alarm and disposal paths. See NS-01 and NS-03. Polling invokes native refresh; removing it needs a freshness replacement."
+    },
+    {
+      "path": "features/omnibox/omnibox-suggestions.patch",
+      "sha256": "6332f94dad6c29eec2e6e29708a256f3afc759b0ded64d7a94ece48849060bf8",
+      "lines": 552,
+      "readRanges": [
+        [
+          1,
+          552
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all patch context, settings/pref changes, provider early returns and added tests. Preferences remain enabled by default. No native build/runtime verification; do not disable suggestions for resource savings."
+    },
+    {
+      "path": "features/omnibox/upstream.json",
+      "sha256": "ef5f46b821ba7209d3e4d6cced3c15abcc589e06b2665057863b2bec1bce705c",
+      "lines": 17,
+      "readRanges": [
+        [
+          1,
+          17
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete pinned provenance manifest; no executable runtime work."
+    },
+    {
+      "path": "features/passwords/native-ui/apply.py",
+      "sha256": "e238cde7c0d26bb8dfaa69103bd351784ec3de58ed38d606ac31a2ca843838dd",
+      "lines": 139,
+      "readRanges": [
+        [
+          1,
+          139
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read full staging, dry-run, reverse detection, validation-before-write, atomic replacement and CLI. Build-only transient maps, not sustained browser state. Not executed."
+    },
+    {
+      "path": "features/passwords/native-ui/password-manager.patch",
+      "sha256": "624a3e5dfce066fc9b4cfc1dd37a607f89ea4f341f28801b4ede44923690c5b5",
+      "lines": 607,
+      "readRanges": [
+        [
+          1,
+          607
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all native password UI, chip suppression, passkey route, trusted Enter fallback and test hunks. Feature/security guards retained. Native compile and runtime not verified."
+    },
+    {
+      "path": "features/passwords/native-ui/upstream.json",
+      "sha256": "b1e7151130bf42f53232ba321a95f8a197a98accf80a5185c7ad36e0f253f58f",
+      "lines": 66,
+      "readRanges": [
+        [
+          1,
+          66
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete pinned provenance manifest; no executable runtime work."
+    },
+    {
+      "path": "features/performance/compiled-filter-context.js",
+      "sha256": "9ef7c5d20c23dc95b1a66c254cfd0463a89aca59a85117de603b928261e89cda",
+      "lines": 48,
+      "readRanges": [
+        [
+          1,
+          48
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Pending states removed in finally; after-update freshness invalidation remains synchronous with consume. Trusted token hash recomputed for each context check, but memoization would need reliable invalidation. Not a proven sustained hotspot."
+    },
+    {
+      "path": "features/performance/compiled-filter-lists.mjs",
+      "sha256": "98166a03e1141733b3a62f458d65021fc221bb38bd062e3a7c8429b77ada8b6a",
+      "lines": 77,
+      "readRanges": [
+        [
+          1,
+          77
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read index lifetime, streaming byte bounds, serialized payload queue, raw/hash/context/trust validation, miss paths. Small index cached; no payload cache. Peak copies are bounded and verification-related. Opt-in rollout unchanged."
+    },
+    {
+      "path": "features/storage/code-sign-clones/apply.py",
+      "sha256": "1d5e12a270444629e8bc05fcfa6d6f0abf0e1183f1f001b5654b7e4afa99f37e",
+      "lines": 117,
+      "readRanges": [
+        [
+          1,
+          117
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read fingerprint, pinned input validation, staging, idempotence and atomic replacement. No execution or prepared-tree mutation."
+    },
+    {
+      "path": "features/storage/code-sign-clones/clone_session.h",
+      "sha256": "55e35e55a0aab36f1501cefbf7541b9b791090ca9537d00bc5646385fc88894c",
+      "lines": 267,
+      "readRanges": [
+        [
+          1,
+          267
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read descriptor ownership, root walk, locks, leases and budgeted recursive cleanup. Cleanup bounded by entries/sessions/nodes/depth/deadline. Released session descriptor intentionally owns live clone until process exit. No private paths inspected."
+    },
+    {
+      "path": "features/storage/code-sign-clones/code-sign-clones.patch",
+      "sha256": "3ae2d630a830ef3487a392a5be2d763418e76e1c699d35baf00f22fba720f4f3",
+      "lines": 167,
+      "readRanges": [
+        [
+          1,
+          167
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all manager, tests and BUILD hunks. Cleanup background and budgeted; live lease prevents deletion. No compile or actual clone workflow run."
+    },
+    {
+      "path": "features/storage/code-sign-clones/upstream.json",
+      "sha256": "8a600940bece5559f08bb70780c3002d9323b5b246c04893cddfb37273067eea",
+      "lines": 10,
+      "readRanges": [
+        [
+          1,
+          10
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete pinned provenance manifest; no executable runtime work."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/backend.cc",
+      "sha256": "b2c4c100f29c6cc30e33158eee31df1c64c8ee2504bad6e43bfff85ed7b0ab77",
+      "lines": 261,
+      "readRanges": [
+        [
+          1,
+          261
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete checkpoint persistence, cancellation polling, diagnostic callback and backend setup/status code. Wait loops occur only during real requests/persistence and have deadlines; not idle polling. Native lifecycle/runtime unverified."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/backend.h",
+      "sha256": "dd2639e7afd2cdd12ac8cc43a1fb57d8d06842592c36799e4c6f500f5429c4a5",
+      "lines": 21,
+      "readRanges": [
+        [
+          1,
+          21
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read declarations and ownership interfaces; native not compiled."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/prefs.h",
+      "sha256": "428eebd9477d0256cf1c4a6adb797b7ba94412c0acd4ed0e3df97bfd71bd215f",
+      "lines": 7,
+      "readRanges": [
+        [
+          1,
+          7
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read fixed workspace preference constant; no dynamic storage."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+      "sha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+      "lines": 164,
+      "readRanges": [
+        [
+          1,
+          164
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all response/error mapping, blocking waits, request cancellation and destructor paths. Refcounted Reply allows late callback after abandonment. ReadObject copies successful payload; see NS-04. Native not compiled."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.h",
+      "sha256": "96494d6343c185f776ff7ed696e77d2ae7c3acb1066cb5e11afbac942effa0d0",
+      "lines": 22,
+      "readRanges": [
+        [
+          1,
+          22
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read weak service and shared active flag factory contract; native not compiled."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/ui/webui/breezer_sync/BUILD.gn",
+      "sha256": "c27b27e4949991d23eceef05e7f0cf908d63bca8c2232d891c41e562656e8b03",
+      "lines": 23,
+      "readRanges": [
+        [
+          1,
+          23
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete BUILD dependency/source declaration; native compilation not performed."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc",
+      "sha256": "df85a9c191c1f7013e940600b514b2f33a951e94838ee870fc7d0828697114c9",
+      "lines": 353,
+      "readRanges": [
+        [
+          1,
+          353
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete handler, setup worker, cancellation, provider session, durable install hold, status and resource serving. Setup keys stay native, task replies use weak pointers. No real vault/provider/Keychain access or native verification."
+    },
+    {
+      "path": "features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.h",
+      "sha256": "c66861770eaaad8d445f192e7d85613e6ab9db6c05ea048bdfc7e0956a683615",
+      "lines": 18,
+      "readRanges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read full WebUI config/controller declarations; native not compiled."
+    },
+    {
+      "path": "features/sync/setup/setup.css",
+      "sha256": "496e0141ea78da17e470060b647997b2fedda4c84ebdbb11621a1b447c4ac3eb",
+      "lines": 3,
+      "readRanges": [
+        [
+          1,
+          3
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all three long CSS lines, including media queries; static style, no recurring script work."
+    },
+    {
+      "path": "features/sync/setup/setup.html",
+      "sha256": "0d2052759a8af17ca7395341da08eb086a903201d0733ca3508478dc14a26e67",
+      "lines": 35,
+      "readRanges": [
+        [
+          1,
+          35
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all setup states and privacy/recovery text; small fixed DOM, recovery fields cleared by script."
+    },
+    {
+      "path": "features/sync/setup/setup.js",
+      "sha256": "8f851cde549caf1e50e2a1acf50d39b62c114b8771133e1e97bdfd631108fe91",
+      "lines": 79,
+      "readRanges": [
+        [
+          1,
+          79
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read send/pending promises, busy/cancel path, render, handlers and 5-second status interval. Interval stops on pagehide, native status has no TriggerRefresh. Hidden-tab timer gating is a minor opportunity requiring freshness testing, not a demonstrated high-impact leak."
+    },
+    {
+      "path": "features/sync/test-provider/extension/background.js",
+      "sha256": "20c5914b7f099d29f49f05b0fb54025f11c5cfc67c73c18c96bb1743b9561740",
+      "lines": 2,
+      "readRanges": [
+        [
+          1,
+          2
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read two-line test-only provider installer."
+    },
+    {
+      "path": "features/sync/test-provider/extension/manifest.json",
+      "sha256": "43a538bcd0f3e88e7aa30710b9264b30bce84a4a410bd9a4f52998d99a207526",
+      "lines": 14,
+      "readRanges": [
+        [
+          1,
+          14
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read test-only permissions, fixed loopback host and CSP."
+    },
+    {
+      "path": "features/sync/test-provider/extension/options.html",
+      "sha256": "9b79519921a6c258916b47f82360b90619d6dd460761b96dd8121400559ff916",
+      "lines": 9,
+      "readRanges": [
+        [
+          1,
+          9
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read test-only fixed form; no recurring work."
+    },
+    {
+      "path": "features/sync/test-provider/extension/options.js",
+      "sha256": "ec43efb88c1ef79d2d24335f2ba27005684cea4204c167ea2d1ce80f8593d6a8",
+      "lines": 14,
+      "readRanges": [
+        [
+          1,
+          14
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read test-only token form storage and clearing; did not access stored values."
+    },
+    {
+      "path": "features/sync/test-provider/extension/package.json",
+      "sha256": "ad91c9ac9136396f5249a45e093bab863e9a23646620d911af827986f6180283",
+      "lines": 1,
+      "readRanges": [
+        [
+          1,
+          1
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read test provider ESM marker."
+    },
+    {
+      "path": "features/sync/test-provider/extension/provider.js",
+      "sha256": "632c3f757ad70b14404ae68f2a5fc64b2d776443536183e885527f4033b1f601",
+      "lines": 84,
+      "readRanges": [
+        [
+          1,
+          84
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all events, opaque ciphertext transport, 90-second abort, pending map identity checks, finally cleanup and dispose. Test-only; stalled storage/respond promises are not bounded by fetch abort alone, but no production reachability established."
+    },
+    {
+      "path": "features/sync/test-provider/server.py",
+      "sha256": "abc1caae982deeefa24d4522539b938cde7eb108c61dc3a38b0efb4b2eca5951",
+      "lines": 199,
+      "readRanges": [
+        [
+          1,
+          199
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete disposable HTTP/SQLite server and CLI. No server started. Request body bounded to 64 MiB, DB retains ciphertext intentionally. Socket timeouts/concurrency limits would matter for hostile clients, not an established production browser optimization."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/BUILD.gn",
+      "sha256": "22b1ed9487c4410d0a61b938414ba7c03064ac5ee128c8661e3c36fc7d9c6be3",
+      "lines": 41,
+      "readRanges": [
+        [
+          1,
+          41
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete BUILD dependency/source declaration; native compilation not performed."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+      "sha256": "6939c92cc59887708166f10cc035f7b06d9af53ca294a7ae76a6d2767d50b79d",
+      "lines": 712,
+      "readRanges": [
+        [
+          1,
+          712
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all appearance mappings/validation/policy writes and browser scans, research permission/document checks/timeout and peek-source marking. No idle timer; research work user-triggered and bounded. Native compile/runtime unverified."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.h",
+      "sha256": "0766a16f80936831b332165f095eae78573acd152edcbc8bb7bc3154e1aec3ba",
+      "lines": 122,
+      "readRanges": [
+        [
+          1,
+          122
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read full declarations, weak document and one-shot timeout state."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h",
+      "sha256": "b065a29cff92c5980e86bb037fb77aa1519d5b0b31642d5b0dd185d6d1640efb",
+      "lines": 29,
+      "readRanges": [
+        [
+          1,
+          29
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read full fixed extractor, masks, visibility/security exclusions, 40000-node and 24000-character bounds. Per-node closest/checkVisibility could be costly on deep pages; no DOM probe allowed/performed. Do not relax secret/visibility checks."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/workspace_sync_api.cc",
+      "sha256": "a278785364fa904271f3923f55071590ef30d79785414a1f594803994b527ec6",
+      "lines": 80,
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read entire native bridge, 1 MiB model bound, policy/CAS/vault identity gates. readWorkspaceSync triggers refresh of active types, including passwords when selected. Polling removal is therefore a behavior change until replacement is tested."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/helium/breezer_workspace_prefs.h",
+      "sha256": "e9c54f58f281395fef004d25ba5b8332ebddc529afb5b9e6896481d8f335e422",
+      "lines": 50,
+      "readRanges": [
+        [
+          1,
+          50
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all constants, seed table and preference names; fixed bounded data."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/BUILD.gn",
+      "sha256": "5b39b93ab3413b9c85d0569f8ecfa469135be3f209df854b98738b8e8b3a77ad",
+      "lines": 38,
+      "readRanges": [
+        [
+          1,
+          38
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete BUILD dependency/source declaration; native compilation not performed."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.cc",
+      "sha256": "4cbf8c741c40b4e63d475b89b6f309f9c24a45500c746bb7fc248371fcab6309",
+      "lines": 725,
+      "readRanges": [
+        [
+          1,
+          725
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read full live WebContents ownership, widget/layer setup, observers/subscriptions, detach/deferred destruction, expansion transfer, navigation throttle and security/gesture gates. One peek per source; teardown code appears deliberate. No native retention/runtime claim."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.h",
+      "sha256": "622e738a7e56d976f59162569878ec2f97f90c93d4939e03bffa7afa51440c79",
+      "lines": 63,
+      "readRanges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read full ownership/navigation contract, including intentional keep-open when source marking clears."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.cc",
+      "sha256": "cd7899e086166a97f4c7d528a665d180d2543ae54c901e1cbcbecdab07af2c62",
+      "lines": 349,
+      "readRanges": [
+        [
+          1,
+          349
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all content creation, weak startup tasks, numbered-tab callback, geometry updates, ordered teardown, crash/unload/shutdown handling. One sidebar host per window is feature state; no proved leak."
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.h",
+      "sha256": "7ee35eb7194873c1ee69a89cded3c49a3d2fb3bc10a09b84900686d00f230b3b",
+      "lines": 142,
+      "readRanges": [
+        [
+          1,
+          142
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all ownership, observations, view fields and declarations. Native lifetime paths remain unverified."
+    },
+    {
+      "path": "features/workspace/native/chrome/common/extensions/api/breezer_private.idl",
+      "sha256": "56c0c2caddb728f19216fbe2abbe5749f8e7cb9cdae3392fb925d7ad36507d97",
+      "lines": 131,
+      "readRanges": [
+        [
+          1,
+          131
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all enums/dictionaries/callbacks/events/functions. Fixed metadata boundary; keys/passwords not exposed."
+    }
+  ],
+  "findings": [
+    {
+      "id": "NS-01",
+      "pathsAndLines": [
+        "features/ai/extension/workspace-sync.js:91-120",
+        "features/ai/extension/workspace-sync.js:153-183",
+        "features/ai/extension/workspace-sync-model.js:61-196"
+      ],
+      "hypothesis": "Every unchanged configured workspace cycle performs three full sync-local storage writes and repeated whole-model validation, cloning and serialization.",
+      "whyReachable": "Startup, saved-workspace/appearance/native hints and the configured 30-second alarm call cycle. All three writes at lines 94, 97 and 120 are unconditional even when there is no edit, remote difference or appearance patch.",
+      "expectedScope": "CONFIRMED synthetic operation counts only. Stable synthetic 1000-entry model: 3 writes with 1158924 serialized storage bytes per cycle; complete storage contents and remote model unchanged, zero exchanges. Probe observed 24109 JSON.stringify calls and 4401830 returned characters including three fixture-side storage serializations. Empty-entry case still writes 6720 serialized bytes. Browser IPC, physical disk bytes, CPU time and RSS not measured.",
+      "risk": "Medium. First capture is crash recovery, merged capture preserves remote edits, final baseline avoids replay. Skipping these indiscriminately can lose changes or cause repeat uploads. Native TriggerRefresh must remain effective.",
+      "cheapReproduction": "node build/efficiency-20261103/native-and-sync-probe.mjs; noOpCycles uses actual WorkspaceSync with cloned in-memory storage and a fake local native bridge. It warms two cycles then asserts a third cycle leaves all data byte-equivalent.",
+      "smallestFix": "Skip sync-local writes when their persisted value is unchanged, while retaining changed pre-transport and merged captures before any failing exchange/apply. First verify no-edit, edit, remote edit, failed exchange and failed appearance paths. Further reduce repeated validation only with an internal validated-model contract while keeping external boundary validation.",
+      "relevantExistingTests": [
+        "tests/sync/reconcile.test.mjs",
+        "tests/sync/workspace-model.test.mjs",
+        "tests/sync/setup-browser.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NS-02",
+      "pathsAndLines": [
+        "features/ai/extension/workspace-sync-model.js:157-163"
+      ],
+      "hypothesis": "Folder expansion restoration performs a linear search of each local space pinned list for each remote folder, yielding quadratic comparison counts for many folders.",
+      "whyReachable": "Every configured reconciliation calls materializeWorkspace; it restores local open flags by searching localStore.spaces[*].pinned for each folder. Current model accepts the synthetic 1000-folder input within its bounds.",
+      "expectedScope": "CONFIRMED synthetic algorithmic count from executing production materializeWorkspace. 100 folders: 5050 predicate calls; 1000 folders: 500500. No timing benchmark or whole-browser claim. Few-folder workspaces have small costs.",
+      "risk": "Low to medium. A lookup map must preserve semantics for duplicate folder IDs across spaces, where the current loop lets the last matching space win, and must preserve local expansion values.",
+      "cheapReproduction": "Same probe, folderLookups. An own find wrapper counts calls to the unchanged production predicate and delegates to Array.prototype.find; asserts n*(n+1)/2.",
+      "smallestFix": "Build one map of local folder ID to expansion state in space order before materializing folders, then perform one lookup per remote folder. Preserve last-space winner and existing fallback open=true.",
+      "relevantExistingTests": [
+        "tests/sync/workspace-model.test.mjs",
+        "tests/sync/reconcile.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NS-03",
+      "pathsAndLines": [
+        "features/ai/extension/workspace-sync.js:158-166",
+        "features/ai/extension/workspace-sync.js:184-189"
+      ],
+      "hypothesis": "Disposing while a cycle is awaiting the bridge can leave a recreated repeating alarm after disposal.",
+      "whyReachable": "dispose clears the alarm and listeners but drain does not recheck disposed after await sync.cycle. A later workspaceOff or reconciled result unconditionally calls alarms.create.",
+      "expectedScope": "CONFIRMED synthetic scheduling race with production installer: pending bridge read, dispose, then workspaceOff callback yields alarm clear followed by alarm create at 0.5 minutes. Actual Chrome worker wake cost and production dispose call frequency not measured.",
+      "risk": "Low. A post-await disposed guard must preserve finally resetting running. Alarm API sequencing should ensure teardown is the last alarm mutation.",
+      "cheapReproduction": "Same probe, disposeRace. Fake extension event/alarms APIs record calls; fake native callback is deliberately delayed until after dispose. Real 250 ms scheduling debounce runs; no network.",
+      "smallestFix": "After sync.cycle returns, stop before changing alarms if disposed. Test dispose during configured/off/disabled cycles and a pending alarms.create, so asynchronous alarm changes cannot overtake final cleanup.",
+      "relevantExistingTests": [
+        "tests/sync/reconcile.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "NS-04",
+      "pathsAndLines": [
+        "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc:76-80"
+      ],
+      "hypothesis": "ReadObject copies the complete successful ciphertext vector into OpaqueSyncVaultObject instead of transferring ownership from the consumed reply.",
+      "whyReachable": "Successful provider object reads bind success as const and return *success.data by value while the response still owns it. This is a full std::vector copy under the expected upstream API types.",
+      "expectedScope": "SUSPECTED native transient allocation per read; source suggests one object-sized duplicate. No compilation, concrete upstream type confirmation, provider runtime, allocation measurement or steady-state footprint proof performed. No gain claimed.",
+      "risk": "Medium. Moving requires confirming generated success/response types and exclusive ownership and keeping revision/size/error checks intact.",
+      "cheapReproduction": "Next allowed native build: exercise an isolated fake Service response with a large bounded ciphertext vector, count allocations or compare the data pointer before/after conversion, and test all malformed response branches. Do not use a real vault.",
+      "smallestFix": "After verifying concrete API ownership types, bind success mutably and move validated data/revision out of the local response, with unchanged checks.",
+      "relevantExistingTests": [
+        "tests/sync/provider.test.mjs",
+        "Native transport C++ coverage needs a new isolated fake-service test; JS provider tests do not prove C++ ownership."
+      ],
+      "verdict": "SUSPECTED"
+    }
+  ],
+  "excludedIdeas": [
+    {
+      "idea": "Repeat previously verified page-context, translation, sidebar pruning or native decoder findings",
+      "reason": "Already verified in docs/evidence/memory-20261102/README.md and decisions.tsv; outside new findings."
+    },
+    {
+      "idea": "Lazy folder child DOM creation",
+      "reason": "Rejected prior experiment slowed opening; do not revive on allocation counts alone."
+    },
+    {
+      "idea": "Remove 30-second workspace alarm or clear it for workspaceOff as a quick optimization",
+      "reason": "Native readWorkspaceSync also TriggerRefreshes all active types. Password-only sync and remote workspace freshness require a tested replacement before changing scheduling. Frequency alone does not prove unnecessary work."
+    },
+    {
+      "idea": "Remove 50 ms native cancellation polling",
+      "reason": "Provider/checkpoint waits are bounded and occur during active operations, with shutdown deadlock avoidance. No idle recurring native wait found; an event-driven replacement needs cancellation/runtime tests."
+    },
+    {
+      "idea": "Prune sync tombstones or unconditionally delete local model on disconnect",
+      "reason": "Deletion history prevents resurrection by offline clients and local metadata preserves recovery. 1 MiB and 12000-record caps make this bounded, not an unbounded leak."
+    },
+    {
+      "idea": "Cache compiled filter payloads or bypass hashes/context/trust checks",
+      "reason": "Reader deliberately retains only the small index and serializes reads. Extra cache increases retained RAM; bypass breaks security/freshness. Remains opt-in."
+    },
+    {
+      "idea": "Treat compiled filter temporary byte/string copies as a memory leak",
+      "reason": "Streaming chunks plus assembled bytes and decoded content are bounded temporary allocations. Queue may retain queued rawText; actual caller concurrency and total peak are not measured. No sustained leak demonstrated."
+    },
+    {
+      "idea": "Eliminate native sidebar WebContents, Peek WebContents or clone lease descriptor",
+      "reason": "They own active feature state and live clone safety. Peek replaces one owned card and releases via detach/deferred deletion. Sidebar host resets on unload/shutdown. Intentional per-process clone lease is kernel-released on exit."
+    },
+    {
+      "idea": "Disable password manager, passkeys, suggestions, research visibility/redaction or privacy checks",
+      "reason": "Would remove features/security instead of preserving behavior."
+    },
+    {
+      "idea": "Optimize build-only Python staging maps for sustained browser savings",
+      "reason": "Scripts run during preparation, not browser idle. No sustained RAM/CPU benefit established."
+    }
+  ],
+  "actualCommandsAndResults": [
+    {
+      "command": "cat AGENTS.md; cat /Users/likht.ethan/.codex/skills/unslop/SKILL.md; cat build/efficiency-20261103/source-inventory.json",
+      "result": "Read repository instructions and writing skill. Whole inventory output truncated; then parsed exact owner selection in Python. No coverage claim for unowned source."
+    },
+    {
+      "command": "python3 inventory JSON filter owner == native-and-sync; cat docs/evidence/memory-20261102/README.md; cat docs/evidence/memory-20261102/decisions.tsv",
+      "result": "44 owned paths / 6330 lines; prior evidence and decisions fully read."
+    },
+    {
+      "command": "Python numbered full-file reads over exact owner-selected array slices [:3]+[8:10], [13:32], [17:25], [3:6]",
+      "result": "All requested files displayed. Large grouped outputs had truncation; covered omitted regions with later targeted reads listed below. Each final fully-read range is the union of visible complete reads, not merely bytes read by a script."
+    },
+    {
+      "command": "sed -n '155,275p' features/sync/native/chrome/browser/ui/webui/breezer_sync/breezer_sync_ui.cc; sed -n '240,330p' features/omnibox/omnibox-suggestions.patch",
+      "result": "Re-read central UI handler and omnibox hunks omitted by grouped tool output."
+    },
+    {
+      "command": "sed -n '1,310p' features/passwords/native-ui/password-manager.patch; sed -n '311,650p' features/passwords/native-ui/password-manager.patch; cat features/passwords/native-ui/upstream.json; cat features/storage/code-sign-clones/apply.py; cat features/storage/code-sign-clones/clone_session.h; cat features/storage/code-sign-clones/code-sign-clones.patch",
+      "result": "Read all patch, provenance, application and clone ownership/cleanup code; none executed."
+    },
+    {
+      "command": "sed -n '1,365p' features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc; sed -n '366,740p' features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc; cat adjacent BUILD.gn breezer_private_api.h research_text.h workspace_sync_api.cc",
+      "result": "Full native extension bridge, headers, extractor, build and sync bridge read."
+    },
+    {
+      "command": "sed -n '1,380p' features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.cc; sed -n '381,760p' same file; cat adjacent breezer_peek.h BUILD.gn; cat features/workspace/native/chrome/browser/ui/helium/breezer_workspace_prefs.h",
+      "result": "Full Peek implementation/headers/build and prefs read."
+    },
+    {
+      "command": "cat features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.cc; cat features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.h; cat features/workspace/native/chrome/common/extensions/api/breezer_private.idl",
+      "result": "Full sidebar native view, declarations and IDL read."
+    },
+    {
+      "command": "node build/efficiency-20261103/native-and-sync-probe.mjs > build/efficiency-20261103/native-and-sync-probe-results.json",
+      "result": "Exit 0. All operation-count, no-change storage equality, no-exchange, folder comparison and disposal-race assertions pass. Offline fake APIs, actual production JS; no timing benchmark."
+    },
+    {
+      "command": "Python SHA-256 and splitlines verification for all 44 owned files against source-inventory.json; node --version; rg --files -g AGENTS.md features",
+      "result": "No source drift printed; all 44 hashes/line counts match. Node v22.14.0. No nested feature AGENTS.md found, rg exit 1."
+    }
+  ],
+  "remainingGaps": [
+    "No owned read gaps: 44/44 files, 6330/6330 lines fully read, hashes equal supplied inventory at report creation.",
+    "Native C++/Objective-C patch changes remain uncompiled and untested at runtime. No app launch, build, install, native UI or private bundle/profile/cache access performed.",
+    "PC remains unavailable and was not probed, connected, started or scheduled. No network/provider/Keychain/config access or publication performed.",
+    "Only JS operation counts and scheduling were reproduced. Browser RAM, CPU time, IPC/storage implementation cost, native allocation sizes, navigation performance and regression-free behavior remain unmeasured.",
+    "No implementation or independent verification performed. Referenced existing test names come from inventory and were not run; some may use broader browser/provider fixtures prohibited in this review.",
+    "Pure production module import transitively executes workspace-store.js, outside owned read coverage; it was not source-audited here. No whole-repository coverage claim.",
+    "Compiled filter pending queue concurrency/retained rawText requires an isolated caller fixture; no context/hash/trust gates were changed. Real filter engine startup/acceptance remains open.",
+    "The model setting is known from runtime; regular-versus-priority serving speed cannot be independently checked through available read-only tools."
+  ]
+}

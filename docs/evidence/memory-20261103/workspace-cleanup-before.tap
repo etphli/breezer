@@ -1,0 +1,54 @@
+TAP version 13
+# Subtest: workspace fixtures close their server after launch failure
+not ok 1 - workspace fixtures close their server after launch failure
+  ---
+  duration_ms: 20.9985
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:10:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:34:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: workspace fixtures close their server after browser close failure
+not ok 2 - workspace fixtures close their server after browser close failure
+  ---
+  duration_ms: 11.351625
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:10:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:34:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 0
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 257.988208

@@ -1,0 +1,518 @@
+{
+  "schema": 1,
+  "status": "implemented and focused offline checks passed",
+  "author": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "delegation": false,
+    "speed": "No speed setting changed; harness does not expose service-tier metadata"
+  },
+  "files": [
+    {
+      "path": "script/summarize_native_transport.py",
+      "beforeSha256": "93390d285b79f6bb3541a6245fc3cede16c671c1acf929756e900a7a7e40b2ad",
+      "afterSha256": "d74d995257f998428972f206693f8bf1c910fa338d9d6d921797eea308d8d83a",
+      "lines": 172
+    },
+    {
+      "path": "script/benchmark_native_transport.mjs",
+      "beforeSha256": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+      "afterSha256": "02bf990ce3b2aa9ba2e70ab2a0449f94f0a89cfd0b646824da39ae7c550d4a76",
+      "lines": 101
+    },
+    {
+      "path": "script/native_transport_diagnostic.mjs",
+      "beforeSha256": null,
+      "afterSha256": "8c5bae242b736b48d5a04fd0db0df091d802235ad91cbf88f8332730d67adcf3",
+      "lines": 103
+    },
+    {
+      "path": "tests/native_transport_summary_test.py",
+      "beforeSha256": null,
+      "afterSha256": "8577cc9fb66678e30ed204cb3c1c5af4fe21770adb2d5bca61ae5f190fb826de",
+      "lines": 101
+    },
+    {
+      "path": "tests/ai/native-transport-lifecycle.test.mjs",
+      "beforeSha256": null,
+      "afterSha256": "1d906df4ee435984432d803dd0318d803c7e9ce936793614d041233a1074e000",
+      "lines": 82
+    }
+  ],
+  "addedOwnership": "script/native_transport_diagnostic.mjs: diagnostic-only validation and owned-child lifecycle seam, shared by producer and focused tests; no production imports",
+  "findings": {
+    "BT-03": "Reproduced original invalid audit fixture acceptance with footprint median -1 MiB despite schema 999, wrong PID and error status. Tightened Python summary and JS producer validation reject it. Independent valid-report mutations cover each boundary. Legacy reports without top-level schema are accepted as the historical format; explicit schema must be 1. New schema-1 footprint reports require bracketed captures. Optional no-probe producer reports remain valid diagnostics but cannot produce footprint summaries.",
+    "BT-06": "Reproduced original finally cleanup on an owned SIGTERM-ignoring disposable Node child: alive after cleared watchdog plus SIGTERM. Manually SIGKILLed and reaped reproduction child. New ownership helper preserves watchdog until close, sends SIGTERM, escalates after 1000ms, observes close, and permits repeated cleanup. Unexpected close, spawn/stream/IPC errors and malformed decoder replies reach awaited failure paths."
+  },
+  "reproductions": [
+    {
+      "path": "build/efficiency-20261103/build-tools-audit-invalid-transport.json",
+      "sha256": "86c37b3abb441b71c9db5c5fb92914d3214c0cfb4eda6e069175d1286eb0de6b",
+      "originalResult": "accepted; baseline and candidate footprint median -1 MiB",
+      "newResult": "rejected"
+    },
+    {
+      "path": "build/efficiency-20261103/reproduce-transport-cleanup.mjs",
+      "sha256": "853825b3c79958118fb24f25509d16e027351593aee52b86a321c1be34352b6d",
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/reproduce-transport-cleanup.mjs",
+      "result": "aliveAfterOriginalCleanup=true; owned child reaped with SIGKILL"
+    }
+  ],
+  "cSourceReview": {
+    "path": "script/macos_process_usage.c",
+    "beforeSha256": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+    "afterSha256": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+    "lines": 63,
+    "readRanges": [
+      [
+        1,
+        63
+      ]
+    ],
+    "read": "Complete cat output; no truncation in C source. No C changes or compilation.",
+    "review": "Validates supplied positive int PIDs before output. Emits schema 1 and CLOCK_MONOTONIC capture bounds as decimal strings. proc_pid_rusage errors and exited rows lack usable footprint fields and are rejected. Successful rows contain PID, raw mach startAbstime, UUID and unsigned counters. Probe exit status alone does not establish process success. startAbstime and captureStartedNs have different units and are never compared."
+  },
+  "historicalValidation": [
+    {
+      "path": "build/efficiency-20261102/native-transport-final-4096.json",
+      "beforeSha256": "c9318c104794e3053c51cffc79bbb45c5a1d1abe97f52c8a99f17ae2be070251",
+      "afterSha256": "c9318c104794e3053c51cffc79bbb45c5a1d1abe97f52c8a99f17ae2be070251",
+      "trialCount": 12,
+      "trials": [
+        {
+          "name": "baseline",
+          "round": 0,
+          "pid": 14575,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 0,
+          "pid": 14577,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 1,
+          "pid": 14579,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 1,
+          "pid": 14582,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 2,
+          "pid": 14584,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 2,
+          "pid": 14586,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 3,
+          "pid": 14588,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 3,
+          "pid": 14590,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 4,
+          "pid": 14592,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 4,
+          "pid": 14594,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 5,
+          "pid": 14596,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 5,
+          "pid": 14598,
+          "status": "valid legacy single-post-sample native capture"
+        }
+      ]
+    },
+    {
+      "path": "build/efficiency-20261102/native-transport-final-65536.json",
+      "beforeSha256": "95a5702aa472102d6c0c6f4aabcba63723190881cd06450e1edc2579e0303fc5",
+      "afterSha256": "95a5702aa472102d6c0c6f4aabcba63723190881cd06450e1edc2579e0303fc5",
+      "trialCount": 12,
+      "trials": [
+        {
+          "name": "baseline",
+          "round": 0,
+          "pid": 14601,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 0,
+          "pid": 14603,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 1,
+          "pid": 14605,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 1,
+          "pid": 14607,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 2,
+          "pid": 14609,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 2,
+          "pid": 14613,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 3,
+          "pid": 14615,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 3,
+          "pid": 14617,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 4,
+          "pid": 14619,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 4,
+          "pid": 14621,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 5,
+          "pid": 14623,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 5,
+          "pid": 14625,
+          "status": "valid legacy single-post-sample native capture"
+        }
+      ]
+    },
+    {
+      "path": "build/efficiency-20261102/native-transport-final-1048576.json",
+      "beforeSha256": "8a7a01d3468761cd7e9d839c66f74bb1cf8d00084a385f1b490e589d1d1bd156",
+      "afterSha256": "8a7a01d3468761cd7e9d839c66f74bb1cf8d00084a385f1b490e589d1d1bd156",
+      "trialCount": 12,
+      "trials": [
+        {
+          "name": "baseline",
+          "round": 0,
+          "pid": 3185,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 0,
+          "pid": 3187,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 1,
+          "pid": 3189,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 1,
+          "pid": 3191,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 2,
+          "pid": 3193,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 2,
+          "pid": 3195,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 3,
+          "pid": 3197,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 3,
+          "pid": 3199,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 4,
+          "pid": 3201,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 4,
+          "pid": 3203,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 5,
+          "pid": 3205,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 5,
+          "pid": 3207,
+          "status": "valid legacy single-post-sample native capture"
+        }
+      ]
+    },
+    {
+      "path": "build/efficiency-20261102/native-transport-final-4194304.json",
+      "beforeSha256": "8086550827c272b5419ecceb5695e7eeb235f0c4a6ba018a70dda85153b7c402",
+      "afterSha256": "8086550827c272b5419ecceb5695e7eeb235f0c4a6ba018a70dda85153b7c402",
+      "trialCount": 12,
+      "trials": [
+        {
+          "name": "baseline",
+          "round": 0,
+          "pid": 3211,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 0,
+          "pid": 3213,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 1,
+          "pid": 3215,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 1,
+          "pid": 3217,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 2,
+          "pid": 3219,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 2,
+          "pid": 3221,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 3,
+          "pid": 3223,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 3,
+          "pid": 3225,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 4,
+          "pid": 3227,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 4,
+          "pid": 3229,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 5,
+          "pid": 3231,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 5,
+          "pid": 3233,
+          "status": "valid legacy single-post-sample native capture"
+        }
+      ]
+    },
+    {
+      "path": "build/efficiency-20261102/native-transport-final-8388608.json",
+      "beforeSha256": "65cc6c702bbec7eaa34d03ba968703dd0c6d6acac6141ceedc8bf373461287e9",
+      "afterSha256": "65cc6c702bbec7eaa34d03ba968703dd0c6d6acac6141ceedc8bf373461287e9",
+      "trialCount": 12,
+      "trials": [
+        {
+          "name": "baseline",
+          "round": 0,
+          "pid": 3236,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 0,
+          "pid": 3238,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 1,
+          "pid": 3240,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 1,
+          "pid": 3242,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 2,
+          "pid": 3244,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 2,
+          "pid": 3246,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 3,
+          "pid": 3248,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 3,
+          "pid": 3250,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 4,
+          "pid": 3252,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 4,
+          "pid": 3254,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "candidate",
+          "round": 5,
+          "pid": 3256,
+          "status": "valid legacy single-post-sample native capture"
+        },
+        {
+          "name": "baseline",
+          "round": 5,
+          "pid": 3258,
+          "status": "valid legacy single-post-sample native capture"
+        }
+      ]
+    }
+  ],
+  "summaryEquality": {
+    "entireSummaryExactlyEqual": true,
+    "mediansAndRangesPreserved": true,
+    "beforePath": "build/efficiency-20261103/transport-summary-before.json",
+    "beforeSha256": "d98b83fc348170556c15d52972e719609e68c59a26e0460d713f8f5b4a9e2b82",
+    "afterPath": "build/efficiency-20261103/transport-summary-after.json",
+    "afterSha256": "adcf6b520b37cfb57b756bf3421e55c918e7a03cf8b14c8857c527246929307a"
+  },
+  "checks": [
+    {
+      "command": "python3 -B tests/native_transport_summary_test.py",
+      "result": "6 tests passed; 23 malformed-boundary mutations plus audit fixture, 60-trial historical check, signed delta, optional diagnostic, bracketed identity and mixed sources",
+      "log": "build/efficiency-20261103/transport-summary-tests.log",
+      "logSha256": "e11bbb630c1a6ea91f4322ac92d7ce2a6c043ad84d3e41ecf0d0f5a73e9c9fd0"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/native-transport-lifecycle.test.mjs",
+      "result": "9 tests passed. Historical sample/probe validation for all 60 trials; malformed report/probe/sample checks; owned ignoring-SIGTERM child cleanup after startup/sample/write/reply/close failure injections; spawn ENOENT; original watchdog retained; signed memory and optional diagnostics. All spawned children observed closed/reaped.",
+      "log": "build/efficiency-20261103/transport-lifecycle-tests.log",
+      "logSha256": "dd5ac9246ad6275b0d2987da0b946b4163136a7337f71c93a776d2bed11dd03d"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --check script/benchmark_native_transport.mjs",
+      "result": "passed"
+    },
+    {
+      "command": "python3 -B script/summarize_native_transport.py <five exact historical reports> --output build/efficiency-20261103/transport-summary-after.json",
+      "result": "passed; entire summary equals pre-edit summary, all raw hashes unchanged"
+    }
+  ],
+  "limitationsAndObjections": [
+    "Historical otherHostSources are recorded Nov 2 source identities, before current Claude/Organato edits. Validation checks historical consistency and hash syntax only, never current source equality. No historical measurement is relabelled as current.",
+    "Historical trials have exactly one usage probe after both IPC samples. Matching IPC PID/runtime and post-sample native identity do not prove native PID/startAbstime/UUID stability over the earlier interval. No pre-probe identity can be reconstructed. No old report was repaired.",
+    "Future producer probe-enabled runs now capture usageBefore before the first IPC sample and usage after the last; require matching PID/startAbstime/executableUuid and ordered monotonic capture bounds. This does not cover unobserved subprocesses or simultaneous peaks.",
+    "CPU deltas must match monotonically increasing before/after CPU counters. Retained ArrayBuffer delta is signed and may legitimately be negative. Footprint absolute counters must be finite, nonnegative safe integers.",
+    "Lifecycle tests exercise the actual shared ownership/wait/validation seam with deterministic failure injections and owned synthetic children, not the complete production-host trial loop. Startup-timeout test stalls a ready synthetic child; actual spawn ENOENT is separately tested. Backpressure and decoder failures are injected at the shared failure boundary rather than driving a production provider.",
+    "Producer CLI/real host, native macOS probe executable, provider/config/Keychain behavior and browser performance were not run. Syntax and focused offline behavior verified; no whole-browser gain claim.",
+    "SIGKILL escalation is bounded, while close/reap still depends on OS scheduling and uninterruptible kernel states. Cleanup deliberately awaits close rather than claiming an unobserved child was reaped.",
+    "No new package/interpreter dependency added. Tests require archived historical JSON fixtures and the generated pre-edit summary under build/efficiency-20261103.",
+    "No PC tools/contact/scheduling, network, downloads, app build/run/install/update, accounts, authentication files, profiles, cache deletions, production module edits, shared docs/inventory/packet edits, commits, pushes or publication."
+  ]
+}

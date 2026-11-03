@@ -1,0 +1,662 @@
+{
+  "role": "Independent review sub-agent; no delegation; production/test/docs read-only",
+  "outcome": "No actionable introduced correctness issue found in final native output framing change. Accept byte correctness and limited logical-allocation claim; broader runtime/performance acceptance remains open.",
+  "files": [
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "lines": 162,
+      "readRanges": [
+        [
+          1,
+          162
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/fixtures/native-encode-before.mjs",
+      "sha256": "6733bc93ca7976a213ac6fbfc950546c07f259216fcada59e5be5b27feb5e5a1",
+      "lines": 7,
+      "readRanges": [
+        [
+          1,
+          7
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_native_output_efficiency.mjs",
+      "sha256": "b5714d8867124601b2ac098c10d22446ca5d0959636ee086f44f5d0f8786b895",
+      "lines": 114,
+      "readRanges": [
+        [
+          1,
+          114
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/native-output.test.mjs",
+      "sha256": "eee087070d60d079661d263df4ba009d348907ff236c8d0219b778e43c79ec51",
+      "lines": 80,
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "scope": {
+    "finalProtocolSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "restoredPriorModuleSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+    "onlyEncoderDiff": true,
+    "coverage": "All 162 current protocol lines freshly read, including unchanged decoder, validation, tool schemas and prompt helpers. Other three required files fully read. This report supplies missing protocol coverage; it does not independently certify all 287 inventory files.",
+    "restrictions": "No network, PC contact, actual provider access, app/browser/Chromium build/run/install, installed data/profile/credentials, git mutation or publication. All writes confined to report and owned review scratch; packaging tests used only synthetic app directories beneath owned TMPDIR. Python run with -B and PYTHONDONTWRITEBYTECODE=1."
+  },
+  "checks": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/native-output.test.mjs",
+      "exitCode": 0,
+      "result": "6 pass, 0 failures, 0 skips",
+      "log": "build/efficiency-20261103/native-output-review-scratch/tests.tap"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 script/verify_native_output_efficiency.mjs",
+      "exitCode": 0,
+      "result": "Pinned baseline, full-frame differentials and explicit allocation accounting pass",
+      "log": "build/efficiency-20261103/native-output-review-scratch/counts.json"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 script/verify_native_output_efficiency.mjs --benchmark",
+      "exitCode": 0,
+      "result": "Five payloads, 12 alternating pairs each after three warmup pairs; actual uninstrumented full-module imports and exact restored prior SHA verified",
+      "log": "build/efficiency-20261103/native-output-review-scratch/benchmark.json"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/native-output-review-scratch/independent.mjs",
+      "exitCode": 0,
+      "result": {
+        "node": "v24.22.1",
+        "platform": "darwin",
+        "arch": "arm64",
+        "files": [
+          {
+            "path": "features/ai/host/protocol.mjs",
+            "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+            "lines": 162,
+            "readRanges": [
+              [
+                1,
+                162
+              ]
+            ],
+            "status": "fully-read"
+          },
+          {
+            "path": "tests/ai/fixtures/native-encode-before.mjs",
+            "sha256": "6733bc93ca7976a213ac6fbfc950546c07f259216fcada59e5be5b27feb5e5a1",
+            "lines": 7,
+            "readRanges": [
+              [
+                1,
+                7
+              ]
+            ],
+            "status": "fully-read"
+          },
+          {
+            "path": "script/verify_native_output_efficiency.mjs",
+            "sha256": "b5714d8867124601b2ac098c10d22446ca5d0959636ee086f44f5d0f8786b895",
+            "lines": 114,
+            "readRanges": [
+              [
+                1,
+                114
+              ]
+            ],
+            "status": "fully-read"
+          },
+          {
+            "path": "tests/ai/native-output.test.mjs",
+            "sha256": "eee087070d60d079661d263df4ba009d348907ff236c8d0219b778e43c79ec51",
+            "lines": 80,
+            "readRanges": [
+              [
+                1,
+                80
+              ]
+            ],
+            "status": "fully-read"
+          }
+        ],
+        "restoredSha": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+        "cases": 2343,
+        "poisonChecks": 4686,
+        "errorFactories": 10,
+        "hookCases": 3,
+        "mutationControls": 2,
+        "bodySizes": [
+          4080,
+          4081,
+          4082,
+          4083,
+          4084,
+          4085,
+          4086,
+          4087,
+          4088,
+          4089,
+          4090,
+          4091,
+          4092,
+          4093,
+          4094,
+          4095,
+          4096,
+          4097,
+          4098,
+          4099,
+          4100,
+          4101,
+          4102,
+          4103,
+          4104,
+          8176,
+          8177,
+          8178,
+          8179,
+          8180,
+          8181,
+          8182,
+          8183,
+          8184,
+          8185,
+          8186,
+          8187,
+          8188,
+          8189,
+          8190,
+          8191,
+          8192,
+          8193,
+          8194,
+          8195,
+          8196,
+          8197,
+          8198,
+          8199,
+          8200,
+          65535,
+          65536,
+          65537,
+          1048575,
+          1048576
+        ],
+        "packet": {
+          "path": "build/efficiency-20261102/pc-packet",
+          "protocolSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+          "receiptAfter": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+          "hostResources": [
+            {
+              "name": "claude.mjs",
+              "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384"
+            },
+            {
+              "name": "cli.mjs",
+              "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9"
+            },
+            {
+              "name": "codex.mjs",
+              "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba"
+            },
+            {
+              "name": "context-controller.mjs",
+              "sha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de"
+            },
+            {
+              "name": "context-summary.mjs",
+              "sha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337"
+            },
+            {
+              "name": "controller.mjs",
+              "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51"
+            },
+            {
+              "name": "main.mjs",
+              "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d"
+            },
+            {
+              "name": "organato.mjs",
+              "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7"
+            },
+            {
+              "name": "protocol.mjs",
+              "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e"
+            },
+            {
+              "name": "update-worker.mjs",
+              "sha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f"
+            },
+            {
+              "name": "updater.mjs",
+              "sha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+            }
+          ]
+        }
+      },
+      "log": "build/efficiency-20261103/native-output-review-scratch/independent.log"
+    },
+    {
+      "command": "TMPDIR=\"$PWD/build/efficiency-20261103/native-output-review-scratch\" PYTHONDONTWRITEBYTECODE=1 python3 -B tests/memory_package_test.py",
+      "exitCode": 0,
+      "result": "8 pass, synthetic apps only; runtime download/unpack/subprocess patched by fixture",
+      "log": "build/efficiency-20261103/native-output-review-scratch/package.log"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc script/verify_native_decoder_memory.mjs --expect-bounded --rounds 3 --output build/efficiency-20261103/native-output-review-scratch/decoder.json",
+      "exitCode": 0,
+      "result": {
+        "rounds": 3,
+        "retainedArrayBufferBytes": 16,
+        "sourceSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e"
+      },
+      "log": "build/efficiency-20261103/native-output-review-scratch/decoder.log"
+    }
+  ],
+  "safety": {
+    "reason": "JSON.stringify is called once, Buffer.from produces the original UTF-8 payload, identical >1 MiB guard runs before allocating final frame. writeUInt32LE initializes [0,4); json.copy initializes [4,4+json.length); returned frame length is exactly 4+json.length. These intervals cover every returned byte. No byteLength/write mismatch or split surrogate path is introduced.",
+    "independentCoverage": {
+      "validCases": 2343,
+      "actualProductionPoisonChecks": 4686,
+      "poisonBytes": [
+        165,
+        90
+      ],
+      "errorFactories": 10,
+      "mutationControls": 2,
+      "bodySizes": [
+        4080,
+        4081,
+        4082,
+        4083,
+        4084,
+        4085,
+        4086,
+        4087,
+        4088,
+        4089,
+        4090,
+        4091,
+        4092,
+        4093,
+        4094,
+        4095,
+        4096,
+        4097,
+        4098,
+        4099,
+        4100,
+        4101,
+        4102,
+        4103,
+        4104,
+        8176,
+        8177,
+        8178,
+        8179,
+        8180,
+        8181,
+        8182,
+        8183,
+        8184,
+        8185,
+        8186,
+        8187,
+        8188,
+        8189,
+        8190,
+        8191,
+        8192,
+        8193,
+        8194,
+        8195,
+        8196,
+        8197,
+        8198,
+        8199,
+        8200,
+        65535,
+        65536,
+        65537,
+        1048575,
+        1048576
+      ],
+      "details": "Small strings; payload and frame sizes on both sides of default 4 KiB pooling threshold and 8 KiB slab size; ASCII, multibyte Unicode, lone/pair surrogates, escaped controls; 2048 seeded UTF-16 cases; exact and over-limit payloads; undefined/function/symbol/BigInt/cycles; throwing getters/toJSON; hook counts; actual production vs VM vs restored full module. Two poisoned-allocation mutations, omitted header and truncated payload copy, are detected."
+    },
+    "callerVisible": "Returned Buffer type, JSON bytes, LE size and error name/code/message preserved for checked inputs. main.mjs send synchronously hands result to stdout.write and ignores its boolean return as before; inspected only, never imported or run."
+  },
+  "diagnosticAssessment": {
+    "allocationCounts": "Truthful as explicitly scoped: wrapper counts calls to Buffer.from, alloc, allocUnsafe and concat, returning their logical lengths; concat output is counted once rather than counting its internal allocator. Explicit copy counted by decorating the payload Buffer copy method. This instrumentation changes object shape and is unsuitable for timing or physical allocation claims.",
+    "saving": "One explicit 4-byte header Buffer allocation and its wrapper plus one concat argument array removed per valid reply. Both payload and frame buffers and a payload-sized copy remain. Four fewer requested logical bytes, not half the payload RAM.",
+    "poison": "Measured VM replaces allocUnsafe with filled alloc, covering selected byte differentials but not actual pooling. Independent fixture supplements it by poisoning real production allocUnsafe results with two values at pool boundaries. Tests cover returned view bytes, not unused backing slab bytes.",
+    "benchmark": "Actual full baseline module reconstructed and imported from data URL; current full source imported directly. Exact restored SHA is asserted. 12 alternating trial pairs per each of five payloads and three warmup pairs are present. This supports narrow local encoder observations only. JSON serialization, GC, JIT and host load affect timings; no independent processes or confidence intervals.",
+    "rejectedVariants": [
+      {
+        "path": "docs/evidence/memory-20261103/protocol-output-explicit-utf8.mjs",
+        "sha256": "6a7776d20e03efccc572d1af165e4dd54edc9a69ccafd802f4ab077eaa1df47f",
+        "benchmarkSourceMatches": true,
+        "fourKiB": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 2.311146000000008,
+              "min": 2.281125000000088,
+              "max": 2.350708000000054
+            },
+            "cpuMs": {
+              "median": 2.341,
+              "min": 2.308,
+              "max": 2.396
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 2.7941040000000044,
+              "min": 2.781791999999996,
+              "max": 2.825416999999902
+            },
+            "cpuMs": {
+              "median": 2.8129999999999997,
+              "min": 2.8,
+              "max": 2.846
+            }
+          }
+        },
+        "trials": 24
+      },
+      {
+        "path": "docs/evidence/memory-20261103/protocol-output-default-write.mjs",
+        "sha256": "e512aad099bb0947d28343dd64d7e84429915e7f9041167f94ba58852db81dcb",
+        "benchmarkSourceMatches": true,
+        "fourKiB": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 2.2876045000000147,
+              "min": 2.277166999999963,
+              "max": 2.317875000000072
+            },
+            "cpuMs": {
+              "median": 2.318,
+              "min": 2.306,
+              "max": 2.362
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 2.7939790000000357,
+              "min": 2.781665999999973,
+              "max": 2.816000000000031
+            },
+            "cpuMs": {
+              "median": 2.8135000000000003,
+              "min": 2.799,
+              "max": 2.84
+            }
+          }
+        },
+        "trials": 24
+      }
+    ],
+    "benchmarkEvidence": "build/efficiency-20261103/native-output-review-scratch/benchmark.json",
+    "independentTimingObservation": "This run shows lower current elapsed medians at all five fixture sizes, with near equality for Unicode and overlapping ranges at larger sizes. A baseline 64 KiB trial has a 187 ms wall-time outlier but about 5.7 ms CPU time. Host scheduling noise is visible; these observations do not establish universal no-regression, speed or RAM claims.",
+    "independentTimingSummary": [
+      {
+        "label": "64",
+        "bodyBytes": 64,
+        "iterations": 65536,
+        "summary": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 17.541312000000005,
+              "min": 16.763999999999996,
+              "max": 21.335417000000007
+            },
+            "cpuMs": {
+              "median": 17.6425,
+              "min": 16.845,
+              "max": 18.716
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 13.428021000000001,
+              "min": 12.74354199999999,
+              "max": 13.758582999999987
+            },
+            "cpuMs": {
+              "median": 13.5055,
+              "min": 12.794,
+              "max": 13.832
+            }
+          }
+        }
+      },
+      {
+        "label": "4096",
+        "bodyBytes": 4096,
+        "iterations": 1024,
+        "summary": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 2.2908125000000155,
+              "min": 2.2789999999999964,
+              "max": 2.353708999999924
+            },
+            "cpuMs": {
+              "median": 2.3205,
+              "min": 2.305,
+              "max": 2.382
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 2.23112500000002,
+              "min": 2.2187079999999924,
+              "max": 2.2549170000000913
+            },
+            "cpuMs": {
+              "median": 2.2605,
+              "min": 2.245,
+              "max": 2.306
+            }
+          }
+        }
+      },
+      {
+        "label": "65536",
+        "bodyBytes": 65536,
+        "iterations": 64,
+        "summary": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 3.7849579999999605,
+              "min": 2.6679579999999987,
+              "max": 187.32170900000006
+            },
+            "cpuMs": {
+              "median": 3.832,
+              "min": 2.693,
+              "max": 5.671
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 3.6388125000000286,
+              "min": 2.6369159999999283,
+              "max": 4.850458000000003
+            },
+            "cpuMs": {
+              "median": 3.6975,
+              "min": 2.723,
+              "max": 4.893
+            }
+          }
+        }
+      },
+      {
+        "label": "1048576",
+        "bodyBytes": 1048576,
+        "iterations": 8,
+        "summary": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 6.499416499999995,
+              "min": 6.005833000000052,
+              "max": 12.998249999999985
+            },
+            "cpuMs": {
+              "median": 6.483499999999999,
+              "min": 6.04,
+              "max": 7.043
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 6.2827499999999645,
+              "min": 5.894333999999958,
+              "max": 8.889208000000053
+            },
+            "cpuMs": {
+              "median": 6.321,
+              "min": 5.925,
+              "max": 8.228
+            }
+          }
+        }
+      },
+      {
+        "label": "unicode",
+        "bodyBytes": 65543,
+        "iterations": 64,
+        "summary": {
+          "baseline": {
+            "elapsedMs": {
+              "median": 12.175396000000092,
+              "min": 11.97120800000016,
+              "max": 13.125082999999904
+            },
+            "cpuMs": {
+              "median": 12.2135,
+              "min": 11.997,
+              "max": 13.071
+            }
+          },
+          "current": {
+            "elapsedMs": {
+              "median": 12.143978999999945,
+              "min": 12.012124999999969,
+              "max": 12.254582999999911
+            },
+            "cpuMs": {
+              "median": 12.1745,
+              "min": 12.039,
+              "max": 12.295
+            }
+          }
+        }
+      }
+    ]
+  },
+  "packet": {
+    "path": "build/efficiency-20261102/pc-packet",
+    "protocolSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "receiptAfter": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "hostResources": [
+      {
+        "name": "claude.mjs",
+        "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384"
+      },
+      {
+        "name": "cli.mjs",
+        "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9"
+      },
+      {
+        "name": "codex.mjs",
+        "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba"
+      },
+      {
+        "name": "context-controller.mjs",
+        "sha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de"
+      },
+      {
+        "name": "context-summary.mjs",
+        "sha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337"
+      },
+      {
+        "name": "controller.mjs",
+        "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51"
+      },
+      {
+        "name": "main.mjs",
+        "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d"
+      },
+      {
+        "name": "organato.mjs",
+        "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7"
+      },
+      {
+        "name": "protocol.mjs",
+        "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e"
+      },
+      {
+        "name": "update-worker.mjs",
+        "sha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f"
+      },
+      {
+        "name": "updater.mjs",
+        "sha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+      }
+    ],
+    "sha256sumsEntriesVerified": 29,
+    "unchanged": true
+  },
+  "findings": [],
+  "objections": [
+    {
+      "severity": "limitation",
+      "subject": "Unsafe-buffer coverage is finite",
+      "detail": "Stock poison test covers six Unicode sizes and probe covers four ASCII sizes; original differential suite uses real unpoisoned buffers for most Unicode cases. Independent poisoning across exact boundaries and randomized UTF-16 inputs strengthens this. No counterexample found; finite tests supplement the full-byte initialization proof."
+    },
+    {
+      "severity": "limitation",
+      "subject": "Logical allocation counters are not physical memory accounting",
+      "detail": "Counters omit hidden Node/V8 internals, pooling, slab retention, wrapper sizes and concat array bytes. AllocUnsafe and concat can have different physical allocator paths by size. Source and report wording correctly retain this limitation."
+    },
+    {
+      "severity": "limitation",
+      "subject": "Performance result is not universal",
+      "detail": "Pair alternation reduces order bias but warmups always run baseline first; all trials share one process and GC/JIT state. Neither elapsed ranges nor this one run prove universal no-regression or deployment-runtime speed."
+    }
+  ],
+  "acceptanceGaps": [
+    "No installed or packaged native runtime acceptance, browser/AI latency or whole-browser RAM/CPU checks performed.",
+    "Unbounded stdout queue and provider stdin buffering remain; output framing change does not implement backpressure.",
+    "Oversized messages still allocate JSON payload before rejection; unchanged.",
+    "Parent 352-test suite is reported evidence only and was not rerun here; full suite and HTTP/provider fixtures were deliberately excluded under no-network restrictions.",
+    "Rejected one-buffer archive hashes and recorded 4 KiB timing summaries checked, but those variants were not benchmarked again.",
+    "No physical RAM/retained-memory or broad end-to-end speed claim is accepted."
+  ],
+  "artifacts": [
+    "build/efficiency-20261103/native-output-review-scratch/independent.mjs",
+    "build/efficiency-20261103/native-output-review-scratch/independent.json",
+    "build/efficiency-20261103/native-output-review-scratch/counts.json",
+    "build/efficiency-20261103/native-output-review-scratch/benchmark.json",
+    "build/efficiency-20261103/native-output-review-scratch/tests.tap",
+    "build/efficiency-20261103/native-output-review-scratch/package.log"
+  ],
+  "model": "gpt-6.1-sol"
+}

@@ -1,0 +1,790 @@
+{
+  "reviewer": {
+    "model": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular/default; settings not changed",
+    "subagents": 0
+  },
+  "status": "ONE P2 CORRECTNESS FINDING; production left read-only",
+  "scope": "Fresh changes to workspace-store.patchMembers, translation eligibility condition ordering, new-tab resize/retry/initial-filter races, workspace toast cleanup, nine-resource migration and full host receipt. Full contents of 15 input source/test/probe files read; this is not a whole-repository or 107-file authored-feature audit. Earlier WeakMap/WeakRef change is baseline.",
+  "findings": [
+    {
+      "id": "workspace-review-01",
+      "priority": "P2",
+      "title": "Invalidate pre-load shortcut filters before suppressing same-bucket refreshes",
+      "path": "features/ai/extension/newtab.js",
+      "lines": [
+        435,
+        439
+      ],
+      "relatedReadRanges": [
+        [
+          397,
+          403
+        ],
+        [
+          469,
+          477
+        ]
+      ],
+      "description": "An updateSites operation started before requestView resolves can capture empty allSites and await a shortcut digest. load installs the newly received sites without changing siteRevision. The older filter remains current by siteRevision and later replaces the valid view with its obsolete empty result. The new resizeLimit guard suppresses same-bucket resize events that previously repaired the list. The new limit check in load only checks width changes during its own filter.",
+      "reproduction": [
+        "Persist one custom shortcut and hide it. Begin initial request at width 1000.",
+        "Before background response, resize to 900; let updateSites filter hidden custom shortcut against empty allSites and hold its digest promise.",
+        "Resolve background response with eight visible top sites. Initial load paints five shortcuts.",
+        "Complete the older digest. The stale filter paints zero shortcuts.",
+        "Resize to 899. Baseline recovers to five; current candidate stays at zero."
+      ],
+      "observed": {
+        "baseline": [
+          5,
+          0,
+          5
+        ],
+        "current": [
+          5,
+          0,
+          0
+        ]
+      },
+      "attribution": "Stale overwrite is inherited; persistent failure to recover on same-bucket resize is introduced by the guard. This is an offline controlled asynchronous schedule, not a real-browser incident.",
+      "probe": "build/efficiency-20261103/workspace-review-newtab-race.mjs",
+      "evidence": "build/efficiency-20261103/workspace-review-newtab-race.json",
+      "probeScope": "Actual startNewTab and ShortcutPreferences.load/filter. Fake storage/request, controlled WebCrypto promise completion, rendering and unrelated UI installers stubbed. Baseline loaded from git HEAD.",
+      "recommendedFix": "Share freshness handling between load and updateSites so new allSites invalidates earlier filters and only a current result reaches view. Cover this pre-response filter ordering while retaining same-bucket no-work after a valid result.",
+      "productionEdited": false
+    }
+  ],
+  "reviewConclusions": {
+    "membership": "Fresh MEMBERS_KEY read under exact shared LOCK_NAME. normalizeMembers, normalized before comparison, sessionToken and rollSession retained. Sets precede removals; changed-only writes preserved. No saved-store read/serialization. Mixed general/member writes and failed-write lock release pass.",
+    "translation": "Fresh diff is one condition reorder against captured baseline. Unchanged translated records skip allowed. New/site-edited nodes and every in-flight write retain eligibility checks. Per-batch pruning and Restore/detach/reattach timing remain unchanged; baseline differential tests pass.",
+    "toast": "Running onclick closure retains action after hideToast clears property. Expiry releases callback; active click still invokes captured Undo once. Test passes.",
+    "newtab": "Existing tests cover bucket crossings, same-width no work, storage changes, explicit Reset, failed resize retry and delayed initial filter. They miss the pre-response stale filter reproduced here.",
+    "migration": "Exact nine-resource set. Replacement hashes, source before/after hashes and plan after pins all checked before backup/source writes. Idempotent after files are not rewritten. Other plan pins and compiled fixture preserved. Interrupt-before-pin cases pass. Changed source content necessarily changes its mtime; repeat-migration mtimes preserved.",
+    "packaging": "Exact eleven current host module names, protocol after consistency, packet/installed checksum, installed containment and no leaf symlink, plus Breezer identity checked. Archive checksum/member size/type/allowlist retained. Native matching-host runtime version/architecture checks retained. Caller still signs/verifies runtime and app after packaging. No live signature/trust/architecture acceptance claimed."
+  },
+  "commandsAndResults": [
+    {
+      "command": "node --test tests/ai/workspace-members-efficiency.test.mjs tests/ai/translation-efficiency.test.mjs tests/ai/workspace-ui-efficiency.test.mjs",
+      "exitCode": 0,
+      "result": "20 passed, no failures/skips",
+      "evidence": "build/efficiency-20261103/workspace-review-tests.tap"
+    },
+    {
+      "command": "TRANSLATION_WORK_BEFORE=build/efficiency-20261103/translation-work-before.js node --test tests/ai/translation-efficiency.test.mjs",
+      "exitCode": 0,
+      "result": "9 passed against captured baseline; rerun of nine tests above",
+      "evidence": "build/efficiency-20261103/workspace-review-translation-baseline.tap"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/windows -p 'memory_update_test.py' -v",
+      "exitCode": 0,
+      "result": "11 passed; synthetic source trees",
+      "evidence": "build/efficiency-20261103/workspace-review-migration-tests.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -p 'memory_package_test.py' -v",
+      "exitCode": 0,
+      "result": "8 passed; disposable synthetic bundle metadata with mocked runtime packaging, no real app/runtime touched",
+      "evidence": "build/efficiency-20261103/workspace-review-package-tests.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 script/check_ai_packaging.py",
+      "exitCode": 0,
+      "result": "5 passed; fake archives and synthetic bundle metadata",
+      "evidence": "build/efficiency-20261103/workspace-review-archive-tests.log"
+    },
+    {
+      "command": "node script/verify_workspace_members_efficiency.mjs features/ai/extension/workspace-store.js build/efficiency-20261103/workspace-review-members.json build/efficiency-20261103/members-before-workspace-store.mjs",
+      "exitCode": 0,
+      "result": "24 differential cases, 120 sequential patches, 96 overlapping operations, exact values/write order; zero saved-store reads/serializations",
+      "evidence": "build/efficiency-20261103/workspace-review-members.json"
+    },
+    {
+      "command": "node build/efficiency-20261103/workspace-review-newtab-race.mjs",
+      "exitCode": 0,
+      "result": "Reproduces finding and asserts baseline/current divergence",
+      "evidence": "build/efficiency-20261103/workspace-review-newtab-race.json"
+    },
+    {
+      "command": "node build/efficiency-20261103/workspace-review-translation-before-probe.mjs; node build/efficiency-20261103/workspace-review-translation-after-probe.mjs",
+      "exitCode": 0,
+      "result": "Both passed separately; adapted output path only. At 4096/8192 nodes unchanged rescan rect/style counts drop from node count to zero; same initial batches/pruning and Restore",
+      "evidence": "build/efficiency-20261103/workspace-review-translation-after-counts.json"
+    },
+    {
+      "command": "git diff --check -- features/ai/extension/workspace-store.js features/ai/extension/newtab.js features/ai/extension/translation-content.js features/ai/extension/workspace.js script/package_breezer_ai.py",
+      "exitCode": 0,
+      "result": "Passed",
+      "evidence": null
+    },
+    {
+      "command": "Local hashlib comparison against workspace-review-input-state.json",
+      "exitCode": 0,
+      "result": "All 15 reviewed source/test/probe input hashes unchanged",
+      "evidence": "build/efficiency-20261103/workspace-review-input-state.json"
+    }
+  ],
+  "runtime": "Node v22.14.0 in this review; prior packaged v24.22.1 results are not fresh review execution",
+  "testSummary": "44 distinct tests passed; nine translation cases additionally rerun against captured baseline. Probes counted separately.",
+  "packetVerification": {
+    "extension": {
+      "page-context.js": {
+        "receiptSha256": "7bfd98c6dcfba67134097a88455c158625693151d965393fc4baa1ef1ce086f7",
+        "packetSha256": "7bfd98c6dcfba67134097a88455c158625693151d965393fc4baa1ef1ce086f7",
+        "currentSourceSha256": "7bfd98c6dcfba67134097a88455c158625693151d965393fc4baa1ef1ce086f7",
+        "matches": true
+      },
+      "translation-content.js": {
+        "receiptSha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+        "packetSha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+        "currentSourceSha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+        "matches": true
+      },
+      "workspace.js": {
+        "receiptSha256": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+        "packetSha256": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+        "currentSourceSha256": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+        "matches": true
+      },
+      "workspace-sync.js": {
+        "receiptSha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+        "packetSha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+        "currentSourceSha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+        "matches": true
+      },
+      "workspace-sync-model.js": {
+        "receiptSha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+        "packetSha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+        "currentSourceSha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+        "matches": true
+      },
+      "workspace-store.js": {
+        "receiptSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+        "packetSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+        "currentSourceSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+        "matches": true
+      },
+      "newtab.js": {
+        "receiptSha256": "b3d82f40ad7242ed35418214c46226eac66e0daf8b8b81a737303589215dcb30",
+        "packetSha256": "b3d82f40ad7242ed35418214c46226eac66e0daf8b8b81a737303589215dcb30",
+        "currentSourceSha256": "b3d82f40ad7242ed35418214c46226eac66e0daf8b8b81a737303589215dcb30",
+        "matches": true
+      },
+      "panel.js": {
+        "receiptSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "packetSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "currentSourceSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "matches": true
+      },
+      "render-message.js": {
+        "receiptSha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "packetSha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "currentSourceSha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "matches": true
+      }
+    },
+    "host": {
+      "claude.mjs": {
+        "receiptSha256": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a",
+        "packetSha256": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a",
+        "currentSourceSha256": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a",
+        "matches": true
+      },
+      "cli.mjs": {
+        "receiptSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+        "packetSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+        "currentSourceSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+        "matches": true
+      },
+      "codex.mjs": {
+        "receiptSha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+        "packetSha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+        "currentSourceSha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+        "matches": true
+      },
+      "context-controller.mjs": {
+        "receiptSha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+        "packetSha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+        "currentSourceSha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+        "matches": true
+      },
+      "context-summary.mjs": {
+        "receiptSha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+        "packetSha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+        "currentSourceSha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+        "matches": true
+      },
+      "controller.mjs": {
+        "receiptSha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+        "packetSha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+        "currentSourceSha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+        "matches": true
+      },
+      "main.mjs": {
+        "receiptSha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+        "packetSha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+        "currentSourceSha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+        "matches": true
+      },
+      "organato.mjs": {
+        "receiptSha256": "5805280cdd6a12df299f0a51d9a54d77df358d71eda93fe1642f7fb170c9712c",
+        "packetSha256": "5805280cdd6a12df299f0a51d9a54d77df358d71eda93fe1642f7fb170c9712c",
+        "currentSourceSha256": "d28adb5eea698d25fd8a0372f43e92d92b28a47ba81828832f4624b680e1d92f",
+        "matches": false
+      },
+      "protocol.mjs": {
+        "receiptSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+        "packetSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+        "currentSourceSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+        "matches": true
+      },
+      "update-worker.mjs": {
+        "receiptSha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+        "packetSha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+        "currentSourceSha256": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+        "matches": true
+      },
+      "updater.mjs": {
+        "receiptSha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6",
+        "packetSha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6",
+        "currentSourceSha256": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6",
+        "matches": true
+      }
+    }
+  },
+  "browserEvidence": {
+    "action": "Read existing logs only",
+    "result": "Workspace 9 pass, newtab 3 pass, translation 1 pass + live provider skip, panel PASS. Isolated-world GC report released=true and translation hash matches current. Logs do not rule out new race; most logs lack individual source hashes. No rerun or whole-browser efficiency claim."
+  },
+  "objections": [
+    "P2 new-tab race needs main-agent fix and fresh verification before accepting the guard.",
+    "Packet source freshness changed during review: initial local comparison matched all 11 host modules; final comparison finds organato.mjs source changed while receipt and staged packet still contain earlier hash. This review did not edit it. Packaging the final source against this packet must reject until coordinator reconciles and verifies it. Exact hashes recorded in packetVerification.",
+    "verification.json has old packet.resources=5 alongside packaging.extensionResources=9. Actual migration and packet contain nine. Shared report left unchanged.",
+    "Operation counts prove removed calls, not native CPU/time/RAM improvement.",
+    "Host receipt validates bytes/containment, not notarization or native trust.",
+    "Migration is resumable per-file atomic replacement, not global nine-file atomicity, and assumes stable packet/source inputs while worker lock is held."
+  ],
+  "remainingGaps": [
+    "No PC contact/probe/connect/start/schedule; cached latest-combined-1.2.0-inputs.json unavailable within worktree. Nine before hashes agree with generator literals, but prior cached-PC-plan comparison was not independently reproduced.",
+    "No real Breezer.app build/run/install, installed app/profile/password/cache mutation, provider/network/Keychain/config access, publishing/downloads, browser rerun or CPU/time/RSS benchmark. Python checks used disposable synthetic bundle metadata only.",
+    "Eventual race fix needs regression test and coordinator browser acceptance.",
+    "Other current source edits such as Claude/sync/page-context/panel belong to separate reviews; packet hash checks do not constitute complete code review of those files.",
+    "Partial baseline and build caller file reads recorded below; no full-read claim from grep/truncated output."
+  ],
+  "files": [
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "lines": 664,
+      "readRanges": [
+        [
+          1,
+          664
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "features/ai/extension/translation-content.js",
+      "sha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "lines": 146,
+      "readRanges": [
+        [
+          1,
+          146
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "features/ai/extension/newtab.js",
+      "sha256": "b3d82f40ad7242ed35418214c46226eac66e0daf8b8b81a737303589215dcb30",
+      "lines": 515,
+      "readRanges": [
+        [
+          1,
+          515
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "features/ai/extension/workspace.js",
+      "sha256": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+      "lines": 1559,
+      "readRanges": [
+        [
+          1,
+          1559
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "features/ai/extension/top-sites.js",
+      "sha256": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "lines": 99,
+      "readRanges": [
+        [
+          1,
+          99
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "sha256": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+      "lines": 85,
+      "readRanges": [
+        [
+          1,
+          85
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/windows/prepare-efficiency-packet.py",
+      "sha256": "f2dfef80215e76152aa4c88d200338478f85bc2703f67c1ec147485db26c83ed",
+      "lines": 69,
+      "readRanges": [
+        [
+          1,
+          69
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/package_breezer_ai.py",
+      "sha256": "67ec259e345ee1f50dcd3b1f15934e0c9fc129f0dbb7f51f78f86ba584239b61",
+      "lines": 164,
+      "readRanges": [
+        [
+          1,
+          164
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/check_breezer_memory_package.py",
+      "sha256": "136e50b4421547f944da9181414ad04edbf015325238ee7f2e563ac705296f1b",
+      "lines": 18,
+      "readRanges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "tests/windows/memory_update_test.py",
+      "sha256": "fe241e82008c51a331c367d7e76970ae100f0fc4c0d29769433c372d51cff698",
+      "lines": 196,
+      "readRanges": [
+        [
+          1,
+          196
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "tests/memory_package_test.py",
+      "sha256": "2dbde9f7861df8f73ae7a116f48dc1b684310ffb2a0be2268dae54ef6445d9b1",
+      "lines": 95,
+      "readRanges": [
+        [
+          1,
+          95
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "tests/ai/workspace-ui-efficiency.test.mjs",
+      "sha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654",
+      "lines": 111,
+      "readRanges": [
+        [
+          1,
+          111
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "tests/ai/translation-efficiency.test.mjs",
+      "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+      "lines": 226,
+      "readRanges": [
+        [
+          1,
+          226
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "docs/updating.md",
+      "sha256": "aa19288a22749963dcc97b8e82baca8776f0eb48fd3a6193ba1618504645b128",
+      "lines": 61,
+      "readRanges": [
+        [
+          1,
+          61
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "docs/evidence/memory-20261103/README.md",
+      "sha256": "7755fc8c912849c02d2bfa61e9eb2314fe51d9067aaffe3e6c1a363138358172",
+      "lines": 137,
+      "readRanges": [
+        [
+          1,
+          137
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "docs/evidence/memory-20261103/verification.json",
+      "sha256": "0f938fa73dcf800897de5c1d9d60d0bbc91c08c8b88530c816b92943c7c4ca59",
+      "lines": 78,
+      "readRanges": [
+        [
+          1,
+          78
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/members-implementation.json",
+      "sha256": "f3aba5f2e0c14eb8d1ff2aeef85e54a8178f442e4429b8ce3218f3cb46e76d54",
+      "lines": 127,
+      "readRanges": [
+        [
+          1,
+          127
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-work-implementation.json",
+      "sha256": "043c15dab1bc30d145423737bbeb14d63af36206a295881144f13eb9c375074e",
+      "lines": 197,
+      "readRanges": [
+        [
+          1,
+          197
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/members-before.json",
+      "sha256": "6e26020d809bc8ed964307cf336cb1799eb76929f54e3ab9f485aacb84c2e03a",
+      "lines": 145,
+      "readRanges": [
+        [
+          1,
+          145
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/members-after.json",
+      "sha256": "72f5b0f042c45feff8fc824c6b19502034d42a4360f86d1d44513a37b68a60d4",
+      "lines": 125,
+      "readRanges": [
+        [
+          1,
+          125
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-work-before-probe.mjs",
+      "sha256": "d68a4dda8a5078576b6f14b74173d0da0f10f330db3d9f2f9196137bd56f918e",
+      "lines": 53,
+      "readRanges": [
+        [
+          1,
+          53
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-work-after-probe.mjs",
+      "sha256": "4b7df5870dce713433fc5e707f09e8f49b0bb8b85be62ef8e49bf778abd197e0",
+      "lines": 53,
+      "readRanges": [
+        [
+          1,
+          53
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-work-production.diff",
+      "sha256": "8ac34e54c6dc308c3beb5cc5bfbc2bc206ab7d2aa41097e737caf03b22f740af",
+      "lines": 11,
+      "readRanges": [
+        [
+          1,
+          11
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/browser-results.json",
+      "sha256": "00ff2fcd15071fd092ecb28a7787471f9484ce4bb3f2c11aab0ae3705bfadab7",
+      "lines": 53,
+      "readRanges": [
+        [
+          1,
+          53
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/ai-packaging-tests.log",
+      "sha256": "5f5990e0827725c953b0171c9b7385b9340b83d5ab9e2a1856b9beb373411d26",
+      "lines": 10,
+      "readRanges": [
+        [
+          1,
+          10
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/memory-package-tests.log",
+      "sha256": "eeb3c4e72cac46b3bf5c693738e3379647b5f53cd7dd10bf63bed96fded362b0",
+      "lines": 13,
+      "readRanges": [
+        [
+          1,
+          13
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-browser-coordinator.log",
+      "sha256": "a50c12e48ceac4d47a568ba383e8823f2be2daa301391b4a9d9b2f809636d63a",
+      "lines": 55,
+      "readRanges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/newtab-browser-coordinator.log",
+      "sha256": "18f170e6137b9d8aebeeeb01d0b90372f2331f03cd3907cbb9e67d72e8e2c218",
+      "lines": 25,
+      "readRanges": [
+        [
+          1,
+          25
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-browser-coordinator.log",
+      "sha256": "1ba7a387980178d7552aa35cc798c7e88f9771dcf31ca89985e3efac5f831486",
+      "lines": 20,
+      "readRanges": [
+        [
+          1,
+          20
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/panel-browser-coordinator.log",
+      "sha256": "6ee9a417955ffe8df369d0691912799d84f3bb5a2d7f1642d7db99f83fdd745b",
+      "lines": 2,
+      "readRanges": [
+        [
+          1,
+          2
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-memory-coordinator.log",
+      "sha256": "359d2e5c550b22aea4772c9e4ba0a5c705c65570e0a05462475a1dbeaa8d7df8",
+      "lines": 33,
+      "readRanges": [
+        [
+          1,
+          33
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/check_ai_packaging.py",
+      "sha256": "8a49930fcd155236b66136832d98031c810599f18c35dd8c64a4cc4d69537103",
+      "lines": 84,
+      "readRanges": [
+        [
+          1,
+          84
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete content inspected, long source read in chunks. Truncated combined source output was followed by complete overlapping reads."
+    },
+    {
+      "path": "script/build_and_run.sh",
+      "sha256": "50fb628b73fac02379c18cf1b459cb1abf4c1d792dc7e256edf51c852c6c1259",
+      "lines": 267,
+      "readRanges": [
+        [
+          215,
+          265
+        ]
+      ],
+      "status": "partial",
+      "notes": "Packaging/signing call site only; never executed."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-work-before.js",
+      "sha256": "22c76bd6c734a24a5a2e2a2f5fcaa56b085322e4f62cd494f37256c16155a1d0",
+      "lines": 146,
+      "readRanges": [
+        [
+          39,
+          55
+        ]
+      ],
+      "status": "partial",
+      "notes": "Baseline condition and pruning read; remainder not claimed fully read."
+    },
+    {
+      "path": "build/efficiency-20261103/members-before-workspace-store.mjs",
+      "sha256": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+      "lines": 658,
+      "readRanges": [
+        [
+          610,
+          658
+        ]
+      ],
+      "status": "partial",
+      "notes": "Baseline persistence read; remainder executed in differential probe, not claimed fully read."
+    }
+  ],
+  "sourceHashes": {
+    "features/ai/extension/workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "features/ai/extension/translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "features/ai/extension/newtab.js": "b3d82f40ad7242ed35418214c46226eac66e0daf8b8b81a737303589215dcb30",
+    "features/ai/extension/workspace.js": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+    "features/ai/extension/top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "script/windows/apply-memory-update.py": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+    "script/windows/prepare-efficiency-packet.py": "f2dfef80215e76152aa4c88d200338478f85bc2703f67c1ec147485db26c83ed",
+    "script/package_breezer_ai.py": "67ec259e345ee1f50dcd3b1f15934e0c9fc129f0dbb7f51f78f86ba584239b61",
+    "script/check_breezer_memory_package.py": "136e50b4421547f944da9181414ad04edbf015325238ee7f2e563ac705296f1b",
+    "tests/windows/memory_update_test.py": "fe241e82008c51a331c367d7e76970ae100f0fc4c0d29769433c372d51cff698",
+    "tests/memory_package_test.py": "2dbde9f7861df8f73ae7a116f48dc1b684310ffb2a0be2268dae54ef6445d9b1",
+    "tests/ai/workspace-ui-efficiency.test.mjs": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654",
+    "tests/ai/workspace-members-efficiency.test.mjs": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+    "tests/ai/translation-efficiency.test.mjs": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+    "script/verify_workspace_members_efficiency.mjs": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9"
+  },
+  "reviewedInputHashesUnchanged": true,
+  "preservation": "Only workspace-review-* artifacts written. Production/docs/shared reports/logs/packet preserved. No commits or pushes."
+}

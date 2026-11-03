@@ -1,0 +1,2349 @@
+{
+  "scope": "verification odd frozen audit",
+  "files": [
+    {
+      "path": "tests/ai/browser-api-fixture.mjs",
+      "sha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef",
+      "lines": 52,
+      "readRanges": [
+        [
+          1,
+          52
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/browser-api-fixture.mjs",
+        "owner": "verification",
+        "lines": 52,
+        "sha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/browser-api-fixture.mjs",
+        "owner": "verification",
+        "lines": 52,
+        "sha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef"
+      },
+      "beforeSha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef",
+      "afterSha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef",
+      "selection": {
+        "currentOddIndex": 1
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/browser-input-regression.mjs",
+      "sha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d",
+      "lines": 41,
+      "readRanges": [
+        [
+          1,
+          41
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/browser-input-regression.mjs",
+        "owner": "verification",
+        "lines": 41,
+        "sha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/browser-input-regression.mjs",
+        "owner": "verification",
+        "lines": 41,
+        "sha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d"
+      },
+      "beforeSha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d",
+      "afterSha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d",
+      "selection": {
+        "currentOddIndex": 3
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "12377d85a84df7d02bd338fd32e20d1a891dc09d419dfe18dab79fce3e1f341d",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/browser-tools.test.mjs",
+      "sha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1",
+      "lines": 805,
+      "readRanges": [
+        [
+          1,
+          805
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/browser-tools.test.mjs",
+        "owner": "verification",
+        "lines": 805,
+        "sha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/browser-tools.test.mjs",
+        "owner": "verification",
+        "lines": 805,
+        "sha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1"
+      },
+      "beforeSha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1",
+      "afterSha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1",
+      "selection": {
+        "currentOddIndex": 5
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/context-integration.test.mjs",
+      "sha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d",
+      "lines": 168,
+      "readRanges": [
+        [
+          1,
+          168
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/context-integration.test.mjs",
+        "owner": "verification",
+        "lines": 168,
+        "sha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/context-integration.test.mjs",
+        "owner": "verification",
+        "lines": 168,
+        "sha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d"
+      },
+      "beforeSha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d",
+      "afterSha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d",
+      "selection": {
+        "currentOddIndex": 7
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/context-settings.test.mjs",
+      "sha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726",
+      "lines": 120,
+      "readRanges": [
+        [
+          1,
+          120
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/context-settings.test.mjs",
+        "owner": "verification",
+        "lines": 120,
+        "sha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/context-settings.test.mjs",
+        "owner": "verification",
+        "lines": 120,
+        "sha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726"
+      },
+      "beforeSha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726",
+      "afterSha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726",
+      "selection": {
+        "currentOddIndex": 9
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "edffcce17ba5553f9a3355a693805e90c57aa66a98630612e5113d29f3901726",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/docs-editor.test.mjs",
+      "sha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06",
+      "lines": 52,
+      "readRanges": [
+        [
+          1,
+          52
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/docs-editor.test.mjs",
+        "owner": "verification",
+        "lines": 52,
+        "sha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/docs-editor.test.mjs",
+        "owner": "verification",
+        "lines": 52,
+        "sha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06"
+      },
+      "beforeSha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06",
+      "afterSha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06",
+      "selection": {
+        "currentOddIndex": 11
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "4cf8286d610f6825b4981dfccde09b75cc90e9f8bb8462608fca5afd3efbca06",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/host-live.mjs",
+      "sha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391",
+      "lines": 81,
+      "readRanges": [
+        [
+          1,
+          81
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/host-live.mjs",
+        "owner": "verification",
+        "lines": 81,
+        "sha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/host-live.mjs",
+        "owner": "verification",
+        "lines": 81,
+        "sha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391"
+      },
+      "beforeSha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391",
+      "afterSha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391",
+      "selection": {
+        "currentOddIndex": 13
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "e05ec72541d467df94cde25d32e29f0ab8d13af35366ba82fab000d88008e391",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not safe for current task: can launch app/provider, access native credential facilities or discover actual account state."
+    },
+    {
+      "path": "tests/ai/host-options.mjs",
+      "sha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282",
+      "lines": 36,
+      "readRanges": [
+        [
+          1,
+          36
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/host-options.mjs",
+        "owner": "verification",
+        "lines": 36,
+        "sha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/host-options.mjs",
+        "owner": "verification",
+        "lines": 36,
+        "sha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282"
+      },
+      "beforeSha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282",
+      "afterSha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282",
+      "selection": {
+        "currentOddIndex": 15
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "7c34aebff5ae0f0134dda46087739aaa5a3e80bcff26fbdc7689695519952282",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not safe for current task: can launch app/provider, access native credential facilities or discover actual account state."
+    },
+    {
+      "path": "tests/ai/installed-chat.mjs",
+      "sha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c",
+      "lines": 256,
+      "readRanges": [
+        [
+          1,
+          256
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/installed-chat.mjs",
+        "owner": "verification",
+        "lines": 256,
+        "sha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/installed-chat.mjs",
+        "owner": "verification",
+        "lines": 256,
+        "sha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c"
+      },
+      "beforeSha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c",
+      "afterSha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c",
+      "selection": {
+        "currentOddIndex": 17
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "20e7997ea42ed4c1bbcdfc4f3384d99ea27c9c8fb43e3fec186fd4bd9f783a8c",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not safe for current task: can launch app/provider, access native credential facilities or discover actual account state."
+    },
+    {
+      "path": "tests/ai/model-catalog.test.mjs",
+      "sha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8",
+      "lines": 101,
+      "readRanges": [
+        [
+          1,
+          101
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/model-catalog.test.mjs",
+        "owner": "verification",
+        "lines": 101,
+        "sha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/model-catalog.test.mjs",
+        "owner": "verification",
+        "lines": 101,
+        "sha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8"
+      },
+      "beforeSha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8",
+      "afterSha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8",
+      "selection": {
+        "currentOddIndex": 19
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "7257336c30d6e5a83f1657dda81ebf29bf8c24a11bbd79bccba03fbc747563e8",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/native-lifetime.test.mjs",
+      "sha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026",
+      "lines": 128,
+      "readRanges": [
+        [
+          1,
+          128
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/native-lifetime.test.mjs",
+        "owner": "verification",
+        "lines": 128,
+        "sha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/native-lifetime.test.mjs",
+        "owner": "verification",
+        "lines": 128,
+        "sha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026"
+      },
+      "beforeSha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026",
+      "afterSha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026",
+      "selection": {
+        "currentOddIndex": 21
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "c507b4a9c0026f585e04e36ab3321b02e6b7b8ab14a57e0aad9ccb062b8d6026",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/newtab-browser.test.mjs",
+      "sha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+      "lines": 516,
+      "readRanges": [
+        [
+          1,
+          516
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/newtab-browser.test.mjs",
+        "owner": "verification",
+        "lines": 516,
+        "sha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/newtab-browser.test.mjs",
+        "owner": "verification",
+        "lines": 516,
+        "sha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf"
+      },
+      "beforeSha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+      "afterSha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+      "selection": {
+        "currentOddIndex": 23
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/ai/onboarding-browser.test.mjs",
+      "sha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e",
+      "lines": 348,
+      "readRanges": [
+        [
+          1,
+          348
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/onboarding-browser.test.mjs",
+        "owner": "verification",
+        "lines": 348,
+        "sha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/onboarding-browser.test.mjs",
+        "owner": "verification",
+        "lines": 348,
+        "sha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e"
+      },
+      "beforeSha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e",
+      "afterSha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e",
+      "selection": {
+        "currentOddIndex": 25
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/ai/organato.test.mjs",
+      "sha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97",
+      "lines": 58,
+      "readRanges": [
+        [
+          1,
+          58
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/organato.test.mjs",
+        "owner": "verification",
+        "lines": 58,
+        "sha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/organato.test.mjs",
+        "owner": "verification",
+        "lines": 58,
+        "sha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97"
+      },
+      "beforeSha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97",
+      "afterSha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97",
+      "selection": {
+        "currentOddIndex": 27
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "05917be7b3cf265e2d4bcb4f3ee5da25d5913c08cb9cff259edc062fc98f5a97",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/package-lock.json",
+      "sha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4",
+      "lines": 53,
+      "readRanges": [
+        [
+          1,
+          53
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/package-lock.json",
+        "owner": "verification",
+        "lines": 53,
+        "sha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/package-lock.json",
+        "owner": "verification",
+        "lines": 53,
+        "sha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4"
+      },
+      "beforeSha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4",
+      "afterSha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4",
+      "selection": {
+        "currentOddIndex": 29
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "eb8f558b69b30706962a745866903eff6e2b01ead659613a567a6fb1e64093d4",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/panel-browser.mjs",
+      "sha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325",
+      "lines": 404,
+      "readRanges": [
+        [
+          1,
+          404
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/panel-browser.mjs",
+        "owner": "verification",
+        "lines": 404,
+        "sha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/panel-browser.mjs",
+        "owner": "verification",
+        "lines": 404,
+        "sha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325"
+      },
+      "beforeSha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325",
+      "afterSha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325",
+      "selection": {
+        "currentOddIndex": 31
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "8349983be5550b6ff31cb2f23235f64b6e9789f111f0b6358af768cf237cc619",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/ai/peek-native.mjs",
+      "sha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47",
+      "lines": 419,
+      "readRanges": [
+        [
+          1,
+          419
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/peek-native.mjs",
+        "owner": "verification",
+        "lines": 419,
+        "sha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/peek-native.mjs",
+        "owner": "verification",
+        "lines": 419,
+        "sha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47"
+      },
+      "beforeSha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47",
+      "afterSha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47",
+      "selection": {
+        "currentOddIndex": 33
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "85c361dfa08e3434db0ac9b6d3f0fd8c109c78d11997a0e6a72f5ce38a061e47",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not safe for current task: can launch app/provider, access native credential facilities or discover actual account state."
+    },
+    {
+      "path": "tests/ai/research-browser.mjs",
+      "sha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6",
+      "lines": 164,
+      "readRanges": [
+        [
+          1,
+          164
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/research-browser.mjs",
+        "owner": "verification",
+        "lines": 164,
+        "sha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/research-browser.mjs",
+        "owner": "verification",
+        "lines": 164,
+        "sha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6"
+      },
+      "beforeSha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6",
+      "afterSha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6",
+      "selection": {
+        "currentOddIndex": 35
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/ai/research.test.mjs",
+      "sha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9",
+      "lines": 126,
+      "readRanges": [
+        [
+          1,
+          126
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/research.test.mjs",
+        "owner": "verification",
+        "lines": 126,
+        "sha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/research.test.mjs",
+        "owner": "verification",
+        "lines": 126,
+        "sha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9"
+      },
+      "beforeSha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9",
+      "afterSha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9",
+      "selection": {
+        "currentOddIndex": 37
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "65216c6cd0d47df1efca973936aa339c442df9dae3fd55810a6e2a33108dfce9",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/settings-nav.test.mjs",
+      "sha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa",
+      "lines": 47,
+      "readRanges": [
+        [
+          1,
+          47
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/settings-nav.test.mjs",
+        "owner": "verification",
+        "lines": 47,
+        "sha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/settings-nav.test.mjs",
+        "owner": "verification",
+        "lines": 47,
+        "sha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa"
+      },
+      "beforeSha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa",
+      "afterSha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa",
+      "selection": {
+        "currentOddIndex": 39
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "072f6d79faa7560bafd96963de7e3a460126aca47e5d6480b1e98f010b7736fa",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/settings-onboarding.test.mjs",
+      "sha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2",
+      "lines": 154,
+      "readRanges": [
+        [
+          1,
+          154
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/settings-onboarding.test.mjs",
+        "owner": "verification",
+        "lines": 154,
+        "sha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/settings-onboarding.test.mjs",
+        "owner": "verification",
+        "lines": 154,
+        "sha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2"
+      },
+      "beforeSha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2",
+      "afterSha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2",
+      "selection": {
+        "currentOddIndex": 41
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "c28af15c22612a1c3cb230de78785f1093501bdc2df53f7a250738b71c282ce2",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/settings.test.mjs",
+      "sha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+      "lines": 364,
+      "readRanges": [
+        [
+          1,
+          364
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/settings.test.mjs",
+        "owner": "verification",
+        "lines": 364,
+        "sha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/settings.test.mjs",
+        "owner": "verification",
+        "lines": 364,
+        "sha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454"
+      },
+      "beforeSha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+      "afterSha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+      "selection": {
+        "currentOddIndex": 43
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/top-sites.test.mjs",
+      "sha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871",
+      "lines": 33,
+      "readRanges": [
+        [
+          1,
+          33
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/top-sites.test.mjs",
+        "owner": "verification",
+        "lines": 33,
+        "sha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/top-sites.test.mjs",
+        "owner": "verification",
+        "lines": 33,
+        "sha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871"
+      },
+      "beforeSha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871",
+      "afterSha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871",
+      "selection": {
+        "currentOddIndex": 45
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "2becc470ff730ba6d8b09f8435dbf848b1d3ae8bf69dc633e0dbce90f85bb871",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/translation-efficiency.test.mjs",
+      "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+      "lines": 226,
+      "readRanges": [
+        [
+          1,
+          226
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/translation-efficiency.test.mjs",
+        "owner": "verification",
+        "lines": 226,
+        "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/translation-efficiency.test.mjs",
+        "owner": "verification",
+        "lines": 226,
+        "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8"
+      },
+      "beforeSha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+      "afterSha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+      "selection": {
+        "currentOddIndex": 47
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/update-lifetime.test.mjs",
+      "sha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97",
+      "lines": 119,
+      "readRanges": [
+        [
+          1,
+          119
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/update-lifetime.test.mjs",
+        "owner": "verification",
+        "lines": 119,
+        "sha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/update-lifetime.test.mjs",
+        "owner": "verification",
+        "lines": 119,
+        "sha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97"
+      },
+      "beforeSha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97",
+      "afterSha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97",
+      "selection": {
+        "currentOddIndex": 49
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "815448485ba7a4c59ad4be328b47c6d432b6799569c274a9787c02fd256d3a97",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/usage.test.mjs",
+      "sha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3",
+      "lines": 63,
+      "readRanges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/usage.test.mjs",
+        "owner": "verification",
+        "lines": 63,
+        "sha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/usage.test.mjs",
+        "owner": "verification",
+        "lines": 63,
+        "sha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3"
+      },
+      "beforeSha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3",
+      "afterSha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3",
+      "selection": {
+        "currentOddIndex": 51
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "75398d44abb16bc215275e02506a5f7602fbca86ae2542d7011f8e22c92bf3b3",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/whats-new-browser.test.mjs",
+      "sha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f",
+      "lines": 243,
+      "readRanges": [
+        [
+          1,
+          243
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/whats-new-browser.test.mjs",
+        "owner": "verification",
+        "lines": 243,
+        "sha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/whats-new-browser.test.mjs",
+        "owner": "verification",
+        "lines": 243,
+        "sha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f"
+      },
+      "beforeSha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f",
+      "afterSha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f",
+      "selection": {
+        "currentOddIndex": 53
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/ai/workspace-browser-fixture.mjs",
+      "sha256": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01",
+      "lines": 201,
+      "readRanges": [
+        [
+          1,
+          201
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/workspace-browser-fixture.mjs",
+        "owner": "verification",
+        "lines": 201,
+        "sha256": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/workspace-browser-fixture.mjs",
+        "owner": "verification",
+        "lines": 201,
+        "sha256": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01"
+      },
+      "beforeSha256": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01",
+      "afterSha256": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01",
+      "selection": {
+        "currentOddIndex": 55
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/workspace-frame.test.mjs",
+      "sha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713",
+      "lines": 172,
+      "readRanges": [
+        [
+          1,
+          172
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/workspace-frame.test.mjs",
+        "owner": "verification",
+        "lines": 172,
+        "sha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/workspace-frame.test.mjs",
+        "owner": "verification",
+        "lines": 172,
+        "sha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713"
+      },
+      "beforeSha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713",
+      "afterSha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713",
+      "selection": {
+        "currentOddIndex": 57
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/ai/workspace-native.mjs",
+      "sha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298",
+      "lines": 703,
+      "readRanges": [
+        [
+          1,
+          703
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/workspace-native.mjs",
+        "owner": "verification",
+        "lines": 703,
+        "sha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/workspace-native.mjs",
+        "owner": "verification",
+        "lines": 703,
+        "sha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298"
+      },
+      "beforeSha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298",
+      "afterSha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298",
+      "selection": {
+        "currentOddIndex": 59
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "21f881a2631231ee10c021b4c92ea33a8fc07c20d6628fbcc623fed200f41298",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not safe for current task: can launch app/provider, access native credential facilities or discover actual account state."
+    },
+    {
+      "path": "tests/ai/workspace-static.test.mjs",
+      "sha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf",
+      "lines": 58,
+      "readRanges": [
+        [
+          1,
+          58
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/workspace-static.test.mjs",
+        "owner": "verification",
+        "lines": 58,
+        "sha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/workspace-static.test.mjs",
+        "owner": "verification",
+        "lines": 58,
+        "sha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf"
+      },
+      "beforeSha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf",
+      "afterSha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf",
+      "selection": {
+        "currentOddIndex": 61
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/workspace-ui-efficiency.test.mjs",
+      "sha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654",
+      "lines": 111,
+      "readRanges": [
+        [
+          1,
+          111
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/ai/workspace-ui-efficiency.test.mjs",
+        "owner": "verification",
+        "lines": 111,
+        "sha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654"
+      },
+      "inventoryPostReview": {
+        "path": "tests/ai/workspace-ui-efficiency.test.mjs",
+        "owner": "verification",
+        "lines": 111,
+        "sha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654"
+      },
+      "beforeSha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654",
+      "afterSha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654",
+      "selection": {
+        "currentOddIndex": 63
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/code_sign_clone_sessions_test.cc",
+      "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+      "lines": 212,
+      "readRanges": [
+        [
+          1,
+          212
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/code_sign_clone_sessions_test.cc",
+        "owner": "verification",
+        "lines": 212,
+        "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5"
+      },
+      "inventoryPostReview": {
+        "path": "tests/code_sign_clone_sessions_test.cc",
+        "owner": "verification",
+        "lines": 212,
+        "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5"
+      },
+      "beforeSha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+      "afterSha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+      "selection": {
+        "currentOddIndex": 65
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/compiled-filter-lists.test.mjs",
+      "sha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d",
+      "lines": 117,
+      "readRanges": [
+        [
+          1,
+          117
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/compiled-filter-lists.test.mjs",
+        "owner": "verification",
+        "lines": 117,
+        "sha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d"
+      },
+      "inventoryPostReview": {
+        "path": "tests/compiled-filter-lists.test.mjs",
+        "owner": "verification",
+        "lines": 117,
+        "sha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d"
+      },
+      "beforeSha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d",
+      "afterSha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d",
+      "selection": {
+        "currentOddIndex": 67
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "65694d9d4af5abfbf19038ee4842d874e01d642229ad18fe90917d4bec62492d",
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/passkeys/component.mjs",
+      "sha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877",
+      "lines": 39,
+      "readRanges": [
+        [
+          1,
+          39
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passkeys/component.mjs",
+        "owner": "verification",
+        "lines": 39,
+        "sha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passkeys/component.mjs",
+        "owner": "verification",
+        "lines": 39,
+        "sha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877"
+      },
+      "beforeSha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877",
+      "afterSha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877",
+      "selection": {
+        "currentOddIndex": 69
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "5a87aa2a23816bde670c3243828c5518079b836fcd54c2e141341ce0f7b37877",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Browser paths were not executed; import failures may be reported as skips in optional Playwright suites."
+    },
+    {
+      "path": "tests/passkeys/webauthn.html",
+      "sha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d",
+      "lines": 15,
+      "readRanges": [
+        [
+          1,
+          15
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passkeys/webauthn.html",
+        "owner": "verification",
+        "lines": 15,
+        "sha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passkeys/webauthn.html",
+        "owner": "verification",
+        "lines": 15,
+        "sha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d"
+      },
+      "beforeSha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d",
+      "afterSha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d",
+      "selection": {
+        "currentOddIndex": 71
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "1795af3339ada86ffdc2c662c500a8c8ca6551dbef04379ffbd0c931ad4dc45d",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/passkeys_native_test.py",
+      "sha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passkeys_native_test.py",
+        "owner": "verification",
+        "lines": 118,
+        "sha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passkeys_native_test.py",
+        "owner": "verification",
+        "lines": 118,
+        "sha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f"
+      },
+      "beforeSha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f",
+      "afterSha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f",
+      "selection": {
+        "currentOddIndex": 73
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "4ddf0bce27f34d7c297c52b105e31f2e8ca4c20bef6c7aadcf51e185ec36a61f",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not run. Pinned-source tests require explicit fixture inputs; Windows migration fixture calls os.sync via production helper."
+    },
+    {
+      "path": "tests/passwords/component.html",
+      "sha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5",
+      "lines": 94,
+      "readRanges": [
+        [
+          1,
+          94
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passwords/component.html",
+        "owner": "verification",
+        "lines": 94,
+        "sha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passwords/component.html",
+        "owner": "verification",
+        "lines": 94,
+        "sha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5"
+      },
+      "beforeSha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5",
+      "afterSha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5",
+      "selection": {
+        "currentOddIndex": 75
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "bfba44daca2e77093fbb0f8e26abd1e652216b4ada39f8dfe8f0423350bee3a5",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/passwords/enter.html",
+      "sha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0",
+      "lines": 21,
+      "readRanges": [
+        [
+          1,
+          21
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passwords/enter.html",
+        "owner": "verification",
+        "lines": 21,
+        "sha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passwords/enter.html",
+        "owner": "verification",
+        "lines": 21,
+        "sha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0"
+      },
+      "beforeSha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0",
+      "afterSha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0",
+      "selection": {
+        "currentOddIndex": 77
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "165a0ea22530c3f1e3d4eaba2bd6017a343e9ff3f4de0d092e753f2edd2b5af0",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/passwords/installed.mjs",
+      "sha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615",
+      "lines": 97,
+      "readRanges": [
+        [
+          1,
+          97
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passwords/installed.mjs",
+        "owner": "verification",
+        "lines": 97,
+        "sha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passwords/installed.mjs",
+        "owner": "verification",
+        "lines": 97,
+        "sha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615"
+      },
+      "beforeSha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615",
+      "afterSha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615",
+      "selection": {
+        "currentOddIndex": 79
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "69f3e0f213ade75c89b5ba0cb42d714e35e6a8677a43bb84fb605ab048ede615",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not safe for current task: can launch app/provider, access native credential facilities or discover actual account state."
+    },
+    {
+      "path": "tests/passwords_enter_test.py",
+      "sha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de",
+      "lines": 93,
+      "readRanges": [
+        [
+          1,
+          93
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passwords_enter_test.py",
+        "owner": "verification",
+        "lines": 93,
+        "sha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passwords_enter_test.py",
+        "owner": "verification",
+        "lines": 93,
+        "sha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de"
+      },
+      "beforeSha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de",
+      "afterSha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de",
+      "selection": {
+        "currentOddIndex": 81
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "c514bd3ae3a02ce82630678c818be88aa66149b5eb52b27355c19785513873de",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not run. Pinned-source tests require explicit fixture inputs; Windows migration fixture calls os.sync via production helper."
+    },
+    {
+      "path": "tests/passwords_proactive_test.py",
+      "sha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3",
+      "lines": 198,
+      "readRanges": [
+        [
+          1,
+          198
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/passwords_proactive_test.py",
+        "owner": "verification",
+        "lines": 198,
+        "sha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3"
+      },
+      "inventoryPostReview": {
+        "path": "tests/passwords_proactive_test.py",
+        "owner": "verification",
+        "lines": 198,
+        "sha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3"
+      },
+      "beforeSha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3",
+      "afterSha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3",
+      "selection": {
+        "currentOddIndex": 83
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "f3021a1b5719f22d3060328a2c2bd748e235d48b61b2ae069364e1172e9d13e3",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not run. Pinned-source tests require explicit fixture inputs; Windows migration fixture calls os.sync via production helper."
+    },
+    {
+      "path": "tests/sync/lifetime.test.mjs",
+      "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc",
+      "lines": 72,
+      "readRanges": [
+        [
+          1,
+          72
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/sync/lifetime.test.mjs",
+        "owner": "verification",
+        "lines": 72,
+        "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc"
+      },
+      "inventoryPostReview": {
+        "path": "tests/sync/lifetime.test.mjs",
+        "owner": "verification",
+        "lines": 72,
+        "sha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc"
+      },
+      "beforeSha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc",
+      "afterSha256": "03e1c73f92193ce1a44cd3d0b29ba81364d5b5409f3a6b2c0c16bddfa86588dc",
+      "selection": {
+        "currentOddIndex": 85
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/sync/reconcile.test.mjs",
+      "sha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd",
+      "lines": 232,
+      "readRanges": [
+        [
+          1,
+          232
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/sync/reconcile.test.mjs",
+        "owner": "verification",
+        "lines": 232,
+        "sha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd"
+      },
+      "inventoryPostReview": {
+        "path": "tests/sync/reconcile.test.mjs",
+        "owner": "verification",
+        "lines": 232,
+        "sha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd"
+      },
+      "beforeSha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd",
+      "afterSha256": "aa033a8da32a2eda9978c95c77eb097561e5618b26263d6f65927f62bd3c80fd",
+      "selection": {
+        "currentOddIndex": 87
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "760e7bc41dafd14bb7131510491c509f81089ec9283329bf3004c939b9ee00da",
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/sync/workspace-model.test.mjs",
+      "sha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+      "lines": 173,
+      "readRanges": [
+        [
+          1,
+          173
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/sync/workspace-model.test.mjs",
+        "owner": "verification",
+        "lines": 173,
+        "sha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387"
+      },
+      "inventoryPostReview": {
+        "path": "tests/sync/workspace-model.test.mjs",
+        "owner": "verification",
+        "lines": 173,
+        "sha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387"
+      },
+      "beforeSha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+      "afterSha256": "a6f2572e442e6822c00caf2b2008b51d15849a488d42bd339e3d1d9d41c30387",
+      "selection": {
+        "currentOddIndex": 89
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "13877ce917cd2fe8defa9ff406411d8287afd7fde0ddb810dac434d5ce704d92",
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/windows/memory_update_test.py",
+      "sha256": "80fa75ad2e4bfad707f55cfcb1aa115c86180dc6e70b1a67a1d4b5e1b106d1ac",
+      "lines": 209,
+      "readRanges": [
+        [
+          1,
+          209
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/windows/memory_update_test.py",
+        "owner": "verification",
+        "lines": 196,
+        "sha256": "fe241e82008c51a331c367d7e76970ae100f0fc4c0d29769433c372d51cff698"
+      },
+      "inventoryPostReview": {
+        "path": "tests/windows/memory_update_test.py",
+        "owner": "verification",
+        "lines": 209,
+        "sha256": "80fa75ad2e4bfad707f55cfcb1aa115c86180dc6e70b1a67a1d4b5e1b106d1ac"
+      },
+      "beforeSha256": "80fa75ad2e4bfad707f55cfcb1aa115c86180dc6e70b1a67a1d4b5e1b106d1ac",
+      "afterSha256": "80fa75ad2e4bfad707f55cfcb1aa115c86180dc6e70b1a67a1d4b5e1b106d1ac",
+      "selection": {
+        "currentOddIndex": 91
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "hash-or-lines-changed",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not run. Pinned-source tests require explicit fixture inputs; Windows migration fixture calls os.sync via production helper."
+    },
+    {
+      "path": "tests/workspace_native_test.py",
+      "sha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff",
+      "lines": 79,
+      "readRanges": [
+        [
+          1,
+          79
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": {
+        "path": "tests/workspace_native_test.py",
+        "owner": "verification",
+        "lines": 79,
+        "sha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff"
+      },
+      "inventoryPostReview": {
+        "path": "tests/workspace_native_test.py",
+        "owner": "verification",
+        "lines": 79,
+        "sha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff"
+      },
+      "beforeSha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff",
+      "afterSha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff",
+      "selection": {
+        "currentOddIndex": 93
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "none",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": "7545bd89eb1ccc682e0b67c3fed002d18093640f0ae9c8d37b72e53d4b3a1cff",
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion. Not run. Pinned-source tests require explicit fixture inputs; Windows migration fixture calls os.sync via production helper."
+    },
+    {
+      "path": "tests/ai/fixtures/render-message-before.js",
+      "sha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "lines": 83,
+      "readRanges": [
+        [
+          1,
+          83
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": null,
+      "inventoryPostReview": {
+        "path": "tests/ai/fixtures/render-message-before.js",
+        "owner": "verification",
+        "lines": 83,
+        "sha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830"
+      },
+      "beforeSha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "afterSha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "selection": {
+        "postReviewNew": true
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "absent",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "not executed; source review only",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/harness-cleanup.test.mjs",
+      "sha256": "2e92590cea1577ca08e6fa0859b895e6f4af0d53e69cf0ebdcadaad8e64a736e",
+      "lines": 40,
+      "readRanges": [
+        [
+          1,
+          40
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": null,
+      "inventoryPostReview": {
+        "path": "tests/ai/harness-cleanup.test.mjs",
+        "owner": "verification",
+        "lines": 40,
+        "sha256": "2e92590cea1577ca08e6fa0859b895e6f4af0d53e69cf0ebdcadaad8e64a736e"
+      },
+      "beforeSha256": "2e92590cea1577ca08e6fa0859b895e6f4af0d53e69cf0ebdcadaad8e64a736e",
+      "afterSha256": "2e92590cea1577ca08e6fa0859b895e6f4af0d53e69cf0ebdcadaad8e64a736e",
+      "selection": {
+        "postReviewNew": true
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "absent",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/newtab-race.test.mjs",
+      "sha256": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea",
+      "lines": 59,
+      "readRanges": [
+        [
+          1,
+          59
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": null,
+      "inventoryPostReview": {
+        "path": "tests/ai/newtab-race.test.mjs",
+        "owner": "verification",
+        "lines": 59,
+        "sha256": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea"
+      },
+      "beforeSha256": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea",
+      "afterSha256": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea",
+      "selection": {
+        "postReviewNew": true
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "absent",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/organato-response.test.mjs",
+      "sha256": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5",
+      "lines": 150,
+      "readRanges": [
+        [
+          1,
+          150
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": null,
+      "inventoryPostReview": {
+        "path": "tests/ai/organato-response.test.mjs",
+        "owner": "verification",
+        "lines": 150,
+        "sha256": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5"
+      },
+      "beforeSha256": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5",
+      "afterSha256": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5",
+      "selection": {
+        "postReviewNew": true
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "absent",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/ai/overlay_fetch_test.py",
+      "sha256": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a",
+      "lines": 43,
+      "readRanges": [
+        [
+          1,
+          43
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": null,
+      "inventoryPostReview": {
+        "path": "tests/ai/overlay_fetch_test.py",
+        "owner": "verification",
+        "lines": 43,
+        "sha256": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a"
+      },
+      "beforeSha256": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a",
+      "afterSha256": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a",
+      "selection": {
+        "postReviewNew": true
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "absent",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    },
+    {
+      "path": "tests/sync/provider-lifecycle.test.mjs",
+      "sha256": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886",
+      "lines": 70,
+      "readRanges": [
+        [
+          1,
+          70
+        ]
+      ],
+      "status": "fully-read",
+      "inventoryCurrent": null,
+      "inventoryPostReview": {
+        "path": "tests/sync/provider-lifecycle.test.mjs",
+        "owner": "verification",
+        "lines": 70,
+        "sha256": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886"
+      },
+      "beforeSha256": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886",
+      "afterSha256": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886",
+      "selection": {
+        "postReviewNew": true
+      },
+      "duringReviewDrift": false,
+      "drift": {
+        "inventoryCurrent": "absent",
+        "inventoryPostReview": "none"
+      },
+      "headSha256": null,
+      "runtimeVerification": "passed focused offline test",
+      "reviewNotes": "Read entire file. Assertions assessed as source evidence; no browser-wide efficiency conclusion."
+    }
+  ],
+  "model": "gpt-6.1-sol",
+  "reasoning": "high",
+  "speed": "regular requested; no speed setting changed",
+  "gitHead": "1ddab549eedeaffbc0eb297ef50b0d85e8625434",
+  "selection": {
+    "algorithm": "owner verification in current inventory order, zero-based indices 1,3,...,93, plus every post-review owner verification path absent from current inventory",
+    "oddCount": 47,
+    "newCount": 6,
+    "total": 53,
+    "frozenInventories": {
+      "source-inventory-current.json": "28ef41f889615274623b3e2ca377791604c628c707734e1229271225ab15de01",
+      "source-inventory-post-review.json": "38d09a3cd125df831d6c9c29744f574e412c85cce1632c40726e589391f39bf3"
+    }
+  },
+  "findings": [
+    {
+      "id": "VODD-1",
+      "severity": "medium",
+      "title": "Browser launch failure leaves fixture servers open",
+      "origin": "inherited relative to HEAD; present in frozen inventories; panel additions do not introduce this gap",
+      "references": [
+        {
+          "path": "tests/ai/newtab-browser.test.mjs",
+          "sha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+          "lines": [
+            152,
+            157
+          ]
+        },
+        {
+          "path": "tests/ai/newtab-browser.test.mjs",
+          "sha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+          "lines": [
+            356,
+            359
+          ]
+        },
+        {
+          "path": "tests/ai/newtab-browser.test.mjs",
+          "sha256": "784bebf21a3cce33d8b148feb55f480e935fa935f4628b406f6b69f128059daf",
+          "lines": [
+            418,
+            423
+          ]
+        },
+        {
+          "path": "tests/ai/onboarding-browser.test.mjs",
+          "sha256": "51d7ce24879cb7e36717700ec484b6b22289b4d0cf0b2575b7cf5d3a99cf499e",
+          "lines": [
+            91,
+            95
+          ]
+        },
+        {
+          "path": "tests/ai/whats-new-browser.test.mjs",
+          "sha256": "a7d9d04650d4286b7f547149d1b94d5b3b66fdeca2f54d03ab9034a23298233f",
+          "lines": [
+            88,
+            92
+          ]
+        },
+        {
+          "path": "tests/ai/workspace-frame.test.mjs",
+          "sha256": "5ba607612a75493c8790afaf7fdb817f610aa3e9c790236a18afdd7d2f75c713",
+          "lines": [
+            104,
+            108
+          ]
+        },
+        {
+          "path": "tests/ai/panel-browser.mjs",
+          "sha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325",
+          "lines": [
+            23,
+            32
+          ]
+        },
+        {
+          "path": "tests/ai/research-browser.mjs",
+          "sha256": "4287e444beb0df1fcf75cca2bf8df3161123a9dfe200b3834d6adc8d7c49c6f6",
+          "lines": [
+            23,
+            32
+          ]
+        }
+      ],
+      "reproduction": "verification-odd-repro.mjs executes actual test declaration callbacks in a VM. Stub launch rejects; all six registered callbacks retain serverStillListening=true. No real browser or server is launched by this reproduction. Panel/research variants confirmed by source only.",
+      "impact": "A missing browser executable or launch error bypasses finally after a real server.listen, potentially hanging the test runner with an open listener. A rejection from browser.close also prevents subsequent server.close.",
+      "smallestSafeFix": "Declare browser before try; put launch/page setup inside try; nest server close in a finally around browser close, as already done in workspace-browser tests.",
+      "objections": [
+        "No real browser failure run was authorised. Reproduction proves callback control flow using fakes, not OS process state.",
+        "Workspace harness cleanup tests pass for their nine callbacks; they do not cover these other harnesses."
+      ]
+    },
+    {
+      "id": "VODD-2",
+      "severity": "medium",
+      "title": "Focus assertions can pass for the wrong space-name input",
+      "origin": "inherited relative to HEAD; settings.test.mjs unchanged",
+      "references": [
+        {
+          "path": "tests/ai/settings.test.mjs",
+          "sha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+          "lines": [
+            14,
+            16
+          ]
+        },
+        {
+          "path": "tests/ai/settings.test.mjs",
+          "sha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+          "lines": [
+            291,
+            297
+          ]
+        },
+        {
+          "path": "tests/ai/settings.test.mjs",
+          "sha256": "13e298369d94d69a7d44d4f7f98e15334130b9ca040b7da91d023c669800d454",
+          "lines": [
+            329,
+            334
+          ]
+        }
+      ],
+      "reproduction": "verification-odd-repro.mjs creates two actual settings-dom fake inputs, focuses the first, verifies it differs from the second, then calls the unmodified assertFocused helper targeting the second. Assertion passes because both labels are <input>.",
+      "impact": "The new-space focus test can pass when focus stays on an existing space input. The helper cannot detect replacement of a focused input by another node with the same diagnostic label.",
+      "smallestSafeFix": "Assert boolean identity with assert.ok(page.document.activeElement === node, a short label-only diagnostic) to avoid serializing DOM graphs.",
+      "objections": [
+        "This demonstrates test weakness, not a confirmed production focus regression.",
+        "Unique-ID controls do not have the same collision in these fixtures."
+      ]
+    }
+  ],
+  "objections": [
+    {
+      "references": [
+        {
+          "path": "tests/ai/translation-efficiency.test.mjs",
+          "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+          "lines": [
+            7,
+            11
+          ]
+        }
+      ],
+      "origin": "introduced test, untracked in HEAD",
+      "detail": "Fallback differential baseline is current source with one literal replacement, not a captured historical file. Currently replacement matches and differs, and all focused tests pass. If formatting changes, replacement silently returns current source and differential assertions compare identical code. VM reproduction proves this hypothetical failure mode; it is not a current vacuous result. Assert replacement occurred and record a captured baseline hash for stronger claims."
+    },
+    {
+      "references": [
+        {
+          "path": "tests/code_sign_clone_sessions_test.cc",
+          "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+          "lines": [
+            24,
+            25
+          ]
+        },
+        {
+          "path": "tests/code_sign_clone_sessions_test.cc",
+          "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+          "lines": [
+            162,
+            181
+          ]
+        },
+        {
+          "path": "tests/code_sign_clone_sessions_test.cc",
+          "sha256": "6013174e2f723880e36bfc6e0455be685c47b74dac83a42e60dd9490df5b98f5",
+          "lines": [
+            204,
+            208
+          ]
+        }
+      ],
+      "origin": "inherited unchanged relative to HEAD",
+      "detail": "alarm(30) terminates the parent outside exception cleanup; the child pause loop can survive a late parent timeout. Source-only concern, not reproduced or compiled. Treat watchdog cleanup claims as unverified on timeout."
+    },
+    {
+      "references": [
+        {
+          "path": "tests/ai/panel-browser.mjs",
+          "sha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325",
+          "lines": [
+            341,
+            375
+          ]
+        }
+      ],
+      "origin": "introduced stream assertions",
+      "detail": "The expected HTML uses the current renderMessage function. Useful for streaming-vs-current-one-shot consistency and node identity, but cannot alone prove preservation against the historical renderer. Historical fixture is present and was read; no browser runs authorised."
+    },
+    {
+      "references": [
+        {
+          "path": "tests/ai/harness-cleanup.test.mjs",
+          "sha256": "2e92590cea1577ca08e6fa0859b895e6f4af0d53e69cf0ebdcadaad8e64a736e",
+          "lines": [
+            30,
+            32
+          ]
+        }
+      ],
+      "origin": "introduced test",
+      "detail": "Exact callback count 9 intentionally detects scope drift, but will require maintenance when workspace-browser adds cases. Two fake phases passed. This coverage is limited to that extracted declaration suffix."
+    },
+    {
+      "references": [
+        {
+          "path": "tests/sync/provider-lifecycle.test.mjs",
+          "sha256": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886",
+          "lines": [
+            10,
+            10
+          ]
+        }
+      ],
+      "origin": "introduced test",
+      "detail": "Extracted helper source is exercised with owned synthetic children and fake token reads. Four tests passed. It does not exercise actual provider accounts or remote transport."
+    }
+  ],
+  "tests": {
+    "node": {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/harness-cleanup.test.mjs tests/ai/newtab-race.test.mjs tests/ai/organato-response.test.mjs tests/sync/provider-lifecycle.test.mjs tests/ai/translation-efficiency.test.mjs tests/ai/workspace-ui-efficiency.test.mjs tests/sync/lifetime.test.mjs tests/sync/reconcile.test.mjs tests/sync/workspace-model.test.mjs tests/compiled-filter-lists.test.mjs",
+      "exitCode": 0,
+      "passed": 71,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "log": "build/efficiency-20261103/verification-odd-tests.tap"
+    },
+    "python": {
+      "command": "TMPDIR=<owned build temporary directory> PYTHONDONTWRITEBYTECODE=1 python3 -B tests/ai/overlay_fetch_test.py",
+      "exitCode": 0,
+      "passed": 1,
+      "log": "build/efficiency-20261103/verification-odd-python.log"
+    },
+    "reproduction": {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/verification-odd-repro.mjs",
+      "exitCode": 0,
+      "results": "build/efficiency-20261103/verification-odd-repro-results.json"
+    },
+    "safety": "Read selected tests and relevant helpers first. Node request tests inject fetch and secrets, call only request, not config/view/list. Provider lifecycle extracts helpers and replaces spawn with owned Node dummy children; it does not launch Python provider server. Cleanup test uses disposable loopback listeners. Python download subprocess is mocked. No app, browser, real provider, profile, credentials, Keychain, PC, SSH, external network, benchmark, build, installation or publication."
+  },
+  "limitations": [
+    "53 files fully read; full repository verification coverage is not claimed.",
+    "Only listed focused tests executed. All browser/native/provider/live tests remain unrun, irrespective of optional skip behavior.",
+    "No native C++ build or runtime, APFS lifecycle run, native source overlay suite, UI screenshots, physical input or Windows/PC validation.",
+    "Call counts, fake reference pruning, output equality and durable fake-storage writes do not establish browser-wide RAM/CPU savings.",
+    "No source/test/script edits or shared evidence/doc/inventory edits. Only owned verification-odd artifacts written.",
+    "Review did not change source bytes. All 53 before/after hashes match. One current-inventory drift: Windows memory_update_test.py grew 196 to 209 lines; its post-review hash matches. Six new paths are absent from current by definition."
+  ],
+  "dependencyContext": [
+    {
+      "path": "features/performance/compiled-filter-lists.mjs",
+      "sha256": "98166a03e1141733b3a62f458d65021fc221bb38bd062e3a7c8429b77ada8b6a",
+      "lines": 77,
+      "readRanges": [
+        [
+          1,
+          76
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Checked malformed-index tests really read and reject index before context checks; no false positive confirmed."
+    },
+    {
+      "path": "features/ai/host/organato.mjs",
+      "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+      "lines": 136,
+      "readRanges": [
+        [
+          1,
+          136
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Checked request path only uses injected fetch/secrets and response decoder; constructor computes default path but request never reads config."
+    },
+    {
+      "path": "features/ai/host/codex.mjs",
+      "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "lines": 312,
+      "readRanges": [
+        [
+          1,
+          120
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Confirmed discovery would access real account on unmocked paths; not run."
+    },
+    {
+      "path": "features/ai/host/claude.mjs",
+      "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "lines": 212,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Read import and parsing context only; no provider discovery run."
+    },
+    {
+      "path": "script/check_ai_overlay.py",
+      "sha256": "da31357b31935e60c5f6073ec667da6f7e01708f1a88b2156282932d7d9784da",
+      "lines": 188,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Checked fetch helper import and mocked subprocess scope."
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "sha256": "e93e3f4965bd2cd5304bad49bd4d72cef7992f04a1acf9a7ddab19ad081c91d9",
+      "lines": 85,
+      "readRanges": [
+        [
+          1,
+          85
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Read apply and entry point; not run migration test due unnecessary global os.sync."
+    },
+    {
+      "path": "tests/ai/settings-dom.mjs",
+      "sha256": "e73b3664ae8eac7be8bee35531b4e348bcf259aafd5eeb2cd5bba9f2fec42409",
+      "lines": 292,
+      "readRanges": [
+        [
+          1,
+          90
+        ],
+        [
+          213,
+          292
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Read input diagnostic and exported fake-DOM creation/action context; partial helper review only."
+    },
+    {
+      "path": "tests/sync/provider.test.mjs",
+      "sha256": "f0ffe9639292786570f3dc2e084e0a547627befd37b6db6fca8f5aee31c80a4e",
+      "lines": 186,
+      "readRanges": [
+        [
+          1,
+          90
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Read extracted lifecycle helper; rest outside scope. Token-read test suffix evaluated using fakes by selected test."
+    },
+    {
+      "path": "tests/ai/workspace-browser.test.mjs",
+      "sha256": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37",
+      "lines": 685,
+      "readRanges": [
+        [
+          1,
+          85
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Read resource setup and first callback to assess cleanup strategy; other callbacks exercised by selected fake cleanup tests, not claimed fully read."
+    },
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "lines": 204,
+      "readRanges": [
+        [
+          1,
+          60
+        ]
+      ],
+      "status": "context-only",
+      "reason": "Read constructor and pure injected bridge/lock context for safe focused execution."
+    },
+    {
+      "path": "features/ai/package.json",
+      "sha256": "bf95b25a7c19b6edd12c10400d6253df1a93e38d1da878726973d6fda2253b72",
+      "lines": 5,
+      "readRanges": [
+        [
+          1,
+          5
+        ]
+      ],
+      "status": "context-only",
+      "reason": "ES module package metadata."
+    }
+  ],
+  "outsideFrozenScopeNotReviewed": [
+    "tests/ai/native-transport-lifecycle.test.mjs",
+    "tests/ai/codex-cancellation.test.mjs",
+    "tests/native_transport_summary_test.py",
+    "tests/passwords/dummy.csv"
+  ],
+  "coverageValidation": {
+    "checker": "script/check_efficiency_coverage.py check() with in-memory selected actual-source entries",
+    "completeForOwnedScope": true,
+    "meaning": "Checks the consistency of reviewer coverage claims and current source bytes; does not prove correctness or runtime performance."
+  }
+}

@@ -1,0 +1,293 @@
+{
+  "area": "page-content",
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular requested; no runtime setting changed"
+  },
+  "files": [
+    {
+      "path": "features/ai/extension/browser-tools.js",
+      "sha256": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "lines": 445,
+      "readRanges": [
+        [
+          1,
+          240
+        ],
+        [
+          241,
+          445
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-240 and 241-445. Reviewed grant/session maps, pending debugger promises, serialized input queue, attachment/detachment, bounded cleanup, new-document observer, navigation contexts, hold timers, abort listeners, screenshots and repeated function serialization. Safety rechecks are intentional. Pending API promises can outlive bounded cleanup; no permanent retention proven. Caller-driven tab grant cleanup lies outside ownership."
+    },
+    {
+      "path": "features/ai/extension/page-context.js",
+      "sha256": "7bfd98c6dcfba67134097a88455c158625693151d965393fc4baa1ef1ce086f7",
+      "lines": 235,
+      "readRanges": [
+        [
+          1,
+          235
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-235. Reviewed all operation branches, editor/frame strong references and clearEditor, mask/overlay cleanup, bounded stoppedSessions, WeakRef target map, full candidate materialization, text extraction limits, visibility checks, secret exclusion, target identity and input focus checks. Existing WeakRef fix excluded. Editor references last until rebind or overlay stop; removal during a live session is a possible follow-up retention probe, not a confirmed leak."
+    },
+    {
+      "path": "features/ai/extension/research-policy.js",
+      "sha256": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "lines": 28,
+      "readRanges": [
+        [
+          1,
+          28
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-28. Selection capped at six, text 24000 per source, identity comparison and tabs.get revalidation; sanitization copies are bounded and preserve privacy. No persistent cache or polling. Provider cancellation is outside this owned module."
+    },
+    {
+      "path": "features/ai/extension/research-sources.js",
+      "sha256": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4",
+      "lines": 97,
+      "readRanges": [
+        [
+          1,
+          97
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-97. Selected metadata capped at six through UI, no stored text; dialog rows persist until next opening/document teardown. Event closures retain tab metadata for listed tabs, bounded by open-tab inventory. Capture starts all native reads in gesture stack and rejects stale revision afterward; no cancel API here, native pending-read lifetime outside ownership. Full DOM rebuilding of at most six chips is harmless bounded state."
+    },
+    {
+      "path": "features/ai/extension/translation-background.js",
+      "sha256": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+      "lines": 97,
+      "readRanges": [
+        [
+          1,
+          97
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-97. Worker port origin/identity checks, immediate generation invalidation, translate request abort, one inFlight batch, serialized commands, storage writes, disconnect and stale-reply handling. Language discovery lacks external abort signal and only has provider timeout; not reproduced. Initialization can continue storage/injection after early UI disconnect but connection creation is guarded by closed. Do not remove MV3 keepalive without lifetime acceptance."
+    },
+    {
+      "path": "features/ai/extension/translation-content.js",
+      "sha256": "22c76bd6c734a24a5a2e2a2f5fcaa56b085322e4f62cd494f37256c16155a1d0",
+      "lines": 146,
+      "readRanges": [
+        [
+          1,
+          146
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-146. Reviewed full scan, batch/chunk copies, weak restore records, pruning, mutation observer, navigation polling, pending response listener/cancel, pagehide, stop and Restore. Existing WeakMap/WeakRef retention fix preserved. Initial limits bound attempted text and output but full-DOM scans have no visited-node budget. Connected originals are intentionally retained for Restore; not waste. New probes count unchanged production operations with fake DOM, no GC claim."
+    },
+    {
+      "path": "features/ai/extension/translation-provider.js",
+      "sha256": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+      "lines": 67,
+      "readRanges": [
+        [
+          1,
+          67
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-67. Provider/payload validation, 25s AbortSignal timeout and composed cancellation, bounded streamed response at 250000 bytes, JSON validation, reader over-limit cancel. Small bounded string accumulation is not the prior native decoder issue. Non-OK response bodies are not explicitly cancelled; whether fetch retains useful resources here needs a controlled fetcher test and real-provider evidence. No network used."
+    },
+    {
+      "path": "features/ai/extension/translation-settings.js",
+      "sha256": "52c2bc5f07850d7655980ddf7b24b9b0bf220987cd616ded83d573f725f614d5",
+      "lines": 55,
+      "readRanges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-55. UI construction, bounded credential preferences, async read/write, AbortController event disposal, cleared key input and section removal. No periodic work; no production config accessed. Async save may finish after disposal, but document lifetime and bounded task do not establish a leak."
+    },
+    {
+      "path": "features/ai/extension/translation.css",
+      "sha256": "d06c697dd99e6ec0521bdcb1fa5f04000f0d20db1c793c504f6fc46d3c48c44f",
+      "lines": 22,
+      "readRanges": [
+        [
+          1,
+          22
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-22. Static layout and focus rules, no continuous animation/timer or expensive filter. No candidate optimization."
+    },
+    {
+      "path": "features/ai/extension/translation.html",
+      "sha256": "081b8d10030b90ba203e4ccb8636868ce9e524833827e247ba6a0e717cbac59f",
+      "lines": 33,
+      "readRanges": [
+        [
+          1,
+          33
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-33. Static small form; imports shared workspace.css and module. Shared stylesheet import cost unmeasured and outside owned stylesheet scope. Keep disclosure/consent/Restore controls."
+    },
+    {
+      "path": "features/ai/extension/translation.js",
+      "sha256": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
+      "lines": 70,
+      "readRanges": [
+        [
+          1,
+          70
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read 1-70. 20s worker keepalive cleared on disconnect/pagehide, bounded language list <=200, option rebuild on user changes, controls/status events. Heartbeat has documented MV3 purpose; removing it risks worker death and Restore/dynamic controls. Language-load button remains enabled during pending discovery, permitting queued requests; no real-world sustained resource impact demonstrated."
+    }
+  ],
+  "findings": [
+    {
+      "id": "page-content-01",
+      "pathsAndLines": [
+        {
+          "path": "features/ai/extension/translation-content.js",
+          "lines": [
+            39,
+            59
+          ]
+        },
+        {
+          "path": "features/ai/extension/translation-content.js",
+          "lines": [
+            104,
+            114
+          ]
+        }
+      ],
+      "hypothesis": "Full translatedNodes pruning on every <=32-node scan batch makes initial translation perform quadratic weak-reference iteration as successful records accumulate.",
+      "whyReachable": "An explicit permitted translation of many short visible text nodes goes through scan, adds weak restore entries, then schedules the next batch. Every scan iterates the entire translatedNodes Set, even when all entries are still connected.",
+      "expectedScope": "Highest estimated impact among these local candidates, on translations of pages with thousands of text nodes. Unchanged production script in synthetic VM: 4096 nodes / 128 batches = 264192 dereferences; 8192 nodes / 256 batches = 1052672 dereferences. Counts include final empty scan and exclude later Restore. No elapsed-time, GC, byte or whole-browser CPU/RAM claim.",
+      "risk": "Weak restore data must survive for connected nodes and site-edited nodes must remain unchanged. Delaying pruning alters when disconnected records disappear; test detach/reattach and dynamic interruptions. Current work is bounded by translation safety limits and may be insignificant next to provider latency on small pages.",
+      "cheapReproduction": "node build/efficiency-20261103/page-content-probe.mjs; results in page-content-probe-results.json. Flat synthetic connected text nodes, async fixture port, fake always-live WeakRef counts deref calls; no layout/network/browser measurement.",
+      "smallestFix": "Evaluate moving full weak-record pruning to completion of a traversal instead of every provider batch, or amortize it with a bounded incremental sweep if active mutations prevent completion. Preserve WeakMap originals, WeakRefs and Restore semantics. Do not implement until removal/reattachment behavior is checked.",
+      "relevantExistingTests": [
+        "tests/ai/translation.test.mjs",
+        "tests/ai/translation-browser.test.mjs",
+        "script/verify_translation_memory.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "page-content-02",
+      "pathsAndLines": [
+        {
+          "path": "features/ai/extension/translation-content.js",
+          "lines": [
+            43,
+            45
+          ]
+        },
+        {
+          "path": "features/ai/extension/translation-content.js",
+          "lines": [
+            121,
+            124
+          ]
+        }
+      ],
+      "hypothesis": "Dynamic mutation rescans perform visibility/layout/style reads for every unchanged translated node because allowed(node) runs before testing the existing translated record.",
+      "whyReachable": "With dynamic translation explicitly enabled, class/style/child/text mutations anywhere under document.body reset walker to null. A settled page changing a body class triggers a full scan of already translated nodes.",
+      "expectedScope": "Potential ongoing CPU work on large dynamic pages only while the translation window remains connected and dynamic mode is active. Synthetic 8192-node page: one class mutation with no text changes yields 8192 getClientRects calls, 8192 getComputedStyle calls, 8192 pruning dereferences and zero provider batches. No actual forced-layout count or CPU duration measured. Debounce coalesces frequent mutations.",
+      "risk": "Attribute observation supports newly visible or newly permitted text; removing it would regress functionality. DOM traversal may still be necessary. Browser style reads can be cached; counting calls does not establish expensive reflow.",
+      "cheapReproduction": "Same unchanged production-script VM probe, unchangedClassMutation results. Observer callback fired with synthetic class mutation; no actual browser mutation delivery or layout engine.",
+      "smallestFix": "First evaluate record && node.data === record.translated before calling allowed(node), preserving allowed for all untranslated or site-edited nodes and retaining attribute observation. This removes repeated visibility reads for known unchanged translations without claiming to eliminate traversal or pruning.",
+      "relevantExistingTests": [
+        "tests/ai/translation-browser.test.mjs",
+        "script/verify_translation_memory.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "page-content-03",
+      "pathsAndLines": [
+        {
+          "path": "features/ai/extension/page-context.js",
+          "lines": [
+            169,
+            173
+          ]
+        }
+      ],
+      "hypothesis": "Snapshot eagerly spreads every matching control into an array and Set even though at most 180 controls are inspected successfully and returned.",
+      "whyReachable": "Explicit page snapshot on a page with many matching controls evaluates the spread and Set before entering the capped loop. querySelectorAll results are unique, with only the prioritized Docs editor needing duplicate handling.",
+      "expectedScope": "Transient traversal/container allocation per AI snapshot, especially pages with large control inventories and repeated control actions. Synthetic 10000-control iterable was fully consumed while only 180 visibility checks ran and 180 elements returned. Exact allocated bytes, selector cost, browser speed and RAM savings are unmeasured.",
+      "risk": "Maintain document order, priority of the Docs editor, duplicate suppression for that one editor, sensitive-field filtering and WeakRef identity. Original querySelectorAll already creates a full static NodeList; avoiding Set does not avoid that selector allocation.",
+      "cheapReproduction": "node build/efficiency-20261103/page-content-snapshot-probe.mjs; page-content-snapshot-results.json. Executes production function with export keyword removed in VM, instrumented synthetic NodeList iterable.",
+      "smallestFix": "Iterate the original NodeList directly and handle the single prioritized Docs editor explicitly, avoiding full spread and Set while preserving order and duplicate behavior. Keep the 180 successful-target limit and all exclusions. No production edit made.",
+      "relevantExistingTests": [
+        "tests/ai/browser-tools.test.mjs",
+        "tests/ai/docs-editor.test.mjs",
+        "tests/ai/browser-page.mjs",
+        "tests/ai/docs-editor-browser.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    }
+  ],
+  "excludedIdeas": [
+    "Existing page-context WeakRef and translation WeakMap/WeakRef fixes are verified prior work, not new findings. No repeat GC or retention claims.",
+    "Existing sidebar pruning and native decoder improvements belong to prior work and other owners. Lazy folder experiment was rejected for slower opening and must stay rejected.",
+    "Keep secret-field exclusion, same-origin Docs identity/focus checks, screenshot masks, consent, provider permissions, response limits, navigation revalidation and all features. Repeated checks are safety-relevant work.",
+    "Bounded 180-target map, 30 stopped session IDs, six research sources, <=24000 characters/source, <=200 languages, 250000-byte responses and original text needed for Restore are not unbounded leaks.",
+    "Navigation URL polling at 250ms is scoped to an open translation connection, cleared on disconnect/pagehide, and detects pushState changes not covered by popstate/hashchange. No evidence to justify removing it.",
+    "MV3 20-second translation heartbeat has a documented lifecycle purpose; no safe keepalive replacement proven.",
+    "No network/provider calls, configuration reads, Keychain calls, PC contact, browser UI, app builds/runs/installations, caches, pins, receipts or production source writes were performed."
+  ],
+  "actualCommandsAndResults": [
+    {
+      "command": "pwd; cat AGENTS.md; cat /Users/likht.ethan/.codex/skills/unslop/SKILL.md; cat build/efficiency-20261103/source-inventory.json",
+      "result": "Read project guide and writing guidance; large inventory output truncated. Subsequently parsed inventory with Python to obtain exact owned list. Unslop guidance applied to report prose."
+    },
+    {
+      "command": "Python filter inventory owner == page-content; cat docs/evidence/memory-20261102/README.md; cat docs/evidence/memory-20261102/decisions.tsv",
+      "result": "11 files, 1295 lines; prior evidence and decisions fully read."
+    },
+    {
+      "command": "nl -ba browser-tools.js | sed -n 1,240p; nl -ba page-context.js, followed by browser-tools.js 241,480p and all remaining owned files via nl -ba",
+      "result": "Read every owned source line without truncated file output. Paths/ranges/hashes in files."
+    },
+    {
+      "command": "rg --files -g AGENTS.md features; rg -n translation|research|snapshot selected tests | head -70; node --version",
+      "result": "No nested AGENTS.md found under features. Test-name/reference discovery only, not full test review. Node v22.14.0. Existing test suites not run."
+    },
+    {
+      "command": "node build/efficiency-20261103/page-content-probe.mjs",
+      "result": "Passed exact operation-count assertions at 4096/8192 nodes, one unchanged class mutation each, Restore and disconnect cleanup. Results in page-content-probe-results.json. No timing benchmark."
+    },
+    {
+      "command": "node build/efficiency-20261103/page-content-snapshot-probe.mjs",
+      "result": "Passed: 10000 candidate iterator visits, 180 visibility checks, 180 returned targets. Results in page-content-snapshot-results.json."
+    },
+    {
+      "command": "Python SHA-256 and line-count validation against inventory",
+      "result": "All 11 owned files still match inventory hashes and counts after probes; 1295 lines fully read."
+    }
+  ],
+  "remainingGaps": [
+    "Owned read coverage complete: 11/11 files, 1295/1295 lines. Cross-owner native extraction implementation, caller-level cancellation, grant tab-close cleanup, message histories and imported shared theme/CSS were not audited as owned production source.",
+    "No production fixes or independent verification performed. Impact ordering estimates reachable work, not measured CPU savings. Coordinator must approve implementation and run regression acceptance.",
+    "Probes use synthetic DOMs, fake timers/observer delivery/ports and Node v22.14.0. They prove exact production control-flow work counts only. Real browser layout, native RAM, steady CPU, real page mutation churn and regressions remain unmeasured.",
+    "Next targeted tests for 01/02: rerun operation counts after candidate change, verify dynamic insertion/reveal, exclusions, site edits, node detach/reattach, cancellation mid-batch, Restore after forced GC and provider error recovery with disposable browser fixtures when authorized. Do not run timing trials alongside other delegates.",
+    "Language discovery cancellation remains suspected: translation-background.js:74 calls providerRequest without a caller signal, so stop/disconnect cannot abort it before its own 25s timeout; repeated UI clicks may queue discovery. Next cheap test: execute installTranslation with an injected deferred providerRequest, send languages, cancel/disconnect, assert whether signal aborts and queued calls stop. No network needed; no finding marked confirmed for this.",
+    "Other follow-ups without confirmed efficiency impact: strong Docs editor binding until rebind/overlay stop, async initialization after UI close, rejected-fetch body cleanup, single huge text node normalization before 18000-character truncation. Need faithful narrowly scoped retention/work probes before proposing fixes.",
+    "Whole-browser sustained RAM/CPU and no-regression acceptance remain open. PC unreachable and intentionally untouched; native builds and installed app unchanged."
+  ]
+}

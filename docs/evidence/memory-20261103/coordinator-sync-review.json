@@ -1,0 +1,32 @@
+{
+  "area": "coordinator-sync-integration",
+  "model": "gpt-6.1-sol, xhigh reasoning, parent settings unchanged",
+  "files": [
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "lines": 204,
+      "readRanges": [
+        [
+          1,
+          204
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the complete original source and reviewed all subsequent changes; local regression and fault checks pass. Independent review pending."
+    },
+    {
+      "path": "features/ai/extension/workspace-sync-model.js",
+      "sha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+      "lines": 206,
+      "readRanges": [
+        [
+          1,
+          206
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the complete original source and reviewed all subsequent changes; local regression and fault checks pass. Independent review pending."
+    }
+  ]
+}

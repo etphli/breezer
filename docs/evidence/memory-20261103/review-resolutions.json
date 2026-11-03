@@ -1,0 +1,186 @@
+{
+  "checkedAtUtc": "2026-11-03T00:18:16.517604+00:00",
+  "status": "CONTINUING; NOT WHOLE-BROWSER ACCEPTANCE",
+  "resolutions": [
+    {
+      "id": "workspace-review-P2",
+      "change": "Loaded-site revision invalidates older shortcut filters; same-bucket resize still skips unchanged work.",
+      "sources": [
+        "features/ai/extension/newtab.js",
+        "tests/ai/newtab-race.test.mjs"
+      ],
+      "evidence": [
+        "review-fixes-after.tap",
+        "newtab-browser-review-fixed.log"
+      ],
+      "sourceHashes": {
+        "features/ai/extension/newtab.js": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+        "tests/ai/newtab-race.test.mjs": "f6abd176bd7d71fc57c2928798217d235abb39ac60cc541001b9afae6e47e8ea"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "streaming-review-P3",
+      "change": "Incremental key matching preserves overlapping malformed text-key prefixes.",
+      "sources": [
+        "features/ai/host/claude.mjs",
+        "tests/ai/claude-streaming.test.mjs"
+      ],
+      "evidence": [
+        "combined-offline-pinned-review-fixed.tap",
+        "streaming-review-adversarial-fixed.log"
+      ],
+      "differentialComparisons": 28057,
+      "remainingDifferences": 0,
+      "sourceHashes": {
+        "features/ai/host/claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+        "tests/ai/claude-streaming.test.mjs": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "organato-review-two-P2",
+      "change": "Preserve Node Response.text handling of two leading BOM characters and propagate read errors without awaiting stalled cancellation; always release the reader lock.",
+      "sources": [
+        "features/ai/host/organato.mjs",
+        "tests/ai/organato-response.test.mjs"
+      ],
+      "evidence": [
+        "combined-offline-pinned-review-fixed.tap"
+      ],
+      "sourceHashes": {
+        "features/ai/host/organato.mjs": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+        "tests/ai/organato-response.test.mjs": "f59ede4b55c150c32c32f1ffab1d1282f23079b72879628ceef3ad02ab5981e5"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "BT-01",
+      "change": "Closed worker output no longer prevents the supervisor from handling stop requests while the worker stays alive.",
+      "sources": [
+        "script/windows/unattended_build.py",
+        "tests/windows/unattended_build_test.py"
+      ],
+      "evidence": [
+        "windows-tests-final-review-fixes.log"
+      ],
+      "sourceHashes": {
+        "script/windows/unattended_build.py": "2ce3da083e395b174fb7dd02dd7e9c269a1aed40c927ff7d3490496660c73143",
+        "tests/windows/unattended_build_test.py": "28320571935d461cf8065dc2c4f08609da03d064affd94e475afe389b1c26143"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "BT-08",
+      "change": "Pin migration writes the exact byte snapshot validated during preflight.",
+      "sources": [
+        "script/windows/apply-memory-update.py",
+        "tests/windows/memory_update_test.py"
+      ],
+      "evidence": [
+        "windows-tests-final-review-fixes.log"
+      ],
+      "sourceHashes": {
+        "script/windows/apply-memory-update.py": "e93e3f4965bd2cd5304bad49bd4d72cef7992f04a1acf9a7ddab19ad081c91d9",
+        "tests/windows/memory_update_test.py": "80fa75ad2e4bfad707f55cfcb1aa115c86180dc6e70b1a67a1d4b5e1b106d1ac"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "EVEN-1",
+      "change": "Preserve the pinned renderer baseline in an authored fixture and require its hash; no fallback to the candidate.",
+      "sources": [
+        "tests/ai/fixtures/render-message-before.js",
+        "tests/ai/stream-render.test.mjs",
+        "script/verify_stream_render_efficiency.mjs"
+      ],
+      "evidence": [
+        "combined-offline-pinned-review-fixed.tap"
+      ],
+      "sourceHashes": {
+        "tests/ai/fixtures/render-message-before.js": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "tests/ai/stream-render.test.mjs": "a7be3fb27be6eecd2fa7f3fc56eeb119f9acbf36b6ce17dd36965cb63cd824b0",
+        "script/verify_stream_render_efficiency.mjs": "6cf4f6e0327d63d9ade66a20c53d502155f9a21662783aaca994d6300516c5b3"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "EVEN-2",
+      "change": "All nine workspace browser fixtures close their owned server after launch or browser-close failure.",
+      "sources": [
+        "tests/ai/workspace-browser.test.mjs",
+        "tests/ai/harness-cleanup.test.mjs"
+      ],
+      "evidence": [
+        "workspace-cleanup-before.tap",
+        "harness-cleanup-after-pinned.tap",
+        "workspace-route-cleanup-browser.tap"
+      ],
+      "sourceHashes": {
+        "tests/ai/workspace-browser.test.mjs": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37",
+        "tests/ai/harness-cleanup.test.mjs": "2e92590cea1577ca08e6fa0859b895e6f4af0d53e69cf0ebdcadaad8e64a736e"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "EVEN-3",
+      "change": "Provider fixtures register cleanup before startup/token reads, terminate and reap on failed readiness, and escalate shutdown when SIGINT is ignored.",
+      "sources": [
+        "tests/sync/provider.test.mjs",
+        "tests/sync/provider-lifecycle.test.mjs"
+      ],
+      "evidence": [
+        "provider-cleanup-before.tap",
+        "harness-cleanup-after-pinned.tap"
+      ],
+      "sourceHashes": {
+        "tests/sync/provider.test.mjs": "f0ffe9639292786570f3dc2e084e0a547627befd37b6db6fca8f5aee31c80a4e",
+        "tests/sync/provider-lifecycle.test.mjs": "e7b7f58fd8ea8d522cac47dcb1b3ac70127f6c53d646ef8a68675825b96c0886"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "BT-02",
+      "change": "Interrupted curl output stays in a temporary file; only successful completion atomically publishes a reusable cache entry.",
+      "sources": [
+        "script/check_ai_overlay.py",
+        "tests/ai/overlay_fetch_test.py"
+      ],
+      "evidence": [
+        "overlay-fetch-before.log",
+        "overlay-fetch-after.log"
+      ],
+      "limitation": "Existing cache entries retain their prior provenance; no new upstream hashes were established. Full overlay check cannot run because pinned offline fixture files are absent.",
+      "sourceHashes": {
+        "script/check_ai_overlay.py": "da31357b31935e60c5f6073ec667da6f7e01708f1a88b2156282932d7d9784da",
+        "tests/ai/overlay_fetch_test.py": "b7ef542dc453d55a7542ddb56f575ec337c36252b9eed6d5d6d4c4688efbc00a"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    },
+    {
+      "id": "BT-07",
+      "change": "Authored-source inventory includes C, C++, Objective-C and Objective-C++; current excluded suffixes contain only docs, icon, dummy data and configuration metadata.",
+      "sources": [
+        "script/inventory_efficiency_sources.py"
+      ],
+      "evidence": [
+        "source-inventory-next.json"
+      ],
+      "limitation": "C probe correctness and measurement validation assigned next.",
+      "sourceHashes": {
+        "script/inventory_efficiency_sources.py": "7417cf86df38299eedb23a3d8556c0505b6a011c09537016d38b6f85f52132e2"
+      },
+      "status": "implemented and locally checked; original review report describes its reviewed earlier source"
+    }
+  ],
+  "remaining": [
+    "BT-03/BT-06 measurement validation and diagnostic child cleanup",
+    "NH-03 cancellation during Codex setup",
+    "Odd-index verification source audit and new/changed-file coverage",
+    "BT-04 unbounded diagnostic log retention",
+    "BT-05 checkpoint journal hashing cost unmeasured; integrity retained",
+    "Native PC build, Linux-only orphan test, native feature acceptance and browser-wide RAM/CPU remain open"
+  ],
+  "noPcContact": true,
+  "installedAppUnchanged": true
+}

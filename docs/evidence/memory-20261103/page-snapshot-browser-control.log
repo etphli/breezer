@@ -1,0 +1,2 @@
+PASS: real Chromium isolated-world snapshots, secret exclusion and pixel redaction, flowing blue wave (transform/opacity only, input pass-through, reduced motion, clean removal) and visible AI pointer, trusted replacement/click, cross-origin tool and link navigation, stale-target/password refusal, Escape/Stop cancellation including a loading page.
+Evidence: /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/browser-evidence/browser-control.png

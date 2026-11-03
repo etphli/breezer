@@ -1075,6 +1075,7 @@ function showToast(message, actionLabel = '', action = null) {
 function hideToast() {
   clearTimeout(toastTimer);
   $('toast').hidden = true;
+  $('toast-action').onclick = null;
 }
 
 // ---------------------------------------------------------------- drag and drop (pointer events)
@@ -1243,9 +1244,36 @@ function onCreated(tab) {
   render();
 }
 
+// Only autoDiscardable is proven unused by the model, presentation and actions.
+// Check the full snapshot too: changeInfo need not describe every changed field.
+function onlyAutoDiscardableChanged(previous, change, tab) {
+  const keys = Object.keys(change);
+  if (!previous || previous === tab || keys.length !== 1 || keys[0] !== 'autoDiscardable') return false;
+  const sameScalar = (a, b) => (a === null || typeof a !== 'object')
+    && (b === null || typeof b !== 'object') && Object.is(a, b);
+  const sameFields = (a, b, same) => {
+    const fields = Object.keys(a);
+    return fields.length === Object.keys(b).length
+      && fields.every(key => Object.hasOwn(b, key) && same(a[key], b[key], key));
+  };
+  const before = Object.keys(previous).filter(key => key !== 'autoDiscardable');
+  const after = Object.keys(tab).filter(key => key !== 'autoDiscardable');
+  return before.length === after.length && before.every(key => {
+    if (!Object.hasOwn(tab, key)) return false;
+    const a = previous[key], b = tab[key];
+    if (sameScalar(a, b)) return true;
+    // Chromium supplies flat MutedInfo snapshots. Shared objects may already
+    // have mutated; unknown nested data also keeps the existing redraw path.
+    return key === 'mutedInfo' && a && b && a !== b
+      && typeof a === 'object' && typeof b === 'object'
+      && sameFields(a, b, sameScalar);
+  });
+}
+
 function onUpdated(tabId, change, tab) {
   if (!belongsHere(tab.windowId)) return;
   ++tabEventVersion;
+  const unchanged = onlyAutoDiscardableChanged(state.tabs.get(tabId), change, tab);
   state.tabs.set(tabId, tab);
   if (change.url && state.records[tabId]) setRecord(tabId, {});
   if (change.pinned === false && state.records[tabId]?.e) {
@@ -1254,7 +1282,7 @@ function onUpdated(tabId, change, tab) {
     setRecord(tabId, { s: found?.space?.id ?? state.activeSpaceId, e: '' });
   }
   if (change.pinned !== undefined) scheduleRefresh();
-  render();
+  if (!unchanged) render();
 }
 
 function onRemoved(tabId, info) {
@@ -1544,6 +1572,8 @@ async function boot() {
     await mountWelcome({ api, callBridge, loadAppearance, applyAppearance, darkQuery });
     return;
   }
+  $('settings').remove();
+  $('welcome').remove();
   await initSidebar(route);
 }
 

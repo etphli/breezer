@@ -1,0 +1,15 @@
+test_failed_download_is_not_reused_and_retry_publishes_complete_bytes (overlay_fetch_test.FixtureDownloadTest.test_failed_download_is_not_reused_and_retry_publishes_complete_bytes) ... FAIL
+
+======================================================================
+FAIL: test_failed_download_is_not_reused_and_retry_publishes_complete_bytes (overlay_fetch_test.FixtureDownloadTest.test_failed_download_is_not_reused_and_retry_publishes_complete_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/overlay_fetch_test.py", line 33, in test_failed_download_is_not_reused_and_retry_publishes_complete_bytes
+    self.assertFalse(destination.exists())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.006s
+
+FAILED (failures=1)

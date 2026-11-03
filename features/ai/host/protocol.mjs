@@ -1,4 +1,4 @@
-import { TextDecoder } from 'node:util';
+import { TextDecoder, types } from 'node:util';
 
 export const MAX_MESSAGE_BYTES = 16 * 1024 * 1024;
 export const MAX_OUTPUT_BYTES = 1024 * 1024;
@@ -6,28 +6,64 @@ export const MAX_OUTPUT_BYTES = 1024 * 1024;
 export function encodeMessage(value) {
   const json = Buffer.from(JSON.stringify(value));
   if (json.length > MAX_OUTPUT_BYTES) throw new Error('Native response is too large.');
-  const header = Buffer.alloc(4);
-  header.writeUInt32LE(json.length);
-  return Buffer.concat([header, json]);
+  const frame = Buffer.allocUnsafe(json.length + 4);
+  frame.writeUInt32LE(json.length);
+  json.copy(frame, 4);
+  return frame;
 }
 
 export class NativeDecoder {
-  #buffer = Buffer.alloc(0);
+  #header = Buffer.alloc(4);
+  #headerBytes = 0;
+  #body = null;
+  #bodyBytes = 0;
   push(chunk) {
-    this.#buffer = Buffer.concat([this.#buffer, chunk]);
+    if (!types.isUint8Array(chunk)) throw new TypeError('Native input must be a byte array.');
     const messages = [];
-    while (this.#buffer.length >= 4) {
-      const length = this.#buffer.readUInt32LE(0);
-      if (!length || length > MAX_MESSAGE_BYTES) throw new Error('Invalid native message length.');
-      if (this.#buffer.length < length + 4) break;
-      const text = new TextDecoder('utf-8', { fatal: true }).decode(this.#buffer.subarray(4, length + 4));
+    let offset = 0;
+    while (offset < chunk.length) {
+      if (this.#body === null) {
+        const size = Math.min(4 - this.#headerBytes, chunk.length - offset);
+        this.#header.set(chunk.subarray(offset, offset + size), this.#headerBytes);
+        this.#headerBytes += size;
+        offset += size;
+        if (this.#headerBytes !== 4) break;
+        const length = this.#header.readUInt32LE(0);
+        if (!length || length > MAX_MESSAGE_BYTES) throw new Error('Invalid native message length.');
+        if (offset === chunk.length) break;
+        if (chunk.length - offset >= length && !types.isSharedArrayBuffer(chunk.buffer)) {
+          const body = chunk.subarray(offset, offset + length);
+          try {
+            const text = new TextDecoder('utf-8', { fatal: true }).decode(body);
+            messages.push(JSON.parse(text));
+          } catch (error) {
+            this.#body = Buffer.alloc(length);
+            this.#body.set(body);
+            this.#bodyBytes = length;
+            throw error;
+          }
+          offset += length;
+          this.#headerBytes = 0;
+          continue;
+        }
+        this.#body = Buffer.alloc(length);
+        this.#bodyBytes = 0;
+      }
+      const size = Math.min(this.#body.length - this.#bodyBytes, chunk.length - offset);
+      this.#body.set(chunk.subarray(offset, offset + size), this.#bodyBytes);
+      this.#bodyBytes += size;
+      offset += size;
+      if (this.#bodyBytes !== this.#body.length) break;
+      const text = new TextDecoder('utf-8', { fatal: true }).decode(this.#body);
       messages.push(JSON.parse(text));
-      this.#buffer = this.#buffer.subarray(length + 4);
+      this.#body = null;
+      this.#bodyBytes = 0;
+      this.#headerBytes = 0;
     }
     return messages;
   }
   finish() {
-    if (this.#buffer.length) throw new Error('Truncated native message.');
+    if (this.#headerBytes || this.#body !== null) throw new Error('Truncated native message.');
   }
 }
 

@@ -1,0 +1,43 @@
+✔ abort during probe initialize closes owned setup before gate release (10.621791ms)
+✔ cancellation closes setup at probe:thread/start (7.241375ms)
+✔ cancellation closes setup at probe:turn/start (2.016792ms)
+✔ cancellation closes setup at probe:receive (1.084708ms)
+✔ cancellation closes setup at runtime:initialize (23.658083ms)
+✔ cancellation closes setup at runtime:thread/start (2.419375ms)
+✔ cancellation closes setup at runtime:turn/start (2.081292ms)
+✔ cancellation closes setup at runtime:done (2.54875ms)
+✔ late resolution after abort at isolate is drained (0.366875ms)
+✔ late rejection after abort at isolate is drained (0.353667ms)
+✔ late resolution after abort at probe:initialize is drained (0.836208ms)
+✔ late rejection after abort at probe:initialize is drained (0.648708ms)
+✔ late resolution after abort at probe:thread/start is drained (0.605667ms)
+✔ late rejection after abort at probe:thread/start is drained (0.614792ms)
+✔ late resolution after abort at probe:turn/start is drained (0.952542ms)
+✔ late rejection after abort at probe:turn/start is drained (0.525458ms)
+✔ late resolution after abort at runtime:initialize is drained (1.691125ms)
+✔ late rejection after abort at runtime:initialize is drained (1.598416ms)
+✔ late resolution after abort at runtime:thread/start is drained (1.45875ms)
+✔ late rejection after abort at runtime:thread/start is drained (1.498709ms)
+✔ late resolution after abort at runtime:turn/start is drained (1.542625ms)
+✔ late rejection after abort at runtime:turn/start is drained (2.427458ms)
+✔ already-aborted chat creates no isolation, probe, or runtime (0.180542ms)
+✔ isolation cleanup waits for the owned process exit (0.3565ms)
+✔ every standard chat runs the actual security preflight (2.088625ms)
+✔ every fast chat runs the actual security preflight (1.623ms)
+✔ noncancelled preflight rejects invalid tools before runtime launch (0.872958ms)
+✔ noncancelled preflight rejects invalid reasoning before runtime launch (0.9195ms)
+✔ noncancelled preflight rejects invalid speed before runtime launch (0.968917ms)
+✔ noncancelled preflight rejects invalid credentials before runtime launch (1.462958ms)
+✔ thirty cancelled replacements keep fake owned setup resources bounded (3.517666ms)
+✔ abort racing probe:spawn prevents initialize (0.36175ms)
+✔ abort racing runtime:spawn prevents initialize (2.886459ms)
+✔ cancelling one chat leaves a separately owned runtime running (2.046416ms)
+✔ Codex setup cancellation reaps its owned resistant child before isolation cleanup (1058.256209ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1165.097583

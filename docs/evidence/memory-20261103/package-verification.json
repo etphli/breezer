@@ -1,0 +1,27 @@
+{
+  "verifiedAt": "2026-11-03T06:34:49.887134+00:00",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/package/candidate/Breezer.app",
+  "dmg": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/package/dist/Breezer-1.2.0-memory-20261103-arm64.dmg",
+  "sha256": "c069d566efbbe9f962e6223fa4e4e24fc11199110508588a098f2e91d53865b0",
+  "verification": {
+    "diskImageChecksumAndReadOnlyMount": true,
+    "mountedAppExactlyMatchesSignedCandidate": true,
+    "bundleFilesAndSymlinksChecked": 374,
+    "compiledResources": 50,
+    "hostModules": 11,
+    "deepStrictSignature": true,
+    "nativeRuntimeSmokeChecks": 5,
+    "streamedPrefixComparisons": 705,
+    "packagedHostSmokeChecks": 4
+  },
+  "signing": "ad hoc, not notarized; no Developer ID identity available",
+  "sourceCommit": "1ddab549eedeaffbc0eb297ef50b0d85e8625434",
+  "includesUncommittedAcceptedChanges": true,
+  "installedAppUnchanged": true,
+  "wholeBrowserRamCpuSavingsVerified": false,
+  "limitations": [
+    "Headless disposable profile; no physical macOS input or spoken screen-reader acceptance",
+    "Mock Keychain; no real accounts, provider traffic or profile migration",
+    "No whole-browser RAM/CPU benefit inferred"
+  ]
+}

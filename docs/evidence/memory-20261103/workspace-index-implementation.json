@@ -1,0 +1,2076 @@
+{
+  "status": "implemented; awaiting independent parent acceptance and staging",
+  "model": "gpt-6.1-sol",
+  "changedFiles": [
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "baselineSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "candidateSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "lines": 664,
+      "changes": [
+        {
+          "before": "[node.id, { node, space: null }]",
+          "after": "[node.id, null]"
+        },
+        {
+          "before": "nodes.set(node.id, { node, space });",
+          "after": "nodes.set(node.id, space);"
+        },
+        {
+          "before": "nodes.set(child.id, { node: child, space });",
+          "after": "nodes.set(child.id, space);"
+        },
+        {
+          "before": "const found = record?.e ? nodes.get(record.e) : null;",
+          "after": "const found = record?.e ? nodes.get(record.e) : undefined;"
+        },
+        {
+          "before": "if (found && !bound.has(record.e)) {",
+          "after": "if (found !== undefined && !bound.has(record.e)) {"
+        },
+        {
+          "before": "if (found.space) counts[found.space.id] += 1;",
+          "after": "if (found) counts[found.id] += 1;"
+        }
+      ]
+    },
+    {
+      "path": "tests/ai/workspace-index-efficiency.test.mjs",
+      "sha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+      "newTests": 4
+    }
+  ],
+  "scope": {
+    "outsideAllowedRegionsByteIdentical": true,
+    "outsideRegionsSha256": "7a538ed2692e6ccc1e79ab0ca1bc28cec2c3d8833df9f50dbdbce4c55c5287d7",
+    "exactSixReplacementDriftCheck": true,
+    "transactionsAndPublicAPIsByteIdentical": true,
+    "otherSourceOrTestEdits": false,
+    "localPacketEdited": false,
+    "cacheAdded": false,
+    "installationOrBrowserOrNetworkActions": false
+  },
+  "allocation": {
+    "unit": "source-level wrapper construction, not physical bytes or guaranteed engine heap allocations",
+    "measurements": [
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 0,
+        "fn": "buildSidebarModel",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 0,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 1,
+        "fn": "buildSidebarModel",
+        "wrappers": 3,
+        "expected": 3,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 1,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 3,
+        "expected": 3,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 100,
+        "fn": "buildSidebarModel",
+        "wrappers": 212,
+        "expected": 212,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 100,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 212,
+        "expected": 212,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 3000,
+        "fn": "buildSidebarModel",
+        "wrappers": 6012,
+        "expected": 6012,
+        "outputEqual": true
+      },
+      {
+        "path": "build/efficiency-20261103/workspace-index/before.mjs",
+        "size": 3000,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 6012,
+        "expected": 6012,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 0,
+        "fn": "buildSidebarModel",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 0,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 1,
+        "fn": "buildSidebarModel",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 1,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 100,
+        "fn": "buildSidebarModel",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 100,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 3000,
+        "fn": "buildSidebarModel",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "size": 3000,
+        "fn": "reconcileWindowTabs",
+        "wrappers": 0,
+        "expected": 0,
+        "outputEqual": true
+      }
+    ],
+    "mechanism": "Index rebuilt on each call; favorites map to null, pins and children map to the original containing space. The Map, favorite pair arrays and all public model objects remain.",
+    "evidence": "build/efficiency-20261103/workspace-index/verify-counts.mjs"
+  },
+  "behavior": {
+    "beforeSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "afterSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "cases": [
+      {
+        "case": "valid-0-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-0-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-1-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-12-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-100-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-now-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s1",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-s1",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-missing",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "valid-3000-old-missing",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-undefined",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-undefined",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-undefined",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-undefined",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-null",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-null",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-null",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-null",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-false",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-false",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-false",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-false",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-fav0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-fav0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-fav0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-fav0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-deleted",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-deleted",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-deleted",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-deleted",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-folder0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-folder0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-folder0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-folder0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-e0",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-e0",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "binding-e0",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "binding-e0",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "duplicate-local-ids",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "duplicate-local-ids",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "duplicate-local-ids",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "duplicate-local-ids",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-exact",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-exact",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-exact",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-exact",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-path",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-path",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-path",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-path",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-same",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-same",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-same",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-same",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-quarantine",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-quarantine",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-quarantine",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-quarantine",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-hint",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-hint",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "restore-hint",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "restore-hint",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "malformed-45",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'spaces')"
+        }
+      },
+      {
+        "case": "malformed-45",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'spaces')"
+        }
+      },
+      {
+        "case": "malformed-45",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'spaces')"
+        }
+      },
+      {
+        "case": "malformed-45",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'spaces')"
+        }
+      },
+      {
+        "case": "malformed-46",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'find')"
+        }
+      },
+      {
+        "case": "malformed-46",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'find')"
+        }
+      },
+      {
+        "case": "malformed-46",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'find')"
+        }
+      },
+      {
+        "case": "malformed-46",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'find')"
+        }
+      },
+      {
+        "case": "malformed-47",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-47",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-47",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-47",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of undefined (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-48",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-48",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-48",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-48",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-49",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-49",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-49",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-49",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-50",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "node.children is not iterable"
+        }
+      },
+      {
+        "case": "malformed-50",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "node.children is not iterable"
+        }
+      },
+      {
+        "case": "malformed-50",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "node.children is not iterable"
+        }
+      },
+      {
+        "case": "malformed-50",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "node.children is not iterable"
+        }
+      },
+      {
+        "case": "malformed-51",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-51",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-51",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "malformed-51",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'id')"
+        }
+      },
+      {
+        "case": "null-record",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "null-record",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "null-record",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'k')"
+        }
+      },
+      {
+        "case": "null-record",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot read properties of null (reading 'k')"
+        }
+      },
+      {
+        "case": "frozen-store",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "frozen-store",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "frozen-store",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "frozen-store",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "reentry",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "reentry",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "reentry",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "reentry",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "actual-default-store",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "actual-default-store",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "actual-default-store",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "actual-default-store",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "missing-records",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "missing-records",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "missing-records",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "missing-records",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "duplicate-space-ids",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "duplicate-space-ids",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "duplicate-space-ids",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "duplicate-space-ids",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "throwing-id-getter",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": {
+          "name": "RangeError",
+          "message": "sentinel id error"
+        }
+      },
+      {
+        "case": "throwing-id-getter",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": {
+          "name": "RangeError",
+          "message": "sentinel id error"
+        }
+      },
+      {
+        "case": "throwing-id-getter",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "RangeError",
+          "message": "sentinel id error"
+        }
+      },
+      {
+        "case": "throwing-id-getter",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "RangeError",
+          "message": "sentinel id error"
+        }
+      },
+      {
+        "case": "changing-entry-getter",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "changing-entry-getter",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "changing-entry-getter",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "changing-entry-getter",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "frozen-members",
+        "fn": "buildSidebarModel",
+        "trace": false,
+        "error": null
+      },
+      {
+        "case": "frozen-members",
+        "fn": "buildSidebarModel",
+        "trace": true,
+        "error": null
+      },
+      {
+        "case": "frozen-members",
+        "fn": "reconcileWindowTabs",
+        "trace": false,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot assign to read only property '1' of object '#<Object>'"
+        }
+      },
+      {
+        "case": "frozen-members",
+        "fn": "reconcileWindowTabs",
+        "trace": true,
+        "error": {
+          "name": "TypeError",
+          "message": "Cannot assign to read only property '1' of object '#<Object>'"
+        }
+      }
+    ],
+    "comparisons": 244,
+    "repeatedMutationSteps": 8,
+    "normalizationAndPublicHelpers": true,
+    "evidence": "build/efficiency-20261103/workspace-index/differential.mjs",
+    "node24": "{ comparisons: 244, passed: true }",
+    "node22": "{ comparisons: 244, passed: true }",
+    "identityProof": "Reference signatures against the pre-operation input graph plus strict reference assertions in permanent tests; output values, key/array ordering, mutated inputs, errors and proxy getter/iteration traces compared. Snapshot harness skips accessors when inspecting results so throwing/changing getters are not invoked by inspection.",
+    "freshness": "Four repeated steps per export with favorite move, folder removal and space replacement; no persistent index.",
+    "recordOwnership": "assigned records strictly equal members.tabs records; restored/ambiguous/quarantined cases compared and existing workspace tests passed"
+  },
+  "negativeControl": {
+    "command": "WORKSPACE_INDEX_SOURCE=\"$PWD/build/efficiency-20261103/workspace-index/before.mjs\" build/efficiency-20261103/organato-review-node24 --test tests/ai/workspace-index-efficiency.test.mjs",
+    "expectedExit": 1,
+    "result": "exactly the efficiency assertion fails; three behavior tests pass",
+    "log": "build/efficiency-20261103/workspace-index/negative-control.txt"
+  },
+  "verification": {
+    "node24": {
+      "version": "v24.22.1",
+      "binary": "build/efficiency-20261103/organato-review-node24",
+      "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329",
+      "tests": 62,
+      "passed": 62,
+      "failed": 0,
+      "log": "build/efficiency-20261103/workspace-index/tests-node24.txt"
+    },
+    "node22": {
+      "version": "v22.14.0",
+      "binary": "/Users/likht.ethan/.local/bin/node",
+      "tests": 29,
+      "passed": 29,
+      "failed": 0,
+      "log": "build/efficiency-20261103/workspace-index/tests-node22.txt"
+    },
+    "sourceDerivedHarnesses": "Membership tests import the actual WorkspaceStore via verify_workspace_members_efficiency.mjs. Tab-update harness strips workspace.js imports and injects the actual store exports. Both suites passed. No unrelated pin failure observed; neither existing harness nor tests edited.",
+    "wholeCombinedSuite": "Not rerun; selected 62 offline tests cover the changed exports, membership transactions, UI-derived consumers and retained sync-size optimization. Browser/native tests are outside authorization."
+  },
+  "cpu": {
+    "gate": {
+      "declaredBeforeTiming": true,
+      "gate": "For each exported function and valid small/typical/large workload, compare median process CPU microseconds per operation from 11 warmed alternating before/after pairs. More than 3% regression for the same workload in both independent rounds requires rejection or bounded recheck. Preserve every sample including warmups and outliers. No allocation result overrides this gate.",
+      "rounds": 2,
+      "pairsPerRound": 11,
+      "warmupBatches": 5,
+      "targetBatchMilliseconds": 40,
+      "maximumIterationsPerBatch": 20000,
+      "timingIncludes": "full uninstrumented module exports; reconcile receives prebuilt current-session member sets, with per-operation record replacement included, fixture creation excluded"
+    },
+    "result": {
+      "pass": true,
+      "repeatableFailures": []
+    },
+    "raw": "build/efficiency-20261103/workspace-index/cpu.json",
+    "console": "build/efficiency-20261103/workspace-index/cpu.txt",
+    "summary": [
+      {
+        "round": 0,
+        "size": 8,
+        "fn": "buildSidebarModel",
+        "baselineMedianCpuUsPerOperation": 3.541564190850959,
+        "candidateMedianCpuUsPerOperation": 3.4338416133792427,
+        "regressionPercent": -3.0416666666666647
+      },
+      {
+        "round": 0,
+        "size": 8,
+        "fn": "reconcileWindowTabs",
+        "baselineMedianCpuUsPerOperation": 3.6884078610082596,
+        "candidateMedianCpuUsPerOperation": 3.6530902876673315,
+        "regressionPercent": -0.9575289575289414
+      },
+      {
+        "round": 0,
+        "size": 100,
+        "fn": "buildSidebarModel",
+        "baselineMedianCpuUsPerOperation": 31.387654320987654,
+        "candidateMedianCpuUsPerOperation": 31.159670781893006,
+        "regressionPercent": -0.7263478078455954
+      },
+      {
+        "round": 0,
+        "size": 100,
+        "fn": "reconcileWindowTabs",
+        "baselineMedianCpuUsPerOperation": 30.343957503320052,
+        "candidateMedianCpuUsPerOperation": 28.747011952191237,
+        "regressionPercent": -5.262812376909265
+      },
+      {
+        "round": 0,
+        "size": 3000,
+        "fn": "buildSidebarModel",
+        "baselineMedianCpuUsPerOperation": 280.8207547169811,
+        "candidateMedianCpuUsPerOperation": 279.14150943396226,
+        "regressionPercent": -0.5979776262303949
+      },
+      {
+        "round": 0,
+        "size": 3000,
+        "fn": "reconcileWindowTabs",
+        "baselineMedianCpuUsPerOperation": 300.45390070921985,
+        "candidateMedianCpuUsPerOperation": 303.1985815602837,
+        "regressionPercent": 0.9135114720045356
+      },
+      {
+        "round": 1,
+        "size": 8,
+        "fn": "buildSidebarModel",
+        "baselineMedianCpuUsPerOperation": 3.885276073619632,
+        "candidateMedianCpuUsPerOperation": 4.005828220858896,
+        "regressionPercent": 3.102794883941251
+      },
+      {
+        "round": 1,
+        "size": 8,
+        "fn": "reconcileWindowTabs",
+        "baselineMedianCpuUsPerOperation": 3.8429406037000975,
+        "candidateMedianCpuUsPerOperation": 3.775365141187926,
+        "regressionPercent": -1.7584310943319692
+      },
+      {
+        "round": 1,
+        "size": 100,
+        "fn": "buildSidebarModel",
+        "baselineMedianCpuUsPerOperation": 32.64076433121019,
+        "candidateMedianCpuUsPerOperation": 32.25732484076433,
+        "regressionPercent": -1.1747258322600818
+      },
+      {
+        "round": 1,
+        "size": 100,
+        "fn": "reconcileWindowTabs",
+        "baselineMedianCpuUsPerOperation": 30.423600605143722,
+        "candidateMedianCpuUsPerOperation": 30.63086232980333,
+        "regressionPercent": 0.6812531079065209
+      },
+      {
+        "round": 1,
+        "size": 3000,
+        "fn": "buildSidebarModel",
+        "baselineMedianCpuUsPerOperation": 409.3697478991597,
+        "candidateMedianCpuUsPerOperation": 426.327731092437,
+        "regressionPercent": 4.142461254233809
+      },
+      {
+        "round": 1,
+        "size": 3000,
+        "fn": "reconcileWindowTabs",
+        "baselineMedianCpuUsPerOperation": 295.0104166666667,
+        "candidateMedianCpuUsPerOperation": 296.875,
+        "regressionPercent": 0.6320398291020712
+      }
+    ],
+    "outlierPolicy": "All samples retained, no trimming or discarded runs; calibration and all warmups retained.",
+    "uncertainty": "Small sidebar round 1 +3.10% and large sidebar round 1 +4.14%, neither repeated in round 0. Small initial calibration batches ran below the target after warmup/JIT. Host load, JIT and GC vary; no CPU speedup claim. Gate passes only its predeclared repeatability rule.",
+    "scope": "Uninstrumented full-module exports, valid small/typical/large saved stores; current-session reconciliation. Previous-session correctness covered differentially, its CPU is not measured."
+  },
+  "commands": [
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/workspace-index/baseline-counts.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/workspace-index/verify-counts.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/workspace-index/differential.mjs",
+    "/Users/likht.ethan/.local/bin/node build/efficiency-20261103/workspace-index/differential.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/workspace-index/cpu.mjs",
+    "build/efficiency-20261103/organato-review-node24 --test tests/ai/workspace-store.test.mjs tests/ai/workspace-members-efficiency.test.mjs tests/ai/workspace-index-efficiency.test.mjs tests/ai/workspace-tab-update-efficiency.test.mjs tests/ai/workspace-ui-efficiency.test.mjs tests/ai/workspace-static.test.mjs tests/sync/workspace-model.test.mjs tests/sync/size-guard.test.mjs",
+    "/Users/likht.ethan/.local/bin/node --test tests/ai/workspace-store.test.mjs tests/ai/workspace-members-efficiency.test.mjs tests/ai/workspace-index-efficiency.test.mjs",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/workspace-index/report.mjs"
+  ],
+  "objectionsAndLimits": [
+    "Source counters establish removed wrapper constructions; V8 can eliminate allocations, so counters do not measure actual bytes.",
+    "Indexes remain transient and retain containing spaces during each operation. No retained-reference lifetime, peak heap, physical RAM, whole-browser memory or whole-browser speed gain is established.",
+    "Map interception permanently checks direct values but cannot detect unrelated discarded allocations; source-bound scratch construction counters and exact source diff supply that evidence.",
+    "Initial scratch harness path and frozen-proxy/throwing-getter inspection errors were corrected; final 244 comparisons pass on both runtimes. No production issue or repeatable CPU gate failure occurred."
+  ],
+  "pendingAcceptance": [
+    "independent parent source/test review and staging",
+    "disposable-browser behavior acceptance",
+    "packaged/native acceptance",
+    "physical-RAM and peak/retained-reference acceptance"
+  ],
+  "fully_read_files": [
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "lines": 664,
+      "readRanges": [
+        [
+          1,
+          664
+        ]
+      ],
+      "status": "fully-read",
+      "readState": "starting source, preserved as before.mjs",
+      "endSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-store.test.mjs",
+      "sha256": "e6a9d40dbbb020e6a8ffd7945186e6909e0c412293933b69f57c39898061f952",
+      "lines": 430,
+      "readRanges": [
+        [
+          1,
+          430
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_workspace_tab_updates.mjs",
+      "sha256": "22f3e1a2a9daff54923db48febaedce7dba234b8123057a4084db89534774cf4",
+      "lines": 100,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-static.test.mjs",
+      "sha256": "ac970a963287c0bc1b6df48b538872fb2b8fc64ff64e7b83eb04a5c300854ebf",
+      "lines": 58,
+      "readRanges": [
+        [
+          1,
+          58
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-tab-update-efficiency.test.mjs",
+      "sha256": "f5cb182c6c8433501068beea3a243cc6d210e4ce7f85c6582f815344155c0bcf",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-ui-efficiency.test.mjs",
+      "sha256": "fb4ade82aa3505a31f687d54721f219ef3215d4d38ede9c3c71d0da89f306654",
+      "lines": 111,
+      "readRanges": [
+        [
+          1,
+          111
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-index-efficiency.test.mjs",
+      "sha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "endSourceDriftChecks": {
+    "startingSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "expectedCandidateSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "actualCandidateSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "candidateCopy": "build/efficiency-20261103/workspace-index/candidate.mjs",
+    "diff": "build/efficiency-20261103/workspace-index/candidate.diff",
+    "onlySixOwnedReplacements": true,
+    "outsideRegionIdentity": true
+  }
+}

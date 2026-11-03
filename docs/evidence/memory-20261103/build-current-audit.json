@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "task": "build-current current-source read-only audit",
+  "generatedAt": "2026-11-03T00:52:22.917477+00:00",
+  "author": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "subagents": 0,
+    "speed": "No speed override requested or changed; service tier not independently observable"
+  },
+  "status": "Six assigned current files fully read; two findings; no source edits; no whole-browser acceptance",
+  "inventory": {
+    "path": "build/efficiency-20261103/source-inventory-after-cli.json",
+    "sha256": "82089938c92c799c362d577857afc583ce4951008257d1346ce77b2adeab0ea8",
+    "assignedFiles": 6,
+    "assignedLines": 1051
+  },
+  "files": [
+    {
+      "path": "script/check_ai_overlay.py",
+      "sha256": "da31357b31935e60c5f6073ec667da6f7e01708f1a88b2156282932d7d9784da",
+      "lines": 188,
+      "readRanges": [
+        [
+          1,
+          188
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "da31357b31935e60c5f6073ec667da6f7e01708f1a88b2156282932d7d9784da",
+      "drift": false,
+      "notes": "Full current read. Successful curl publishes through same-directory unique temporary rename; failed curl cleans temporary output. Existing cache presence remains trusted without content/version receipt."
+    },
+    {
+      "path": "script/inventory_efficiency_sources.py",
+      "sha256": "7417cf86df38299eedb23a3d8556c0505b6a011c09537016d38b6f85f52132e2",
+      "lines": 59,
+      "readRanges": [
+        [
+          1,
+          59
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "7417cf86df38299eedb23a3d8556c0505b6a011c09537016d38b6f85f52132e2",
+      "drift": false,
+      "notes": "Full current read. C/C++/Objective-C suffixes now included. Current excluded-name scan contains only Markdown, PNG, dummy CSV and dot metadata. Generic suffix list does not cover hypothetical future languages and roots deliberately exclude marketing/vendor/docs."
+    },
+    {
+      "path": "script/verify_stream_render_efficiency.mjs",
+      "sha256": "6cf4f6e0327d63d9ade66a20c53d502155f9a21662783aaca994d6300516c5b3",
+      "lines": 59,
+      "readRanges": [
+        [
+          1,
+          59
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "6cf4f6e0327d63d9ade66a20c53d502155f9a21662783aaca994d6300516c5b3",
+      "drift": false,
+      "notes": "Full current read. Baseline path is mandatory, with no candidate fallback. Standalone probe reports hashes but does not enforce expected baseline hash. Fake DOM operation counts do not measure browser RAM/CPU."
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "sha256": "e93e3f4965bd2cd5304bad49bd4d72cef7992f04a1acf9a7ddab19ad081c91d9",
+      "lines": 85,
+      "readRanges": [
+        [
+          1,
+          85
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "e93e3f4965bd2cd5304bad49bd4d72cef7992f04a1acf9a7ddab19ad081c91d9",
+      "drift": false,
+      "notes": "Full current read. Nine replacements are captured and hashed before writes. Source and pin accept checked before/after states. Resource writes precede plan publication; interruptions within known states resume. File fsync exists; directory fsync is absent and process-interruption recovery is narrower than power-loss durability."
+    },
+    {
+      "path": "script/windows/unattended_build.py",
+      "sha256": "2ce3da083e395b174fb7dd02dd7e9c269a1aed40c927ff7d3490496660c73143",
+      "lines": 338,
+      "readRanges": [
+        [
+          1,
+          338
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "2ce3da083e395b174fb7dd02dd7e9c269a1aed40c927ff7d3490496660c73143",
+      "drift": false,
+      "notes": "Full current read. Bounded queue/read/error retention. Stop observes EOF-loop flag. Freeze-before-discovery, own group exclusion, PID-bound worker state, Linux adoption, escalation and final group check inspected. Early cleanup-attempt flag disables retries after cleanup exceptions. Retry eligibility excludes logged FAILED and stale state; default max attempts four."
+    },
+    {
+      "path": "tests/windows/unattended_build_test.py",
+      "sha256": "28320571935d461cf8065dc2c4f08609da03d064affd94e475afe389b1c26143",
+      "lines": 322,
+      "readRanges": [
+        [
+          1,
+          322
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "28320571935d461cf8065dc2c4f08609da03d064affd94e475afe389b1c26143",
+      "drift": false,
+      "notes": "Full current read, including repaired bounded reread of lines 70-115 after initial output truncation. Real outcome assertions inspect output files, mtimes, exact action totals, journal members, exit states and process absence. Newly added EOF case has explicit finally cleanup. Other inherited fixture paths still kill only parents or register detached cleanup after readiness."
+    }
+  ],
+  "sourceDrift": [],
+  "findings": [
+    {
+      "id": "BUILD-CURRENT-1",
+      "severity": "medium",
+      "classification": "newly identified inherited cleanup defect; source is untracked relative to HEAD, so earlier build-tools report/source lineage is the comparison, not a claimed committed regression",
+      "title": "Failed cleanup is permanently marked complete enough to skip the final attempt",
+      "locations": [
+        {
+          "path": "script/windows/unattended_build.py",
+          "sha256": "2ce3da083e395b174fb7dd02dd7e9c269a1aed40c927ff7d3490496660c73143",
+          "lines": [
+            141,
+            154
+          ]
+        },
+        {
+          "path": "script/windows/unattended_build.py",
+          "sha256": "2ce3da083e395b174fb7dd02dd7e9c269a1aed40c927ff7d3490496660c73143",
+          "lines": [
+            309,
+            319
+          ]
+        }
+      ],
+      "impact": "A transient ps failure after SIGSTOP leaves the worker frozen and alive. run records failure then its finally calls stop_worker again, which immediately returns because breezer_cleanup_attempted is already true. Detached compiler groups can likewise remain alive if discovery or later termination fails. No retry of the build occurs, but cleanup is incomplete.",
+      "reachability": "Stop or worker-exit handling calls stop_worker. process_table uses check_output and parsing, either of which can raise; failure is not caught inside cleanup. The fake reproduces the first discovery failure after the actual SIGSTOP branch. No claim of a PC incident.",
+      "reproduction": "python3 -B build/efficiency-20261103/build-current-audit-probe.py; cleanupRetryFailure: two calls produce one process_table call and only SIGSTOP, child remains live. OS/process functions are fake and no workers were started.",
+      "smallestFix": "Mark successful cleanup only after reaping and final survivor verification. Keep failed cleanup retryable, preserve discovered ownership for retries, and ensure an exception after freezing cannot leave the worker stopped without a bounded terminate/resume fallback. Add a fake transient discovery failure followed by successful cleanup test. Do not weaken ownership checks."
+    },
+    {
+      "id": "BUILD-CURRENT-2",
+      "severity": "low",
+      "classification": "newly identified narrow evidence gap in standalone probe; inherited hash-reporting behavior. EVEN-1 mandatory fixture resolution remains valid for absence and the separate test hash assertion is not re-audited here",
+      "title": "Standalone renderer probe accepts a non-pinned baseline",
+      "locations": [
+        {
+          "path": "script/verify_stream_render_efficiency.mjs",
+          "sha256": "6cf4f6e0327d63d9ade66a20c53d502155f9a21662783aaca994d6300516c5b3",
+          "lines": [
+            53,
+            59
+          ]
+        }
+      ],
+      "impact": "Running this script alone can produce plausible before/after operation counts for an arbitrary baseline. It fails when baseline is missing, but presence and reported SHA alone do not enforce the mandatory pinned reference. This is evidence integrity, not a demonstrated false browser efficiency result.",
+      "reachability": "A changed or incorrectly copied baseline file on disk followed by standalone CLI execution, without separately running the integrity test or checking the reported hash.",
+      "reproduction": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/build-current-audit-renderer-probe.mjs; exact probe/fixture code with injected fake fs accepts baseline f565a5e8ef1e1782f7da76b6f11d6979b81cf7cd2a6d62ed7dcc7686b86fe919 instead of recorded pin 9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830. No real renderer/baseline altered.",
+      "smallestFix": "Check the expected baseline SHA before workload execution in the shared probe so standalone consumers and tests use the same mandatory pin. Preserve reported hashes and differential correctness tests."
+    }
+  ],
+  "resolutionChecks": [
+    {
+      "id": "BT-02",
+      "result": "Confirmed fixed for interrupted curl in offline failure/retry test. Existing pristine cache provenance remains accepted/unverified. No network, version/content receipt or full overlay fixture checked."
+    },
+    {
+      "id": "BT-07",
+      "result": "Confirmed current suffix set includes .c/.cc/.cpp/.m/.mm/.h. Fresh git filename scan found no omitted executable-language suffix among current features/script/tests files. Inventory not rewritten. This does not cover excluded repository roots."
+    },
+    {
+      "id": "BT-08",
+      "result": "Confirmed validated byte snapshots survive packet mutation after preflight. Fault after three resource writes leaves old pins; rerun converges all nine resources/pins. File fsync preserved; power-loss directory durability not established."
+    },
+    {
+      "id": "BT-01",
+      "result": "Current EOF loop polls stopping before final wait. Existing new test explicitly checks return 130, stopped state, no retry and worker absence with finally cleanup. Real process execution not repeated; failure of cleanup itself is separately BUILD-CURRENT-1."
+    },
+    {
+      "id": "EVEN-1",
+      "result": "Mandatory authored baseline read replaces absent-baseline fallback in assigned probe. Expected fixture hash recorded in review-resolutions; standalone probe enforcement gap is BUILD-CURRENT-2. Current stream-render test outside assigned six was not fully reviewed here."
+    },
+    {
+      "id": "BT-05",
+      "result": "Whole Ninja journal hashes and os.sync retained. Hashes stream rather than load whole journals. Repeated hashing is inherited I/O with unmeasured cost, not a proved RAM/CPU regression. No integrity removal proposed."
+    }
+  ],
+  "passedChecks": [
+    "All six current SHA256 and line counts match source-inventory-after-cli.json.",
+    "Python AST/fake curl failure publishes no partial destination, removes temporary output, succeeds on retry and reuses successful file.",
+    "Disposable nine-resource migration: interruption after three writes preserves old plan, resume converges, later packet mutation installs validated snapshots. Host os.sync replaced with no-op; owned file fsync exercised.",
+    "Small fake progress checkpoint case: default 10000, no receipt at 9999, receipt at 10000, duplicate does not count, next build-pass reset accumulates 10001. No 10001-edge build run.",
+    "Python AST syntax load of owned Python sources and Node24 execution of exact renderer probe logic with fake fs.",
+    "Inventory suffix exclusion checked using git filenames only; no auth paths opened.",
+    "Report files array validated through check_efficiency_coverage.check against only assigned inventory entries, with final live hash verification."
+  ],
+  "commandsAndResults": [
+    {
+      "command": "Read AGENTS.md first; read required unslop skill; full current source reads and bounded truncation repair",
+      "result": "1051 current lines fully read; inventory/earlier audit never substituted for current-source reading."
+    },
+    {
+      "command": "Read build-tools-audit.json, verification-even-audit.json and review-resolutions.json",
+      "result": "Earlier findings, resolution hashes and known limits compared; oversized historical output repaired by compact field reads. Earlier passes are historical evidence only."
+    },
+    {
+      "command": "python3 -B build/efficiency-20261103/build-current-audit-probe.py",
+      "result": "Exit 0, fetch/migration/checkpoint assertions passed and cleanup failure reproduced; fake processes/signals only."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/build-current-audit-renderer-probe.mjs",
+      "result": "Final exit 0, arbitrary baseline acceptance reproduced. Initial artifact-only attempts failed on VM module syntax and export rewriting, then corrected; production sources unchanged."
+    }
+  ],
+  "knownLimits": [
+    "Supervisor max-retries CLI bounds 0..10, default three retries; loop has max_retries+1 attempts. Logged FAILED blocks retry even with zero exit; stale state PID cannot authorize resource retry. SIGKILL is eligible without owned resource reason. Inspected, not run with real processes.",
+    "Checkpoint totals explicitly include failed actions and aggregate observations across passes/restarts. A progress jump records the observed count rather than synthesizing every skipped interval. Not an independent object snapshot or rollback copy. os.sync, file and directory fsync in supervisor inspected; no power-loss test.",
+    "Inherited fixture cleanup gaps remain in tests/windows/unattended_build_test.py:150,234,292,307 parent kill callbacks do not reap/own descendants; readiness failure before 238/244 skips detached-driver cleanup. The 10000-edge fixture cleanup at 91-95 depends on supervisor shutdown and has no kill escalation. Static known limit, no orphaning reproduction run.",
+    "Migration main takes the shared runner lock and scans Ninja command lines; direct apply assumes stopped ownership. Reviewed stopped-worker contract, not deployment lock integration. Source checks, checksums, backups and pin ordering retained. No compiled cache touched.",
+    "Bounded 128-line queue uses readline(65536), errors deque maxlen 30 with per-line truncation. Backpressure during checkpoint hashing is possible; no memory/time measurement made.",
+    "Detached child freeze/discovery ownership and Linux subreaper logic inspected. Driver state validates matching worker PID and detached PGID, not process-start epoch; process churn/escaped grandchildren are not exhaustively proven safe by these fixtures."
+  ],
+  "remainingGaps": [
+    "No actual workers/Ninja, 10001-edge run, Linux subreaper/orphan adoption, native build, native feature acceptance, EOF process lifecycle or real signal escalation executed in this audit. Offline fake checks isolate logic and do not prove operating-system behavior.",
+    "Pinned offline Chromium fixture, GRIT compilation and cache provenance not verified; external network and downloads prohibited.",
+    "No browser-wide RAM/CPU claim; deterministic parser/DOM counters cannot establish browser RSS, layout, energy or sustained CPU.",
+    "Only six owned files receive current full-read coverage. Referenced feature modules and other tests remain outside this assignment.",
+    "No PC/SSH/probe/scheduling, real provider/account discovery, auth/profile/config/Keychain access, browser/app build/run/install/update, cache deletion, external network, dependencies, commit/push or publication. No docs/evidence, packet or inventories modified."
+  ],
+  "artifacts": {
+    "build-current-audit-probe.py": "8c1c480f87acf524ecf51d400584990e3db1a989c09e8ebe0d78d707dc8b2196",
+    "build-current-audit-probe-results.json": "eea47e400e161afb97bd857ea2463c86f577f5a8def8a186ad7a1b6710ed34e3",
+    "build-current-audit-renderer-probe.mjs": "569d9ae33e09cba409739a66056424a4e8a25c22348e0671ae205f9a797a2cd6",
+    "build-current-audit-renderer-results.json": "c5ffb3526ee19cb14e5d35d55ae04026f5c3c810a1080acdb2c603f00fc55942"
+  },
+  "coverageValidation": {
+    "complete": true,
+    "scope": "six assigned files only; not repository-wide"
+  }
+}

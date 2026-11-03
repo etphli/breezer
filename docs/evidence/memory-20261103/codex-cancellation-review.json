@@ -1,0 +1,464 @@
+{
+  "status": "REVIEW COMPLETE: no actionable introduced correctness findings",
+  "reviewer": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "speed": "regular",
+    "delegation": false
+  },
+  "scope": "Independent read-only review of exact requested cancellation implementation, new tests, HEAD baseline and parent host-test integration. Only this report and uniquely named offline reproduction artifacts written.",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/host/codex.mjs",
+      "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "lines": 312,
+      "readRanges": [
+        [
+          1,
+          312
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/host/cli.mjs",
+      "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+      "lines": 101,
+      "readRanges": [
+        [
+          1,
+          101
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/host/controller.mjs",
+      "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "lines": 94,
+      "readRanges": [
+        [
+          1,
+          94
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "sha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+      "lines": 161,
+      "readRanges": [
+        [
+          1,
+          161
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/codex-cancellation.test.mjs",
+      "sha256": "d5a2c188f54083bed4bc2aa33b4eb6864db80b1e87703a52d0bb190124b59e94",
+      "lines": 171,
+      "readRanges": [
+        [
+          1,
+          171
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/codex-process-cancellation.test.mjs",
+      "sha256": "b5ed3c9326b6a9c1cc3c89da7ac4817b806bede91da83810067ad550904c1606",
+      "lines": 50,
+      "readRanges": [
+        [
+          1,
+          50
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/host.test.mjs",
+      "sha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+      "lines": 404,
+      "readRanges": [
+        [
+          1,
+          404
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/codex-cancellation-integration.json",
+      "sha256": "6f0b4409c01ba5fa02636fb6d62b0ed9e839e8b81a05def7f507481b9836a4fd",
+      "lines": 67,
+      "readRanges": [
+        [
+          1,
+          67
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/codex-cancellation-implementation.json",
+      "sha256": "e5ff90169a0fede1501538c30bfdd1eb46d9cfa022d515cfee0abb8e05840167",
+      "lines": 145,
+      "readRanges": [
+        [
+          1,
+          145
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/check_efficiency_coverage.py",
+      "sha256": "16edbf6d64f53db55360cd8d2a590980ecd73fb02d505225b911fab3bd1128be",
+      "lines": 55,
+      "readRanges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "baseline": {
+    "ref": "HEAD",
+    "path": "features/ai/host/codex.mjs",
+    "sha256": "ff533f3ba80ed62d3736a30afd7898fc83bb94cc4303fc0a3545086eefde98ba",
+    "lines": 242,
+    "status": "fully-read",
+    "comparison": "Full baseline read and complete working diff inspected. Discovery/isolate/tool verification unchanged. Parent host-test diff adds native framing cases and hermeticizes Fast isolation using dummy CODEX_HOME with restoration.",
+    "readRanges": [
+      [
+        1,
+        242
+      ]
+    ]
+  },
+  "findings": [],
+  "analysis": [
+    {
+      "topic": "Ownership and close-once",
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            66,
+            90
+          ]
+        },
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            164,
+            172
+          ]
+        },
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            244,
+            301
+          ]
+        }
+      ],
+      "conclusion": "Each chat has a fresh scope. RPC ownership registers synchronously after creation and before initialize. Duplicate own calls are Set-idempotent; close promises are memoized before close executes in a microtask. Only owned RPCs close, including abort synchronous with process factory. Listener removal precedes final close. Same-provider simultaneous chat fake confirms isolation of ownership."
+    },
+    {
+      "topic": "Await boundaries and late settlement",
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            218,
+            234
+          ]
+        },
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            247,
+            301
+          ]
+        }
+      ],
+      "conclusion": "Abort is checked around isolation/preflight/start/thread/turn/completion boundaries. own also checks on return from start. Each setup promise remains awaited, so late fulfillment/rejection is consumed; no detached setup continues after isolation deletion. Real JsonLineProcess close rejects pending requests then awaits child close. Resistant owned child test passes."
+    },
+    {
+      "topic": "Loopback bind and close races",
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            177,
+            235
+          ]
+        }
+      ],
+      "conclusion": "Bind is inside try/finally. Memoized closeServer awaits pending listen resolution/rejection before closing connections/server. Abort rejects received even if RPC has not started. Fake delayed bind success, bind failure and synchronous listen throw all clean once without RPC launch or dangling signal listener. These test JS ordering, not every OS behavior."
+    },
+    {
+      "topic": "Tools and late replies",
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            254,
+            282
+          ]
+        },
+        {
+          "path": "features/ai/host/controller.mjs",
+          "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+          "lines": [
+            56,
+            91
+          ]
+        }
+      ],
+      "conclusion": "Queued tool invocation checks abort in its first microtask; both fulfillment and rejection suppress reply after abort/closed. Host rejects browser-tool promises on cancellation and denies stale calls. Provider does not await arbitrary external tool promises before removing isolation, but those callbacks use no isolation resource. Offline queued and late-result/rejection checks pass without unhandled rejection."
+    },
+    {
+      "topic": "Security and parent integration",
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            182,
+            198
+          ]
+        },
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            237,
+            253
+          ]
+        },
+        {
+          "path": "tests/ai/host.test.mjs",
+          "sha256": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+          "lines": [
+            167,
+            190
+          ]
+        }
+      ],
+      "conclusion": "Every ordinary chat still executes actual preflight with exact allowed tools, reported reasoning, explicit speed and credential-absence checks. Runtime begins only after probe closes. Invalid tool/reasoning/speed/Authorization fixtures reject before runtime. Fast isolation fixture overrides CODEX_HOME before isolate, checks only the owned dummy symlink path, reads generated config, cleans and restores environment. No real auth target opened by this review."
+    },
+    {
+      "topic": "Set/Map lifetime and bounded retention",
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            67,
+            89
+          ]
+        },
+        {
+          "path": "features/ai/host/cli.mjs",
+          "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+          "lines": [
+            37,
+            69
+          ]
+        }
+      ],
+      "conclusion": "Ordinary chat retains at most probe and runtime RPC keys, with one memoized promise each, until chat closure. No per-message or cross-chat registry growth introduced. The closed probe remains strongly reachable for the running chat; its transport can retain child/stream objects and any partial JSON buffer. This is avoidable bounded retention, but significant normal RAM impact is not established. Scope/signal/message listeners are detached, so no demonstrated post-chat root retains these collections. Do not claim a measured memory improvement or strict global concurrency limit."
+    }
+  ],
+  "remainingObjections": [
+    {
+      "priority": "P2",
+      "origin": "inherited",
+      "blocking": false,
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            151,
+            162
+          ]
+        }
+      ],
+      "objection": "isolate can reject after partial allocation without returning a cleanup handle. Pending isolation is intentionally drained; partial allocation failure remains inherited and untested here.",
+      "smallestFollowup": "If addressed separately, wrap isolate allocations in try/catch and remove its owned temp directory on failure. No expansion required for cancellation ownership fix."
+    },
+    {
+      "priority": "P2",
+      "origin": "inherited controller policy; new scope deliberately drains owned work",
+      "blocking": false,
+      "locations": [
+        {
+          "path": "features/ai/host/controller.mjs",
+          "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+          "lines": [
+            85,
+            91
+          ]
+        },
+        {
+          "path": "features/ai/host/cli.mjs",
+          "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+          "lines": [
+            90,
+            99
+          ]
+        }
+      ],
+      "objection": "Controller allows replacement before old cleanup finishes. Slow exits, pending filesystem operations, or an injected close/request that never settles can overlap replacements. Immediate-close fake peak of one does not prove a strict real-process cap.",
+      "smallestFollowup": "Keep claim limited to ownership/cleanup correctness. A strict cap needs an explicit admission policy or serialized retirement and separate real-process verification."
+    },
+    {
+      "priority": "P3",
+      "origin": "inherited cleanup-error precedence, explicitly preserved in new disposal",
+      "blocking": false,
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            84,
+            89
+          ]
+        },
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            295,
+            301
+          ]
+        }
+      ],
+      "objection": "Cancellation normally rejects Cancelled.; when close throws/rejects, finally instead rejects close failed and intentionally skips isolation cleanup. Offline fault injection confirms one close attempt and retained isolation. Thus consistent cancellation rejection has a cleanup-failure exception.",
+      "smallestFollowup": "No safety regression found. If a uniform cancellation contract is required, preserve cleanup failure as cause/diagnostic while returning cancellation, without deleting unconfirmed isolation."
+    },
+    {
+      "priority": "P3",
+      "origin": "introduced bounded lifetime extension",
+      "blocking": false,
+      "locations": [
+        {
+          "path": "features/ai/host/codex.mjs",
+          "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+          "lines": [
+            67,
+            89
+          ]
+        }
+      ],
+      "objection": "Successful probe RPC remains in owned/closing for chat lifetime. Normal resource significance is unmeasured; no unbounded growth or actionable RAM regression demonstrated.",
+      "smallestFollowup": "Only if measurement justifies it, release successfully closed probe ownership after confirmed exit while preserving close-once behavior for races. Avoid discarding failed-close evidence."
+    },
+    {
+      "priority": "unmeasured",
+      "origin": "verification boundary",
+      "blocking": false,
+      "objection": "Real provider behavior, paid inference, browser performance/RAM/CPU and all OS bind failure modes remain unmeasured. No browser benchmark or app launch performed."
+    }
+  ],
+  "checks": [
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--test",
+        "tests/ai/codex-cancellation.test.mjs",
+        "tests/ai/codex-process-cancellation.test.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 35,
+      "failed": 0,
+      "log": "build/efficiency-20261103/codex-cancellation-review-focused-20261103.tap"
+    },
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--test",
+        "build/efficiency-20261103/codex-cancellation-review-faults-20261103.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 9,
+      "failed": 0,
+      "log": "build/efficiency-20261103/codex-cancellation-review-faults-20261103.tap"
+    },
+    {
+      "argv": [
+        "build/efficiency-20261103/organato-review-node24",
+        "--test",
+        "tests/ai/host.test.mjs"
+      ],
+      "exitCode": 0,
+      "passed": 31,
+      "failed": 0,
+      "log": "build/efficiency-20261103/codex-cancellation-review-host-20261103.tap"
+    }
+  ],
+  "verificationTotals": {
+    "passed": 75,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "runtime": "v24.22.1",
+    "parent220CheckClaim": "Read as supplied evidence, not independently repeated or treated as review."
+  },
+  "boundaries": {
+    "otherMachinesContacted": false,
+    "network": "Owned loopback only, plus fake bind/server fault injection.",
+    "actualProviderExecuted": false,
+    "realAuthTargetRead": false,
+    "appBuildRunInstall": false,
+    "productionTestsScriptsSharedDocsChanged": false,
+    "commitsPushesPublication": false
+  },
+  "artifacts": [
+    {
+      "path": "build/efficiency-20261103/codex-cancellation-review-faults-20261103.mjs",
+      "sha256": "56b8a9ab0b734cff603e8c7ad7488ba4883d4f65ceae9ff6742e0ce0c60b60fe"
+    },
+    {
+      "path": "build/efficiency-20261103/codex-cancellation-review-faults-20261103.tap",
+      "sha256": "111222f34f8ecacccc3629103bd8633b1b8b8a41be83b5b3a6c5b3302ed7477c"
+    },
+    {
+      "path": "build/efficiency-20261103/codex-cancellation-review-focused-20261103.tap",
+      "sha256": "4d082645d7a7ea90bdeb5617cea8f2d6526c98b6786b1b33e6791d8c0a9ae4ca"
+    },
+    {
+      "path": "build/efficiency-20261103/codex-cancellation-review-host-20261103.tap",
+      "sha256": "b93e7fa9f2b17439056cf75f263a581a7930ae8ddd715154f29c52b6a2e7cdaf"
+    }
+  ]
+}

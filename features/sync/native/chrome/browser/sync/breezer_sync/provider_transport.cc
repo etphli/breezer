@@ -73,11 +73,12 @@ class ProviderTransport final : public syncer::SyncVaultTransport {
         return std::nullopt;
       return base::unexpected(MapError(response->error().error));
     }
-    const auto& success = *response->value().success;
+    auto& success = *response->value().success;
     if (!success.data || !success.revision || success.revision->empty() ||
         success.data->size() > maximum)
       return base::unexpected(Error::kInvalidData);
-    return syncer::OpaqueSyncVaultObject{*success.data, *success.revision};
+    return syncer::OpaqueSyncVaultObject{std::move(*success.data),
+                                       std::move(*success.revision)};
   }
 
   WriteResult WriteObject(const std::string& object,

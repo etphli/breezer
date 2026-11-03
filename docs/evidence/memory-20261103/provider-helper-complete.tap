@@ -1,0 +1,52 @@
+TAP version 13
+# Subtest: provider readiness waits for the complete port line, padded=false
+ok 1 - provider readiness waits for the complete port line, padded=false
+  ---
+  duration_ms: 5.710875
+  type: 'test'
+  ...
+# Subtest: provider readiness waits for the complete port line, padded=true
+ok 2 - provider readiness waits for the complete port line, padded=true
+  ---
+  duration_ms: 2.917458
+  type: 'test'
+  ...
+# Subtest: provider client disposal rejects pending requests and clears their timers
+ok 3 - provider client disposal rejects pending requests and clears their timers
+  ---
+  duration_ms: 1.749959
+  type: 'test'
+  ...
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=false
+ok 4 - provider fixture reaps a child that ignores SIGINT, readiness=false
+  ---
+  duration_ms: 1238.257917
+  type: 'test'
+  ...
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=true
+ok 5 - provider fixture reaps a child that ignores SIGINT, readiness=true
+  ---
+  duration_ms: 298.126916
+  type: 'test'
+  ...
+# Subtest: provider fixture reports spawn failure and observes child close
+ok 6 - provider fixture reports spawn failure and observes child close
+  ---
+  duration_ms: 3.741667
+  type: 'test'
+  ...
+# Subtest: provider fixture registers cleanup before reading its token
+ok 7 - provider fixture registers cleanup before reading its token
+  ---
+  duration_ms: 2.115917
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1650.793375

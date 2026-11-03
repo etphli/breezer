@@ -1,0 +1,51 @@
+TAP version 13
+# Subtest: same-bucket new-tab resizes skip shortcut storage, filtering and painting
+ok 1 - same-bucket new-tab resizes skip shortcut storage, filtering and painting
+  ---
+  duration_ms: 18.411667
+  ...
+# Subtest: shortcut changes and explicit Reset still refresh at the same width
+ok 2 - shortcut changes and explicit Reset still refresh at the same width
+  ---
+  duration_ms: 1.755792
+  ...
+# Subtest: resize during initial shortcut filtering cannot leave the wrong number of sites
+not ok 3 - resize during initial shortcut filtering cannot leave the wrong number of sites
+  ---
+  duration_ms: 1.817958
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/workspace-ui-efficiency.test.mjs:66:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    8 !== 5
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 5
+  actual: 8
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/workspace-ui-efficiency.test.mjs:72:10)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: failed resize refreshes can retry and pagehide releases the resize listener
+ok 4 - failed resize refreshes can retry and pagehide releases the resize listener
+  ---
+  duration_ms: 1.529417
+  ...
+# Subtest: expired Undo releases its action and clicking active Undo still invokes it once
+ok 5 - expired Undo releases its action and clicking active Undo still invokes it once
+  ---
+  duration_ms: 1.114958
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 85.662084

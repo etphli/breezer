@@ -1,0 +1,124 @@
+TAP version 13
+# Subtest: every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+ok 1 - every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+  ---
+  duration_ms: 43.957458
+  type: 'test'
+  ...
+# Subtest: deterministic malformed block combinations match at every chunk
+ok 2 - deterministic malformed block combinations match at every chunk
+  ---
+  duration_ms: 76.75975
+  type: 'test'
+  ...
+# Subtest: the long formatted response matches at each streaming chunk boundary
+ok 3 - the long formatted response matches at each streaming chunk boundary
+  ---
+  duration_ms: 440.3435
+  type: 'test'
+  ...
+# Subtest: committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+ok 4 - committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+  ---
+  duration_ms: 0.807875
+  type: 'test'
+  ...
+# Subtest: formatted work decreases and long single-block work remains explicitly unchanged
+ok 5 - formatted work decreases and long single-block work remains explicitly unchanged
+  ---
+  duration_ms: 212.393875
+  type: 'test'
+  ...
+# Subtest: panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+ok 6 - panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+  ---
+  duration_ms: 1.831167
+  type: 'test'
+  ...
+# Subtest: complete, stop, error and New Chat dispose streams and retain final full output
+ok 7 - complete, stop, error and New Chat dispose streams and retain final full output
+  ---
+  duration_ms: 3.792834
+  type: 'test'
+  ...
+# Subtest: the full renderer remains byte-for-byte the pinned baseline
+ok 8 - the full renderer remains byte-for-byte the pinned baseline
+  ---
+  duration_ms: 1.165417
+  type: 'test'
+  ...
+# Subtest: standalone probe rejects an altered baseline before reporting counts
+ok 9 - standalone probe rejects an altered baseline before reporting counts
+  ---
+  duration_ms: 1.912125
+  type: 'test'
+  ...
+# Subtest: empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+ok 10 - empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+  ---
+  duration_ms: 6.398375
+  type: 'test'
+  ...
+# Subtest: provider readiness waits for the complete port line
+ok 11 - provider readiness waits for the complete port line
+  ---
+  duration_ms: 4.773375
+  type: 'test'
+  ...
+# Subtest: provider client disposal rejects pending requests and clears their timers
+ok 12 - provider client disposal rejects pending requests and clears their timers
+  ---
+  duration_ms: 1.310625
+  type: 'test'
+  ...
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=false
+ok 13 - provider fixture reaps a child that ignores SIGINT, readiness=false
+  ---
+  duration_ms: 1220.41575
+  type: 'test'
+  ...
+# Subtest: provider fixture reaps a child that ignores SIGINT, readiness=true
+ok 14 - provider fixture reaps a child that ignores SIGINT, readiness=true
+  ---
+  duration_ms: 248.96875
+  type: 'test'
+  ...
+# Subtest: provider fixture reports spawn failure and observes child close
+ok 15 - provider fixture reports spawn failure and observes child close
+  ---
+  duration_ms: 1.622541
+  type: 'test'
+  ...
+# Subtest: provider fixture registers cleanup before reading its token
+ok 16 - provider fixture registers cleanup before reading its token
+  ---
+  duration_ms: 0.88875
+  type: 'test'
+  ...
+# Subtest: two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+ok 17 - two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+  ---
+  duration_ms: 284.800042
+  type: 'test'
+  ...
+# Subtest: provider permission, key boundaries, and native enum spellings match imported API
+ok 18 - provider permission, key boundaries, and native enum spellings match imported API
+  ---
+  duration_ms: 2.567375
+  type: 'test'
+  ...
+# Subtest: cancel and dispose abort in-flight provider work without stale replies
+ok 19 - cancel and dispose abort in-flight provider work without stale replies
+  ---
+  duration_ms: 0.624959
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1590.042834

@@ -1,0 +1,294 @@
+TAP version 13
+# Subtest: workspace-browser.test.mjs closes its server after launch failure
+ok 1 - workspace-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 18.892041
+  type: 'test'
+  ...
+# Subtest: workspace-browser.test.mjs closes its server after browser close failure
+ok 2 - workspace-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 2.028541
+  type: 'test'
+  ...
+# Subtest: newtab-browser.test.mjs closes its server after launch failure
+not ok 3 - newtab-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 2.442875
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: newtab-browser.test.mjs closes its server after browser close failure
+not ok 4 - newtab-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 2.508791
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: onboarding-browser.test.mjs closes its server after launch failure
+not ok 5 - onboarding-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 2.304708
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: onboarding-browser.test.mjs closes its server after browser close failure
+not ok 6 - onboarding-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 1.205542
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: whats-new-browser.test.mjs closes its server after launch failure
+not ok 7 - whats-new-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.531792
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: whats-new-browser.test.mjs closes its server after browser close failure
+not ok 8 - whats-new-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.989875
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: workspace-frame.test.mjs closes its server after launch failure
+not ok 9 - workspace-frame.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.413666
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: workspace-frame.test.mjs closes its server after browser close failure
+not ok 10 - workspace-frame.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 1.170083
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:12:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    the owned fixture server must close
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:38:16)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: panel-browser.mjs closes its server after launch failure
+not ok 11 - panel-browser.mjs closes its server after launch failure
+  ---
+  duration_ms: 2.038583
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:47:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:61:14)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: panel-browser.mjs closes its server after browser close failure
+not ok 12 - panel-browser.mjs closes its server after browser close failure
+  ---
+  duration_ms: 1.573541
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:47:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    The validation function is expected to return "true". Received false
+    
+    Caught error:
+    
+    Error: Stop before browser work
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:60:7)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: research-browser.mjs closes its server after launch failure
+not ok 13 - research-browser.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.788625
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:47:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:61:14)
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: research-browser.mjs closes its server after browser close failure
+not ok 14 - research-browser.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.913791
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:47:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    The validation function is expected to return "true". Received false
+    
+    Caught error:
+    
+    Error: Stop before browser work
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    async TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/harness-cleanup.test.mjs:60:7)
+    async Test.run (node:internal/test_runner/test:1409:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 2
+# fail 12
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 149.925958

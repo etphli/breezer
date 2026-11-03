@@ -1,0 +1,84 @@
+TAP version 13
+# Subtest: oversized responses stop consumption and cancel the body at the existing character limit
+not ok 1 - oversized responses stop consumption and cancel the body at the existing character limit
+  ---
+  duration_ms: 26.406042
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-response-baseline.test.mjs:21:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(body.consumed() <= limit + 65536)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-response-baseline.test.mjs:26:10)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# 4194304 bytes consumed from 4194304
+# Subtest: UTF-8 splitting, replacement and BOM behavior matches Response.text
+ok 2 - UTF-8 splitting, replacement and BOM behavior matches Response.text
+  ---
+  duration_ms: 6.504542
+  ...
+# Subtest: one oversized transport chunk is decoded only up to the rejection boundary
+not ok 3 - one oversized transport chunk is decoded only up to the rejection boundary
+  ---
+  duration_ms: 1.706834
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-response-baseline.test.mjs:49:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(decoded <= limit + 65536)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-response-baseline.test.mjs:57:10)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# 4194304 bytes decoded from one 4194304-byte chunk
+# Subtest: non-byte stream chunks retain Response.text rejection
+ok 4 - non-byte stream chunks retain Response.text rejection
+  ---
+  duration_ms: 0.43225
+  ...
+# Subtest: the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes
+ok 5 - the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes
+  ---
+  duration_ms: 98.304334
+  ...
+# Subtest: the limit includes replacement characters emitted by the final decoder flush
+ok 6 - the limit includes replacement characters emitted by the final decoder flush
+  ---
+  duration_ms: 3.309916
+  ...
+# Subtest: empty, malformed and failed bodies preserve their error behavior
+ok 7 - empty, malformed and failed bodies preserve their error behavior
+  ---
+  duration_ms: 0.879833
+  ...
+# Subtest: abort and HTTP status still follow the original request contract
+ok 8 - abort and HTTP status still follow the original request contract
+  ---
+  duration_ms: 4.733
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 6
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 220.748083

@@ -1,0 +1,97 @@
+{
+  "finding": "workspace-04",
+  "status": "implemented; offline verification passed; disposable-browser verification remains with parent",
+  "model": "GPT-6.1 Sol, high reasoning, regular speed as requested; no subagents",
+  "cwd": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906",
+  "ownedChanges": [
+    "features/ai/extension/workspace.js",
+    "script/verify_workspace_tab_updates.mjs",
+    "tests/ai/workspace-tab-update-efficiency.test.mjs"
+  ],
+  "hashesSha256": {
+    "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "script/verify_workspace_tab_updates.mjs": "6725c2cacff0418f4e8055fd3bd53b3f3f8aa5cab894e97f7fdc935269621779",
+    "tests/ai/workspace-tab-update-efficiency.test.mjs": "f5cb182c6c8433501068beea3a243cc6d210e4ce7f85c6582f815344155c0bcf",
+    "features/ai/extension/workspace-store.js": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "tests/ai/workspace-browser-fixture.mjs": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01",
+    "build/efficiency-20261103/workspace-tab-update-baseline.js": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+    "build/efficiency-20261103/organato-review-node24": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329",
+    "build/efficiency-20261103/workspace-tab-update-tests.tap": "f9d997e792b92f75a5906cecfc7cfcd5fa68949e84df374722a15406c0344570",
+    "build/efficiency-20261103/workspace-tab-update-counters.json": "cb7011b6630e654672fe6a6d5da8c86b0659cf7e1ebbe6234079cb6fc4518254"
+  },
+  "commands": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 script/verify_workspace_tab_updates.mjs",
+      "phase": "before source fix",
+      "result": "both baseline and current 20 scheduled / 20 drawn, eventVersion 20; original source SHA256 7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/workspace-tab-update-efficiency.test.mjs tests/ai/workspace-store.test.mjs tests/ai/workspace-static.test.mjs tests/ai/workspace-ui-efficiency.test.mjs tests/ai/workspace-members-efficiency.test.mjs > build/efficiency-20261103/workspace-tab-update-tests.tap",
+      "exitCode": 0,
+      "result": "39 passed, 0 failed, 0 skipped; 7 new tab-update tests"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 script/verify_workspace_tab_updates.mjs build/efficiency-20261103/workspace-tab-update-counters.json",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check -- features/ai/extension/workspace.js",
+      "exitCode": 0
+    },
+    {
+      "command": "diff -u build/efficiency-20261103/workspace-tab-update-baseline.js features/ai/extension/workspace.js",
+      "exitCode": 1,
+      "result": "expected focused diff: helper plus onUpdated guard only; toast release and route pruning unchanged from captured baseline"
+    }
+  ],
+  "counters": {
+    "baselineSha256": "7e36707b4285e0ee835fc9d41106ae2d1475c9c03df070a326ddaa8385c9feb6",
+    "currentSha256": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+    "baseline": {
+      "scheduled": 20,
+      "drawn": 20,
+      "queries": 0,
+      "refreshScheduled": 0,
+      "writes": [],
+      "eventVersion": 20
+    },
+    "current": {
+      "scheduled": 0,
+      "drawn": 0,
+      "queries": 0,
+      "refreshScheduled": 0,
+      "writes": [],
+      "eventVersion": 20
+    }
+  },
+  "decision": {
+    "suppression": "Only changeInfo with exactly one own key autoDiscardable; prior tab must exist and differ by identity. All other own snapshot fields must have equal scalar values and identical key sets. Separate flat mutedInfo objects may contain identical scalar fields. Unknown nested objects and shared mutable objects retain redraw.",
+    "preserved": "Every relevant state.tabs replacement and tabEventVersion increment, window filtering, URL record updates, external unpin release, pin refresh scheduling and stale-query retries remain in their original order.",
+    "modelTrace": [
+      "buildSidebarModel: id for record lookup and binding, index for sorted binding/today order; records determine entry/space membership and tab counts.",
+      "displayTitle: customTitle then tab.title then saved title then host of entry.url/tab.url. urlOf: tab.url then pendingUrl. URL also used for record writes, openability/matching, context actions and close/restore.",
+      "presentation: active, status, discarded, audible, mutedInfo.muted, data-image favIconUrl and effective URL; favorite identity uses saved entry title/URL, live tab id/active for peek and selection.",
+      "tab actions: id, active, index, title, url/pendingUrl and mutedInfo.muted for close fallback, focus, tab move, pin/favorite, context menus, mute and undo. pinned participates in event side effects and creation/reconciliation; openerTabId used on creation.",
+      "No autoDiscardable read in workspace model, presentation, sorting, matching, active/closed-tab actions; all other snapshot properties compared rather than ignored."
+    ]
+  },
+  "verification": [
+    "Production onUpdated, refreshTabs/scheduleRefresh, render/requestAnimationFrame, draw, buildSidebarModel, reconcile, row presentation, favicon construction, favorites, eager folders, today and spaces run in VM against deterministic fake APIs/DOM.",
+    "Differential comparisons after events include full state.tabs, records, lastActive, close fallback, fake persisted local/session data, membership writes and DOM property/attribute/tree snapshots. Baseline tests restore unconditional render; measurement separately executes the exact captured original source.",
+    "Sequential 20-event nonvisual stream; 21-field/membership/window event stream; 160 deterministic mixed events and 8 activations; mixed coalesced burst; first-seen/missing tab; omitted full-snapshot changes; nested aliases; cloned mutedInfo.",
+    "Held query: versions [0,1] then [1,1], stale result rejected, one recovery scheduled, final [1,2] with two queries. Superseded query burst ends [4,2] with only original pin refresh scheduled.",
+    "Safe offline workspace store, static, UI efficiency and membership efficiency suites passed. No browser or installed application launched."
+  ],
+  "objections": [
+    "Broad visual-field allowlist rejected: new or omitted changeInfo fields could be missed. Guard recognizes only autoDiscardable and verifies the remainder of the full snapshot.",
+    "Simple object identity equality rejected: mutable mutedInfo can change in place. Shared tab/mutedInfo and nested data retain redraw.",
+    "Avoiding a frame is not a measured browser-wide CPU/RAM saving. A burst may already coalesce; counters describe only the fixture workload.",
+    "state.model/state.items keep the prior snapshot during a suppressed event. Its only differing property is unused autoDiscardable; state.tabs always receives the new complete tab. Next actual draw rebuilds model/items normally."
+  ],
+  "remainingGaps": [
+    "Parent must run allowed disposable-browser suite for real DOM/layout, focus, browser callback ordering and image load behavior. VM intentionally bypasses boot/event subscription while executing actual handler and downstream functions.",
+    "DOM contract has no CSS/layout engine, image decoding or browser internals; fake patchMembers records/applies in-memory membership writes with fixed session S1. Existing separate WorkspaceStore tests cover actual persistence logic.",
+    "No production event frequency, browser-wide memory, allocation, CPU or latency measurements; no invented gains.",
+    "PC unavailable. No connection/probe/SSH/schedule, app build/run/install/update, provider/account/auth/Keychain/config access, real profile access, cache deletion, external network, dependencies, commit/push/publication performed."
+  ]
+}

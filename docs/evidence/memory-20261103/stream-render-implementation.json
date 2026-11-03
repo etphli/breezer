@@ -1,0 +1,187 @@
+{
+  "finding": "ES-02",
+  "model": {
+    "name": "gpt-6.1-sol",
+    "reasoning": "high",
+    "requestedSpeed": "regular",
+    "delegation": "none"
+  },
+  "status": "Implemented and offline-verified candidate; coordinator browser acceptance remains required.",
+  "changedFiles": [
+    "features/ai/extension/render-message.js",
+    "features/ai/extension/panel.js",
+    "tests/ai/stream-render.test.mjs",
+    "script/verify_stream_render_efficiency.mjs"
+  ],
+  "sourceHashesBeforeAfter": {
+    "features/ai/extension/render-message.js": {
+      "before": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "after": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948"
+    },
+    "features/ai/extension/panel.js": {
+      "before": "dc0f37319f2a650997d944a9ba0804b0f281501d61f122144759c61dae9495ca",
+      "after": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb"
+    },
+    "tests/ai/stream-render.test.mjs": {
+      "before": null,
+      "after": "57d7000249ae5ea0147887f635ce4b386034d68625a710340a05a2f9b3eea2c1"
+    },
+    "script/verify_stream_render_efficiency.mjs": {
+      "before": null,
+      "after": "0c2a15d28d090c30b37b5fec624eabb7ec5cdb8693e339e84590d9d1dd54498b"
+    }
+  },
+  "reproduction": {
+    "beforeReport": "build/efficiency-20261103/stream-render-before.json",
+    "afterReport": "build/efficiency-20261103/stream-render-after.json",
+    "beforeSources": [
+      "build/efficiency-20261103/stream-render-before-render-message.js",
+      "build/efficiency-20261103/stream-render-before-panel.js"
+    ],
+    "baselineCapturedBeforeProductionEdits": true,
+    "originalAuditFixture": {
+      "chunks": 100,
+      "charactersPerChunk": 27,
+      "finalCharacters": 2700,
+      "parsedCharacters": 136350,
+      "createdNodes": 10200
+    },
+    "counts": {
+      "scope": "Deterministic synthetic DOM and parser-input counts only. No CPU, RSS, layout, browser, network or PC access.",
+      "sourceHashes": {
+        "before": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "after": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948"
+      },
+      "cases": {
+        "formatted": {
+          "before": {
+            "chunks": 700,
+            "finalCharacters": 11480,
+            "streaming": {
+              "nodes": 631600,
+              "parsedCharacters": 4018700,
+              "renders": 700,
+              "scannedCharacters": 0,
+              "scannedLines": 0
+            },
+            "includingFinalRender": {
+              "nodes": 633400,
+              "parsedCharacters": 4030180,
+              "renders": 701,
+              "scannedCharacters": 0,
+              "scannedLines": 0
+            }
+          },
+          "after": {
+            "chunks": 700,
+            "finalCharacters": 11480,
+            "streaming": {
+              "nodes": 4600,
+              "parsedCharacters": 25040,
+              "renders": 1100,
+              "scannedCharacters": 11480,
+              "scannedLines": 1100
+            },
+            "includingFinalRender": {
+              "nodes": 6400,
+              "parsedCharacters": 36520,
+              "renders": 1101,
+              "scannedCharacters": 11480,
+              "scannedLines": 1100
+            }
+          }
+        },
+        "singleBlock": {
+          "before": {
+            "chunks": 100,
+            "finalCharacters": 2700,
+            "streaming": {
+              "nodes": 10200,
+              "parsedCharacters": 136350,
+              "renders": 100,
+              "scannedCharacters": 0,
+              "scannedLines": 0
+            },
+            "includingFinalRender": {
+              "nodes": 10401,
+              "parsedCharacters": 139050,
+              "renders": 101,
+              "scannedCharacters": 0,
+              "scannedLines": 0
+            }
+          },
+          "after": {
+            "chunks": 100,
+            "finalCharacters": 2700,
+            "streaming": {
+              "nodes": 10200,
+              "parsedCharacters": 136350,
+              "renders": 100,
+              "scannedCharacters": 2700,
+              "scannedLines": 100
+            },
+            "includingFinalRender": {
+              "nodes": 10401,
+              "parsedCharacters": 139050,
+              "renders": 101,
+              "scannedCharacters": 2700,
+              "scannedLines": 100
+            }
+          }
+        }
+      }
+    },
+    "method": "Offline vm execution of exact renderer source with counted synthetic DOM allocations, render input lengths and completed-line scanner characters. No timing/RSS/CPU/browser benchmark. Final full rendering included separately. Baseline source snapshots SHA-256 match audit."
+  },
+  "acceptedChanges": [
+    "Append-only stream retains completed blocks only after a full blank line outside a fence. Reuses unchanged safe parser for the unfinished tail on every existing RAF; no delayed rendering.",
+    "Original renderMessage implementation remains byte-for-byte unchanged. Complete stable portion and unfinished tail concatenate to the same DOM because a blank line outside a fence flushes paragraph/list state and inline tokens cannot cross a newline.",
+    "Panel passes only text since the last RAF to one renderer owned by the active run. Existing at-bottom decision and RAF scheduling are unchanged.",
+    "Every finish path disposes renderer text/node/container references, clears its owner field, and performs the existing full final render. New Chat invokes stop before clearing messages. Queued RAF behavior across finalization and a new run tested.",
+    "No provider history, retention, permission, URL interpretation, reduced-motion code, retry logic or sync code changed."
+  ],
+  "commandsAndResults": [
+    {
+      "command": "node script/verify_stream_render_efficiency.mjs --before > build/efficiency-20261103/stream-render-before.json",
+      "result": "PASS before production edits; reproduced audit 136350 characters / 10200 nodes, plus long formatted baseline."
+    },
+    {
+      "command": "node script/verify_stream_render_efficiency.mjs > build/efficiency-20261103/stream-render-after.json",
+      "result": "PASS. 700 chunks / 11480 characters: streaming parser inputs 4018700 -> 25040; DOM nodes 631600 -> 4600. Including final full render: parser inputs 4030180 -> 36520; nodes 633400 -> 6400. New scanner visits 11480 characters once in addition. Single-block render inputs and nodes unchanged; scanner adds 2700 characters once."
+    },
+    {
+      "command": "node --test tests/ai/stream-render.test.mjs",
+      "result": "PASS 9/9, 0 skipped. Every UTF-16 prefix for edge fixtures, 60 deterministic malformed combinations, long formatted prefix comparisons, node identity, disposal, work counts, production panel RAF/scroll/finish/error/stop/New Chat/empty delta/stale event handling. See stream-render-tests.tap."
+    },
+    {
+      "command": "node --test tests/ai/model-catalog.test.mjs tests/ai/panel-theme.test.mjs tests/ai/research.test.mjs",
+      "result": "PASS 28/28, 0 skipped; fake APIs only. See stream-render-existing-tests.tap."
+    },
+    {
+      "command": "node --check features/ai/extension/render-message.js; node --check features/ai/extension/panel.js; node --check script/verify_stream_render_efficiency.mjs",
+      "result": "PASS all exit 0."
+    },
+    {
+      "command": "git diff --check -- features/ai/extension/render-message.js features/ai/extension/panel.js",
+      "result": "PASS exit 0; inspected focused final diff."
+    }
+  ],
+  "rejectedIdeas": [
+    "No cadence reduction, debounce, deferred full-reply rendering or hidden streaming text.",
+    "No history caps, virtualization, provider history changes or dropping user data.",
+    "Did not commit individual lines, headings, list items or incomplete fences: conservative blank-line boundary keeps exact parser state simple.",
+    "Avoided extra DOM wrapper or per-frame DocumentFragment allocations; forwarding target removes only mutable top-level nodes."
+  ],
+  "objections": [
+    "Long single paragraphs, uninterrupted lists, and open code fences have no stable blank boundary, so retain full-tail quadratic rendering work. Added scanner does one extra pass over completed lines. No speed improvement is claimed for these cases; actual latency remains unmeasured.",
+    "Counters measure explicit renderer input and synthetic DOM allocations, not all JS allocations, substring representation, regex work, DOM garbage collection, real memory, CPU, energy or browser speed.",
+    "Tail rebuilding can still replace focused/selected nodes in the unfinished tail, as the old renderer did for the full reply. Stable prefix nodes now retain identity.",
+    "Fake DOM validates tree structure, link properties, node identity and explicit scrollTop decisions, not browser automatic scroll anchoring/layout or assistive announcements."
+  ],
+  "unverifiedGates": [
+    "Coordinator sequential disposable-browser acceptance: scroll anchoring while reading above/below the active reply, bottom-following, large code/list tails, reduced motion and assistive log behavior.",
+    "Coordinator integration and any browser performance acceptance. No whole-browser gain or absence of physical speed regression has been established.",
+    "PC remains explicitly unreachable: no contact, probe, connect, launch or scheduling performed.",
+    "No Breezer.app build/run/install, app/profile/password/cache changes, real providers/network/Keychain/config access, publication, package download or commit/push performed."
+  ]
+}

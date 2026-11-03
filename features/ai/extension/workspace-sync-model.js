@@ -60,7 +60,11 @@ function validField(key, field, value) {
 
 export function validateSyncModel(model) {
   if (!model || model.version !== SYNC_MODEL_VERSION || !model.records || typeof model.records !== 'object' || Array.isArray(model.records)) throw new Error('Unsupported workspace sync data.');
-  if (new TextEncoder().encode(JSON.stringify(model)).length > MAX_SYNC_BYTES) throw new Error('Workspace sync has reached its storage limit. Local data is preserved.');
+  const serialized = JSON.stringify(model);
+  const units = serialized === undefined ? 0 : serialized.length;
+  // UTF-8 uses between one and three bytes per UTF-16 code unit. Encode only
+  // when these bounds straddle the limit; encode(undefined) was empty too.
+  if (units > MAX_SYNC_BYTES || units * 3 > MAX_SYNC_BYTES && new TextEncoder().encode(serialized).length > MAX_SYNC_BYTES) throw new Error('Workspace sync has reached its storage limit. Local data is preserved.');
   const records = Object.entries(model.records);
   if (records.length > MAX_RECORDS) throw new Error('Workspace sync has too many records.');
   const identities = new Set();
@@ -153,14 +157,23 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   // Concurrent removal of the final spaces cannot strand the surviving pins.
   if (!spaces.length) spaces.push(recoveredSpace(model));
   const bySpace = new Map(spaces.map(s => [`space/${s.id}`, s]));
+  const orderedFolders = ordered('folder/');
+  const localExpansion = new Map();
+  if (orderedFolders.length) {
+    const folderIds = orderedFolders.map(([key]) => key.slice(7));
+    for (const space of localStore.spaces) {
+      const remaining = new Set(folderIds);
+      for (const node of space.pinned) {
+        if (node.kind === 'folder' && remaining.delete(node.id)) localExpansion.set(node.id, node.open);
+        if (!remaining.size) break;
+      }
+    }
+  }
   const folders = new Map();
-  for (const [key, folder] of ordered('folder/')) {
+  for (const [key, folder] of orderedFolders) {
     const node = { kind: 'folder', id: key.slice(7), name: folder.name || 'Folder', open: true, children: [] };
     // Expansion is device-local, even when a folder is renamed remotely.
-    for (const space of localStore.spaces) {
-      const previous = space.pinned.find(n => n.id === node.id && n.kind === 'folder');
-      if (previous) node.open = previous.open;
-    }
+    if (localExpansion.has(node.id)) node.open = localExpansion.get(node.id);
     folders.set(key, node);
     (bySpace.get(folder.parent) || spaces[0]).pinned.push(node);
   }

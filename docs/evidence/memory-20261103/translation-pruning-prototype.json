@@ -1,0 +1,324 @@
+{
+  "status": "REJECTED FOR SOURCE APPLICATION: observer domain escape changes Restore",
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular requested; no runtime settings changed",
+    "subagents": 0
+  },
+  "scope": "Offline Node v22.14.0 VM prototype only. Production and shared tests/docs/packet untouched. No PC, browser, app, network/provider, Keychain/config, installation, downloads, publishing, commit or push. Operation counts exclude Restore and are not CPU/time/RSS/GC or whole-browser measurements.",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "docs/evidence/memory-20261103/README.md",
+      "sha256": "7755fc8c912849c02d2bfa61e9eb2314fe51d9067aaffe3e6c1a363138358172",
+      "lines": 137,
+      "readRanges": [
+        [
+          1,
+          137
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "docs/evidence/memory-20261103/verification.json",
+      "sha256": "0f938fa73dcf800897de5c1d9d60d0bbc91c08c8b88530c816b92943c7c4ca59",
+      "lines": 78,
+      "readRanges": [
+        [
+          1,
+          78
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "docs/evidence/memory-20261103/page-content-audit.json",
+      "sha256": "83102de3b6cff0b50e141e30417741fc7d6eb65a50ad21b74d26a7f5b121b86c",
+      "lines": 293,
+      "readRanges": [
+        [
+          1,
+          150
+        ],
+        [
+          151,
+          189
+        ],
+        [
+          190,
+          293
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "docs/evidence/memory-20261103/translation-work-implementation.json",
+      "sha256": "043c15dab1bc30d145423737bbeb14d63af36206a295881144f13eb9c375074e",
+      "lines": 197,
+      "readRanges": [
+        [
+          1,
+          197
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "features/ai/extension/translation-content.js",
+      "sha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "lines": 146,
+      "readRanges": [
+        [
+          1,
+          146
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "tests/ai/translation-efficiency.test.mjs",
+      "sha256": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8",
+      "lines": 226,
+      "readRanges": [
+        [
+          1,
+          169
+        ],
+        [
+          170,
+          226
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-work-before.js",
+      "sha256": "22c76bd6c734a24a5a2e2a2f5fcaa56b085322e4f62cd494f37256c16155a1d0",
+      "lines": 146,
+      "readRanges": [
+        [
+          1,
+          146
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-pruning-prototype-baseline.js",
+      "sha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "lines": 146,
+      "readRanges": [
+        [
+          1,
+          146
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-pruning-candidate.js",
+      "sha256": "ad730414932a02d433def33cf657894018e63131398e3e75d361e36d990fd54c",
+      "lines": 156,
+      "readRanges": [
+        [
+          1,
+          156
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    },
+    {
+      "path": "build/efficiency-20261103/translation-pruning-prototype.test.mjs",
+      "sha256": "81beff148f63f9a7d6183ea030398e271069710b106f7f2064327b2cd566197b",
+      "lines": 384,
+      "readRanges": [
+        [
+          1,
+          180
+        ],
+        [
+          181,
+          384
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source/artifact read. Only this translation prototype scope reviewed; no coverage claim for referenced or other repository files."
+    }
+  ],
+  "commands": [
+    {
+      "command": "node --check build/efficiency-20261103/translation-pruning-candidate.js",
+      "result": "exit 0"
+    },
+    {
+      "command": "node --check build/efficiency-20261103/translation-pruning-prototype.test.mjs",
+      "result": "exit 0"
+    },
+    {
+      "command": "node --test build/efficiency-20261103/translation-pruning-prototype.test.mjs",
+      "result": {
+        "path": "build/efficiency-20261103/translation-pruning-prototype-current.tap",
+        "sha256": "ef2b8cc09d10d3e6755b9d3a88fe41c37da193747c32898aa738f38a49de5fc7",
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "command": "PRUNING_BASELINE=saved node --test build/efficiency-20261103/translation-pruning-prototype.test.mjs",
+      "result": {
+        "path": "build/efficiency-20261103/translation-pruning-prototype-saved.tap",
+        "sha256": "d1698192b33708684c8739fbb2e24a8f51ea3dcdb2a908dd0a3c692ef1703fa9",
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "counts": {
+    "static": [
+      {
+        "count": 4096,
+        "saved": {
+          "derefs": 264192,
+          "sweeps": 129,
+          "batches": 128
+        },
+        "current": {
+          "derefs": 264192,
+          "sweeps": 129,
+          "batches": 128
+        },
+        "candidate": {
+          "derefs": 0,
+          "sweeps": 0,
+          "batches": 128
+        }
+      },
+      {
+        "count": 8192,
+        "saved": {
+          "derefs": 1052672,
+          "sweeps": 257,
+          "batches": 256
+        },
+        "current": {
+          "derefs": 1052672,
+          "sweeps": 257,
+          "batches": 256
+        },
+        "candidate": {
+          "derefs": 0,
+          "sweeps": 0,
+          "batches": 256
+        }
+      }
+    ],
+    "churn": [
+      {
+        "derefs": 16896,
+        "sweeps": 33
+      },
+      {
+        "derefs": 6720,
+        "sweeps": 20
+      }
+    ]
+  },
+  "differentialResults": {
+    "existingCases": "All nine existing deterministic test bodies ported into owned test harness; same scenario outcomes against actual saved pre-reorder baseline and captured current production. Source code loaded from actual artifacts, not reconstructed baseline.",
+    "additionalCases": "Queued versus delivered removals; detach/reattach on either side of scan; body/root replacement; metadata observer cleanup; dynamic=false consent; removal during dynamic-observer write-disconnection interval; pending cancel/failure/invalid reply/reconnect/restart; undefined WeakRefs; static and churn counts.",
+    "interpretation": "17 passing assertions per run include two expected rejection assertions. This is NOT full baseline equivalence or candidate acceptance.",
+    "adoptionCounterexample": {
+      "nodes": 160,
+      "dynamic": false,
+      "steps": [
+        "Translate batch 1.",
+        "Adopt node 0 into a different connected document; deliver original document removal.",
+        "Run batch 2 sweep. node.isConnected is true, so both implementations keep the record.",
+        "Detach node 0 in the other document. Original document observer cannot observe this removal.",
+        "Run batch 3 sweep while node is disconnected. Baseline deletes the record; candidate skips sweep.",
+        "Reattach node to original document and Restore."
+      ],
+      "savedBaseline": "Ta",
+      "currentBaseline": "Ta",
+      "candidate": "a"
+    },
+    "undefinedAfterEscape": "After adoption and later foreign removal, forcing fake WeakRef undefined leads to 64 baseline dereferences versus 0 candidate dereferences at next boundary; skipped sweep cannot remove the stale WeakRef."
+  },
+  "review": {
+    "authoredCode": "Candidate and complete 384-line owned harness fully read, including instrumentation, observer queue routing, cleanup, differential assertions and operation counters; exact hashes and line ranges are in files.",
+    "candidateMechanism": "Separate active-run Document childList/subtree observer reduces records immediately to one boolean. takeRecords consumed at exact original per-batch sweep point. Original !node?.isConnected removal condition unchanged. Dynamic translation observer, scheduling, eligibility and all safety/size limits unchanged. Metadata observer stays connected during dynamic write disconnections and disconnects/resets on stop.",
+    "blockingFinding": "A connected translated node can leave the observed Document through adoption. The first sweep must keep it by original isConnected semantics. Subsequent disconnected/collected state outside the observer domain is unobservable to the boolean. This produces a deterministic Restore regression in the fake model.",
+    "retention": "No candidate callback stores records, removed nodes or DOM arrays. Browser MutationObserver itself may temporarily retain queued MutationRecords and removed subtrees until callback/takeRecords/disconnect. This is a new transient retention cost, unmeasured. The fixture intentionally owns nodes and fake WeakRefs strongly, so it cannot establish real collection or retention.",
+    "observability": "No candidate source counters or global testing hooks. Sweep counters are injected only into VM code copies. Observable text/status/batch/listener/timer snapshots are compared. No claim to preserve all real-DOM observability."
+  },
+  "rejectedAlternatives": [
+    {
+      "idea": "Completion-only pruning",
+      "reason": "Existing rejection scenario reproduced; detached record survives a baseline sweep and later restores incorrectly."
+    },
+    {
+      "idea": "Incremental/delayed full pruning",
+      "reason": "Still rejected by exact per-batch semantics; not reimplemented."
+    },
+    {
+      "idea": "Document-only dirty flag",
+      "reason": "Tested candidate rejected due to adoption escape; Document observation fixes body/root replacement coverage but not foreign documents or shadow trees."
+    },
+    {
+      "idea": "Prune connected adopted nodes at original removal",
+      "reason": "Would change original isConnected semantics; never implemented."
+    },
+    {
+      "idea": "Observe each removed/adopted subtree",
+      "reason": "Additional observation can retain detached trees and expands lifecycle/domain tracking. Not implemented or accepted."
+    },
+    {
+      "idea": "Sticky full-sweep fallback once a connected record leaves document containment",
+      "reason": "Possible future hypothesis. Would need reliable owner/root containment checks at dirty sweeps, shadow-root/adoption cases and reset rules. Not evaluated; no correctness or optimisation claim."
+    }
+  ],
+  "limitations": [
+    "Fake observer models explicit record queues, takeRecords/disconnect consumption and chosen callback checkpoints. It does not implement a browser event loop, transient registered observers, nested ancestry, shadow DOM or true TreeWalker root replacement semantics.",
+    "Body/root tests model removal coverage and Restore outcome only, not complete root-replacement traversal acceptance.",
+    "Mutation churn count is a finite 20-boundary fixture with 20 removals/reattachments each. Dirty boolean coalesces them to one sweep per boundary. Under removal at every boundary worst case remains quadratic, as required by baseline semantics.",
+    "Real MutationObserver record generation and transient allocation costs have not been measured.",
+    "Current and saved baseline hashes were verified from bytes; older shared reports were treated as input evidence, not current verification."
+  ],
+  "nextRealDOMChecks": [
+    "Coordinator only, sequential disposable browser with isolated-world translation script and fake provider. Reproduce 160-node adoption sequence using an inert same-origin secondary Document. Confirm baseline Ta versus candidate a at Restore; test callback-delivered and queued boundary variants. Do not apply this rejected candidate.",
+    "For any revised fallback design, compare baseline/candidate detach+reattach before/after every batch boundary in dynamic=true/false, including moving into open/closed shadow roots and foreign live documents, and removing them later.",
+    "Replace body and documentElement separately while provider response is pending; test genuine TreeWalker continuation, observer root coverage, no extra scheduling or dynamic=false translation consent.",
+    "Exercise native microtask delivery, takeRecords immediately before sweep, multiple observer callbacks, removal during dynamic-observer disconnect, stop/reconnect/start/error/cancel/navigation/pagehide and late replies. Verify exact Restore text/status.",
+    "Repeat real isolated-world forced-GC checks with removed subtrees and undefined WeakRefs, ensuring observer queues and all temporary JS handles are released. No claim of real-DOM ordering or GC from current fake tests."
+  ],
+  "productionUnchanged": {
+    "path": "features/ai/extension/translation-content.js",
+    "sha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "byteIdenticalToCapturedBaseline": true
+  }
+}

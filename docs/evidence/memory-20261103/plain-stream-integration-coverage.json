@@ -1,0 +1,44 @@
+{
+  "scope": "Coordinator current source coverage for reviewed and browser-tested plain stream integration, with final diagnostic case and four regression checks. Not native/full-browser performance certification.",
+  "files": [
+    {
+      "path": "features/ai/extension/render-message.js",
+      "sha256": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "lines": 157,
+      "readRanges": [
+        [
+          1,
+          157
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator reviewed the previously fully-read baseline and exact staged changes, current renderer in full, all new test/helper text, and the final diagnostic case. Applied hashes, browser candidate equality, focused/combined tests and unchanged full-renderer prefix checked."
+    },
+    {
+      "path": "script/verify_stream_render_efficiency.mjs",
+      "sha256": "053a793bce8b61f00709b6a247829b7528c9db8b2de41de6a67284f4828e2054",
+      "lines": 68,
+      "readRanges": [
+        [
+          1,
+          68
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator reviewed the previously fully-read baseline and exact staged changes, current renderer in full, all new test/helper text, and the final diagnostic case. Applied hashes, browser candidate equality, focused/combined tests and unchanged full-renderer prefix checked."
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "sha256": "b5c1057e06a3b202d71720364477efe3ad0c88a32f6408bd35a8557bdd379c32",
+      "lines": 264,
+      "readRanges": [
+        [
+          1,
+          264
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator reviewed the previously fully-read baseline and exact staged changes, current renderer in full, all new test/helper text, and the final diagnostic case. Applied hashes, browser candidate equality, focused/combined tests and unchanged full-renderer prefix checked."
+    }
+  ]
+}

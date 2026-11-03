@@ -1,0 +1,64 @@
+TAP version 13
+# Subtest: sidebar releases unused route markup and reloads Settings and welcome intact
+ok 1 - sidebar releases unused route markup and reloads Settings and welcome intact
+  ---
+  duration_ms: 8887.242458
+  type: 'test'
+  ...
+# Subtest: empty Settings-created spaces and sidebar controls respond to held clicks
+ok 2 - empty Settings-created spaces and sidebar controls respond to held clicks
+  ---
+  duration_ms: 2784.98
+  type: 'test'
+  ...
+# Subtest: dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+ok 3 - dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+  ---
+  duration_ms: 1517.922792
+  type: 'test'
+  ...
+# Subtest: delayed tab queries cannot revive closed rows or overwrite navigation and activation
+ok 4 - delayed tab queries cannot revive closed rows or overwrite navigation and activation
+  ---
+  duration_ms: 1600.667209
+  type: 'test'
+  ...
+# Subtest: Arc-style sidebar and settings work against the chrome.* fixture
+ok 5 - Arc-style sidebar and settings work against the chrome.* fixture
+  ---
+  duration_ms: 6150.100667
+  type: 'test'
+  ...
+# Subtest: tab updates leave unchanged rows and their audio controls intact
+ok 6 - tab updates leave unchanged rows and their audio controls intact
+  ---
+  duration_ms: 1238.569416
+  type: 'test'
+  ...
+# Subtest: numbered favorite command lazily opens the saved first slot, once under rapid repeat
+ok 7 - numbered favorite command lazily opens the saved first slot, once under rapid repeat
+  ---
+  duration_ms: 975.031416
+  type: 'test'
+  ...
+# Subtest: numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+ok 8 - numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+  ---
+  duration_ms: 982.035292
+  type: 'test'
+  ...
+# Subtest: numbered favorite activation is scoped to the host window, including another window with a live target
+ok 9 - numbered favorite activation is scoped to the host window, including another window with a live target
+  ---
+  duration_ms: 1152.13875
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 25610.859458

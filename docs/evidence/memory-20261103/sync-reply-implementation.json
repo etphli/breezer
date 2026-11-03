@@ -1,0 +1,159 @@
+{
+  "scope": "Native sync reply move and checked PC packet migration, local source-derived verification only.",
+  "files": [
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+      "sha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00",
+      "lines": 165,
+      "readRanges": [
+        [
+          1,
+          165
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the current source, inspected changes and ran the focused conversion or migration checks. Not a full generated-header/native Chromium build."
+    },
+    {
+      "path": "tests/sync/fixtures/provider-read-before.cc",
+      "sha256": "73740e4fb244726bd3c8031cfd28f1d28dae510c3509383cf2ab06a96aaf5a42",
+      "lines": 5,
+      "readRanges": [
+        [
+          1,
+          5
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the current source, inspected changes and ran the focused conversion or migration checks. Not a full generated-header/native Chromium build."
+    },
+    {
+      "path": "script/verify_sync_reply_efficiency.py",
+      "sha256": "e51125979de696c6a83ca9c8e086da9c0a9f73774e6b7c911e4a3f518e9970b4",
+      "lines": 162,
+      "readRanges": [
+        [
+          1,
+          162
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the current source, inspected changes and ran the focused conversion or migration checks. Not a full generated-header/native Chromium build."
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "sha256": "cbd1ee521887ef559e7faf3f4e695e81970dcdd1b04a0883ea50cb444a4567e6",
+      "lines": 86,
+      "readRanges": [
+        [
+          1,
+          86
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the current source, inspected changes and ran the focused conversion or migration checks. Not a full generated-header/native Chromium build."
+    },
+    {
+      "path": "script/windows/prepare-efficiency-packet.py",
+      "sha256": "1d29fab04b0905b705f85750af9c7e571073687f9eddec616178b48958b03030",
+      "lines": 72,
+      "readRanges": [
+        [
+          1,
+          72
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the current source, inspected changes and ran the focused conversion or migration checks. Not a full generated-header/native Chromium build."
+    },
+    {
+      "path": "tests/windows/memory_update_test.py",
+      "sha256": "c34e36c147d96b5b565c2b0770c4c7fae5dcddc2572f6862e3ed6e68e2bf2e7e",
+      "lines": 264,
+      "readRanges": [
+        [
+          1,
+          264
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read the current source, inspected changes and ran the focused conversion or migration checks. Not a full generated-header/native Chromium build."
+    }
+  ],
+  "change": "Transfer validated owned ciphertext and revision into the return object instead of copying. Fixed packet mapping adds exactly one native path alongside nine extension paths.",
+  "conversion": {
+    "cases": 12,
+    "nonemptySuccesses": 4,
+    "baseline": {
+      "allocations": 9,
+      "allocatedBytes": 3146665,
+      "dataTransfers": 0
+    },
+    "current": {
+      "allocations": 0,
+      "allocatedBytes": 0,
+      "dataTransfers": 4
+    },
+    "valuesAndRejectionsPreserved": true,
+    "sourceSha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00",
+    "baselineSourceSha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+    "conversionBaselineSha256": "73740e4fb244726bd3c8031cfd28f1d28dae510c3509383cf2ab06a96aaf5a42",
+    "compiler": "/usr/bin/clang++",
+    "scope": "Actual conversion text compiled with a small API type model. Not a full generated-header/Chromium/native-provider build; allocation counts are fixture values, not physical RAM or steady-state browser savings."
+  },
+  "checks": [
+    {
+      "command": "python3 -B script/verify_sync_reply_efficiency.py --expect-moved --output build/efficiency-20261103/sync-reply-after.json",
+      "result": "12 cases preserve values and rejection behavior. Zero conversion allocations and four nonempty data ownership transfers in the API type model."
+    },
+    {
+      "command": "python3 -B tests/windows/memory_update_test.py",
+      "result": "14 pass, including native packet/source/pin preflight failures, interrupted native write, idempotent native mtime/backups, captured bytes after packet mutation and preserved object cache."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/sync/provider.test.mjs tests/sync/reconcile.test.mjs tests/sync/workspace-model.test.mjs",
+      "result": "29 pass, zero skips."
+    },
+    {
+      "command": "python3 -B tests/memory_package_test.py",
+      "result": "8 pass."
+    },
+    {
+      "command": "git diff --check",
+      "result": "Pass."
+    }
+  ],
+  "negativeControls": [
+    {
+      "path": "sync-reply-negative-control.log",
+      "result": "Original source compiles/runs but --expect-moved fails because it still copies."
+    },
+    {
+      "path": "native-packet-negative-control.log",
+      "result": "Original nine-resource migration rejects the newly required native resource."
+    }
+  ],
+  "packet": {
+    "packet": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/pc-packet",
+    "checksumFiles": 29,
+    "compiledResources": 10,
+    "extensionResources": 9,
+    "nativeResources": 1,
+    "hostModules": 11,
+    "allBytesMatchCurrentSources": true,
+    "allBeforePinsMatchCachedPlan": true,
+    "pcContacted": false
+  },
+  "ownershipEvidence": [
+    "Call returns the owned local Service::Response by move; the successful ReadObject branch does not use response after constructing its return object.",
+    "Local service patch Response is base::expected<ProviderResponse,ProviderFailure>; response callback takes Response by value.",
+    "Local vault-transport patch owns std::vector<uint8_t> data and std::string revision. Existing validation and all other source bytes are pinned unchanged."
+  ],
+  "limitations": [
+    "The conversion compiles with a small API type model, not generated Chromium headers, base::expected or the complete native service.",
+    "Allocation counters are fixture results, not physical memory, CPU timing, native provider or whole-browser savings.",
+    "Full Chromium/PC compilation, generated API compatibility, native provider/browser behavior and RAM/CPU acceptance remain pending.",
+    "The packet is local and undeployed. PC not contacted; installed app, user profiles and required compiled caches untouched."
+  ],
+  "review": "Independent current-hash review found no actionable introduced issue; native/generated-header/concurrency/performance acceptance remains pending."
+}

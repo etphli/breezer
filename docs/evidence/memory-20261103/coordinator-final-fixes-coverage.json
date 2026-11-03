@@ -1,0 +1,109 @@
+{
+  "scope": "Coordinator complete current-source read and verification after direct resolution of final audit findings.",
+  "files": [
+    {
+      "path": "script/windows/unattended_build.py",
+      "sha256": "4671e199ba69e206de82f0f57f60873fbfdd82fef357149f25a5255696efaceb",
+      "lines": 390,
+      "readRanges": [
+        [
+          1,
+          390
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "script/windows/prepare-efficiency-packet.py",
+      "sha256": "dd73e9d39901a2414266fe8e381f0670154a83de6f037d457d2f4f3397af538e",
+      "lines": 70,
+      "readRanges": [
+        [
+          1,
+          70
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "script/verify_stream_render_efficiency.mjs",
+      "sha256": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+      "lines": 60,
+      "readRanges": [
+        [
+          1,
+          60
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "script/verify_workspace_tab_updates.mjs",
+      "sha256": "22f3e1a2a9daff54923db48febaedce7dba234b8123057a4084db89534774cf4",
+      "lines": 100,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "tests/ai/stream-render.test.mjs",
+      "sha256": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+      "lines": 188,
+      "readRanges": [
+        [
+          1,
+          188
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "tests/sync/provider.test.mjs",
+      "sha256": "3a10b38160a5d5ac83937ffeec101cfe2fea1262df3e7bc7e938d48fb29ee8a0",
+      "lines": 196,
+      "readRanges": [
+        [
+          1,
+          196
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "tests/sync/provider-lifecycle.test.mjs",
+      "sha256": "9905219d310b0f9a6a7c873f4c266f7c1997666745047c66fba4e111fe1ca608",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    },
+    {
+      "path": "tests/windows/unattended_cleanup_test.py",
+      "sha256": "a2809528cb0876d50e40d1d5ac0d78da94b06d6ad91f5ab337c31be976319342",
+      "lines": 182,
+      "readRanges": [
+        [
+          1,
+          182
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Actual source read, changed logic inspected and focused checks run. Read coverage is not native performance acceptance."
+    }
+  ]
+}

@@ -68,6 +68,59 @@ test('offline changes survive capture, worker restart and remote deletion', asyn
   assert.deepEqual(a.saved[SYNC_LOCAL_KEY].model, b.saved[SYNC_LOCAL_KEY].model);
 });
 
+test('unchanged sync cycles preserve durable recovery data without rewriting storage', async () => {
+  const remote = server(), a = fixture(remote, 'client_alpha');
+  await cycle(a);
+  const before = structuredClone(a.saved), writes = [];
+  const set = a.storage.local.set;
+  a.storage.local.set = async patch => { writes.push(structuredClone(patch)); return set(patch); };
+  await cycle(a); await cycle(a);
+  assert.deepEqual(a.saved, before);
+  assert.deepEqual(writes, []);
+});
+
+test('changed local recovery data reaches storage before a failing exchange', async () => {
+  const remote = server(), a = fixture(remote, 'client_alpha');
+  await cycle(a);
+  renameSpace(a.saved[STORE_KEY], 'space-default', 'Keep this edit');
+  let captured = false;
+  a.bridge.exchange = async () => {
+    assert.equal(a.saved[SYNC_LOCAL_KEY].baseline['space/space-default'].name, 'Keep this edit');
+    assert.equal(a.saved[SYNC_LOCAL_KEY].model.records['space/space-default'].name[2], 'Keep this edit');
+    captured = true;
+    throw new Error('Offline after capture');
+  };
+  assert.equal((await a.instance().cycle()).phase, 'error');
+  assert.equal(captured, true);
+  const persisted = structuredClone(a.saved[SYNC_LOCAL_KEY]);
+  assert.equal((await a.instance().cycle()).phase, 'error');
+  assert.deepEqual(a.saved[SYNC_LOCAL_KEY], persisted);
+});
+
+test('remote changes remain captured if applying the local workspace fails', async () => {
+  const remote = server(), a = fixture(remote, 'client_alpha'), b = fixture(remote, 'client_beta1');
+  await cycle(a); await cycle(b);
+  renameSpace(b.saved[STORE_KEY], 'space-default', 'Remote edit');
+  await cycle(b);
+  const before = structuredClone(a.saved[STORE_KEY]), set = a.storage.local.set;
+  let attempted = false;
+  a.storage.local.set = async patch => {
+    if (patch[STORE_KEY]) {
+      attempted = true;
+      assert.equal(a.saved[SYNC_LOCAL_KEY].model.records['space/space-default'].name[2], 'Remote edit');
+      throw new Error('Workspace write failed');
+    }
+    return set(patch);
+  };
+  assert.equal((await a.instance().cycle()).phase, 'error');
+  assert.equal(attempted, true);
+  assert.deepEqual(a.saved[STORE_KEY], before);
+  assert.equal(a.saved[SYNC_LOCAL_KEY].baseline['space/space-default'].name, 'Personal');
+  a.storage.local.set = set;
+  await cycle(a);
+  assert.equal(a.saved[STORE_KEY].spaces[0].name, 'Remote edit');
+});
+
 test('untouched joining profile defaults do not overwrite remote space names or appearance', async () => {
   const remote = server();
   const a = fixture(remote, 'client_alpha');

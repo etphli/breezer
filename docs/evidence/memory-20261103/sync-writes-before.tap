@@ -1,0 +1,2033 @@
+TAP version 13
+# Subtest: workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership
+ok 1 - workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership
+  ---
+  duration_ms: 9.038333
+  ...
+# Subtest: offline changes survive capture, worker restart and remote deletion
+ok 2 - offline changes survive capture, worker restart and remote deletion
+  ---
+  duration_ms: 3.907791
+  ...
+# Subtest: unchanged sync cycles preserve durable recovery data without rewriting storage
+not ok 3 - unchanged sync cycles preserve durable recovery data without rewriting storage
+  ---
+  duration_ms: 88.666625
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/reconcile.test.mjs:71:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+    + [
+    +   {
+    +     'workspace.sync.local.v1': {
+    +       baseline: {
+    +         'appearance/alwaysShowSidebar': {
+    +           appearance: false
+    +         },
+    +         'appearance/alwaysShowTopBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/bookmarkBarMode': {
+    +           appearance: 'newTab'
+    +         },
+    +         'appearance/centeredAddressBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/colorMode': {
+    +           appearance: 'system'
+    +         },
+    +         'appearance/frameless': {
+    +           appearance: true
+    +         },
+    +         'appearance/layout': {
+    +           appearance: 'sidebar'
+    +         },
+    +         'appearance/minimalUrl': {
+    +           appearance: true
+    +         },
+    +         'appearance/showLoadProgress': {
+    +           appearance: true
+    +         },
+    +         'appearance/sidebarFontSize': {
+    +           appearance: 15
+    +         },
+    +         'appearance/sidebarMode': {
+    +           appearance: 'expanded'
+    +         },
+    +         'appearance/sidebarWidth': {
+    +           appearance: 240
+    +         },
+    +         'appearance/theme': {
+    +           appearance: 'mint'
+    +         },
+    +         'space/space-default': {
+    +           alive: true,
+    +           index: 0,
+    +           name: 'Personal',
+    +           tone: 'mint'
+    +         },
+    +         preferences: {
+    +           closeButton: 'hover',
+    +           newTabPosition: 'bottom'
+    +         }
+    +       },
+    +       clientId: 'client_alpha',
+    +       model: {
+    +         records: {
+    +           'appearance/alwaysShowSidebar': {
+    +             appearance: [
+    +               18,
+    +               'client_alpha',
+    +               false
+    +             ]
+    +           },
+    +           'appearance/alwaysShowTopBar': {
+    +             appearance: [
+    +               19,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/bookmarkBarMode': {
+    +             appearance: [
+    +               11,
+    +               'client_alpha',
+    +               'newTab'
+    +             ]
+    +           },
+    +           'appearance/centeredAddressBar': {
+    +             appearance: [
+    +               14,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/colorMode': {
+    +             appearance: [
+    +               10,
+    +               'client_alpha',
+    +               'system'
+    +             ]
+    +           },
+    +           'appearance/frameless': {
+    +             appearance: [
+    +               17,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/layout': {
+    +             appearance: [
+    +               7,
+    +               'client_alpha',
+    +               'sidebar'
+    +             ]
+    +           },
+    +           'appearance/minimalUrl': {
+    +             appearance: [
+    +               15,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/showLoadProgress': {
+    +             appearance: [
+    +               16,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/sidebarFontSize': {
+    +             appearance: [
+    +               13,
+    +               'client_alpha',
+    +               15
+    +             ]
+    +           },
+    +           'appearance/sidebarMode': {
+    +             appearance: [
+    +               8,
+    +               'client_alpha',
+    +               'expanded'
+    +             ]
+    +           },
+    +           'appearance/sidebarWidth': {
+    +             appearance: [
+    +               12,
+    +               'client_alpha',
+    +               240
+    +             ]
+    +           },
+    +           'appearance/theme': {
+    +             appearance: [
+    +               9,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           'space/space-default': {
+    +             alive: [
+    +               1,
+    +               'client_alpha',
+    +               true
+    +             ],
+    +             index: [
+    +               4,
+    +               'client_alpha',
+    +               0
+    +             ],
+    +             name: [
+    +               2,
+    +               'client_alpha',
+    +               'Personal'
+    +             ],
+    +             tone: [
+    +               3,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           preferences: {
+    +             closeButton: [
+    +               6,
+    +               'client_alpha',
+    +               'hover'
+    +             ],
+    +             newTabPosition: [
+    +               5,
+    +               'client_alpha',
+    +               'bottom'
+    +             ]
+    +           }
+    +         },
+    +         version: 1
+    +       },
+    +       providerId: 'disposable-provider',
+    +       vaultId: 'disposable-vault',
+    +       version: 1
+    +     }
+    +   },
+    +   {
+    +     'workspace.sync.local.v1': {
+    +       baseline: {
+    +         'appearance/alwaysShowSidebar': {
+    +           appearance: false
+    +         },
+    +         'appearance/alwaysShowTopBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/bookmarkBarMode': {
+    +           appearance: 'newTab'
+    +         },
+    +         'appearance/centeredAddressBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/colorMode': {
+    +           appearance: 'system'
+    +         },
+    +         'appearance/frameless': {
+    +           appearance: true
+    +         },
+    +         'appearance/layout': {
+    +           appearance: 'sidebar'
+    +         },
+    +         'appearance/minimalUrl': {
+    +           appearance: true
+    +         },
+    +         'appearance/showLoadProgress': {
+    +           appearance: true
+    +         },
+    +         'appearance/sidebarFontSize': {
+    +           appearance: 15
+    +         },
+    +         'appearance/sidebarMode': {
+    +           appearance: 'expanded'
+    +         },
+    +         'appearance/sidebarWidth': {
+    +           appearance: 240
+    +         },
+    +         'appearance/theme': {
+    +           appearance: 'mint'
+    +         },
+    +         'space/space-default': {
+    +           alive: true,
+    +           index: 0,
+    +           name: 'Personal',
+    +           tone: 'mint'
+    +         },
+    +         preferences: {
+    +           closeButton: 'hover',
+    +           newTabPosition: 'bottom'
+    +         }
+    +       },
+    +       clientId: 'client_alpha',
+    +       model: {
+    +         records: {
+    +           'appearance/alwaysShowSidebar': {
+    +             appearance: [
+    +               18,
+    +               'client_alpha',
+    +               false
+    +             ]
+    +           },
+    +           'appearance/alwaysShowTopBar': {
+    +             appearance: [
+    +               19,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/bookmarkBarMode': {
+    +             appearance: [
+    +               11,
+    +               'client_alpha',
+    +               'newTab'
+    +             ]
+    +           },
+    +           'appearance/centeredAddressBar': {
+    +             appearance: [
+    +               14,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/colorMode': {
+    +             appearance: [
+    +               10,
+    +               'client_alpha',
+    +               'system'
+    +             ]
+    +           },
+    +           'appearance/frameless': {
+    +             appearance: [
+    +               17,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/layout': {
+    +             appearance: [
+    +               7,
+    +               'client_alpha',
+    +               'sidebar'
+    +             ]
+    +           },
+    +           'appearance/minimalUrl': {
+    +             appearance: [
+    +               15,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/showLoadProgress': {
+    +             appearance: [
+    +               16,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/sidebarFontSize': {
+    +             appearance: [
+    +               13,
+    +               'client_alpha',
+    +               15
+    +             ]
+    +           },
+    +           'appearance/sidebarMode': {
+    +             appearance: [
+    +               8,
+    +               'client_alpha',
+    +               'expanded'
+    +             ]
+    +           },
+    +           'appearance/sidebarWidth': {
+    +             appearance: [
+    +               12,
+    +               'client_alpha',
+    +               240
+    +             ]
+    +           },
+    +           'appearance/theme': {
+    +             appearance: [
+    +               9,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           'space/space-default': {
+    +             alive: [
+    +               1,
+    +               'client_alpha',
+    +               true
+    +             ],
+    +             index: [
+    +               4,
+    +               'client_alpha',
+    +               0
+    +             ],
+    +             name: [
+    +               2,
+    +               'client_alpha',
+    +               'Personal'
+    +             ],
+    +             tone: [
+    +               3,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           preferences: {
+    +             closeButton: [
+    +               6,
+    +               'client_alpha',
+    +               'hover'
+    +             ],
+    +             newTabPosition: [
+    +               5,
+    +               'client_alpha',
+    +               'bottom'
+    +             ]
+    +           }
+    +         },
+    +         version: 1
+    +       },
+    +       providerId: 'disposable-provider',
+    +       vaultId: 'disposable-vault',
+    +       version: 1
+    +     }
+    +   },
+    +   {
+    +     'workspace.sync.local.v1': {
+    +       baseline: {
+    +         'appearance/alwaysShowSidebar': {
+    +           appearance: false
+    +         },
+    +         'appearance/alwaysShowTopBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/bookmarkBarMode': {
+    +           appearance: 'newTab'
+    +         },
+    +         'appearance/centeredAddressBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/colorMode': {
+    +           appearance: 'system'
+    +         },
+    +         'appearance/frameless': {
+    +           appearance: true
+    +         },
+    +         'appearance/layout': {
+    +           appearance: 'sidebar'
+    +         },
+    +         'appearance/minimalUrl': {
+    +           appearance: true
+    +         },
+    +         'appearance/showLoadProgress': {
+    +           appearance: true
+    +         },
+    +         'appearance/sidebarFontSize': {
+    +           appearance: 15
+    +         },
+    +         'appearance/sidebarMode': {
+    +           appearance: 'expanded'
+    +         },
+    +         'appearance/sidebarWidth': {
+    +           appearance: 240
+    +         },
+    +         'appearance/theme': {
+    +           appearance: 'mint'
+    +         },
+    +         'space/space-default': {
+    +           alive: true,
+    +           index: 0,
+    +           name: 'Personal',
+    +           tone: 'mint'
+    +         },
+    +         preferences: {
+    +           closeButton: 'hover',
+    +           newTabPosition: 'bottom'
+    +         }
+    +       },
+    +       clientId: 'client_alpha',
+    +       model: {
+    +         records: {
+    +           'appearance/alwaysShowSidebar': {
+    +             appearance: [
+    +               18,
+    +               'client_alpha',
+    +               false
+    +             ]
+    +           },
+    +           'appearance/alwaysShowTopBar': {
+    +             appearance: [
+    +               19,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/bookmarkBarMode': {
+    +             appearance: [
+    +               11,
+    +               'client_alpha',
+    +               'newTab'
+    +             ]
+    +           },
+    +           'appearance/centeredAddressBar': {
+    +             appearance: [
+    +               14,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/colorMode': {
+    +             appearance: [
+    +               10,
+    +               'client_alpha',
+    +               'system'
+    +             ]
+    +           },
+    +           'appearance/frameless': {
+    +             appearance: [
+    +               17,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/layout': {
+    +             appearance: [
+    +               7,
+    +               'client_alpha',
+    +               'sidebar'
+    +             ]
+    +           },
+    +           'appearance/minimalUrl': {
+    +             appearance: [
+    +               15,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/showLoadProgress': {
+    +             appearance: [
+    +               16,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/sidebarFontSize': {
+    +             appearance: [
+    +               13,
+    +               'client_alpha',
+    +               15
+    +             ]
+    +           },
+    +           'appearance/sidebarMode': {
+    +             appearance: [
+    +               8,
+    +               'client_alpha',
+    +               'expanded'
+    +             ]
+    +           },
+    +           'appearance/sidebarWidth': {
+    +             appearance: [
+    +               12,
+    +               'client_alpha',
+    +               240
+    +             ]
+    +           },
+    +           'appearance/theme': {
+    +             appearance: [
+    +               9,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           'space/space-default': {
+    +             alive: [
+    +               1,
+    +               'client_alpha',
+    +               true
+    +             ],
+    +             index: [
+    +               4,
+    +               'client_alpha',
+    +               0
+    +             ],
+    +             name: [
+    +               2,
+    +               'client_alpha',
+    +               'Personal'
+    +             ],
+    +             tone: [
+    +               3,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           preferences: {
+    +             closeButton: [
+    +               6,
+    +               'client_alpha',
+    +               'hover'
+    +             ],
+    +             newTabPosition: [
+    +               5,
+    +               'client_alpha',
+    +               'bottom'
+    +             ]
+    +           }
+    +         },
+    +         version: 1
+    +       },
+    +       providerId: 'disposable-provider',
+    +       vaultId: 'disposable-vault',
+    +       version: 1
+    +     }
+    +   },
+    +   {
+    +     'workspace.sync.local.v1': {
+    +       baseline: {
+    +         'appearance/alwaysShowSidebar': {
+    +           appearance: false
+    +         },
+    +         'appearance/alwaysShowTopBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/bookmarkBarMode': {
+    +           appearance: 'newTab'
+    +         },
+    +         'appearance/centeredAddressBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/colorMode': {
+    +           appearance: 'system'
+    +         },
+    +         'appearance/frameless': {
+    +           appearance: true
+    +         },
+    +         'appearance/layout': {
+    +           appearance: 'sidebar'
+    +         },
+    +         'appearance/minimalUrl': {
+    +           appearance: true
+    +         },
+    +         'appearance/showLoadProgress': {
+    +           appearance: true
+    +         },
+    +         'appearance/sidebarFontSize': {
+    +           appearance: 15
+    +         },
+    +         'appearance/sidebarMode': {
+    +           appearance: 'expanded'
+    +         },
+    +         'appearance/sidebarWidth': {
+    +           appearance: 240
+    +         },
+    +         'appearance/theme': {
+    +           appearance: 'mint'
+    +         },
+    +         'space/space-default': {
+    +           alive: true,
+    +           index: 0,
+    +           name: 'Personal',
+    +           tone: 'mint'
+    +         },
+    +         preferences: {
+    +           closeButton: 'hover',
+    +           newTabPosition: 'bottom'
+    +         }
+    +       },
+    +       clientId: 'client_alpha',
+    +       model: {
+    +         records: {
+    +           'appearance/alwaysShowSidebar': {
+    +             appearance: [
+    +               18,
+    +               'client_alpha',
+    +               false
+    +             ]
+    +           },
+    +           'appearance/alwaysShowTopBar': {
+    +             appearance: [
+    +               19,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/bookmarkBarMode': {
+    +             appearance: [
+    +               11,
+    +               'client_alpha',
+    +               'newTab'
+    +             ]
+    +           },
+    +           'appearance/centeredAddressBar': {
+    +             appearance: [
+    +               14,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/colorMode': {
+    +             appearance: [
+    +               10,
+    +               'client_alpha',
+    +               'system'
+    +             ]
+    +           },
+    +           'appearance/frameless': {
+    +             appearance: [
+    +               17,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/layout': {
+    +             appearance: [
+    +               7,
+    +               'client_alpha',
+    +               'sidebar'
+    +             ]
+    +           },
+    +           'appearance/minimalUrl': {
+    +             appearance: [
+    +               15,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/showLoadProgress': {
+    +             appearance: [
+    +               16,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/sidebarFontSize': {
+    +             appearance: [
+    +               13,
+    +               'client_alpha',
+    +               15
+    +             ]
+    +           },
+    +           'appearance/sidebarMode': {
+    +             appearance: [
+    +               8,
+    +               'client_alpha',
+    +               'expanded'
+    +             ]
+    +           },
+    +           'appearance/sidebarWidth': {
+    +             appearance: [
+    +               12,
+    +               'client_alpha',
+    +               240
+    +             ]
+    +           },
+    +           'appearance/theme': {
+    +             appearance: [
+    +               9,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           'space/space-default': {
+    +             alive: [
+    +               1,
+    +               'client_alpha',
+    +               true
+    +             ],
+    +             index: [
+    +               4,
+    +               'client_alpha',
+    +               0
+    +             ],
+    +             name: [
+    +               2,
+    +               'client_alpha',
+    +               'Personal'
+    +             ],
+    +             tone: [
+    +               3,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           preferences: {
+    +             closeButton: [
+    +               6,
+    +               'client_alpha',
+    +               'hover'
+    +             ],
+    +             newTabPosition: [
+    +               5,
+    +               'client_alpha',
+    +               'bottom'
+    +             ]
+    +           }
+    +         },
+    +         version: 1
+    +       },
+    +       providerId: 'disposable-provider',
+    +       vaultId: 'disposable-vault',
+    +       version: 1
+    +     }
+    +   },
+    +   {
+    +     'workspace.sync.local.v1': {
+    +       baseline: {
+    +         'appearance/alwaysShowSidebar': {
+    +           appearance: false
+    +         },
+    +         'appearance/alwaysShowTopBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/bookmarkBarMode': {
+    +           appearance: 'newTab'
+    +         },
+    +         'appearance/centeredAddressBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/colorMode': {
+    +           appearance: 'system'
+    +         },
+    +         'appearance/frameless': {
+    +           appearance: true
+    +         },
+    +         'appearance/layout': {
+    +           appearance: 'sidebar'
+    +         },
+    +         'appearance/minimalUrl': {
+    +           appearance: true
+    +         },
+    +         'appearance/showLoadProgress': {
+    +           appearance: true
+    +         },
+    +         'appearance/sidebarFontSize': {
+    +           appearance: 15
+    +         },
+    +         'appearance/sidebarMode': {
+    +           appearance: 'expanded'
+    +         },
+    +         'appearance/sidebarWidth': {
+    +           appearance: 240
+    +         },
+    +         'appearance/theme': {
+    +           appearance: 'mint'
+    +         },
+    +         'space/space-default': {
+    +           alive: true,
+    +           index: 0,
+    +           name: 'Personal',
+    +           tone: 'mint'
+    +         },
+    +         preferences: {
+    +           closeButton: 'hover',
+    +           newTabPosition: 'bottom'
+    +         }
+    +       },
+    +       clientId: 'client_alpha',
+    +       model: {
+    +         records: {
+    +           'appearance/alwaysShowSidebar': {
+    +             appearance: [
+    +               18,
+    +               'client_alpha',
+    +               false
+    +             ]
+    +           },
+    +           'appearance/alwaysShowTopBar': {
+    +             appearance: [
+    +               19,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/bookmarkBarMode': {
+    +             appearance: [
+    +               11,
+    +               'client_alpha',
+    +               'newTab'
+    +             ]
+    +           },
+    +           'appearance/centeredAddressBar': {
+    +             appearance: [
+    +               14,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/colorMode': {
+    +             appearance: [
+    +               10,
+    +               'client_alpha',
+    +               'system'
+    +             ]
+    +           },
+    +           'appearance/frameless': {
+    +             appearance: [
+    +               17,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/layout': {
+    +             appearance: [
+    +               7,
+    +               'client_alpha',
+    +               'sidebar'
+    +             ]
+    +           },
+    +           'appearance/minimalUrl': {
+    +             appearance: [
+    +               15,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/showLoadProgress': {
+    +             appearance: [
+    +               16,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/sidebarFontSize': {
+    +             appearance: [
+    +               13,
+    +               'client_alpha',
+    +               15
+    +             ]
+    +           },
+    +           'appearance/sidebarMode': {
+    +             appearance: [
+    +               8,
+    +               'client_alpha',
+    +               'expanded'
+    +             ]
+    +           },
+    +           'appearance/sidebarWidth': {
+    +             appearance: [
+    +               12,
+    +               'client_alpha',
+    +               240
+    +             ]
+    +           },
+    +           'appearance/theme': {
+    +             appearance: [
+    +               9,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           'space/space-default': {
+    +             alive: [
+    +               1,
+    +               'client_alpha',
+    +               true
+    +             ],
+    +             index: [
+    +               4,
+    +               'client_alpha',
+    +               0
+    +             ],
+    +             name: [
+    +               2,
+    +               'client_alpha',
+    +               'Personal'
+    +             ],
+    +             tone: [
+    +               3,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           preferences: {
+    +             closeButton: [
+    +               6,
+    +               'client_alpha',
+    +               'hover'
+    +             ],
+    +             newTabPosition: [
+    +               5,
+    +               'client_alpha',
+    +               'bottom'
+    +             ]
+    +           }
+    +         },
+    +         version: 1
+    +       },
+    +       providerId: 'disposable-provider',
+    +       vaultId: 'disposable-vault',
+    +       version: 1
+    +     }
+    +   },
+    +   {
+    +     'workspace.sync.local.v1': {
+    +       baseline: {
+    +         'appearance/alwaysShowSidebar': {
+    +           appearance: false
+    +         },
+    +         'appearance/alwaysShowTopBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/bookmarkBarMode': {
+    +           appearance: 'newTab'
+    +         },
+    +         'appearance/centeredAddressBar': {
+    +           appearance: true
+    +         },
+    +         'appearance/colorMode': {
+    +           appearance: 'system'
+    +         },
+    +         'appearance/frameless': {
+    +           appearance: true
+    +         },
+    +         'appearance/layout': {
+    +           appearance: 'sidebar'
+    +         },
+    +         'appearance/minimalUrl': {
+    +           appearance: true
+    +         },
+    +         'appearance/showLoadProgress': {
+    +           appearance: true
+    +         },
+    +         'appearance/sidebarFontSize': {
+    +           appearance: 15
+    +         },
+    +         'appearance/sidebarMode': {
+    +           appearance: 'expanded'
+    +         },
+    +         'appearance/sidebarWidth': {
+    +           appearance: 240
+    +         },
+    +         'appearance/theme': {
+    +           appearance: 'mint'
+    +         },
+    +         'space/space-default': {
+    +           alive: true,
+    +           index: 0,
+    +           name: 'Personal',
+    +           tone: 'mint'
+    +         },
+    +         preferences: {
+    +           closeButton: 'hover',
+    +           newTabPosition: 'bottom'
+    +         }
+    +       },
+    +       clientId: 'client_alpha',
+    +       model: {
+    +         records: {
+    +           'appearance/alwaysShowSidebar': {
+    +             appearance: [
+    +               18,
+    +               'client_alpha',
+    +               false
+    +             ]
+    +           },
+    +           'appearance/alwaysShowTopBar': {
+    +             appearance: [
+    +               19,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/bookmarkBarMode': {
+    +             appearance: [
+    +               11,
+    +               'client_alpha',
+    +               'newTab'
+    +             ]
+    +           },
+    +           'appearance/centeredAddressBar': {
+    +             appearance: [
+    +               14,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/colorMode': {
+    +             appearance: [
+    +               10,
+    +               'client_alpha',
+    +               'system'
+    +             ]
+    +           },
+    +           'appearance/frameless': {
+    +             appearance: [
+    +               17,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/layout': {
+    +             appearance: [
+    +               7,
+    +               'client_alpha',
+    +               'sidebar'
+    +             ]
+    +           },
+    +           'appearance/minimalUrl': {
+    +             appearance: [
+    +               15,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/showLoadProgress': {
+    +             appearance: [
+    +               16,
+    +               'client_alpha',
+    +               true
+    +             ]
+    +           },
+    +           'appearance/sidebarFontSize': {
+    +             appearance: [
+    +               13,
+    +               'client_alpha',
+    +               15
+    +             ]
+    +           },
+    +           'appearance/sidebarMode': {
+    +             appearance: [
+    +               8,
+    +               'client_alpha',
+    +               'expanded'
+    +             ]
+    +           },
+    +           'appearance/sidebarWidth': {
+    +             appearance: [
+    +               12,
+    +               'client_alpha',
+    +               240
+    +             ]
+    +           },
+    +           'appearance/theme': {
+    +             appearance: [
+    +               9,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           'space/space-default': {
+    +             alive: [
+    +               1,
+    +               'client_alpha',
+    +               true
+    +             ],
+    +             index: [
+    +               4,
+    +               'client_alpha',
+    +               0
+    +             ],
+    +             name: [
+    +               2,
+    +               'client_alpha',
+    +               'Personal'
+    +             ],
+    +             tone: [
+    +               3,
+    +               'client_alpha',
+    +               'mint'
+    +             ]
+    +           },
+    +           preferences: {
+    +             closeButton: [
+    +               6,
+    +               'client_alpha',
+    +               'hover'
+    +             ],
+    +             newTabPosition: [
+    +               5,
+    +               'client_alpha',
+    +               'bottom'
+    +             ]
+    +           }
+    +         },
+    +         version: 1
+    +       },
+    +       providerId: 'disposable-provider',
+    +       vaultId: 'disposable-vault',
+    +       version: 1
+    +     }
+    +   }
+    + ]
+    - []
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual:
+    0:
+      workspace.sync.local.v1:
+        version: 1
+        providerId: 'disposable-provider'
+        vaultId: 'disposable-vault'
+        clientId: 'client_alpha'
+        model:
+          version: 1
+          records:
+            space/space-default:
+              alive:
+                0: 1
+                1: 'client_alpha'
+                2: true
+              name:
+                0: 2
+                1: 'client_alpha'
+                2: 'Personal'
+              tone:
+                0: 3
+                1: 'client_alpha'
+                2: 'mint'
+              index:
+                0: 4
+                1: 'client_alpha'
+                2: 0
+            preferences:
+              newTabPosition:
+                0: 5
+                1: 'client_alpha'
+                2: 'bottom'
+              closeButton:
+                0: 6
+                1: 'client_alpha'
+                2: 'hover'
+            appearance/layout:
+              appearance:
+                0: 7
+                1: 'client_alpha'
+                2: 'sidebar'
+            appearance/sidebarMode:
+              appearance:
+                0: 8
+                1: 'client_alpha'
+                2: 'expanded'
+            appearance/theme:
+              appearance:
+                0: 9
+                1: 'client_alpha'
+                2: 'mint'
+            appearance/colorMode:
+              appearance:
+                0: 10
+                1: 'client_alpha'
+                2: 'system'
+            appearance/bookmarkBarMode:
+              appearance:
+                0: 11
+                1: 'client_alpha'
+                2: 'newTab'
+            appearance/sidebarWidth:
+              appearance:
+                0: 12
+                1: 'client_alpha'
+                2: 240
+            appearance/sidebarFontSize:
+              appearance:
+                0: 13
+                1: 'client_alpha'
+                2: 15
+            appearance/centeredAddressBar:
+              appearance:
+                0: 14
+                1: 'client_alpha'
+                2: true
+            appearance/minimalUrl:
+              appearance:
+                0: 15
+                1: 'client_alpha'
+                2: true
+            appearance/showLoadProgress:
+              appearance:
+                0: 16
+                1: 'client_alpha'
+                2: true
+            appearance/frameless:
+              appearance:
+                0: 17
+                1: 'client_alpha'
+                2: true
+            appearance/alwaysShowSidebar:
+              appearance:
+                0: 18
+                1: 'client_alpha'
+                2: false
+            appearance/alwaysShowTopBar:
+              appearance:
+                0: 19
+                1: 'client_alpha'
+                2: true
+        baseline:
+          space/space-default:
+            alive: true
+            name: 'Personal'
+            tone: 'mint'
+            index: 0
+          preferences:
+            newTabPosition: 'bottom'
+            closeButton: 'hover'
+          appearance/layout:
+            appearance: 'sidebar'
+          appearance/sidebarMode:
+            appearance: 'expanded'
+          appearance/theme:
+            appearance: 'mint'
+          appearance/colorMode:
+            appearance: 'system'
+          appearance/bookmarkBarMode:
+            appearance: 'newTab'
+          appearance/sidebarWidth:
+            appearance: 240
+          appearance/sidebarFontSize:
+            appearance: 15
+          appearance/centeredAddressBar:
+            appearance: true
+          appearance/minimalUrl:
+            appearance: true
+          appearance/showLoadProgress:
+            appearance: true
+          appearance/frameless:
+            appearance: true
+          appearance/alwaysShowSidebar:
+            appearance: false
+          appearance/alwaysShowTopBar:
+            appearance: true
+    1:
+      workspace.sync.local.v1:
+        version: 1
+        providerId: 'disposable-provider'
+        vaultId: 'disposable-vault'
+        clientId: 'client_alpha'
+        model:
+          version: 1
+          records:
+            space/space-default:
+              alive:
+                0: 1
+                1: 'client_alpha'
+                2: true
+              name:
+                0: 2
+                1: 'client_alpha'
+                2: 'Personal'
+              tone:
+                0: 3
+                1: 'client_alpha'
+                2: 'mint'
+              index:
+                0: 4
+                1: 'client_alpha'
+                2: 0
+            preferences:
+              newTabPosition:
+                0: 5
+                1: 'client_alpha'
+                2: 'bottom'
+              closeButton:
+                0: 6
+                1: 'client_alpha'
+                2: 'hover'
+            appearance/layout:
+              appearance:
+                0: 7
+                1: 'client_alpha'
+                2: 'sidebar'
+            appearance/sidebarMode:
+              appearance:
+                0: 8
+                1: 'client_alpha'
+                2: 'expanded'
+            appearance/theme:
+              appearance:
+                0: 9
+                1: 'client_alpha'
+                2: 'mint'
+            appearance/colorMode:
+              appearance:
+                0: 10
+                1: 'client_alpha'
+                2: 'system'
+            appearance/bookmarkBarMode:
+              appearance:
+                0: 11
+                1: 'client_alpha'
+                2: 'newTab'
+            appearance/sidebarWidth:
+              appearance:
+                0: 12
+                1: 'client_alpha'
+                2: 240
+            appearance/sidebarFontSize:
+              appearance:
+                0: 13
+                1: 'client_alpha'
+                2: 15
+            appearance/centeredAddressBar:
+              appearance:
+                0: 14
+                1: 'client_alpha'
+                2: true
+            appearance/minimalUrl:
+              appearance:
+                0: 15
+                1: 'client_alpha'
+                2: true
+            appearance/showLoadProgress:
+              appearance:
+                0: 16
+                1: 'client_alpha'
+                2: true
+            appearance/frameless:
+              appearance:
+                0: 17
+                1: 'client_alpha'
+                2: true
+            appearance/alwaysShowSidebar:
+              appearance:
+                0: 18
+                1: 'client_alpha'
+                2: false
+            appearance/alwaysShowTopBar:
+              appearance:
+                0: 19
+                1: 'client_alpha'
+                2: true
+        baseline:
+          space/space-default:
+            alive: true
+            name: 'Personal'
+            tone: 'mint'
+            index: 0
+          preferences:
+            newTabPosition: 'bottom'
+            closeButton: 'hover'
+          appearance/layout:
+            appearance: 'sidebar'
+          appearance/sidebarMode:
+            appearance: 'expanded'
+          appearance/theme:
+            appearance: 'mint'
+          appearance/colorMode:
+            appearance: 'system'
+          appearance/bookmarkBarMode:
+            appearance: 'newTab'
+          appearance/sidebarWidth:
+            appearance: 240
+          appearance/sidebarFontSize:
+            appearance: 15
+          appearance/centeredAddressBar:
+            appearance: true
+          appearance/minimalUrl:
+            appearance: true
+          appearance/showLoadProgress:
+            appearance: true
+          appearance/frameless:
+            appearance: true
+          appearance/alwaysShowSidebar:
+            appearance: false
+          appearance/alwaysShowTopBar:
+            appearance: true
+    2:
+      workspace.sync.local.v1:
+        version: 1
+        providerId: 'disposable-provider'
+        vaultId: 'disposable-vault'
+        clientId: 'client_alpha'
+        model:
+          version: 1
+          records:
+            space/space-default:
+              alive:
+                0: 1
+                1: 'client_alpha'
+                2: true
+              name:
+                0: 2
+                1: 'client_alpha'
+                2: 'Personal'
+              tone:
+                0: 3
+                1: 'client_alpha'
+                2: 'mint'
+              index:
+                0: 4
+                1: 'client_alpha'
+                2: 0
+            preferences:
+              newTabPosition:
+                0: 5
+                1: 'client_alpha'
+                2: 'bottom'
+              closeButton:
+                0: 6
+                1: 'client_alpha'
+                2: 'hover'
+            appearance/layout:
+              appearance:
+                0: 7
+                1: 'client_alpha'
+                2: 'sidebar'
+            appearance/sidebarMode:
+              appearance:
+                0: 8
+                1: 'client_alpha'
+                2: 'expanded'
+            appearance/theme:
+              appearance:
+                0: 9
+                1: 'client_alpha'
+                2: 'mint'
+            appearance/colorMode:
+              appearance:
+                0: 10
+                1: 'client_alpha'
+                2: 'system'
+            appearance/bookmarkBarMode:
+              appearance:
+                0: 11
+                1: 'client_alpha'
+                2: 'newTab'
+            appearance/sidebarWidth:
+              appearance:
+                0: 12
+                1: 'client_alpha'
+                2: 240
+            appearance/sidebarFontSize:
+              appearance:
+                0: 13
+                1: 'client_alpha'
+                2: 15
+            appearance/centeredAddressBar:
+              appearance:
+                0: 14
+                1: 'client_alpha'
+                2: true
+            appearance/minimalUrl:
+              appearance:
+                0: 15
+                1: 'client_alpha'
+                2: true
+            appearance/showLoadProgress:
+              appearance:
+                0: 16
+                1: 'client_alpha'
+                2: true
+            appearance/frameless:
+              appearance:
+                0: 17
+                1: 'client_alpha'
+                2: true
+            appearance/alwaysShowSidebar:
+              appearance:
+                0: 18
+                1: 'client_alpha'
+                2: false
+            appearance/alwaysShowTopBar:
+              appearance:
+                0: 19
+                1: 'client_alpha'
+                2: true
+        baseline:
+          space/space-default:
+            alive: true
+            name: 'Personal'
+            tone: 'mint'
+            index: 0
+          preferences:
+            newTabPosition: 'bottom'
+            closeButton: 'hover'
+          appearance/layout:
+            appearance: 'sidebar'
+          appearance/sidebarMode:
+            appearance: 'expanded'
+          appearance/theme:
+            appearance: 'mint'
+          appearance/colorMode:
+            appearance: 'system'
+          appearance/bookmarkBarMode:
+            appearance: 'newTab'
+          appearance/sidebarWidth:
+            appearance: 240
+          appearance/sidebarFontSize:
+            appearance: 15
+          appearance/centeredAddressBar:
+            appearance: true
+          appearance/minimalUrl:
+            appearance: true
+          appearance/showLoadProgress:
+            appearance: true
+          appearance/frameless:
+            appearance: true
+          appearance/alwaysShowSidebar:
+            appearance: false
+          appearance/alwaysShowTopBar:
+            appearance: true
+    3:
+      workspace.sync.local.v1:
+        version: 1
+        providerId: 'disposable-provider'
+        vaultId: 'disposable-vault'
+        clientId: 'client_alpha'
+        model:
+          version: 1
+          records:
+            space/space-default:
+              alive:
+                0: 1
+                1: 'client_alpha'
+                2: true
+              name:
+                0: 2
+                1: 'client_alpha'
+                2: 'Personal'
+              tone:
+                0: 3
+                1: 'client_alpha'
+                2: 'mint'
+              index:
+                0: 4
+                1: 'client_alpha'
+                2: 0
+            preferences:
+              newTabPosition:
+                0: 5
+                1: 'client_alpha'
+                2: 'bottom'
+              closeButton:
+                0: 6
+                1: 'client_alpha'
+                2: 'hover'
+            appearance/layout:
+              appearance:
+                0: 7
+                1: 'client_alpha'
+                2: 'sidebar'
+            appearance/sidebarMode:
+              appearance:
+                0: 8
+                1: 'client_alpha'
+                2: 'expanded'
+            appearance/theme:
+              appearance:
+                0: 9
+                1: 'client_alpha'
+                2: 'mint'
+            appearance/colorMode:
+              appearance:
+                0: 10
+                1: 'client_alpha'
+                2: 'system'
+            appearance/bookmarkBarMode:
+              appearance:
+                0: 11
+                1: 'client_alpha'
+                2: 'newTab'
+            appearance/sidebarWidth:
+              appearance:
+                0: 12
+                1: 'client_alpha'
+                2: 240
+            appearance/sidebarFontSize:
+              appearance:
+                0: 13
+                1: 'client_alpha'
+                2: 15
+            appearance/centeredAddressBar:
+              appearance:
+                0: 14
+                1: 'client_alpha'
+                2: true
+            appearance/minimalUrl:
+              appearance:
+                0: 15
+                1: 'client_alpha'
+                2: true
+            appearance/showLoadProgress:
+              appearance:
+                0: 16
+                1: 'client_alpha'
+                2: true
+            appearance/frameless:
+              appearance:
+                0: 17
+                1: 'client_alpha'
+                2: true
+            appearance/alwaysShowSidebar:
+              appearance:
+                0: 18
+                1: 'client_alpha'
+                2: false
+            appearance/alwaysShowTopBar:
+              appearance:
+                0: 19
+                1: 'client_alpha'
+                2: true
+        baseline:
+          space/space-default:
+            alive: true
+            name: 'Personal'
+            tone: 'mint'
+            index: 0
+          preferences:
+            newTabPosition: 'bottom'
+            closeButton: 'hover'
+          appearance/layout:
+            appearance: 'sidebar'
+          appearance/sidebarMode:
+            appearance: 'expanded'
+          appearance/theme:
+            appearance: 'mint'
+          appearance/colorMode:
+            appearance: 'system'
+          appearance/bookmarkBarMode:
+            appearance: 'newTab'
+          appearance/sidebarWidth:
+            appearance: 240
+          appearance/sidebarFontSize:
+            appearance: 15
+          appearance/centeredAddressBar:
+            appearance: true
+          appearance/minimalUrl:
+            appearance: true
+          appearance/showLoadProgress:
+            appearance: true
+          appearance/frameless:
+            appearance: true
+          appearance/alwaysShowSidebar:
+            appearance: false
+          appearance/alwaysShowTopBar:
+            appearance: true
+    4:
+      workspace.sync.local.v1:
+        version: 1
+        providerId: 'disposable-provider'
+        vaultId: 'disposable-vault'
+        clientId: 'client_alpha'
+        model:
+          version: 1
+          records:
+            space/space-default:
+              alive:
+                0: 1
+                1: 'client_alpha'
+                2: true
+              name:
+                0: 2
+                1: 'client_alpha'
+                2: 'Personal'
+              tone:
+                0: 3
+                1: 'client_alpha'
+                2: 'mint'
+              index:
+                0: 4
+                1: 'client_alpha'
+                2: 0
+            preferences:
+              newTabPosition:
+                0: 5
+                1: 'client_alpha'
+                2: 'bottom'
+              closeButton:
+                0: 6
+                1: 'client_alpha'
+                2: 'hover'
+            appearance/layout:
+              appearance:
+                0: 7
+                1: 'client_alpha'
+                2: 'sidebar'
+            appearance/sidebarMode:
+              appearance:
+                0: 8
+                1: 'client_alpha'
+                2: 'expanded'
+            appearance/theme:
+              appearance:
+                0: 9
+                1: 'client_alpha'
+                2: 'mint'
+            appearance/colorMode:
+              appearance:
+                0: 10
+                1: 'client_alpha'
+                2: 'system'
+            appearance/bookmarkBarMode:
+              appearance:
+                0: 11
+                1: 'client_alpha'
+                2: 'newTab'
+            appearance/sidebarWidth:
+              appearance:
+                0: 12
+                1: 'client_alpha'
+                2: 240
+            appearance/sidebarFontSize:
+              appearance:
+                0: 13
+                1: 'client_alpha'
+                2: 15
+            appearance/centeredAddressBar:
+              appearance:
+                0: 14
+                1: 'client_alpha'
+                2: true
+            appearance/minimalUrl:
+              appearance:
+                0: 15
+                1: 'client_alpha'
+                2: true
+            appearance/showLoadProgress:
+              appearance:
+                0: 16
+                1: 'client_alpha'
+                2: true
+            appearance/frameless:
+              appearance:
+                0: 17
+                1: 'client_alpha'
+                2: true
+            appearance/alwaysShowSidebar:
+              appearance:
+                0: 18
+                1: 'client_alpha'
+                2: false
+            appearance/alwaysShowTopBar:
+              appearance:
+                0: 19
+                1: 'client_alpha'
+                2: true
+        baseline:
+          space/space-default:
+            alive: true
+            name: 'Personal'
+            tone: 'mint'
+            index: 0
+          preferences:
+            newTabPosition: 'bottom'
+            closeButton: 'hover'
+          appearance/layout:
+            appearance: 'sidebar'
+          appearance/sidebarMode:
+            appearance: 'expanded'
+          appearance/theme:
+            appearance: 'mint'
+          appearance/colorMode:
+            appearance: 'system'
+          appearance/bookmarkBarMode:
+            appearance: 'newTab'
+          appearance/sidebarWidth:
+            appearance: 240
+          appearance/sidebarFontSize:
+            appearance: 15
+          appearance/centeredAddressBar:
+            appearance: true
+          appearance/minimalUrl:
+            appearance: true
+          appearance/showLoadProgress:
+            appearance: true
+          appearance/frameless:
+            appearance: true
+          appearance/alwaysShowSidebar:
+            appearance: false
+          appearance/alwaysShowTopBar:
+            appearance: true
+    5:
+      workspace.sync.local.v1:
+        version: 1
+        providerId: 'disposable-provider'
+        vaultId: 'disposable-vault'
+        clientId: 'client_alpha'
+        model:
+          version: 1
+          records:
+            space/space-default:
+              alive:
+                0: 1
+                1: 'client_alpha'
+                2: true
+              name:
+                0: 2
+                1: 'client_alpha'
+                2: 'Personal'
+              tone:
+                0: 3
+                1: 'client_alpha'
+                2: 'mint'
+              index:
+                0: 4
+                1: 'client_alpha'
+                2: 0
+            preferences:
+              newTabPosition:
+                0: 5
+                1: 'client_alpha'
+                2: 'bottom'
+              closeButton:
+                0: 6
+                1: 'client_alpha'
+                2: 'hover'
+            appearance/layout:
+              appearance:
+                0: 7
+                1: 'client_alpha'
+                2: 'sidebar'
+            appearance/sidebarMode:
+              appearance:
+                0: 8
+                1: 'client_alpha'
+                2: 'expanded'
+            appearance/theme:
+              appearance:
+                0: 9
+                1: 'client_alpha'
+                2: 'mint'
+            appearance/colorMode:
+              appearance:
+                0: 10
+                1: 'client_alpha'
+                2: 'system'
+            appearance/bookmarkBarMode:
+              appearance:
+                0: 11
+                1: 'client_alpha'
+                2: 'newTab'
+            appearance/sidebarWidth:
+              appearance:
+                0: 12
+                1: 'client_alpha'
+                2: 240
+            appearance/sidebarFontSize:
+              appearance:
+                0: 13
+                1: 'client_alpha'
+                2: 15
+            appearance/centeredAddressBar:
+              appearance:
+                0: 14
+                1: 'client_alpha'
+                2: true
+            appearance/minimalUrl:
+              appearance:
+                0: 15
+                1: 'client_alpha'
+                2: true
+            appearance/showLoadProgress:
+              appearance:
+                0: 16
+                1: 'client_alpha'
+                2: true
+            appearance/frameless:
+              appearance:
+                0: 17
+                1: 'client_alpha'
+                2: true
+            appearance/alwaysShowSidebar:
+              appearance:
+                0: 18
+                1: 'client_alpha'
+                2: false
+            appearance/alwaysShowTopBar:
+              appearance:
+                0: 19
+                1: 'client_alpha'
+                2: true
+        baseline:
+          space/space-default:
+            alive: true
+            name: 'Personal'
+            tone: 'mint'
+            index: 0
+          preferences:
+            newTabPosition: 'bottom'
+            closeButton: 'hover'
+          appearance/layout:
+            appearance: 'sidebar'
+          appearance/sidebarMode:
+            appearance: 'expanded'
+          appearance/theme:
+            appearance: 'mint'
+          appearance/colorMode:
+            appearance: 'system'
+          appearance/bookmarkBarMode:
+            appearance: 'newTab'
+          appearance/sidebarWidth:
+            appearance: 240
+          appearance/sidebarFontSize:
+            appearance: 15
+          appearance/centeredAddressBar:
+            appearance: true
+          appearance/minimalUrl:
+            appearance: true
+          appearance/showLoadProgress:
+            appearance: true
+          appearance/frameless:
+            appearance: true
+          appearance/alwaysShowSidebar:
+            appearance: false
+          appearance/alwaysShowTopBar:
+            appearance: true
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/reconcile.test.mjs:79:10)
+    async Test.run (node:internal/test_runner/test:980:9)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: changed local recovery data reaches storage before a failing exchange
+ok 4 - changed local recovery data reaches storage before a failing exchange
+  ---
+  duration_ms: 1.5155
+  ...
+# Subtest: untouched joining profile defaults do not overwrite remote space names or appearance
+ok 5 - untouched joining profile defaults do not overwrite remote space names or appearance
+  ---
+  duration_ms: 1.03425
+  ...
+# Subtest: disabled and disconnected clients never write or apply remote data
+ok 6 - disabled and disconnected clients never write or apply remote data
+  ---
+  duration_ms: 0.15925
+  ...
+# Subtest: invalid remote data preserves local store and membership
+ok 7 - invalid remote data preserves local store and membership
+  ---
+  duration_ms: 0.233875
+  ...
+# Subtest: CAS conflicts retry with remote edits without dropping captured local edits
+ok 8 - CAS conflicts retry with remote edits without dropping captured local edits
+  ---
+  duration_ms: 3.14775
+  ...
+# Subtest: local capture failure never publishes a partial snapshot or replaces saved data
+ok 9 - local capture failure never publishes a partial snapshot or replaces saved data
+  ---
+  duration_ms: 0.538375
+  ...
+# Subtest: explicit overflow recovery keeps pins when removing a concurrent space
+ok 10 - explicit overflow recovery keeps pins when removing a concurrent space
+  ---
+  duration_ms: 6.441667
+  ...
+# Subtest: changing providers with the same vault UUID cannot receive an old in-flight write
+ok 11 - changing providers with the same vault UUID cannot receive an old in-flight write
+  ---
+  duration_ms: 0.939583
+  ...
+# Subtest: managed appearance changes do not block valid saved spaces or overwrite the local appearance
+ok 12 - managed appearance changes do not block valid saved spaces or overwrite the local appearance
+  ---
+  duration_ms: 3.243833
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 11
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 191.491333

@@ -1,0 +1,262 @@
+{
+  "baselineSource": "import { spawn } from 'node:child_process';\nimport { access } from 'node:fs/promises';\nimport { constants } from 'node:fs';\nimport { homedir } from 'node:os';\nimport { join, dirname } from 'node:path';\nimport { EventEmitter } from 'node:events';\n\nexport const safeDirectories = [dirname(process.execPath), join(homedir(), '.local/bin'), join(homedir(), '.local/node/bin'), '/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/bin'];\nexport async function findCli(name) {\n  if (!['codex', 'claude'].includes(name)) throw new Error('Unknown provider.');\n  for (const directory of safeDirectories) {\n    const path = join(directory, name);\n    try { await access(path, constants.X_OK); return path; } catch {}\n  }\n  throw new Error(`${name === 'codex' ? 'Codex' : 'Claude Code'} CLI was not found. Install it and sign in from Terminal.`);\n}\n\nexport function cliEnvironment(extra = {}) {\n  const env = { HOME: homedir(), PATH: safeDirectories.join(':'), LANG: process.env.LANG || 'en_US.UTF-8', TMPDIR: process.env.TMPDIR || '/tmp' };\n  for (const key of ['USER', 'LOGNAME', 'HTTPS_PROXY', 'HTTP_PROXY', 'NO_PROXY', 'SSL_CERT_FILE', 'SSL_CERT_DIR', 'ANTHROPIC_API_KEY', 'CLAUDE_CODE_OAUTH_TOKEN', 'OPENAI_API_KEY']) if (process.env[key]) env[key] = process.env[key];\n  return { ...env, ...extra };\n}\n\nexport function runCli(binary, args, { timeout = 20_000, env = cliEnvironment(), cwd = homedir(), spawnProcess = spawn } = {}) {\n  return new Promise((resolve, reject) => {\n    const child = spawnProcess(binary, args, { cwd, env, stdio: ['pipe', 'pipe', 'pipe'], shell: false });\n    let stdout = '', stderr = '';\n    const timer = setTimeout(() => { child.kill('SIGKILL'); reject(new Error('CLI discovery timed out.')); }, timeout);\n    child.stdout.on('data', (data) => { stdout += data; if (stdout.length > 16 * 1024 * 1024) child.kill('SIGKILL'); });\n    child.stderr.on('data', (data) => { stderr = (stderr + data).slice(-4000); });\n    child.on('error', (error) => { clearTimeout(timer); reject(error); });\n    child.on('close', (code) => { clearTimeout(timer); resolve({ stdout, stderr, code }); });\n    child.stdin.end();\n  });\n}\n\nexport class JsonLineProcess extends EventEmitter {\n  #buffer = '';\n  #pending = new Map();\n  #counter = 0;\n  closed = false;\n  constructor(binary, args, { cwd = homedir(), env = cliEnvironment(), spawnProcess = spawn } = {}) {\n    super();\n    this.child = spawnProcess(binary, args, { cwd, env, stdio: ['pipe', 'pipe', 'pipe'], shell: false });\n    this.exited = new Promise((resolve) => this.child.once('close', resolve));\n    this.child.stdout.setEncoding('utf8');\n    this.child.stdout.on('data', (chunk) => {\n      this.#buffer += chunk;\n      if (this.#buffer.length > 16 * 1024 * 1024) return this.close(new Error('CLI output exceeded its limit.'));\n      let index;\n      while ((index = this.#buffer.indexOf('\\n')) !== -1) {\n        const line = this.#buffer.slice(0, index); this.#buffer = this.#buffer.slice(index + 1);\n        if (!line.trim()) continue;\n        try {\n          const message = JSON.parse(line);\n          const key = message.id ?? message.response?.request_id;\n          const pending = this.#pending.get(key);\n          if (pending && (!message.method || message.type === 'control_response')) {\n            clearTimeout(pending.timer); this.#pending.delete(key);\n            if (message.error || message.response?.subtype === 'error') pending.reject(new Error(message.error?.message || message.response?.error || 'CLI request failed.'));\n            else pending.resolve(message.result ?? message.response?.response);\n          } else this.emit('message', message);\n        } catch (error) { this.close(new Error(`Invalid CLI response: ${error.message}`)); }\n      }\n    });\n    this.child.stderr.on('data', () => {});\n    this.child.stdin.on('error', (error) => this.close(error));\n    this.child.on('error', (error) => this.close(error));\n    this.child.on('close', () => this.close(new Error('CLI connection closed.')));\n  }\n  send(message) {\n    if (this.closed) throw new Error('CLI connection is closed.');\n    this.child.stdin.write(`${JSON.stringify(message)}\\n`);\n  }\n  request(method, params = {}, timeout = 30_000) {\n    const id = ++this.#counter;\n    return this.#wait(id, { id, method, params }, timeout);\n  }\n  control(request, timeout = 30_000) {\n    const id = `breezer-${++this.#counter}`;\n    return this.#wait(id, { type: 'control_request', request_id: id, request }, timeout);\n  }\n  #wait(id, message, timeout) {\n    return new Promise((resolve, reject) => {\n      const timer = setTimeout(() => { this.#pending.delete(id); reject(new Error('CLI request timed out.')); }, timeout);\n      this.#pending.set(id, { resolve, reject, timer });\n      try { this.send(message); } catch (error) { clearTimeout(timer); this.#pending.delete(id); reject(error); }\n    });\n  }\n  close(error = new Error('Cancelled.')) {\n    if (this.closed) return this.exited;\n    this.closed = true;\n    for (const pending of this.#pending.values()) { clearTimeout(pending.timer); pending.reject(error); }\n    this.#pending.clear();\n    this.child.kill('SIGTERM');\n    const child = this.child;\n    const timer = setTimeout(() => { if (child.exitCode === null) child.kill('SIGKILL'); }, 1000); timer.unref();\n    this.emit('closed', error);\n    return this.exited;\n  }\n}\n",
+  "baselineSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+  "baselineReproduction": {
+    "baselineSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+    "currentSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+    "fixtures": {
+      "fragmented1MiB": {
+        "baseline": {
+          "searches": 1026,
+          "searchInputUnits": 538443788,
+          "elapsedMs": 97.004458,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 1048588
+        },
+        "current": {
+          "searches": 1026,
+          "searchInputUnits": 538443788,
+          "elapsedMs": 82.722667,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 1048588
+        }
+      },
+      "fragmentedNearLimit": {
+        "baseline": {
+          "searches": 16385,
+          "searchInputUnits": 137447342080,
+          "elapsedMs": 19473.390833,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 16777216
+        },
+        "current": {
+          "searches": 16385,
+          "searchInputUnits": 137447342080,
+          "elapsedMs": 19294.792125,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 16777216
+        }
+      },
+      "shortLines": {
+        "baseline": {
+          "searches": 60000,
+          "searchInputUnits": 240000,
+          "elapsedMs": 31.43183300000237,
+          "messages": 30000,
+          "retainedUnits": 0,
+          "inputUnits": 240000
+        },
+        "current": {
+          "searches": 60000,
+          "searchInputUnits": 240000,
+          "elapsedMs": 30.845416999996814,
+          "messages": 30000,
+          "retainedUnits": 0,
+          "inputUnits": 240000
+        }
+      }
+    },
+    "shortLineSamples": [
+      {
+        "baseline": 31.91829200000211,
+        "current": 37.02716700000019
+      },
+      {
+        "current": 30.251124999995227,
+        "baseline": 30.59441700000025
+      },
+      {
+        "baseline": 33.40562499999942,
+        "current": 28.922958000002836
+      },
+      {
+        "current": 29.203874999999243,
+        "baseline": 32.60383400000137
+      },
+      {
+        "baseline": 28.849417000004905,
+        "current": 29.029042000001937
+      },
+      {
+        "current": 29.013334000002942,
+        "baseline": 32.41137499999604
+      },
+      {
+        "baseline": 29.30645799999911,
+        "current": 28.73933300000499
+      },
+      {
+        "current": 32.55008299999463,
+        "baseline": 29.01825000000099
+      }
+    ]
+  },
+  "measurement": {
+    "runtime": "v24.22.1",
+    "fixtureHarnessSha256": "3ab70941cd5a01422e3f96c4a1b78d6e6a2059c6c134f3af9ce44179da9143c1",
+    "baselineSha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+    "currentSha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+    "fixtures": {
+      "fragmented1MiB": {
+        "baseline": {
+          "searches": 1026,
+          "searchInputUnits": 538443788,
+          "elapsedMs": 78.859792,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 1048588
+        },
+        "current": {
+          "searches": 1026,
+          "searchInputUnits": 1048588,
+          "elapsedMs": 3.3570409999999953,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 1048588
+        }
+      },
+      "fragmentedNearLimit": {
+        "baseline": {
+          "searches": 16385,
+          "searchInputUnits": 137447342080,
+          "elapsedMs": 19293.717667,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 16777216
+        },
+        "current": {
+          "searches": 16385,
+          "searchInputUnits": 16777216,
+          "elapsedMs": 42.24141700000109,
+          "messages": 1,
+          "retainedUnits": 0,
+          "inputUnits": 16777216
+        }
+      },
+      "shortLines": {
+        "baseline": {
+          "searches": 60000,
+          "searchInputUnits": 240000,
+          "elapsedMs": 31.147667000001093,
+          "messages": 30000,
+          "retainedUnits": 0,
+          "inputUnits": 240000
+        },
+        "current": {
+          "searches": 60000,
+          "searchInputUnits": 240000,
+          "elapsedMs": 30.554166999998415,
+          "messages": 30000,
+          "retainedUnits": 0,
+          "inputUnits": 240000
+        }
+      }
+    },
+    "shortLineSamples": [
+      {
+        "baseline": 31.923957999999402,
+        "current": 38.03900000000067
+      },
+      {
+        "current": 31.320457999998325,
+        "baseline": 31.163416999999754
+      },
+      {
+        "baseline": 42.24912499999846,
+        "current": 29.932874999998603
+      },
+      {
+        "current": 31.08733299999949,
+        "baseline": 30.847750000000815
+      },
+      {
+        "baseline": 33.1205829999999,
+        "current": 29.748584000000847
+      },
+      {
+        "current": 29.945040999999037,
+        "baseline": 33.8204160000023
+      },
+      {
+        "baseline": 29.85779200000252,
+        "current": 29.288375000000087
+      },
+      {
+        "current": 30.042584000002535,
+        "baseline": 33.55200000000332
+      }
+    ]
+  },
+  "verifiedFilesSha256": {
+    "features/ai/host/cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+    "tests/ai/cli-fragment-buffer.test.mjs": "a3803050ac22d7666ba7645497df8c5830ae08d15efd2e1a60c642ae9a9dc8d4",
+    "script/verify_cli_fragment_efficiency.mjs": "3ab70941cd5a01422e3f96c4a1b78d6e6a2059c6c134f3af9ce44179da9143c1",
+    "features/ai/host/codex.mjs": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+    "features/ai/host/claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+    "tests/ai/codex-cancellation.test.mjs": "d5a2c188f54083bed4bc2aa33b4eb6864db80b1e87703a52d0bb190124b59e94",
+    "tests/ai/codex-process-cancellation.test.mjs": "b5ed3c9326b6a9c1cc3c89da7ac4817b806bede91da83810067ad550904c1606",
+    "tests/ai/claude-streaming.test.mjs": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874",
+    "tests/ai/host.test.mjs": "e0664326b6322b24c0ff9283f5786e68e05e4f6033a92873c165df52bff333bb",
+    "build/efficiency-20261103/organato-review-node24": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "authorModel": "gpt-6.1-sol, high reasoning, regular speed; no subagents",
+  "auditFinding": "NH-05 reproduced before edit using actual JsonLineProcess source in an isolated VM and fake UTF-8 PassThrough child streams. Baseline source stored verbatim above; current also tested through direct production import.",
+  "representation": {
+    "choice": "Keep the existing accumulated string, search only the incoming decoded chunk for the first newline, then retain the original suffix loop. String length does not require a prefix search. No fragment arrays or indexed access to accumulated text before a newline.",
+    "reason": "An offset indexOf on the accumulated rope can still flatten it. Searching the new chunk instead avoids that trigger until a newline requires slicing and JSON parsing. No claim of engine-independent copy counts; measured on the supplied Node 24 runtime.",
+    "limits": "Unchanged whole incoming chunk UTF-16 length check, performed before parsing even if the chunk contains complete early lines. Existing over-limit and malformed-response behaviors remain, including suffix processing after parse errors.",
+    "lifecycle": "Clear partial string only on confirmed child close. Preserve partial line across explicit cancellation/error close because a still-exiting child can complete that line. Pending rejection, timers, SIGTERM/SIGKILL escalation and exited promise remain unchanged."
+  },
+  "shortLineInterpretation": {
+    "baselineMedianMs": 32.52227049999965,
+    "currentMedianMs": 29.993812500000786,
+    "verdict": "No material ordinary short-line regression observed in eight alternating-order samples of 30000 complete lines each; noisy fixture timings are not a universal performance guarantee. Same 60000 searches and 240000 search input units."
+  },
+  "commands": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 script/verify_cli_fragment_efficiency.mjs --record",
+      "result": "Executed before edit with identical hashes, then after edit. Fixture counters and timings recorded above."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/cli-fragment-buffer.test.mjs",
+      "result": "10 passed, 0 failed. Initial candidate run also passed all 9 tests then present."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/claude-streaming.test.mjs tests/ai/codex-cancellation.test.mjs tests/ai/codex-process-cancellation.test.mjs",
+      "result": "41 passed, 0 failed. Loopback fakes and one owned synthetic Node child with empty env; resistant child confirmed reaped before cleanup."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test --test-name-pattern='^(Claude structured|Codex streams|Codex Fast failures|an unsafe Codex probe)' tests/ai/host.test.mjs",
+      "result": "4 passed, 0 failed; selected fake-provider tests only, no real discovery/isolation/auth fixtures."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --check features/ai/host/cli.mjs",
+      "result": "passed"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --check script/verify_cli_fragment_efficiency.mjs",
+      "result": "passed"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --check tests/ai/cli-fragment-buffer.test.mjs",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check -- features/ai/host/cli.mjs tests/ai/cli-fragment-buffer.test.mjs script/verify_cli_fragment_efficiency.mjs",
+      "result": "passed"
+    }
+  ],
+  "objectionsAndRemainingGaps": [
+    "Search counters sum indexOf haystack lengths, not actual character comparisons, allocation copies, RSS, browser memory, CPU utilization or end-to-end speed. Concatenation counts were not instrumented.",
+    "The VM fixture instruments only indexOf and exposes private retained text length, and uses fake timers. A direct production import test and existing real synthetic-child cancellation test additionally verify the actual runtime class.",
+    "Private retained-length test proves a logical reference is cleared on confirmed child exit, not immediate GC or physical memory release. Output after confirmed child close is outside the real child-stream lifecycle; cancellation before exit remains supported.",
+    "String rope representation/flattening is engine-dependent. No fragment accumulator was implemented because the small incoming-chunk search removes the repeated search without per-fragment array storage.",
+    "Differential baseline source is stored in the owned build receipt, so these tests require that receipt. Shared host full suite intentionally not run because it includes config/auth/isolation fixtures outside authorization.",
+    "Parent still owns combined verification, all-host receipt, inventories and documentation. No app build/run/install, real provider/account/config/Keychain access, PC action, external network, dependency download, compiled-cache deletion, commit or publication performed."
+  ],
+  "finalVerification": "55 selected tests passed: 10 fragment differential/direct-import, 41 current Codex/Claude fake and synthetic-child cancellation, 4 selected host provider tests. Syntax checks and owned diff whitespace check passed. Final harness measurement rerun on v24.22.1 after adding direct-import fixture support and measurement harness hash."
+}

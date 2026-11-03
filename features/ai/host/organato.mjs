@@ -3,10 +3,41 @@ import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
+import { types } from 'node:util';
 const BASE = 'https://organato.etphli.workers.dev/api/v1';
 const SERVICE = 'io.github.etphli.breezer.organato';
 const CONFIG = join(homedir(), 'Library/Application Support/io.github.etphli.breezer-integrations');
 const keyPattern = /^org_[A-Za-z0-9_-]{43}$/;
+async function responseText(response) {
+  if (!response.body) return '';
+  const reader = response.body.getReader(), decoder = new TextDecoder('utf-8', { ignoreBOM: true });
+  let text = '', leading = true, boms = 0;
+  const append = value => {
+    let start = 0;
+    if (leading) {
+      // Node Response.text removes a byte BOM and then the decoder's BOM.
+      while (start < value.length && boms < 2 && value[start] === '\ufeff') { start++; boms++; }
+      leading = start === value.length;
+    }
+    text += start ? value.slice(start) : value;
+    if (text.length > 2_000_000) throw new Error('Organato response is too large.');
+  };
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!types.isUint8Array(value)) throw new TypeError('Organato response stream must contain bytes.');
+      for (let offset = 0; offset < value.byteLength; offset += 65536) {
+        append(decoder.decode(value.subarray(offset, offset + 65536), { stream: true }));
+      }
+    }
+    append(decoder.decode());
+    return text;
+  } catch (error) {
+    void reader.cancel().catch(() => {});
+    throw error;
+  } finally { reader.releaseLock(); }
+}
 function security(args, input) {
   return new Promise((resolve, reject) => {
     const child = spawn('/usr/bin/security', args, { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -80,7 +111,7 @@ export class Organato {
     if (!key) throw new Error('Connect Organato in Breezer Settings first.');
     const response = await this.fetcher(BASE + path, { method, redirect: 'error', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(10_000)]) : AbortSignal.timeout(10_000) });
     if (!response.ok) throw new Error(({ 401: 'Organato API key is invalid or expired.', 403: 'This Organato key is read-only. Use a read/write key to change items.', 409: 'This item changed in Organato. Read it again before updating.', 429: 'Organato rate limit reached. Try again in a minute.' })[response.status] || `Organato request failed (${response.status}).`);
-    const text = await response.text(); if (text.length > 2_000_000) throw new Error('Organato response is too large.'); return JSON.parse(text);
+    return JSON.parse(await responseText(response));
   }
   async list(signal) {
     const config = await this.config(); if (!config.enabled) throw new Error('Organato is switched off in Settings.');

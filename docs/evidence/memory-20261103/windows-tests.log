@@ -1,0 +1,33 @@
+test_corrupt_packet_is_not_applied (memory_update_test.MemoryUpdateTest.test_corrupt_packet_is_not_applied) ... ok
+test_corrupt_second_packet_resource_is_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_corrupt_second_packet_resource_is_rejected_before_any_writes) ... ok
+test_corrupt_third_packet_is_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_corrupt_third_packet_is_rejected_before_any_writes) ... ok
+test_idempotent_update_keeps_pins_backups_and_object_cache (memory_update_test.MemoryUpdateTest.test_idempotent_update_keeps_pins_backups_and_object_cache) ... ok
+test_resume_after_all_resource_writes_before_pin_write (memory_update_test.MemoryUpdateTest.test_resume_after_all_resource_writes_before_pin_write) ... ok
+test_resume_after_resource_write_before_pin_write (memory_update_test.MemoryUpdateTest.test_resume_after_resource_write_before_pin_write) ... ok
+test_sync_resource_errors_are_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_sync_resource_errors_are_rejected_before_any_writes) ... ok
+test_unexpected_pin_is_not_overwritten (memory_update_test.MemoryUpdateTest.test_unexpected_pin_is_not_overwritten) ... ok
+test_unexpected_second_resource_preserves_both_resources_and_plan (memory_update_test.MemoryUpdateTest.test_unexpected_second_resource_preserves_both_resources_and_plan) ... ok
+test_unexpected_source_is_not_overwritten (memory_update_test.MemoryUpdateTest.test_unexpected_source_is_not_overwritten) ... ok
+test_unexpected_third_resource_is_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_unexpected_third_resource_is_rejected_before_any_writes) ... ok
+test_compiler_failure_after_paging_backoff_does_not_retry (unattended_build_test.UnattendedBuildTest.test_compiler_failure_after_paging_backoff_does_not_retry) ... ok
+test_default_checkpoint_at_ten_thousand_real_actions_survives_interruption (unattended_build_test.UnattendedBuildTest.test_default_checkpoint_at_ten_thousand_real_actions_survives_interruption) ... ok
+test_freeze_timeout_still_terminates_a_driver_without_state (unattended_build_test.UnattendedBuildTest.test_freeze_timeout_still_terminates_a_driver_without_state) ... ok
+test_killed_worker_before_state_write_does_not_orphan_driver (unattended_build_test.UnattendedBuildTest.test_killed_worker_before_state_write_does_not_orphan_driver) ... skipped 'Linux subreaper requires the PC/WSL environment'
+test_logged_failed_action_cannot_be_success_even_with_zero_worker_exit (unattended_build_test.UnattendedBuildTest.test_logged_failed_action_cannot_be_success_even_with_zero_worker_exit) ... ok
+test_manual_stop_cleans_up_a_separate_ninja_group (unattended_build_test.UnattendedBuildTest.test_manual_stop_cleans_up_a_separate_ninja_group) ... ok
+test_manual_stop_does_not_restart_and_lock_rejects_another_runner (unattended_build_test.UnattendedBuildTest.test_manual_stop_does_not_restart_and_lock_rejects_another_runner) ... ok
+test_real_ninja_continues_after_failure_and_resumes_completed_outputs (unattended_build_test.UnattendedBuildTest.test_real_ninja_continues_after_failure_and_resumes_completed_outputs) ... ok
+test_recovery_can_succeed_after_one_resource_interruption (unattended_build_test.UnattendedBuildTest.test_recovery_can_succeed_after_one_resource_interruption) ... ok
+test_resource_failure_retries_but_stops_at_limit (unattended_build_test.UnattendedBuildTest.test_resource_failure_retries_but_stops_at_limit) ... ok
+test_stale_resource_state_does_not_retry_a_compiler_failure (unattended_build_test.UnattendedBuildTest.test_stale_resource_state_does_not_retry_a_compiler_failure) ... ok
+test_stop_before_driver_state_is_published_cleans_detached_group (unattended_build_test.UnattendedBuildTest.test_stop_before_driver_state_is_published_cleans_detached_group) ... ok
+test_stubborn_driver_is_terminated_without_leaving_worker_alive (unattended_build_test.UnattendedBuildTest.test_stubborn_driver_is_terminated_without_leaving_worker_alive) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 18.105s
+
+OK (skipped=1)
+Memory resources and worker pins verified. Graph and compiled outputs preserved.
+Memory resources and worker pins verified. Graph and compiled outputs preserved.
+Memory resources and worker pins verified. Graph and compiled outputs preserved.
+Memory resources and worker pins verified. Graph and compiled outputs preserved.

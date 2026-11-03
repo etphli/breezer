@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/check_ai_overlay.py", line 188, in <module>
+    main()
+    ~~~~^^
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/check_ai_overlay.py", line 179, in main
+    originals = prepare(tree, args.offline)
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/check_ai_overlay.py", line 78, in prepare
+    raise ValueError(f'Offline fixture is missing: {missing}')
+ValueError: Offline fixture is missing: ['chrome/browser/global_keyboard_shortcuts_mac.mm', 'tools/gritsettings/resource_ids.spec', 'chrome/browser/extensions/api/messaging/launch_context_posix.cc', 'chrome/browser/extensions/api/messaging/launch_context.cc', 'chrome/browser/ui/cocoa/accelerators_cocoa.mm', 'chrome/browser/extensions/component_loader.cc', 'chrome/browser/extensions/BUILD.gn', 'chrome/chrome_paks.gni', 'chrome/browser/extensions/chrome_component_extension_resource_manager.cc', 'chrome/browser/ui/browser_command_controller.cc', 'chrome/browser/ui/views/frame/browser_native_widget_mac.mm', 'chrome/browser/extensions/component_loader.h', 'chrome/app/chrome_command_ids.h', 'chrome/app/generated_resources.grd', 'chrome/browser/extensions/component_extensions_allowlist/allowlist.cc']

@@ -1,0 +1,465 @@
+{
+  "status": "Independent focused review complete",
+  "recommendation": "accept",
+  "recommendationScope": "Accept the six-replacement source change and permanent tests for source-level wrapper removal and preserved behavior. This does not accept physical RAM, packaged/native or whole-browser CPU claims.",
+  "reviewerModel": "gpt-6.1-sol",
+  "findings": [],
+  "blockingObjections": [],
+  "observations": [
+    {
+      "severity": "informational",
+      "location": "build/efficiency-20261103/workspace-index/cpu.mjs:13",
+      "issue": "Original calibration uses a cold baseline-only 200-operation batch. Warmed round0 small builder samples are about 7 ms despite a 40 ms target; rounds share one process. Importing differential.mjs also executes its checks before timing. Both sides still receive equivalent fixtures and the same batch count. This weakens precision, without demonstrating a regression.",
+      "repro": "Inspect calibration/warmups/samples in original cpu.json and cpu.mjs. Independent longer, fresh-process recheck below addresses flagged workloads."
+    },
+    {
+      "severity": "informational",
+      "location": "features/ai/extension/workspace-store.js:228",
+      "issue": "A direct space value keeps its pinned tree reachable while the index lives. Baseline wrappers already retained both node and containing space. Favorite nulls remove the direct node edge, but the store and model retain favorites. No persistent cache is added. Liveness and actual memory use need engine/native measurements."
+    }
+  ],
+  "sourceReview": {
+    "candidateSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "baselineSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "testSha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+    "exactSixInverseRestoresBaseline": true,
+    "outsideRegionIdentity": true,
+    "independentProof": "build/efficiency-20261103/workspace-index-review/checks.json",
+    "consumerAudit": "Only two private index call sites. Builder has one get; reconciliation has two has calls and is byte-identical. Remaining found.node/found.space accesses belong to public findNode results, whose representation is unchanged.",
+    "publicApiValidationTransactionsCache": "No changes. Full candidate store read including schema normalization, public findNode, mutations, session/quarantine recovery, mutex and WorkspaceStore persistence.",
+    "semanticReasoning": [
+      "Favorites have a present null value. Missing keys and a falsey record.e produce undefined; !== undefined distinguishes these cases. The second binding falls through to today and its membership-space count.",
+      "Map insertion order and overwrite order are unchanged: favorites first, then spaces in order, pinned node then its children. Later duplicate IDs still win, even in deliberately unnormalized stores. Folder IDs remain present.",
+      "The containing-space object is exactly the former wrapper.space. Counting reads the same space.id at the same point; original node data remains in output entries/folders with the same identities.",
+      "Each operation builds a fresh map. Favorite moves/removal, folder unwrapping, replacement/reordering of spaces and members changes are reflected in the next operation.",
+      "Reconciliation uses only presence. Current-session acceptance, hints, old exact/path matching, ambiguous duplicate URLs, quarantine, orphan handling and membership record replacement remain unchanged.",
+      "Index creation still reads node.id/kind/children in the same order. Malformed input errors, throwing/changing getters, proxy access traces and frozen-input behavior match in differential checks."
+    ]
+  },
+  "permanentTestReview": {
+    "synchronousMapRestoration": true,
+    "details": "The test callback and both exports are synchronous. try/finally restores globalThis.Map before assertions or return, including an export throw. Folder keys distinguish index maps from bound maps. No async scope spans interception.",
+    "sourceSelection": "Normal runs explicitly remove WORKSPACE_INDEX_SOURCE from subprocess environment; default import is the actual production module. Baseline override is used only for the explicit negative control.",
+    "noIgnoredBuildDependency": true,
+    "limitation": "Map interception proves direct stored values, not the absence of every possible discarded allocation. Exact source inverse and wrapper-construction evidence provide the narrower source claim."
+  },
+  "independentChecks": {
+    "perRuntime": {
+      "node24": {
+        "tests": 29,
+        "pass": 29,
+        "skip": 0,
+        "newDifferential": 240,
+        "adaptedExistingDifferential": 244,
+        "negativeMutationControlsCaught": 2
+      },
+      "node22": {
+        "tests": 29,
+        "pass": 29,
+        "skip": 0,
+        "newDifferential": 240,
+        "adaptedExistingDifferential": 244,
+        "negativeMutationControlsCaught": 2
+      }
+    },
+    "newDifferentialScope": "120 varied deterministic seeds per export: three spaces, favorite/pin/folder/child collisions and last-write order, duplicate URLs, sorted tabs, missing/falsey IDs, missing spaces, raw and normalized members, current/old sessions, hints, throwing id getters, changing record.e getter, mutated input snapshots, output and member-record identities. The adapted existing 244 checks additionally compare access traces, key/array order, malformed/frozen stores and repeated mutation freshness.",
+    "negativeControls": [
+      "Independent source mutant using found truthiness loses favorite binding and is caught.",
+      "Independent source mutant using null for absent record enters binding branch and is caught.",
+      "Exact preserved baseline fails only the direct index-value efficiency test; all three behavior tests pass."
+    ],
+    "commands": [
+      {
+        "command": [
+          "build/efficiency-20261103/organato-review-node24",
+          "build/efficiency-20261103/workspace-index-review/checks.mjs"
+        ],
+        "exit": 0,
+        "log": "build/efficiency-20261103/workspace-index-review/checks.mjs-node24.log"
+      },
+      {
+        "command": [
+          "build/efficiency-20261103/organato-review-node24",
+          "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs"
+        ],
+        "exit": 0,
+        "log": "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs-node24.log"
+      },
+      {
+        "command": [
+          "build/efficiency-20261103/organato-review-node24",
+          "--test",
+          "tests/ai/workspace-store.test.mjs",
+          "tests/ai/workspace-members-efficiency.test.mjs",
+          "tests/ai/workspace-index-efficiency.test.mjs"
+        ],
+        "environment": "WORKSPACE_INDEX_SOURCE explicitly removed",
+        "exit": 0,
+        "log": "build/efficiency-20261103/workspace-index-review/tests-node24.log"
+      },
+      {
+        "command": [
+          "/Users/likht.ethan/.local/bin/node",
+          "build/efficiency-20261103/workspace-index-review/checks.mjs"
+        ],
+        "exit": 0,
+        "log": "build/efficiency-20261103/workspace-index-review/checks.mjs-node22.log"
+      },
+      {
+        "command": [
+          "/Users/likht.ethan/.local/bin/node",
+          "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs"
+        ],
+        "exit": 0,
+        "log": "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs-node22.log"
+      },
+      {
+        "command": [
+          "/Users/likht.ethan/.local/bin/node",
+          "--test",
+          "tests/ai/workspace-store.test.mjs",
+          "tests/ai/workspace-members-efficiency.test.mjs",
+          "tests/ai/workspace-index-efficiency.test.mjs"
+        ],
+        "environment": "WORKSPACE_INDEX_SOURCE explicitly removed",
+        "exit": 0,
+        "log": "build/efficiency-20261103/workspace-index-review/tests-node22.log"
+      },
+      {
+        "command": [
+          "build/efficiency-20261103/organato-review-node24",
+          "--test",
+          "tests/ai/workspace-index-efficiency.test.mjs"
+        ],
+        "environment": {
+          "WORKSPACE_INDEX_SOURCE": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/workspace-index/before.mjs"
+        },
+        "exit": 1,
+        "expectedExit": 1,
+        "result": "only direct-value efficiency test fails; three behavior tests pass",
+        "log": "build/efficiency-20261103/workspace-index-review/baseline-negative.log"
+      },
+      {
+        "command": [
+          "build/efficiency-20261103/organato-review-node24",
+          "build/efficiency-20261103/workspace-index-review/cpu.mjs",
+          "0"
+        ],
+        "exit": 0,
+        "bound": "finite 5 calibration + 6 warmup + 15 paired sample batches per size; at most 200000 iterations per batch; round1 subprocess timeout55s",
+        "log": "build/efficiency-20261103/workspace-index-review/cpu-round-0.log"
+      },
+      {
+        "command": [
+          "build/efficiency-20261103/organato-review-node24",
+          "build/efficiency-20261103/workspace-index-review/cpu.mjs",
+          "1"
+        ],
+        "exit": 0,
+        "bound": "finite 5 calibration + 6 warmup + 15 paired sample batches per size; at most 200000 iterations per batch; round1 subprocess timeout55s",
+        "log": "build/efficiency-20261103/workspace-index-review/cpu-round-1.log"
+      }
+    ],
+    "runtime24": {
+      "version": "v24.22.1",
+      "path": "build/efficiency-20261103/organato-review-node24",
+      "sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+    },
+    "runtime22": {
+      "version": "v22.14.0",
+      "path": "/Users/likht.ethan/.local/bin/node",
+      "sha256": "e2d4915d03eda6a2f00a09920e7eeb7a04ad123f9aaad61b1481179fe1bf50e0"
+    },
+    "failedTrials": "No benchmark or correctness trial failed unexpectedly. A read-only receipt-summary trial used a nonexistent differential key instead of behavior; correction and original diagnostic are preserved in inspection-error.log."
+  },
+  "cpu": {
+    "gate": "Predeclared in review cpu.mjs before either timing run: reject repeatable >3% regression for same small or large builder workload in both isolated rounds; allocation counters cannot override it.",
+    "method": "Two sequential fresh Node24 processes, size order reversed in second. Full uninstrumented modules, equivalent independently cloned rings of 12 fresh valid varied fixtures per size and round. Fixture generation excluded. Five alternating calibration phases for both sides, six paired warmups, fifteen alternating sample pairs. Adaptive target150ms process CPU, equal iterations per side per workload, at most200000 iterations. All calibrations, warmups and outliers retained. No forced GC or Map instrumentation.",
+    "summary": [
+      {
+        "round": 0,
+        "size": 8,
+        "baselineMedianCpuUs": 2.468796620681563,
+        "candidateMedianCpuUs": 2.4898670734364785,
+        "regressionPercent": 0.8534705766527928,
+        "pairedMedianPercent": 0.6634573423521584,
+        "iterationsPerBatch": 59657,
+        "sampleBatches": 30,
+        "minimumSampleCpuMs": 146.211,
+        "maximumSampleWallMs": 152.6446249999999
+      },
+      {
+        "round": 0,
+        "size": 3000,
+        "baselineMedianCpuUs": 237.4515625,
+        "candidateMedianCpuUs": 225.9609375,
+        "regressionPercent": -4.839144825589425,
+        "pairedMedianPercent": -4.786667460585248,
+        "iterationsPerBatch": 640,
+        "sampleBatches": 30,
+        "minimumSampleCpuMs": 141.07,
+        "maximumSampleWallMs": 258.7336670000004
+      },
+      {
+        "round": 1,
+        "size": 3000,
+        "baselineMedianCpuUs": 233.60842433697348,
+        "candidateMedianCpuUs": 221.69578783151326,
+        "regressionPercent": -5.099403644911615,
+        "pairedMedianPercent": -5.449084762805711,
+        "iterationsPerBatch": 641,
+        "sampleBatches": 30,
+        "minimumSampleCpuMs": 139.712,
+        "maximumSampleWallMs": 209.61499999999978
+      },
+      {
+        "round": 1,
+        "size": 8,
+        "baselineMedianCpuUs": 2.558556104205687,
+        "candidateMedianCpuUs": 2.531704410011919,
+        "regressionPercent": -1.0494862375552305,
+        "pairedMedianPercent": -1.1051194993675573,
+        "iterationsPerBatch": 58730,
+        "sampleBatches": 30,
+        "minimumSampleCpuMs": 147.718,
+        "maximumSampleWallMs": 151.6202910000011
+      }
+    ],
+    "repeatableRegressions": [],
+    "result": "No repeatable material regression reproduced. Small result changes sign between rounds. Large workload favored candidate in these fixtures; no precise or general speedup claim is made.",
+    "fairnessLimits": "Targeted builder check only, not previous-session reconciliation CPU, browser CPU or a native build. Host scheduling, GC, thermal state and V8 compilation remain uncontrolled. Larger batches and alternating order reduce, but do not eliminate, noise. Original two-round gate was a same-process comparison; independent recheck improves isolation.",
+    "rawFiles": [
+      "build/efficiency-20261103/workspace-index-review/cpu-round-0.json",
+      "build/efficiency-20261103/workspace-index-review/cpu-round-1.json"
+    ]
+  },
+  "existingEvidence": {
+    "implementationReceipt": "build/efficiency-20261103/workspace-index-implementation.json",
+    "coordinatorReceipt": "build/efficiency-20261103/workspace-index-coordinator.json",
+    "inspection": "Read focused receipt sections and source-bound harnesses, inspected original timing calibration/warmups/raw samples and result summaries; reran adapted differential in owned directory without modifying originals.",
+    "combined": "Parent log has 381 pass, zero skip, zero fail; not rerun.",
+    "packaging": "Coordinator reports 8 synthetic packaging tests pass; not rerun and does not establish packaged/native acceptance.",
+    "browser": "Read external manifest, browser.log and browser-ownership.json. Log shows all9 tests pass, no skips; ownership lists nine closed Chrome156 browsers and blocked[] empty. No browser launched or suite rerun by reviewer. Synthetic API scope remains.",
+    "packet": {
+      "path": "build/efficiency-20261102/pc-packet/workspace-store.js",
+      "sha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "updated": false,
+      "meaning": "Intentionally retains baseline b439; candidate acceptance does not stage packet."
+    }
+  },
+  "exclusions": [
+    "Physical RAM and peak/retained heap acceptance remain open. Source wrapper counts do not prove physical allocations because V8 may eliminate them.",
+    "Packaged/native integration and whole-browser CPU acceptance remain open.",
+    "No app/native build/install, browser, network/provider/account/Keychain/credential/profile/cache or PC actions. No commit/push/publication, messages or delegation.",
+    "Only owned review directory and final review JSON written; unrelated uncommitted work preserved."
+  ],
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "lines": 664,
+      "readRanges": [
+        [
+          1,
+          664
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-index-efficiency.test.mjs",
+      "sha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-store.test.mjs",
+      "sha256": "e6a9d40dbbb020e6a8ffd7945186e6909e0c412293933b69f57c39898061f952",
+      "lines": 430,
+      "readRanges": [
+        [
+          1,
+          430
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index/candidate.diff",
+      "sha256": "255162e9ea53d42ad8eb4789a5d5692ad7b59cdd09dc1c92f8dc3273498a1aa2",
+      "lines": 31,
+      "readRanges": [
+        [
+          1,
+          31
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index/cpu.mjs",
+      "sha256": "639bc9ebfb957c10abfa66a97648f38cbddbc4a6ceb3c251eaf426df304e2adc",
+      "lines": 23,
+      "readRanges": [
+        [
+          1,
+          23
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index/differential.mjs",
+      "sha256": "610d8d166f29754cf0431ec475db01d8e8057d4e5d57666364a6740dfef5965b",
+      "lines": 59,
+      "readRanges": [
+        [
+          1,
+          59
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "endDrift": {
+    "candidate": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "test": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+    "baseline": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "expectedHashesMatch": true,
+    "exactInverseAndOutsideIdentity": "Verified by checks.mjs against full files on both runtimes."
+  },
+  "rawArtifacts": [
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs",
+      "sha256": "40497c3389fba9e7f1c15b1cdcfda923666d223ebd57a3f522b6e3c693295881",
+      "bytes": 8130
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs-node22.log",
+      "sha256": "8a0a9df81afc0df20c695f0f1127d8d17a34b8c9dfda1cf52787dad3f9301067",
+      "bytes": 35
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/adapted-differential.mjs-node24.log",
+      "sha256": "8a0a9df81afc0df20c695f0f1127d8d17a34b8c9dfda1cf52787dad3f9301067",
+      "bytes": 35
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/baseline-negative.log",
+      "sha256": "ee9343eb0b2c72904178814c83c6236d6014c1d5d8fa3121e0a06b4d01509b32",
+      "bytes": 1630
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/checks.json",
+      "sha256": "cd5c5f8a06f57da4134b9bea729b49a5653a2d4b23b3042c2530648fcc798e67",
+      "bytes": 511
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/checks.mjs",
+      "sha256": "cbccde3f34a0ae6532b8823760ef7889c77d82f81cbd22f3728c32b6d521176d",
+      "bytes": 4963
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/checks.mjs-node22.log",
+      "sha256": "1c757a3e1b92b7cd4e5f91922478df0bba309dd0b928bd2ed28fdbee30d07030",
+      "bytes": 159
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/checks.mjs-node24.log",
+      "sha256": "1c757a3e1b92b7cd4e5f91922478df0bba309dd0b928bd2ed28fdbee30d07030",
+      "bytes": 159
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/commands.json",
+      "sha256": "17cdd43bf4dbb9c2bd32d5784bb255390963923979c4cdad9cbae06021696761",
+      "bytes": 3239
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/cpu-round-0.json",
+      "sha256": "acd16936668e5886363f299fd3be4a271c3ae08aa07ab51d685af0d25ff5a046",
+      "bytes": 22140
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/cpu-round-0.log",
+      "sha256": "c508df23343e9eaec9a2ca6418f1c5e2717f69274991c5425c1a46b1afda74d9",
+      "bytes": 308
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/cpu-round-1.json",
+      "sha256": "32c232db9bbf2811731ecfb8bd921d2bb11b773397b596a7d1471350623e577b",
+      "bytes": 22519
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/cpu-round-1.log",
+      "sha256": "0efe5b7c111709945e557d9ddc50332c24b809a4637a52f35f4fd998e83bbe6d",
+      "bytes": 323
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/cpu.mjs",
+      "sha256": "95485d8bf003a0e6990e7f4e424067c5832003253b40965e41cb6e1bea95f221",
+      "bytes": 3571
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/differential.json",
+      "sha256": "20b6265f3a29d3993a17cbba0b36d886107f5340d3cb6f946f6352ec9d5fd164",
+      "bytes": 33524
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/inspection-error.log",
+      "sha256": "80a45fd0b3079c81a10d5ab78ed2908fdf53c55163355fb80311e4f62ec125fe",
+      "bytes": 232
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/tests-node22.log",
+      "sha256": "500af1ade317af49ad4794d5f2c7e56ca50c3ff4ee20a966ee1b2db2c574bf61",
+      "bytes": 5964
+    },
+    {
+      "path": "build/efficiency-20261103/workspace-index-review/tests-node24.log",
+      "sha256": "3ed82449b74254a7891f5c718652cf2ab7c481449c3083a16d710ef1b86f9955",
+      "bytes": 2732
+    }
+  ]
+}

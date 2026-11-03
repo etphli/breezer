@@ -1,0 +1,13 @@
+test_accepts_matching_packaged_host (memory_package_test.MemoryPackageTest.test_accepts_matching_packaged_host) ... ok
+test_package_command_enforces_the_memory_receipt (memory_package_test.MemoryPackageTest.test_package_command_enforces_the_memory_receipt) ... ok
+test_rejects_an_incomplete_host_receipt (memory_package_test.MemoryPackageTest.test_rejects_an_incomplete_host_receipt) ... ok
+test_rejects_an_unknown_host_receipt_path (memory_package_test.MemoryPackageTest.test_rejects_an_unknown_host_receipt_path) ... ok
+test_rejects_corrupt_packet (memory_package_test.MemoryPackageTest.test_rejects_corrupt_packet) ... ok
+test_rejects_host_symlink (memory_package_test.MemoryPackageTest.test_rejects_host_symlink) ... ok
+test_rejects_stale_claude_with_a_matching_decoder (memory_package_test.MemoryPackageTest.test_rejects_stale_claude_with_a_matching_decoder) ... ok
+test_rejects_stale_packaged_host (memory_package_test.MemoryPackageTest.test_rejects_stale_packaged_host) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.058s
+
+OK

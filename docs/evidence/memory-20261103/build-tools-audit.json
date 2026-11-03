@@ -1,0 +1,1439 @@
+{
+  "schema": 1,
+  "status": "READ-ONLY ASSIGNED SOURCE AUDIT COMPLETE; FINDINGS OPEN; NO PRODUCTION FIXES AUTHORIZED",
+  "generatedAt": "2026-11-02T23:52:17.092942+00:00",
+  "author": {
+    "model": "gpt-6.1-sol",
+    "reasoning": "high",
+    "subagents": 0,
+    "speed": "No speed setting changed; no service-tier metadata is exposed by this harness"
+  },
+  "scope": "All 62 build-tools-owned entries in source-inventory-current.json, 9543 lines in the frozen receipt. Build/preparation/packaging/probes/supervisor review, not whole-repository approval and not sustained browser RAM/CPU measurement.",
+  "inventory": {
+    "path": "build/efficiency-20261103/source-inventory-current.json",
+    "sha256": "28ef41f889615274623b3e2ca377791604c628c707734e1229271225ab15de01",
+    "assignedFiles": 62,
+    "assignedLines": 9543
+  },
+  "sourceSnapshot": {
+    "path": "build/efficiency-20261103/build-tools-audit-snapshot.json",
+    "sha256": "d6de3b518c76f6d14638749e470e1a335eb310c84992926feabf644072d1e96d",
+    "contains": "Exact UTF-8 contents and hashes read, preserving bytes under concurrent coordinator edits."
+  },
+  "files": [
+    {
+      "path": "script/apply_breezer_ai.py",
+      "sha256": "1df165d8aac3efdba5e90af242e09f176f4bd66d4ccb25d00d50a447b862ce08",
+      "lines": 223,
+      "readRanges": [
+        [
+          1,
+          223
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "1df165d8aac3efdba5e90af242e09f176f4bd66d4ccb25d00d50a447b862ce08",
+      "currentSha256AtReport": "1df165d8aac3efdba5e90af242e09f176f4bd66d4ccb25d00d50a447b862ce08",
+      "drift": false
+    },
+    {
+      "path": "script/apply_breezer_ai_ui.py",
+      "sha256": "46e6a197bd55c808d83277ac192722d30170f9e44f96fdc9447bd36cfdd4dbc0",
+      "lines": 137,
+      "readRanges": [
+        [
+          1,
+          137
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "46e6a197bd55c808d83277ac192722d30170f9e44f96fdc9447bd36cfdd4dbc0",
+      "currentSha256AtReport": "46e6a197bd55c808d83277ac192722d30170f9e44f96fdc9447bd36cfdd4dbc0",
+      "drift": false
+    },
+    {
+      "path": "script/apply_breezer_branding.py",
+      "sha256": "7da097870b000a4007122ae184ceba50c86a6b4ba1ef0818d29d40a39fafb388",
+      "lines": 224,
+      "readRanges": [
+        [
+          1,
+          224
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "7da097870b000a4007122ae184ceba50c86a6b4ba1ef0818d29d40a39fafb388",
+      "currentSha256AtReport": "7da097870b000a4007122ae184ceba50c86a6b4ba1ef0818d29d40a39fafb388",
+      "drift": false
+    },
+    {
+      "path": "script/apply_breezer_filter_lists.py",
+      "sha256": "ca115e5941f73d407e3dd7199a2096a7fda606b859bc092b0dd40918ed222fb0",
+      "lines": 180,
+      "readRanges": [
+        [
+          1,
+          180
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "ca115e5941f73d407e3dd7199a2096a7fda606b859bc092b0dd40918ed222fb0",
+      "currentSha256AtReport": "ca115e5941f73d407e3dd7199a2096a7fda606b859bc092b0dd40918ed222fb0",
+      "drift": false
+    },
+    {
+      "path": "script/apply_breezer_omnibox.py",
+      "sha256": "47a5caffadb0a0f84b3e631ecf7d84d641ce47c54d34e5956a472fa9cbd5b741",
+      "lines": 138,
+      "readRanges": [
+        [
+          1,
+          138
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "47a5caffadb0a0f84b3e631ecf7d84d641ce47c54d34e5956a472fa9cbd5b741",
+      "currentSha256AtReport": "47a5caffadb0a0f84b3e631ecf7d84d641ce47c54d34e5956a472fa9cbd5b741",
+      "drift": false
+    },
+    {
+      "path": "script/apply_breezer_sync.py",
+      "sha256": "2c755747907b4eac2d4d39b6de18eff9d9b9e2edb27558b05e2cc7aeb9891dfc",
+      "lines": 191,
+      "readRanges": [
+        [
+          1,
+          191
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "2c755747907b4eac2d4d39b6de18eff9d9b9e2edb27558b05e2cc7aeb9891dfc",
+      "currentSha256AtReport": "2c755747907b4eac2d4d39b6de18eff9d9b9e2edb27558b05e2cc7aeb9891dfc",
+      "drift": false
+    },
+    {
+      "path": "script/apply_breezer_workspace.py",
+      "sha256": "d7adbda10683608f2fcbf01a62e7deacd511672fecedb4e620a375656393e0e4",
+      "lines": 864,
+      "readRanges": [
+        [
+          1,
+          430
+        ],
+        [
+          431,
+          864
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "d7adbda10683608f2fcbf01a62e7deacd511672fecedb4e620a375656393e0e4",
+      "currentSha256AtReport": "d7adbda10683608f2fcbf01a62e7deacd511672fecedb4e620a375656393e0e4",
+      "drift": false
+    },
+    {
+      "path": "script/benchmark_browsers.mjs",
+      "sha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+      "lines": 774,
+      "readRanges": [
+        [
+          1,
+          390
+        ],
+        [
+          391,
+          774
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+      "currentSha256AtReport": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+      "drift": false
+    },
+    {
+      "path": "script/benchmark_native_transport.mjs",
+      "sha256": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+      "lines": 93,
+      "readRanges": [
+        [
+          1,
+          93
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+      "currentSha256AtReport": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+      "drift": false
+    },
+    {
+      "path": "script/benchmark_workspace.mjs",
+      "sha256": "6e13431151c7e1e56766e52e80d83135790154d632099a6889ab5e801cc6e202",
+      "lines": 28,
+      "readRanges": [
+        [
+          1,
+          28
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "6e13431151c7e1e56766e52e80d83135790154d632099a6889ab5e801cc6e202",
+      "currentSha256AtReport": "6e13431151c7e1e56766e52e80d83135790154d632099a6889ab5e801cc6e202",
+      "drift": false
+    },
+    {
+      "path": "script/breezer_build_profile.py",
+      "sha256": "100cb5d2c181f6713ab26d044eb521d0b7a94e87144e45b15692bff9f433e06a",
+      "lines": 74,
+      "readRanges": [
+        [
+          1,
+          74
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "100cb5d2c181f6713ab26d044eb521d0b7a94e87144e45b15692bff9f433e06a",
+      "currentSha256AtReport": "100cb5d2c181f6713ab26d044eb521d0b7a94e87144e45b15692bff9f433e06a",
+      "drift": false
+    },
+    {
+      "path": "script/breezer_filter_lists.mjs",
+      "sha256": "29e66bf5031cdcb5b3b5d20566592347874ebe66aca9fb0f08c788c4bc0059cb",
+      "lines": 92,
+      "readRanges": [
+        [
+          1,
+          92
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "29e66bf5031cdcb5b3b5d20566592347874ebe66aca9fb0f08c788c4bc0059cb",
+      "currentSha256AtReport": "29e66bf5031cdcb5b3b5d20566592347874ebe66aca9fb0f08c788c4bc0059cb",
+      "drift": false
+    },
+    {
+      "path": "script/breezer_preparation.py",
+      "sha256": "0045977701aa606815002854b1bf92cf37026b591818327014569dfd997ddfe7",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "0045977701aa606815002854b1bf92cf37026b591818327014569dfd997ddfe7",
+      "currentSha256AtReport": "0045977701aa606815002854b1bf92cf37026b591818327014569dfd997ddfe7",
+      "drift": false
+    },
+    {
+      "path": "script/breezer_release.py",
+      "sha256": "cef6d49cb0b74ef33562a962b9f5f2954d83e4c50a64ac9451a31ee0ff3c468b",
+      "lines": 17,
+      "readRanges": [
+        [
+          1,
+          17
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "cef6d49cb0b74ef33562a962b9f5f2954d83e4c50a64ac9451a31ee0ff3c468b",
+      "currentSha256AtReport": "cef6d49cb0b74ef33562a962b9f5f2954d83e4c50a64ac9451a31ee0ff3c468b",
+      "drift": false
+    },
+    {
+      "path": "script/breezer_sidebar_frame.py",
+      "sha256": "99305e5af919beef8426e054549bee377d7aac5356bec80455f40bc295761640",
+      "lines": 527,
+      "readRanges": [
+        [
+          1,
+          270
+        ],
+        [
+          271,
+          527
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "99305e5af919beef8426e054549bee377d7aac5356bec80455f40bc295761640",
+      "currentSha256AtReport": "99305e5af919beef8426e054549bee377d7aac5356bec80455f40bc295761640",
+      "drift": false
+    },
+    {
+      "path": "script/build_and_run.sh",
+      "sha256": "50fb628b73fac02379c18cf1b459cb1abf4c1d792dc7e256edf51c852c6c1259",
+      "lines": 267,
+      "readRanges": [
+        [
+          1,
+          267
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "50fb628b73fac02379c18cf1b459cb1abf4c1d792dc7e256edf51c852c6c1259",
+      "currentSha256AtReport": "50fb628b73fac02379c18cf1b459cb1abf4c1d792dc7e256edf51c852c6c1259",
+      "drift": false
+    },
+    {
+      "path": "script/check_ai_overlay.py",
+      "sha256": "c2e6b86d72eac3ba87f1aea48ef03b8996b5e738d21ec8a34e04bb8f242128bd",
+      "lines": 182,
+      "readRanges": [
+        [
+          1,
+          182
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "c2e6b86d72eac3ba87f1aea48ef03b8996b5e738d21ec8a34e04bb8f242128bd",
+      "currentSha256AtReport": "c2e6b86d72eac3ba87f1aea48ef03b8996b5e738d21ec8a34e04bb8f242128bd",
+      "drift": false
+    },
+    {
+      "path": "script/check_ai_packaging.py",
+      "sha256": "8a49930fcd155236b66136832d98031c810599f18c35dd8c64a4cc4d69537103",
+      "lines": 84,
+      "readRanges": [
+        [
+          1,
+          84
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "8a49930fcd155236b66136832d98031c810599f18c35dd8c64a4cc4d69537103",
+      "currentSha256AtReport": "8a49930fcd155236b66136832d98031c810599f18c35dd8c64a4cc4d69537103",
+      "drift": false
+    },
+    {
+      "path": "script/check_branding.py",
+      "sha256": "8cca7924300e1b466d0d0a0e73149ed3a5a0f4b459e4f055852de07d0b4dabfc",
+      "lines": 91,
+      "readRanges": [
+        [
+          1,
+          91
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "8cca7924300e1b466d0d0a0e73149ed3a5a0f4b459e4f055852de07d0b4dabfc",
+      "currentSha256AtReport": "8cca7924300e1b466d0d0a0e73149ed3a5a0f4b459e4f055852de07d0b4dabfc",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_ai_ui.py",
+      "sha256": "d40bedb6c340b69af9ebe59d21e8ffd41ead51040ed9393dc99fb3df9d997984",
+      "lines": 53,
+      "readRanges": [
+        [
+          1,
+          53
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "d40bedb6c340b69af9ebe59d21e8ffd41ead51040ed9393dc99fb3df9d997984",
+      "currentSha256AtReport": "d40bedb6c340b69af9ebe59d21e8ffd41ead51040ed9393dc99fb3df9d997984",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_build_profile.py",
+      "sha256": "edf1252ec26fd0f9454ae8346ab67f33c02dccd31742145d0558a8afe2cadff2",
+      "lines": 196,
+      "readRanges": [
+        [
+          1,
+          196
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "edf1252ec26fd0f9454ae8346ab67f33c02dccd31742145d0558a8afe2cadff2",
+      "currentSha256AtReport": "edf1252ec26fd0f9454ae8346ab67f33c02dccd31742145d0558a8afe2cadff2",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_filter_lists.py",
+      "sha256": "e3c296993ef1907e17e71f4546a6b9622f6a325dae7305e7246804846dea8eff",
+      "lines": 93,
+      "readRanges": [
+        [
+          1,
+          93
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "e3c296993ef1907e17e71f4546a6b9622f6a325dae7305e7246804846dea8eff",
+      "currentSha256AtReport": "e3c296993ef1907e17e71f4546a6b9622f6a325dae7305e7246804846dea8eff",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_installer.py",
+      "sha256": "00fef9dbfec6f7294c22661cd88f94c07ea20a2b40ab625171377ad6773efd0b",
+      "lines": 215,
+      "readRanges": [
+        [
+          1,
+          215
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "00fef9dbfec6f7294c22661cd88f94c07ea20a2b40ab625171377ad6773efd0b",
+      "currentSha256AtReport": "00fef9dbfec6f7294c22661cd88f94c07ea20a2b40ab625171377ad6773efd0b",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_memory_package.py",
+      "sha256": "136e50b4421547f944da9181414ad04edbf015325238ee7f2e563ac705296f1b",
+      "lines": 18,
+      "readRanges": [
+        [
+          1,
+          18
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "136e50b4421547f944da9181414ad04edbf015325238ee7f2e563ac705296f1b",
+      "currentSha256AtReport": "136e50b4421547f944da9181414ad04edbf015325238ee7f2e563ac705296f1b",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_omnibox.py",
+      "sha256": "e8ad12659f6b97044d1a4886429dbb991dbc0c052f6a686ff555d203c1b42a19",
+      "lines": 189,
+      "readRanges": [
+        [
+          1,
+          189
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "e8ad12659f6b97044d1a4886429dbb991dbc0c052f6a686ff555d203c1b42a19",
+      "currentSha256AtReport": "e8ad12659f6b97044d1a4886429dbb991dbc0c052f6a686ff555d203c1b42a19",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_passwords.py",
+      "sha256": "15d8b12eb72922d7f7f7ff1ff43a997f57dc715e660afc82a471b90c2cb1ed0f",
+      "lines": 86,
+      "readRanges": [
+        [
+          1,
+          86
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "15d8b12eb72922d7f7f7ff1ff43a997f57dc715e660afc82a471b90c2cb1ed0f",
+      "currentSha256AtReport": "15d8b12eb72922d7f7f7ff1ff43a997f57dc715e660afc82a471b90c2cb1ed0f",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_preparation.py",
+      "sha256": "3a681ea7f90752a950cdc55721a3d9bb5d1129f05410213ec28401beb78fdb85",
+      "lines": 210,
+      "readRanges": [
+        [
+          1,
+          210
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "3a681ea7f90752a950cdc55721a3d9bb5d1129f05410213ec28401beb78fdb85",
+      "currentSha256AtReport": "3a681ea7f90752a950cdc55721a3d9bb5d1129f05410213ec28401beb78fdb85",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_release.py",
+      "sha256": "6081f61829d1f385593a2e21cf973ed7a934588a020032f5817387292816adcc",
+      "lines": 116,
+      "readRanges": [
+        [
+          1,
+          116
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "6081f61829d1f385593a2e21cf973ed7a934588a020032f5817387292816adcc",
+      "currentSha256AtReport": "6081f61829d1f385593a2e21cf973ed7a934588a020032f5817387292816adcc",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_sidebar_frame.py",
+      "sha256": "e2d9fb0cd8d893e7f6b77cd78843ad091fab61fe2bdf5a48cba4720c7b640768",
+      "lines": 399,
+      "readRanges": [
+        [
+          1,
+          399
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "e2d9fb0cd8d893e7f6b77cd78843ad091fab61fe2bdf5a48cba4720c7b640768",
+      "currentSha256AtReport": "e2d9fb0cd8d893e7f6b77cd78843ad091fab61fe2bdf5a48cba4720c7b640768",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_sync.py",
+      "sha256": "0cde36f7c9ec572638f4a3177360b313f36957b1e1835e12132195c8f8dd6477",
+      "lines": 77,
+      "readRanges": [
+        [
+          1,
+          77
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "0cde36f7c9ec572638f4a3177360b313f36957b1e1835e12132195c8f8dd6477",
+      "currentSha256AtReport": "0cde36f7c9ec572638f4a3177360b313f36957b1e1835e12132195c8f8dd6477",
+      "drift": false
+    },
+    {
+      "path": "script/check_breezer_workspace.py",
+      "sha256": "7b0be6ad9eb0baea872c18887c8a53e08c7c57a74e8fbaa7d5fbea287c6b8b38",
+      "lines": 300,
+      "readRanges": [
+        [
+          1,
+          300
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "7b0be6ad9eb0baea872c18887c8a53e08c7c57a74e8fbaa7d5fbea287c6b8b38",
+      "currentSha256AtReport": "7b0be6ad9eb0baea872c18887c8a53e08c7c57a74e8fbaa7d5fbea287c6b8b38",
+      "drift": false
+    },
+    {
+      "path": "script/check_efficiency_coverage.py",
+      "sha256": "16edbf6d64f53db55360cd8d2a590980ecd73fb02d505225b911fab3bd1128be",
+      "lines": 55,
+      "readRanges": [
+        [
+          1,
+          55
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "16edbf6d64f53db55360cd8d2a590980ecd73fb02d505225b911fab3bd1128be",
+      "currentSha256AtReport": "16edbf6d64f53db55360cd8d2a590980ecd73fb02d505225b911fab3bd1128be",
+      "drift": false
+    },
+    {
+      "path": "script/check_helium.py",
+      "sha256": "8dcc5725abeafdf183938bc1686d834c6639fb536268a8d0fccf6109c832a4af",
+      "lines": 37,
+      "readRanges": [
+        [
+          1,
+          37
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed. Existing check implementation inspected; no pass inferred from its source.",
+      "inventorySha256": "8dcc5725abeafdf183938bc1686d834c6639fb536268a8d0fccf6109c832a4af",
+      "currentSha256AtReport": "8dcc5725abeafdf183938bc1686d834c6639fb536268a8d0fccf6109c832a4af",
+      "drift": false
+    },
+    {
+      "path": "script/generate_breezer_filter_lists.mjs",
+      "sha256": "b8875d41f0c1ff5ea0edd13a111e071e5cb594367f760c6697cf1c0636089325",
+      "lines": 57,
+      "readRanges": [
+        [
+          1,
+          57
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "b8875d41f0c1ff5ea0edd13a111e071e5cb594367f760c6697cf1c0636089325",
+      "currentSha256AtReport": "b8875d41f0c1ff5ea0edd13a111e071e5cb594367f760c6697cf1c0636089325",
+      "drift": false
+    },
+    {
+      "path": "script/install_breezer.py",
+      "sha256": "cf5b0bcf561b9012792b11579ba06a40474b5cd6fe383c876c5216650e051fa0",
+      "lines": 364,
+      "readRanges": [
+        [
+          1,
+          364
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "cf5b0bcf561b9012792b11579ba06a40474b5cd6fe383c876c5216650e051fa0",
+      "currentSha256AtReport": "cf5b0bcf561b9012792b11579ba06a40474b5cd6fe383c876c5216650e051fa0",
+      "drift": false
+    },
+    {
+      "path": "script/inventory_efficiency_sources.py",
+      "sha256": "e8f888a595a5af468cc2bd7adcdb214c9f5c6155c0633f0fe58f17b08e01f1e6",
+      "lines": 59,
+      "readRanges": [
+        [
+          1,
+          59
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "e8f888a595a5af468cc2bd7adcdb214c9f5c6155c0633f0fe58f17b08e01f1e6",
+      "currentSha256AtReport": "e8f888a595a5af468cc2bd7adcdb214c9f5c6155c0633f0fe58f17b08e01f1e6",
+      "drift": false
+    },
+    {
+      "path": "script/package_breezer_ai.py",
+      "sha256": "67ec259e345ee1f50dcd3b1f15934e0c9fc129f0dbb7f51f78f86ba584239b61",
+      "lines": 164,
+      "readRanges": [
+        [
+          1,
+          164
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "67ec259e345ee1f50dcd3b1f15934e0c9fc129f0dbb7f51f78f86ba584239b61",
+      "currentSha256AtReport": "67ec259e345ee1f50dcd3b1f15934e0c9fc129f0dbb7f51f78f86ba584239b61",
+      "drift": false
+    },
+    {
+      "path": "script/package_breezer_dmg.py",
+      "sha256": "1b646e60a83440d5866c55f5492a9ffdae58533950a5f8153b9249d9858de897",
+      "lines": 142,
+      "readRanges": [
+        [
+          1,
+          142
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "1b646e60a83440d5866c55f5492a9ffdae58533950a5f8153b9249d9858de897",
+      "currentSha256AtReport": "1b646e60a83440d5866c55f5492a9ffdae58533950a5f8153b9249d9858de897",
+      "drift": false
+    },
+    {
+      "path": "script/summarize_native_transport.py",
+      "sha256": "93390d285b79f6bb3541a6245fc3cede16c671c1acf929756e900a7a7e40b2ad",
+      "lines": 56,
+      "readRanges": [
+        [
+          1,
+          56
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "93390d285b79f6bb3541a6245fc3cede16c671c1acf929756e900a7a7e40b2ad",
+      "currentSha256AtReport": "93390d285b79f6bb3541a6245fc3cede16c671c1acf929756e900a7a7e40b2ad",
+      "drift": false
+    },
+    {
+      "path": "script/verify_breezer_filter_behavior.mjs",
+      "sha256": "3cd51935f3d83be1a9e8d785bd7cb3a9e2a34de165503c31df7467ad9c359a93",
+      "lines": 248,
+      "readRanges": [
+        [
+          1,
+          248
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "3cd51935f3d83be1a9e8d785bd7cb3a9e2a34de165503c31df7467ad9c359a93",
+      "currentSha256AtReport": "3cd51935f3d83be1a9e8d785bd7cb3a9e2a34de165503c31df7467ad9c359a93",
+      "drift": false
+    },
+    {
+      "path": "script/verify_breezer_filter_lists.mjs",
+      "sha256": "c0406356fc674e1339da46c472212e3ff583f695cdb6ba5085f0db1aa461f69f",
+      "lines": 95,
+      "readRanges": [
+        [
+          1,
+          95
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "c0406356fc674e1339da46c472212e3ff583f695cdb6ba5085f0db1aa461f69f",
+      "currentSha256AtReport": "c0406356fc674e1339da46c472212e3ff583f695cdb6ba5085f0db1aa461f69f",
+      "drift": false
+    },
+    {
+      "path": "script/verify_breezer_filter_lists_native.mjs",
+      "sha256": "e63f337745b4fc549e816b46049ece10ea3145ec82c703e009322e9776f4dbec",
+      "lines": 122,
+      "readRanges": [
+        [
+          1,
+          122
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "e63f337745b4fc549e816b46049ece10ea3145ec82c703e009322e9776f4dbec",
+      "currentSha256AtReport": "e63f337745b4fc549e816b46049ece10ea3145ec82c703e009322e9776f4dbec",
+      "drift": false
+    },
+    {
+      "path": "script/verify_breezer_helper_lifetime.mjs",
+      "sha256": "ecc86eb543549825ee17ebe4af4ca0180f87490092a44c8ba1c04bffa4785df1",
+      "lines": 78,
+      "readRanges": [
+        [
+          1,
+          78
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "ecc86eb543549825ee17ebe4af4ca0180f87490092a44c8ba1c04bffa4785df1",
+      "currentSha256AtReport": "ecc86eb543549825ee17ebe4af4ca0180f87490092a44c8ba1c04bffa4785df1",
+      "drift": false
+    },
+    {
+      "path": "script/verify_breezer_settings_lifetime.mjs",
+      "sha256": "49a48757129baf6b8340be2ec8d11b0a48938aa1e9689567d68c3417d97d1844",
+      "lines": 145,
+      "readRanges": [
+        [
+          1,
+          145
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "49a48757129baf6b8340be2ec8d11b0a48938aa1e9689567d68c3417d97d1844",
+      "currentSha256AtReport": "49a48757129baf6b8340be2ec8d11b0a48938aa1e9689567d68c3417d97d1844",
+      "drift": false
+    },
+    {
+      "path": "script/verify_breezer_update_lifetime.mjs",
+      "sha256": "e23ddc70dfded5c0adf53a629c50e0be0cfc823970509756e277e3e036bdf8c9",
+      "lines": 115,
+      "readRanges": [
+        [
+          1,
+          115
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "e23ddc70dfded5c0adf53a629c50e0be0cfc823970509756e277e3e036bdf8c9",
+      "currentSha256AtReport": "e23ddc70dfded5c0adf53a629c50e0be0cfc823970509756e277e3e036bdf8c9",
+      "drift": false
+    },
+    {
+      "path": "script/verify_claude_streaming_efficiency.mjs",
+      "sha256": "dc5bd56cd0d51311bc10edae9cc5ee584c204d8deeaaf7caddc848f85f53cd29",
+      "lines": 83,
+      "readRanges": [
+        [
+          1,
+          83
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "dc5bd56cd0d51311bc10edae9cc5ee584c204d8deeaaf7caddc848f85f53cd29",
+      "currentSha256AtReport": "dc5bd56cd0d51311bc10edae9cc5ee584c204d8deeaaf7caddc848f85f53cd29",
+      "drift": false
+    },
+    {
+      "path": "script/verify_native_decoder_memory.mjs",
+      "sha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "lines": 60,
+      "readRanges": [
+        [
+          1,
+          60
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "currentSha256AtReport": "847f21f9b3189d679efb730b81c5c5d52c33e0337283b252c9791d2560aa7712",
+      "drift": false
+    },
+    {
+      "path": "script/verify_page_context_memory.mjs",
+      "sha256": "d4ce5c8918728f2d77de496c7663bb3946a3ddc1ab78afd943129a91d9403ec4",
+      "lines": 71,
+      "readRanges": [
+        [
+          1,
+          71
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "d4ce5c8918728f2d77de496c7663bb3946a3ddc1ab78afd943129a91d9403ec4",
+      "currentSha256AtReport": "d4ce5c8918728f2d77de496c7663bb3946a3ddc1ab78afd943129a91d9403ec4",
+      "drift": false
+    },
+    {
+      "path": "script/verify_sidebar_memory.mjs",
+      "sha256": "74683f63c1f3f635703483f8621f9eadd41a5896c0733fba95c535ed380ce931",
+      "lines": 102,
+      "readRanges": [
+        [
+          1,
+          102
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "74683f63c1f3f635703483f8621f9eadd41a5896c0733fba95c535ed380ce931",
+      "currentSha256AtReport": "74683f63c1f3f635703483f8621f9eadd41a5896c0733fba95c535ed380ce931",
+      "drift": false
+    },
+    {
+      "path": "script/verify_stream_render_efficiency.mjs",
+      "sha256": "0c2a15d28d090c30b37b5fec624eabb7ec5cdb8693e339e84590d9d1dd54498b",
+      "lines": 59,
+      "readRanges": [
+        [
+          1,
+          59
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "0c2a15d28d090c30b37b5fec624eabb7ec5cdb8693e339e84590d9d1dd54498b",
+      "currentSha256AtReport": "0c2a15d28d090c30b37b5fec624eabb7ec5cdb8693e339e84590d9d1dd54498b",
+      "drift": false
+    },
+    {
+      "path": "script/verify_translation_memory.mjs",
+      "sha256": "75c28bd913c5fdb194fef2434976e23d63ef9f5260452478eb8fbae0e053b85c",
+      "lines": 106,
+      "readRanges": [
+        [
+          1,
+          106
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "75c28bd913c5fdb194fef2434976e23d63ef9f5260452478eb8fbae0e053b85c",
+      "currentSha256AtReport": "75c28bd913c5fdb194fef2434976e23d63ef9f5260452478eb8fbae0e053b85c",
+      "drift": false
+    },
+    {
+      "path": "script/verify_upstream.py",
+      "sha256": "be97b872b2e193d619d6d836ab028e930a27c1341d3bed22139283b27807e2e1",
+      "lines": 82,
+      "readRanges": [
+        [
+          1,
+          82
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "be97b872b2e193d619d6d836ab028e930a27c1341d3bed22139283b27807e2e1",
+      "currentSha256AtReport": "be97b872b2e193d619d6d836ab028e930a27c1341d3bed22139283b27807e2e1",
+      "drift": false
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "currentSha256AtReport": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "drift": false
+    },
+    {
+      "path": "script/verify_workspace_sync_efficiency.mjs",
+      "sha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b",
+      "lines": 63,
+      "readRanges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b",
+      "currentSha256AtReport": "e7da0b48b2c914da02a46b245c0d2f1545d4a33cd2d9ff8278eb63bb07d3a03b",
+      "drift": false
+    },
+    {
+      "path": "script/windows/BuildProgress.psm1",
+      "sha256": "52e247777c33e0731d5475c6179ffba5b5597cc36d78d3230fd8a1d29c7400a8",
+      "lines": 137,
+      "readRanges": [
+        [
+          1,
+          137
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "52e247777c33e0731d5475c6179ffba5b5597cc36d78d3230fd8a1d29c7400a8",
+      "currentSha256AtReport": "52e247777c33e0731d5475c6179ffba5b5597cc36d78d3230fd8a1d29c7400a8",
+      "drift": false
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "sha256": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+      "lines": 85,
+      "readRanges": [
+        [
+          1,
+          85
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+      "currentSha256AtReport": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+      "drift": false
+    },
+    {
+      "path": "script/windows/continue-pc-browser-unattended.ps1",
+      "sha256": "d316069f194bdac3ec05061ad5c25822772bc650e84919f1083e1a9e8f20fbdb",
+      "lines": 14,
+      "readRanges": [
+        [
+          1,
+          14
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "d316069f194bdac3ec05061ad5c25822772bc650e84919f1083e1a9e8f20fbdb",
+      "currentSha256AtReport": "d316069f194bdac3ec05061ad5c25822772bc650e84919f1083e1a9e8f20fbdb",
+      "drift": false
+    },
+    {
+      "path": "script/windows/prepare-efficiency-packet.py",
+      "sha256": "f2dfef80215e76152aa4c88d200338478f85bc2703f67c1ec147485db26c83ed",
+      "lines": 69,
+      "readRanges": [
+        [
+          1,
+          69
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "f2dfef80215e76152aa4c88d200338478f85bc2703f67c1ec147485db26c83ed",
+      "currentSha256AtReport": "f2dfef80215e76152aa4c88d200338478f85bc2703f67c1ec147485db26c83ed",
+      "drift": false
+    },
+    {
+      "path": "script/windows/prepare-unattended-build.ps1",
+      "sha256": "99020149515a67c6cb9f3c5dd2dc25f903b4f47ed0c01c24bfb5a84d62db5126",
+      "lines": 34,
+      "readRanges": [
+        [
+          1,
+          34
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "99020149515a67c6cb9f3c5dd2dc25f903b4f47ed0c01c24bfb5a84d62db5126",
+      "currentSha256AtReport": "99020149515a67c6cb9f3c5dd2dc25f903b4f47ed0c01c24bfb5a84d62db5126",
+      "drift": false
+    },
+    {
+      "path": "script/windows/show-build-progress.ps1",
+      "sha256": "cb1cf010c603b63752d0b1a4b64d312eefef0d503a3298b482dd0b1304f8fb1e",
+      "lines": 100,
+      "readRanges": [
+        [
+          1,
+          100
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "cb1cf010c603b63752d0b1a4b64d312eefef0d503a3298b482dd0b1304f8fb1e",
+      "currentSha256AtReport": "cb1cf010c603b63752d0b1a4b64d312eefef0d503a3298b482dd0b1304f8fb1e",
+      "drift": false
+    },
+    {
+      "path": "script/windows/unattended_build.py",
+      "sha256": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+      "lines": 331,
+      "readRanges": [
+        [
+          1,
+          331
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+      "currentSha256AtReport": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+      "drift": false
+    },
+    {
+      "path": "script/windows/windows-command.py",
+      "sha256": "26769e7e2de585bd4b0fb5f77e1d653ad0e0105899a7ac39e4f4b3fe0cc07343",
+      "lines": 49,
+      "readRanges": [
+        [
+          1,
+          49
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete numbered snapshot read in bounded tool output. Static audit only; operational entry point not executed.",
+      "inventorySha256": "26769e7e2de585bd4b0fb5f77e1d653ad0e0105899a7ac39e4f4b3fe0cc07343",
+      "currentSha256AtReport": "26769e7e2de585bd4b0fb5f77e1d653ad0e0105899a7ac39e4f4b3fe0cc07343",
+      "drift": false
+    }
+  ],
+  "sourceDrift": [],
+  "findings": [
+    {
+      "id": "BT-01",
+      "status": "confirmed-control-flow",
+      "severity": "medium",
+      "title": "Worker stdout EOF enters a wait that cannot observe the stop flag",
+      "locations": [
+        {
+          "path": "script/windows/unattended_build.py",
+          "sha256": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+          "lines": [
+            261,
+            280
+          ]
+        },
+        {
+          "path": "script/windows/unattended_build.py",
+          "sha256": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+          "lines": [
+            236,
+            240
+          ]
+        }
+      ],
+      "evidence": "The fake worker remains alive and its output immediately returns EOF. run exits the queue loop and calls child.wait() without a timeout. The probe intercepts that call instead of starting a process. SIGINT/SIGTERM handlers only set stopping, so this wait has no route to stop_worker until the worker exits or wait raises.",
+      "trigger": "A worker closes stdout/stderr while remaining alive. Whether the externally prepared PC worker can do this is not established.",
+      "impact": "Unattended cancellation and cleanup can stall indefinitely after EOF. No claim that this happened on the PC.",
+      "smallestSafeFix": "After EOF, keep polling/waiting with a timeout and honor stopping before the final reap. Add an EOF-while-alive fixture to the existing supervisor suite.",
+      "existingChecks": [
+        "tests/windows/unattended_build_test.py:189-234 tests stop/driver cleanup; 269-283 tests stop and competing lock, but stdout stays open."
+      ],
+      "reproduction": "build-tools-audit-probe.py: workerStdoutEOF"
+    },
+    {
+      "id": "BT-02",
+      "status": "confirmed",
+      "severity": "medium",
+      "title": "An interrupted source download becomes a reusable pristine cache entry",
+      "locations": [
+        {
+          "path": "script/check_ai_overlay.py",
+          "sha256": "c2e6b86d72eac3ba87f1aea48ef03b8996b5e738d21ec8a34e04bb8f242128bd",
+          "lines": [
+            30,
+            37
+          ]
+        },
+        {
+          "path": "script/check_ai_overlay.py",
+          "sha256": "c2e6b86d72eac3ba87f1aea48ef03b8996b5e738d21ec8a34e04bb8f242128bd",
+          "lines": [
+            69,
+            79
+          ]
+        }
+      ],
+      "evidence": "fetch writes curl output directly to CACHE/path. The fake curl writes partial bytes and raises. A second fetch sees is_file and returns those bytes without a new download or validation. Offline prepare also only checks file existence.",
+      "impact": "An interrupted fetch can poison subsequent source fixtures. Patch anchor checks may reject many such files, but cache existence is not proof of pinned source. check_resources also executes cached generate_grd.py.",
+      "smallestSafeFix": "Use a unique temporary download, validate success before atomic rename, and bind pristine cache entries to reviewed version/content hashes. Reuse the staging pattern already present in check_breezer_omnibox.py:46-60 and package_breezer_ai.py:32-48; add an interrupted-fetch fake test.",
+      "existingChecks": [
+        "check_ai_overlay.py:128-162 checks overlay idempotence, identity and anchor drift; it does not test download interruption.",
+        "check_breezer_omnibox.py already uses a temporary file and rename."
+      ],
+      "reproduction": "build-tools-audit-probe.py: cacheRetry. No curl or network was invoked."
+    },
+    {
+      "id": "BT-03",
+      "status": "confirmed",
+      "severity": "medium",
+      "title": "Transport summary accepts an invalid footprint sample as a measurement",
+      "locations": [
+        {
+          "path": "script/summarize_native_transport.py",
+          "sha256": "93390d285b79f6bb3541a6245fc3cede16c671c1acf929756e900a7a7e40b2ad",
+          "lines": [
+            15,
+            33
+          ]
+        },
+        {
+          "path": "script/benchmark_native_transport.mjs",
+          "sha256": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+          "lines": [
+            67,
+            75
+          ]
+        }
+      ],
+      "evidence": "A fabricated passed report with the expected pair counts but usage schema 999, PID 999 instead of trial PID 123, status error and negative physicalFootprintBytes yields a median of -1 MiB. The summarizer takes usage.processes[0] without checking identity, status or numeric bounds.",
+      "impact": "Malformed or misattributed footprint samples can enter published-looking summaries. This does not invalidate any existing raw report without checking that report.",
+      "smallestSafeFix": "Before summarizing require schema 1, exactly one successful process matching after.pid, a finite nonnegative safe integer footprint, consistent before/after identity and valid metrics. Require producer-side probe validation too. Reuse the identity validation approach in benchmark_browsers.mjs:124-165 rather than creating another measurement harness.",
+      "existingChecks": [
+        "summarize_native_transport.py already rejects mixed runtime/source hashes and missing/repeated pairs.",
+        "benchmark_browsers.mjs has stricter footprint identity/status validation. No transport-summary test was found among inspected assigned scripts or relevant test filenames."
+      ],
+      "reproduction": "build-tools-audit-probe.py: invalidTransport; raw input is build-tools-audit-invalid-transport.json."
+    },
+    {
+      "id": "BT-04",
+      "status": "confirmed-static",
+      "severity": "medium",
+      "title": "Browser diagnostic logs grow without a byte limit",
+      "locations": [
+        {
+          "path": "script/benchmark_browsers.mjs",
+          "sha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+          "lines": [
+            439,
+            444
+          ]
+        },
+        {
+          "path": "script/benchmark_browsers.mjs",
+          "sha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+          "lines": [
+            467,
+            485
+          ]
+        },
+        {
+          "path": "script/breezer_filter_lists.mjs",
+          "sha256": "29e66bf5031cdcb5b3b5d20566592347874ebe66aca9fb0f08c788c4bc0059cb",
+          "lines": [
+            37,
+            41
+          ]
+        },
+        {
+          "path": "script/breezer_filter_lists.mjs",
+          "sha256": "29e66bf5031cdcb5b3b5d20566592347874ebe66aca9fb0f08c788c4bc0059cb",
+          "lines": [
+            72,
+            73
+          ]
+        }
+      ],
+      "evidence": "Both helpers append every stderr/stdout chunk to arrays until cleanup. Buffer.concat duplicates retained data when producing a log. Slicing the concatenated string in the blocker helper only bounds the displayed tail, not retained buffers or concatenation.",
+      "impact": "Long or noisy diagnostic runs can consume increasing harness memory. These arrays belong to the Node harness, so bounding them does not reduce sustained browser RAM.",
+      "smallestSafeFix": "Stream full logs to an owned artifact with backpressure and retain only a capped byte tail for errors. Test a fake noisy stream and exact cap without timing measurements.",
+      "existingChecks": [
+        "benchmark_native_transport.mjs:45-47 already keeps a bounded stderr tail.",
+        "The supervisor uses queue.Queue(maxsize=128), 65536-character reads and a 30-entry error deque."
+      ],
+      "reproduction": "Static complete-file read. No browser or allocation stress test run."
+    },
+    {
+      "id": "BT-05",
+      "status": "confirmed-static-with-offline-call-count",
+      "severity": "low",
+      "title": "Checkpointing rehashes both complete Ninja journals on every interval",
+      "locations": [
+        {
+          "path": "script/windows/unattended_build.py",
+          "sha256": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+          "lines": [
+            94,
+            106
+          ]
+        },
+        {
+          "path": "script/windows/unattended_build.py",
+          "sha256": "e62ec980ace7c9823e0e53bc8eb47a5dab7864e54052e140869110c06076faf5",
+          "lines": [
+            28,
+            30
+          ]
+        }
+      ],
+      "evidence": "Two fake checkpoint calls invoke digest four times, once per whole .ninja_log and .ninja_deps per checkpoint. Hashing is streamed, so it does not retain the whole files. os.sync also runs on every checkpoint. The supervisor does not use these journal hashes to restore or authorize resume.",
+      "impact": "Potential repeated I/O during large builds, especially large .ninja_deps. No CPU/time/RSS saving measured. This is build-only work.",
+      "smallestSafeFix": "Keep action checkpoints and durable state, but consider recording journal size/mtime during intermediate checkpoints and reserve whole-file hashes for stopped/final receipts. Do not replace integrity checks without deciding which receipt requires them.",
+      "existingChecks": [
+        "tests/windows/unattended_build_test.py:70-125 verifies real Ninja checkpoint, interruption and preserved output mtimes. It asserts .ninja_log metadata presence, not a dependency on journal hashes for resume.",
+        "BuildProgress.psm1:94-107 already avoids repeated full-log reads."
+      ],
+      "reproduction": "build-tools-audit-probe.py: checkpointJournalReads. No real journal, os.sync or benchmark ran."
+    },
+    {
+      "id": "BT-06",
+      "status": "confirmed-static",
+      "severity": "medium",
+      "title": "Diagnostic timeout can clear the only SIGKILL watchdog before the child has exited",
+      "locations": [
+        {
+          "path": "script/benchmark_native_transport.mjs",
+          "sha256": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+          "lines": [
+            49,
+            53
+          ]
+        },
+        {
+          "path": "script/benchmark_native_transport.mjs",
+          "sha256": "6e8706be4e2388026f309abf24c35a5e9b1b80dacfb8eef6a316076be789a002",
+          "lines": [
+            69,
+            76
+          ]
+        }
+      ],
+      "evidence": "The 15-second bounded promise can reject before the 20-second watchdog. finally clears that watchdog, disconnects IPC, then sends SIGTERM without awaiting close or escalating. A child ignoring SIGTERM can remain alive, retaining pipes and the diagnostic process.",
+      "impact": "Failure-path helper leakage or hung offline diagnostics. Existing success-path close assertions do not cover an unresponsive child.",
+      "smallestSafeFix": "Centralize cleanup: send SIGTERM, await close under a deadline, then SIGKILL and reap. Keep the kill watchdog armed until close is observed. Add a fake-child lifecycle check or bounded disposable-child regression when operational tests are permitted.",
+      "existingChecks": [
+        "benchmark_native_transport.mjs:69-72 checks code zero and decoder.finish on the success path."
+      ],
+      "reproduction": "Static complete-file read only; no host process was started."
+    },
+    {
+      "id": "BT-07",
+      "status": "confirmed-static",
+      "severity": "low",
+      "title": "Authored-source inventory omits the native C measurement probe",
+      "locations": [
+        {
+          "path": "script/inventory_efficiency_sources.py",
+          "sha256": "e8f888a595a5af468cc2bd7adcdb214c9f5c6155c0633f0fe58f17b08e01f1e6",
+          "lines": [
+            10,
+            10
+          ]
+        },
+        {
+          "path": "script/inventory_efficiency_sources.py",
+          "sha256": "e8f888a595a5af468cc2bd7adcdb214c9f5c6155c0633f0fe58f17b08e01f1e6",
+          "lines": [
+            39,
+            42
+          ]
+        },
+        {
+          "path": "script/benchmark_browsers.mjs",
+          "sha256": "627082bb686cb51711aea68af2825685a8b0c578c65404679d7558952adaf112",
+          "lines": [
+            684,
+            692
+          ]
+        }
+      ],
+      "evidence": "The CODE suffix set lacks .c. script/macos_process_usage.c exists and benchmark_browsers.mjs reads and compiles it as its physical-footprint probe. It is absent from the assigned 62-file inventory.",
+      "impact": "A complete claim over this inventory is narrower than a complete authored-code audit, especially for measurement validity.",
+      "smallestSafeFix": "Include .c in the inventory suffix set, regenerate through the coordinator, and assign a complete review of the added probe. Review other authored-language suffixes against the actual checkout before claiming whole-repository coverage.",
+      "existingChecks": [
+        "check_efficiency_coverage.py validates only inventory entries and reviewer claims, so it cannot detect an omitted source path."
+      ],
+      "reproduction": "Offline existence and inventory suffix comparison. The C file contents were not read in this assigned audit."
+    },
+    {
+      "id": "BT-08",
+      "status": "suspected",
+      "severity": "medium",
+      "title": "Migration hashes packet bytes then rereads them for source replacement",
+      "locations": [
+        {
+          "path": "script/windows/apply-memory-update.py",
+          "sha256": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+          "lines": [
+            33,
+            45
+          ]
+        },
+        {
+          "path": "script/windows/apply-memory-update.py",
+          "sha256": "234fba5deaf5610341d59099c1ff2a616684fd2bbb9441429760f62f8575c15b",
+          "lines": [
+            51,
+            65
+          ]
+        }
+      ],
+      "evidence": "The validation loop hashes replacement files but stores Path objects. The mutation loop rereads replacement bytes. A packet edit between those operations could write unvalidated data and update the plan before the final mismatch check.",
+      "trigger": "A concurrent writer changes a staged packet during migration. PC stopped-worker enforcement does not by itself make packet files immutable. No such writer or incident was observed.",
+      "impact": "Final validation detects mismatch but only after source/plan mutation. Ordinary interruption between known before/after values remains recoverable as tested.",
+      "smallestSafeFix": "Capture replacement bytes once during preflight, validate their hash, and write that captured data. Preserve before/after pin guards and backups. Add a mutation-between-validation-and-write case to existing migration tests.",
+      "existingChecks": [
+        "tests/windows/memory_update_test.py:95-99,131-142 covers interrupted known-version writes; 124-129,144-168 covers corruption present before preflight. It does not change the packet during preflight."
+      ],
+      "reproduction": "Not executed: migration/deployment scripts were not run, including against fixture source. This is a source-based race hypothesis."
+    }
+  ],
+  "supportingEvidenceRead": [
+    {
+      "path": "AGENTS.md",
+      "sha256AtReport": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/README.md",
+      "sha256AtReport": "7755fc8c912849c02d2bfa61e9eb2314fe51d9067aaffe3e6c1a363138358172",
+      "lines": 137,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/verification.json",
+      "sha256AtReport": "0f938fa73dcf800897de5c1d9d60d0bbc91c08c8b88530c816b92943c7c4ca59",
+      "lines": 78,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/windows-tests.log",
+      "sha256AtReport": "ccf821a0950de554919e1891dc943b5b4bcc5bf49dca80a79cb3c5ea380d6912",
+      "lines": 33,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/memory-package-tests.log",
+      "sha256AtReport": "eeb3c4e72cac46b3bf5c693738e3379647b5f53cd7dd10bf63bed96fded362b0",
+      "lines": 13,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "tests/windows/unattended_build_test.py",
+      "sha256AtReport": "c5f4a743b10df3729c02b734be30fab73c2bf88e9236818c89742a9abb391545",
+      "lines": 287,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "tests/windows/build-progress.test.ps1",
+      "sha256AtReport": "7f8360e7e11efb6763cbfd7c0f481f975be1819ebe800d9f84a784ddcb22a88d",
+      "lines": 80,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "tests/windows/memory_update_test.py",
+      "sha256AtReport": "fe241e82008c51a331c367d7e76970ae100f0fc4c0d29769433c372d51cff698",
+      "lines": 196,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    },
+    {
+      "path": "tests/memory_package_test.py",
+      "sha256AtReport": "2dbde9f7861df8f73ae7a116f48dc1b684310ffb2a0be2268dae54ef6445d9b1",
+      "lines": 95,
+      "readScope": "complete tool-output read; hash sampled at report time, not frozen with assigned sources"
+    }
+  ],
+  "excludedIdeas": [
+    {
+      "idea": "Replace progress polling with another incremental tail reader",
+      "reason": "Already implemented in BuildProgress.psm1 with bounded 64KiB reads, bounded carry, encoding/reset handling, and tests. No duplicate tool proposed."
+    },
+    {
+      "idea": "Treat supervisor queue as unbounded",
+      "reason": "Queue has maxsize=128, each readline is limited to 65536 characters, and retained error deque is bounded. It can backpressure while checkpoint hashing runs, but is not an unbounded buffer."
+    },
+    {
+      "idea": "Delete caches or prepare a fresh tree to recover every overlay change",
+      "reason": "Existing marker checks preserve prepared source and compiled output, and overlay fixtures test resumability. Cache deletion is prohibited and unnecessary for this audit."
+    },
+    {
+      "idea": "Drop runtime checksum, identity, signature or pin checks to accelerate packaging",
+      "reason": "Those checks are safety boundaries. Runtime archive hashing is streamed and extraction selects only bounded regular binary/license members."
+    },
+    {
+      "idea": "Claim prior 143 offline passes or browser acceptance proves build tools or native efficiency",
+      "reason": "The supplied evidence has narrower scope. Logs read here record historical runs without binding every audited source hash. They were not rerun and are not a whole-browser measurement."
+    },
+    {
+      "idea": "Rerun browser/CPU/RSS benchmarks now",
+      "reason": "Prohibited while concurrent work runs. This audit uses fake APIs and operation counts only."
+    },
+    {
+      "idea": "Claim checkpoints are independent rollback copies",
+      "reason": "They describe in-place Ninja journals and preserved outputs. They are not object snapshots or proof of crash atomicity."
+    }
+  ],
+  "commandsAndResults": [
+    {
+      "command": "cat AGENTS.md, docs/evidence/memory-20261103/README.md, verification.json; read unslop SKILL.md",
+      "result": "Read complete instructions and evidence; no evidence claims promoted to fresh verification."
+    },
+    {
+      "command": "Python snapshot and bounded numbered reads of all assigned source files",
+      "result": "62 files / 9543 lines fully read. Initial oversized output was truncated; affected files were reread completely from the frozen receipt before assigning coverage."
+    },
+    {
+      "command": "Read relevant existing test files and historical windows/package logs",
+      "result": "Inspected existing tests before recommending additions. No existing test suite was executed in this audit."
+    },
+    {
+      "command": "python3 -B build/efficiency-20261103/build-tools-audit-probe.py",
+      "exitCode": 0,
+      "result": "Four AST/fake API checks passed and reproduced reported code paths. No child processes, real locks/signals, os.sync, browser, network or credentials used. Results in build-tools-audit-probe-results.json."
+    },
+    {
+      "command": "Rehash all 62 live assigned source files against frozen receipt",
+      "result": "No source drift observed at report generation."
+    },
+    {
+      "command": "Existing check_efficiency_coverage.py check() against build-tools-only inventory and authored report; final live rehash",
+      "result": "complete=True for all 62 assigned files, 9543 lines, no source drift; JSON valid. Saved build-tools-audit-coverage.json. This verifies coverage consistency, not correctness."
+    }
+  ],
+  "remainingGaps": [
+    "No PC contact/probe/connect/start/schedule, browser launch, Breezer.app build/run/install, profile/password/cache mutation, provider/network/Keychain/config access, publication or download occurred.",
+    "EOF and timeout findings have fake/static evidence. Actual externally prepared PC worker behavior and Linux orphan adoption remain unverified.",
+    "No whole-browser RAM/CPU result; build-only I/O and diagnostic-process memory findings cannot be counted as sustained browser savings.",
+    "Native C probe is omitted by the inventory and was not read; expand inventory and review separately before whole-authored-code completion.",
+    "No fixes applied and no fault reproductions against real prepared source, migration plan, app bundles or compiled caches.",
+    "Referenced upstream dependencies and feature implementations outside assigned sources were not fully reviewed here.",
+    "No new measurements were run. Invalid transport acceptance does not establish that any prior real report contains invalid data.",
+    "Coverage records complete reads, not a proof that every correctness defect was found. Later source changes require fresh hash-specific review."
+  ],
+  "artifacts": {
+    "build-tools-audit-probe.py": "3c0d0c4243d3914dc1dd438916dc8cd18686b7a35eeb23c6728df40d100f83a3",
+    "build-tools-audit-probe-results.json": "81f0aa675e0877d33662975412e7c93e16bbc626715a58ac67ded20119cf3d5f",
+    "build-tools-audit-invalid-transport.json": "86c37b3abb441b71c9db5c5fb92914d3214c0cfb4eda6e069175d1286eb0de6b",
+    "build-tools-audit-coverage.json": "4595558a89f3a34244311010ad5e4998d2fb63d9a92fc2191cc876e00d740fe7"
+  }
+}

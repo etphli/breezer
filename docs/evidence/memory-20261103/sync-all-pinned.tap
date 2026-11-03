@@ -1,0 +1,42 @@
+✔ disposing an in-flight {"configured":false} cycle cannot recreate an alarm (252.428417ms)
+✔ disposing an in-flight {"configured":true,"workspaceEnabled":false} cycle cannot recreate an alarm (253.4315ms)
+✔ disposing an in-flight {"configured":true,"workspaceEnabled":true,"providerId":"fixture-provider","vaultId":"fixture-vault","model":""} cycle cannot recreate an alarm (265.937417ms)
+✔ disposing while alarm creation is pending clears the late-created alarm (253.629125ms)
+✔ two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart (244.844041ms)
+✔ provider permission, key boundaries, and native enum spellings match imported API (1.208ms)
+✔ cancel and dispose abort in-flight provider work without stale replies (0.60525ms)
+✔ workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership (11.521417ms)
+✔ offline changes survive capture, worker restart and remote deletion (4.180667ms)
+✔ unchanged sync cycles preserve durable recovery data without rewriting storage (1.530792ms)
+✔ changed local recovery data reaches storage before a failing exchange (1.148ms)
+✔ remote changes remain captured if applying the local workspace fails (2.542625ms)
+✔ untouched joining profile defaults do not overwrite remote space names or appearance (1.070667ms)
+✔ disabled and disconnected clients never write or apply remote data (0.219083ms)
+✔ invalid remote data preserves local store and membership (0.171584ms)
+✔ CAS conflicts retry with remote edits without dropping captured local edits (2.638333ms)
+✔ local capture failure never publishes a partial snapshot or replaces saved data (0.332708ms)
+✔ explicit overflow recovery keeps pins when removing a concurrent space (7.336083ms)
+✔ changing providers with the same vault UUID cannot receive an old in-flight write (0.794417ms)
+✔ managed appearance changes do not block valid saved spaces or overwrite the local appearance (2.231625ms)
+✔ persistent identity preserves duplicate URLs; local IDs and folder expansion never sync (5.070875ms)
+✔ restoring many folder states reads local pins a linear number of times (24.041375ms)
+ℹ 1000 local pin reads for 1000 folders
+✔ folder expansion preserves the first match within the last matching local space (0.614125ms)
+✔ folder restoration skips unrelated pins once all matching states are found (1.426583ms)
+✔ two offline clients converge with concurrent rename, move, independent field edits and restart (3.314125ms)
+✔ deletions survive stale clients, later edits and concurrent folder/space removal (2.551625ms)
+✔ same-field ties use stable client order; merge is associative (1.837417ms)
+✔ appearance allowlist includes only supported preferences and keeps field-level changes (0.899792ms)
+✔ malformed and future data reject without mutating either client (0.431334ms)
+✔ concurrent deletion of different last spaces recovers a usable stable identity (1.244042ms)
+✔ concurrent capacity overflow rejects instead of silently losing saved items (1.110125ms)
+✔ clock and payload limits fail without replacing local state (1.390584ms)
+✔ incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization (0.38575ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1100.829959

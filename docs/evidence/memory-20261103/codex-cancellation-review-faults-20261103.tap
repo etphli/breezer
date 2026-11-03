@@ -1,0 +1,17 @@
+✔ abort while bind pending: success (3.917ms)
+✔ abort while bind pending: failure (0.509583ms)
+✔ abort while bind pending: throw (0.33175ms)
+✔ close reject is called once and preserves unconfirmed isolation (0.325459ms)
+✔ close throw is called once and preserves unconfirmed isolation (0.140875ms)
+✔ cancel suppresses queued tool activity (1.086291ms)
+✔ cancel suppresses late-success tool activity (0.44525ms)
+✔ cancel suppresses late-error tool activity (0.337125ms)
+✔ same provider simultaneous chats own separate processes (0.347042ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 120.525541

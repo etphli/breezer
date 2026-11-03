@@ -1,0 +1,2117 @@
+{
+  "recommendation": {
+    "selection": "reject-C-as-written",
+    "scope": "SCRATCH only; no adoption or production change",
+    "reason": "Fails predeclared fast-path CPU bound with empty saved store and one pending pin. Targeted buckets reduce B live ownership but C still uses more in-operation live heap than baseline. Browser physical evidence is component-only and cannot establish whole Breezer acceptance.",
+    "parentIndependentReviewRequired": true,
+    "priorARejectedAndLazyFolderRowsRejected": "preserved; neither experiment repeated"
+  },
+  "criteria": {
+    "declaredBeforeMeasurement": true,
+    "cpu": {
+      "rounds": 7,
+      "minimumCalibrationBatchMs": 150,
+      "warmupsPerVariant": 2,
+      "largeAndTypicalColdMedianCOverBaselineMax": 0.8,
+      "fasterPairsMinimum": 6,
+      "COverBMax": 1.15,
+      "smallFastPathsMedianMax": 1.15,
+      "allSamplesRetained": true,
+      "freshMembersEveryCall": true
+    },
+    "memory": {
+      "liveCOverBMaxTypicalUnique": 0.85,
+      "afterReturnExcessBytesMax": 65536,
+      "samePathCOverBMax": 1.1,
+      "physicalCOverBaselineAndBMax": 1.1,
+      "minimumFreshAlternatingPhysicalTrialsPerVariantPerSize": 3,
+      "unresolvedPhysicalRisk": "hold"
+    },
+    "scope": "SCRATCH only; semantic application contract, all correctness gates and parent review required"
+  },
+  "base": {
+    "path": "features/ai/extension/workspace-store.js",
+    "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842"
+  },
+  "sources": {
+    "baseline": {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/baseline.mjs",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842"
+    },
+    "candidate-b": {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-b.mjs",
+      "sha256": "cb7d7418c6d7d86518c8c2f9504da9b119ce3aed13b8351de27029513b610635"
+    },
+    "candidate-c": {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c.mjs",
+      "sha256": "c916af3e0852562f937354d67fb6e7d8c296ea0fa30acb91d83f91040ea6f2cc"
+    }
+  },
+  "diff": {
+    "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c.diff",
+    "sha256": "55957dc83a2dc9349a45784ee27f9db96a1b2ab205a4df9709bfb2a9062cf45e",
+    "text": "--- build/efficiency-20261103/pin-matching-targeted/baseline.mjs\t2026-11-03 16:22:24\n+++ build/efficiency-20261103/pin-matching-targeted/candidate-c.mjs\t2026-11-03 16:22:24\n@@ -248,6 +248,38 @@\n   return exact.length ? exact : all.filter(({ entry }) => urlKeys(entry.url).path === keys.path);\n }\n \n+function targetedSavedUrlBuckets(store, pending) {\n+  const exact = new Map(), path = new Map();\n+  for (const tab of pending) {\n+    if (!tab.pinned) continue;\n+    const keys = urlKeys(tab.url || tab.pendingUrl || '');\n+    exact.set(keys.exact, []);\n+    path.set(keys.path, []);\n+  }\n+  const add = (entry, space) => {\n+    const keys = urlKeys(entry.url);\n+    const exactBucket = exact.get(keys.exact), pathBucket = path.get(keys.path);\n+    if (!exactBucket && !pathBucket) return;\n+    const match = { entry, space };\n+    if (exactBucket) exactBucket.push(match);\n+    if (pathBucket) pathBucket.push(match);\n+  };\n+  for (const entry of store.favorites) add(entry, null);\n+  for (const space of store.spaces) {\n+    for (const node of space.pinned) {\n+      if (node.kind === 'folder') for (const entry of node.children) add(entry, space);\n+      else add(node, space);\n+    }\n+  }\n+  return { exact, path };\n+}\n+\n+function targetedSavedMatches(buckets, url, exclude) {\n+  const keys = urlKeys(url);\n+  const exact = (buckets.exact.get(keys.exact) || []).filter(({ entry }) => !exclude.has(entry.id));\n+  return exact.length ? exact : (buckets.path.get(keys.path) || []).filter(({ entry }) => !exclude.has(entry.id));\n+}\n+\n export const displayTitle = (entry, tab) => entry?.customTitle || tab?.title || entry?.title || hostLabel(entry?.url || tab?.url || '') || 'New tab';\n \n // ---------------------------------------------------------------- store operations (mutate a draft)\n@@ -405,6 +437,7 @@\n   const orphanPinned = [];\n   const urlOf = (tab) => tab.url || tab.pendingUrl || '';\n   const pending = [];\n+  let savedMatches;\n \n   const accept = (tab, record) => {\n     const clean = { s: resolveSpaceId(store, record.s), u: urlOf(tab), k: session };\n@@ -491,7 +524,7 @@\n     if (record) { accept(tab, record); continue; }\n     // 3. Chromium-pinned tabs bind to an entry with the same URL.\n     if (tab.pinned) {\n-      const matches = findEntriesByUrl(store, urlOf(tab), boundEntries);\n+      const matches = targetedSavedMatches(savedMatches ||= targetedSavedUrlBuckets(store, pending), urlOf(tab), boundEntries);\n       if (matches.length === 1) {\n         const match = matches[0];\n         accept(tab, { s: match.space?.id ?? fallback, e: match.entry.id });\n",
+    "outsideListedPrivateHelperAndTwoConsumerEditsByteIdentical": true,
+    "publicHelperByteIdentical": true,
+    "validationAndSchemaAndNodeIndexByteIdentical": true,
+    "exports": "complete actual modules; exports unchanged"
+  },
+  "callerContract": {
+    "provenFromSource": [
+      "Repository extension caller search finds workspace.js:1404 as the only application WorkspaceStore.reconcile call. workspace-store.js:660 is its synchronous internal call. workspace-sync.js.reconcile is a different coordinator method.",
+      "workspace.js:1395 obtains tabs from native chrome.tabs.query. The same array is passed to WorkspaceStore.reconcile. No caller installs getters/proxies or invokes a configurable matching callback. Event handlers are subscribed after initial reconcile.",
+      "WorkspaceStore.read emits newly allocated plain normalized store/member data; ids and URLs are strings, dense arrays, duplicate node IDs removed. Stored accessor descriptors cannot persist through the native storage data boundary; normalization allocates all matching records.",
+      "transact holds the Web Lock, obtains normalized data and token, then calls synchronous reconcile with no awaits/callbacks during matching. The only saved-state changes inside that span are local member claims; saved URLs and native snapshots remain stable.",
+      "adoptPinned at workspace.js:1363 uses the public helper inside update and may add entries between calls. Public helper remains byte-identical; scratch sequential mutation tests cover this."
+    ],
+    "intentionalAssumptions": [
+      "Native Chrome storage/tab API results are data snapshots, native APIs and built-in URL/Map/Array methods are not maliciously replaced, and no unrelated extension code mutates native snapshots synchronously through accessors.",
+      "This is an application-input contract, not arbitrary exported-JavaScript equivalence. Direct callers of the exported function or generic WorkspaceStore with custom fake storage can supply excluded inputs. New injection seams require renewed review."
+    ],
+    "excludedCounterexamples": "Saved URL getters with changing/throwing reads, proxy traps and tab getters that mutate the saved store are valid raw JavaScript but absent from actual inspected caller construction. They can be supplied by tests/custom module consumers. C remains observably different for excluded saved getter reads and cached changing getters. Its pending-key collection also adds eager reads of later pinned tab URLs. No security/schema validation was relaxed.",
+    "reachableStabilityViolationFound": false
+  },
+  "semantics": {
+    "differentialNode24": {
+      "cases": 614,
+      "equalCounts": {
+        "candidate-b": 614,
+        "candidate-c": 614
+      },
+      "failures": [],
+      "adversarial": [
+        {
+          "name": "helper-reentrant-exclude-mutates-earlier-entry",
+          "results": [
+            {
+              "matches": [],
+              "log": [
+                "e0",
+                "e1"
+              ]
+            },
+            {
+              "matches": [],
+              "log": [
+                "e0",
+                "e1"
+              ]
+            },
+            {
+              "matches": [],
+              "log": [
+                "e0",
+                "e1"
+              ]
+            }
+          ],
+          "differences": []
+        },
+        {
+          "name": "helper-url-getter-path-second-read",
+          "results": [
+            {
+              "matches": [
+                "e0"
+              ],
+              "reads": 2
+            },
+            {
+              "matches": [
+                "e0"
+              ],
+              "reads": 2
+            },
+            {
+              "matches": [
+                "e0"
+              ],
+              "reads": 2
+            }
+          ],
+          "differences": []
+        },
+        {
+          "name": "helper-sparse-favorites",
+          "results": [
+            {
+              "error": "TypeError",
+              "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+            },
+            {
+              "error": "TypeError",
+              "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+            },
+            {
+              "error": "TypeError",
+              "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+            }
+          ],
+          "differences": []
+        },
+        {
+          "name": "reconcile-excluded-getter-throws",
+          "results": [
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://example.test/p/1?q=1",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            },
+            {
+              "error": "Error",
+              "message": "excluded URL read"
+            },
+            {
+              "error": "Error",
+              "message": "excluded URL read"
+            }
+          ],
+          "differences": [
+            "candidate-b",
+            "candidate-c"
+          ]
+        },
+        {
+          "name": "reconcile-getter-changes-between-lookups",
+          "results": [
+            {
+              "result": {
+                "assigned": {
+                  "1": {
+                    "s": "a",
+                    "u": "https://example.test/p/0?q=1",
+                    "k": "now",
+                    "e": "e0"
+                  },
+                  "2": {
+                    "s": "a",
+                    "u": "https://example.test/p/1?q=1",
+                    "k": "now",
+                    "e": "e1"
+                  }
+                },
+                "orphanPinned": []
+              },
+              "reads": 2
+            },
+            {
+              "result": {
+                "assigned": {
+                  "1": {
+                    "s": "a",
+                    "u": "https://example.test/p/0?q=1",
+                    "k": "now",
+                    "e": "e0"
+                  },
+                  "2": {
+                    "s": "a",
+                    "u": "https://example.test/p/1?q=1",
+                    "k": "now"
+                  }
+                },
+                "orphanPinned": [
+                  2
+                ]
+              },
+              "reads": 1
+            },
+            {
+              "result": {
+                "assigned": {
+                  "1": {
+                    "s": "a",
+                    "u": "https://example.test/p/0?q=1",
+                    "k": "now",
+                    "e": "e0"
+                  },
+                  "2": {
+                    "s": "a",
+                    "u": "https://example.test/p/1?q=1",
+                    "k": "now"
+                  }
+                },
+                "orphanPinned": [
+                  2
+                ]
+              },
+              "reads": 1
+            }
+          ],
+          "differences": [
+            "candidate-b",
+            "candidate-c"
+          ]
+        },
+        {
+          "name": "reconcile-tab-url-getter-mutates-store",
+          "results": [
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://changed.test/",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            },
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://changed.test/",
+                  "k": "now"
+                }
+              },
+              "orphanPinned": [
+                2
+              ]
+            },
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://changed.test/",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            }
+          ],
+          "differences": [
+            "candidate-b"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "name": "ignore-exclusions",
+          "caught": true,
+          "message": "Expected values to be strictly equal:\n\n1 !== 0\n"
+        },
+        {
+          "name": "wrong-exact-precedence",
+          "caught": true,
+          "message": "Expected values to be strictly equal:\n\n2 !== 1\n"
+        },
+        {
+          "name": "reuse-bound-entry",
+          "caught": true,
+          "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   2\n- ]\n"
+        }
+      ],
+      "identityChecks": "entry/space references, original store/tabs JSON, members.tabs and assigned record ownership; frozen snapshots; sequential store mutation",
+      "exclusions": "Not exhaustive JS proxy/prototype/Array method monkeypatch equivalence. Errors compared including engine message."
+    },
+    "differentialNode22": {
+      "cases": 614,
+      "equalCounts": {
+        "candidate-b": 614,
+        "candidate-c": 614
+      },
+      "failures": [],
+      "adversarial": [
+        {
+          "name": "helper-reentrant-exclude-mutates-earlier-entry",
+          "results": [
+            {
+              "matches": [],
+              "log": [
+                "e0",
+                "e1"
+              ]
+            },
+            {
+              "matches": [],
+              "log": [
+                "e0",
+                "e1"
+              ]
+            },
+            {
+              "matches": [],
+              "log": [
+                "e0",
+                "e1"
+              ]
+            }
+          ],
+          "differences": []
+        },
+        {
+          "name": "helper-url-getter-path-second-read",
+          "results": [
+            {
+              "matches": [
+                "e0"
+              ],
+              "reads": 2
+            },
+            {
+              "matches": [
+                "e0"
+              ],
+              "reads": 2
+            },
+            {
+              "matches": [
+                "e0"
+              ],
+              "reads": 2
+            }
+          ],
+          "differences": []
+        },
+        {
+          "name": "helper-sparse-favorites",
+          "results": [
+            {
+              "error": "TypeError",
+              "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+            },
+            {
+              "error": "TypeError",
+              "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+            },
+            {
+              "error": "TypeError",
+              "message": "Cannot destructure property 'entry' of 'undefined' as it is undefined."
+            }
+          ],
+          "differences": []
+        },
+        {
+          "name": "reconcile-excluded-getter-throws",
+          "results": [
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://example.test/p/1?q=1",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            },
+            {
+              "error": "Error",
+              "message": "excluded URL read"
+            },
+            {
+              "error": "Error",
+              "message": "excluded URL read"
+            }
+          ],
+          "differences": [
+            "candidate-b",
+            "candidate-c"
+          ]
+        },
+        {
+          "name": "reconcile-getter-changes-between-lookups",
+          "results": [
+            {
+              "result": {
+                "assigned": {
+                  "1": {
+                    "s": "a",
+                    "u": "https://example.test/p/0?q=1",
+                    "k": "now",
+                    "e": "e0"
+                  },
+                  "2": {
+                    "s": "a",
+                    "u": "https://example.test/p/1?q=1",
+                    "k": "now",
+                    "e": "e1"
+                  }
+                },
+                "orphanPinned": []
+              },
+              "reads": 2
+            },
+            {
+              "result": {
+                "assigned": {
+                  "1": {
+                    "s": "a",
+                    "u": "https://example.test/p/0?q=1",
+                    "k": "now",
+                    "e": "e0"
+                  },
+                  "2": {
+                    "s": "a",
+                    "u": "https://example.test/p/1?q=1",
+                    "k": "now"
+                  }
+                },
+                "orphanPinned": [
+                  2
+                ]
+              },
+              "reads": 1
+            },
+            {
+              "result": {
+                "assigned": {
+                  "1": {
+                    "s": "a",
+                    "u": "https://example.test/p/0?q=1",
+                    "k": "now",
+                    "e": "e0"
+                  },
+                  "2": {
+                    "s": "a",
+                    "u": "https://example.test/p/1?q=1",
+                    "k": "now"
+                  }
+                },
+                "orphanPinned": [
+                  2
+                ]
+              },
+              "reads": 1
+            }
+          ],
+          "differences": [
+            "candidate-b",
+            "candidate-c"
+          ]
+        },
+        {
+          "name": "reconcile-tab-url-getter-mutates-store",
+          "results": [
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://changed.test/",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            },
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://changed.test/",
+                  "k": "now"
+                }
+              },
+              "orphanPinned": [
+                2
+              ]
+            },
+            {
+              "assigned": {
+                "1": {
+                  "s": "a",
+                  "u": "https://example.test/p/0?q=1",
+                  "k": "now",
+                  "e": "e0"
+                },
+                "2": {
+                  "s": "a",
+                  "u": "https://changed.test/",
+                  "k": "now",
+                  "e": "e1"
+                }
+              },
+              "orphanPinned": []
+            }
+          ],
+          "differences": [
+            "candidate-b"
+          ]
+        }
+      ],
+      "negative": [
+        {
+          "name": "ignore-exclusions",
+          "caught": true,
+          "message": "Expected values to be strictly equal:\n\n1 !== 0\n"
+        },
+        {
+          "name": "wrong-exact-precedence",
+          "caught": true,
+          "message": "Expected values to be strictly equal:\n\n2 !== 1\n"
+        },
+        {
+          "name": "reuse-bound-entry",
+          "caught": true,
+          "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   2\n- ]\n"
+        }
+      ],
+      "identityChecks": "entry/space references, original store/tabs JSON, members.tabs and assigned record ownership; frozen snapshots; sequential store mutation",
+      "exclusions": "Not exhaustive JS proxy/prototype/Array method monkeypatch equivalence. Errors compared including engine message."
+    },
+    "snapshotSequences": [
+      {
+        "variant": "baseline",
+        "passed": true,
+        "claimsAfterIndexAndFrozenRecordIdentity": true,
+        "publicSequentialMutationAndFavoriteNull": true,
+        "orphanPinnedOrder": [
+          1,
+          3
+        ]
+      },
+      {
+        "variant": "candidate-b",
+        "passed": true,
+        "claimsAfterIndexAndFrozenRecordIdentity": true,
+        "publicSequentialMutationAndFavoriteNull": true,
+        "orphanPinnedOrder": [
+          1,
+          3
+        ]
+      },
+      {
+        "variant": "candidate-c",
+        "passed": true,
+        "claimsAfterIndexAndFrozenRecordIdentity": true,
+        "publicSequentialMutationAndFavoriteNull": true,
+        "orphanPinnedOrder": [
+          1,
+          3
+        ]
+      }
+    ],
+    "classDifferential": [
+      {
+        "seed": 0,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 1,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 2,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 3,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 4,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 5,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 6,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 7,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 8,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 9,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 10,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 11,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 12,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 13,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 14,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 15,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 16,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      },
+      {
+        "seed": 17,
+        "steps": 6,
+        "exactWritesAndReadbackEqual": true
+      }
+    ],
+    "candidateCNegativeControls": [
+      {
+        "name": "exclusions",
+        "caught": true,
+        "message": "Expected values to be strictly equal:\n\nundefined !== 'a2'\n"
+      },
+      {
+        "name": "precedence",
+        "caught": true,
+        "message": "Expected values to be strictly equal:\n\nundefined !== 'a1'\n"
+      },
+      {
+        "name": "reuse",
+        "caught": true,
+        "message": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n+ []\n- [\n-   2\n- ]\n"
+      }
+    ],
+    "coverage": "raw and normalized reconciliation, prior/current/missing members, hints/quarantine, duplicate IDs/URLs, URL normalization edges, late previous-session claims, exact exhaustion to path, frozen object identities, orphan ordering, sequential public mutation; 87 existing import-only scratch tests pass on each Node runtime",
+    "limits": "Corpus is finite, not a proof for arbitrary hostile JavaScript inputs or all hash collisions. Tombstone/quarantine algorithms are byte-identical and existing tests cover ambiguous cross-window records.",
+    "proxyCounterexample": {
+      "rows": [
+        {
+          "variant": "baseline",
+          "log": [],
+          "result": {
+            "assigned": {
+              "1": {
+                "s": "a",
+                "u": "https://x.test/0",
+                "k": "now",
+                "e": "e0"
+              },
+              "2": {
+                "s": "a",
+                "u": "https://x.test/1",
+                "k": "now",
+                "e": "e1"
+              }
+            },
+            "orphanPinned": []
+          }
+        },
+        {
+          "variant": "candidate-b",
+          "log": [
+            "excluded saved URL proxy trap"
+          ],
+          "result": {
+            "error": "proxy URL trap"
+          }
+        },
+        {
+          "variant": "candidate-c",
+          "log": [
+            "excluded saved URL proxy trap"
+          ],
+          "result": {
+            "error": "proxy URL trap"
+          }
+        }
+      ],
+      "classification": "Direct exported JavaScript input; not constructible by native tabs.query or storage.local snapshot callers inspected. Store normalization allocates plain entries. Proxy example intentionally bypasses that application boundary."
+    }
+  },
+  "cpu": {
+    "summary": [
+      {
+        "name": "small",
+        "n": 10,
+        "pendingTabs": 3,
+        "mode": "cold",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.7615045597376467,
+            "fasterPairs": 7,
+            "ratios": [
+              0.7181826357279942,
+              0.9352925689319037,
+              0.7409341726898266,
+              0.7620131142278516,
+              0.7615045597376467,
+              0.7643800170122731,
+              0.7567516611276229
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 0.7828911186341249,
+            "fasterPairs": 7,
+            "ratios": [
+              0.7828911186341249,
+              0.7561970220680109,
+              0.7657371377177364,
+              0.7868784172028268,
+              0.7632094703254035,
+              0.7938068870457948,
+              0.786495279124539
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 329.88729199999943,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 13.11859130859375,
+          "candidate-b": 9.860519409179688,
+          "candidate-c": 10.19366455078125
+        }
+      },
+      {
+        "name": "typical",
+        "n": 100,
+        "pendingTabs": 20,
+        "mode": "cold",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.15403038956840348,
+            "fasterPairs": 7,
+            "ratios": [
+              0.1542453408478332,
+              0.15354254321511082,
+              0.1536063966920311,
+              0.16171519192505315,
+              0.15854090656779318,
+              0.15403038956840348,
+              0.15359910847275468
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 0.15387696150724034,
+            "fasterPairs": 7,
+            "ratios": [
+              0.15888512874976374,
+              0.15392476779685074,
+              0.1531240128990119,
+              0.15387696150724034,
+              0.15295871403733463,
+              0.15469513832930432,
+              0.15377557528629185
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 554.7301249999982,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 543.67236328125,
+          "candidate-b": 83.74951171875,
+          "candidate-c": 83.79248046875
+        }
+      },
+      {
+        "name": "large",
+        "n": 1000,
+        "pendingTabs": 100,
+        "mode": "cold",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.026890574072127013,
+            "fasterPairs": 7,
+            "ratios": [
+              0.026989656497321213,
+              0.026684175785723376,
+              0.026465145476686495,
+              0.026890574072127013,
+              0.02935260354900236,
+              0.032247343444034515,
+              0.025797765280079106
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 0.022725026130846777,
+            "fasterPairs": 7,
+            "ratios": [
+              0.022753550894075505,
+              0.021687573041157544,
+              0.022169243001150037,
+              0.0226597538429936,
+              0.0240926381163411,
+              0.023280503311515405,
+              0.022725026130846777
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 204.88908300000003,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 37162.625,
+          "candidate-b": 965.30078125,
+          "candidate-c": 826.1796875
+        }
+      },
+      {
+        "name": "same-path",
+        "n": 1000,
+        "pendingTabs": 20,
+        "mode": "same",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.10338444154914223,
+            "fasterPairs": 7,
+            "ratios": [
+              0.10757602766701763,
+              0.1005462569045827,
+              0.10105990991699157,
+              0.10421125362475976,
+              0.10338444154914223,
+              0.10479795018146043,
+              0.10294627837459508
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 0.08993822494307696,
+            "fasterPairs": 7,
+            "ratios": [
+              0.08993822494307696,
+              0.09214304773763993,
+              0.08902053521387993,
+              0.089070287406778,
+              0.0888568664597525,
+              0.09006718123507011,
+              0.09204619110630584
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 528.9750840000052,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 5857.2890625,
+          "candidate-b": 604.4765625,
+          "candidate-c": 531.3935546875
+        }
+      },
+      {
+        "name": "one-pin",
+        "n": 1000,
+        "pendingTabs": 1,
+        "mode": "cold",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.910841345291187,
+            "fasterPairs": 0,
+            "ratios": [
+              1.921473383297258,
+              1.8945632082230282,
+              1.911522042793175,
+              1.910841345291187,
+              1.9212402443300902,
+              1.8536418288417158,
+              1.8857179923581362
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 1.341606380944755,
+            "fasterPairs": 0,
+            "ratios": [
+              1.3239942725880056,
+              1.4029239364606114,
+              1.3409034902906047,
+              1.3509956976431992,
+              1.341606380944755,
+              1.3693108232051583,
+              1.2662039390382536
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 410.09500000000116,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 299.352294921875,
+          "candidate-b": 572.033203125,
+          "candidate-c": 401.373046875
+        }
+      },
+      {
+        "name": "zero",
+        "n": 100,
+        "pendingTabs": 0,
+        "mode": "cold",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.008891078736872,
+            "fasterPairs": 3,
+            "ratios": [
+              0.978143182165628,
+              1.008891078736872,
+              0.9819103905438863,
+              0.9977540049069129,
+              1.0150632555264991,
+              1.0127940790088932,
+              1.0154316733873656
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 0.9944932268455192,
+            "fasterPairs": 5,
+            "ratios": [
+              0.9944932268455192,
+              1.001142176535161,
+              1.0010170202674353,
+              0.9857345113711715,
+              0.9986581054097129,
+              0.9934291074684447,
+              0.9939869761579666
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 216.81708300000173,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 3.429290771484375,
+          "candidate-b": 3.3767852783203125,
+          "candidate-c": 3.437286376953125
+        }
+      },
+      {
+        "name": "current",
+        "n": 100,
+        "pendingTabs": 20,
+        "mode": "current",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.0043831794188383,
+            "fasterPairs": 3,
+            "ratios": [
+              0.9222531274152717,
+              0.8523796243420675,
+              1.020922230515381,
+              1.071141302660926,
+              1.0043831794188383,
+              0.9944622513597614,
+              1.0049833192148003
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 1.0018811742268738,
+            "fasterPairs": 3,
+            "ratios": [
+              0.9951585898745069,
+              1.1205405405405406,
+              1.0337027946749675,
+              1.0883375193444453,
+              1.0018811742268738,
+              0.9939995754660813,
+              0.9976132034665874
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 191.23116600000503,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 11.90911865234375,
+          "candidate-b": 11.776123046875,
+          "candidate-c": 11.76727294921875
+        }
+      },
+      {
+        "name": "no-pinned",
+        "n": 100,
+        "pendingTabs": 20,
+        "mode": "unpinned",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 0.9981749576818312,
+            "fasterPairs": 4,
+            "ratios": [
+              0.9769642068051259,
+              0.9957403135274563,
+              0.9981749576818312,
+              1.0058303167317277,
+              0.9943538922345628,
+              1.005309346003814,
+              1.0010176514612197
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 1.0019564551592361,
+            "fasterPairs": 2,
+            "ratios": [
+              1.0039985244624992,
+              1.0018877732483378,
+              0.991019057451883,
+              1.0302585582177577,
+              0.9947336934846452,
+              1.0041050189233591,
+              1.0019564551592361
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 218.5032080000019,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 26.77703857421875,
+          "candidate-b": 26.7867431640625,
+          "candidate-c": 26.8212890625
+        }
+      },
+      {
+        "name": "no-saved",
+        "n": 0,
+        "pendingTabs": 20,
+        "mode": "cold",
+        "ratios": [
+          {
+            "variant": "candidate-b",
+            "medianRatio": 1.0478449849032814,
+            "fasterPairs": 0,
+            "ratios": [
+              1.0298137827401899,
+              1.102155422385463,
+              1.0440667073072762,
+              1.0478449849032814,
+              1.0721012192926775,
+              1.040483917444931,
+              1.1350647138964578
+            ]
+          },
+          {
+            "variant": "candidate-c",
+            "medianRatio": 1.4917317843831002,
+            "fasterPairs": 0,
+            "ratios": [
+              1.7930342949661466,
+              1.4799266469177599,
+              1.4917317843831002,
+              1.4987707261292167,
+              1.4943702788731057,
+              1.4592919591127484,
+              1.462842633735357
+            ]
+          }
+        ],
+        "minimumWarmedPairWallMs": 157.2728749999951,
+        "medianCpuMicrosecondsPerCompleteCall": {
+          "baseline": 25.836181640625,
+          "candidate-b": 27.6278076171875,
+          "candidate-c": 38.497314453125
+        }
+      }
+    ],
+    "raw": [
+      "cpu.json",
+      "cpu-duration-correction.json"
+    ],
+    "units": "process CPU user+system ms in raw; microseconds per full exported reconcile call in summary. Fresh normalized members/reset and all lazy index construction included; fixture construction/import outside timing.",
+    "eligibility": "Four rows with initial warmed batches below 150ms repeated at 400ms calibration, all originals retained. Remaining rows use original measurements. No own heap/browser/native sampling overlapped either CPU run.",
+    "COverB": "Ratios to B inferred from adjacent baseline-paired summaries, not direct B/C pairing. No claim of directly paired C/B confidence.",
+    "outliers": "None removed. All calibrations/warmups/pairs retained."
+  },
+  "memory": {
+    "summary": [
+      {
+        "n": 10,
+        "t": 3,
+        "mode": "unique",
+        "variant": "baseline",
+        "medianLiveDeltaBytes": 20472,
+        "medianAfterReturnDeltaBytes": 22128,
+        "liveRangeBytes": [
+          -192936,
+          21712
+        ],
+        "structure": {
+          "keys": 0,
+          "keyChars": 0,
+          "bucketSlots": 0,
+          "wrappers": 0
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 10,
+        "t": 3,
+        "mode": "unique",
+        "variant": "candidate-b",
+        "medianLiveDeltaBytes": 35432,
+        "medianAfterReturnDeltaBytes": 34696,
+        "liveRangeBytes": [
+          34968,
+          35432
+        ],
+        "structure": {
+          "keys": 20,
+          "keyChars": 360,
+          "bucketSlots": 20,
+          "wrappers": 10
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 10,
+        "t": 3,
+        "mode": "unique",
+        "variant": "candidate-c",
+        "medianLiveDeltaBytes": 25456,
+        "medianAfterReturnDeltaBytes": 27704,
+        "liveRangeBytes": [
+          25456,
+          25456
+        ],
+        "structure": {
+          "keys": 6,
+          "keyChars": 108,
+          "bucketSlots": 6,
+          "wrappers": 3
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 100,
+        "t": 20,
+        "mode": "unique",
+        "variant": "baseline",
+        "medianLiveDeltaBytes": 33904,
+        "medianAfterReturnDeltaBytes": 75672,
+        "liveRangeBytes": [
+          33784,
+          34304
+        ],
+        "structure": {
+          "keys": 0,
+          "keyChars": 0,
+          "bucketSlots": 0,
+          "wrappers": 0
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 100,
+        "t": 20,
+        "mode": "unique",
+        "variant": "candidate-b",
+        "medianLiveDeltaBytes": 113896,
+        "medianAfterReturnDeltaBytes": 43472,
+        "liveRangeBytes": [
+          110776,
+          118584
+        ],
+        "structure": {
+          "keys": 200,
+          "keyChars": 3870,
+          "bucketSlots": 200,
+          "wrappers": 100
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 100,
+        "t": 20,
+        "mode": "unique",
+        "variant": "candidate-c",
+        "medianLiveDeltaBytes": 56616,
+        "medianAfterReturnDeltaBytes": 50112,
+        "liveRangeBytes": [
+          56496,
+          57064
+        ],
+        "structure": {
+          "keys": 40,
+          "keyChars": 750,
+          "bucketSlots": 40,
+          "wrappers": 20
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 1000,
+        "t": 100,
+        "mode": "unique",
+        "variant": "baseline",
+        "medianLiveDeltaBytes": 81136,
+        "medianAfterReturnDeltaBytes": 55808,
+        "liveRangeBytes": [
+          61688,
+          81184
+        ],
+        "structure": {
+          "keys": 0,
+          "keyChars": 0,
+          "bucketSlots": 0,
+          "wrappers": 0
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 1000,
+        "t": 100,
+        "mode": "unique",
+        "variant": "candidate-b",
+        "medianLiveDeltaBytes": 804160,
+        "medianAfterReturnDeltaBytes": 52296,
+        "liveRangeBytes": [
+          796744,
+          804208
+        ],
+        "structure": {
+          "keys": 2000,
+          "keyChars": 41670,
+          "bucketSlots": 2000,
+          "wrappers": 1000
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 1000,
+        "t": 100,
+        "mode": "unique",
+        "variant": "candidate-c",
+        "medianLiveDeltaBytes": 127016,
+        "medianAfterReturnDeltaBytes": 30448,
+        "liveRangeBytes": [
+          124496,
+          152560
+        ],
+        "structure": {
+          "keys": 200,
+          "keyChars": 3870,
+          "bucketSlots": 200,
+          "wrappers": 100
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 1000,
+        "t": 20,
+        "mode": "same",
+        "variant": "baseline",
+        "medianLiveDeltaBytes": 72704,
+        "medianAfterReturnDeltaBytes": 15456,
+        "liveRangeBytes": [
+          69736,
+          84072
+        ],
+        "structure": {
+          "keys": 0,
+          "keyChars": 0,
+          "bucketSlots": 0,
+          "wrappers": 0
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 1000,
+        "t": 20,
+        "mode": "same",
+        "variant": "candidate-b",
+        "medianLiveDeltaBytes": 524744,
+        "medianAfterReturnDeltaBytes": -256,
+        "liveRangeBytes": [
+          519960,
+          530800
+        ],
+        "structure": {
+          "keys": 1001,
+          "keyChars": 21906,
+          "bucketSlots": 2000,
+          "wrappers": 1000
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "n": 1000,
+        "t": 20,
+        "mode": "same",
+        "variant": "candidate-c",
+        "medianLiveDeltaBytes": 144656,
+        "medianAfterReturnDeltaBytes": 24808,
+        "liveRangeBytes": [
+          144656,
+          145064
+        ],
+        "structure": {
+          "keys": 21,
+          "keyChars": 426,
+          "bucketSlots": 1020,
+          "wrappers": 1000
+        },
+        "remainingProbeMapCounts": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "raw": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/memory.json",
+    "limits": "bytes forced-GC V8 heap; source hook at first fallback after matches computed, all operation state live; not physical peak; Map WeakRefs and hook perturb measurement equally",
+    "ownership": "C stores requested exact/path keys directly in its two maps, using their empty arrays as target containers. It returns an object, not a closure: no factory callback, pending tab array or whole store variable is captured. Build-time add closure dies on return. Required entry/space identity references can indirectly retain their containing space arrays. Shared-path buckets can retain every saved entry even when most exact keys are omitted. No cross-call/window/mutation cache. Zero remaining probed Maps after return and event-loop GC in every trial.",
+    "afterReturn": "Heap deltas include module/JIT/probe and result/member allocations; negative deltas reflect collection of earlier garbage. They are not a leak estimate or physical bytes."
+  },
+  "browser": {
+    "raw": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-contained-results.json",
+    "excludedRaw": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-results.json",
+    "harness": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-contained.mjs",
+    "summary": [
+      {
+        "n": 10,
+        "t": 3,
+        "mode": "unique",
+        "variant": "baseline",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 39.45312462747097,
+        "medianHeapUsedBeforeBytes": 710960,
+        "medianHeapUsedAfterBytes": 1502552,
+        "medianHeapUsedReleasedBytes": 833660,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 298981568,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 300390464,
+        "physicalAfterMedianSum_physicalFootprintBytes": 344677568,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 344726720,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 329112768,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 344743104,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 44.57769097222222
+      },
+      {
+        "n": 10,
+        "t": 3,
+        "mode": "unique",
+        "variant": "candidate-b",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 21.484375,
+        "medianHeapUsedBeforeBytes": 711156,
+        "medianHeapUsedAfterBytes": 1680732,
+        "medianHeapUsedReleasedBytes": 839412,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 299965440,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 303045632,
+        "physicalAfterMedianSum_physicalFootprintBytes": 366172608,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 366205376,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 357620160,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 366221760,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 24.40277777777778
+      },
+      {
+        "n": 10,
+        "t": 3,
+        "mode": "unique",
+        "variant": "candidate-c",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 25.00000037252903,
+        "medianHeapUsedBeforeBytes": 711336,
+        "medianHeapUsedAfterBytes": 1362524,
+        "medianHeapUsedReleasedBytes": 845544,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 322247744,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 323001472,
+        "physicalAfterMedianSum_physicalFootprintBytes": 375740864,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 375773632,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 365959616,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 375773632,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 27.971354166666668
+      },
+      {
+        "n": 1000,
+        "t": 100,
+        "mode": "unique",
+        "variant": "baseline",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 103200.00004768372,
+        "medianHeapUsedBeforeBytes": 892176,
+        "medianHeapUsedAfterBytes": 2172856,
+        "medianHeapUsedReleasedBytes": 976328,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 301784128,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 304978880,
+        "physicalAfterMedianSum_physicalFootprintBytes": 393665792,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 451795584,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 336862400,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 451795584,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 104404.55555555556
+      },
+      {
+        "n": 1000,
+        "t": 100,
+        "mode": "unique",
+        "variant": "candidate-b",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 1657.8124985098839,
+        "medianHeapUsedBeforeBytes": 892372,
+        "medianHeapUsedAfterBytes": 6853556,
+        "medianHeapUsedReleasedBytes": 990224,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 312056704,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 313170816,
+        "physicalAfterMedianSum_physicalFootprintBytes": 422255360,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 480468224,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 334600832,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 480468224,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 1720.3003472222222
+      },
+      {
+        "n": 1000,
+        "t": 100,
+        "mode": "unique",
+        "variant": "candidate-c",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 1740.624999627471,
+        "medianHeapUsedBeforeBytes": 892552,
+        "medianHeapUsedAfterBytes": 4301508,
+        "medianHeapUsedReleasedBytes": 997368,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 319363712,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 320461504,
+        "physicalAfterMedianSum_physicalFootprintBytes": 396892864,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 454990528,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 364927616,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 454990528,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 1741.2031250000002
+      },
+      {
+        "n": 1000,
+        "t": 20,
+        "mode": "same",
+        "variant": "baseline",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 20937.5,
+        "medianHeapUsedBeforeBytes": 885152,
+        "medianHeapUsedAfterBytes": 1784932,
+        "medianHeapUsedReleasedBytes": 980560,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 315611712,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 316709504,
+        "physicalAfterMedianSum_physicalFootprintBytes": 446175744,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 450353664,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 389241280,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 450353664,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 21272.11111111111
+      },
+      {
+        "n": 1000,
+        "t": 20,
+        "mode": "same",
+        "variant": "candidate-b",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 1338.281249627471,
+        "medianHeapUsedBeforeBytes": 885348,
+        "medianHeapUsedAfterBytes": 15289304,
+        "medianHeapUsedReleasedBytes": 986160,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 300964096,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 304847168,
+        "physicalAfterMedianSum_physicalFootprintBytes": 503651072,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 503700224,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 392747648,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 503749376,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 1370.259548611111
+      },
+      {
+        "n": 1000,
+        "t": 20,
+        "mode": "same",
+        "variant": "candidate-c",
+        "freshTrials": 3,
+        "identityValidTrials": 3,
+        "medianJsElapsedMicrosecondsPerCall": 1285.937501117587,
+        "medianHeapUsedBeforeBytes": 885528,
+        "medianHeapUsedAfterBytes": 6411548,
+        "medianHeapUsedReleasedBytes": 994308,
+        "physicalBeforeMedianSum_physicalFootprintBytes": 319314560,
+        "physicalBeforeMedianSum_lifetimeMaxPhysicalFootprintBytes": 320395904,
+        "physicalAfterMedianSum_physicalFootprintBytes": 485333952,
+        "physicalAfterMedianSum_lifetimeMaxPhysicalFootprintBytes": 489134912,
+        "physicalReleasedMedianSum_physicalFootprintBytes": 394533568,
+        "physicalReleasedMedianSum_lifetimeMaxPhysicalFootprintBytes": 489134912,
+        "rendererMainTaskCpuMicrosecondsPerCallIncludingCalibrationAndCDP": 1330.5390625
+      }
+    ],
+    "network": "Owned fresh Chrome profiles, page route rejects non-loopback; background DNS blocked; HTTP proxy is dead 127.0.0.1:9 with loopback bypass. mock keychain/basic password store; background network/component updates/sync disabled. No user profiles.",
+    "scope": "Actual full store module in synthetic normalized component fixtures, bounded cold restoration. Native installed Breezer untouched. No visual rendering behavior changed or screenshot claim. Explicit user Playwright path used for diagnostics; frontend-testing skill read, browser plugin skill absent.",
+    "cpuLimits": "JS elapsed batches are wall time, not process CPU. CDP TaskDuration reports renderer main task time and includes calibration/CDP overhead. Before/after SystemInfo cpuTime is raw cumulative process CPU evidence, not isolated feature CPU. No native probes run during timed batches.",
+    "physicalLimits": "Read-only compiled C probe captures current physical footprint and per-process lifetime maxima including startup/JIT. PID/startAbstime/executableUuid bracket every included process from this launched browser CDP list. Identity/unavailable failures reject entire trial. Sums of lifetime process maxima are NOT a simultaneous whole-browser peak. Discrete snapshots cannot establish exact transient peak. Three fresh alternating trials per variant/size, no whole Breezer claim.",
+    "cleanup": {
+      "serverClosed": true,
+      "ownedProfilesRemoved": 27,
+      "evidencePreservedOutsideRepo": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox"
+    },
+    "acceptance": "Component evidence only. Whole Breezer physical regression risk remains unproven; would require hold if CPU rejection were absent."
+  },
+  "runtime": {
+    "node24": "v24.22.1",
+    "node24Sha256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329",
+    "node22": "v22.14.0",
+    "node22Path": "/Users/likht.ethan/.local/bin/node",
+    "node22Sha256": "e2d4915d03eda6a2f00a09920e7eeb7a04ad123f9aaad61b1481179fe1bf50e0",
+    "probeSourceSha256": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+    "probeBinarySha256": "29f51735bea1073c966c4d07d29a7fe7aecceafc4af4c1862b65c7103e6a7e07",
+    "probeCompilation": "clang -O2 -Wall -Wextra -Werror script/macos_process_usage.c -o owned usage-probe; no reused binary"
+  },
+  "failuresAndCorrections": [
+    "Requested /Users/likht.ethan/.local/bin/node22.14.0 absent; failed commands retained in tests-node22.log and differential-node22.log. Existing .local/bin/node verified v22.14.0 used for corrected logs. No download.",
+    "Initial CPU small/typical/same-path/one-pin batches warmed below 150ms; original data retained; duration-correction run has minimum >329ms for these rows.",
+    "First 27 Chrome trials lacked dead loopback proxy despite DNS/page blocking; excluded for network containment assurance. All profiles/server cleaned, full raw retained. Repeated with proxy and distinct report/log.",
+    "CPU C no-saved and one-pin regressions retained; no post-hoc gate change, no forced adoption.",
+    "Browser preparation script and derived console summary were initially placed in owned scratch. Relocated both byte-preserving to owned outside mkdtemp before finalization; browser harnesses, derived browser reports and profiles now reside outside repo. Unified final experiment report remains at explicitly requested path."
+  ],
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+      "lines": 19,
+      "readRanges": [
+        [
+          1,
+          19
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "lines": 664,
+      "readRanges": [
+        [
+          1,
+          664
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "features/ai/extension/workspace.js",
+      "sha256": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+      "lines": 1586,
+      "readRanges": [
+        [
+          1,
+          1586
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-store.test.mjs",
+      "sha256": "e6a9d40dbbb020e6a8ffd7945186e6909e0c412293933b69f57c39898061f952",
+      "lines": 430,
+      "readRanges": [
+        [
+          1,
+          430
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-members-efficiency.test.mjs",
+      "sha256": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c",
+      "lines": 118,
+      "readRanges": [
+        [
+          1,
+          118
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/ai/workspace-index-efficiency.test.mjs",
+      "sha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_workspace_members_efficiency.mjs",
+      "sha256": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9",
+      "lines": 135,
+      "readRanges": [
+        [
+          1,
+          135
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/macos_process_usage.c",
+      "sha256": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+      "lines": 63,
+      "readRanges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "protectedSourceEndDrift": {
+    "expectedSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "actualSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "changed": false,
+    "writeScope": "Only owned scratch and final report, plus owned mkdtemp outside repo for browser artifacts. No shared tests/docs/packet/installed app writes, commits, publication, provider/PC/native-app contact. Old evidence preserved.",
+    "priorReadSourceHashChecks": [
+      {
+        "path": "AGENTS.md",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "features/ai/extension/workspace-store.js",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "features/ai/extension/workspace.js",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "tests/ai/workspace-store.test.mjs",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "tests/ai/workspace-members-efficiency.test.mjs",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "tests/ai/workspace-index-efficiency.test.mjs",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "script/verify_workspace_members_efficiency.mjs",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "build/efficiency-20261103/pin-matching/parent-baseline.mjs",
+        "matchesPriorHash": true
+      },
+      {
+        "path": "build/efficiency-20261103/pin-matching/parent-baseline.json",
+        "matchesPriorHash": true
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/baseline-workspace-index-efficiency.test.mjs",
+      "sha256": "5e2d675b90f0016110708aac72fd0592c7a27ff2e73e111d2186579ac94f6a01",
+      "bytes": 4854
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/baseline-workspace-members-efficiency.test.mjs",
+      "sha256": "5163bae0422e55fa45800566b8747763d77caabba369e8f14181bd375ba2a85b",
+      "bytes": 6015
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/baseline-workspace-store.test.mjs",
+      "sha256": "b7f77885d5f586a19812570b1ca88d6dcc22a0734e25074f4f5945f5984f061e",
+      "bytes": 24829
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/baseline.mjs",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "bytes": 28499
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-b-workspace-index-efficiency.test.mjs",
+      "sha256": "4157c808135ee4c088e7c56c85c546f76852db6c57364b70aef3e198ed7a7b01",
+      "bytes": 4857
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-b-workspace-members-efficiency.test.mjs",
+      "sha256": "cd2bbed2b6015c71b28ab9f499ea9a1363422ea116573eb9ea4391e4214927c5",
+      "bytes": 6018
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-b-workspace-store.test.mjs",
+      "sha256": "9910a16310ea39925d1914ad07b6e2e7c506c3a90752bab47369a4c0936900a0",
+      "bytes": 24832
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-b.mjs",
+      "sha256": "cb7d7418c6d7d86518c8c2f9504da9b119ce3aed13b8351de27029513b610635",
+      "bytes": 29350
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c-workspace-index-efficiency.test.mjs",
+      "sha256": "2eaa88e40a066b57b77b24ade39abfee9eb9bc5009e329b1d87ae12e4d4070db",
+      "bytes": 4857
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c-workspace-members-efficiency.test.mjs",
+      "sha256": "77ebc4c57d7ae5a1cd1bf715fcb73a5881200ecd6bc4063bf8db791a66399df2",
+      "bytes": 6018
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c-workspace-store.test.mjs",
+      "sha256": "a07c5c4b61ceb930dcdff50eb7a69200cf1f41a0bd0e3ee60edf902f23ccb9c5",
+      "bytes": 24832
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c.diff",
+      "sha256": "55957dc83a2dc9349a45784ee27f9db96a1b2ab205a4df9709bfb2a9062cf45e",
+      "bytes": 2577
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/candidate-c.mjs",
+      "sha256": "c916af3e0852562f937354d67fb6e7d8c296ea0fa30acb91d83f91040ea6f2cc",
+      "bytes": 29776
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/class-differential.json",
+      "sha256": "a68b634bfa85242f5188b75cfab0ebb48acefa08dfc28697b07ce707a588f804",
+      "bytes": 1450
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/class-differential.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/class-differential.mjs",
+      "sha256": "136df61627545d5bcd77133350f8b55e5734d02a264cb7aae24695295533db59",
+      "bytes": 1876
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/cpu-duration-correction.json",
+      "sha256": "ab3972fe9b8e986aa567de1d74bea813be75bce64e8e0fcac36c1af16677b4a2",
+      "bytes": 76628
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/cpu.json",
+      "sha256": "d3bf7d5542bfdbda26508796333a67375f607a1a5d53762c7573b1d3ef21a33f",
+      "bytes": 216753
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/criteria.json",
+      "sha256": "6c1b83f64258c4289f8eb2f59460eb93ffa0756005bda01494c75419d08a59c0",
+      "bytes": 728
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/differential-node22-corrected.log",
+      "sha256": "071b4312f2217a727db7476ca21a7bbac33097b6908f4aa8638e5086ee8a437f",
+      "bytes": 737
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/differential-node22.log",
+      "sha256": "f0e7bd021c2f610df2244db44f5597fb70a0de45b3f65b8d37d91f1f1301a806",
+      "bytes": 76
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/differential-node24.json",
+      "sha256": "d9ec5ffe09acaeca419410add042eac515cd7403812f67cd2141c2c993ecff22",
+      "bytes": 6059
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/differential.json",
+      "sha256": "d9ec5ffe09acaeca419410add042eac515cd7403812f67cd2141c2c993ecff22",
+      "bytes": 6059
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/differential.mjs",
+      "sha256": "64e2ff62a9f7c34b2fa8c2fecf31141cb751639ca6a477c9a45b6f95893edd7e",
+      "bytes": 12507
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/git-status-observed.txt",
+      "sha256": "1230eb0964ac0c1da21002c77781ea8ee73c74e03076648489071bc5df1fcf47",
+      "bytes": 3537
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/memory.json",
+      "sha256": "ac39a72da0ad2d0c59879d4e25e130c529ee45936208c69c7dc588720c79f771",
+      "bytes": 14953
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/memory.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/memory.mjs",
+      "sha256": "659cce48dd89044401dc308a9fbe6b5f67cd5ae80f3e0c9e44afcee81c76571e",
+      "bytes": 2639
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/negative-c.json",
+      "sha256": "13517c8b9c1588e4ccb809e6f199ba9b1c2699e17274b86ba14f85a034d82d40",
+      "bytes": 428
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/negative-c.mjs",
+      "sha256": "07e8a03583baf6791d974ab1f288694c44b9846361592b954b32e24a955537fc",
+      "bytes": 1707
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/outside-location.json",
+      "sha256": "fb2a4101e10d3e44a323a89b53818b3ceb395d65248af531cf10501ff7270e01",
+      "bytes": 210
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/prepare.py",
+      "sha256": "4cda259050ccbd4c56c0b9fede75e11dd7bcd142f09d576bc18dd728497b5fd1",
+      "bytes": 4006
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/proxy-inputs.json",
+      "sha256": "345652f73d39dd7e17985390772c9bb746c9f119325f171eedf5ee3414946e4a",
+      "bytes": 1020
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/proxy-inputs.mjs",
+      "sha256": "3f08a175e68cab2471165ac431df5acf8d7804e13d3e6718e94625451b8c21dc",
+      "bytes": 1147
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/report.py",
+      "sha256": "0a42c29e5ce365c67ff2884d185f5bdd10cf51d264b2b343e3c76f12c05e7c25",
+      "bytes": 16133
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/sequences-node22.log",
+      "sha256": "1b650f960e45be2b95ec4f03c1549a475285d03e776efa85f137db5b1e5a5ffe",
+      "bytes": 567
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/snapshot-sequences.json",
+      "sha256": "62da11dadd48e740cb135c1fc06a42690878506a75a3778b0be69bca7a71980a",
+      "bytes": 645
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/snapshot-sequences.mjs",
+      "sha256": "a71379ec4d3aedf3695f036526b5227900f83d7770f3a139acc3cc4ef2b0010f",
+      "bytes": 2208
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/tests-node22-corrected.log",
+      "sha256": "ec000e31ccbeb1da78df795a269576ad4c41a5f36cb7c1a8adc06d4663105fd6",
+      "bytes": 17667
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/tests-node22.log",
+      "sha256": "ebd2d35a0b46eb792e950335b8513b5d14169fc8f02427220e0ece667f231bad",
+      "bytes": 76
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/tests-node24.log",
+      "sha256": "2001b256951d4ff585e9453cd18aa8634d0917f0de465d0b8848c04bb24ade41",
+      "bytes": 7965
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/timing-duration-correction.log",
+      "sha256": "b90b999f795c706d6a30fd428e15939924d658ca65fde541c6c582301d26226a",
+      "bytes": 1810
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/timing-duration-correction.mjs",
+      "sha256": "952ac9cf4258027191bab239b7a1377fe3ffe5cb9e87a4593fc231e5754a5640",
+      "bytes": 2957
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/timing.log",
+      "sha256": "73b4c2a19d83276a225cddbacef1582eed32aa985fc1bc198673dbb7f8fa38c9",
+      "bytes": 4056
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/timing.mjs",
+      "sha256": "8ac108ddcd83f7124d16f0751d7e0b4b97f1f097eb53abf5c1f16e326f74224e",
+      "bytes": 2865
+    },
+    {
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-targeted/usage-probe",
+      "sha256": "29f51735bea1073c966c4d07d29a7fe7aecceafc4af4c1862b65c7103e6a7e07",
+      "bytes": 34168
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/baseline.mjs",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "bytes": 28499
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-contained-results.json",
+      "sha256": "b1a95161b92770a15fa1f83884aef0c3653d370f0bce772974b0b79aa76c0f13",
+      "bytes": 590357
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-contained.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-contained.mjs",
+      "sha256": "d8bca0f43403deb1d3530554e03b7d2800a0cdcdeeff3ddb3dc1ab66323af868",
+      "bytes": 5222
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-prepare.py",
+      "sha256": "0b973296791d0243de99a66256c574b57a90c61b45773447b4e000e2c6510201",
+      "bytes": 605
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser-results.json",
+      "sha256": "af5657d452a147e8bfeb297e2a1a4774bb5af104915d09277ee11d3d5b042bad",
+      "bytes": 590242
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/browser.mjs",
+      "sha256": "2b5a19ea124544bda2e741a143ebc747fef06e628c29dd8e09c6fca2fc0dda72",
+      "bytes": 5144
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/candidate-b.mjs",
+      "sha256": "cb7d7418c6d7d86518c8c2f9504da9b119ce3aed13b8351de27029513b610635",
+      "bytes": 29350
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/candidate-c.mjs",
+      "sha256": "c916af3e0852562f937354d67fb6e7d8c296ea0fa30acb91d83f91040ea6f2cc",
+      "bytes": 29776
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/fixture.html",
+      "sha256": "21beeaa214660683f1af3187d282b7127348fdde7d430a32ee9e2eec582d7ccf",
+      "bytes": 104
+    },
+    {
+      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-pin-targeted-hsfvt_ox/report-summary-initial.json",
+      "sha256": "ff7eaea687081041af3d68550ff0fa33c65d70d2040fb0bf9fd879c2ee0de254",
+      "bytes": 9732
+    }
+  ],
+  "priorEvidence": {
+    "reportPath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching-experiment.json",
+    "reportSha256": "4053824b37e532b41040244b7c8a89577d70f963ed113bac70890c1f9c078ec6",
+    "rawCPUPath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching/timings.json",
+    "rawCPUSha256": "7ecab40ed354d4e308b9b6bb483b03c52d187c632c64c2abeafded6507c10a65",
+    "rawHeapPath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/pin-matching/retention.json",
+    "rawHeapSha256": "acccfdf4c64b58f04cc2c77475d9dbd823613233c72ace2c910a64d29f6c78d8",
+    "review": "Prior diff, differential failures, gate and raw CPU/heap structure reviewed. Prior A rejection retained. Source contract re-established from current source; not inherited as an unexamined equivalence claim."
+  },
+  "gateEvaluation": {
+    "CPU": "FAIL no-saved 1.492 and one-pin 1.342 exceed 1.15 maximum. Typical and large pass 0.80 bound and 7/7 faster pairs. Same-path, zero/current/no-pinned also measured.",
+    "liveHeap": "PASS versus B threshold in unique typical/large, same-path and small samples; C still exceeds baseline live heap.",
+    "afterReturn": "All probe Map WeakRefs cleared after next-task GC. C minus baseline median after-return heap delta <65536 bytes in all four scenarios; finite probe, no persistent index detected.",
+    "physical": "27/27 bracketed component trials valid. Current/lifetime before/after/released raw preserved. No exact transient peak or whole Breezer bound established. HOLD physical acceptance independent of CPU rejection."
+  }
+}

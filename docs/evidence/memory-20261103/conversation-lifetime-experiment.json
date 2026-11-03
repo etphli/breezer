@@ -1,0 +1,479 @@
+{
+  "issue": "ES-03",
+  "status": "Offline source-bound retention confirmed. Candidate rejected for production adoption pending restored-window preservation policy and actual-browser acceptance.",
+  "restrictions": "Only owned scratch and result JSON written. No network, providers, native bridge, browser, app, build, git mutations or real user storage. All session values synthetic.",
+  "runtime": {
+    "version": "v24.22.1",
+    "execPath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+    "flags": [
+      "--experimental-vm-modules"
+    ],
+    "binarySHA256": "6f32069480ec14d52b6d7b1f3c7124cfbbc46203abf5ddf5c65b127435f3f329"
+  },
+  "sourceBound": [
+    "Exact extracted saveConversation, initialize, finish executed in VM with synthetic Chrome/DOM.",
+    "Entire actual installBackground executed with all local imported production modules. Actual listeners installed, sidePanel events and panel port disconnect delivered. No provider operation invoked.",
+    "Candidate entire copies preserve production structure; candidate save extracted from replacement string and background installed from copied-content equivalent."
+  ],
+  "modelBoundary": [
+    "Storage API serializes values synchronously at invocation in fixture; physical Chrome serialization/runtime not measured.",
+    "Successful getAll returns all accessible live window IDs at completion. Promise fulfillment order, delayed commits and errors are synthetic.",
+    "Minimal DOM/UI helpers stubbed. No actual visibility lifecycle or browser session restore performed.",
+    "400 seeded deterministic source-bound schedules are coverage, not exhaustive scheduling exploration. Conditional ordering proof below covers successful operation interleavings under stated assumptions.",
+    "All 1171 enabled two-save/one-close operation-completion schedules were enumerated by a pure scheduling model and individually replayed through candidate source. Separate explicit test splits liveness resolve and its continuation. Three reversed writes also tested. This is bounded enumeration, not exhaustive Chrome lifecycle verification."
+  ],
+  "counters": {
+    "baseline": {
+      "closedWindows": 200,
+      "orphanKeys": 200,
+      "orphanMessages": 12000,
+      "orphanTextUTF16Units": 1613520,
+      "orphanJSONUTF8Bytes": 3640733,
+      "calls": {
+        "set": 200,
+        "getAll": 0,
+        "remove": 0,
+        "get": 1
+      }
+    },
+    "candidate": {
+      "closedWindows": 200,
+      "orphanKeys": 0,
+      "orphanMessages": 0,
+      "orphanTextUTF16Units": 0,
+      "orphanJSONUTF8Bytes": 2,
+      "calls": {
+        "set": 200,
+        "getAll": 200,
+        "remove": 200,
+        "get": 1
+      }
+    }
+  },
+  "results": [
+    {
+      "name": "baseline: 200 closed windows, 60 retained messages each",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: 200 closed windows, 60 retained messages each",
+      "status": "pass"
+    },
+    {
+      "name": "baseline: actual initialize, sidePanel close/reopen and disconnect finish preserve same-window data",
+      "status": "pass"
+    },
+    {
+      "name": "baseline: filter, last 60, restore validation, New Chat empty, synchronous snapshot",
+      "status": "pass"
+    },
+    {
+      "name": "baseline: save pending before close, committed after close cleanup",
+      "status": "pass"
+    },
+    {
+      "name": "baseline: port-disconnect finish saves after closed-window cleanup",
+      "status": "pass"
+    },
+    {
+      "name": "baseline: three writes resolve in reverse after close",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: actual initialize, sidePanel close/reopen and disconnect finish preserve same-window data",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: filter, last 60, restore validation, New Chat empty, synchronous snapshot",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: save pending before close, committed after close cleanup",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: port-disconnect finish saves after closed-window cleanup",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: three writes resolve in reverse after close",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: closure after successful live check, before check callback",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: liveness rejection preserves live window; storage rejection makes no delete",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: transient remove failure retains orphan, later late save can clean it",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: late-save liveness failure retains orphan without retry",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: post-save remove failure retains orphan without retry",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: invalid IDs and pre-initialize fallback cannot delete conversation keys",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: capture key/window identity at API call across initialization change",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: 400 deterministic schedules with two saves and one close",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: exhaustive two-save one-close success schedules at API completion boundaries",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: live hidden windows and mismatched fallback key remain untouched",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: modeled same-ID restore before delayed close-remove erases live transcript",
+      "status": "pass"
+    },
+    {
+      "name": "baseline: modeled same-ID restored window demonstrates preservation gap",
+      "status": "pass"
+    },
+    {
+      "name": "candidate: modeled same-ID restored window demonstrates preservation gap",
+      "status": "pass"
+    }
+  ],
+  "restoreGaps": [
+    {
+      "variant": "candidate",
+      "recovered": false,
+      "classification": "Conditional same-ID restoration while onRemoved remove is pending: actual copied listener deletes key after modeled restored window is live. Not a claim Chrome reuses/restores IDs."
+    },
+    {
+      "variant": "baseline",
+      "recovered": true,
+      "classification": "Hypothetical same-ID restoration fixture. Not actual Chrome behavior. Candidate deletes before restore; local code cannot recover value."
+    },
+    {
+      "variant": "candidate",
+      "recovered": false,
+      "classification": "Hypothetical same-ID restoration fixture. Not actual Chrome behavior. Candidate deletes before restore; local code cannot recover value."
+    }
+  ],
+  "exhaustiveSchedules": 1171,
+  "asynchronousArgument": "For each successful set completion, if the subsequent successful liveness snapshot omits its ID, its subsequent remove deletes that exact key. If snapshot includes ID, a subsequent close event schedules remove after the set commit. Every later successful write repeats this check, including reverse completions and disconnect finish. Therefore after quiescence no orphan remains provided all callbacks run, APIs succeed, getAll is authoritative and IDs are not reused/restored. Closing between live snapshot and continuation is covered by onRemoved. No retained ID Set, transcript IPC, queue, timers or additional transcript copy in candidate. Failure/cancellation breaks eventual cleanup; data is retained on API errors.",
+  "unchangedSemantics": [
+    "Array value format, truthy text filter, last 60 limit, synchronous storage.set invocation snapshot, default fallback key save, New Chat empty array, same-window hide/reopen recovery.",
+    "No disk storage, global session access change, provider history change or new message-array IPC."
+  ],
+  "failures": [
+    "Liveness errors are never absence evidence. Failed set does not trigger liveness/delete. Failed onRemoved or post-save remove and missed/aborted panel continuation can leave orphans without bounded retry.",
+    "Pre-initialize fallback key deliberately not reclaimed; ownership is unknown. No startup sweep of historical keys.",
+    "Concurrent live saves remain last-completion-wins as baseline. Candidate does not add ordering locks or change snapshot timing.",
+    "If a same-ID restored window is recoverable by the baseline exact key, candidate irreversibly loses its transcript. Confirmed in synthetic conditional reproduction, actual browser ID behavior not established.",
+    "A restore with a new ID does not reload old exact key in current panel; this is a source-bound limitation, not proof old history is disposable."
+  ],
+  "assumptions": [
+    "Nonnegative integer window IDs valid; negative sentinels and nonnumbers never reclaimed.",
+    "Within-session IDs not assigned to a different live window. Coordinator-supplied primary-doc claim, not reverified offline.",
+    "getAll without a windowTypes filter includes every window accessible to the panel context, including hidden/popup windows. Browser acceptance must verify permission/incognito/type boundaries.",
+    "onRemoved identifies closed window, not sidebar hide; successful session.remove completion is authoritative.",
+    "Worker/event lifetime and panel destruction may cancel async work. No liveness or retry guarantee claimed."
+  ],
+  "recommendation": "Keep production unchanged. Retention is reproduced logically; close cleanup is a policy-sensitive deletion. Reject candidate until restored-window history requirements and lifecycle delivery are settled. No physical RAM claim.",
+  "browserAcceptance": [
+    "In an explicitly authorized isolated browser profile, save real panel conversation, hide/show sidebar and close/reopen via shortcut; confirm identical same-window history.",
+    "Close normal, popup, hidden/background and last window; reopen closed window via browser restore and restart restore; record old/new IDs, extension worker lifetime, session key presence and user-visible history before and after baseline/candidate.",
+    "Explicitly decide required closed-window conversation recovery. Reject close deletion if baseline can recover or product intends recovery; durable window/session mapping or retention policy needs separate design.",
+    "Inject/reproduce late final saves and port disconnect ordering during close, extension worker suspension/restart and panel teardown. Verify no orphan after all successful callbacks, and safe retention on failure.",
+    "Verify getAll completeness and windows.onRemoved behavior for accessible window types, incognito separation, window ID sentinels, and no deletion of live/hidden/restored histories.",
+    "Measure Chrome session storage logical bytes and process memory independently if RAM impact is needed. This report counts serialized synthetic values only."
+  ],
+  "primaryDocs": {
+    "provenance": "Supplied and checked by coordinator, not fetched in this offline experiment.",
+    "storage": "https://developer.chrome.com/docs/extensions/reference/api/storage",
+    "windows": "https://developer.chrome.com/docs/extensions/reference/api/windows",
+    "claims": [
+      "session in memory; clears on extension disable/reload/update or browser restart, not individual window close",
+      "window IDs unique within browser session; onRemoved reports window close; restored-ID guarantee unresolved"
+    ]
+  },
+  "commands": [
+    "build/efficiency-20261103/organato-review-node24 --experimental-vm-modules build/efficiency-20261103/conversation-lifetime-experiment/run.mjs",
+    "diff -u build/efficiency-20261103/conversation-lifetime-experiment/baseline/panel.js build/efficiency-20261103/conversation-lifetime-experiment/candidate/panel.js",
+    "diff -u build/efficiency-20261103/conversation-lifetime-experiment/baseline/background.js build/efficiency-20261103/conversation-lifetime-experiment/candidate/background.js",
+    "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/conversation-lifetime-experiment/finalize.mjs"
+  ],
+  "sourceHashes": {
+    "features/ai/extension/panel.js": {
+      "before": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+      "after": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+      "unchanged": true,
+      "endAfterVerification": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb"
+    },
+    "features/ai/extension/background.js": {
+      "before": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "after": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "unchanged": true,
+      "endAfterVerification": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1"
+    },
+    "tests/ai/browser-api-fixture.mjs": {
+      "before": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef",
+      "after": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef",
+      "unchanged": true,
+      "endAfterVerification": "9accc5b9430eed73c4fd9d33556aa38e526a12e69aeb6c3a32696028b0b298ef"
+    },
+    "tests/ai/context-integration.test.mjs": {
+      "before": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d",
+      "after": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d",
+      "unchanged": true,
+      "endAfterVerification": "673899bec1305e6ca31644cd85850ef5995ee2fa92e6bc211fa7d1e93d57601d"
+    },
+    "tests/ai/stream-render.test.mjs": {
+      "before": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+      "after": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+      "unchanged": true,
+      "endAfterVerification": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20"
+    },
+    "tests/ai/claude-streaming.test.mjs": {
+      "before": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874",
+      "after": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874",
+      "unchanged": true,
+      "endAfterVerification": "421e3f2dca3c22d77162e145b70ff81277d33286d15502717a0376f8874f6874"
+    },
+    "tests/ai/native-transport-lifecycle.test.mjs": {
+      "before": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925",
+      "after": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925",
+      "unchanged": true,
+      "endAfterVerification": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925"
+    },
+    "tests/ai/browser-tools.test.mjs": {
+      "before": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1",
+      "after": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1",
+      "unchanged": true,
+      "endAfterVerification": "689d4afc9dc9f9eb37f73781a40170fe750780a6fe0c16f1430ff83aa81291f1"
+    },
+    "script/verify_stream_render_efficiency.mjs": {
+      "before": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+      "after": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+      "unchanged": true,
+      "endAfterVerification": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856"
+    },
+    "features/ai/extension/research-policy.js": {
+      "before": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "after": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "unchanged": true,
+      "endAfterVerification": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c"
+    },
+    "features/ai/extension/research-sources.js": {
+      "before": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4",
+      "after": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4",
+      "unchanged": true,
+      "endAfterVerification": "f2f7df2e528d0adbd7c0eebc02e69bde49b2a88fcc7f06fe76b63f398ced33e4"
+    },
+    "features/ai/extension/release-notes.js": {
+      "before": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "after": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "unchanged": true,
+      "endAfterVerification": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d"
+    },
+    "features/ai/extension/release-info.js": {
+      "before": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf",
+      "after": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf",
+      "unchanged": true,
+      "endAfterVerification": "a6aca78e01f456ac7dc8a12a28576c40c6341b4b12387ae856429745b12f53bf"
+    },
+    "features/ai/extension/setup-state.js": {
+      "before": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "after": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "unchanged": true,
+      "endAfterVerification": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b"
+    },
+    "features/ai/extension/workspace-sync.js": {
+      "before": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "after": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "unchanged": true,
+      "endAfterVerification": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+    },
+    "features/ai/extension/workspace-store.js": {
+      "before": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "after": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+      "unchanged": true,
+      "endAfterVerification": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81"
+    },
+    "features/ai/extension/workspace-sync-model.js": {
+      "before": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+      "after": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+      "unchanged": true,
+      "endAfterVerification": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c"
+    },
+    "features/ai/extension/usage.js": {
+      "before": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "after": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "unchanged": true,
+      "endAfterVerification": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3"
+    },
+    "features/ai/extension/browser-tools.js": {
+      "before": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "after": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "unchanged": true,
+      "endAfterVerification": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9"
+    },
+    "features/ai/extension/page-context.js": {
+      "before": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "after": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "unchanged": true,
+      "endAfterVerification": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4"
+    },
+    "features/ai/extension/context-background.js": {
+      "before": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "after": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "unchanged": true,
+      "endAfterVerification": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c"
+    },
+    "features/ai/extension/context-memory.js": {
+      "before": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "after": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "unchanged": true,
+      "endAfterVerification": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff"
+    },
+    "features/ai/extension/translation-background.js": {
+      "before": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+      "after": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+      "unchanged": true,
+      "endAfterVerification": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9"
+    },
+    "features/ai/extension/translation-provider.js": {
+      "before": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+      "after": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+      "unchanged": true,
+      "endAfterVerification": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c"
+    }
+  },
+  "endSourceDrift": false,
+  "verification": [
+    {
+      "command": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "--check",
+        "build/efficiency-20261103/conversation-lifetime-experiment/candidate/panel.js"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/organato-review-node24",
+        "--check",
+        "build/efficiency-20261103/conversation-lifetime-experiment/candidate/background.js"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "diff",
+        "-u",
+        "build/efficiency-20261103/conversation-lifetime-experiment/baseline/panel.js",
+        "build/efficiency-20261103/conversation-lifetime-experiment/candidate/panel.js"
+      ],
+      "exit": 1,
+      "meaning": "1 means expected candidate difference",
+      "artifact": "build/efficiency-20261103/conversation-lifetime-experiment/panel.diff"
+    },
+    {
+      "command": [
+        "diff",
+        "-u",
+        "build/efficiency-20261103/conversation-lifetime-experiment/baseline/background.js",
+        "build/efficiency-20261103/conversation-lifetime-experiment/candidate/background.js"
+      ],
+      "exit": 1,
+      "meaning": "1 means expected candidate difference",
+      "artifact": "build/efficiency-20261103/conversation-lifetime-experiment/background.diff"
+    }
+  ],
+  "sourceLocations": [
+    {
+      "file": "features/ai/extension/panel.js",
+      "line": 21,
+      "fact": "Unowned pre-initialize fallback key."
+    },
+    {
+      "file": "features/ai/extension/panel.js",
+      "line": 319,
+      "fact": "Direct session save, truthy text filter, last 60."
+    },
+    {
+      "file": "features/ai/extension/panel.js",
+      "line": 375,
+      "fact": "finish invokes saveConversation, including disconnect path."
+    },
+    {
+      "file": "features/ai/extension/panel.js",
+      "line": 625,
+      "fact": "Initialize exact window key, restore validation, disconnect listener."
+    },
+    {
+      "file": "features/ai/extension/panel.js",
+      "line": 555,
+      "fact": "New Chat empty array reaches same save function."
+    },
+    {
+      "file": "features/ai/extension/background.js",
+      "line": 83,
+      "fact": "Whole installBackground executed, no original windows.onRemoved conversation cleanup."
+    }
+  ],
+  "evidenceCorrections": [
+    "The first fixture run failed its invalid-ID assertion because the fixture close(undefined) defaulted to ID 3. Fixed only the scratch test to emit raw invalid ID. Initial failure log preserved. No production failure inferred from that harness error."
+  ],
+  "artifacts": {
+    "baseline": [
+      "build/efficiency-20261103/conversation-lifetime-experiment/baseline/panel.js",
+      "build/efficiency-20261103/conversation-lifetime-experiment/baseline/background.js"
+    ],
+    "candidate": [
+      "build/efficiency-20261103/conversation-lifetime-experiment/candidate/panel.js",
+      "build/efficiency-20261103/conversation-lifetime-experiment/candidate/background.js"
+    ],
+    "diffs": [
+      "build/efficiency-20261103/conversation-lifetime-experiment/panel.diff",
+      "build/efficiency-20261103/conversation-lifetime-experiment/background.diff"
+    ],
+    "logs": [
+      "build/efficiency-20261103/conversation-lifetime-experiment/raw.log",
+      "build/efficiency-20261103/conversation-lifetime-experiment/command.log",
+      "build/efficiency-20261103/conversation-lifetime-experiment/first-run-failure.log"
+    ]
+  },
+  "measurementLimit": "Counters measure logical synthetic key/message/text/serialized JSON size. Empty orphan JSON is two bytes for {}. Neither JS heap residency nor Chrome physical RAM was measured. Synthetic fixture clones emulate API serialization, not added candidate transcript copies.",
+  "scratchHashes": {
+    "build/efficiency-20261103/conversation-lifetime-experiment/background.diff": "e0f3743a7c4dea61ddae8a4ad99dfc170f139388c72337aa6b83192a453c2f1a",
+    "build/efficiency-20261103/conversation-lifetime-experiment/baseline/background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "build/efficiency-20261103/conversation-lifetime-experiment/baseline/panel.js": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "build/efficiency-20261103/conversation-lifetime-experiment/candidate/background.js": "38d27a77aba9dc77a3ed240d9c57350febc6411bc05b4697896d3f8f98bb5043",
+    "build/efficiency-20261103/conversation-lifetime-experiment/candidate/panel.js": "636642bbd646192d82d6a1dac2a701edf980aac49ec811c2355b71b46fb6c6cb",
+    "build/efficiency-20261103/conversation-lifetime-experiment/command.log": "e6af73a9e27cf526eb380c1f56be11bbf14ffe846fae34d4cc5d77f1a9ceb208",
+    "build/efficiency-20261103/conversation-lifetime-experiment/extracted-finish.js": "4dfa93a95f2cd0e54234d05aa4b564db4515b68a754ec6f5606606cfb964fa7c",
+    "build/efficiency-20261103/conversation-lifetime-experiment/extracted-initialize.js": "6b6db85219ab108d5f7ed8c24443fe417ee5039da9b48b4a2416f7f5d018e2a9",
+    "build/efficiency-20261103/conversation-lifetime-experiment/extracted-save.js": "c35213b89d343502a6bd78454adb32198b536396e65cb2a499af3569391a9005",
+    "build/efficiency-20261103/conversation-lifetime-experiment/finalize.mjs": "04a794e9f5460a48bb84a1d4e92a3f1af4b3bea619daf8bbd97dfe6e2cc2d226",
+    "build/efficiency-20261103/conversation-lifetime-experiment/first-run-failure.log": "4c732884ac817481926498f4026f12da6bba7b44c94c4b06b61be4d0bd5e5efc",
+    "build/efficiency-20261103/conversation-lifetime-experiment/panel.diff": "f04cf6943d6957264201e080255248931e3144eb81ec49666a95f0ce9ca5d0ff",
+    "build/efficiency-20261103/conversation-lifetime-experiment/raw.log": "c971c44be7db858424dfd971edb117975e3c604519537739ae9797347b34f064",
+    "build/efficiency-20261103/conversation-lifetime-experiment/run.mjs": "5ceb7d6db3283c2840ac72f4bcf9e49f6e9c7496223d901029ab66294e1dd40c",
+    "build/efficiency-20261103/conversation-lifetime-experiment/finalization.log": "693839ab23563e837366fce8b5c36651f6ef727a052d6ecf04ca4ed690b51d0a"
+  }
+}

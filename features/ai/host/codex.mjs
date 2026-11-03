@@ -63,6 +63,33 @@ export function selectCodexCatalog(refreshedResult, bundledResult) {
   throw new Error('Codex did not return a model catalog.');
 }
 
+// One scope owns only this chat's RPCs, including a process still initializing.
+function cancellationScope(signal) {
+  const owned = new Set(), closing = new Map();
+  const check = () => { if (signal?.aborted) throw new Error('Cancelled.'); };
+  const close = (rpc) => {
+    if (!rpc) return Promise.resolve();
+    if (!closing.has(rpc)) {
+      const closed = Promise.resolve().then(() => rpc.close());
+      closed.catch(() => {});
+      closing.set(rpc, closed);
+    }
+    return closing.get(rpc);
+  };
+  const abort = () => { for (const rpc of owned) close(rpc); };
+  signal?.addEventListener('abort', abort, { once: true });
+  return {
+    signal, check, close,
+    own(rpc) { owned.add(rpc); if (signal?.aborted) close(rpc); check(); return rpc; },
+    async dispose() {
+      signal?.removeEventListener('abort', abort);
+      const results = await Promise.allSettled([...owned].map(close));
+      const failed = results.find(result => result.status === 'rejected');
+      if (failed) throw failed.reason;
+    },
+  };
+}
+
 export class CodexProvider {
   id = 'codex';
   constructor({ find = findCli, run = runCli, createProcess = (...args) => new JsonLineProcess(...args) } = {}) {
@@ -134,17 +161,21 @@ export class CodexProvider {
     await writeFile(join(codexHome, 'config.toml'), config, { mode: 0o600 });
     return { directory, env: cliEnvironment({ CODEX_HOME: codexHome }), cleanup: () => rm(directory, { recursive: true, force: true }) };
   }
-  async start(isolation, args = []) {
+  async start(isolation, args = [], scope) {
+    scope?.check();
     const rpc = this.createProcess(this.binary, ['app-server', '--strict-config', ...args], { cwd: isolation.directory, env: isolation.env });
     try {
+      scope?.own(rpc);
       await rpc.request('initialize', { clientInfo: { name: 'breezer', title: 'Breezer', version: '1.0.0' }, capabilities: { experimentalApi: true } });
+      scope?.check();
       rpc.send({ method: 'initialized', params: {} }); return rpc;
-    } catch (error) { await rpc.close(); throw error; }
+    } catch (error) { await (scope ? scope.close(rpc) : rpc.close()); throw error; }
   }
   threadParams(model, tools) {
     return { model, modelProvider: 'openai', ephemeral: true, approvalPolicy: 'never', sandbox: 'read-only', environments: [], baseInstructions: systemPrompt, developerInstructions: systemPrompt, dynamicTools: tools.map((tool) => ({ ...tool, deferLoading: false })), config: { web_search: 'disabled' } };
   }
-  async preflight(isolation, model, tools, options = {}) {
+  async preflight(isolation, model, tools, options = {}, scope = cancellationScope()) {
+    scope.check();
     let receive;
     const received = new Promise((resolve, reject) => { receive = { resolve, reject }; });
     received.catch(() => {});
@@ -167,15 +198,41 @@ export class CodexProvider {
         } catch (error) { receive.reject(error); response.writeHead(400); response.end(); }
       });
     });
-    await new Promise((resolve, reject) => { server.on('error', reject); server.listen(0, '127.0.0.1', resolve); });
-    const address = server.address();
+    let listening, serverClosing;
+    const closeServer = () => {
+      if (!serverClosing) {
+        serverClosing = (async () => {
+          // A bind already in progress must settle before close can release it.
+          await listening?.catch(() => {});
+          server.closeAllConnections();
+          await new Promise(resolve => server.close(resolve));
+        })();
+        serverClosing.catch(() => {});
+      }
+      return serverClosing;
+    };
+    const abort = () => { receive.reject(new Error('Cancelled.')); closeServer(); };
+    scope.signal?.addEventListener('abort', abort, { once: true });
     let rpc, timer;
     try {
-      rpc = await this.start(isolation, ['-c', 'model_provider="breezer_probe"', '-c', `model_providers.breezer_probe={name="Breezer isolation probe",base_url="http://127.0.0.1:${address.port}/v1",wire_api="responses",requires_openai_auth=false}`]);
+      scope.check();
+      listening = new Promise((resolve, reject) => { server.on('error', reject); server.listen(0, '127.0.0.1', resolve); });
+      await listening;
+      scope.check();
+      const address = server.address();
+      rpc = await this.start(isolation, ['-c', 'model_provider="breezer_probe"', '-c', `model_providers.breezer_probe={name="Breezer isolation probe",base_url="http://127.0.0.1:${address.port}/v1",wire_api="responses",requires_openai_auth=false}`], scope);
+      scope.own(rpc);
       const started = await rpc.request('thread/start', { ...this.threadParams(model, tools), modelProvider: 'breezer_probe' });
+      scope.check();
       await rpc.request('turn/start', { threadId: started.thread.id, input: [{ type: 'text', text: 'Tool isolation probe. Do not call tools.' }], ...options });
+      scope.check();
       return await Promise.race([received, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Could not verify Codex browser-only tool isolation.')), 15_000); })]);
-    } finally { clearTimeout(timer); await rpc?.close(); server.closeAllConnections(); await new Promise((resolve) => server.close(resolve)); }
+    } finally {
+      clearTimeout(timer);
+      scope.signal?.removeEventListener('abort', abort);
+      try { await scope.close(rpc); }
+      finally { await closeServer(); }
+    }
   }
   async chat(chat, { signal, emit, callTool }) {
     const model = chat.model || this.defaultModel;
@@ -184,50 +241,63 @@ export class CodexProvider {
     if (!selected) throw new Error('This model was not reported by Codex model/list.');
     const options = codexTurnOptions(chat, selected);
     const tools = allowedTools(chat);
-    const isolation = await this.isolate({ fast: chat.speed === 'fast' });
-    let rpc;
+    const scope = cancellationScope(signal);
+    let isolation, rpc, onClosed, onMessage;
     try {
-      await this.preflight(isolation, model, tools, options);
-      if (signal.aborted) throw new Error('Cancelled.');
-      rpc = await this.start(isolation);
-      const abort = () => rpc.close(new Error('Cancelled.'));
-      signal.addEventListener('abort', abort, { once: true });
+      scope.check();
+      isolation = await this.isolate({ fast: chat.speed === 'fast' });
+      scope.check();
+      await this.preflight(isolation, model, tools, options, scope);
+      scope.check();
+      rpc = await this.start(isolation, [], scope);
+      scope.own(rpc);
+      const done = new Promise((resolve, reject) => {
+        onClosed = reject;
+        onMessage = (message) => {
+          if (signal.aborted || rpc.closed) return;
+          if (message.method === 'item/agentMessage/delta') emit({ type: 'delta', text: message.params.delta });
+          if (message.method === 'turn/completed') {
+            const turn = message.params.turn;
+            if (turn.status === 'completed') resolve();
+            else {
+              const error = turn.error?.message || (turn.status === 'interrupted' ? 'Cancelled.' : 'Codex turn failed.');
+              reject(turn.status === 'interrupted' ? new Error(error) : fastRequestError(new Error(error), chat.speed));
+            }
+          }
+          if (message.id !== undefined && message.method) {
+            if (message.method !== 'item/tool/call') {
+              rpc.send({ id: message.id, error: { code: -32601, message: 'Only Breezer browser tools are permitted.' } }); return;
+            }
+            const { tool, arguments: args } = message.params;
+            Promise.resolve().then(() => { scope.check(); return callTool(tool, args, tools); }).then((result) => {
+              if (signal.aborted || rpc.closed) return;
+              const parts = contextParts(result);
+              const contentItems = parts.map((part) => part.type === 'image' ? { type: 'inputImage', imageUrl: part.image } : { type: 'inputText', text: part.text });
+              rpc.send({ id: message.id, result: { success: true, contentItems: contentItems.length ? contentItems : [{ type: 'inputText', text: JSON.stringify(result) }] } });
+            }).catch((error) => { if (!signal.aborted && !rpc.closed) rpc.send({ id: message.id, result: { success: false, contentItems: [{ type: 'inputText', text: error.message }] } }); });
+          }
+        };
+        rpc.on('closed', onClosed);
+        rpc.on('message', onMessage);
+      });
+      // Attach rejection handling before requests, which may fail synchronously on cancellation.
+      done.catch(() => {});
+      const started = await rpc.request('thread/start', this.threadParams(model, tools));
+      scope.check();
+      const input = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...(chat.includeContext === true ? contextParts(chat.context) : [])];
       try {
-        const done = new Promise((resolve, reject) => {
-          rpc.on('closed', reject);
-          rpc.on('message', (message) => {
-            if (message.method === 'item/agentMessage/delta') emit({ type: 'delta', text: message.params.delta });
-            if (message.method === 'turn/completed') {
-              const turn = message.params.turn;
-              if (turn.status === 'completed') resolve();
-              else {
-                const error = turn.error?.message || (turn.status === 'interrupted' ? 'Cancelled.' : 'Codex turn failed.');
-                reject(turn.status === 'interrupted' ? new Error(error) : fastRequestError(new Error(error), chat.speed));
-              }
-            }
-            if (message.id !== undefined && message.method) {
-              if (message.method !== 'item/tool/call') {
-                rpc.send({ id: message.id, error: { code: -32601, message: 'Only Breezer browser tools are permitted.' } }); return;
-              }
-              const { tool, arguments: args } = message.params;
-              Promise.resolve().then(() => callTool(tool, args, tools)).then((result) => {
-                const parts = contextParts(result);
-                const contentItems = parts.map((part) => part.type === 'image' ? { type: 'inputImage', imageUrl: part.image } : { type: 'inputText', text: part.text });
-                rpc.send({ id: message.id, result: { success: true, contentItems: contentItems.length ? contentItems : [{ type: 'inputText', text: JSON.stringify(result) }] } });
-              }).catch((error) => { if (!rpc.closed) rpc.send({ id: message.id, result: { success: false, contentItems: [{ type: 'inputText', text: error.message }] } }); });
-            }
-          });
-        });
-        // Attach rejection handling before requests, which may fail synchronously on cancellation.
-        done.catch(() => {});
-        const started = await rpc.request('thread/start', this.threadParams(model, tools));
-        const input = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...(chat.includeContext === true ? contextParts(chat.context) : [])];
-        try {
-          await rpc.request('turn/start', { threadId: started.thread.id, input: input.map((part) => part.type === 'image' ? { type: 'image', url: part.image } : part), ...options });
-        } catch (error) { throw fastRequestError(error, chat.speed); }
-        await done;
-      } finally { signal.removeEventListener('abort', abort); }
-    } finally { await rpc?.close(); await isolation.cleanup(); }
+        await rpc.request('turn/start', { threadId: started.thread.id, input: input.map((part) => part.type === 'image' ? { type: 'image', url: part.image } : part), ...options });
+      } catch (error) { throw fastRequestError(error, chat.speed); }
+      scope.check();
+      await done;
+      scope.check();
+    } catch (error) { scope.check(); throw error; }
+    finally {
+      if (onClosed) rpc.removeListener('closed', onClosed);
+      if (onMessage) rpc.removeListener('message', onMessage);
+      await scope.dispose();
+      await isolation?.cleanup();
+    }
   }
 }
 

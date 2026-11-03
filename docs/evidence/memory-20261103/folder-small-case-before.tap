@@ -1,0 +1,92 @@
+TAP version 13
+# Subtest: persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+ok 1 - persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+  ---
+  duration_ms: 3.367833
+  ...
+# Subtest: restoring many folder states reads local pins a linear number of times
+ok 2 - restoring many folder states reads local pins a linear number of times
+  ---
+  duration_ms: 17.204125
+  ...
+# 1000 local pin reads for 1000 folders
+# Subtest: folder expansion preserves the first match within the last matching local space
+ok 3 - folder expansion preserves the first match within the last matching local space
+  ---
+  duration_ms: 0.651292
+  ...
+# Subtest: folder restoration skips unrelated pins once all matching states are found
+not ok 4 - folder restoration skips unrelated pins once all matching states are found
+  ---
+  duration_ms: 0.739833
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/workspace-model.test.mjs:61:1'
+  failureType: 'testCodeFailure'
+  error: '0 folders caused 1000 unrelated pin reads'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/workspace-model.test.mjs:73:12)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:677:7)
+  ...
+# Subtest: two offline clients converge with concurrent rename, move, independent field edits and restart
+ok 5 - two offline clients converge with concurrent rename, move, independent field edits and restart
+  ---
+  duration_ms: 1.65225
+  ...
+# Subtest: deletions survive stale clients, later edits and concurrent folder/space removal
+ok 6 - deletions survive stale clients, later edits and concurrent folder/space removal
+  ---
+  duration_ms: 1.1515
+  ...
+# Subtest: same-field ties use stable client order; merge is associative
+ok 7 - same-field ties use stable client order; merge is associative
+  ---
+  duration_ms: 0.992208
+  ...
+# Subtest: appearance allowlist includes only supported preferences and keeps field-level changes
+ok 8 - appearance allowlist includes only supported preferences and keeps field-level changes
+  ---
+  duration_ms: 0.755917
+  ...
+# Subtest: malformed and future data reject without mutating either client
+ok 9 - malformed and future data reject without mutating either client
+  ---
+  duration_ms: 0.519667
+  ...
+# Subtest: concurrent deletion of different last spaces recovers a usable stable identity
+ok 10 - concurrent deletion of different last spaces recovers a usable stable identity
+  ---
+  duration_ms: 1.720833
+  ...
+# Subtest: concurrent capacity overflow rejects instead of silently losing saved items
+ok 11 - concurrent capacity overflow rejects instead of silently losing saved items
+  ---
+  duration_ms: 0.78625
+  ...
+# Subtest: clock and payload limits fail without replacing local state
+ok 12 - clock and payload limits fail without replacing local state
+  ---
+  duration_ms: 3.212041
+  ...
+# Subtest: incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+ok 13 - incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+  ---
+  duration_ms: 0.482125
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 12
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 113.896833

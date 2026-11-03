@@ -69,7 +69,9 @@ test('Continue browsing closes this tab, else the window', async () => {
 test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
   // A new minor edition replaces the previous one's features and patches.
   assert.doesNotMatch(text, /Update 1\.1\.\d|Organato on your new tab|Your own theme color/);
-  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 0);
+  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 1);
+  assert.match(text, /Update 1\.2\.1/);
+  assert.match(text, /Whole-browser RAM and CPU savings have not yet been measured/);
   assert.match(text, /A new profile now opens a short setup guide instead of these notes/);
   assert.match(text, /Setup guide button in Settings/);
   assert.match(html, /<a class="button secondary" href="workspace\.html#\/welcome">Open the setup guide<\/a>/);

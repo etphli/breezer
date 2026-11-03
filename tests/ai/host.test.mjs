@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter, once } from 'node:events';
 import { PassThrough, Writable } from 'node:stream';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readlink, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { NativeDecoder, encodeMessage, MAX_MESSAGE_BYTES, allowedTools, browserTools, validateTool, validateChat, validOrigin, contextParts, promptText, browserAccess, selectedReasoning } from '../../features/ai/host/protocol.mjs';
 import { JsonLineProcess, cliEnvironment } from '../../features/ai/host/cli.mjs';
@@ -46,6 +47,66 @@ test('native framing rejects oversize, zero, invalid UTF-8 and truncated data', 
   }
   assert.throws(() => new NativeDecoder().push(Buffer.from([1, 0, 0, 0, 0xff])));
   const decoder = new NativeDecoder(); decoder.push(Buffer.from([9, 0])); assert.throws(() => decoder.finish(), /Truncated/);
+});
+
+test('native framing handles every header/body split with byte-array input and empty chunks', () => {
+  const expected = [{ type: 'delta', text: 'é😀\u0000' }, { type: 'complete' }, null];
+  const frame = Buffer.concat(expected.map(encodeMessage));
+  for (let split = 0; split <= frame.length; split++) {
+    const decoder = new NativeDecoder();
+    const received = [...decoder.push(new Uint8Array(frame.subarray(0, split))),
+      ...decoder.push(Buffer.alloc(0)), ...decoder.push(frame.subarray(split))];
+    decoder.finish();
+    assert.deepEqual(received, expected, `split at ${split}`);
+  }
+});
+
+test('native framing keeps rejecting non-byte chunks, including empty arrays', () => {
+  for (const chunk of [null, [], '', new Uint16Array(1), new DataView(new ArrayBuffer(4))]) {
+    assert.throws(() => new NativeDecoder().push(chunk), TypeError);
+  }
+  const decoder = new NativeDecoder();
+  assert.deepEqual(decoder.push(new Uint8Array(0)), []);
+  decoder.finish();
+});
+
+test('native framing owns partial bytes when the caller reuses an input buffer', () => {
+  const frame = encodeMessage({ text: 'preserve me' });
+  const first = Buffer.from(frame.subarray(0, 9));
+  const decoder = new NativeDecoder();
+  assert.deepEqual(decoder.push(first), []);
+  first.fill(0);
+  assert.deepEqual(decoder.push(frame.subarray(9)), [{ text: 'preserve me' }]);
+  decoder.finish();
+});
+
+test('native framing handles repeatable fragmented/coalesced messages without losing the next header', () => {
+  const expected = Array.from({ length: 40 }, (_, i) => ({ id: i, text: 'é😀'.repeat(i) }));
+  const frame = Buffer.concat(expected.map(encodeMessage));
+  for (let trial = 1; trial <= 50; trial++) {
+    let random = trial, offset = 0;
+    const decoder = new NativeDecoder(), received = [];
+    while (offset < frame.length) {
+      random = Math.imul(random, 1664525) + 1013904223 | 0;
+      const size = (random >>> 0) % 131 + 1;
+      received.push(...decoder.push(frame.subarray(offset, offset + size)));
+      offset += size;
+    }
+    decoder.finish();
+    assert.deepEqual(received, expected);
+  }
+});
+
+test('native framing accepts the exact input limit and rejects incomplete maximum frames', () => {
+  const header = Buffer.alloc(4); header.writeUInt32LE(MAX_MESSAGE_BYTES);
+  const decoder = new NativeDecoder();
+  assert.deepEqual(decoder.push(header), []);
+  assert.throws(() => decoder.finish(), /Truncated/);
+  const body = Buffer.from('"' + 'x'.repeat(MAX_MESSAGE_BYTES - 2) + '"');
+  const result = decoder.push(body);
+  assert.equal(result.length, 1);
+  assert.equal(result[0].length, MAX_MESSAGE_BYTES - 2);
+  decoder.finish();
 });
 
 test('only the exact bundled extension origin is accepted', () => {
@@ -107,13 +168,24 @@ test('only an explicitly selected Codex Fast request enables the fast_mode featu
   const provider = new CodexProvider();
   provider.catalog = { models: [{ slug: 'actual-model' }] };
   provider.features = ['fast_mode', 'shell_tool', 'plugins', 'multi_agent'];
-  for (const fast of [false, true]) {
-    const isolation = await provider.isolate({ fast });
-    try {
-      const config = await readFile(join(isolation.directory, 'config/config.toml'), 'utf8');
-      assert.ok(config.includes(`"fast_mode" = ${fast}`));
-      for (const name of ['shell_tool', 'plugins', 'multi_agent']) assert.ok(config.includes(`"${name}" = false`));
-    } finally { await isolation.cleanup(); }
+  const directory = await mkdtemp(join(tmpdir(), 'breezer-isolation-test-'));
+  const previousCodexHome = process.env.CODEX_HOME;
+  try {
+    await writeFile(join(directory, 'auth.json'), '{"fixture":true}', { mode: 0o600 });
+    process.env.CODEX_HOME = directory;
+    for (const fast of [false, true]) {
+      const isolation = await provider.isolate({ fast });
+      try {
+        assert.equal(await readlink(join(isolation.directory, 'config/auth.json')), join(directory, 'auth.json'));
+        const config = await readFile(join(isolation.directory, 'config/config.toml'), 'utf8');
+        assert.ok(config.includes(`"fast_mode" = ${fast}`));
+        for (const name of ['shell_tool', 'plugins', 'multi_agent']) assert.ok(config.includes(`"${name}" = false`));
+      } finally { await isolation.cleanup(); }
+    }
+  } finally {
+    if (previousCodexHome === undefined) delete process.env.CODEX_HOME;
+    else process.env.CODEX_HOME = previousCodexHome;
+    await rm(directory, { recursive: true, force: true });
   }
 });
 

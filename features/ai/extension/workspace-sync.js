@@ -78,6 +78,15 @@ export class WorkspaceSync {
     const appearance = normalizeAppearance(await this.bridge.getAppearance());
     const current = projectWorkspace(store, appearance);
     let local = values[SYNC_LOCAL_KEY];
+    let persistedLocal = JSON.stringify(local);
+    const capture = async (writes = {}) => {
+      const serialized = JSON.stringify(local);
+      if (serialized !== persistedLocal) writes[SYNC_LOCAL_KEY] = local;
+      if (Object.keys(writes).length) {
+        await this.storage.local.set(writes);
+        persistedLocal = serialized;
+      }
+    };
     if (!local || local.providerId !== remote.providerId || local.vaultId !== remote.vaultId) {
       // Joining another vault intentionally merges this profile's current saved
       // workspace, but never carries the previous vault's deletion records.
@@ -91,10 +100,10 @@ export class WorkspaceSync {
     local = { ...local, model: recordWorkspaceChanges(local.model, local.baseline, current, local.clientId), baseline: current };
     // Capture before attempting transport. A crash, disconnect or provider
     // failure cannot erase edits that have not reached the remote preference.
-    await this.storage.local.set({ [SYNC_LOCAL_KEY]: local });
+    await capture();
     for (let attempt = 0; attempt < 4; attempt += 1) {
       local.model = mergeSyncModels(local.model, decode(remote.model));
-      await this.storage.local.set({ [SYNC_LOCAL_KEY]: local });
+      await capture();
       const applied = materializeWorkspace(local.model, store);
       const model = serializeSyncModel(local.model);
       if (model !== remote.model) {
@@ -115,9 +124,9 @@ export class WorkspaceSync {
       const changed = !same(projectWorkspace(store), projectWorkspace(applied.store));
       applied.store.rev = store.rev + (changed ? 1 : 0);
       local.baseline = projectWorkspace(applied.store, nextAppearance);
-      const writes = { [SYNC_LOCAL_KEY]: local };
+      const writes = {};
       if (changed) writes[STORE_KEY] = applied.store;
-      await this.storage.local.set(writes);
+      await capture(writes);
       if (Object.keys(patch).length) await this.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() });
       if (appearanceError) return this.state({ phase: 'appearanceBlocked', message: `Saved spaces were updated locally. Appearance remains unchanged: ${appearanceError}`, ...nativeHealth });
       return this.state({ phase: 'reconciled', vaultId: local.vaultId, ...nativeHealth });
@@ -161,8 +170,12 @@ export function installWorkspaceSync(api) {
     try { while (dirty && !disposed) {
       dirty = false;
       const result = await sync.cycle();
+      if (disposed) break;
       if (result.phase === 'disabled') await api.alarms?.clear(alarmName);
-      else await api.alarms?.create(alarmName, { periodInMinutes: 0.5 });
+      else {
+        await api.alarms?.create(alarmName, { periodInMinutes: 0.5 });
+        if (disposed) await api.alarms?.clear(alarmName);
+      }
     } }
     finally { running = false; }
   };

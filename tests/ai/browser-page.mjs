@@ -32,18 +32,18 @@ const server = createServer((request, response) => {
     window.events=[];destination.addEventListener('input',event=>events.push({type:'input',trusted:event.isTrusted}));save.addEventListener('click',event=>{events.push({type:'click',trusted:event.isTrusted});result.textContent='Note saved'});
     </script></body></html>`);
 });
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-firstOrigin = `http://127.0.0.1:${server.address().port}`;
 const secondServer = createServer(server.listeners('request')[0]);
-await new Promise(resolve => secondServer.listen(0, '127.0.0.1', resolve));
-secondOrigin = `http://127.0.0.1:${secondServer.address().port}`;
-const executablePath = process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined);
-const browser = await chromium.launch({ ...(executablePath ? { executablePath } : {}), headless: true });
-const page = await browser.newPage({ viewport: { width: 1100, height: 850 }, deviceScaleFactor: 1 });
-const errors = [];
-page.on('pageerror', error => errors.push(error.message));
-let tools;
+let browser, tools;
 try {
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  firstOrigin = `http://127.0.0.1:${server.address().port}`;
+  await new Promise(resolve => secondServer.listen(0, '127.0.0.1', resolve));
+  secondOrigin = `http://127.0.0.1:${secondServer.address().port}`;
+  const executablePath = process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined);
+  browser = await chromium.launch({ ...(executablePath ? { executablePath } : {}), headless: true });
+  const page = await browser.newPage({ viewport: { width: 1100, height: 850 }, deviceScaleFactor: 1 });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
   await page.goto(`http://127.0.0.1:${server.address().port}/`);
   assert.equal(await page.title(), 'Breezer control fixture');
   const cdp = await page.context().newCDPSession(page);
@@ -202,7 +202,9 @@ try {
   console.log('PASS: real Chromium isolated-world snapshots, secret exclusion and pixel redaction, flowing blue wave (transform/opacity only, input pass-through, reduced motion, clean removal) and visible AI pointer, trusted replacement/click, cross-origin tool and link navigation, stale-target/password refusal, Escape/Stop cancellation including a loading page.');
   console.log(`Evidence: ${evidence}/browser-control.png`);
 } finally {
-  await tools?.stop();
-  await browser.close();
-  await Promise.all([new Promise(resolve => server.close(resolve)), new Promise(resolve => secondServer.close(resolve))]);
+  try { await tools?.stop(); } finally {
+    try { await browser?.close(); } finally {
+      await Promise.all([new Promise(resolve => server.close(resolve)), new Promise(resolve => secondServer.close(resolve))]);
+    }
+  }
 }

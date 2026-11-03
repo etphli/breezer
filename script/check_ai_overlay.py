@@ -31,9 +31,15 @@ def fetch(path):
     destination = CACHE / path
     if not destination.is_file():
         destination.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(['curl', '--fail', '--location', '--silent', '--show-error',
-                        f'https://raw.githubusercontent.com/chromium/chromium/{VERSION}/{path}',
-                        '--output', str(destination)], check=True)
+        with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as output:
+            temporary = Path(output.name)
+        try:
+            subprocess.run(['curl', '--fail', '--location', '--silent', '--show-error',
+                            f'https://raw.githubusercontent.com/chromium/chromium/{VERSION}/{path}',
+                            '--output', str(temporary)], check=True)
+            temporary.replace(destination)
+        finally:
+            temporary.unlink(missing_ok=True)
     return destination
 
 

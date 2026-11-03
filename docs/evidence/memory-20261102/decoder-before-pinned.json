@@ -1,0 +1,61 @@
+{
+  "node": "v24.22.1",
+  "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-protocol.mjs",
+  "sourceSha256": "26cf7b4bdd775003e1c303f9d31f3b02a052d382ef797c671c29a00a6351168d",
+  "payloadBytes": 8388608,
+  "chunkBytes": 32768,
+  "rounds": 5,
+  "before": {
+    "rss": 54722560,
+    "heapTotal": 8224768,
+    "heapUsed": 4842536,
+    "external": 2401990,
+    "arrayBuffers": 143635
+  },
+  "after": {
+    "rss": 539688960,
+    "heapTotal": 72450048,
+    "heapUsed": 3969896,
+    "external": 10868601,
+    "arrayBuffers": 8532291
+  },
+  "retainedArrayBufferBytes": 8388656,
+  "observations": [
+    {
+      "elapsedMs": 157.826958,
+      "cpuUserMicros": 109508,
+      "cpuSystemMicros": 95371,
+      "concatCopiedBytes": 1086324768,
+      "assemblySetBytes": 0
+    },
+    {
+      "elapsedMs": 70.84508300000002,
+      "cpuUserMicros": 88920,
+      "cpuSystemMicros": 30695,
+      "concatCopiedBytes": 1086324768,
+      "assemblySetBytes": 0
+    },
+    {
+      "elapsedMs": 59.26391699999999,
+      "cpuUserMicros": 96734,
+      "cpuSystemMicros": 10113,
+      "concatCopiedBytes": 1086324768,
+      "assemblySetBytes": 0
+    },
+    {
+      "elapsedMs": 49.75325000000004,
+      "cpuUserMicros": 84837,
+      "cpuSystemMicros": 7805,
+      "concatCopiedBytes": 1086324768,
+      "assemblySetBytes": 0
+    },
+    {
+      "elapsedMs": 49.97000000000003,
+      "cpuUserMicros": 85508,
+      "cpuSystemMicros": 5918,
+      "concatCopiedBytes": 1086324768,
+      "assemblySetBytes": 0
+    }
+  ],
+  "limits": "Production native frame decoder with synthetic JSON, fragmented input and forced GC. Buffer.concat and Buffer.set instrumentation count decoder assembly bytes. Not whole-browser RAM, unique memory or AI/provider latency."
+}

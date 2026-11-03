@@ -1,0 +1,301 @@
+{
+  "reviewer": "gpt-6.1-sol, independent read-only review; no subagents",
+  "date": "2026-11-03",
+  "scope": "Native ReadObject reply ownership transfer, diagnostic truthfulness, fixed PC native migration and focused test adequacy. No source fixes.",
+  "verdict": "No actionable introduced correctness issues found within the reviewed scope. Offline checks pass; native and PC acceptance remain pending.",
+  "baselineNativeSha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+  "currentNativeSha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00",
+  "files": [
+    {
+      "path": "features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc",
+      "sha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00",
+      "lines": 165,
+      "readRanges": [
+        [
+          1,
+          165
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/sync/fixtures/provider-read-before.cc",
+      "sha256": "73740e4fb244726bd3c8031cfd28f1d28dae510c3509383cf2ab06a96aaf5a42",
+      "lines": 5,
+      "readRanges": [
+        [
+          1,
+          5
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/verify_sync_reply_efficiency.py",
+      "sha256": "e51125979de696c6a83ca9c8e086da9c0a9f73774e6b7c911e4a3f518e9970b4",
+      "lines": 162,
+      "readRanges": [
+        [
+          1,
+          162
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/windows/apply-memory-update.py",
+      "sha256": "cbd1ee521887ef559e7faf3f4e695e81970dcdd1b04a0883ea50cb444a4567e6",
+      "lines": 86,
+      "readRanges": [
+        [
+          1,
+          86
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "script/windows/prepare-efficiency-packet.py",
+      "sha256": "1d29fab04b0905b705f85750af9c7e571073687f9eddec616178b48958b03030",
+      "lines": 72,
+      "readRanges": [
+        [
+          1,
+          72
+        ]
+      ],
+      "status": "fully-read"
+    },
+    {
+      "path": "tests/windows/memory_update_test.py",
+      "sha256": "c34e36c147d96b5b565c2b0770c4c7fae5dcddc2572f6862e3ed6e68e2bf2e7e",
+      "lines": 264,
+      "readRanges": [
+        [
+          1,
+          264
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "findings": [],
+  "inheritedIssues": [],
+  "referencesRead": [
+    "docs/evidence/memory-20261103/sync-reply-implementation.json",
+    "docs/evidence/memory-20261103/native-packet-validation.json"
+  ],
+  "additionalReadRanges": [
+    {
+      "path": "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/api.patch",
+      "readRanges": [
+        [
+          198,
+          245
+        ]
+      ],
+      "status": "pertinent declarations read"
+    },
+    {
+      "path": "upstream/helium-macos/helium-chromium/patches/helium/core/sync/provider/service.patch",
+      "readRanges": [
+        [
+          440,
+          514
+        ],
+        [
+          770,
+          829
+        ],
+        [
+          1010,
+          1035
+        ]
+      ],
+      "status": "pertinent ownership, validation and callback declarations read"
+    },
+    {
+      "path": "upstream/helium-macos/helium-chromium/patches/helium/core/sync/vault-transport.patch",
+      "readRanges": [
+        [
+          1,
+          92
+        ]
+      ],
+      "status": "transport result and owned object declarations read"
+    },
+    {
+      "path": "docs/pc-build.md",
+      "readRanges": [
+        [
+          225,
+          314
+        ]
+      ],
+      "status": "native migration additions read; diff also inspected"
+    }
+  ],
+  "analysis": {
+    "changeIsolation": "Replacing only the ReadObject mutable reference and two moves with the pinned baseline conversion reproduces the exact supplied baseline SHA. All error/not-found paths, maximum-int check, validation expressions/order, Call/callback/wait logic and WriteObject remain byte-identical.",
+    "ownershipAndLifetime": "Service::Response is base::expected<ProviderResponse, ProviderFailure>, not a borrowed provider response. ResponseCallback is base::OnceCallback<void(Response)>. Respond accepts ProviderResponse by value, builds an owned Response, removes the pending callback and invokes it with std::move(result). The UI callback emplaces its owned response then signals ready. Successful TimedWait precedes the engine move out of Reply. Call returns the response by value to ReadObject. Reply is refcounted and retained by callback/tasks across timeout or cancellation; abandoned branches do not read response. Moving fields after Call therefore neither borrows callback storage nor changes concurrent access. No further response/success/data/revision reads occur after constructing the return object.",
+    "typesAndConstness": "api.patch declares optional success, ArrayBuffer data and DOMString revision. Local service code treats data as an owning byte container and uses std::vector<uint8_t> in WriteObject; vault-transport.patch explicitly defines output fields as std::vector<uint8_t> and std::string. Mutable local response -> mutable success -> mutable optional payloads permits actual moves. The source change removes const from the ReadObject reference. A separate const-move control compiled the actual conversion with const restored and still observed 9 allocations and zero data transfers, so merely spelling std::move is not accepted as ownership evidence. Generated API C++ fields and base::expected overloads were not compiled or directly verified by this model.",
+    "validationAndMovedValues": "Checks for engaged data/revision, nonempty revision and maximum size are unchanged and precede both moves. Aggregate list initialization moves two distinct owned fields in order; no expression depends on either moved-from value. Owned return vector/string outlive the response. No-data, no-revision, empty-revision and oversize rejection cases pass; empty data remains accepted by this conversion as before, while actual service ValidateSuccessResponse additionally rejects empty object data and validates revision syntax.",
+    "modelEvidence": "The diagnostic compiles the extracted conversion text with optional/variant wrappers and model structs, not the actual expected/optional result chain or generated headers. It asserts returned values after response destruction and observes original vector storage transfer for four nonempty cases. Long revisions force a copy allocation in the baseline. The exact source/baseline SHA gates prevent silently testing a different conversion. It does not exercise service callbacks, synchronization, cancellation or native API build compatibility. Allocation counts describe the fixture, with no physical RAM, CPU or browser performance claim.",
+    "packetAndMigration": "Packet regeneration and checksum comparison reproduce 9 extension resources, 1 native source and 11 host modules, with 29 checksum entries total. Exact native mapping is native-provider-transport.cc -> chrome/browser/sync/breezer_sync/provider_transport.cc. The allowlisted set rejects extra/missing resource entries. Preflight reads and hashes replacement bytes, verifies every current source and existing sourceChanges after pin is either before or after, and retains captured replacement bytes before any backup/resource/plan write. Each file uses temp-write/fsync/rename. Source writes precede the combined plan write; both before and after are accepted to resume source-before-pin interruptions. Already-after sources retain mtimes. Existing sourceChanges records and unrelated plan fields are preserved; graph/output/cache files are not targets. Packet host modules are staged separately and never migrated into Chromium.",
+    "testAdequacy": "Migration tests cover native packet/source/pin rejection before writes, interrupted native-source-before-pin recovery, full interrupted migration recovery, repeat mtimes/backups, unchanged cache sentinel, and packet mutation after preflight. Packaging tests cover matching and stale host files, incomplete/unknown receipts, corrupt packet and symlink rejection. Native conversion tests meaningfully cover local conversion ownership and validation, with independently reproduced baseline and constness controls. Broader generated-header, callback/concurrency and Windows/WSL launch acceptance are outside these tests."
+  },
+  "checks": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/build/efficiency-20261103/sync-reply-review-scratch/tmp\" python3 -B script/verify_sync_reply_efficiency.py --expect-moved",
+      "exitCode": 0,
+      "result": "12 cases passed; values and rejections preserved. Model baseline 9 allocations / 3146665 allocated bytes / 0 data transfers; current 0 / 0 / 4.",
+      "log": "build/efficiency-20261103/sync-reply-review-scratch/conversion.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/build/efficiency-20261103/sync-reply-review-scratch/tmp\" python3 -B tests/windows/memory_update_test.py",
+      "exitCode": 0,
+      "result": "14 tests passed.",
+      "log": "build/efficiency-20261103/sync-reply-review-scratch/migration.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/build/efficiency-20261103/sync-reply-review-scratch/tmp\" python3 -B tests/memory_package_test.py",
+      "exitCode": 0,
+      "result": "8 tests passed. Download, unpack, platform and subprocess calls mocked for disposable bundle test; installed app and runtime not accessed.",
+      "log": "build/efficiency-20261103/sync-reply-review-scratch/package.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/build/efficiency-20261103/sync-reply-review-scratch/tmp\" build/efficiency-20261103/organato-review-node24 --test tests/sync/reconcile.test.mjs tests/sync/workspace-model.test.mjs",
+      "exitCode": 0,
+      "result": "26 passed, 0 failures, 0 skips; injected storage and bridges only.",
+      "log": "build/efficiency-20261103/sync-reply-review-scratch/node.log"
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/build/efficiency-20261103/sync-reply-review-scratch/tmp\" python3 -B script/windows/prepare-efficiency-packet.py --output build/efficiency-20261103/sync-reply-review-scratch/packet",
+      "exitCode": 0,
+      "result": "Generated isolated offline packet beneath owned scratch."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 TMPDIR=\"$PWD/build/efficiency-20261103/sync-reply-review-scratch/tmp\" python3 -B build/efficiency-20261103/sync-reply-review-scratch/independent_checks.py",
+      "exitCode": 0,
+      "result": "Restored exact baseline SHA, baseline transfer-gate negative control, separately compiled const-move negative control, packet checksum/source/manifest checks passed.",
+      "log": "build/efficiency-20261103/sync-reply-review-scratch/independent-checks.log",
+      "compilerCommand": [
+        "/usr/bin/clang++",
+        "-std=c++17",
+        "-O0",
+        "-fno-modules",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/sync-reply-review-scratch/const-move-model.cc",
+        "-o",
+        "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/sync-reply-review-scratch/const-move-model"
+      ]
+    },
+    {
+      "command": "git diff --check -- features/sync/native/chrome/browser/sync/breezer_sync/provider_transport.cc docs/pc-build.md",
+      "exitCode": 0,
+      "result": "Passed."
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -B - < inline existing-packet checksum comparison",
+      "exitCode": 0,
+      "result": "All 29 existing packet SHA256SUMS entries verify and corresponding files equal the freshly generated packet.",
+      "log": "build/efficiency-20261103/sync-reply-review-scratch/existing-packet.log",
+      "procedure": "Read build/efficiency-20261102/pc-packet/SHA256SUMS; split each entry on two spaces; assert SHA256 of packet/name equals digest; assert packet/name bytes equal owned scratch packet/name bytes."
+    }
+  ],
+  "conversionResult": {
+    "cases": 12,
+    "nonemptySuccesses": 4,
+    "baseline": {
+      "allocations": 9,
+      "allocatedBytes": 3146665,
+      "dataTransfers": 0
+    },
+    "current": {
+      "allocations": 0,
+      "allocatedBytes": 0,
+      "dataTransfers": 4
+    },
+    "valuesAndRejectionsPreserved": true,
+    "sourceSha256": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00",
+    "baselineSourceSha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+    "conversionBaselineSha256": "73740e4fb244726bd3c8031cfd28f1d28dae510c3509383cf2ab06a96aaf5a42",
+    "compiler": "/usr/bin/clang++",
+    "scope": "Actual conversion text compiled with a small API type model. Not a full generated-header/Chromium/native-provider build; allocation counts are fixture values, not physical RAM or steady-state browser savings."
+  },
+  "independentChecks": {
+    "baselineSourceSha256": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+    "baselineGateRejected": true,
+    "constMoveCompileCommand": [
+      "/usr/bin/clang++",
+      "-std=c++17",
+      "-O0",
+      "-fno-modules",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/sync-reply-review-scratch/const-move-model.cc",
+      "-o",
+      "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261103/sync-reply-review-scratch/const-move-model"
+    ],
+    "constMoveModel": {
+      "cases": 12,
+      "nonemptySuccesses": 4,
+      "baseline": {
+        "allocations": 9,
+        "allocatedBytes": 3146665,
+        "dataTransfers": 0
+      },
+      "current": {
+        "allocations": 9,
+        "allocatedBytes": 3146665,
+        "dataTransfers": 0
+      },
+      "valuesAndRejectionsPreserved": true
+    },
+    "generatedPacket": {
+      "checksums": 29,
+      "extensionResources": 9,
+      "nativeResources": 1,
+      "hostModules": 11,
+      "allSourceBytesMatch": true
+    }
+  },
+  "objections": [
+    {
+      "classification": "acceptance-gap",
+      "issue": "Generated API/base::expected/full transport compilation is not established by the small type model.",
+      "requiredEvidence": "Build the native provider/Chromium target when authorised; keep this diagnostic labelled as a model."
+    },
+    {
+      "classification": "acceptance-gap",
+      "issue": "Lifetime/concurrency conclusion is source reasoning over existing once-callback and WaitableEvent ownership, not a new concurrency runtime test.",
+      "requiredEvidence": "Authorised native cancellation, timeout and success lifecycle acceptance."
+    },
+    {
+      "classification": "acceptance-gap",
+      "issue": "No physical RAM, CPU, latency or whole-browser gain is measured here.",
+      "requiredEvidence": "Matched candidate browser measurements and feature acceptance after native build."
+    },
+    {
+      "classification": "operational-assumption",
+      "issue": "Migration requires stopped source/build activity. Its shared unattended lock protects cooperating supervisor runs, not arbitrary source editors; validate-before-write does not promise a transaction against concurrent target/plan writers or power-loss durability.",
+      "introducedFinding": false,
+      "reason": "No change to the native move introduces such concurrency; the documented stopped-workspace condition is required."
+    }
+  ],
+  "skippedChecks": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/sync/provider.test.mjs tests/sync/reconcile.test.mjs tests/sync/workspace-model.test.mjs",
+      "reason": "provider.test.mjs launches Python HTTP server and performs loopback requests. Omitted provider.test.mjs to respect the explicit no-network constraint; other two files passed separately."
+    }
+  ],
+  "limitations": [
+    "Read-only production/test/docs; only review report and owned scratch/logs were written under build/efficiency-20261103. All Python ran with -B and PYTHONDONTWRITEBYTECODE=1; temporary fixture directories redirected under owned scratch.",
+    "No PC contact/probes/network; no installed app/provider/credentials/profile access; no Chromium/app build/run/install, publication or git mutations. Tiny C++ type-model executables and synthetic packaging fixtures only.",
+    "Did not independently inspect the cached prepared worker plan or its before pins on the PC. Native baseline is independently reconstructed by SHA, and actual migration pin behaviour is exercised in disposable fixtures.",
+    "No fixes made. Existing reference evidence was checked against current six file hashes and independently reproduced tests, not accepted as sole proof."
+  ]
+}

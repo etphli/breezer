@@ -1,0 +1,364 @@
+{
+  "area": "workspace",
+  "model": "GPT-6.1 Sol, high reasoning, regular speed as requested; no subagents",
+  "files": [
+    {
+      "path": "features/ai/extension/newtab.css",
+      "sha256": "8cb4956de440b8f2b19004e8c45cd23b1d4a2a6e6e91727ebe52d51302c63515",
+      "lines": 379,
+      "readRanges": [
+        [
+          1,
+          379
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all style rules, responsive breakpoints, animations and custom themes. No continuous idle animation except pending Refresh spinner. Preserve shortcut Add visibility and theme tokens."
+    },
+    {
+      "path": "features/ai/extension/newtab.html",
+      "sha256": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
+      "lines": 58,
+      "readRanges": [
+        [
+          1,
+          58
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete document and module entry. Bounded initial markup and lists. No external font or script imports."
+    },
+    {
+      "path": "features/ai/extension/newtab.js",
+      "sha256": "9be0e837b86f877f2c1aa25867f9ef017e61a4e76044fc2ea3a0f5f29b0d5d75",
+      "lines": 501,
+      "readRanges": [
+        [
+          1,
+          501
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read imports, normalization, port lifecycle, complete renderers and startNewTab. Daily timer is one callback per page/day, not polling. Resize amplification confirmed. Last view retains all normalized Organato items despite bounded display; actual provider payload size outside ownership and unmeasured."
+    },
+    {
+      "path": "features/ai/extension/onboarding.css",
+      "sha256": "c531c5a275791a22c8821d4e209fe2eea9eddc62bf8db3ac61be1d5199f7ecc8",
+      "lines": 452,
+      "readRanges": [
+        [
+          1,
+          452
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all selectors and keyframes. Tour and auto-hide demonstration have deliberate infinite animations. No feature removal recommended; visibility-based pausing needs native measurement."
+    },
+    {
+      "path": "features/ai/extension/onboarding.js",
+      "sha256": "fb3755f786c8b846ab2bfbef2019067a7349f48662f0ee7da32402ef8107f6ec",
+      "lines": 447,
+      "readRanges": [
+        [
+          1,
+          447
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete mount, appearance write chain, imports, helper port, steps/tour and shutdown. Organato port disconnects on pagehide. Appearance writes are serialized but not coalesced; setup-only use and unknown native call latency make impact unproven."
+    },
+    {
+      "path": "features/ai/extension/settings-nav.js",
+      "sha256": "38600a1e45f189d613a59d84b195058568911ecfa3f52e26205b4c7d4117381d",
+      "lines": 393,
+      "readRanges": [
+        [
+          1,
+          393
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete navigation, ranking, DOM index collection, search results, keyboard and reveal logic. Recollects/normalizes all visible settings text per input; results capped at 24 plus native fallback. Dynamic index protects feature availability and latest text; cache invalidation must preserve that."
+    },
+    {
+      "path": "features/ai/extension/settings-onboarding.js",
+      "sha256": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae",
+      "lines": 149,
+      "readRanges": [
+        [
+          1,
+          149
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete DOM creation, async storage, import actions, dismissal and disposal. AbortController and disposed flag cover listeners and pending work. Single bounded card."
+    },
+    {
+      "path": "features/ai/extension/settings.js",
+      "sha256": "676a570b36fa8906babf21f669b9932131d89d2d65bab8a4e121fcca44e15697",
+      "lines": 543,
+      "readRanges": [
+        [
+          1,
+          543
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all appearance controls/queue, spaces, modules, helper requests and pagehide disposal. Hidden categories mount immediately. Update check and Organato view begin on every settings route mount. Poll is installation-only and cleared on terminal/disconnect/pagehide; native lifetime outside ownership."
+    },
+    {
+      "path": "features/ai/extension/setup-state.js",
+      "sha256": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "lines": 15,
+      "readRanges": [
+        [
+          1,
+          15
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all constants and setup normalization. Small fixed step list and bounded return object; no resource concern."
+    },
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+      "lines": 658,
+      "readRanges": [
+        [
+          1,
+          658
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete schemas, normalization, indexes, queries, mutations, reconciliation, model building and persistence. Shared Web Lock is required for cross-window correctness. Membership transactions serialize an unchanged store twice; confirmed with actual class and synthetic storage. Previous-session metadata and quarantine intentionally protect ambiguous restore."
+    },
+    {
+      "path": "features/ai/extension/workspace.css",
+      "sha256": "5b2007277a3cbd5fdd3ac2c26fff5a044d9282451841231110deb5fb767a08c9",
+      "lines": 1092,
+      "readRanges": [
+        [
+          1,
+          1092
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all 1092 lines including sidebar, motion, settings, responsive, reduced-motion, context and custom palette rules. Sidebar enter/leave animations finite. Preserve readiness and full eager folder children."
+    },
+    {
+      "path": "features/ai/extension/workspace.html",
+      "sha256": "8ed520d8ac4d2df8d22dec5b79a7ad6868e87bdca2275833d53f9b0a8197dcf5",
+      "lines": 507,
+      "readRanges": [
+        [
+          1,
+          507
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read complete sidebar, Settings categories and welcome miniature markup. Sidebar pruning already implemented and previously verified; not a new finding. Inactive roots in settings/welcome are bounded route-local DOM, not an accumulating leak."
+    },
+    {
+      "path": "features/ai/extension/workspace.js",
+      "sha256": "01a12badcf462d9770e855107764a07936eefeec4560a2dd0edbea7ee6d5eab5",
+      "lines": 1558,
+      "readRanges": [
+        [
+          1,
+          1558
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Read all bridge, state, rendering, actions, event ordering, drag/keyboard, initialization and router code. requestAnimationFrame coalesces render requests; WeakMap skips unchanged row writes; eager folder readiness preserved. Nonvisual event render request and hidden-toast callback retention directly reproduced. Route changes reload document except settings category switches."
+    }
+  ],
+  "findings": [
+    {
+      "id": "workspace-01",
+      "pathsAndLines": [
+        "features/ai/extension/workspace-store.js:605-639",
+        "features/ai/extension/workspace.js:143-174",
+        "features/ai/extension/workspace.js:1246-1257"
+      ],
+      "hypothesis": "Every debounced tab-membership patch reads and normalizes the entire saved-entry store and membership set, then serializes both twice even though patchMembers only changes members.",
+      "whyReachable": "Tab URL changes, create/close and assignment call setRecord/dropRecord; flushRecords invokes patchMembers after 150 ms. The production WorkspaceStore class was executed, including locks/session logic, against disposable in-memory storage.",
+      "expectedScope": "Recurring O(saved entries + membership) transient allocation and string traversal per membership flush. Synthetic fixtures at 0/100/1000 saved entries serialized unchanged store strings of 172/8441/85841 characters twice. Only membership key was written in all cases. Character counts are not allocated physical bytes, execution time or whole-browser RAM.",
+      "risk": "Medium. Specialized membership writes must keep the same cross-window Web Lock, session rollover, normalization, removal semantics and changed-key-only persistence. Do not cache stale members across windows or cap/drop metadata.",
+      "cheapReproduction": "node build/efficiency-20261103/workspace-probe.mjs; membershipTransactions. Actual production class, synthetic storage and synthetic saved entries; no provider/config access.",
+      "smallestFix": "Give patchMembers a membership-only read-modify-write path under the existing LOCK_NAME, preserving rollSession and before/after members comparison. Do not redesign the general transaction API until cross-window and restart tests pass.",
+      "relevantExistingTests": [
+        "tests/ai/workspace-store.test.mjs",
+        "tests/ai/workspace-browser.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "workspace-02",
+      "pathsAndLines": [
+        "features/ai/extension/newtab.js:394-403",
+        "features/ai/extension/newtab.js:434",
+        "features/ai/extension/newtab.js:437-449"
+      ],
+      "hypothesis": "Every resize calls shortcut loading/filtering and repaints sites plus Organato, even when width stays in the same site-count bucket and only height changes. Revision gating suppresses stale paint, but occurs after load and filter.",
+      "whyReachable": "startNewTab installs an unconditional global resize listener. The actual production startNewTab closure was run with imported preferences and renderers stubbed, then its registered listener received synthetic events at a fixed width.",
+      "expectedScope": "Resize-only CPU/DOM churn, not idle savings. 20 sequential events at width 1000 produced 20 load/filter/site-paint/Organato-paint calls. A synchronous burst produced 20 load/filter calls and one paint of each section. Actual storage cost and DOM/layout cost were not measured.",
+      "risk": "Low to medium. Preserve breakpoint changes, latest revision wins, cross-tab preference changes, Add shortcut, favicon rendering and explicit refresh. A width-bucket guard must apply only to resize, not storage or user actions.",
+      "cheapReproduction": "node build/efficiency-20261103/workspace-probe.mjs; resize. Synthetic renderer/dependency stubs count production caller work, not actual browser rendering.",
+      "smallestFix": "Track the last siteLimit bucket for the resize listener; skip same-bucket events and coalesce changed-bucket work. Consider rendering only the site section for a responsive site-count change, leaving daily Organato repaint intact.",
+      "relevantExistingTests": [
+        "tests/ai/newtab.test.mjs",
+        "tests/ai/newtab-browser.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "workspace-03",
+      "pathsAndLines": [
+        "features/ai/extension/workspace.js:333-340",
+        "features/ai/extension/workspace.js:1062-1078"
+      ],
+      "hypothesis": "hideToast hides markup but leaves toast-action.onclick installed. The closure retains its action after the Undo window expires, including the restore URL/index array for clearToday.",
+      "whyReachable": "Clear today supplies () => restoreClosed(restore, spaceId). showToast attaches a closure over action and hideToast never clears it. Executed unchanged toast functions with an in-memory DOM contract stub; callback remained attached and invocable after hide.",
+      "expectedScope": "Bounded retention of the most recent action until another toast replaces it or the document unloads. Can retain a large clearToday URL list; not an accumulating DOM leak. No browser heap/physical-memory measurement.",
+      "risk": "Low. Ensure clicking Undo still invokes the captured local action even when hideToast clears the DOM handler; retain the 8-second action timeout and accessibility behavior.",
+      "cheapReproduction": "node build/efficiency-20261103/workspace-probe.mjs; toast. Synthetic callback proves retained reachability via actual production function. Payload size and realistic URL count unmeasured.",
+      "smallestFix": "Clear toast-action.onclick inside hideToast after hiding it. The already-running click closure can still call its captured action.",
+      "relevantExistingTests": [
+        "tests/ai/workspace-browser.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "workspace-04",
+      "pathsAndLines": [
+        "features/ai/extension/workspace.js:1246-1257",
+        "features/ai/extension/workspace.js:438-442",
+        "features/ai/extension/workspace.js:592-705",
+        "features/ai/extension/workspace-store.js:526-557"
+      ],
+      "hypothesis": "onUpdated requests a full model/reconcile pass for nonvisual changes such as autoDiscardable, which no sidebar presentation uses.",
+      "whyReachable": "Executed the production onUpdated function for a same-window {autoDiscardable:false} event and observed one render call. draw rebuilds the all-space index, sorts tabs and traverses active-space children. Exact end-to-end browser draw cost was not measured.",
+      "expectedScope": "Potential recurring CPU on nonvisual tab updates across each relevant window. CONFIRMED only for redundant render request. requestAnimationFrame merges events and rowPresentation prevents unchanged row writes, so not one DOM paint per event.",
+      "risk": "Medium. Allowlist filtering risks stale title/URL/pinned/status/favicon/audible/mute/discarded indicators and event ordering. State.tabs must update even when redraw skipped. Preserve tabEventVersion stale-query protection.",
+      "cheapReproduction": "node build/efficiency-20261103/workspace-probe.mjs; nonvisualUpdate. Production handler with render counter; next test should instrument full draw with mixed visual/nonvisual event stream in disposable workspace fixture.",
+      "smallestFix": "Keep state and event-version updates for every relevant event, but request rendering only when fields used by buildSidebarModel or presentation change. Verify diff semantics against full tab snapshots before adopting.",
+      "relevantExistingTests": [
+        "tests/ai/workspace-browser.test.mjs",
+        "tests/ai/workspace-static.test.mjs"
+      ],
+      "verdict": "CONFIRMED"
+    },
+    {
+      "id": "workspace-05",
+      "pathsAndLines": [
+        "features/ai/extension/settings.js:119-138",
+        "features/ai/extension/settings.js:429-486",
+        "features/ai/extension/settings.js:489-542",
+        "features/ai/extension/onboarding.js:243-308"
+      ],
+      "hypothesis": "Settings eagerly requests update and Organato state for any category and retains both ports until pagehide, potentially keeping extension/native helpers resident while Settings is left open.",
+      "whyReachable": "mountSettings calls mountUpdates and mountOrganato immediately; both issue a request and retain port after success. Welcome likewise reads Organato state before reaching that step. Native/helper ownership and shared background multiplexing are outside this audit.",
+      "expectedScope": "Possible settings-open native/helper lifetime and startup overhead. No claim of actual native memory waste: a runtime port may be cheap or shared with active features. Settings does not continuously poll in idle state; update poll starts only during installation.",
+      "risk": "High if changed without tracing host lifetime and preserving immediate settings state, setup summary, search availability and reconnect behavior. Do not disable update/privacy/Organato features.",
+      "cheapReproduction": "Next test: stub runtime ports, deliver successful view/check responses, verify open-port counts and pagehide disconnect. Then coordinator traces extension-services/native-host ownership and measures actual helper ownership in disposable environment. No network, real helper or app launch performed here.",
+      "smallestFix": "Only if independent helper lifetime evidence establishes waste, disconnect completed read-only ports and reconnect on action, preserving in-flight configure/install progress and status polling. Do not lazy-render folders or hide available settings.",
+      "relevantExistingTests": [
+        "tests/ai/organato-settings.test.mjs",
+        "tests/ai/settings.test.mjs",
+        "tests/ai/onboarding-browser.test.mjs"
+      ],
+      "verdict": "SUSPECTED"
+    },
+    {
+      "id": "workspace-06",
+      "pathsAndLines": [
+        "features/ai/extension/settings-nav.js:81-122",
+        "features/ai/extension/settings-nav.js:252-312"
+      ],
+      "hypothesis": "Settings search rescans DOM and normalizes every indexed field for each input, while show also writes category state and scrolls selected navigation into view.",
+      "whyReachable": "input event directly calls render, which invokes collectEntries and rankEntries each time. No cheap real-DOM probe executed; current settings page is small and results are capped.",
+      "expectedScope": "Interactive settings-search CPU only; likely low priority relative to membership churn. No measured slowdown or idle RAM gain.",
+      "risk": "Medium. Cached indexes can miss feature mounts, hidden onboarding changes, current labels, validation and optional categories. Scroll behavior has narrow-screen accessibility value.",
+      "cheapReproduction": "Next test: disposable DOM fixture from workspace.html with dynamic modules, instrument selector and normalizeText counts across incremental query input, verify changed labels/hidden controls are immediately searchable. Do not run native browser UI.",
+      "smallestFix": "Only if measured worthwhile, retain a normalized index with explicit invalidation after feature mounts and relevant text/visibility changes; coalesce input rendering without changing keyboard results.",
+      "relevantExistingTests": [
+        "tests/ai/settings-nav.test.mjs",
+        "tests/ai/settings-redesign-browser.test.mjs"
+      ],
+      "verdict": "SUSPECTED"
+    }
+  ],
+  "excludedIdeas": [
+    {
+      "idea": "Lazy folder child rendering",
+      "reason": "Rejected previously for reproducibly slower folder opening. Keep all children ready, favicons and saved-slot shortcuts."
+    },
+    {
+      "idea": "Reclaim hidden sidebar Settings/welcome roots",
+      "reason": "Already implemented and verified; not counted as a new finding."
+    },
+    {
+      "idea": "Page-context, translation and native decoder fixes",
+      "reason": "Already verified and outside workspace ownership; no duplicate claims."
+    },
+    {
+      "idea": "Remove all listeners/timers on settings category switches",
+      "reason": "Settings categories remain in one document and mount once. Other routes reload. Listener count is bounded by document lifetime; removal on category switch would break shared controls."
+    },
+    {
+      "idea": "Drop saved restore records, quarantine or other-window metadata",
+      "reason": "Required for conservative restart restoration and cross-window correctness. rollSession already limits previous-session survival."
+    },
+    {
+      "idea": "Disable animations, favicons, Organato, privacy or update behavior",
+      "reason": "Feature removal is prohibited. Welcome loops are deliberate demonstrations; profiling needed before visibility-only pausing."
+    },
+    {
+      "idea": "Treat new-tab midnight callback as polling",
+      "reason": "One daily wakeup maintains Today/Tomorrow without network. Normal document teardown releases it; no idle loop demonstrated."
+    },
+    {
+      "idea": "Cap normalized Organato view to displayed rows",
+      "reason": "Additional items support counts and duplicate handling. Payload size/provider contract outside ownership; no measured meaningful retention."
+    },
+    {
+      "idea": "Memoize mutable store index indefinitely",
+      "reason": "Every store update replaces/changes nodes. Stale indexes would break rename/move/delete and cross-window sync; rebuilding on each operation is bounded and intentional."
+    }
+  ],
+  "actualCommandsAndResults": [
+    {
+      "command": "cat AGENTS.md; parse build/efficiency-20261103/source-inventory.json; cat docs/evidence/memory-20261102/README.md and decisions.tsv",
+      "result": "Read project restrictions, all inventory entries programmatically, prior results and rejected experiments. Initial combined output truncated; owned inventory was printed separately and README reread completely."
+    },
+    {
+      "command": "nl/sed/cat over each owned file in full, in chunks",
+      "result": "All 13 owned files, 6752 lines. workspace.js 1-520/521-1040/1041-1558; workspace.css 1-360/361-760/761-1092; workspace.html 1-250/251-507; newtab.js 1-250/251-501; onboarding.js 1-225/226-447. settings.js initial combined output truncated after 348; 340-543 reread. settings-nav.js initial combined output prefix truncated; 1-180 and 181-393 reread. Other owned files read complete."
+    },
+    {
+      "command": "cat /Users/likht.ethan/.codex/skills/unslop/SKILL.md",
+      "result": "Applied required concise plain-writing guidance to report."
+    },
+    {
+      "command": "rg --files tests/ai | rg '(workspace|settings|newtab|onboarding)'; git status --short; node --version; sed -n '1,100p' tests/ai/workspace.test.mjs",
+      "result": "Identified relevant test paths and existing user edits; Node v22.14.0. Final sed failed because workspace.test.mjs does not exist. Actual store test is workspace-store.test.mjs. No tests from that discovery command ran."
+    },
+    {
+      "command": "node build/efficiency-20261103/workspace-probe.mjs > build/efficiency-20261103/workspace-probe-results.json",
+      "result": "Exit 0. Assertions passed for three production membership-transaction fixtures, sequential/burst resize counts, toast callback reachability and nonvisual event render request. Runtime and executed source hashes included. No timing benchmarks, native browser, provider/network/config/Keychain access."
+    },
+    {
+      "command": "Python inventory SHA-256/line count comparison and JSON report generation",
+      "result": "Every owned file matches inventory hash and line count at report generation. Wrote only workspace-probe.mjs, workspace-probe-results.json and workspace-audit.json under requested directory."
+    }
+  ],
+  "remainingGaps": [
+    "No owned read gaps. Every owned file fully read; source hashes match inventory.",
+    "No production changes made and no fix verification or no-regression claim. Coordinator owns implementation and independent tests.",
+    "No whole-browser CPU/RAM, native process lifetime, long-session, startup or UI measurements. Synthetic call/character counts do not predict whole-browser savings.",
+    "Existing test filenames identify follow-up coverage only. Existing suites were not run because no production edits were made and browser/provider side effects were outside this read-only scope.",
+    "No native settings/helper ownership trace beyond owned files. Suspected eager-port lifetime requires extension-services/native-host review.",
+    "PC unavailable: no probe, connection, start or schedule attempted. No app build/run/install, installed/private bundle/profile/password/cache changes, publication or packet pin/receipt changes.",
+    "Operation-count probes are safe alongside delegates but not CPU or latency benchmarks. Source slices preserve function bodies; dependencies/UI/storage use synthetic stubs as recorded."
+  ]
+}

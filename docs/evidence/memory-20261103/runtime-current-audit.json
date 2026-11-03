@@ -1,0 +1,420 @@
+{
+  "status": "COMPLETE FOR SEVEN ASSIGNED CURRENT FILES; NO ACTIONABLE NEW FINDING",
+  "reviewer": {
+    "model": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular/default",
+    "subagents": 0
+  },
+  "checkedAtUtc": "2026-11-03T00:50:44.534363+00:00",
+  "scope": "Read-only current-source runtime review, seven files and 2072 lines. Coverage is a full textual read at the listed hashes, not an inventory or earlier-version review. Only this report and runtime-current-audit-* offline artifacts written.",
+  "inventory": {
+    "path": "build/efficiency-20261103/source-inventory-after-cli.json",
+    "sha256": "82089938c92c799c362d577857afc583ce4951008257d1346ce77b2adeab0ea8",
+    "drift": []
+  },
+  "files": [
+    {
+      "path": "features/ai/extension/newtab.js",
+      "sha256": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+      "lines": 518,
+      "readRanges": [
+        [
+          1,
+          518
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62",
+      "inventoryLines": 518,
+      "drift": false,
+      "notes": "Complete source read. Reviewed normalization, port settlement, rendering, preference events, resize buckets, async load revisions, refresh and page lifetime."
+    },
+    {
+      "path": "features/ai/extension/panel.js",
+      "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+      "lines": 662,
+      "readRanges": [
+        [
+          1,
+          662
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+      "inventoryLines": 662,
+      "drift": false,
+      "notes": "Complete source read, including UI handlers and initialization. Reviewed full transcript/node ownership, stream RAF coalescing, final render/disposal, cancellation and new-chat boundaries."
+    },
+    {
+      "path": "features/ai/extension/render-message.js",
+      "sha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+      "lines": 134,
+      "readRanges": [
+        [
+          1,
+          134
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+      "inventoryLines": 134,
+      "drift": false,
+      "notes": "Complete source read. Reviewed safe full renderer, blank-line commit boundary, code-fence scanning, mutable tail/node ownership and idempotent disposal."
+    },
+    {
+      "path": "features/ai/extension/workspace-sync-model.js",
+      "sha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+      "lines": 206,
+      "readRanges": [
+        [
+          1,
+          206
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c",
+      "inventoryLines": 206,
+      "drift": false,
+      "notes": "Complete source read. Reviewed projection, validation, merge clocks, materialization, duplicate folder expansion semantics, early exit and deterministic serialization."
+    },
+    {
+      "path": "features/ai/extension/workspace-sync.js",
+      "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "lines": 204,
+      "readRanges": [
+        [
+          1,
+          204
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "inventoryLines": 204,
+      "drift": false,
+      "notes": "Complete source read. Reviewed locks, recovery snapshots and awaited write ordering, vault/CAS races, policy recovery, native invocation settlement and alarm disposal."
+    },
+    {
+      "path": "features/ai/host/claude.mjs",
+      "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "lines": 212,
+      "readRanges": [
+        [
+          1,
+          212
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "inventoryLines": 212,
+      "drift": false,
+      "notes": "Complete source read. Reviewed incremental key overlap and escape suppression against one-shot behavior, round/block prefix matching, final validation, RPC listener lifetime and surrounding provider flow. No real discovery/chat invoked."
+    },
+    {
+      "path": "features/ai/host/organato.mjs",
+      "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+      "lines": 136,
+      "readRanges": [
+        [
+          1,
+          136
+        ]
+      ],
+      "status": "fully-read",
+      "inventorySha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+      "inventoryLines": 136,
+      "drift": false,
+      "notes": "Complete source read. Reviewed incremental decoding/limit/BOM/cancel and reader release, item/config validation and request/list/tool paths. Config/Keychain functions only read as source; never invoked."
+    }
+  ],
+  "findings": [],
+  "findingClassification": {
+    "new": [],
+    "introduced": [],
+    "inheritedNewlyActionable": [],
+    "meaning": "No actionable defect established by this bounded review. Existing accepted limitations are recorded separately; no claim of complete provider/browser correctness."
+  },
+  "reviewedInvariants": [
+    {
+      "topic": "Shortcut async revisions",
+      "locations": [
+        {
+          "path": "features/ai/extension/newtab.js",
+          "startLine": 394,
+          "endLine": 404,
+          "sha256": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62"
+        },
+        {
+          "path": "features/ai/extension/newtab.js",
+          "startLine": 435,
+          "endLine": 446,
+          "sha256": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62"
+        },
+        {
+          "path": "features/ai/extension/newtab.js",
+          "startLine": 463,
+          "endLine": 495,
+          "sha256": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62"
+        }
+      ],
+      "assessment": "updateSites increments its revision before awaiting preferences/filter, rejects obsolete results and requires a view. load increments the same revision when allSites changes, preventing an older pre-response filter from replacing loaded sites. A stale initial filter installs the new Organato response while preserving shown sites, then recomputes current shortcuts. Width changes across its await also trigger a refresh. Same-bucket skips preserve retry after failures through resizeLimit=null. The current stale-filter regression passes. No introduced race found; this guard does not cancel underlying filter work."
+    },
+    {
+      "topic": "Stable-block rendering, final output and scroll",
+      "locations": [
+        {
+          "path": "features/ai/extension/render-message.js",
+          "startLine": 85,
+          "endLine": 134,
+          "sha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948"
+        },
+        {
+          "path": "features/ai/extension/panel.js",
+          "startLine": 328,
+          "endLine": 343,
+          "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb"
+        },
+        {
+          "path": "features/ai/extension/panel.js",
+          "startLine": 376,
+          "endLine": 393,
+          "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb"
+        },
+        {
+          "path": "features/ai/extension/panel.js",
+          "startLine": 491,
+          "endLine": 509,
+          "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb"
+        },
+        {
+          "path": "features/ai/extension/panel.js",
+          "startLine": 553,
+          "endLine": 566,
+          "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb"
+        }
+      ],
+      "assessment": "A fully received blank line outside fences flushes all parser context. Committed nodes leave mutableNodes and stay attached; only the uncommitted tail is rebuilt. The full renderer remains the exact authored baseline prefix. Queued frames resolve current run ownership, so completion/new-chat and a later run cannot append to an old body. finish disposes the stream and renders complete text even when the last RAF has not run. Fixture checks preserve reader-away/bottom-follow decisions, final DOM equivalence and committed identity. Real browser layout/scroll anchoring was not rerun."
+    },
+    {
+      "topic": "Recovery durability and comparison lifetime",
+      "locations": [
+        {
+          "path": "features/ai/extension/workspace-sync.js",
+          "startLine": 70,
+          "endLine": 134,
+          "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+        }
+      ],
+      "assessment": "persistedLocal is an immutable serialized snapshot, not an alias of the subsequently mutated local.model. It updates only after storage.local.set fulfills. Local edits are captured before exchange, merged remote edits before materialization/application, and final baseline together with a changed STORE_KEY. CAS misses repeat up to four times and preserve capture. Locks serialize cooperating writers. Current fault tests pass for quota, rejected apply, transport failure, retry and appearance refusal. The serialized value lasts for one reconcile invocation and its awaits, not across all cycles. Do not remove durability captures to avoid serialization."
+    },
+    {
+      "topic": "Folder duplicate and early-scan semantics",
+      "locations": [
+        {
+          "path": "features/ai/extension/workspace-sync-model.js",
+          "startLine": 147,
+          "endLine": 175,
+          "sha256": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c"
+        }
+      ],
+      "assessment": "A fresh remaining Set per local space accepts the first matching folder in that space; later spaces overwrite earlier expansion values. No remote folders means no pin scan. Each space stops scanning once every relevant ID has matched. 400 seeded baseline comparisons and current zero/one/two-folder early scans pass. Per-space Set construction still costs work when few/no matching local folders exist; count reductions are not physical RAM/CPU evidence."
+    },
+    {
+      "topic": "Claude incremental malformed overlap and final validation",
+      "locations": [
+        {
+          "path": "features/ai/host/claude.mjs",
+          "startLine": 18,
+          "endLine": 95,
+          "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384"
+        },
+        {
+          "path": "features/ai/host/claude.mjs",
+          "startLine": 167,
+          "endLine": 210,
+          "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384"
+        }
+      ],
+      "assessment": "The state machine preserves the first one-shot text-key match, including adjacent malformed overlapping prefixes. It suppresses incomplete escapes, raw trailing backslash-pair prefixes and invalid escape/control text consistently with partialText. Block resets match only an already emitted prefix, avoiding duplicate content. Successful results still require string text and an own action field, with result-string JSON fallback and inherited final-prefix behavior. Round listeners/timer are cleaned on supported terminal paths. Current tests and 28057 old/new comparisons show no introduced event/result difference. These checks do not certify all CLI lifecycle/cancellation cases or arbitrary malformed streams."
+    },
+    {
+      "topic": "Organato bounds, BOMs and stalled cancellation",
+      "locations": [
+        {
+          "path": "features/ai/host/organato.mjs",
+          "startLine": 11,
+          "endLine": 40,
+          "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7"
+        },
+        {
+          "path": "features/ai/host/organato.mjs",
+          "startLine": 109,
+          "endLine": 115,
+          "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7"
+        }
+      ],
+      "assessment": "The limit remains 2000000 decoded UTF-16 code units after pinned-runtime leading BOM handling, not a UTF-8 byte cap. 65536-byte subviews bound decode work within a single oversized delivered chunk. Up to two initial BOMs are removed across split bytes; third/fourth remain invalid JSON as before. Final decoder flush participates in the limit. Failure starts cancellation without awaiting its possibly stalled promise, suppresses cancellation rejection, preserves the original error and releases the reader lock. All exact-limit/UTF8/replacement/BOM/stalled/rejected cancellation checks pass with native Response and injected fetcher. No network/keychain/config operation occurred."
+    }
+  ],
+  "priorFindingDispositions": [
+    {
+      "id": "workspace-review-P2",
+      "status": "Current revision guard fix read and test rerun; not an open finding."
+    },
+    {
+      "id": "streaming-review-P3 / STREAM-REVIEW-01",
+      "status": "Current overlapping-key fix read; 28057 differential comparisons have zero differences."
+    },
+    {
+      "id": "organato-review-two-P2 / ORG-RESPONSE-1 / ORG-RESPONSE-2",
+      "status": "Current double-BOM and nonblocking cancellation fixes read and regression tests rerun successfully."
+    },
+    {
+      "id": "EVEN-1",
+      "status": "Current renderer suite requires the authored baseline hash and verifies full-render byte equality; missing-baseline fallback is no longer used."
+    }
+  ],
+  "acceptedLimits": [
+    {
+      "classification": "known retained optimization tradeoff",
+      "location": {
+        "path": "features/ai/extension/workspace-sync.js",
+        "startLine": 81,
+        "endLine": 89,
+        "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+      },
+      "detail": "Unchanged 1000-entry source-bound fixture makes four full recovery JSON.stringify calls, each 422107 UTF-16 code units, total 1688428. Zero redundant storage submissions does not establish reduced CPU or peak memory. Holding a serialized snapshot avoids mutable-object aliasing; keep pending real measurement."
+    },
+    {
+      "classification": "known inherited boundary assumption",
+      "location": {
+        "path": "features/ai/extension/workspace-sync.js",
+        "startLine": 125,
+        "endLine": 129,
+        "sha256": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+      },
+      "detail": "Prior review demonstrated a synthetic recovery-only partial final multi-key commit can treat the older workspace as a fresh local edit on retry. Actual Chrome partial-commit reachability remains unestablished. Current rejected-apply test models rejection before writes, not arbitrary crash atomicity. This review does not revive it as an introduced defect or claim it fixed; prior partial-write experiment was read, not rerun."
+    },
+    {
+      "classification": "known retained renderer cost",
+      "location": {
+        "path": "features/ai/extension/render-message.js",
+        "startLine": 104,
+        "endLine": 124,
+        "sha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948"
+      },
+      "detail": "An uninterrupted paragraph, list or open fence still rebuilds the complete mutable tail, with an additional newline scan. Full final render and complete conversation text remain intentional. No transcript pruning proposed."
+    },
+    {
+      "classification": "known Organato measurement limit",
+      "location": {
+        "path": "features/ai/host/organato.mjs",
+        "startLine": 13,
+        "endLine": 39,
+        "sha256": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7"
+      },
+      "detail": "The decoder cannot bound an already delivered transport chunk or upstream queued allocations. String concatenation, flattening and parsed-object costs remain unmeasured. A never-settling underlying cancel may retain its own resources despite release of this reader lock."
+    },
+    {
+      "classification": "scope preservation",
+      "detail": "Rejected translation WeakRef pruning remains rejected. No translation pruning, content dropping or recovery-durability shortcuts are recommended by this report."
+    }
+  ],
+  "checks": [
+    {
+      "command": "TMPDIR=\"$PWD/build/efficiency-20261103/runtime-current-audit-tmp\" build/efficiency-20261103/organato-review-node24 --test tests/ai/newtab-race.test.mjs tests/ai/stream-render.test.mjs tests/ai/claude-streaming.test.mjs tests/ai/organato-response.test.mjs tests/sync/lifetime.test.mjs tests/sync/reconcile.test.mjs tests/sync/workspace-model.test.mjs",
+      "runtime": "v24.22.1",
+      "exitCode": 0,
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "artifact": "build/efficiency-20261103/runtime-current-audit-tests.tap",
+      "scope": "Fake APIs, fake RPC, synthetic DOM and native Response only. Claude chat fixture injects fake process and uses owned task-prefixed TMPDIR. No CLI discovery/auth/process launch."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/runtime-current-audit-adversarial.mjs",
+      "exitCode": 0,
+      "cases": 2965,
+      "comparisons": 28057,
+      "differences": 0,
+      "additionalRendererPrefixes": 127,
+      "artifact": "build/efficiency-20261103/runtime-current-audit-adversarial-results.json",
+      "provenance": "Task-prefixed copy of reviewed streaming-review-adversarial.mjs, output redirected to task-prefixed artifact and operationProbe removed. Source-bound old/new fake RPC and synthetic DOM; no benchmark."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/runtime-current-audit-sync.mjs",
+      "exitCode": 0,
+      "artifact": "build/efficiency-20261103/runtime-current-audit-sync.json",
+      "provenance": "Task-prefixed copy of reviewed sync-review-focused.mjs. Four-CAS-miss restart, repeated appearance refusal and later recovery, detached recovery writes/no-op, serialization counts and 400 seeded differential folder cases pass."
+    }
+  ],
+  "evidenceRead": [
+    {
+      "path": "docs/evidence/memory-20261103/README.md",
+      "sha256": "10800cddff9c96d86dd4bdf2572b35becf3dad43d473f463e5e519a2d948c336"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/verification.json",
+      "sha256": "215c8b7a9e78d1381d5abc3ca52260acdd895dab118509bc6cd210e9083f6d27"
+    },
+    {
+      "path": "docs/evidence/memory-20261103/review-resolutions.json",
+      "sha256": "ecdb5a82205bbd51dc51d1875e5d56934aeedd2db51f97eebad32229c1bb9b01"
+    }
+  ],
+  "notVerified": [
+    "Native PC/browser-wide RAM or CPU",
+    "Browser UI/layout, accessibility and real GC in this review",
+    "Live providers, external network, Keychain or real auth/config",
+    "Packet or installed app acceptance",
+    "All possible input strings/chunk partitions and actual Chrome crash atomicity"
+  ],
+  "restrictionsObserved": {
+    "sourceTestScriptEdits": false,
+    "docsEvidencePacketInventoryEdits": false,
+    "pcContactProbeSshScheduling": false,
+    "installedAppBuildRunInstallUpdate": false,
+    "realProviderAccountAuthConfigKeychainAccess": false,
+    "networkDownloadsDependencies": false,
+    "compiledCacheDeletion": false,
+    "commitPushPublication": false,
+    "browserOrTimedPerformanceSuite": false,
+    "fakeProcessesOrLoopbackServersStarted": false
+  },
+  "coverageValidation": {
+    "checker": "script/check_efficiency_coverage.py check(), scoped to exactly seven owned inventory entries",
+    "complete": true,
+    "fileCount": 7,
+    "lineCount": 2072,
+    "statuses": [
+      {
+        "path": "features/ai/extension/newtab.js",
+        "status": "fully-read"
+      },
+      {
+        "path": "features/ai/extension/panel.js",
+        "status": "fully-read"
+      },
+      {
+        "path": "features/ai/extension/render-message.js",
+        "status": "fully-read"
+      },
+      {
+        "path": "features/ai/extension/workspace-sync-model.js",
+        "status": "fully-read"
+      },
+      {
+        "path": "features/ai/extension/workspace-sync.js",
+        "status": "fully-read"
+      },
+      {
+        "path": "features/ai/host/claude.mjs",
+        "status": "fully-read"
+      },
+      {
+        "path": "features/ai/host/organato.mjs",
+        "status": "fully-read"
+      }
+    ]
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "scope": "Deterministic synthetic DOM and parser-input counts only. No CPU, RSS, layout, browser, network or PC access.",
+  "sourceHashes": {
+    "before": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+    "after": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948"
+  },
+  "cases": {
+    "formatted": {
+      "before": {
+        "chunks": 700,
+        "finalCharacters": 11480,
+        "streaming": {
+          "nodes": 631600,
+          "parsedCharacters": 4018700,
+          "renders": 700,
+          "scannedCharacters": 0,
+          "scannedLines": 0
+        },
+        "includingFinalRender": {
+          "nodes": 633400,
+          "parsedCharacters": 4030180,
+          "renders": 701,
+          "scannedCharacters": 0,
+          "scannedLines": 0
+        }
+      },
+      "after": {
+        "chunks": 700,
+        "finalCharacters": 11480,
+        "streaming": {
+          "nodes": 4600,
+          "parsedCharacters": 25040,
+          "renders": 1100,
+          "scannedCharacters": 11480,
+          "scannedLines": 1100
+        },
+        "includingFinalRender": {
+          "nodes": 6400,
+          "parsedCharacters": 36520,
+          "renders": 1101,
+          "scannedCharacters": 11480,
+          "scannedLines": 1100
+        }
+      }
+    },
+    "singleBlock": {
+      "before": {
+        "chunks": 100,
+        "finalCharacters": 2700,
+        "streaming": {
+          "nodes": 10200,
+          "parsedCharacters": 136350,
+          "renders": 100,
+          "scannedCharacters": 0,
+          "scannedLines": 0
+        },
+        "includingFinalRender": {
+          "nodes": 10401,
+          "parsedCharacters": 139050,
+          "renders": 101,
+          "scannedCharacters": 0,
+          "scannedLines": 0
+        }
+      },
+      "after": {
+        "chunks": 100,
+        "finalCharacters": 2700,
+        "streaming": {
+          "nodes": 10200,
+          "parsedCharacters": 136350,
+          "renders": 100,
+          "scannedCharacters": 2700,
+          "scannedLines": 100
+        },
+        "includingFinalRender": {
+          "nodes": 10401,
+          "parsedCharacters": 139050,
+          "renders": 101,
+          "scannedCharacters": 2700,
+          "scannedLines": 100
+        }
+      }
+    }
+  }
+}

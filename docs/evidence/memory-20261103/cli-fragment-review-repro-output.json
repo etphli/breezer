@@ -1,0 +1,114 @@
+{
+  "runtime": "v24.22.1",
+  "comparisons": 800,
+  "reentrancy": {
+    "write": {
+      "baseline": [
+        [
+          "message",
+          {
+            "first": true
+          }
+        ],
+        [
+          "message",
+          {
+            "second": true
+          }
+        ],
+        [
+          "message",
+          {
+            "nested": true
+          }
+        ]
+      ],
+      "current": [
+        [
+          "message",
+          {
+            "first": true
+          }
+        ],
+        [
+          "message",
+          {
+            "second": true
+          }
+        ],
+        [
+          "message",
+          {
+            "nested": true
+          }
+        ]
+      ]
+    },
+    "emit": {
+      "baseline": [
+        [
+          "message",
+          {
+            "first": true
+          }
+        ],
+        [
+          "message",
+          {
+            "second": true
+          }
+        ],
+        [
+          "message",
+          {
+            "nested": true
+          }
+        ]
+      ],
+      "current": [
+        [
+          "message",
+          {
+            "first": true
+          }
+        ],
+        [
+          "closed",
+          "Invalid CLI response: Unexpected non-whitespace character after JSON at position 16 (line 2 column 1)"
+        ]
+      ]
+    }
+  },
+  "closeOrder": [
+    [
+      "closed",
+      0
+    ],
+    [
+      "later-child-close-listener",
+      0
+    ],
+    [
+      "exited-continuation",
+      0
+    ]
+  ],
+  "counters": {
+    "baseline": {
+      "searches": 1059,
+      "searchInputUnits": 17366523,
+      "elapsedMs": 2.964915999999903,
+      "messages": 1,
+      "retainedUnits": 0,
+      "inputUnits": 32780
+    },
+    "current": {
+      "searches": 1059,
+      "searchInputUnits": 32780,
+      "elapsedMs": 0.8152919999999995,
+      "messages": 1,
+      "retainedUnits": 0,
+      "inputUnits": 32780
+    }
+  }
+}

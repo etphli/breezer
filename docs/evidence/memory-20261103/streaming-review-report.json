@@ -1,0 +1,438 @@
+{
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular",
+    "delegation": "none"
+  },
+  "status": "Review complete for listed hashes; one low-priority introduced malformed-progress compatibility regression remains for main agent.",
+  "scope": "READ-ONLY production review of the three streaming production files, both new tests, both probes, complete panel browser fixture, saved before sources and implementation/evidence reports. Not complete repository-wide authored-code coverage.",
+  "findings": [
+    {
+      "id": "STREAM-REVIEW-01",
+      "priority": "P3",
+      "kind": "introduced correctness / stated compatibility contract",
+      "path": "features/ai/host/claude.mjs",
+      "line": 55,
+      "relatedLines": [
+        46,
+        47,
+        54,
+        55
+      ],
+      "title": "Key scanner loses overlapping text-key matches in malformed progress",
+      "reproduction": {
+        "command": "node build/efficiency-20261103/streaming-review-adversarial.mjs",
+        "steps": [
+          "Create old and current ClaudeProvider.round with fake EventEmitter RPC; start StructuredOutput block 0.",
+          "Push the raw progress string below, either whole or at every split.",
+          "Inspect emitted events before sending the final result. Finish both with {text:\"final fallback\",action:null}."
+        ],
+        "partial_json": "\"text\"text\":\"value\"",
+        "oldEventsBeforeFinal": [
+          {
+            "type": "delta",
+            "text": "value"
+          }
+        ],
+        "currentEventsBeforeFinal": [],
+        "savedEvidence": "build/efficiency-20261103/streaming-review-adversarial-results.json"
+      },
+      "cause": "After matching the first closing quote of \"text\", key=6 waits for a colon. When the next t arrives it resets to zero, forgetting that the previous closing quote also starts another overlapping \"text\" token. The old regex retries from that previous quote and matches the second token.",
+      "impact": "Changes emitted progress and can change final displayed text when final output is incompatible with the earlier streamed prefix. Only malformed key prefixes reproduced; ordinary schema-conforming text-first JSON was unaffected in these checks. No authority bypass found.",
+      "recommendation": "Preserve the overlapping quote-prefix state when a completed key fails its colon match, and add whole-chunk, character-wise and every-split old-round differential fixtures. Retain bounded state and no accumulated raw JSON.",
+      "proof": "42 failing split variants across two overlapping-key forms; all other added cases matched. Existing 14 tests pass and miss this case.",
+      "productionEdited": false
+    }
+  ],
+  "reviewConclusions": {
+    "claude": [
+      "Full original partialText helper, safe CLI arguments, native-tool rejection, final validation/fallback and action separator logic are unchanged against saved before source. No accumulated raw JSON remains in round; only decoded pending text, four unicode digits, scalar decoder state and emitted output remain.",
+      "Checked all two-way splits plus UTF-16 character chunks of valid escape/literal fixtures, raw escaped trailing backslashes, literal backslash-u suffixes with 0/1/3/4 hex digits, incomplete and invalid escapes, raw controls, escaped surrogate halves and pairs, raw astral text and lone surrogates. Supplemented with 400 deterministic three-block rounds using seed 90123.",
+      "Checked shorter/equal/longer/conflicting/empty block prefixes, including surrogate overlap and trailing backslash overlap. Newly decoded segments only emit after the previous emitted prefix agrees. Final result validity and listener/abort cleanup covered by focused production tests.",
+      "Final validation remains the original text-string plus own action-property check, not independent full JSON Schema validation. Tool authority is not expanded by this diff. No real provider or CLI invoked by review probes."
+    ],
+    "renderer": [
+      "Original full safe renderMessage/inline source is byte-for-byte equal to the saved 83-line baseline. URL matching, direct text nodes, target and rel remain unchanged.",
+      "Complete blank lines outside fences flush paragraph/list state; inline tokens cannot cross newline. Fence scanner uses the same line-start fence regex as full renderer. Only those boundaries commit nodes; unfinished paragraph/list/open fence stays mutable. Focused tests compare every UTF-16 prefix of edge fixtures and deterministic malformed combinations.",
+      "No renderer mismatch found in focused suite or 127 supplemental UTF-16 prefix comparisons. Committed nodes retain identity until final full render. Dispose nulls container, tail and mutable-node references; panel clears owner reference on complete/stop/error/New Chat, including queued RAF and empty delta paths.",
+      "RAF closure resolves current run at execution; after finish with no run it returns, and after a new run it renders only that current run. Stale message ids remain ignored. Final full render remains in every finish path."
+    ],
+    "browserEvidence": [
+      "Read all 404 lines of tests/ai/panel-browser.mjs. Stream assertions at lines 327-365 exercise four prefixes at 320/400 widths, blank-separated committed content, an unfinished emphasis tail, 100-line open fence and following list, reader-at-top position/node identity, bottom-following and final DOM equality.",
+      "Saved panel-browser-coordinator.log reports PASS and browser-results.json records exitCode 0. This is inspected prior-run evidence, not a review-run browser check. Log does not include tested source hashes or assertion-specific counts, so it cannot independently bind the PASS to current source hashes. No browser was started."
+    ],
+    "efficiency": [
+      "Reproduced 512-chunk fake Claude round: old JSON.parse input 16,811,008 code units / 512 parses; current 65,545 scanned input characters and zero streaming parses. Emitted 65,536 characters in both. This does not count all allocations or old regex work.",
+      "Re-ran renderer operation probe without overwriting implementation reports. Formatted fixture including final render: nodes 633400 -> 6400; parser input characters 4030180 -> 36520 plus 11480 scanner characters. Single uninterrupted list: same nodes/parser inputs/renders, plus 2700 scanner characters.",
+      "Open fences, uninterrupted lists and paragraphs have unchanged full-tail rendering plus scanner work. No whole-browser memory, CPU, latency, RSS or throughput claim is justified."
+    ]
+  },
+  "commandsAndResults": [
+    {
+      "command": "node --test --test-concurrency=1 tests/ai/claude-streaming.test.mjs tests/ai/stream-render.test.mjs > build/efficiency-20261103/streaming-review-tests.tap",
+      "result": "Exit 0; 14 pass, 0 fail, 0 skipped; system Node v22.14.0. Test-runner durations are incidental and not benchmarks."
+    },
+    {
+      "command": "node build/efficiency-20261103/streaming-review-adversarial.mjs",
+      "result": {
+        "exitCode": 0,
+        "runtime": "v22.14.0",
+        "cases": 2965,
+        "perDeltaComparisons": 28057,
+        "compatibilityDifferences": 42,
+        "renderPrefixComparisons": 127,
+        "note": "Exit zero means the diagnostic completed. It records the 42 differences; it does not assert compatibility success.",
+        "artifact": "build/efficiency-20261103/streaming-review-adversarial-results.json"
+      }
+    },
+    {
+      "command": "Inline offline ESM using loadSource/fakeRound for old/current 512-chunk scan/JSON.parse instrumentation; JSON.parse restored in finally",
+      "result": "Exit 0; counts reproduced; build/efficiency-20261103/streaming-review-claude-counts.json"
+    },
+    {
+      "command": "git diff -- features/ai/host/claude.mjs features/ai/extension/render-message.js features/ai/extension/panel.js; complete bounded reads of listed files; SHA-256 checks",
+      "result": "Inspected exact changes against baseline; current production hashes match implementation reports. No production modifications by reviewer."
+    }
+  ],
+  "objections": [
+    "Claim of exact old-prefix equivalence is too broad until STREAM-REVIEW-01 is fixed or explicitly scoped to conforming progress. Existing deterministic probe covers valid generated JSON plus limited junk prefixes, not arbitrary overlapping keys.",
+    "Fake DOM tests prove structure/property equality and explicit scroll decisions, not layout, scroll anchoring, accessibility announcements, real heap release or GC. Prior browser run supplements only some of these.",
+    "Renderer tests fall back to current full-render source if saved baseline is absent. Here the baseline exists and its exact hash and full-parser equality were checked, so this review did use a genuine saved oracle.",
+    "Saved browser PASS log lacks source hashes. Implementation reports predate coordinator browser acceptance; those stale pending-gate statements are not new evidence of failure.",
+    "verification.json packet resource count remains five while README says nine. Treat metadata as historical assertions and verify packaging independently; no packaging verification is claimed here."
+  ],
+  "coverage": {
+    "files": [
+      {
+        "path": "AGENTS.md",
+        "sha256": "eace78bc00967c3ea4e037a06d40c485443fefaab1e1c3abc88a3c4b197e0bca",
+        "lines": 19,
+        "readRanges": [
+          [
+            1,
+            19
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "docs/evidence/memory-20261103/README.md",
+        "sha256": "7755fc8c912849c02d2bfa61e9eb2314fe51d9067aaffe3e6c1a363138358172",
+        "lines": 137,
+        "readRanges": [
+          [
+            1,
+            137
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "docs/evidence/memory-20261103/verification.json",
+        "sha256": "0f938fa73dcf800897de5c1d9d60d0bbc91c08c8b88530c816b92943c7c4ca59",
+        "lines": 78,
+        "readRanges": [
+          [
+            1,
+            78
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "features/ai/host/claude.mjs",
+        "sha256": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a",
+        "lines": 208,
+        "readRanges": [
+          [
+            1,
+            208
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "features/ai/extension/render-message.js",
+        "sha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "lines": 134,
+        "readRanges": [
+          [
+            1,
+            134
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "features/ai/extension/panel.js",
+        "sha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "lines": 662,
+        "readRanges": [
+          [
+            1,
+            662
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "tests/ai/claude-streaming.test.mjs",
+        "sha256": "12659c4f7a1cbab33343f3f08c4b7824abe27e94e3eb9b19f0f1fe9e4cd2cff0",
+        "lines": 119,
+        "readRanges": [
+          [
+            1,
+            119
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "tests/ai/stream-render.test.mjs",
+        "sha256": "57d7000249ae5ea0147887f635ce4b386034d68625a710340a05a2f9b3eea2c1",
+        "lines": 180,
+        "readRanges": [
+          [
+            1,
+            180
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "tests/ai/panel-browser.mjs",
+        "sha256": "ffa28e9226959da7da68421ac0de87bcad7bc6266adf2d999b0d6b45b9ec8325",
+        "lines": 404,
+        "readRanges": [
+          [
+            1,
+            404
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "script/verify_claude_streaming_efficiency.mjs",
+        "sha256": "dc5bd56cd0d51311bc10edae9cc5ee584c204d8deeaaf7caddc848f85f53cd29",
+        "lines": 83,
+        "readRanges": [
+          [
+            1,
+            83
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "script/verify_stream_render_efficiency.mjs",
+        "sha256": "0c2a15d28d090c30b37b5fec624eabb7ec5cdb8693e339e84590d9d1dd54498b",
+        "lines": 59,
+        "readRanges": [
+          [
+            1,
+            59
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "features/ai/host/cli.mjs",
+        "sha256": "64088b181aed86f5aab9991a61474878e05d586726a2477aed20a37982ca1c4b",
+        "lines": 101,
+        "readRanges": [
+          [
+            1,
+            101
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/claude-stream-implementation.json",
+        "sha256": "cca0a765375903a263d51c5c77d50a4b827265b9a1dd3afc1b4cabd2bc4d2a6f",
+        "lines": 152,
+        "readRanges": [
+          [
+            1,
+            152
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/stream-render-implementation.json",
+        "sha256": "de70410e1078c53b839235026773ba59a6103a1165c72897b49157ff19739217",
+        "lines": 187,
+        "readRanges": [
+          [
+            1,
+            187
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/claude-stream-before.mjs",
+        "sha256": "ed5c48e871aa968cec7041c8fa70fdfec4a655a78144ae9e6481905c591d8733",
+        "lines": 142,
+        "readRanges": [
+          [
+            1,
+            142
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/stream-render-before-render-message.js",
+        "sha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "lines": 83,
+        "readRanges": [
+          [
+            1,
+            83
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/stream-render-before-panel.js",
+        "sha256": "dc0f37319f2a650997d944a9ba0804b0f281501d61f122144759c61dae9495ca",
+        "lines": 657,
+        "readRanges": [
+          [
+            1,
+            657
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/claude-stream-before.json",
+        "sha256": "183adfd331fdcbb60bfcee06110295c3769cb74b098ab5dde65783aa1918c358",
+        "lines": 34,
+        "readRanges": [
+          [
+            1,
+            34
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/claude-stream-after.json",
+        "sha256": "2399b7fecba20136adddd67771b83b2baee938ca99a8093ae6b8a339bb3a13d3",
+        "lines": 40,
+        "readRanges": [
+          [
+            1,
+            40
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/stream-render-before.json",
+        "sha256": "b6f2e125f3d65a0561665e2fed41313a267ea33f0f1b2097d0ff1527913156c4",
+        "lines": 41,
+        "readRanges": [
+          [
+            1,
+            41
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/stream-render-after.json",
+        "sha256": "ec7bbdbbab65d4cc79b9d2e04bcd410e0e6cd783fcd5dfbef318d716c8d221cc",
+        "lines": 85,
+        "readRanges": [
+          [
+            1,
+            85
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/panel-browser-coordinator.log",
+        "sha256": "6ee9a417955ffe8df369d0691912799d84f3bb5a2d7f1642d7db99f83fdd745b",
+        "lines": 2,
+        "readRanges": [
+          [
+            1,
+            2
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/browser-results.json",
+        "sha256": "00ff2fcd15071fd092ecb28a7787471f9484ce4bb3f2c11aab0ae3705bfadab7",
+        "lines": 53,
+        "readRanges": [
+          [
+            1,
+            53
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      },
+      {
+        "path": "build/efficiency-20261103/streaming-review-tests.tap",
+        "sha256": "f5a5f9479687acb57f796a68fe079aec4745511a8e585cf29da8aef617fd8d00",
+        "lines": 80,
+        "readRanges": [
+          [
+            1,
+            80
+          ]
+        ],
+        "status": "fully-read",
+        "notes": "Complete tool output read. Any earlier truncated combined output was replaced by complete bounded reads. Coverage is limited to this exact hash."
+      }
+    ],
+    "gaps": [],
+    "limits": "Fully-read means complete textual review for listed exact hashes. It does not mean every possible stream or repository file was covered. Initial truncated reads were not used to claim complete coverage until repeated without truncation."
+  },
+  "remainingGaps": [
+    "Main must fix or disposition STREAM-REVIEW-01; reviewer production edits forbidden. Re-run differential suite after any fix and refresh hashes.",
+    "No finite suite proves all possible strings/chunk partitions. Added checks enumerate all two-way splits of chosen cases, not every possible multi-way partition or Unicode scalar.",
+    "Current review tests used Node v22.14.0. Packaged Node24.22.1 combined 143-pass assertion was read in supplied records, not independently rerun here.",
+    "Real provider/transport, physical browser GC, accessibility log announcements and whole-browser performance remain unmeasured. No browser checks rerun while workers may be concurrent.",
+    "Broader authored code and unchanged protocol tool validators outside this task are not fully reviewed. cli.mjs was additionally read to check exception containment.",
+    "PC unavailable. No PC contact/probe/connect/start/schedule, app build/run/install, bundle/profile/password/cache mutation, provider/network/Keychain/config access, publication, downloads, commits or pushes performed."
+  ],
+  "artifacts": [
+    "build/efficiency-20261103/streaming-review-adversarial.mjs",
+    "build/efficiency-20261103/streaming-review-adversarial-results.json",
+    "build/efficiency-20261103/streaming-review-claude-counts.json",
+    "build/efficiency-20261103/streaming-review-tests.tap",
+    "build/efficiency-20261103/streaming-review-write-report.py"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "checkedAtUtc": "2026-11-03T00:32:07.739451+00:00",
+  "status": "FOCUSED OFFLINE VALIDATION PASS; RUNTIME OPTIMISATION CONTINUES",
+  "measurement": {
+    "historicalTrialsValidated": 60,
+    "rawReportsUnchanged": [
+      {
+        "name": "native-transport-final-4096.json",
+        "sha256": "c9318c104794e3053c51cffc79bbb45c5a1d1abe97f52c8a99f17ae2be070251",
+        "trials": 12
+      },
+      {
+        "name": "native-transport-final-65536.json",
+        "sha256": "95a5702aa472102d6c0c6f4aabcba63723190881cd06450e1edc2579e0303fc5",
+        "trials": 12
+      },
+      {
+        "name": "native-transport-final-1048576.json",
+        "sha256": "8a7a01d3468761cd7e9d839c66f74bb1cf8d00084a385f1b490e589d1d1bd156",
+        "trials": 12
+      },
+      {
+        "name": "native-transport-final-4194304.json",
+        "sha256": "8086550827c272b5419ecceb5695e7eeb235f0c4a6ba018a70dda85153b7c402",
+        "trials": 12
+      },
+      {
+        "name": "native-transport-final-8388608.json",
+        "sha256": "65cc6c702bbec7eaa34d03ba968703dd0c6d6acac6141ceedc8bf373461287e9",
+        "trials": 12
+      }
+    ],
+    "summaryValuesUnchanged": true,
+    "pythonTestsPassed": 6,
+    "nodeTestsPassed": 9,
+    "currentTestHashes": {
+      "script/summarize_native_transport.py": "d74d995257f998428972f206693f8bf1c910fa338d9d6d921797eea308d8d83a",
+      "script/benchmark_native_transport.mjs": "02bf990ce3b2aa9ba2e70ab2a0449f94f0a89cfd0b646824da39ae7c550d4a76",
+      "script/native_transport_diagnostic.mjs": "8c5bae242b736b48d5a04fd0db0df091d802235ad91cbf88f8332730d67adcf3",
+      "script/macos_process_usage.c": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+      "tests/native_transport_summary_test.py": "fd9711a768291ead5ffe46ad2f538f054d12465d6677a1990081ba9608b06491",
+      "tests/ai/native-transport-lifecycle.test.mjs": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925"
+    },
+    "scope": "Historical reports describe Nov 2 sources. Their single post-sample native capture does not establish native identity throughout the earlier interval. New probe-enabled producer brackets the IPC samples and validates PID/start/UUID. No new performance run."
+  },
+  "auditResolutions": {
+    "VODD-1": "Launch/page initialization protected by cleanup in newtab, onboarding, whats-new, workspace-frame, panel and research harnesses; server close survives browser-close failure. Fourteen offline checker cases pass. Full normal browser suites not rerun for these cleanup-only edits.",
+    "VODD-2": "Focus helper compares node identity while keeping diagnostics short. Before fix the new regression case failed; all 18 settings cases now pass.",
+    "testPortability": "Transport tests now use preserved docs/evidence historical reports and summary instead of ignored build artifacts; malformed audit fixture constructed in-memory."
+  },
+  "sourceHashes": {
+    "tests/ai/settings.test.mjs": "4eb295c4b44d73c7f755e091cb4909d8797ce280dff3a0103a251759a833c181",
+    "tests/ai/newtab-browser.test.mjs": "430347bf565e7463821083ec5be175cfdc44c897ffb63e5ea42352fef5074f5f",
+    "tests/ai/onboarding-browser.test.mjs": "654b5967e94ee0edd25904316ebb7fbfcbd486774ee0b96e20d7438e53acacd4",
+    "tests/ai/whats-new-browser.test.mjs": "f95c359da6207b443588b8a74d7cf3e32366f2e8d8945f95a198f7cd0ce5f924",
+    "tests/ai/workspace-frame.test.mjs": "2e852d6becbc8ebbc92596a2a1593f752f0afb2a22d8564bc3dc792431985615",
+    "tests/ai/panel-browser.mjs": "d3d15fcab35a65ca26bb3af3a36a994a0a19cd1c66b3b7971183b5af0ea0c463",
+    "tests/ai/research-browser.mjs": "0169039ebd5332f09755afcadfef874d69fc5ca3740a15e168e63dbaa1e24f06"
+  },
+  "codexIndependentReview": {
+    "report": "codex-cancellation-review.json",
+    "introducedActionableCorrectnessFindings": 0,
+    "focusedChecksPassed": 75,
+    "remaining": "Partial isolate allocation failure, slow real replacement overlap, cleanup error precedence and bounded closed-probe retention remain documented, with no measured browser-wide gain."
+  },
+  "pcContact": false,
+  "installedAppUnchanged": true
+}

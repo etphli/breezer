@@ -1,0 +1,9 @@
+test_cached_group_with_no_known_member_is_not_signalled (__main__.CleanupTest.test_cached_group_with_no_known_member_is_not_signalled) ... ok
+test_failure_after_discovery_preserves_groups_for_final_retry (__main__.CleanupTest.test_failure_after_discovery_preserves_groups_for_final_retry) ... ok
+test_permanent_discovery_failure_does_not_leave_a_frozen_worker (__main__.CleanupTest.test_permanent_discovery_failure_does_not_leave_a_frozen_worker) ... ok
+test_transient_discovery_failure_cannot_disable_cleanup (__main__.CleanupTest.test_transient_discovery_failure_cannot_disable_cleanup) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.404s
+
+OK

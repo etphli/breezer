@@ -1,0 +1,19 @@
+E
+======================================================================
+ERROR: test_idempotent_update_keeps_pins_backups_and_object_cache (__main__.MemoryUpdateTest.test_idempotent_update_keeps_pins_backups_and_object_cache)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/windows/memory_update_test.py", line 77, in test_idempotent_update_keeps_pins_backups_and_object_cache
+    self.apply()
+    ~~~~~~~~~~^^
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/windows/memory_update_test.py", line 74, in apply
+    migration.apply(self.root, self.plan, self.packet)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/windows/apply-memory-update.py", line 30, in apply
+    raise ValueError('Unexpected memory resource set')
+ValueError: Unexpected memory resource set
+
+----------------------------------------------------------------------
+Ran 1 test in 0.006s
+
+FAILED (errors=1)

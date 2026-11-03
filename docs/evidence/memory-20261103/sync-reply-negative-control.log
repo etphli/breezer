@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/verify_sync_reply_efficiency.py", line 162, in <module>
+    main()
+    ~~~~^^
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/verify_sync_reply_efficiency.py", line 154, in main
+    result = verify(args.source, args.expect_moved)
+  File "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/script/verify_sync_reply_efficiency.py", line 144, in verify
+    raise AssertionError('Current conversion still copies the reply payload/revision')
+AssertionError: Current conversion still copies the reply payload/revision

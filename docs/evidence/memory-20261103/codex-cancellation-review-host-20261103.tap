@@ -1,0 +1,39 @@
+✔ both providers can advertise validated canvas mouse actions and game keys (1.720459ms)
+✔ game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions (0.389958ms)
+✔ native framing decodes fragmented UTF-8 and multiple messages (0.994291ms)
+✔ native framing rejects oversize, zero, invalid UTF-8 and truncated data (0.143666ms)
+✔ native framing handles every header/body split with byte-array input and empty chunks (0.969292ms)
+✔ native framing keeps rejecting non-byte chunks, including empty arrays (0.277708ms)
+✔ native framing owns partial bytes when the caller reuses an input buffer (0.099208ms)
+✔ native framing handles repeatable fragmented/coalesced messages without losing the next header (10.070375ms)
+✔ native framing accepts the exact input limit and rejects incomplete maximum frames (33.202458ms)
+✔ only the exact bundled extension origin is accepted (0.333542ms)
+✔ context and action permissions are opt-in and tools reject arbitrary execution (1.108167ms)
+✔ chat input rejects invalid providers, histories, ids and image URLs (0.424167ms)
+✔ reasoning uses reported defaults and rejects unavailable model levels (0.148459ms)
+✔ Codex Fast metadata requires a reported service tier and verified runtime support (0.171708ms)
+✔ only an explicitly selected Codex Fast request enables the fast_mode feature (8.352084ms)
+✔ CLI environment removes inherited executable injection settings (0.116041ms)
+✔ profile name reaches the model even when profile context is empty (0.241541ms)
+✔ explicit init refreshes login discovery while concurrent inits share the in-flight request (0.642041ms)
+✔ JSON-lines child transport correlates requests and carries notifications (0.884042ms)
+✔ Codex removes catalog-native execution capabilities and fails closed for foreign tools (0.275083ms)
+✔ controller awaits matching browser result before completing and denies forged results (2.469333ms)
+✔ controller derives tool permission from consent even if a provider supplies a broader catalog (0.174875ms)
+✔ cancel rejects in-flight tools and suppresses stale text and duplicate completion (0.363833ms)
+✔ tool errors and timeouts terminate pending calls without executing anything locally (5.936833ms)
+✔ provider absence and unknown models remain truthful and do not launch chat (0.489208ms)
+✔ Claude uses no native or external tools and decodes split JSON text safely (0.178791ms)
+✔ Claude structured output streams text, waits for result, and rejects native-tool exposure (0.435166ms)
+✔ Codex streams agent text and waits for the extension before answering its dynamic tool request (0.946917ms)
+✔ Claude maps only reported reasoning to --effort and never forwards Codex speed controls (1.426834ms)
+✔ Codex Fast failures returned directly by turn/start include Standard retry guidance (0.246667ms)
+✔ an unsafe Codex probe received before turn/start resolves rejects cleanly (32.127833ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 194.843833

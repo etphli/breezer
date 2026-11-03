@@ -1,0 +1,86 @@
+{
+  "scope": "Source-derived encoder VM with real Node Buffers and explicit allocation/copy counters. Requested bytes are logical counts, not physical RAM, retained memory or browser/AI latency. Payload buffering/copying and the unbounded native output queue remain.",
+  "node": "v24.22.1",
+  "sourceSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+  "baselineSha256": "6733bc93ca7976a213ac6fbfc950546c07f259216fcada59e5be5b27feb5e5a1",
+  "cases": {
+    "64": {
+      "bodyBytes": 64,
+      "frameBytes": 68,
+      "baseline": {
+        "allocations": 3,
+        "requestedBufferBytes": 136,
+        "concatCopiedBytes": 68,
+        "explicitCopiedBytes": 0
+      },
+      "current": {
+        "allocations": 2,
+        "requestedBufferBytes": 132,
+        "concatCopiedBytes": 0,
+        "explicitCopiedBytes": 64
+      }
+    },
+    "4096": {
+      "bodyBytes": 4096,
+      "frameBytes": 4100,
+      "baseline": {
+        "allocations": 3,
+        "requestedBufferBytes": 8200,
+        "concatCopiedBytes": 4100,
+        "explicitCopiedBytes": 0
+      },
+      "current": {
+        "allocations": 2,
+        "requestedBufferBytes": 8196,
+        "concatCopiedBytes": 0,
+        "explicitCopiedBytes": 4096
+      }
+    },
+    "65536": {
+      "bodyBytes": 65536,
+      "frameBytes": 65540,
+      "baseline": {
+        "allocations": 3,
+        "requestedBufferBytes": 131080,
+        "concatCopiedBytes": 65540,
+        "explicitCopiedBytes": 0
+      },
+      "current": {
+        "allocations": 2,
+        "requestedBufferBytes": 131076,
+        "concatCopiedBytes": 0,
+        "explicitCopiedBytes": 65536
+      }
+    },
+    "1048576": {
+      "bodyBytes": 1048576,
+      "frameBytes": 1048580,
+      "baseline": {
+        "allocations": 3,
+        "requestedBufferBytes": 2097160,
+        "concatCopiedBytes": 1048580,
+        "explicitCopiedBytes": 0
+      },
+      "current": {
+        "allocations": 2,
+        "requestedBufferBytes": 2097156,
+        "concatCopiedBytes": 0,
+        "explicitCopiedBytes": 1048576
+      }
+    }
+  },
+  "oversizedReply": {
+    "baseline": {
+      "allocations": 1,
+      "requestedBufferBytes": 1048587,
+      "concatCopiedBytes": 0,
+      "explicitCopiedBytes": 0
+    },
+    "current": {
+      "allocations": 1,
+      "requestedBufferBytes": 1048587,
+      "concatCopiedBytes": 0,
+      "explicitCopiedBytes": 0
+    }
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular"
+  },
+  "finding": "NH-01",
+  "changedFiles": [
+    "features/ai/host/claude.mjs",
+    "tests/ai/claude-streaming.test.mjs",
+    "script/verify_claude_streaming_efficiency.mjs"
+  ],
+  "sourceHashesBeforeAfter": {
+    "features/ai/host/claude.mjs": {
+      "before": "ed5c48e871aa968cec7041c8fa70fdfec4a655a78144ae9e6481905c591d8733",
+      "after": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a"
+    },
+    "tests/ai/claude-streaming.test.mjs": {
+      "before": null,
+      "after": "12659c4f7a1cbab33343f3f08c4b7824abe27e94e3eb9b19f0f1fe9e4cd2cff0"
+    },
+    "script/verify_claude_streaming_efficiency.mjs": {
+      "before": null,
+      "after": "dc5bd56cd0d51311bc10edae9cc5ee584c204d8deeaaf7caddc848f85f53cd29"
+    }
+  },
+  "reproduction": {
+    "beforeReport": "build/efficiency-20261103/claude-stream-before.json",
+    "beforeSource": "build/efficiency-20261103/claude-stream-before.mjs",
+    "afterReport": "build/efficiency-20261103/claude-stream-after.json",
+    "before": {
+      "runtime": "v22.14.0",
+      "scope": "Actual round, fake RPC; deterministic code-unit counts only. No provider or timing measurements.",
+      "measurement": {
+        "path": "build/efficiency-20261103/claude-stream-before.mjs",
+        "sha256": "ed5c48e871aa968cec7041c8fa70fdfec4a655a78144ae9e6481905c591d8733",
+        "cases": [
+          {
+            "chunks": 128,
+            "arrivedCodeUnits": 16393,
+            "emittedCodeUnits": 16384,
+            "scanned": 0,
+            "parsed": 1057024,
+            "parses": 128
+          },
+          {
+            "chunks": 256,
+            "arrivedCodeUnits": 32777,
+            "emittedCodeUnits": 32768,
+            "scanned": 0,
+            "parsed": 4211200,
+            "parses": 256
+          },
+          {
+            "chunks": 512,
+            "arrivedCodeUnits": 65545,
+            "emittedCodeUnits": 65536,
+            "scanned": 0,
+            "parsed": 16811008,
+            "parses": 512
+          }
+        ]
+      }
+    },
+    "after": {
+      "runtime": "v22.14.0",
+      "scope": "Actual round, fake RPC; deterministic code-unit counts only. No provider or timing measurements.",
+      "differential": {
+        "actualOldAndNewRounds": 800,
+        "structuredBlocks": 1200,
+        "perDeltaComparisons": 22407,
+        "result": "identical events and results"
+      },
+      "measurement": {
+        "path": "features/ai/host/claude.mjs",
+        "sha256": "21066f85c0aac3db78590a48fc7f298dff576326835c0c4581d6abeea96eaa6a",
+        "cases": [
+          {
+            "chunks": 128,
+            "arrivedCodeUnits": 16393,
+            "emittedCodeUnits": 16384,
+            "scanned": 16393,
+            "parsed": 0,
+            "parses": 0
+          },
+          {
+            "chunks": 256,
+            "arrivedCodeUnits": 32777,
+            "emittedCodeUnits": 32768,
+            "scanned": 32777,
+            "parsed": 0,
+            "parses": 0
+          },
+          {
+            "chunks": 512,
+            "arrivedCodeUnits": 65545,
+            "emittedCodeUnits": 65536,
+            "scanned": 65545,
+            "parsed": 0,
+            "parses": 0
+          }
+        ]
+      }
+    }
+  },
+  "acceptedChanges": [
+    "Round now matches the first text-field prefix and decodes incoming characters with incremental state. It retains no accumulated raw JSON prefix. Decoded text is drained on each valid delta instead of re-slicing an accumulated decoded prefix.",
+    "Prefix matching against text emitted by earlier StructuredOutput blocks compares each newly decoded segment once. Final structured_output validation, fallback JSON.parse, action separation, native-tool refusal, timeout, listener cleanup and chat abort cleanup remain in place.",
+    "Exported partialText is unchanged. Incremental decoding reproduces its trailing raw-backslash and partial unicode-suffix suppression, including suffixes following escaped backslash pairs.",
+    "ASCII fixture at 128/256/512 chunks scans exactly 16393/32777/65545 newly received code units and performs zero streaming JSON.parse calls. Old implementation passed 1057024/4211200/16811008 characters through JSON.parse. Counts exclude old regex scans, so do not state full old work totals.",
+    "Differential actual old/new round probe uses fixed seed, escaped/raw Unicode, arbitrary splits and three blocks per case. 800 rounds, 1200 blocks, 22407 delta comparisons have identical emitted events and resolved results."
+  ],
+  "commandsAndResults": [
+    {
+      "command": "node script/verify_claude_streaming_efficiency.mjs --before",
+      "result": "Passed before production edits; source-hashed snapshot and deterministic old parsing counts saved."
+    },
+    {
+      "command": "node script/verify_claude_streaming_efficiency.mjs",
+      "result": "Passed source-bound scan instrumentation and old/new differential comparisons; current final production hash matches after report."
+    },
+    {
+      "command": "node --test --test-concurrency=1 tests/ai/claude-streaming.test.mjs tests/ai/host-loading.test.mjs",
+      "result": "8/8 pass: 5 new streaming tests plus 3 existing loading tests. Output claude-stream-tests.tap."
+    },
+    {
+      "command": "node --test --test-concurrency=1 --test-name-pattern='^(?!only an explicitly selected Codex Fast request|an unsafe Codex probe)' tests/ai/host.test.mjs",
+      "result": "31/31 pass. The negative-lookahead filter did not exclude the two intended cases under this Node runner: all host tests actually ran. One creates/removes disposable isolation config and a symlink to the auth pathname without reading the real auth/config files. One serves a local synthetic HTTP response with injected RPC; no external network/provider call. Output claude-stream-host-tests.tap."
+    },
+    {
+      "command": "node --check features/ai/host/claude.mjs; node --check script/verify_claude_streaming_efficiency.mjs; git diff --check -- features/ai/host/claude.mjs",
+      "result": "Passed."
+    }
+  ],
+  "rejectedIdeas": [
+    "Keeping the accumulated decoded string and slicing its suffix each delta could cause repeated rope flattening. Replaced before final acceptance with draining decoded segments.",
+    "Simplifying away partialText trailing-backslash quirks would change per-delta behavior. Preserved them with bounded suffix state.",
+    "No batching, delayed emissions, feature/security removal, data caps or privacy/input-bound changes."
+  ],
+  "objections": [
+    "Manual decoder adds 60 lines of state logic. Differential coverage and unchanged one-shot helper make its compatibility rules inspectable.",
+    "Operation counts prove scan/parse work for the supplied source-bound fixture only, not runtime heap allocation counts, CPU speed, RSS or whole-browser gains.",
+    "Parser keeps decoded streamed text needed by final reconciliation and block prefix checks; there is no new output limit or discarded user data."
+  ],
+  "unverified gates": [
+    "Coordinator sequential disposable-browser acceptance and integration.",
+    "Packaged Node v24.22.1; these probes/tests used system Node v22.14.0.",
+    "Real Claude transport/provider behavior; no real provider launched.",
+    "Whole-browser speed/CPU/RSS and real transport allocation behavior are unmeasured.",
+    "PC remains unreachable and was not contacted or scheduled. No Breezer app build/run/install, app/profile/password/cache mutation, publication or downloads."
+  ]
+}

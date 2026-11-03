@@ -1,0 +1,21 @@
+{
+  "checksumFiles": 29,
+  "compiledResources": 10,
+  "hostModules": 11,
+  "hostHashes": {
+    "claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+    "cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+    "codex.mjs": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+    "context-controller.mjs": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+    "context-summary.mjs": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+    "controller.mjs": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+    "main.mjs": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+    "organato.mjs": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+    "protocol.mjs": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "update-worker.mjs": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+    "updater.mjs": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+  },
+  "allPacketBytesMatchSources": true,
+  "pcContacted": false,
+  "deployed": false
+}

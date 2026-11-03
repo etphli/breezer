@@ -1,0 +1,41 @@
+{
+  "scope": "Deterministic synthetic DOM and parser-input counts only. No CPU, RSS, layout, browser, network or PC access.",
+  "sourceHashes": {
+    "before": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+    "after": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830"
+  },
+  "cases": {
+    "formatted": {
+      "before": {
+        "chunks": 700,
+        "finalCharacters": 11480,
+        "streaming": {
+          "nodes": 631600,
+          "parsedCharacters": 4018700,
+          "renders": 700
+        },
+        "includingFinalRender": {
+          "nodes": 633400,
+          "parsedCharacters": 4030180,
+          "renders": 701
+        }
+      }
+    },
+    "singleBlock": {
+      "before": {
+        "chunks": 100,
+        "finalCharacters": 2700,
+        "streaming": {
+          "nodes": 10200,
+          "parsedCharacters": 136350,
+          "renders": 100
+        },
+        "includingFinalRender": {
+          "nodes": 10401,
+          "parsedCharacters": 139050,
+          "renders": 101
+        }
+      }
+    }
+  }
+}

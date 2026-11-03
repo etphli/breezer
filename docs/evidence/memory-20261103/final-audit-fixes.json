@@ -1,0 +1,77 @@
+{
+  "checkedAtUtc": "2026-11-03T01:10:40.806418+00:00",
+  "status": "CURRENT AUDIT FINDINGS RESOLVED AND LOCAL CHECKS PASS",
+  "sourceHashes": {
+    "script/windows/unattended_build.py": "4671e199ba69e206de82f0f57f60873fbfdd82fef357149f25a5255696efaceb",
+    "script/windows/prepare-efficiency-packet.py": "dd73e9d39901a2414266fe8e381f0670154a83de6f037d457d2f4f3397af538e",
+    "script/verify_stream_render_efficiency.mjs": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+    "script/verify_workspace_tab_updates.mjs": "22f3e1a2a9daff54923db48febaedce7dba234b8123057a4084db89534774cf4",
+    "tests/ai/stream-render.test.mjs": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+    "tests/sync/provider.test.mjs": "3a10b38160a5d5ac83937ffeec101cfe2fea1262df3e7bc7e938d48fb29ee8a0",
+    "tests/sync/provider-lifecycle.test.mjs": "9905219d310b0f9a6a7c873f4c266f7c1997666745047c66fba4e111fe1ca608",
+    "tests/windows/unattended_cleanup_test.py": "a2809528cb0876d50e40d1d5ac0d78da94b06d6ad91f5ab337c31be976319342"
+  },
+  "resolutions": [
+    {
+      "id": "BUILD-CURRENT-1",
+      "change": "Only confirmed cleanup is idempotent. Bounded process-table retries, retained observed group members for final retry, ownership reconfirmation, bounded owned-worker termination/resume fallback, and independent lock/signal restoration.",
+      "checks": "Four fake faults plus a real owned worker/detached-driver transient discovery failure pass. Full 31-case Windows preparation suite: 30 pass, one Linux-only skip."
+    },
+    {
+      "id": "BUILD-CURRENT-2",
+      "change": "Standalone renderer probe checks mandatory baseline SHA before executing workload.",
+      "checks": "New altered-baseline negative control failed before fix; focused and combined checks pass."
+    },
+    {
+      "id": "VCUR-1",
+      "change": "Readiness waits for newline-complete output, retaining a delimited URL separately while bounding incomplete log suffix.",
+      "checks": "Partial port and fragmented padded readiness lines pass; real dummy-provider CAS/restart path passes."
+    },
+    {
+      "id": "VCUR-2",
+      "change": "Client disposal clears/rejects pending requests and timers, empties map, is idempotent, and refuses new work. Timeout removes waiting entry.",
+      "checks": "Fake pending-disposal, repeated disposal and post-disposal request checks pass."
+    },
+    {
+      "id": "COORDINATOR-CLOCK",
+      "change": "Workspace event differential harness now supplies the same explicit clock to baseline/candidate and advances it with fixture timers.",
+      "checks": "Recorded one-millisecond real-clock mismatch caused the first combined failure. Fixed-clock combined run passes; production sidebar source unchanged."
+    }
+  ],
+  "checks": {
+    "combinedPassed": 346,
+    "combinedFailed": 0,
+    "combinedSkipped": 0,
+    "combinedLog": "combined-final-local.tap",
+    "combinedCommand": "combined-cli-command.json",
+    "runtime": "v24.22.1",
+    "windowsPassed": 30,
+    "windowsSkipped": 1,
+    "windowsLog": "windows-cleanup-complete.log",
+    "stagedCleanupPassed": 5,
+    "stagedCleanupLog": "staged-cleanup-tests.log",
+    "packagingPassed": 8,
+    "packagingLog": "memory-package-final-audit-fixes.log"
+  },
+  "panelExperiment": {
+    "report": "panel-rendering-experiment-report.json",
+    "decision": "rejected",
+    "reason": "Resize layout benefit does not establish general improvement; streaming medians worsen, heap reduction not established, Find reveal/screen-reader behavior unresolved.",
+    "productionSourceChanged": false
+  },
+  "remainingLimits": [
+    "Linux subreaper/orphan behavior still requires PC/WSL acceptance.",
+    "If process discovery or ownership cannot be established, cleanup reports failure and no build retry/success is permitted. It cannot certify unknown surviving processes.",
+    "Observed PID/group membership is not a kernel process-handle identity; no claim of eliminating all PID reuse races.",
+    "Whole-browser RAM/CPU, native provider and installed-app acceptance remain open."
+  ],
+  "pcContact": false,
+  "installedAppUnchanged": true,
+  "packet": {
+    "refreshed": true,
+    "extensionResources": 9,
+    "hostModules": 11,
+    "includesCleanupFaultTest": true,
+    "deployed": false
+  }
+}

@@ -2,7 +2,8 @@
 (() => {
   if (globalThis.__breezerTranslation) return;
   globalThis.__breezerTranslation = true;
-  const originals = new Map();
+  let originals = new WeakMap();
+  const translatedNodes = new Set();
   const excluded = 'script,style,noscript,template,pre,code,kbd,samp,input,textarea,select,button,svg,math,canvas,video,audio,[contenteditable]:not([contenteditable="false"]),[translate="no"],.notranslate,[hidden],[aria-hidden="true"]';
   let port, observer, timer, navigationTimer, cancelWait, walker;
   let active = false, busy = false, epoch = 0, url = location.href, total = 0, skipped = 0, characters = 0, outputCharacters = 0;
@@ -19,8 +20,11 @@
   }
   function restore() {
     stop();
-    for (const [node, record] of originals) if (node.isConnected && node.data === record.translated) node.data = record.original;
-    originals.clear(); total = 0; skipped = 0; characters = 0; outputCharacters = 0;
+    for (const reference of translatedNodes) {
+      const node = reference.deref(), record = node && originals.get(node);
+      if (node?.isConnected && record && node.data === record.translated) node.data = record.original;
+    }
+    originals = new WeakMap(); translatedNodes.clear(); total = 0; skipped = 0; characters = 0; outputCharacters = 0;
   }
   function checkNavigation() {
     if (location.href === url) return false;
@@ -38,13 +42,16 @@
     const nodes = []; let size = 0, node;
     while ((node = walker.nextNode())) {
       const record = originals.get(node);
-      if (!allowed(node) || (record && node.data === record.translated)) continue;
+      if ((record && node.data === record.translated) || !allowed(node)) continue;
       // Oversized nodes are split by code point into bounded batches below.
       if (total >= 50000 || node.data.length > 100000 || characters + size + node.data.length > 1000000) { skipped++; continue; }
       if (nodes.length === 32 || (nodes.length && size + Math.min(node.data.length, 3500) > 4000)) { walker.currentNode = node.previousSibling || node.parentNode; break; }
       nodes.push(node); size += node.data.length;
     }
-    for (const node of originals.keys()) if (!node.isConnected) originals.delete(node);
+    for (const reference of translatedNodes) {
+      const node = reference.deref();
+      if (!node?.isConnected) { if (node) originals.delete(node); translatedNodes.delete(reference); }
+    }
     if (!nodes.length) {
       post({ type: 'status', state: 'done', total, skipped, message: total ? (dynamic ? 'Translated. Watching for new text on this page.' : 'Page translated.') : 'No supported text found. PDFs, frames, editors, hidden text and code are excluded.' });
       if (!dynamic) stop();
@@ -99,6 +106,7 @@
         const translated = parts.join('');
         if (outputCharacters + translated.length > 4000000) throw new Error('Translation text limit reached. Restore the original or translate a shorter page.');
         outputCharacters += translated.length;
+        if (!originals.has(node)) translatedNodes.add(new WeakRef(node));
         originals.set(node, { original, translated }); node.data = translated; total++;
       }
       observe(); busy = false;
@@ -120,7 +128,7 @@
     stop(); port?.disconnect(); port = connection;
     if (location.href !== url) { restore(); url = location.href; }
     clearInterval(navigationTimer); navigationTimer = setInterval(checkNavigation, 250);
-    post({ type: 'status', state: originals.size ? 'paused' : 'ready', total, message: originals.size ? 'Translated text remains on this page. Restore original or translate again.' : 'Ready to translate.' });
+    post({ type: 'status', state: translatedNodes.size ? 'paused' : 'ready', total, message: translatedNodes.size ? 'Translated text remains on this page. Restore original or translate again.' : 'Ready to translate.' });
     port.onMessage.addListener(message => {
       if (message.type === 'restore') { restore(); post({ type: 'status', state: 'ready', total, message: 'Original text restored.' }); }
       if (message.type === 'cancel') { stop(); post({ type: 'status', state: 'cancelled', total, message: 'Stopped. Translated text remains until you restore the original.' }); }

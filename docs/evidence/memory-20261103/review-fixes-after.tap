@@ -1,0 +1,167 @@
+TAP version 13
+# Subtest: actual round matches one-shot prefix semantics at every split and character
+ok 1 - actual round matches one-shot prefix semantics at every split and character
+  ---
+  duration_ms: 317.640666
+  ...
+# Subtest: malformed prefixes preserve suppression and final fallback, including action newlines
+ok 2 - malformed prefixes preserve suppression and final fallback, including action newlines
+  ---
+  duration_ms: 3.0095
+  ...
+# Subtest: overlapping text keys in malformed progress retain one-shot compatibility
+ok 3 - overlapping text keys in malformed progress retain one-shot compatibility
+  ---
+  duration_ms: 64.124792
+  ...
+# Subtest: multiple StructuredOutput blocks match only the already emitted prefix
+ok 4 - multiple StructuredOutput blocks match only the already emitted prefix
+  ---
+  duration_ms: 2.647
+  ...
+# Subtest: unrelated blocks, control requests and final validation keep existing boundaries
+ok 5 - unrelated blocks, control requests and final validation keep existing boundaries
+  ---
+  duration_ms: 2.902834
+  ...
+# Subtest: actual chat cancellation closes fake RPC and removes abort and round listeners
+ok 6 - actual chat cancellation closes fake RPC and removes abort and round listeners
+  ---
+  duration_ms: 58.679875
+  ...
+# Subtest: a pre-response shortcut filter cannot overwrite the loaded sites
+ok 7 - a pre-response shortcut filter cannot overwrite the loaded sites
+  ---
+  duration_ms: 399.645
+  ...
+# Subtest: oversized responses stop consumption and cancel the body at the existing character limit
+ok 8 - oversized responses stop consumption and cancel the body at the existing character limit
+  ---
+  duration_ms: 139.920667
+  ...
+# 2031616 bytes consumed from 4194304
+# Subtest: UTF-8 splitting, replacement and BOM behavior matches Response.text
+ok 9 - UTF-8 splitting, replacement and BOM behavior matches Response.text
+  ---
+  duration_ms: 39.258625
+  ...
+# Subtest: one oversized transport chunk is decoded only up to the rejection boundary
+ok 10 - one oversized transport chunk is decoded only up to the rejection boundary
+  ---
+  duration_ms: 23.408417
+  ...
+# 2031616 bytes decoded from one 4194304-byte chunk
+# Subtest: non-byte stream chunks retain Response.text rejection
+ok 11 - non-byte stream chunks retain Response.text rejection
+  ---
+  duration_ms: 3.505416
+  ...
+# Subtest: leading BOM removal matches the pinned Response.text implementation
+ok 12 - leading BOM removal matches the pinned Response.text implementation
+  ---
+  duration_ms: 44.157375
+  ...
+# Subtest: stalled or rejected cancellation never hides the size error or retains the reader lock
+ok 13 - stalled or rejected cancellation never hides the size error or retains the reader lock
+  ---
+  duration_ms: 142.943792
+  ...
+# Subtest: the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes
+ok 14 - the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes
+  ---
+  duration_ms: 382.695042
+  ...
+# Subtest: the limit includes replacement characters emitted by the final decoder flush
+ok 15 - the limit includes replacement characters emitted by the final decoder flush
+  ---
+  duration_ms: 14.214625
+  ...
+# Subtest: empty, malformed and failed bodies preserve their error behavior
+ok 16 - empty, malformed and failed bodies preserve their error behavior
+  ---
+  duration_ms: 3.043209
+  ...
+# Subtest: abort and HTTP status still follow the original request contract
+ok 17 - abort and HTTP status still follow the original request contract
+  ---
+  duration_ms: 7.858
+  ...
+# Subtest: every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+ok 18 - every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+  ---
+  duration_ms: 476.29625
+  ...
+# Subtest: deterministic malformed block combinations match at every chunk
+ok 19 - deterministic malformed block combinations match at every chunk
+  ---
+  duration_ms: 389.888625
+  ...
+# Subtest: the long formatted response matches at each streaming chunk boundary
+ok 20 - the long formatted response matches at each streaming chunk boundary
+  ---
+  duration_ms: 3256.382042
+  ...
+# Subtest: committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+ok 21 - committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+  ---
+  duration_ms: 2.693917
+  ...
+# Subtest: formatted work decreases and long single-block work remains explicitly unchanged
+ok 22 - formatted work decreases and long single-block work remains explicitly unchanged
+  ---
+  duration_ms: 1081.741541
+  ...
+# Subtest: panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+ok 23 - panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+  ---
+  duration_ms: 9.690875
+  ...
+# Subtest: complete, stop, error and New Chat dispose streams and retain final full output
+ok 24 - complete, stop, error and New Chat dispose streams and retain final full output
+  ---
+  duration_ms: 18.480875
+  ...
+# Subtest: the full renderer remains byte-for-byte the pinned baseline
+ok 25 - the full renderer remains byte-for-byte the pinned baseline
+  ---
+  duration_ms: 17.794417
+  ...
+# Subtest: empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+ok 26 - empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+  ---
+  duration_ms: 18.120375
+  ...
+# Subtest: same-bucket new-tab resizes skip shortcut storage, filtering and painting
+ok 27 - same-bucket new-tab resizes skip shortcut storage, filtering and painting
+  ---
+  duration_ms: 219.893917
+  ...
+# Subtest: shortcut changes and explicit Reset still refresh at the same width
+ok 28 - shortcut changes and explicit Reset still refresh at the same width
+  ---
+  duration_ms: 7.262917
+  ...
+# Subtest: resize during initial shortcut filtering cannot leave the wrong number of sites
+ok 29 - resize during initial shortcut filtering cannot leave the wrong number of sites
+  ---
+  duration_ms: 6.055416
+  ...
+# Subtest: failed resize refreshes can retry and pagehide releases the resize listener
+ok 30 - failed resize refreshes can retry and pagehide releases the resize listener
+  ---
+  duration_ms: 4.988667
+  ...
+# Subtest: expired Undo releases its action and clicking active Undo still invokes it once
+ok 31 - expired Undo releases its action and clicking active Undo still invokes it once
+  ---
+  duration_ms: 15.11175
+  ...
+1..31
+# tests 31
+# suites 0
+# pass 31
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5819.9685

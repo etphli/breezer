@@ -5,9 +5,9 @@ const { BrowserTools } = await import(process.env.BREEZER_CONTROL_MODULE || '../
 
 // A synthetic Docs-shaped document, not an authenticated Google Doc. No site
 // requests, credentials, personal profile, extension permission grants or native build.
-const { chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright');
-const browser = await chromium.launch({ executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined), headless: true });
-const page = await browser.newPage({ viewport: { width: 1000, height: 750 } });
+const playwrightModule = process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright';
+const { chromium } = await import(playwrightModule);
+let browser;
 const url = 'https://docs.google.com/document/d/disposable-fixture/edit';
 const html = `<!doctype html><meta charset="utf-8"><title>Disposable editor fixture</title><style>
 body{margin:0;background:#eef0f3;font:16px system-ui;color:#253247}header{padding:24px;background:white}main{position:relative;margin:35px auto;width:700px;height:500px;background:white;border:1px solid #ccd2db}canvas{width:700px;height:500px}.kix-hit{position:absolute;inset:0}iframe{position:absolute;left:-10000px;width:10px;height:10px}#output{position:absolute;left:50px;top:50px;white-space:pre-wrap;pointer-events:none}</style>
@@ -15,6 +15,8 @@ body{margin:0;background:#eef0f3;font:16px system-ui;color:#253247}header{paddin
 <script>const frame=document.querySelector('iframe');const doc=frame.contentDocument;doc.body.contentEditable='true';doc.body.setAttribute('role','textbox');window.events=[];doc.body.addEventListener('input', e=>{events.push({type:e.type,trusted:e.isTrusted});document.querySelector('#output').textContent=doc.body.innerText});document.querySelector('main').addEventListener('mousedown',event=>{event.preventDefault();doc.body.focus()});</script>`;
 let tools;
 try {
+  browser = await chromium.launch({ executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined), headless: true });
+  const page = await browser.newPage({ viewport: { width: 1000, height: 750 } });
   await page.route('**/*', route => route.fulfill({ contentType: 'text/html', body: html }));
   await page.goto(url);
   const cdp = await page.context().newCDPSession(page);
@@ -141,7 +143,7 @@ try {
   await page.evaluate(() => { const frame = document.querySelector('iframe'); frame.style.cssText = 'position:fixed;left:200px;top:200px;width:100px;height:100px'; });
   await tools.injectControl(session, 'screenshot-mask');
   try {
-    const { PNG } = createRequire(import.meta.url)('pngjs');
+  const { PNG } = createRequire(playwrightModule.startsWith('/') ? playwrightModule : import.meta.url)('pngjs');
     const pixels = PNG.sync.read(await page.screenshot());
     const offset = (250 * pixels.width + 250) * 4;
     assert.deepEqual([...pixels.data.subarray(offset, offset + 3)], [23, 32, 51], 'visible frame pixels are redacted');
@@ -157,6 +159,5 @@ try {
   console.log('PASS frame restrictions: stale handles, secret fields, detached/navigated/cross-origin frames, site scope, late focus changes, cancellation and frame Escape.');
   console.log('PASS synthetic Docs workflow: capture, editor hit layer, focused frame typing, selection and follow-up edit. Authenticated Docs/native acceptance NOT tested.');
 } finally {
-  await tools?.stop();
-  await browser.close();
+  try { await tools?.stop(); } finally { await browser?.close(); }
 }

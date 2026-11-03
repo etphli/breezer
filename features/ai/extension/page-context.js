@@ -133,7 +133,7 @@ export function pageContext(operation, args = {}) {
     return { ok: true };
   }
   if (operation === 'bind-editor') {
-    const el = args.elementId ? state.targets.get(args.elementId) : document.elementFromPoint(args.x, args.y)?.closest('.kix-appview-editor');
+    const el = args.elementId ? state.targets.get(args.elementId)?.deref() : document.elementFromPoint(args.x, args.y)?.closest('.kix-appview-editor');
     clearEditor();
     if (!docsEditor(el)) return { ok: true };
     const frame = document.activeElement;
@@ -149,7 +149,7 @@ export function pageContext(operation, args = {}) {
     } catch (error) { clearEditor(); throw error; }
   }
   if (operation === 'editor-focus') {
-    if (state.targets.get(args.elementId) !== state.editor?.root) throw new Error('Click the document editor from a new snapshot before inserting text.');
+    if (state.targets.get(args.elementId)?.deref() !== state.editor?.root) throw new Error('Click the document editor from a new snapshot before inserting text.');
     return editorFocus();
   }
   if (operation === 'resolve-point') {
@@ -167,9 +167,10 @@ export function pageContext(operation, args = {}) {
     const snapshotId = token();
     const elements = [];
     const editorRoot = docsPage && document.querySelector('.kix-appview-editor');
-    const candidates = new Set([...(editorRoot ? [editorRoot] : []), ...document.querySelectorAll('a[href],button,input,textarea,select,canvas,[role="button"],[role="link"],[contenteditable="true"],[tabindex]')]);
-    for (const el of candidates) {
-      if (elements.length >= 180) break;
+    const candidates = document.querySelectorAll('a[href],button,input,textarea,select,canvas,[role="button"],[role="link"],[contenteditable="true"],[tabindex]');
+    for (let index = editorRoot ? -1 : 0; index < candidates.length && elements.length < 180; index++) {
+      const el = index < 0 ? editorRoot : candidates[index];
+      if (index >= 0 && el === editorRoot) continue;
       if (!visible(el) || sensitive(el) || el.closest('[data-breezer-ai]')) continue;
       const editor = el.closest('.kix-appview-editor');
       if (editor && docsEditor(editor) && el !== editor) continue;
@@ -177,7 +178,7 @@ export function pageContext(operation, args = {}) {
       const rect = el.getBoundingClientRect();
       if (rect.bottom <= 0 || rect.right <= 0 || rect.top >= innerHeight || rect.left >= innerWidth) continue;
       const id = `${state.documentId}:${snapshotId}:${elements.length + 1}`;
-      state.targets.set(id, el);
+      state.targets.set(id, new WeakRef(el));
       const label = el.getAttribute('aria-label') || (docsEditor(el) ? 'Document editor' : '') || el.labels?.[0]?.innerText || el.getAttribute('placeholder') || (el.matches('input,textarea,[contenteditable="true"]') ? '' : el.innerText) || el.getAttribute('title') || '';
       elements.push({ id, tag: el.tagName.toLowerCase(), role: el.getAttribute('role') || el.tagName.toLowerCase(), label: label.slice(0, 180), type: docsEditor(el) ? 'canvas-editor' : el.getAttribute('type') || undefined, x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) });
     }
@@ -194,7 +195,7 @@ export function pageContext(operation, args = {}) {
     return { url: location.href, title: document.title, text: text.join(' ').slice(0, 18000), viewport: { width: innerWidth, height: innerHeight }, elements };
   }
   if (operation === 'resolve') {
-    const el = state.targets.get(args.elementId);
+    const el = state.targets.get(args.elementId)?.deref();
     if (!el || !visible(el)) throw new Error('This element changed. Take a new snapshot.');
     if (sensitive(el)) throw new Error('Breezer cannot enter passwords or secret fields.');
     if (args.typing && !(el.matches('input:not([readonly]):not([disabled]),textarea:not([readonly]):not([disabled]),[contenteditable="true"]'))) throw new Error('Choose an editable field.');
@@ -213,7 +214,7 @@ export function pageContext(operation, args = {}) {
     }
     if (document.activeElement && sensitive(document.activeElement)) throw new Error('Breezer cannot enter passwords or secret fields.');
     if (args.elementId) {
-      const target = state.targets.get(args.elementId);
+      const target = state.targets.get(args.elementId)?.deref();
       if (!target || !visible(target) || !(document.activeElement === target || target.contains(document.activeElement))) throw new Error('The selected field lost focus. Take a new snapshot.');
       if (sensitive(target)) throw new Error('Breezer cannot enter passwords or secret fields.');
       if (operation === 'select-content') {

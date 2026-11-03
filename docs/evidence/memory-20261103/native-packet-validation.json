@@ -1,0 +1,11 @@
+{
+  "packet": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/pc-packet",
+  "checksumFiles": 29,
+  "compiledResources": 10,
+  "extensionResources": 9,
+  "nativeResources": 1,
+  "hostModules": 11,
+  "allBytesMatchCurrentSources": true,
+  "allBeforePinsMatchCachedPlan": true,
+  "pcContacted": false
+}

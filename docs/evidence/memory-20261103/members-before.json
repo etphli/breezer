@@ -1,0 +1,145 @@
+{
+  "scope": "Offline actual WorkspaceStore class; deterministic requested-key and serialized-character counts only. No timing, RSS or browser claim.",
+  "sourcePath": "features/ai/extension/workspace-store.js",
+  "sourceSha256": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+  "measurements": [
+    {
+      "savedEntries": 0,
+      "reads": [
+        {
+          "area": "local",
+          "op": "get",
+          "keys": [
+            "workspace.v1",
+            "workspace.members.v1"
+          ]
+        },
+        {
+          "area": "session",
+          "op": "get",
+          "keys": [
+            "workspace.session"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "area": "local",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        }
+      ],
+      "serializations": [
+        {
+          "kind": "store",
+          "chars": 172
+        },
+        {
+          "kind": "members",
+          "chars": 102
+        },
+        {
+          "kind": "store",
+          "chars": 172
+        },
+        {
+          "kind": "members",
+          "chars": 175
+        }
+      ]
+    },
+    {
+      "savedEntries": 100,
+      "reads": [
+        {
+          "area": "local",
+          "op": "get",
+          "keys": [
+            "workspace.v1",
+            "workspace.members.v1"
+          ]
+        },
+        {
+          "area": "session",
+          "op": "get",
+          "keys": [
+            "workspace.session"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "area": "local",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        }
+      ],
+      "serializations": [
+        {
+          "kind": "store",
+          "chars": 8441
+        },
+        {
+          "kind": "members",
+          "chars": 102
+        },
+        {
+          "kind": "store",
+          "chars": 8441
+        },
+        {
+          "kind": "members",
+          "chars": 175
+        }
+      ]
+    },
+    {
+      "savedEntries": 1000,
+      "reads": [
+        {
+          "area": "local",
+          "op": "get",
+          "keys": [
+            "workspace.v1",
+            "workspace.members.v1"
+          ]
+        },
+        {
+          "area": "session",
+          "op": "get",
+          "keys": [
+            "workspace.session"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "area": "local",
+          "keys": [
+            "workspace.members.v1"
+          ]
+        }
+      ],
+      "serializations": [
+        {
+          "kind": "store",
+          "chars": 85841
+        },
+        {
+          "kind": "members",
+          "chars": 102
+        },
+        {
+          "kind": "store",
+          "chars": 85841
+        },
+        {
+          "kind": "members",
+          "chars": 175
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "scope": "Small native output encoding overhead reduction. Logical Buffer counts and synthetic timings only; native output backpressure remains unfixed.",
+  "files": [
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "lines": 162,
+      "readRanges": [
+        [
+          6,
+          14
+        ]
+      ],
+      "status": "partial",
+      "notes": "Changed encoder read and exact restoration of all other bytes checked against the prior reviewed module; fresh whole-file coverage deferred to independent review."
+    },
+    {
+      "path": "tests/ai/fixtures/native-encode-before.mjs",
+      "sha256": "6733bc93ca7976a213ac6fbfc950546c07f259216fcada59e5be5b27feb5e5a1",
+      "lines": 7,
+      "readRanges": [
+        [
+          1,
+          7
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read/wrote the complete current diagnostic, test or pinned baseline fixture."
+    },
+    {
+      "path": "script/verify_native_output_efficiency.mjs",
+      "sha256": "b5714d8867124601b2ac098c10d22446ca5d0959636ee086f44f5d0f8786b895",
+      "lines": 114,
+      "readRanges": [
+        [
+          1,
+          114
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read/wrote the complete current diagnostic, test or pinned baseline fixture."
+    },
+    {
+      "path": "tests/ai/native-output.test.mjs",
+      "sha256": "eee087070d60d079661d263df4ba009d348907ff236c8d0219b778e43c79ec51",
+      "lines": 80,
+      "readRanges": [
+        [
+          1,
+          80
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Coordinator read/wrote the complete current diagnostic, test or pinned baseline fixture."
+    }
+  ],
+  "change": "Keep the existing JSON-to-UTF8 payload buffer and size check. Allocate the final frame, write its header directly, then copy payload bytes into it. Remove the temporary 4-byte header Buffer and concat array.",
+  "baselineSourceSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+  "counts": {
+    "scope": "Source-derived encoder VM with real Node Buffers and explicit allocation/copy counters. Requested bytes are logical counts, not physical RAM, retained memory or browser/AI latency. Payload buffering/copying and the unbounded native output queue remain.",
+    "node": "v24.22.1",
+    "sourceSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+    "baselineSha256": "6733bc93ca7976a213ac6fbfc950546c07f259216fcada59e5be5b27feb5e5a1",
+    "cases": {
+      "64": {
+        "bodyBytes": 64,
+        "frameBytes": 68,
+        "baseline": {
+          "allocations": 3,
+          "requestedBufferBytes": 136,
+          "concatCopiedBytes": 68,
+          "explicitCopiedBytes": 0
+        },
+        "current": {
+          "allocations": 2,
+          "requestedBufferBytes": 132,
+          "concatCopiedBytes": 0,
+          "explicitCopiedBytes": 64
+        }
+      },
+      "4096": {
+        "bodyBytes": 4096,
+        "frameBytes": 4100,
+        "baseline": {
+          "allocations": 3,
+          "requestedBufferBytes": 8200,
+          "concatCopiedBytes": 4100,
+          "explicitCopiedBytes": 0
+        },
+        "current": {
+          "allocations": 2,
+          "requestedBufferBytes": 8196,
+          "concatCopiedBytes": 0,
+          "explicitCopiedBytes": 4096
+        }
+      },
+      "65536": {
+        "bodyBytes": 65536,
+        "frameBytes": 65540,
+        "baseline": {
+          "allocations": 3,
+          "requestedBufferBytes": 131080,
+          "concatCopiedBytes": 65540,
+          "explicitCopiedBytes": 0
+        },
+        "current": {
+          "allocations": 2,
+          "requestedBufferBytes": 131076,
+          "concatCopiedBytes": 0,
+          "explicitCopiedBytes": 65536
+        }
+      },
+      "1048576": {
+        "bodyBytes": 1048576,
+        "frameBytes": 1048580,
+        "baseline": {
+          "allocations": 3,
+          "requestedBufferBytes": 2097160,
+          "concatCopiedBytes": 1048580,
+          "explicitCopiedBytes": 0
+        },
+        "current": {
+          "allocations": 2,
+          "requestedBufferBytes": 2097156,
+          "concatCopiedBytes": 0,
+          "explicitCopiedBytes": 1048576
+        }
+      }
+    },
+    "oversizedReply": {
+      "baseline": {
+        "allocations": 1,
+        "requestedBufferBytes": 1048587,
+        "concatCopiedBytes": 0,
+        "explicitCopiedBytes": 0
+      },
+      "current": {
+        "allocations": 1,
+        "requestedBufferBytes": 1048587,
+        "concatCopiedBytes": 0,
+        "explicitCopiedBytes": 0
+      }
+    }
+  },
+  "benchmark": {
+    "path": "native-output-final-benchmark.json",
+    "command": "build/efficiency-20261103/organato-review-node24 script/verify_native_output_efficiency.mjs --benchmark",
+    "trials": 120,
+    "design": "Five payload fixtures; twelve alternating baseline/current pairs each after warmup. Actual full module functions, not instrumented VM encoders.",
+    "interpretation": "Small 64-byte fixture improved; larger fixtures are close or have overlapping timing ranges. No material slowdown observed in this narrow sample. Not a universal speed guarantee or browser benchmark."
+  },
+  "rejectedCandidates": [
+    {
+      "path": "protocol-output-explicit-utf8.mjs",
+      "benchmark": "native-output-explicit-utf8-benchmark.json",
+      "reason": "One-buffer encoding reduces payload staging allocations but produces a repeatable 4 KiB slowdown."
+    },
+    {
+      "path": "protocol-output-default-write.mjs",
+      "benchmark": "native-output-default-write-benchmark.json",
+      "reason": "Omitting the write encoding/length arguments retains the same 4 KiB slowdown; rejected."
+    }
+  ],
+  "checks": [
+    {
+      "command": "combined-native-output-command.json",
+      "log": "combined-native-output-final.tap",
+      "result": "352 pass, zero skips, final production encoder. A later diagnostic benchmark-only addition was checked separately with the six output tests and benchmark command."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test --test-reporter tap tests/ai/native-output.test.mjs",
+      "log": "native-output-tool-final.tap",
+      "result": "6 pass using final diagnostic module."
+    },
+    {
+      "command": "four-file owned checkout with no build directory; same six output tests",
+      "log": "native-output-portability.tap",
+      "result": "6 pass."
+    },
+    {
+      "command": "same isolated checkout with pinned pre-change protocol module",
+      "log": "native-output-final-negative-control.tap",
+      "result": "5 pass and only the new allocation-budget check fails, 3 allocations versus the expected 2."
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --expose-gc script/verify_native_decoder_memory.mjs --expect-bounded --rounds 3 --output build/efficiency-20261103/native-decoder-after-output.json",
+      "result": "Pass; decoder assembly unchanged, completed-frame retained ArrayBuffer delta 16 bytes in fixture."
+    },
+    {
+      "command": "python3 -B tests/memory_package_test.py",
+      "result": "8 pass."
+    },
+    {
+      "command": "packet SHA256SUMS, FILES source comparison and all host-update.json hashes",
+      "result": "All 29 entries and 11 host modules match latest source bytes."
+    },
+    {
+      "command": "git diff --check",
+      "result": "Pass."
+    }
+  ],
+  "packet": {
+    "checksumFiles": 29,
+    "compiledResources": 10,
+    "hostModules": 11,
+    "hostHashes": {
+      "claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "codex.mjs": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "context-controller.mjs": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "context-summary.mjs": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "controller.mjs": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "main.mjs": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "organato.mjs": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+      "protocol.mjs": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "update-worker.mjs": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+      "updater.mjs": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+    },
+    "allPacketBytesMatchSources": true,
+    "pcContacted": false,
+    "deployed": false
+  },
+  "limitations": [
+    "The payload Buffer and full payload copy remain. Four logical Buffer bytes per valid reply are removed, plus the header Buffer wrapper and concat argument array; this does not halve payload RAM.",
+    "The existing oversized-response path still allocates the payload before rejecting it; that behavior remains unchanged.",
+    "Native stdout queue and provider stdin buffering remain unbounded. No drop, cancellation, producer pause or backpressure behavior was added.",
+    "Logical requested bytes do not measure pool/backing-store overhead, physical RAM, retained memory or GC timing.",
+    "Historical native helper footprint measurements and charts retain their original source/runtime hashes and have not been reassigned to this current module.",
+    "No PC contact, browser/app build/run/install, actual provider/credential access, publication or user-profile/required compiled-cache changes.",
+    "Independent review, packaged/native acceptance and whole-browser RAM/CPU/speed/feature comparisons remain pending."
+  ],
+  "review": "Independent current-hash review found no actionable introduced issue. Byte correctness and limited logical-allocation claim accepted; performance/physical RAM and packaged/native/browser acceptance remain open."
+}

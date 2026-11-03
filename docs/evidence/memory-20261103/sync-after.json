@@ -1,0 +1,37 @@
+{
+  "scope": "Offline production JS with synthetic in-memory storage. Operation counts only, not native browser RAM, CPU, IPC or physical disk bytes.",
+  "node": "v22.14.0",
+  "sourceSha256": {
+    "workspace-store.js": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+    "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "workspace-sync-model.js": "9b8bc9b27bf71b13742aa47b55917787848c4f00eb0225bd5885522febae8a7c"
+  },
+  "noOpCycles": [
+    {
+      "entries": 0,
+      "storageWrites": 0,
+      "serializedStorageBytes": 0,
+      "dataUnchanged": true,
+      "exchanges": 0
+    },
+    {
+      "entries": 1000,
+      "storageWrites": 0,
+      "serializedStorageBytes": 0,
+      "dataUnchanged": true,
+      "exchanges": 0
+    }
+  ],
+  "folders": [
+    {
+      "count": 100,
+      "localPinReads": 100,
+      "expansionPreserved": true
+    },
+    {
+      "count": 1000,
+      "localPinReads": 1000,
+      "expansionPreserved": true
+    }
+  ]
+}

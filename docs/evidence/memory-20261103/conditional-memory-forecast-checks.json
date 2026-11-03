@@ -1,0 +1,14 @@
+[
+  {
+    "width": 320,
+    "controlUpdates": true,
+    "noHorizontalOverflow": true,
+    "noScriptErrors": true
+  },
+  {
+    "width": 728,
+    "controlUpdates": true,
+    "noHorizontalOverflow": true,
+    "noScriptErrors": true
+  }
+]

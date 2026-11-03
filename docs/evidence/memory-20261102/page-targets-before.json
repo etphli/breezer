@@ -1,0 +1,27 @@
+{
+  "browser": "156.0.8078.4",
+  "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/baseline-page-context.js",
+  "isolatedWorld": true,
+  "sourceSha256": "5f2d2162e260103aea561da9f83bc95b6c2608105db718f66b410fe2c8747790",
+  "empty": {
+    "documents": 1,
+    "nodes": 8,
+    "jsEventListeners": 0,
+    "usedHeapBytes": 828916
+  },
+  "attached": {
+    "documents": 1,
+    "nodes": 72188,
+    "jsEventListeners": 0,
+    "usedHeapBytes": 1253496
+  },
+  "detached": {
+    "documents": 1,
+    "nodes": 72188,
+    "jsEventListeners": 0,
+    "usedHeapBytes": 1253768
+  },
+  "retainedExtraNodes": 72180,
+  "released": false,
+  "limits": "Synthetic isolated-world page-control retention check after forced GC. Not whole-browser RAM, CPU or browsing speed."
+}

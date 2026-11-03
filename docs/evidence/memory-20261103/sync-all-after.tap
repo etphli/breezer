@@ -1,0 +1,176 @@
+TAP version 13
+# Subtest: disposing an in-flight {"configured":false} cycle cannot recreate an alarm
+ok 1 - disposing an in-flight {"configured":false} cycle cannot recreate an alarm
+  ---
+  duration_ms: 252.972792
+  ...
+# Subtest: disposing an in-flight {"configured":true,"workspaceEnabled":false} cycle cannot recreate an alarm
+ok 2 - disposing an in-flight {"configured":true,"workspaceEnabled":false} cycle cannot recreate an alarm
+  ---
+  duration_ms: 252.62025
+  ...
+# Subtest: disposing an in-flight {"configured":true,"workspaceEnabled":true,"providerId":"fixture-provider","vaultId":"fixture-vault","model":""} cycle cannot recreate an alarm
+ok 3 - disposing an in-flight {"configured":true,"workspaceEnabled":true,"providerId":"fixture-provider","vaultId":"fixture-vault","model":""} cycle cannot recreate an alarm
+  ---
+  duration_ms: 264.126708
+  ...
+# Subtest: disposing while alarm creation is pending clears the late-created alarm
+ok 4 - disposing while alarm creation is pending clears the late-created alarm
+  ---
+  duration_ms: 253.45025
+  ...
+# Subtest: two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+ok 5 - two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+  ---
+  duration_ms: 300.831667
+  ...
+# Subtest: provider permission, key boundaries, and native enum spellings match imported API
+ok 6 - provider permission, key boundaries, and native enum spellings match imported API
+  ---
+  duration_ms: 2.394375
+  ...
+# Subtest: cancel and dispose abort in-flight provider work without stale replies
+ok 7 - cancel and dispose abort in-flight provider work without stale replies
+  ---
+  duration_ms: 1.1595
+  ...
+# Subtest: workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership
+ok 8 - workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership
+  ---
+  duration_ms: 11.914
+  ...
+# Subtest: offline changes survive capture, worker restart and remote deletion
+ok 9 - offline changes survive capture, worker restart and remote deletion
+  ---
+  duration_ms: 4.782042
+  ...
+# Subtest: unchanged sync cycles preserve durable recovery data without rewriting storage
+ok 10 - unchanged sync cycles preserve durable recovery data without rewriting storage
+  ---
+  duration_ms: 1.520209
+  ...
+# Subtest: changed local recovery data reaches storage before a failing exchange
+ok 11 - changed local recovery data reaches storage before a failing exchange
+  ---
+  duration_ms: 2.007667
+  ...
+# Subtest: remote changes remain captured if applying the local workspace fails
+ok 12 - remote changes remain captured if applying the local workspace fails
+  ---
+  duration_ms: 2.41925
+  ...
+# Subtest: untouched joining profile defaults do not overwrite remote space names or appearance
+ok 13 - untouched joining profile defaults do not overwrite remote space names or appearance
+  ---
+  duration_ms: 1.296167
+  ...
+# Subtest: disabled and disconnected clients never write or apply remote data
+ok 14 - disabled and disconnected clients never write or apply remote data
+  ---
+  duration_ms: 0.245208
+  ...
+# Subtest: invalid remote data preserves local store and membership
+ok 15 - invalid remote data preserves local store and membership
+  ---
+  duration_ms: 0.162667
+  ...
+# Subtest: CAS conflicts retry with remote edits without dropping captured local edits
+ok 16 - CAS conflicts retry with remote edits without dropping captured local edits
+  ---
+  duration_ms: 4.370334
+  ...
+# Subtest: local capture failure never publishes a partial snapshot or replaces saved data
+ok 17 - local capture failure never publishes a partial snapshot or replaces saved data
+  ---
+  duration_ms: 1.172708
+  ...
+# Subtest: explicit overflow recovery keeps pins when removing a concurrent space
+ok 18 - explicit overflow recovery keeps pins when removing a concurrent space
+  ---
+  duration_ms: 6.311459
+  ...
+# Subtest: changing providers with the same vault UUID cannot receive an old in-flight write
+ok 19 - changing providers with the same vault UUID cannot receive an old in-flight write
+  ---
+  duration_ms: 0.735708
+  ...
+# Subtest: managed appearance changes do not block valid saved spaces or overwrite the local appearance
+ok 20 - managed appearance changes do not block valid saved spaces or overwrite the local appearance
+  ---
+  duration_ms: 1.898042
+  ...
+# Subtest: persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+ok 21 - persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+  ---
+  duration_ms: 4.129125
+  ...
+# Subtest: restoring many folder states reads local pins a linear number of times
+ok 22 - restoring many folder states reads local pins a linear number of times
+  ---
+  duration_ms: 20.949958
+  ...
+# 1000 local pin reads for 1000 folders
+# Subtest: folder expansion preserves the first match within the last matching local space
+ok 23 - folder expansion preserves the first match within the last matching local space
+  ---
+  duration_ms: 0.711709
+  ...
+# Subtest: folder restoration skips unrelated pins once all matching states are found
+ok 24 - folder restoration skips unrelated pins once all matching states are found
+  ---
+  duration_ms: 0.593958
+  ...
+# Subtest: two offline clients converge with concurrent rename, move, independent field edits and restart
+ok 25 - two offline clients converge with concurrent rename, move, independent field edits and restart
+  ---
+  duration_ms: 2.075458
+  ...
+# Subtest: deletions survive stale clients, later edits and concurrent folder/space removal
+ok 26 - deletions survive stale clients, later edits and concurrent folder/space removal
+  ---
+  duration_ms: 1.222
+  ...
+# Subtest: same-field ties use stable client order; merge is associative
+ok 27 - same-field ties use stable client order; merge is associative
+  ---
+  duration_ms: 1.037083
+  ...
+# Subtest: appearance allowlist includes only supported preferences and keeps field-level changes
+ok 28 - appearance allowlist includes only supported preferences and keeps field-level changes
+  ---
+  duration_ms: 0.79625
+  ...
+# Subtest: malformed and future data reject without mutating either client
+ok 29 - malformed and future data reject without mutating either client
+  ---
+  duration_ms: 0.54425
+  ...
+# Subtest: concurrent deletion of different last spaces recovers a usable stable identity
+ok 30 - concurrent deletion of different last spaces recovers a usable stable identity
+  ---
+  duration_ms: 1.297042
+  ...
+# Subtest: concurrent capacity overflow rejects instead of silently losing saved items
+ok 31 - concurrent capacity overflow rejects instead of silently losing saved items
+  ---
+  duration_ms: 1.379417
+  ...
+# Subtest: clock and payload limits fail without replacing local state
+ok 32 - clock and payload limits fail without replacing local state
+  ---
+  duration_ms: 5.283041
+  ...
+# Subtest: incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+ok 33 - incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+  ---
+  duration_ms: 0.674834
+  ...
+1..33
+# tests 33
+# suites 0
+# pass 33
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1092.483333

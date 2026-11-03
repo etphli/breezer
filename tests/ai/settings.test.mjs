@@ -12,8 +12,16 @@ import {
 const html = readFileSync(new URL('../../features/ai/extension/workspace.html', import.meta.url), 'utf8');
 const { mountSettings } = await import('../../features/ai/extension/settings.js');
 const label = (node) => node?.[Symbol.for('nodejs.util.inspect.custom')]?.() ?? String(node);
-// Compares labels, not nodes: failing assertions must not serialize the DOM graph.
-const assertFocused = (page, node, message = 'focus') => assert.equal(label(page.document.activeElement), label(node), message);
+// Compare identity but keep failure diagnostics from serializing the DOM graph.
+const assertFocused = (page, node, message = 'focus') => assert.ok(page.document.activeElement === node,
+  `${message}: expected ${label(node)}, found ${label(page.document.activeElement)}`);
+test('focus assertions distinguish two inputs with the same label', () => {
+  const page = createDom('<html><body><input><input></body></html>');
+  const [first, second] = page.document.querySelectorAll('input');
+  first.focus();
+  assert.throws(() => assertFocused(page, second), { code: 'ERR_ASSERTION' });
+  assert.doesNotThrow(() => assertFocused(page, first));
+});
 const settle = async (rounds = 6) => { for (let i = 0; i < rounds; i += 1) await new Promise((resolve) => setTimeout(resolve, 0)); };
 
 function fakeStorage() {

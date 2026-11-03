@@ -1,0 +1,53 @@
+[
+  {
+    "name": "workspace-browser",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "--test",
+      "tests/ai/workspace-browser.test.mjs"
+    ],
+    "log": "workspace-browser-coordinator.log"
+  },
+  {
+    "name": "newtab-browser",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "--test",
+      "tests/ai/newtab-browser.test.mjs"
+    ],
+    "log": "newtab-browser-coordinator.log"
+  },
+  {
+    "name": "translation-browser",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "--test",
+      "tests/ai/translation-browser.test.mjs"
+    ],
+    "log": "translation-browser-coordinator.log"
+  },
+  {
+    "name": "translation-memory",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "script/verify_translation_memory.mjs",
+      "--expect-released",
+      "--output",
+      "build/efficiency-20261103/translation-memory-after.json"
+    ],
+    "log": "translation-memory-coordinator.log"
+  },
+  {
+    "name": "panel-browser",
+    "exitCode": 0,
+    "command": [
+      "node",
+      "tests/ai/panel-browser.mjs"
+    ],
+    "log": "panel-browser-coordinator.log"
+  }
+]

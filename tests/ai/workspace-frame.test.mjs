@@ -104,9 +104,10 @@ test('sidebar text follows sidebarFontSize and content clears the title bar band
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
-  const browser = await chromium.launch({ executablePath, headless: true });
+  let browser;
   const errors = [];
   try {
+    browser = await chromium.launch({ executablePath, headless: true });
     const context = await browser.newContext({ viewport: { width: 240, height: 640 }, deviceScaleFactor: 2 });
     await context.addInitScript(installFixture, APPEARANCE);
     const page = await context.newPage();
@@ -166,7 +167,8 @@ test('sidebar text follows sidebarFontSize and content clears the title bar band
 
     assert.deepEqual(errors, []);
   } finally {
-    await browser.close();
-    server.close();
+    try { await browser?.close(); } finally {
+      await new Promise(done => server.close(done));
+    }
   }
 });

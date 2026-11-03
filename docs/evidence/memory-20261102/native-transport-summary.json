@@ -1,0 +1,256 @@
+{
+  "runtime": "v24.22.1",
+  "runtimeIdentity": {
+    "path": "/Users/likht.ethan/.t3/projects/breezer/build/performance-20261029/native-blocker-candidate-r5/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Versions/156.0.8078.47/Resources/breezer_ai/runtime/node",
+    "sha256": "cd9da8ecb0ccf4b18048b6d0ce00dc0aa9fb24ab3e54dd10aeff74c255c6f5f5",
+    "version": "v24.22.1"
+  },
+  "candidateProtocolSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+  "baselineProtocolSha256": "26cf7b4bdd775003e1c303f9d31f3b02a052d382ef797c671c29a00a6351168d",
+  "pairedRoundsPerPayload": 6,
+  "rawReports": {
+    "native-transport-final-4096.json": "c9318c104794e3053c51cffc79bbb45c5a1d1abe97f52c8a99f17ae2be070251",
+    "native-transport-final-65536.json": "95a5702aa472102d6c0c6f4aabcba63723190881cd06450e1edc2579e0303fc5",
+    "native-transport-final-1048576.json": "8a7a01d3468761cd7e9d839c66f74bb1cf8d00084a385f1b490e589d1d1bd156",
+    "native-transport-final-4194304.json": "8086550827c272b5419ecceb5695e7eeb235f0c4a6ba018a70dda85153b7c402",
+    "native-transport-final-8388608.json": "65cc6c702bbec7eaa34d03ba968703dd0c6d6acac6141ceedc8bf373461287e9"
+  },
+  "metrics": [
+    {
+      "payloadMiB": 0.00390625,
+      "baseline": {
+        "footprintMiB": {
+          "median": 17.31121826171875,
+          "min": 17.1627197265625,
+          "max": 17.69384765625
+        },
+        "cpuMs": {
+          "median": 8.536999999999999,
+          "min": 7.971,
+          "max": 9.621
+        },
+        "replyMs": {
+          "median": 0.7931254999999737,
+          "min": 0.7042089999999916,
+          "max": 1.2780839999999785
+        },
+        "retainedArrayBufferBytes": {
+          "median": 16.0,
+          "min": 16,
+          "max": 16
+        }
+      },
+      "candidate": {
+        "footprintMiB": {
+          "median": 17.256500244140625,
+          "min": 17.06878662109375,
+          "max": 17.5533447265625
+        },
+        "cpuMs": {
+          "median": 8.102,
+          "min": 8.029,
+          "max": 10.479
+        },
+        "replyMs": {
+          "median": 0.7690005000000042,
+          "min": 0.7295829999999341,
+          "max": 0.8439580000000433
+        },
+        "retainedArrayBufferBytes": {
+          "median": 16.0,
+          "min": 16,
+          "max": 16
+        }
+      }
+    },
+    {
+      "payloadMiB": 0.0625,
+      "baseline": {
+        "footprintMiB": {
+          "median": 17.35015869140625,
+          "min": 17.16278076171875,
+          "max": 17.5533447265625
+        },
+        "cpuMs": {
+          "median": 9.0455,
+          "min": 8.743,
+          "max": 13.832
+        },
+        "replyMs": {
+          "median": 0.9042294999999569,
+          "min": 0.761459000000059,
+          "max": 1.178416999999996
+        },
+        "retainedArrayBufferBytes": {
+          "median": 65653.0,
+          "min": 65653,
+          "max": 65653
+        }
+      },
+      "candidate": {
+        "footprintMiB": {
+          "median": 17.154815673828125,
+          "min": 16.99053955078125,
+          "max": 17.412841796875
+        },
+        "cpuMs": {
+          "median": 9.1525,
+          "min": 8.856,
+          "max": 9.508
+        },
+        "replyMs": {
+          "median": 0.8680415000000181,
+          "min": 0.8122499999999491,
+          "max": 0.8800410000000056
+        },
+        "retainedArrayBufferBytes": {
+          "median": 16.0,
+          "min": 16,
+          "max": 16
+        }
+      }
+    },
+    {
+      "payloadMiB": 1.0,
+      "baseline": {
+        "footprintMiB": {
+          "median": 28.80340576171875,
+          "min": 28.678466796875,
+          "max": 29.10028076171875
+        },
+        "cpuMs": {
+          "median": 11.6985,
+          "min": 10.784,
+          "max": 12.001
+        },
+        "replyMs": {
+          "median": 2.83785450000002,
+          "min": 2.6019589999999653,
+          "max": 3.2038749999999965
+        },
+        "retainedArrayBufferBytes": {
+          "median": 1048693.0,
+          "min": 1048693,
+          "max": 1048693
+        }
+      },
+      "candidate": {
+        "footprintMiB": {
+          "median": 20.2955322265625,
+          "min": 19.83441162109375,
+          "max": 20.53765869140625
+        },
+        "cpuMs": {
+          "median": 10.721,
+          "min": 10.432,
+          "max": 11.319
+        },
+        "replyMs": {
+          "median": 1.9396249999999782,
+          "min": 1.9030830000000378,
+          "max": 2.638666999999998
+        },
+        "retainedArrayBufferBytes": {
+          "median": 16.0,
+          "min": 16,
+          "max": 16
+        }
+      }
+    },
+    {
+      "payloadMiB": 4.0,
+      "baseline": {
+        "footprintMiB": {
+          "median": 160.2899169921875,
+          "min": 157.99298095703125,
+          "max": 160.47747802734375
+        },
+        "cpuMs": {
+          "median": 36.408500000000004,
+          "min": 35.798,
+          "max": 39.577
+        },
+        "replyMs": {
+          "median": 18.50818749999999,
+          "min": 17.74924999999996,
+          "max": 20.056041000000008
+        },
+        "retainedArrayBufferBytes": {
+          "median": 4194421.0,
+          "min": 4194421,
+          "max": 4194421
+        }
+      },
+      "candidate": {
+        "footprintMiB": {
+          "median": 29.037750244140625,
+          "min": 28.9283447265625,
+          "max": 29.25653076171875
+        },
+        "cpuMs": {
+          "median": 13.493500000000001,
+          "min": 13.173,
+          "max": 14.198
+        },
+        "replyMs": {
+          "median": 4.719999999999999,
+          "min": 4.489583000000039,
+          "max": 4.83558400000004
+        },
+        "retainedArrayBufferBytes": {
+          "median": 16.0,
+          "min": 16,
+          "max": 16
+        }
+      }
+    },
+    {
+      "payloadMiB": 8.0,
+      "baseline": {
+        "footprintMiB": {
+          "median": 453.4461364746094,
+          "min": 450.884521484375,
+          "max": 453.978271484375
+        },
+        "cpuMs": {
+          "median": 94.81649999999999,
+          "min": 84.394,
+          "max": 107.523
+        },
+        "replyMs": {
+          "median": 60.50200000000001,
+          "min": 59.378584000000046,
+          "max": 74.338709
+        },
+        "retainedArrayBufferBytes": {
+          "median": 8388725.0,
+          "min": 8388725,
+          "max": 8388725
+        }
+      },
+      "candidate": {
+        "footprintMiB": {
+          "median": 41.178314208984375,
+          "min": 40.9127197265625,
+          "max": 41.50653076171875
+        },
+        "cpuMs": {
+          "median": 18.0815,
+          "min": 17.333,
+          "max": 19.483
+        },
+        "replyMs": {
+          "median": 9.634645499999976,
+          "min": 8.142708000000084,
+          "max": 10.003541999999982
+        },
+        "retainedArrayBufferBytes": {
+          "median": 16.0,
+          "min": 16,
+          "max": 16
+        }
+      }
+    }
+  ],
+  "scope": "Single actual native host, synthetic invalid settings frames, forced GC, no provider/Keychain/network/config changes; not whole-browser RAM or AI latency. CPU includes validation, transport and post-request forced GC."
+}

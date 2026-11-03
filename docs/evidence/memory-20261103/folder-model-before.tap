@@ -1,0 +1,87 @@
+TAP version 13
+# Subtest: persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+ok 1 - persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+  ---
+  duration_ms: 4.417458
+  ...
+# Subtest: restoring many folder states reads local pins a linear number of times
+not ok 2 - restoring many folder states reads local pins a linear number of times
+  ---
+  duration_ms: 62.30975
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/workspace-model.test.mjs:34:1'
+  failureType: 'testCodeFailure'
+  error: 'Repeated local scans read 500500 pins'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/sync/workspace-model.test.mjs:47:10)
+    Test.runInAsyncScope (node:async_hooks:211:14)
+    Test.run (node:internal/test_runner/test:979:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:677:18)
+    Test.postRun (node:internal/test_runner/test:1090:19)
+    Test.run (node:internal/test_runner/test:1018:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# 500500 local pin reads for 1000 folders
+# Subtest: folder expansion preserves the first match within the last matching local space
+ok 3 - folder expansion preserves the first match within the last matching local space
+  ---
+  duration_ms: 0.625291
+  ...
+# Subtest: two offline clients converge with concurrent rename, move, independent field edits and restart
+ok 4 - two offline clients converge with concurrent rename, move, independent field edits and restart
+  ---
+  duration_ms: 1.643834
+  ...
+# Subtest: deletions survive stale clients, later edits and concurrent folder/space removal
+ok 5 - deletions survive stale clients, later edits and concurrent folder/space removal
+  ---
+  duration_ms: 1.254833
+  ...
+# Subtest: same-field ties use stable client order; merge is associative
+ok 6 - same-field ties use stable client order; merge is associative
+  ---
+  duration_ms: 1.0145
+  ...
+# Subtest: appearance allowlist includes only supported preferences and keeps field-level changes
+ok 7 - appearance allowlist includes only supported preferences and keeps field-level changes
+  ---
+  duration_ms: 0.817792
+  ...
+# Subtest: malformed and future data reject without mutating either client
+ok 8 - malformed and future data reject without mutating either client
+  ---
+  duration_ms: 0.275667
+  ...
+# Subtest: concurrent deletion of different last spaces recovers a usable stable identity
+ok 9 - concurrent deletion of different last spaces recovers a usable stable identity
+  ---
+  duration_ms: 1.015625
+  ...
+# Subtest: concurrent capacity overflow rejects instead of silently losing saved items
+ok 10 - concurrent capacity overflow rejects instead of silently losing saved items
+  ---
+  duration_ms: 1.259208
+  ...
+# Subtest: clock and payload limits fail without replacing local state
+ok 11 - clock and payload limits fail without replacing local state
+  ---
+  duration_ms: 3.683209
+  ...
+# Subtest: incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+ok 12 - incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+  ---
+  duration_ms: 0.444
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 11
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 143.850083

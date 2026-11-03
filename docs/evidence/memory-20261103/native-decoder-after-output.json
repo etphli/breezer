@@ -1,0 +1,47 @@
+{
+  "node": "v24.22.1",
+  "source": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/features/ai/host/protocol.mjs",
+  "sourceSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+  "payloadBytes": 8388608,
+  "chunkBytes": 32768,
+  "rounds": 3,
+  "before": {
+    "rss": 54804480,
+    "heapTotal": 8224768,
+    "heapUsed": 4843600,
+    "external": 2401990,
+    "arrayBuffers": 143635
+  },
+  "after": {
+    "rss": 125796352,
+    "heapTotal": 39419904,
+    "heapUsed": 4989824,
+    "external": 2483666,
+    "arrayBuffers": 143651
+  },
+  "retainedArrayBufferBytes": 16,
+  "observations": [
+    {
+      "elapsedMs": 7.819457999999997,
+      "cpuUserMicros": 10762,
+      "cpuSystemMicros": 2967,
+      "concatCopiedBytes": 0,
+      "assemblySetBytes": 8388640
+    },
+    {
+      "elapsedMs": 7.2881249999999795,
+      "cpuUserMicros": 9253,
+      "cpuSystemMicros": 2583,
+      "concatCopiedBytes": 0,
+      "assemblySetBytes": 8388640
+    },
+    {
+      "elapsedMs": 6.0222499999999854,
+      "cpuUserMicros": 8116,
+      "cpuSystemMicros": 1968,
+      "concatCopiedBytes": 0,
+      "assemblySetBytes": 8388640
+    }
+  ],
+  "limits": "Production native frame decoder with synthetic JSON, fragmented input and forced GC. Buffer.concat and Buffer.set instrumentation count decoder assembly bytes. Not whole-browser RAM, unique memory or AI/provider latency."
+}

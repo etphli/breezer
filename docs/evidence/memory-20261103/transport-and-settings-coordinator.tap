@@ -1,0 +1,172 @@
+TAP version 13
+# Subtest: producer validates every historical sample/probe and rejects malformed records
+ok 1 - producer validates every historical sample/probe and rejects malformed records
+  ---
+  duration_ms: 7.642375
+  type: 'test'
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after startup failure
+ok 2 - owned SIGTERM-ignoring child is killed and reaped after startup failure
+  ---
+  duration_ms: 105.763334
+  type: 'test'
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after sample failure
+ok 3 - owned SIGTERM-ignoring child is killed and reaped after sample failure
+  ---
+  duration_ms: 101.890584
+  type: 'test'
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after write failure
+ok 4 - owned SIGTERM-ignoring child is killed and reaped after write failure
+  ---
+  duration_ms: 87.325792
+  type: 'test'
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after reply failure
+ok 5 - owned SIGTERM-ignoring child is killed and reaped after reply failure
+  ---
+  duration_ms: 112.420167
+  type: 'test'
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after close failure
+ok 6 - owned SIGTERM-ignoring child is killed and reaped after close failure
+  ---
+  duration_ms: 125.989916
+  type: 'test'
+  ...
+# Subtest: startup spawn error is observed and close reaped
+ok 7 - startup spawn error is observed and close reaped
+  ---
+  duration_ms: 0.941333
+  type: 'test'
+  ...
+# Subtest: original watchdog survives cleanup until child close
+ok 8 - original watchdog survives cleanup until child close
+  ---
+  duration_ms: 22.155084
+  type: 'test'
+  ...
+# Subtest: producer report boundary checks deltas, source identity, structure and optional diagnostics
+ok 9 - producer report boundary checks deltas, source identity, structure and optional diagnostics
+  ---
+  duration_ms: 2.183834
+  type: 'test'
+  ...
+# Subtest: focus assertions distinguish two inputs with the same label
+ok 10 - focus assertions distinguish two inputs with the same label
+  ---
+  duration_ms: 2.4065
+  type: 'test'
+  ...
+# Subtest: every appearance control maps to a declared bridge field and renders the reported value
+ok 11 - every appearance control maps to a declared bridge field and renders the reported value
+  ---
+  duration_ms: 50.455
+  type: 'test'
+  ...
+# Subtest: switches, radios and swatches each write one field and persist the reported value
+ok 12 - switches, radios and swatches each write one field and persist the reported value
+  ---
+  duration_ms: 107.466833
+  type: 'test'
+  ...
+# Subtest: keyboard steps on a slider keep focus and are all applied while a save is in flight
+ok 13 - keyboard steps on a slider keep focus and are all applied while a save is in flight
+  ---
+  duration_ms: 48.809292
+  type: 'test'
+  ...
+# Subtest: saving one setting does not disable or dim the others
+ok 14 - saving one setting does not disable or dim the others
+  ---
+  duration_ms: 43.892125
+  type: 'test'
+  ...
+# Subtest: a quick second click on a switch is applied instead of dropped
+ok 15 - a quick second click on a switch is applied instead of dropped
+  ---
+  duration_ms: 49.564
+  type: 'test'
+  ...
+# Subtest: arrowing through a radio group during a save selects the focused option
+ok 16 - arrowing through a radio group during a save selects the focused option
+  ---
+  duration_ms: 74.015208
+  type: 'test'
+  ...
+# Subtest: an outside appearance change does not reset a slider the user is dragging
+ok 17 - an outside appearance change does not reset a slider the user is dragging
+  ---
+  duration_ms: 48.08025
+  type: 'test'
+  ...
+# Subtest: a rejected change shows an error and the control reverts to the browser value
+ok 18 - a rejected change shows an error and the control reverts to the browser value
+  ---
+  duration_ms: 59.694791
+  type: 'test'
+  ...
+# Subtest: a browser that keeps a different value reports it
+ok 19 - a browser that keeps a different value reports it
+  ---
+  duration_ms: 26.664667
+  type: 'test'
+  ...
+# Subtest: without the bridge appearance controls are disabled but store-backed settings work
+ok 20 - without the bridge appearance controls are disabled but store-backed settings work
+  ---
+  duration_ms: 32.781458
+  type: 'test'
+  ...
+# Subtest: rows that cannot take effect in the current layout are marked muted
+ok 21 - rows that cannot take effect in the current layout are marked muted
+  ---
+  duration_ms: 34.191166
+  type: 'test'
+  ...
+# Subtest: tab behavior settings persist in the workspace store
+ok 22 - tab behavior settings persist in the workspace store
+  ---
+  duration_ms: 26.932708
+  type: 'test'
+  ...
+# Subtest: spaces: rename, recolor, reorder, add and two-step delete
+ok 23 - spaces: rename, recolor, reorder, add and two-step delete
+  ---
+  duration_ms: 68.181042
+  type: 'test'
+  ...
+# Subtest: a blank space name is rejected and the field shows the saved name again
+ok 24 - a blank space name is rejected and the field shows the saved name again
+  ---
+  duration_ms: 27.073292
+  type: 'test'
+  ...
+# Subtest: spaces changed elsewhere appear once the user leaves a name field
+ok 25 - spaces changed elsewhere appear once the user leaves a name field
+  ---
+  duration_ms: 33.140292
+  type: 'test'
+  ...
+# Subtest: browser settings links open beside the settings tab and report failures
+ok 26 - browser settings links open beside the settings tab and report failures
+  ---
+  duration_ms: 33.006583
+  type: 'test'
+  ...
+# Subtest: custom color saves through the native theme field and preset restores normally
+ok 27 - custom color saves through the native theme field and preset restores normally
+  ---
+  duration_ms: 36.289041
+  type: 'test'
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 903.939458

@@ -1,0 +1,158 @@
+{
+  "status": "Accepted after independent source/test and CPU review; local packet refreshed; native/physical-RAM acceptance open.",
+  "files": [
+    {
+      "path": "features/ai/extension/workspace-store.js",
+      "sha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "lines": 664,
+      "readRanges": [
+        [
+          225,
+          240
+        ],
+        [
+          526,
+          561
+        ]
+      ],
+      "status": "partial",
+      "notes": "Coordinator read changed helper/builder and verified six inverse replacements restore baseline. Independent workspace-index-review.json fully reads this current file/hash."
+    },
+    {
+      "path": "tests/ai/workspace-index-efficiency.test.mjs",
+      "sha256": "27a55c03b3d2766b42ec794384d994c91b9f19247c6e4d561e7e4807b2a709ab",
+      "lines": 88,
+      "readRanges": [
+        [
+          1,
+          88
+        ]
+      ],
+      "status": "fully-read"
+    }
+  ],
+  "source": {
+    "baselineSha256": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81",
+    "currentSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "exactSixReplacementInverseVerified": true
+  },
+  "implementation": "workspace-index-implementation.json",
+  "checks": [
+    {
+      "commandFile": "combined-workspace-index-command.json",
+      "log": "combined-workspace-index.tap",
+      "result": "381 pass, zero skips."
+    },
+    {
+      "command": "python3 -B tests/memory_package_test.py",
+      "result": "8 pass, synthetic packaging."
+    },
+    {
+      "commandFile": "workspace-index/coordinator-negative-command.json",
+      "log": "workspace-index/coordinator-negative.log",
+      "result": "Pinned original fails exactly new efficiency check; 3 behavior checks pass."
+    },
+    {
+      "command": "Copied full canonical workspace-browser.test.mjs, explicit root/fixture import, mock Keychain, loopback-only route and owned Chrome156",
+      "manifest": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-workspace-index-browser-tvdp47yw/manifest.json",
+      "script": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-workspace-index-browser-tvdp47yw/workspace-browser.test.mjs",
+      "log": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-workspace-index-browser-tvdp47yw/browser.log",
+      "result": "9 original tests pass, zero skips; all assertions retained. Covers route teardown/reload, held clicks/empty spaces, pinning/collapse, inactive/loading updates, title/favicon/audio state, drag/drop, keyboard/rename, numbered favorites and saved slots, reorder/restart and per-window scope.",
+      "sourceHashes": {
+        "features/ai/extension/workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+        "features/ai/extension/workspace.js": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670",
+        "features/ai/extension/workspace.html": "8ed520d8ac4d2df8d22dec5b79a7ad6868e87bdca2275833d53f9b0a8197dcf5",
+        "tests/ai/workspace-browser.test.mjs": "ac09a857ff0c3ac639c0e8c3db5301bed67dd995f89ad5c7f6b64a34bf4efb37",
+        "tests/ai/workspace-browser-fixture.mjs": "0553c8a81a8549b84586544698e568fa0149194c09862d7b22aa486d595f9a01"
+      },
+      "ownedBrowsersClosed": 9,
+      "blockedExternalRequests": [],
+      "scope": "Disposable Chrome fixture, synthetic extension APIs. Native host/app behavior and RAM/CPU not measured."
+    },
+    {
+      "command": "git diff --check",
+      "result": "Pass."
+    },
+    {
+      "command": "SHA256SUMS, current-source byte comparisons, ten before/after pins vs cached PC plan, eleven host hashes",
+      "result": "29 checksums,10 compiled resources,11 host modules match; local staging only."
+    }
+  ],
+  "packet": {
+    "updated": true,
+    "verification": "workspace-index-packet-validation.json",
+    "packet": "/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/build/efficiency-20261102/pc-packet",
+    "checksumFiles": 29,
+    "compiledResources": {
+      "page-context.js": {
+        "before": "5f2d2162e260103aea561da9f83bc95b6c2608105db718f66b410fe2c8747790",
+        "after": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4"
+      },
+      "translation-content.js": {
+        "before": "b7b5284f1a0f7db0a88ff9f95893dabc0c10c256a7629c244dfed7e4a86a215f",
+        "after": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d"
+      },
+      "workspace.js": {
+        "before": "7ca0a6b76bb2c17cb21d860b53ce66fa892d2c0d90fd1b6ca0a66402ff8c9953",
+        "after": "ef7b3e8d13caf5b1b49820e0ebda91228656a5f0b99f2a62cc980f4d89ec9670"
+      },
+      "workspace-sync.js": {
+        "before": "a8d3fc3064758b6f1d7814a616bdbb82ba19d6df5dd71e65a31b9dccc073f1ea",
+        "after": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19"
+      },
+      "workspace-sync-model.js": {
+        "before": "f97e326df1b1ab8add1bcefa8c1aacbc0da08cc0adb9f0492c4e0264b55537f9",
+        "after": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a"
+      },
+      "workspace-store.js": {
+        "before": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+        "after": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842"
+      },
+      "newtab.js": {
+        "before": "9be0e837b86f877f2c1aa25867f9ef017e61a4e76044fc2ea3a0f5f29b0d5d75",
+        "after": "217580323c479c7a07a9d4498c9a5d3c5348e515d0413f3a0f083e9abcf04b62"
+      },
+      "panel.js": {
+        "before": "dc0f37319f2a650997d944a9ba0804b0f281501d61f122144759c61dae9495ca",
+        "after": "ad916a3144c3a00d2884fad919ab0e0cdc1e115639e3e69dfa6a588780d67ff2"
+      },
+      "render-message.js": {
+        "before": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "after": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35"
+      },
+      "native-provider-transport.cc": {
+        "before": "3660bf9123234227399b3081d44cebcb48d1c6575e77e91bbd83265b751fe1eb",
+        "after": "5b0f0b28e958e0e8e1a3dc6ab55bb00b850608d13bfee2292714d4ee26532e00"
+      }
+    },
+    "hostModules": {
+      "claude.mjs": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "cli.mjs": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "codex.mjs": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "context-controller.mjs": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "context-summary.mjs": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "controller.mjs": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "main.mjs": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "organato.mjs": "6c72e8cce7d6b033f164991dbe9e0f497477550a20890fc40b9a370795cd47b7",
+      "protocol.mjs": "448ad4774dcc0983b8d17571fc11dbd62ea4d0f3c32ef714024096634d0dda2c",
+      "update-worker.mjs": "bee4629e7f7c5495d87c884189ca8b417519e108d2446c0ac676eee959fc698f",
+      "updater.mjs": "3e9fa83d72dba55e1fca3a76d4d7eff3fa6888f846d95ae2830bfc60f91ad9f6"
+    },
+    "allPacketBytesMatchCurrentSources": true,
+    "beforePinsMatchCachedPlan": true,
+    "pcContacted": false,
+    "deployed": false
+  },
+  "limits": [
+    "Logical wrapper constructions are not physical allocations; V8 may eliminate source-level objects. Map and output data structures remain.",
+    "Independent targeted CPU recheck found no repeatable material regression; no general or precise CPU speedup claim.",
+    "Containing space references remain live in transient indexes; no cache or new persistent owner introduced.",
+    "Canonical browser fixture assertions do not prove packaged/native integration or physical RAM savings.",
+    "Initial manual QA launch path typo failed before launching a process; corrected launch reads the recorded directory from a manifest. Original diagnostic output remains in transcript.",
+    "No installed Breezer/user profile/credential/cache changes; no PC probe/contact/start/deploy/schedule, commit/push/publication."
+  ],
+  "review": {
+    "report": "workspace-index-review.json",
+    "result": "Accept; no blocking finding. Independent cases and Node22/24 checks pass. Two isolated CPU recheck rounds did not reproduce material regression."
+  }
+}

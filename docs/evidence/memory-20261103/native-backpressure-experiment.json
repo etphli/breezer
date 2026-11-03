@@ -1,0 +1,1658 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "status": "REJECT_BOTH_PROTOTYPES_PRECISE_PROTOCOL_BLOCKER",
+  "model": "gpt-6.1-sol",
+  "runtime": {
+    "node": "v22.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "execPath": "/Users/likht.ethan/.local/node/bin/node"
+  },
+  "recommendation": {
+    "adoptReady": false,
+    "productionChanges": false,
+    "decision": "Do not adopt either local patch. Neither preserves all existing semantics while bounding aggregate retained output.",
+    "blocker": "A single ordered provider stdout channel carries arbitrarily many deltas before acknowledgments, control/tool requests and completion. Stopping its parser bounds local admission but prevents servicing the later control traffic before existing deadlines. Reading ahead to find that traffic requires retaining arbitrarily many lossless deltas somewhere. Awaiting send only works if every producer, controller and callback participates; the existing EventEmitter chain does not. Pausing a pipe does not establish that the provider bounds its own output queue.",
+    "nextDesignRequirements": [
+      "Specify and verify provider-side bounded credit/demand all the way back to output production. Anonymous stdio Writable pressure alone is insufficient if the child ignores false.",
+      "Establish a control-plane progress guarantee independent of blocked data: separate channel or documented bound/order on early data before initialization/turn acknowledgments and control/tool frames. A lookahead parser without such a guarantee merely adds another queue.",
+      "Replace ignored EventEmitter emission promises with an explicit ordered admission contract at every streaming and terminal producer, including both providers, controller, summaries, initialization/status, updater and Organato replies. Concurrent native receive currently uses void receive; a writer alone cannot limit those entrants.",
+      "Define ownership of cancellation and writer failure: reject pending admission, detach drain listeners, close/reap only owned processes, keep already-admitted output order, suppress stale emissions and prevent tool delivery after timeout. Never pause or extend existing timers merely to make a prototype pass.",
+      "Retain all existing tool/security preflight checks. A bounded spool or overload cancellation policy would be a separate product/protocol decision, not a semantics-preserving local fix. Do not drop/coalesce messages or introduce arbitrary queue ceilings."
+    ]
+  },
+  "scope": {
+    "allowedWrites": [
+      "build/efficiency-20261103/native-backpressure-experiment.json",
+      "build/efficiency-20261103/native-backpressure-experiment/**"
+    ],
+    "executed": "Owned Node fixtures with empty env and stdio pipe; actual frozen JsonLineProcess, ContextHostController, HostController and protocol encoder only. No CodexProvider/ClaudeProvider imported or instantiated.",
+    "forbiddenActionsPerformed": false,
+    "noNetwork": true,
+    "noRealProviderCliAccountAuthKeychainProfileAccess": true,
+    "noInstalledAppBrowserChromiumBuildRunInstall": true,
+    "noGitMutations": true,
+    "noPCContact": true,
+    "pythonInvocations": 0,
+    "providerCallbackHandlers": "worker.mjs fake provider is explicitly a cloned type/handler model of delta/done/tool callbacks, not execution of actual provider callback bodies. main send is a source-derived writer clone with counters/error ownership, not main.mjs execution. Provider modules and main are read-only evidence.",
+    "sourceFreeze": "Seven requested modules copied and sha256 checked before experiments. Self-contained context-summary dependency copied and hashed before any execution. Frozen copies power every run. prepare.mjs records initial hashes and builds prototype A from the frozen cli copy.",
+    "audit": "NH-02 from native-host-audit.json is historical evidence; its older source hashes are not current baselines. Current protocol and CLI match user-provided hashes."
+  },
+  "sourceHashes": [
+    {
+      "path": "features/ai/host/main.mjs",
+      "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "bytes": 3388,
+      "copySha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "endSha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 60
+    },
+    {
+      "path": "features/ai/host/protocol.mjs",
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "bytes": 16858,
+      "copySha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "endSha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 162
+    },
+    {
+      "path": "features/ai/host/cli.mjs",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "bytes": 5658,
+      "copySha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "endSha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 108
+    },
+    {
+      "path": "features/ai/host/controller.mjs",
+      "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "bytes": 4877,
+      "copySha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "endSha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 94
+    },
+    {
+      "path": "features/ai/host/context-controller.mjs",
+      "sha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "bytes": 2244,
+      "copySha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "endSha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 46
+    },
+    {
+      "path": "features/ai/host/context-summary.mjs",
+      "sha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "bytes": 5389,
+      "copySha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "endSha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 76
+    },
+    {
+      "path": "features/ai/host/codex.mjs",
+      "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "bytes": 19447,
+      "copySha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "endSha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 312
+    },
+    {
+      "path": "features/ai/host/claude.mjs",
+      "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "bytes": 13672,
+      "copySha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "endSha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384",
+      "unchanged": true,
+      "fullyRead": true,
+      "lines": 212
+    }
+  ],
+  "dataPath": [
+    {
+      "path": "main.mjs:24-29,48-51",
+      "finding": "send synchronously encodes every message and ignores stdout.write false; input decoding creates a messages array per received chunk and launches receives without awaiting them. Per-frame output cap is 1 MiB; aggregate queue is unbounded."
+    },
+    {
+      "path": "controller.mjs:39-49,61-68,85-94",
+      "finding": "emit does not return send result; complete/error/init/tool/cancel sends are not awaited. Browser tool deadline begins before send delivery. Cancellation invalidates run and aborts provider, but already-admitted frames stay in FIFO."
+    },
+    {
+      "path": "context-controller.mjs:1-46 and context-summary.mjs:30-76",
+      "finding": "Adapter inherits ordinary flow, summary sends result then complete synchronously. Summary accumulator has 4000-character cap and 45s timeout; this is not a bound on ordinary chat output."
+    },
+    {
+      "path": "cli.mjs:39-101",
+      "finding": "setEncoding preserves fragmented UTF-8; decoded incomplete line and current-chunk suffix live in #buffer. 16 Mi-character guard is existing input safety limit, not native output aggregate cap. for-loop dispatch is synchronous and keeps parsing current chunk regardless of stdout.pause(). Numeric id/string control request_id match pending map; deadlines keep running; late replies become notifications. send to child stdin also ignores false, not fixed here."
+    },
+    {
+      "path": "codex.mjs:165-175,251-323",
+      "finding": "initialize is awaited before start returns; onMessage listeners for streaming attach later. Thus synthetic initialize-early-delta transport case is not proof that current Codex forwards deltas during initialize. The listener IS attached before thread/start and turn/start acknowledgment; early deltas there can cause pressure while request is pending. Emit ignores async results; tool replies use independent Promise chains and complete resolves done."
+    },
+    {
+      "path": "claude.mjs:chat and round",
+      "finding": "control initialize precedes round listener. round synchronous EventEmitter callback emits streamed/final deltas and resolves output without awaiting emit; 5-minute round timer runs independently. Native control requests are denied synchronously when parsed, so pausing the shared parser delays even refusal. No actual Claude code is executed."
+    }
+  ],
+  "accumulation": {
+    "nativeEncodedBytes": "Node process.stdout Writable queue after kernel/stdout channel accepts what it can. writableLength is logical queued bytes, not physical RAM. Parent reader is genuinely paused with no data handler until release.",
+    "jsMessages": "Baseline JsonLineProcess parses one line at a time; no async message backlog in its dispatch itself. Prototype B promise chain closures retain messages and text while ordered writer waits for drain. Controller pending tool/request bookkeeping remains separately live.",
+    "incompleteLines": "Decoded JS string #buffer holds incomplete lines and, for A, unparsed suffix of the current chunk. Focused test stops at parsed=1 of 3 coalesced lines. Independent 1 Mi-character no-newline test retains 1048576 characters and emits no messages.",
+    "childBytes": "Pausing A leaves bytes in child.stdout readable buffer and anonymous channel; cooperative fixture waits on drain with one current write, but this does not bound actual providers. Pressure-ignoring fixture queued maxChildWritable=16789442 bytes in child Node Writable. Coalesced fixture also prebuilds a finite block; this generator allocation is synthetic and not a provider memory measurement.",
+    "unknowns": "Kernel channel occupancy/capacity and actual provider internal queues were not measured. JS character counts cannot be summed as encoded bytes or physical allocation. No browser or whole-machine RAM claim."
+  },
+  "prototypes": [
+    {
+      "name": "A writer pressure -> child stdout pause plus mid-chunk parser gate",
+      "file": "cli-pressure.mjs and worker.mjs mode pressure",
+      "sourceDerived": true,
+      "verdict": "REJECT",
+      "results": "Native writer stays near one frame in tested stream. Repeated 256 pause/drain cycles preserve 256 delta order in direct transport after release. Numeric and control acknowledgments behind deltas time out. Actual controller model closes early on that timeout, giving only two deltas then error. Controls/tool requests behind pause are unserviced. Ignoring pressure upstream recreates the queue in the child.",
+      "failure": "Closed writer closes/reaps child, but prototype leaves one pending drain listener. Small cleanup fix alone cannot resolve the protocol blocker."
+    },
+    {
+      "name": "B asynchronous ordered admission writer with existing synchronous callers",
+      "file": "worker.mjs mode async",
+      "sourceDerived": true,
+      "verdict": "REJECT",
+      "results": "Native writer stays near one frame but retains up to 255 JS message closures / 16711680 text characters for 256 deltas; controller complete can add another pending message. Responses and denial handling continue because parser keeps flowing, at the cost of that unbounded backlog. Existing browser tool timeout fires while tool frame is queued behind deltas.",
+      "failure": "On writer error queued closures eventually reject/clear in this finite fixture; no delivery guarantee or cancellation contract is established. Async send alone cannot fix ignored controller/EventEmitter results."
+    }
+  ],
+  "experimentSummary": [
+    {
+      "name": "upstream-ignores-pressure",
+      "mode": "pressure",
+      "frames": 256,
+      "maxNativeWritableBytes": 65588,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 73772,
+        "parsed": 258,
+        "pauses": 256,
+        "resumes": 256
+      },
+      "acks": [
+        {
+          "error": "CLI request timed out."
+        }
+      ],
+      "controls": [
+        null,
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 471.401167,
+      "lastFrameMs": 593.050625,
+      "cleanup": [
+        {
+          "pid": 96077,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96075,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "real-pipe-growth-128",
+      "mode": "baseline",
+      "frames": 128,
+      "maxNativeWritableBytes": 8329568,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 340.37483399999985,
+      "lastFrameMs": 358.158,
+      "cleanup": [
+        {
+          "pid": 96099,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96098,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "real-pipe-growth-256",
+      "mode": "baseline",
+      "frames": 256,
+      "maxNativeWritableBytes": 16724832,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 336.5975830000002,
+      "lastFrameMs": 370.3602500000002,
+      "cleanup": [
+        {
+          "pid": 96105,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96103,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "blocked-burst",
+      "mode": "pressure",
+      "frames": 256,
+      "maxNativeWritableBytes": 65588,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 73728,
+        "parsed": 258,
+        "pauses": 256,
+        "resumes": 256
+      },
+      "acks": [
+        {
+          "error": "CLI request timed out."
+        }
+      ],
+      "controls": [
+        null,
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 324.56558399999994,
+      "lastFrameMs": 436.51695900000004,
+      "cleanup": [
+        {
+          "pid": 96116,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96115,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "early-deltas-before-ack-and-controls",
+      "mode": "pressure",
+      "frames": 200,
+      "maxNativeWritableBytes": 66352,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 12286,
+        "parsed": 204,
+        "pauses": 2,
+        "resumes": 2
+      },
+      "acks": [
+        {
+          "error": "CLI request timed out."
+        }
+      ],
+      "controls": [
+        "tool",
+        "control_request",
+        null,
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 338.5037080000002,
+      "lastFrameMs": 356.942583,
+      "cleanup": [
+        {
+          "pid": 96128,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96127,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "control-response-behind-deltas",
+      "mode": "pressure",
+      "frames": 200,
+      "maxNativeWritableBytes": 66368,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 12286,
+        "parsed": 202,
+        "pauses": 2,
+        "resumes": 2
+      },
+      "acks": [
+        {
+          "error": "CLI request timed out."
+        }
+      ],
+      "controls": [
+        "control_response",
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 336.83958299999995,
+      "lastFrameMs": 355.0864999999999,
+      "cleanup": [
+        {
+          "pid": 96133,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96132,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "controller-timeout",
+      "mode": "pressure",
+      "frames": 3,
+      "maxNativeWritableBytes": 65653,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 81966,
+        "parsed": 2,
+        "pauses": 2,
+        "resumes": 1
+      },
+      "acks": [],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 338.32020800000055,
+      "lastFrameMs": 339.1230410000003,
+      "cleanup": [
+        {
+          "pid": 96139,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96138,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "cancel-paused",
+      "mode": "pressure",
+      "frames": 2,
+      "maxNativeWritableBytes": 65586,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 81966,
+        "parsed": 2,
+        "pauses": 2,
+        "resumes": 1
+      },
+      "acks": [
+        {
+          "error": "CLI request timed out."
+        }
+      ],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 342.11983300000065,
+      "lastFrameMs": 343.32245800000055,
+      "cleanup": [
+        {
+          "pid": 96144,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96142,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "closed-writer",
+      "mode": "pressure",
+      "frames": 0,
+      "maxNativeWritableBytes": 65586,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 81966,
+        "parsed": 2,
+        "pauses": 2,
+        "resumes": 1
+      },
+      "acks": [
+        {
+          "error": "CLI request timed out."
+        }
+      ],
+      "controls": [],
+      "writerErrors": 1,
+      "remainingDrainListeners": 1,
+      "firstFrameMs": null,
+      "lastFrameMs": null,
+      "cleanup": [
+        {
+          "pid": 96149,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96147,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "fragmented-utf8",
+      "mode": "pressure",
+      "frames": 20,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 984,
+        "parsed": 22,
+        "pauses": 0,
+        "resumes": 0
+      },
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 147.1468329999998,
+      "lastFrameMs": 147.86049999999977,
+      "cleanup": [
+        {
+          "pid": 96152,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96151,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "coalesced-lines",
+      "mode": "pressure",
+      "frames": 100,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 5238,
+        "parsed": 102,
+        "pauses": 0,
+        "resumes": 0
+      },
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 143.68562500000007,
+      "lastFrameMs": 144.5645000000004,
+      "cleanup": [
+        {
+          "pid": 96157,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96156,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "controller-success",
+      "mode": "pressure",
+      "frames": 9,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 594,
+        "parsed": 10,
+        "pauses": 0,
+        "resumes": 0
+      },
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 138.23858400000063,
+      "lastFrameMs": 140.28629199999978,
+      "cleanup": [
+        {
+          "pid": 96160,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96159,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "controller-error",
+      "mode": "pressure",
+      "frames": 9,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 596,
+        "parsed": 10,
+        "pauses": 0,
+        "resumes": 0
+      },
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 147.5688339999997,
+      "lastFrameMs": 149.71491700000024,
+      "cleanup": [
+        {
+          "pid": 96162,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96161,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "tool-timeout-while-blocked",
+      "mode": "pressure",
+      "frames": 3,
+      "maxNativeWritableBytes": 65653,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 81966,
+        "parsed": 2,
+        "pauses": 2,
+        "resumes": 1
+      },
+      "acks": [],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 322.72562500000095,
+      "lastFrameMs": 323.37787500000013,
+      "cleanup": [
+        {
+          "pid": 96176,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96175,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "blocked-burst",
+      "mode": "async",
+      "frames": 256,
+      "maxNativeWritableBytes": 65588,
+      "maxJsPendingMessages": 255,
+      "maxJsPendingTextCharacters": 16711680,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 333.6404170000005,
+      "lastFrameMs": 425.2536250000012,
+      "cleanup": [
+        {
+          "pid": 96184,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96182,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "early-deltas-before-ack-and-controls",
+      "mode": "async",
+      "frames": 200,
+      "maxNativeWritableBytes": 66368,
+      "maxJsPendingMessages": 168,
+      "maxJsPendingTextCharacters": 688128,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "tool",
+        "control_request",
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 334.1158340000002,
+      "lastFrameMs": 346.5724590000009,
+      "cleanup": [
+        {
+          "pid": 96192,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96190,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "control-response-behind-deltas",
+      "mode": "async",
+      "frames": 200,
+      "maxNativeWritableBytes": 66368,
+      "maxJsPendingMessages": 168,
+      "maxJsPendingTextCharacters": 688128,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 331.05908400000044,
+      "lastFrameMs": 343.1077089999999,
+      "cleanup": [
+        {
+          "pid": 96202,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96199,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "controller-timeout",
+      "mode": "async",
+      "frames": 257,
+      "maxNativeWritableBytes": 65588,
+      "maxJsPendingMessages": 256,
+      "maxJsPendingTextCharacters": 16711680,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 326.42766699999993,
+      "lastFrameMs": 411.4419170000001,
+      "cleanup": [
+        {
+          "pid": 96210,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96209,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "cancel-paused",
+      "mode": "async",
+      "frames": 256,
+      "maxNativeWritableBytes": 65588,
+      "maxJsPendingMessages": 255,
+      "maxJsPendingTextCharacters": 16711680,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 330.70029200000135,
+      "lastFrameMs": 418.4220000000005,
+      "cleanup": [
+        {
+          "pid": 96218,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96217,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "closed-writer",
+      "mode": "async",
+      "frames": 0,
+      "maxNativeWritableBytes": 65586,
+      "maxJsPendingMessages": 255,
+      "maxJsPendingTextCharacters": 16711680,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 1,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": null,
+      "lastFrameMs": null,
+      "cleanup": [
+        {
+          "pid": 96228,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96225,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "fragmented-utf8",
+      "mode": "async",
+      "frames": 20,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 19,
+      "maxJsPendingTextCharacters": 95,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 147.44337500000074,
+      "lastFrameMs": 148.15504200000032,
+      "cleanup": [
+        {
+          "pid": 96235,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96233,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "coalesced-lines",
+      "mode": "async",
+      "frames": 100,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 100,
+      "maxJsPendingTextCharacters": 500,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 145.6434160000008,
+      "lastFrameMs": 146.3328330000004,
+      "cleanup": [
+        {
+          "pid": 96239,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96238,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "controller-success",
+      "mode": "async",
+      "frames": 9,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 7,
+      "maxJsPendingTextCharacters": 224,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 148.57154099999934,
+      "lastFrameMs": 150.44074999999975,
+      "cleanup": [
+        {
+          "pid": 96244,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96243,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "controller-error",
+      "mode": "async",
+      "frames": 9,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 7,
+      "maxJsPendingTextCharacters": 224,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 132.1418330000015,
+      "lastFrameMs": 133.9697920000017,
+      "cleanup": [
+        {
+          "pid": 96246,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96245,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "tool-timeout-while-blocked",
+      "mode": "async",
+      "frames": 130,
+      "maxNativeWritableBytes": 65588,
+      "maxJsPendingMessages": 129,
+      "maxJsPendingTextCharacters": 8323072,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "deny-1",
+        "The browser action timed out."
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 339.3208340000001,
+      "lastFrameMs": 390.79054200000064,
+      "cleanup": [
+        {
+          "pid": 96248,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96247,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "normal-unblocked",
+      "mode": "baseline",
+      "frames": 4096,
+      "maxNativeWritableBytes": 36019,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 146.4827089999999,
+      "lastFrameMs": 169.49291699999958,
+      "cleanup": [
+        {
+          "pid": 96250,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96249,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "normal-unblocked",
+      "mode": "pressure",
+      "frames": 4096,
+      "maxNativeWritableBytes": 25702,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 8342,
+        "parsed": 4098,
+        "pauses": 0,
+        "resumes": 0
+      },
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 142.72354199999972,
+      "lastFrameMs": 164.74504199999865,
+      "cleanup": [
+        {
+          "pid": 96252,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96251,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "normal-unblocked",
+      "mode": "async",
+      "frames": 4096,
+      "maxNativeWritableBytes": 60454,
+      "maxJsPendingMessages": 47,
+      "maxJsPendingTextCharacters": 6016,
+      "acks": [
+        {
+          "ok": true
+        }
+      ],
+      "controls": [
+        "done"
+      ],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": 143.78708299999926,
+      "lastFrameMs": 164.960750000002,
+      "cleanup": [
+        {
+          "pid": 96254,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96253,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    },
+    {
+      "name": "incomplete-line",
+      "mode": "pressure",
+      "frames": 0,
+      "maxNativeWritableBytes": 0,
+      "maxJsPendingMessages": 0,
+      "maxJsPendingTextCharacters": 0,
+      "parser": {
+        "maxBufferCharacters": 1048576,
+        "parsed": 0,
+        "pauses": 0,
+        "resumes": 0
+      },
+      "acks": [],
+      "controls": [],
+      "writerErrors": 0,
+      "remainingDrainListeners": 0,
+      "firstFrameMs": null,
+      "lastFrameMs": null,
+      "cleanup": [
+        {
+          "pid": 96256,
+          "exitCode": null,
+          "signalCode": "SIGTERM"
+        }
+      ],
+      "worker": {
+        "pid": 96255,
+        "exitCode": 0,
+        "signalCode": null
+      }
+    }
+  ],
+  "focusedChecks": {
+    "checks": [
+      {
+        "test": "stop mid coalesced chunk and resume preserving Unicode/order",
+        "pass": true,
+        "stopped": {
+          "messages": 1,
+          "stats": {
+            "maxBufferCharacters": 153,
+            "parsed": 1,
+            "pauses": 1,
+            "resumes": 0
+          }
+        },
+        "final": {
+          "maxBufferCharacters": 153,
+          "parsed": 3,
+          "pauses": 1,
+          "resumes": 1
+        }
+      },
+      {
+        "test": "UTF-8 codepoints and JSON line fragmented into delayed individual byte writes",
+        "pass": true
+      },
+      {
+        "test": "concurrent reversed numeric request and string control response correlation",
+        "pass": true
+      },
+      {
+        "test": "cancel while paused rejects pending and reaps SIGTERM-resistant owned child",
+        "pass": true,
+        "elapsedMs": 1004.5751660000001,
+        "signal": "SIGKILL"
+      },
+      {
+        "test": "actual context/controller forged tool result rejected; matching id and requestId accepted",
+        "pass": true,
+        "events": [
+          {
+            "type": "tool",
+            "id": "one"
+          },
+          {
+            "type": "error",
+            "id": "wrong"
+          },
+          {
+            "type": "complete",
+            "id": "one"
+          }
+        ]
+      },
+      {
+        "test": "tool timeout starts on enqueue even without delivery acknowledgment",
+        "pass": true,
+        "events": [
+          {
+            "type": "tool",
+            "id": "timeout",
+            "requestId": "462072e9-a836-4090-93a2-ba7e75938403",
+            "name": "browser_snapshot",
+            "args": {}
+          },
+          {
+            "type": "error",
+            "id": "timeout",
+            "error": "The browser action timed out."
+          }
+        ]
+      }
+    ],
+    "cleanup": [
+      {
+        "pid": 96101,
+        "exitCode": null,
+        "signalCode": "SIGTERM"
+      },
+      {
+        "pid": 96102,
+        "exitCode": null,
+        "signalCode": "SIGTERM"
+      },
+      {
+        "pid": 96106,
+        "exitCode": null,
+        "signalCode": "SIGTERM"
+      },
+      {
+        "pid": 96107,
+        "exitCode": null,
+        "signalCode": "SIGKILL"
+      }
+    ]
+  },
+  "assertions": [
+    {
+      "name": "upstream-ignores-pressure/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "real-pipe-growth-128/baseline: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "real-pipe-growth-256/baseline: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "blocked-burst/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "early-deltas-before-ack-and-controls/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "control-response-behind-deltas/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "controller-timeout/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "cancel-paused/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "closed-writer/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "fragmented-utf8/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "fragmented-utf8/pressure: exact Unicode and sequence",
+      "pass": true
+    },
+    {
+      "name": "coalesced-lines/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "coalesced-lines/pressure: exact Unicode and sequence",
+      "pass": true
+    },
+    {
+      "name": "controller-success/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "controller-success/pressure: delta order then terminal with matching chat id",
+      "pass": true
+    },
+    {
+      "name": "controller-error/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "controller-error/pressure: delta order then terminal with matching chat id",
+      "pass": true
+    },
+    {
+      "name": "tool-timeout-while-blocked/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "blocked-burst/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "early-deltas-before-ack-and-controls/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "control-response-behind-deltas/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "controller-timeout/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "cancel-paused/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "closed-writer/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "fragmented-utf8/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "fragmented-utf8/async: exact Unicode and sequence",
+      "pass": true
+    },
+    {
+      "name": "coalesced-lines/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "coalesced-lines/async: exact Unicode and sequence",
+      "pass": true
+    },
+    {
+      "name": "controller-success/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "controller-success/async: delta order then terminal with matching chat id",
+      "pass": true
+    },
+    {
+      "name": "controller-error/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "controller-error/async: delta order then terminal with matching chat id",
+      "pass": true
+    },
+    {
+      "name": "tool-timeout-while-blocked/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "normal-unblocked/baseline: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "normal-unblocked/baseline: all 4096 messages",
+      "pass": true
+    },
+    {
+      "name": "normal-unblocked/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "normal-unblocked/pressure: all 4096 messages",
+      "pass": true
+    },
+    {
+      "name": "normal-unblocked/async: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "normal-unblocked/async: all 4096 messages",
+      "pass": true
+    },
+    {
+      "name": "incomplete-line/pressure: writer framing valid, worker and child reaped",
+      "pass": true
+    },
+    {
+      "name": "pressure gate delays numeric acknowledgment beyond unchanged deadline",
+      "pass": true
+    },
+    {
+      "name": "pressure gate delays string control response beyond unchanged deadline",
+      "pass": true
+    },
+    {
+      "name": "async writer retains upstream JS messages",
+      "pass": true
+    },
+    {
+      "name": "async blocked tool retains existing tool timeout",
+      "pass": true
+    },
+    {
+      "name": "controller pressure gate early timeout terminates remaining deltas",
+      "pass": true
+    },
+    {
+      "name": "closed writers trigger failure in both prototypes",
+      "pass": true
+    },
+    {
+      "name": "focused checks all passed and owned children exited",
+      "pass": true
+    }
+  ],
+  "deadlines": {
+    "workerHardDeadlineMs": 4500,
+    "parentWatchdogQuitMs": 5000,
+    "parentPostQuitWaitMs": 2500,
+    "readerBlockedMs": 310,
+    "fixtureRequestDeadlineMs": 180,
+    "fixtureToolDeadlineMs": 150,
+    "focusedToolDeadlineMs": 40,
+    "productionRequestDeadlineMs": 30000,
+    "productionToolDeadlineMs": 60000,
+    "productionClaudeRoundDeadlineMs": 300000,
+    "productionContextSummaryDeadlineMs": 45000,
+    "notes": "Short fixture deadlines accelerate the same unchanged timer algorithm. They are not proposed production changes. Parent schedules snapshot and release using bounded waits; startup variance can make first snapshot precede child output. No claim of a representative real-provider timeout frequency."
+  },
+  "verification": {
+    "suiteCases": 29,
+    "focusedCases": 6,
+    "assertionCount": 47,
+    "allPassed": true,
+    "syntax": [
+      {
+        "file": "check-child.mjs",
+        "pid": 98320,
+        "status": 0
+      },
+      {
+        "file": "checks.mjs",
+        "pid": 98321,
+        "status": 0
+      },
+      {
+        "file": "cli-pressure.mjs",
+        "pid": 98323,
+        "status": 0
+      },
+      {
+        "file": "extend.mjs",
+        "pid": 98325,
+        "status": 0
+      },
+      {
+        "file": "fake-child.mjs",
+        "pid": 98326,
+        "status": 0
+      },
+      {
+        "file": "finalize-fixtures.mjs",
+        "pid": 98327,
+        "status": 0
+      },
+      {
+        "file": "prepare.mjs",
+        "pid": 98328,
+        "status": 0
+      },
+      {
+        "file": "report.mjs",
+        "pid": 98329,
+        "status": 0
+      },
+      {
+        "file": "run.mjs",
+        "pid": 98332,
+        "status": 0
+      },
+      {
+        "file": "worker.mjs",
+        "pid": 98333,
+        "status": 0
+      }
+    ],
+    "sourceDrift": false,
+    "terminalOrdering": "Both small unblocked controller runs produce eight ordered deltas and then complete or error with matching id. Pressure timeout produces error after only the admitted deltas; this is a counterexample, not successful equivalence.",
+    "normalOverhead": "All three modes deliver 4096 ordered messages unblocked. A has no pressure cycles in this sample; B has promise-chain/message retention overhead even unblocked. First/last frame times include process startup and scheduling; one sample per mode is not a benchmark or evidence of negligible overhead. A adds parser gate check per line; B schedules at least one promise continuation per send.",
+    "cleanup": "Every worker final snapshot follows await rpc.close(), which resolves on owned child close. Every parent observed its own worker exitCode 0. Focused stubborn-child test required SIGKILL after the existing ~1s escalation and awaited close. No process inventory/probe or non-owned kill was used. Earlier exploratory runs also completed with all workers/children reaped; logs were replaced by final reproducible suite.",
+    "limitations": [
+      "Only the finite tested workload is bounded by the harness; no universal resource bound proved.",
+      "Provider callback mapping is an explicitly labelled fake; actual provider/native host/security preflight not run.",
+      "Initialization-early-delta reachability differs from turn/start: listeners are installed after initialize in current providers. Generic transport tests challenge ordering but do not establish a current real CLI sends early data.",
+      "No broad repository suite run because it can reach prohibited provider/config/network paths. No production adoption or app validation.",
+      "Output failure means no reliable final error can be delivered on that same closed output pipe.",
+      "No pause-only third prototype was implemented. Its current-chunk weakness follows directly from unchanged synchronous parser loop, contrasted with A focused parser-gate test."
+    ]
+  },
+  "runnableCommands": [
+    "node build/efficiency-20261103/native-backpressure-experiment/run.mjs > build/efficiency-20261103/native-backpressure-experiment/run.log 2>&1",
+    "node build/efficiency-20261103/native-backpressure-experiment/checks.mjs > build/efficiency-20261103/native-backpressure-experiment/checks.log 2>&1",
+    "node build/efficiency-20261103/native-backpressure-experiment/report.mjs"
+  ],
+  "reproductionNotes": "Run from repository root, using already-frozen sources and final fixture files. Do not rerun extend.mjs/finalize-fixtures.mjs: these are historical one-shot fixture construction scripts, not test prerequisites. prepare.mjs recreates A from frozen source if desired. No env from caller is forwarded to child fixtures.",
+  "scratchHashes": [
+    {
+      "path": "check-child.mjs",
+      "bytes": 937,
+      "sha256": "c630366f20ea16e5cd91621e25b4d42de42b076f34197a9ca57e9c9bde3baf13"
+    },
+    {
+      "path": "checks.json",
+      "bytes": 2096,
+      "sha256": "325d095e9dc5dcc6637783759eee86d44b19f64bde163724b79b1be716e916f7"
+    },
+    {
+      "path": "checks.log",
+      "bytes": 1104,
+      "sha256": "7761ca79936a8244318ad5a4401bff206ded65f876b312343fae325f6965699e"
+    },
+    {
+      "path": "checks.mjs",
+      "bytes": 4073,
+      "sha256": "e02d7053e15d4fb173547fa725a1a0fbede097bbc52a122906d4336bb2b9b36f"
+    },
+    {
+      "path": "cli-pressure.mjs",
+      "bytes": 6261,
+      "sha256": "62cb1bf930e8f85bc2d94adbf603c0faabbbeb326e853e8e0dbf2a4e5c6e41f2"
+    },
+    {
+      "path": "extend.mjs",
+      "bytes": 1891,
+      "sha256": "b8c8bfb873c4bd68c3898baff71019d70705e462270a3c6feee6ee395057489b"
+    },
+    {
+      "path": "fake-child.mjs",
+      "bytes": 2015,
+      "sha256": "4fe855d8ae815102a12ab574a2a6f642aecffb60dd02c89966867fe84af5bf3b"
+    },
+    {
+      "path": "finalize-fixtures.mjs",
+      "bytes": 1710,
+      "sha256": "c828ff54b73415341236e22d6c146499ad1333f42db48ea65eede721b4a001c3"
+    },
+    {
+      "path": "prepare.mjs",
+      "bytes": 2098,
+      "sha256": "fcbc499cf26ef5e2d19dc69bcbfe7c2f2693b126e1effa33fbbeba7e45928972"
+    },
+    {
+      "path": "report.mjs",
+      "bytes": 16833,
+      "sha256": "ee9441b4f0fdab859f679d6c8d64ea0232bf3df4de8b9ce10b60ec3608ec1413"
+    },
+    {
+      "path": "results.json",
+      "bytes": 3331451,
+      "sha256": "477b3969dac0f019bce09224c9a27c9494644c9f95840d15c34bf54e8035efd8"
+    },
+    {
+      "path": "run.log",
+      "bytes": 6505,
+      "sha256": "1573ea3fef0bec28ca2b4d1d3e4aad93e18845dd46205af79e5505d48a828bff"
+    },
+    {
+      "path": "run.mjs",
+      "bytes": 4677,
+      "sha256": "c31c08774cc376c57a96cdf8fd2be0b6c334c25da4402046bd22af73705de914"
+    },
+    {
+      "path": "source/claude.mjs",
+      "bytes": 13672,
+      "sha256": "53234147b83a08da304726fe64cfbe1018677616c56d193b8e9d5d35ed5cd384"
+    },
+    {
+      "path": "source/cli.mjs",
+      "bytes": 5658,
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9"
+    },
+    {
+      "path": "source/codex.mjs",
+      "bytes": 19447,
+      "sha256": "e35239dc88a09368d761b043898f540d84dc12447b5023b6dae6cbeed2007fba"
+    },
+    {
+      "path": "source/context-controller.mjs",
+      "bytes": 2244,
+      "sha256": "dcbf8f7671b8142690fe2abf021326c914327749783d5f75824d2268970646de"
+    },
+    {
+      "path": "source/context-summary.mjs",
+      "bytes": 5389,
+      "sha256": "65297a481630d8bee843424e71d41fe6a46982ce8c31fa507f0573571555b337"
+    },
+    {
+      "path": "source/controller.mjs",
+      "bytes": 4877,
+      "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51"
+    },
+    {
+      "path": "source/main.mjs",
+      "bytes": 3388,
+      "sha256": "23632aa4daaa4c9cb10780376a0b54569f3b1fdac56de9bdd470d1e0850bc28d"
+    },
+    {
+      "path": "source/protocol.mjs",
+      "bytes": 16858,
+      "sha256": "225e443a35d306476a552eee1b3c4ff6559f9fb4f16bdeae119764df292ce13e"
+    },
+    {
+      "path": "source-manifest.json",
+      "bytes": 1242,
+      "sha256": "b311b5f171b99776ff40ffd516728dcd73e744df89100624efac87307afcb1dc"
+    },
+    {
+      "path": "worker.mjs",
+      "bytes": 5023,
+      "sha256": "1414b0980cfd7f83905ea9fe1d991623e6e45c9cd279e3f51de520793ff7ec12"
+    }
+  ]
+}

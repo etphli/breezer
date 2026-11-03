@@ -45,10 +45,14 @@ export class JsonLineProcess extends EventEmitter {
     this.exited = new Promise((resolve) => this.child.once('close', resolve));
     this.child.stdout.setEncoding('utf8');
     this.child.stdout.on('data', (chunk) => {
+      const prefixLength = this.#buffer.length;
       this.#buffer += chunk;
       if (this.#buffer.length > 16 * 1024 * 1024) return this.close(new Error('CLI output exceeded its limit.'));
-      let index;
-      while ((index = this.#buffer.indexOf('\n')) !== -1) {
+      // Search the arriving chunk before touching the accumulated string rope.
+      // Once a newline arrives, slicing/parsing materializes that line only once.
+      let index = chunk.indexOf('\n');
+      if (index !== -1) index += prefixLength;
+      for (; index !== -1; index = this.#buffer.indexOf('\n')) {
         const line = this.#buffer.slice(0, index); this.#buffer = this.#buffer.slice(index + 1);
         if (!line.trim()) continue;
         try {
@@ -66,7 +70,10 @@ export class JsonLineProcess extends EventEmitter {
     this.child.stderr.on('data', () => {});
     this.child.stdin.on('error', (error) => this.close(error));
     this.child.on('error', (error) => this.close(error));
-    this.child.on('close', () => this.close(new Error('CLI connection closed.')));
+    this.child.on('close', () => {
+      this.#buffer = '';
+      this.close(new Error('CLI connection closed.'));
+    });
   }
   send(message) {
     if (this.closed) throw new Error('CLI connection is closed.');

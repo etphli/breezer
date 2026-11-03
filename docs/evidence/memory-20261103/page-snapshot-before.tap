@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: large snapshot avoids eager candidate copies and stops after 180 successful targets
+not ok 1 - large snapshot avoids eager candidate copies and stops after 180 successful targets
+  ---
+  duration_ms: 15.266583
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/page-snapshot-efficiency.test.mjs:54:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    10000 !== 180
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 180
+  actual: 10000
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/page-snapshot-efficiency.test.mjs:58:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.start (node:internal/test_runner/test:1262:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":0}
+ok 2 - snapshot ordering and filtering match baseline {"count":0}
+  ---
+  duration_ms: 0.781333
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1}
+ok 3 - snapshot ordering and filtering match baseline {"count":1}
+  ---
+  duration_ms: 0.736583
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":179}
+ok 4 - snapshot ordering and filtering match baseline {"count":179}
+  ---
+  duration_ms: 1.839
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":180}
+ok 5 - snapshot ordering and filtering match baseline {"count":180}
+  ---
+  duration_ms: 3.229875
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":181}
+ok 6 - snapshot ordering and filtering match baseline {"count":181}
+  ---
+  duration_ms: 1.822
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+ok 7 - snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+  ---
+  duration_ms: 2.418791
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+ok 8 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+  ---
+  duration_ms: 3.8575
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+ok 9 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+  ---
+  duration_ms: 1.829041
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+ok 10 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+  ---
+  duration_ms: 1.79025
+  type: 'test'
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+ok 11 - snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+  ---
+  duration_ms: 1.673875
+  type: 'test'
+  ...
+1..11
+# tests 11
+# suites 0
+# pass 10
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 100.799792

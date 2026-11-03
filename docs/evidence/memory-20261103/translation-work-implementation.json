@@ -1,0 +1,197 @@
+{
+  "model": {
+    "name": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular; no runtime setting changed"
+  },
+  "changedFiles": [
+    "features/ai/extension/translation-content.js",
+    "tests/ai/translation-efficiency.test.mjs"
+  ],
+  "sourceHashesBeforeAfter": {
+    "features/ai/extension/translation-content.js": {
+      "before": "22c76bd6c734a24a5a2e2a2f5fcaa56b085322e4f62cd494f37256c16155a1d0",
+      "after": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d"
+    },
+    "tests/ai/translation-efficiency.test.mjs": {
+      "before": null,
+      "after": "e6e7bc83f72db6bb1fcd613b5dab4f5b9ec0f719991ec549ba5a9bbcae2ef9d8"
+    }
+  },
+  "reproduction": {
+    "beforeSource": "build/efficiency-20261103/translation-work-before.js",
+    "beforeProbe": "build/efficiency-20261103/translation-work-before-probe.mjs",
+    "afterProbe": "build/efficiency-20261103/translation-work-after-probe.mjs",
+    "beforeCounts": {
+      "scope": "Unchanged translation-content.js in Node VM, synthetic connected flat text nodes and async fixture port. Counts operations, not time, GC, bytes or native browser gains. Fake WeakRef intentionally keeps nodes alive; fixture DOM owns all connected nodes. No collection claim.",
+      "runtime": "v22.14.0",
+      "sourcePath": "build/efficiency-20261103/translation-work-before.js",
+      "sha256": "22c76bd6c734a24a5a2e2a2f5fcaa56b085322e4f62cd494f37256c16155a1d0",
+      "trials": [
+        {
+          "textNodes": 4096,
+          "dynamic": true,
+          "initial": {
+            "dereferences": 264192,
+            "rectReads": 8319,
+            "styleReads": 8319,
+            "batches": 128,
+            "observersDisconnected": 128
+          },
+          "unchangedClassMutation": {
+            "dereferences": 4096,
+            "rectReads": 4096,
+            "styleReads": 4096,
+            "batches": 0,
+            "observersDisconnected": 0
+          },
+          "restorePassed": true,
+          "disconnectClearedScheduledScan": true
+        },
+        {
+          "textNodes": 8192,
+          "dynamic": true,
+          "initial": {
+            "dereferences": 1052672,
+            "rectReads": 16639,
+            "styleReads": 16639,
+            "batches": 256,
+            "observersDisconnected": 256
+          },
+          "unchangedClassMutation": {
+            "dereferences": 8192,
+            "rectReads": 8192,
+            "styleReads": 8192,
+            "batches": 0,
+            "observersDisconnected": 0
+          },
+          "restorePassed": true,
+          "disconnectClearedScheduledScan": true
+        }
+      ]
+    },
+    "afterCounts": {
+      "scope": "Candidate translation-content.js in Node VM, synthetic connected flat text nodes and async fixture port. Counts operations, not time, GC, bytes or native browser gains. Fake WeakRef intentionally keeps nodes alive; fixture DOM owns all connected nodes. No collection claim.",
+      "runtime": "v22.14.0",
+      "sourcePath": "features/ai/extension/translation-content.js",
+      "sha256": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "trials": [
+        {
+          "textNodes": 4096,
+          "dynamic": true,
+          "initial": {
+            "dereferences": 264192,
+            "rectReads": 8319,
+            "styleReads": 8319,
+            "batches": 128,
+            "observersDisconnected": 128
+          },
+          "unchangedClassMutation": {
+            "dereferences": 4096,
+            "rectReads": 0,
+            "styleReads": 0,
+            "batches": 0,
+            "observersDisconnected": 0
+          },
+          "restorePassed": true,
+          "disconnectClearedScheduledScan": true
+        },
+        {
+          "textNodes": 8192,
+          "dynamic": true,
+          "initial": {
+            "dereferences": 1052672,
+            "rectReads": 16639,
+            "styleReads": 16639,
+            "batches": 256,
+            "observersDisconnected": 256
+          },
+          "unchangedClassMutation": {
+            "dereferences": 8192,
+            "rectReads": 0,
+            "styleReads": 0,
+            "batches": 0,
+            "observersDisconnected": 0
+          },
+          "restorePassed": true,
+          "disconnectClearedScheduledScan": true
+        }
+      ]
+    },
+    "scope": "Exact deterministic operations in production source executed in a Node VM with fake DOM, timers, provider port, observer delivery and controllable WeakRef. No elapsed-time, allocation-byte, RSS, actual layout or real GC claims."
+  },
+  "acceptedChanges": [
+    {
+      "finding": "page-content-02",
+      "change": "Check the weak-map translated record before allowed(node). Unchanged translations skip visibility/style reads. All new or site-edited text and all in-flight writes still pass original eligibility checks.",
+      "provenGain": "On one settled class mutation at 8192 translated nodes, rectangle reads 8192 -> 0 and style reads 8192 -> 0. Provider batches remain 0. At 4096 nodes, both counts 4096 -> 0. Initial counts unchanged.",
+      "productionScope": "One reordered short-circuit expression; WeakMap, WeakRef, limits, observation, navigation, cancellation and pruning unchanged."
+    }
+  ],
+  "commandsAndResults": [
+    {
+      "command": "node build/efficiency-20261103/translation-work-before-probe.mjs",
+      "result": "PASS; source-hashed old cost: 4096 nodes / 128 batches / 264192 derefs and 8192 nodes / 256 batches / 1052672 derefs; unchanged dynamic rescan reads visibility/style once per node; Restore and disconnect assertions pass."
+    },
+    {
+      "command": "node build/efficiency-20261103/translation-work-after-probe.mjs",
+      "result": "PASS; unchanged dynamic rescans have zero rectangle/style reads; same initial work, batches, pruning derefs, Restore and disconnect results."
+    },
+    {
+      "command": "TRANSLATION_WORK_BEFORE=build/efficiency-20261103/translation-work-before.js node --test tests/ai/translation-efficiency.test.mjs",
+      "result": "PASS 9/9, no skips; actual saved baseline differential tests.",
+      "output": "build/efficiency-20261103/translation-work-edge-tests.tap"
+    },
+    {
+      "command": "node --test tests/ai/translation-efficiency.test.mjs",
+      "result": "PASS 9/9, no skips; independent fallback baseline condition-order reconstruction.",
+      "output": "build/efficiency-20261103/translation-work-standalone-tests.tap"
+    },
+    {
+      "command": "node --test tests/ai/translation.test.mjs",
+      "result": "PASS 7/7, no skips; offline provider/background/source suite with mocked fetch and APIs.",
+      "output": "build/efficiency-20261103/translation-work-source-tests.tap"
+    },
+    {
+      "command": "node --check features/ai/extension/translation-content.js; node --check tests/ai/translation-efficiency.test.mjs",
+      "result": "PASS both syntax checks."
+    },
+    {
+      "command": "Python snapshot diff assertion",
+      "result": "PASS exactly one removed and one added production line against captured pre-edit source. Diff saved as translation-work-production.diff."
+    }
+  ],
+  "rejectedIdeas": [
+    {
+      "finding": "page-content-01",
+      "candidate": "Prune only when the TreeWalker completes.",
+      "evaluation": "Executed only as an in-memory candidate in the new test; never applied to production.",
+      "reproduction": "96 nodes. Translate first 32, detach node 0, execute next provider scan, reattach node 0, Restore. Before and accepted implementation leave Ta because detached record was pruned. Completion-only candidate changes it to a because it retains the record.",
+      "result": "REJECTED: changes detach/reattach Restore semantics. Per-batch pruning retained; quadratic dereference count remains."
+    },
+    {
+      "candidate": "Bounded incremental pruning",
+      "result": "Not implemented. Deferring any unvisited detached record across a provider scan has the same Restore risk. Exact behavior needs additional removal tracking and faithful real-DOM observer tests; outside the smallest proven fix. No claimed pruning gain."
+    }
+  ],
+  "objections": [
+    "page-content-01 remains unresolved because the tested cheaper sweep changes observable behavior.",
+    "VM fixtures flatten text-node ancestry and simulate observer delivery; they cannot prove browser TreeWalker scheduling, layout effects or garbage collection.",
+    "Fake weak references allow deterministic undefined deref tests but themselves hold fixture nodes strongly; only production uses real WeakRef and WeakMap, unchanged.",
+    "No whole-browser CPU, speed or RAM improvement claimed."
+  ],
+  "unverifiedGates": [
+    "Coordinator: sequential real disposable extension acceptance, including original shared translation-browser tests.",
+    "Coordinator: sequential isolated-world forced-GC acceptance via existing verify_translation_memory.mjs.",
+    "Real-browser mutation churn, nested ancestry, navigation and provider latency remain integration acceptance gates."
+  ],
+  "constraintsObserved": [
+    "No PC contact, probe, schedule or connection.",
+    "No app build/run/install or app/profile/password/cache mutation.",
+    "No real network/provider/Keychain/config access or package download.",
+    "No benchmark or browser execution.",
+    "No edits to other production files, sync files, packet scripts/docs/shared logs or existing shared translation-browser tests.",
+    "No commit, push or publication."
+  ],
+  "artifactsPrefix": "build/efficiency-20261103/translation-work-"
+}

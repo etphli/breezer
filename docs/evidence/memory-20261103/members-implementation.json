@@ -1,0 +1,127 @@
+{
+  "finding": "workspace-01",
+  "model": "gpt-6.1-sol, high reasoning, regular speed; implementation performed directly without subagents",
+  "changedFiles": [
+    "features/ai/extension/workspace-store.js",
+    "tests/ai/workspace-members-efficiency.test.mjs",
+    "script/verify_workspace_members_efficiency.mjs"
+  ],
+  "sourceHashesBeforeAfter": {
+    "features/ai/extension/workspace-store.js": {
+      "before": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+      "after": "b439f21f2ace7577bdc06fc93b657b750350c8ff511fb230bfc7aa21b17c3c81"
+    },
+    "tests/ai/workspace-members-efficiency.test.mjs": {
+      "before": null,
+      "after": "f1d0be7a96c1bdeaba90a890304e39bf9df178a56087b8afd374ee339a1b6e5c"
+    },
+    "script/verify_workspace_members_efficiency.mjs": {
+      "before": null,
+      "after": "c81e74ab3fec83b0e4a532b1808d393a3ea4bdd13dc7167e5899dd59769cc1f9"
+    }
+  },
+  "reproduction": {
+    "command": "node script/verify_workspace_members_efficiency.mjs features/ai/extension/workspace-store.js build/efficiency-20261103/members-before.json",
+    "beforeReport": "build/efficiency-20261103/members-before.json",
+    "sourceSnapshot": "build/efficiency-20261103/members-before-workspace-store.mjs",
+    "sourceSnapshotSha256": "5055b78dfceddc6821c273f7ca1d855b47c046ae4e560b9797e36bd0dbb40b58",
+    "oldCost": [
+      {
+        "savedEntries": 0,
+        "savedStoreReads": 1,
+        "savedStoreSerializations": 2,
+        "savedStoreCharsPerSerialization": 172
+      },
+      {
+        "savedEntries": 100,
+        "savedStoreReads": 1,
+        "savedStoreSerializations": 2,
+        "savedStoreCharsPerSerialization": 8441
+      },
+      {
+        "savedEntries": 1000,
+        "savedStoreReads": 1,
+        "savedStoreSerializations": 2,
+        "savedStoreCharsPerSerialization": 85841
+      }
+    ]
+  },
+  "acceptedChanges": [
+    {
+      "change": "patchMembers reads and normalizes only MEMBERS_KEY under the unchanged breezer.workspace Web Lock, obtains sessionToken and calls rollSession, applies sets before removals, and persists only changed members. No caching. General transactions and sync code unchanged.",
+      "proof": {
+        "afterReport": "build/efficiency-20261103/members-after.json",
+        "savedStoreReadsPerPatch": 0,
+        "savedStoreSerializationsPerPatch": 0,
+        "membersSerializationsPerPatch": 2,
+        "sizesChecked": [
+          0,
+          100,
+          1000
+        ],
+        "differential": {
+          "cases": 24,
+          "sequentialSteps": 120,
+          "overlappingOperations": 96,
+          "exactPersistedValuesAndWriteSequenceMatch": true
+        }
+      }
+    }
+  ],
+  "commandsAndResults": [
+    {
+      "command": "node --test tests/ai/workspace-members-efficiency.test.mjs tests/ai/workspace-store.test.mjs",
+      "exitCode": 0,
+      "result": "25 passed, 0 failed, 0 skipped; includes six new regression tests",
+      "evidence": "build/efficiency-20261103/members-tests.tap"
+    },
+    {
+      "command": "node --test tests/ai/workspace-static.test.mjs tests/sync/workspace-model.test.mjs tests/sync/reconcile.test.mjs",
+      "exitCode": 0,
+      "result": "28 passed, 0 failed, 0 skipped; fake provider API only",
+      "evidence": "build/efficiency-20261103/members-pure-tests.tap"
+    },
+    {
+      "command": "node script/verify_workspace_members_efficiency.mjs features/ai/extension/workspace-store.js build/efficiency-20261103/members-after.json build/efficiency-20261103/members-before-workspace-store.mjs",
+      "exitCode": 0,
+      "result": "24 differential cases, 120 sequential patches, 96 overlapping operations; exact persisted values and write sequence match baseline"
+    },
+    {
+      "command": "node --test build/efficiency-20261103/members-baseline-regression.test.mjs",
+      "exitCode": 1,
+      "result": "Expected negative control: 1 failed saved-store request assertion, 5 behavior tests passed on preserved baseline",
+      "evidence": "build/efficiency-20261103/members-baseline-regression.tap"
+    },
+    {
+      "command": "git diff --check -- features/ai/extension/workspace-store.js; node --check features/ai/extension/workspace-store.js; node --check script/verify_workspace_members_efficiency.mjs; node --check tests/ai/workspace-members-efficiency.test.mjs",
+      "exitCode": 0,
+      "result": "Whitespace and all three syntax checks passed"
+    }
+  ],
+  "rejectedIdeas": [
+    {
+      "idea": "Cache members across patches",
+      "reason": "Would use stale cross-window state and risk lost updates."
+    },
+    {
+      "idea": "Skip membership normalization, rollover or comparison",
+      "reason": "Would change malformed-member handling, restart behavior or unchanged-write suppression."
+    },
+    {
+      "idea": "Generalize all transactions or alter saved-store/sync structures",
+      "reason": "Unneeded scope and risk; specialized path eliminates confirmed saved-store work."
+    }
+  ],
+  "objections": [
+    "Saved string character counts prove removed work, not physical allocation bytes, latency, CPU, RSS or whole-browser gains.",
+    "Membership work remains linear in stored membership count, with existing bounds and semantics preserved.",
+    "Web Lock fake uses a FIFO queue per exact name with deep-copied requested storage keys, async storage yields, and lock release on failure; real browser scheduling remains an acceptance gate.",
+    "Malformed saved stores are intentionally never inspected by this path. Malformed member normalization and cleanup-only write suppression remain identical to the old implementation."
+  ],
+  "unverified gates": [
+    "Coordinator disposable-browser acceptance and integration, including real cross-window Chrome storage and Web Locks.",
+    "No native build/run/install, browser test, CPU/time/RSS benchmark, provider/network/Keychain/config access, app/profile/password/cache mutation, publication or package download performed.",
+    "PC explicitly unreachable; no probe, connection, start or scheduling attempted.",
+    "No whole-browser performance or speed-regression claim. Source history, saved pins and sync changes preserved; no commit or push."
+  ]
+}

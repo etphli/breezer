@@ -1,0 +1,38 @@
+✔ two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart (259.621167ms)
+✔ provider permission, key boundaries, and native enum spellings match imported API (2.196042ms)
+✔ cancel and dispose abort in-flight provider work without stale replies (0.561792ms)
+✔ workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership (16.253792ms)
+✔ offline changes survive capture, worker restart and remote deletion (4.519417ms)
+✔ unchanged sync cycles preserve durable recovery data without rewriting storage (1.565167ms)
+✔ changed local recovery data reaches storage before a failing exchange (1.439542ms)
+✔ remote changes remain captured if applying the local workspace fails (1.970084ms)
+✔ untouched joining profile defaults do not overwrite remote space names or appearance (1.242583ms)
+✔ disabled and disconnected clients never write or apply remote data (0.231417ms)
+✔ invalid remote data preserves local store and membership (0.199834ms)
+✔ CAS conflicts retry with remote edits without dropping captured local edits (3.860959ms)
+✔ local capture failure never publishes a partial snapshot or replaces saved data (0.534333ms)
+✔ explicit overflow recovery keeps pins when removing a concurrent space (11.062375ms)
+✔ changing providers with the same vault UUID cannot receive an old in-flight write (4.672958ms)
+✔ managed appearance changes do not block valid saved spaces or overwrite the local appearance (5.997709ms)
+✔ persistent identity preserves duplicate URLs; local IDs and folder expansion never sync (5.777292ms)
+✔ restoring many folder states reads local pins a linear number of times (19.69375ms)
+ℹ 1000 local pin reads for 1000 folders
+✔ folder expansion preserves the first match within the last matching local space (0.752459ms)
+✔ folder restoration skips unrelated pins once all matching states are found (1.040084ms)
+✔ two offline clients converge with concurrent rename, move, independent field edits and restart (6.184834ms)
+✔ deletions survive stale clients, later edits and concurrent folder/space removal (3.063083ms)
+✔ same-field ties use stable client order; merge is associative (9.139083ms)
+✔ appearance allowlist includes only supported preferences and keeps field-level changes (0.931334ms)
+✔ malformed and future data reject without mutating either client (0.484167ms)
+✔ concurrent deletion of different last spaces recovers a usable stable identity (1.237916ms)
+✔ concurrent capacity overflow rejects instead of silently losing saved items (1.119959ms)
+✔ clock and payload limits fail without replacing local state (1.416084ms)
+✔ incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization (0.358084ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 356.426459

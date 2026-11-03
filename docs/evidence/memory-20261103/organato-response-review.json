@@ -1,0 +1,108 @@
+{
+  "status": "CHANGES REQUESTED: two reproduced edge-case regressions",
+  "reviewer": {
+    "model": "GPT-6.1 Sol",
+    "reasoning": "high",
+    "speed": "regular/default",
+    "subagents": 0
+  },
+  "scope": "Independent offline read-only production review. Only assigned report and uniquely prefixed organato-review-* diagnostics written. No PC, browser, providers, network, Keychain, real config, app launch/build/install, package download, publication, timing or RSS benchmarks.",
+  "source": {
+    "path": "features/ai/host/organato.mjs",
+    "sha256": "d28adb5eea698d25fd8a0372f43e92d92b28a47ba81828832f4624b680e1d92f",
+    "beforePath": "build/efficiency-20261103/organato-response-before.mjs",
+    "beforeSha256": "5805280cdd6a12df299f0a51d9a54d77df358d71eda93fe1642f7fb170c9712c",
+    "beforeEqualsHEAD": true,
+    "matchesImplementationHashes": true
+  },
+  "findings": [
+    {
+      "id": "ORG-RESPONSE-1",
+      "priority": "P2",
+      "title": "Preserve actual Response.text leading-BOM behavior on the pinned runtime",
+      "location": {
+        "file": "features/ai/host/organato.mjs",
+        "line": 13,
+        "endLine": 25
+      },
+      "description": "On pinned Node v24.22.1, actual Response.text strips two consecutive leading UTF-8 BOMs. The incremental default TextDecoder strips one. Thus a previously accepted successful JSON response with bytes EF BB BF EF BB BF followed by {\"ok\":true} now fails JSON.parse with SyntaxError. This is an observed runtime compatibility difference, not a claim about which behavior the standard requires.",
+      "reproduction": "Run build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/organato-review-independent.mjs; lines 50-52 compare actual before/candidate request paths. The before fixture returns {ok:true}; candidate rejects. Text-level comparison also reproduces with chunk sizes 1,2,3,7,64,65536.",
+      "recommendedChange": "Match the old pinned Response.text BOM handling across arbitrary byte splits, and add a double-leading-BOM response regression test. Apply character accounting after the same leading-BOM handling.",
+      "reachability": "Reproduced with native Response and offline injected fetcher on both Node 22.14.0 and 24.22.1. No evidence a live Organato response emits two BOMs."
+    },
+    {
+      "id": "ORG-RESPONSE-2",
+      "priority": "P2",
+      "title": "Do not let cancellation settlement block the size error and lock cleanup",
+      "location": {
+        "file": "features/ai/host/organato.mjs",
+        "line": 29,
+        "endLine": 31
+      },
+      "description": "The catch block awaits reader.cancel() without a bound. A native Response stream whose underlying cancel promise never settles leaves request pending and body.locked true even though the size error has already been determined. An explicit caller abort does not unblock this await in the reproduction. The equivalent finite oversized before stream rejects without entering cancellation. Rejected cancellation is correctly swallowed; stalled cancellation is not handled.",
+      "reproduction": "Same diagnostic command; lines 62-96. Native ReadableStream enqueues 2000001 ASCII bytes then would close on the next pull; its cancel hook returns a manually controlled promise. Candidate remains pending/locked across event-loop turns and explicit abort, then rejects/releases immediately after manually resolving cancel. Before fixture rejects equivalent finite stream with nonsettling cancel without invoking that hook. No timing benchmark or real network required.",
+      "recommendedChange": "Initiate cancellation and handle rejection without indefinitely awaiting its settlement before propagating the original error and releasing the reader lock. Add coverage for rejection and nonsettling cancellation.",
+      "reachability": "Confirmed for the supported injected-fetch/native-Response path. Whether the actual network fetch implementation can stall cancellation is unverified; this is not evidence of a live transport timeout failure."
+    }
+  ],
+  "checks": [
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test tests/ai/organato-response.test.mjs",
+      "result": "8 passed, 0 failed",
+      "log": "organato-review-response-tests-pinned.tap"
+    },
+    {
+      "command": "TMPDIR=\"$PWD/build/efficiency-20261103/organato-review-tmp\" build/efficiency-20261103/organato-review-node24 --test tests/ai/organato.test.mjs",
+      "result": "6 passed, 0 failed; only injected secret store/fetcher and disposable diagnostic config directories",
+      "log": "organato-review-existing-tests-pinned.tap"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 --test build/efficiency-20261103/organato-response-baseline.test.mjs",
+      "result": "Expected exit 1: six pass, two fail. Old path consumes/decodes all 4194304 bytes, failing both early-stop checks.",
+      "log": "organato-review-baseline-tests-pinned.tap"
+    },
+    {
+      "command": "build/efficiency-20261103/organato-review-node24 build/efficiency-20261103/organato-review-independent.mjs",
+      "result": "Exit 0: 1875 text comparisons, 1869 match and six known double-BOM mismatches; actual request differential; ASCII/BMP/astral 2000000/2000001 boundaries; resolving/rejecting/stalled cancellation and lock cleanup.",
+      "log": "organato-review-independent-results.json"
+    },
+    {
+      "command": "node --test tests/ai/organato-response.test.mjs",
+      "result": "System Node 22.14.0: 8 passed, 0 failed",
+      "log": "organato-review-response-tests.tap"
+    },
+    {
+      "command": "Cached Node archive SHA256 compared with features/ai/runtime.lock.json before extracting only bin/node to organato-review-node24",
+      "result": "Matches 89c682593d76cd44233fa53b1563264e7de9cbb189cad169135c5b4fadfbc0a7; diagnostic executable reports v24.22.1. No download or cache modification."
+    }
+  ],
+  "reviewedEvidence": [
+    "AGENTS.md",
+    "features/ai/host/organato.mjs",
+    "tests/ai/organato-response.test.mjs",
+    "tests/ai/organato.test.mjs",
+    "build/efficiency-20261103/organato-response-before.mjs",
+    "build/efficiency-20261103/organato-response-implementation.json",
+    "build/efficiency-20261103/organato-response-baseline.test.mjs",
+    "build/efficiency-20261103/organato-response-baseline.tap",
+    "build/efficiency-20261103/organato-response-pinned.tap",
+    "tests/ai/host-loading.test.mjs"
+  ],
+  "nonFindings": [
+    "ASCII/BMP/astral UTF16 count, arbitrary UTF8 splits, malformed replacement characters, single BOM, empty/malformed JSON, failed stream identity, final-flush overflow and nonbyte rejection pass relevant offline checks, subject to leading-double-BOM difference above.",
+    "Successful/error status dispatch, URL, headers, redirect policy, timeout construction and AbortSignal composition are unchanged by inspected diff. HTTP error bodies remain unread as before.",
+    "Resolved and rejected cancellation preserve original size error and release reader lock. Successful reads release their lock."
+  ],
+  "objections": [
+    "Per-piece decoding bounds temporary decoder output to <=65536 source bytes, but does not cap the size of a chunk already delivered by the reader, queued upstream bytes or transport allocations.",
+    "Decoded text is retained up to the UTF16 limit plus the rejecting piece. Repeated text += on tiny chunks creates string/rope bookkeeping; JSON.parse may flatten/copy text and allocate parsed objects. Physical peak RAM, CPU and garbage collection effects remain unmeasured. Do not label the change an overall RAM improvement.",
+    "Counter evidence establishes early stop and reduced decoding of an oversized synthetic body only. It does not establish real network byte savings, abort/cancellation latency, wire-level backpressure or end-to-end speed.",
+    "The eight existing response tests omit double-leading-BOM and stalled/rejected cancellation cases and therefore pass despite both review findings."
+  ],
+  "unverifiedGates": [
+    "Live provider/network, native app runtime/UI and physical memory/CPU behavior intentionally not exercised.",
+    "The supplied pinned log contains 17 passing checks including three host-loading checks. Reviewer independently reran the 14 Organato checks; the three host-loading results were read, not independently rerun.",
+    "Packet/coordinator regeneration and all-host-module receipt claims are outside this focused review and were not independently revalidated.",
+    "No production source fix or acceptance recheck performed by reviewer. Main agent owns fixes and regression tests."
+  ]
+}

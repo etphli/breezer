@@ -1,0 +1,29 @@
+TAP version 13
+# Subtest: standalone probe rejects an altered baseline before reporting counts
+not ok 1 - standalone probe rejects an altered baseline before reporting counts
+  ---
+  duration_ms: 196.03225
+  type: 'test'
+  location: '/Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/stream-render.test.mjs:153:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  operator: 'throws'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906/tests/ai/stream-render.test.mjs:161:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.start (node:internal/test_runner/test:1262:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 302.02575

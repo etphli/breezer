@@ -1,0 +1,746 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-03",
+  "status": "offline-prototype-complete; not adopted",
+  "recommendation": {
+    "decision": "Do not adopt into production from this evidence. Retain the narrow candidate for a separately authorised real-browser experiment; do not widen eligibility.",
+    "rationale": "All model semantics checks pass and ordinary paragraph parser/node churn falls. No material general-path parser regression. Initial 14.8% formatted model slowdown was not reproduced in longer batches (2.6% median paired difference). This small timing difference remains unproven, and browser CharacterData storage, layout, selection and accessibility costs are unmeasured.",
+    "rejectionCriteria": "Reject adoption if a real browser shows incorrect visible prefixes, stale or duplicated committed text, retained detached nodes after disposal/New Chat, broken Find/selection/accessibility, materially worse fallback CPU/latency, or no useful user-facing CPU/GC/allocation improvement. Do not broaden this candidate to rescue a failed result."
+  },
+  "constraints": {
+    "productionEdits": false,
+    "otherAgentScratchAccess": false,
+    "network": false,
+    "actualProviders": false,
+    "pcContact": false,
+    "credentialsKeychainProfileAccess": false,
+    "installedAppAccess": false,
+    "browserAppChromiumBuildRunInstall": false,
+    "gitMutationsOrPublication": false,
+    "pythonUsed": false,
+    "writes": "Only this JSON and owned scratch subtree."
+  },
+  "sourceFreeze": {
+    "method": "Full byte copies and sha256 captured before prototype writes; full source files listed below checked again at end.",
+    "files": {
+      "features/ai/extension/render-message.js": {
+        "initialSha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "frozenSha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "endSha256": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+        "unchanged": true
+      },
+      "features/ai/extension/panel.js": {
+        "initialSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "frozenSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "endSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+        "unchanged": true
+      },
+      "script/verify_stream_render_efficiency.mjs": {
+        "initialSha256": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+        "frozenSha256": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+        "endSha256": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+        "unchanged": true
+      },
+      "tests/ai/stream-render.test.mjs": {
+        "initialSha256": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+        "frozenSha256": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+        "endSha256": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+        "unchanged": true
+      },
+      "tests/ai/fixtures/render-message-before.js": {
+        "initialSha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "frozenSha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "endSha256": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+        "unchanged": true
+      }
+    }
+  },
+  "artifacts": {
+    "candidate": "build/efficiency-20261103/plain-stream-experiment/render-message.candidate.js",
+    "candidateSha256": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "exactDiff": "build/efficiency-20261103/plain-stream-experiment/candidate.diff",
+    "diffSha256": "21393362fea546ad1c437cae43b4e8c335fa4688057d268d277a1d718e1dd77d",
+    "scratchManifest": "build/efficiency-20261103/plain-stream-experiment/scratch-hashes.json",
+    "scratchManifestSha256": "333b2e9d82970f2a87508a3948ab0296da37df412c27eed96ad3d4c43e7c5a65",
+    "scratchHashes": {
+      "build/efficiency-20261103/plain-stream-experiment/candidate.diff": "21393362fea546ad1c437cae43b4e8c335fa4688057d268d277a1d718e1dd77d",
+      "build/efficiency-20261103/plain-stream-experiment/commands.txt": "4396af67e3880a7333ed395708ba7f99f9d8195f5ddc5db92f3fa15bf3010faa",
+      "build/efficiency-20261103/plain-stream-experiment/confirm-timing.json": "721bb86f5b8e8ab55c8532021bc5a6a5ebe19b95dbf0bd50d6f6ad05e2786291",
+      "build/efficiency-20261103/plain-stream-experiment/confirm-timing.log": "721bb86f5b8e8ab55c8532021bc5a6a5ebe19b95dbf0bd50d6f6ad05e2786291",
+      "build/efficiency-20261103/plain-stream-experiment/confirm-timing.mjs": "0bf6487d1ad4d3d90690d6f00c88aebe01bdf279b4b6b232fe9f963a2fc83ca4",
+      "build/efficiency-20261103/plain-stream-experiment/counts.json": "c3f2d3623f3aca788ab4d778812ea8385939aa87fc08343d2502d28475b228ac",
+      "build/efficiency-20261103/plain-stream-experiment/differential.json": "0208b3f0690c32e84144c7b560f34d71e484816a81de2c03ed018f960c73464b",
+      "build/efficiency-20261103/plain-stream-experiment/end-drift.json": "beef552683cf4faaea6c18b560cab7b0dacaa52aad74aea199e63fc8c079bb41",
+      "build/efficiency-20261103/plain-stream-experiment/experiment.log": "573d1094c9cede2090dbe9a1614335565f76b715d7192d03b619c0dbcaae4da3",
+      "build/efficiency-20261103/plain-stream-experiment/experiment.mjs": "895b7058bbb8760ad57effbdd4572572147697107ed778b31432631461e87340",
+      "build/efficiency-20261103/plain-stream-experiment/finalize.mjs": "72a90832bdc209ae88530d845b7404459f6ebaf22b57aac21751c40b66adb4f2",
+      "build/efficiency-20261103/plain-stream-experiment/fixture-uncounted.mjs": "a700a38f8f1564c515dee2fd8ee9d7e4805027b70cdfb1a3d73e3734cc80b358",
+      "build/efficiency-20261103/plain-stream-experiment/fixture.mjs": "61a18a3ee6c6221ce18df1a2a964af08ed482795c2363e8a92ff750edeba1f8a",
+      "build/efficiency-20261103/plain-stream-experiment/frozen-hashes.json": "19099aa50145bc653920fc138ee3949d279a0123cfbf42b73cbc76d8f493dcbc",
+      "build/efficiency-20261103/plain-stream-experiment/frozen/panel.js": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+      "build/efficiency-20261103/plain-stream-experiment/frozen/render-message-before.js": "9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830",
+      "build/efficiency-20261103/plain-stream-experiment/frozen/render-message.js": "278f221cf73504f39fe6ad7b6810bf8405f50762c1b6e1e22517add6153dd948",
+      "build/efficiency-20261103/plain-stream-experiment/frozen/stream-render.test.mjs": "ccde0e67bdf0abb6a34ec5019e471d2df3d63aab781e370768bfbced524f4b20",
+      "build/efficiency-20261103/plain-stream-experiment/frozen/verify_stream_render_efficiency.mjs": "2fb8e8af7cf98f03f5e8dc430719520ada874ea2659f458117d522689720a856",
+      "build/efficiency-20261103/plain-stream-experiment/original-stream-render.test.mjs": "5f883e2950dd597e0c7f175ef6502236c346bf26541dc9d67a5c638b3bf7a40b",
+      "build/efficiency-20261103/plain-stream-experiment/original-tests.tap": "1f1ba789dbd4f19fd8e41bdac354c65f7a7701e43e5fab927fe72982a4bce4ac",
+      "build/efficiency-20261103/plain-stream-experiment/plain-panel-tests.tap": "6a09b551c9df565d12f2b5b8d5e7be8cacd9d8e5e70ce7c41b3738d5f5156a8e",
+      "build/efficiency-20261103/plain-stream-experiment/plain-panel.test.mjs": "b56f5304138cd8693bae85629da2ea69e89a3cf92ae126755de4b2f4cc8edd17",
+      "build/efficiency-20261103/plain-stream-experiment/prepare.mjs": "6d6b2868cdff6d50bb94852a10891ec6a48d475447711848769c7e524715db5e",
+      "build/efficiency-20261103/plain-stream-experiment/render-message.candidate.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "build/efficiency-20261103/plain-stream-experiment/timing.json": "78dbb3a7db8a301d5aa5c1ae37288b1995821946a5b5d5e1ba5514c1fbff2fd2",
+      "build/efficiency-20261103/plain-stream-experiment/timing.log": "47c93b62d9f3822b7dc795f0866967374b047baacd1b8ba79739363e0000e29a",
+      "build/efficiency-20261103/plain-stream-experiment/timing.mjs": "d84a430b6d14c2fdb4090ca0d6b2846e7cfce51ced6cbd1f32aa20d6b150d241"
+    },
+    "commands": "build/efficiency-20261103/plain-stream-experiment/commands.txt"
+  },
+  "implementation": {
+    "scope": "Only createMessageStream in the full source-derived candidate changes. renderMessage and inline remain byte-for-byte identical to pinned full-render baseline; panel source untouched.",
+    "eligibility": "A nonempty tail must start with a character outside JS whitespace, ASCII digits, #, -, >, backtick, *, [. The entire initial tail must contain no LF, backtick, *, [. Existing eligible tails inspect only the new delta for these four openers. Every initial digit is rejected, even harmless numeric prose. Leading/all whitespace stays on parser path until a stable boundary. Empty tails retain eligibility but render as before.",
+    "seed": "Use unchanged renderMessage once to create the p and Text. Retain only its lastChild Text reference. Subsequent eligible deltas invoke that Text appendData. No extra paragraph reference is needed; mutableNodes retains the p.",
+    "fallback": "First ambiguity clears Text reference and permanently disables this fast path for that tail. Existing safe parser runs normally. Only a completed stable blank-line boundary resets eligibility.",
+    "boundary": "Original scanner and commit code run first. Replacement clears the Text reference. After commit, reset eligibility and seed only the remaining tail through the parser, never append the original cross-boundary delta to a new Text. Explicit test checks committed identity and Next tail without duplication.",
+    "disposal": "target.replaceChildren, fallback, stable boundary and dispose explicitly clear plainText. dispose keeps existing container=null, tail/mutableNodes cleanup. Existing panel finish/stop/error/New Chat dispose through original source. Late append and queued RAF tests pass.",
+    "prefixArgument": "A safe first character cannot turn into a recognised block opener by suffix appends. No LF means one line. No supported inline opener means inline creates exactly one Text under p. Whitespace later in the paragraph cannot turn its already-safe first character into a block prefix. ASCII #/-/>/digit ambiguous starts are never optimised, including partial #, -, 1., >. Unicode whitespace is rejected by JS \\s at the start; interior whitespace and UTF-16 surrogate halves append verbatim. Full parser receives all accumulated text on fallback."
+  },
+  "evidence": {
+    "fixture": "Both frozen current and candidate compile the actual complete render-message source in the same owned minimal DOM fixture. Only copied fixture extended with Text data/appendData semantics and counters. This is simulated CharacterData with JS string concatenation, not a browser Text implementation.",
+    "originalTests": {
+      "pass": 10,
+      "fail": 0,
+      "log": "build/efficiency-20261103/plain-stream-experiment/original-tests.tap",
+      "changes": "Only imports/source paths redirected to owned snapshots/candidate/fixture. All ten original assertions retained."
+    },
+    "plainPanelTests": {
+      "pass": 10,
+      "fail": 0,
+      "log": "build/efficiency-20261103/plain-stream-experiment/plain-panel-tests.tap",
+      "changes": "Additional copy changes selected panel fixture input from formatted text to fast-path-eligible plain text; source-bound panel extraction and assertions retained."
+    },
+    "differential": {
+      "cases": 5476,
+      "visiblePrefixes": 112920,
+      "seed": "0x511091",
+      "emptyDeltasAtEveryPrefix": true,
+      "identityAndBoundaryChecks": "pass",
+      "fullRendererByteIdentical": true
+    },
+    "coverage": "Cases recorded in differential.json include every one-character visible prefix and mixed chunks; every ASCII punctuation/digit/letter initial character; partial headers/list/quote/fences; all 24 enumerated ECMAScript non-LF whitespace code points; zero-width/non-whitespace Unicode controls; malformed markup; unsafe links; combined/split surrogate halves; blank-line/fence boundaries; 300 deterministic generated mixtures with two chunk schedules; long plain and formatted responses. Empty delta and post-dispose checks included per case. Candidate and current trees both compared to full-render oracle including exact text-node segmentation, tag and link properties.",
+    "counts": {
+      "longPlainParagraph": {
+        "current": {
+          "chunks": 1898,
+          "finalCharacters": 70206,
+          "streaming": {
+            "nodes": 3796,
+            "parsedCharacters": 66679567,
+            "renders": 1898,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 3798,
+            "parsedCharacters": 66749773,
+            "renders": 1899,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        },
+        "candidate": {
+          "chunks": 1898,
+          "finalCharacters": 70206,
+          "streaming": {
+            "nodes": 2,
+            "parsedCharacters": 37,
+            "renders": 1,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 1897,
+            "appendedCharacters": 70169,
+            "priorTextAtAppend": 66609361
+          },
+          "includingFinalRender": {
+            "nodes": 4,
+            "parsedCharacters": 70243,
+            "renders": 2,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 1897,
+            "appendedCharacters": 70169,
+            "priorTextAtAppend": 66609361
+          }
+        }
+      },
+      "formattedStableBlocks": {
+        "current": {
+          "chunks": 700,
+          "finalCharacters": 11480,
+          "streaming": {
+            "nodes": 4600,
+            "parsedCharacters": 25040,
+            "renders": 1100,
+            "scannedCharacters": 11480,
+            "scannedLines": 1100,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 6400,
+            "parsedCharacters": 36520,
+            "renders": 1101,
+            "scannedCharacters": 11480,
+            "scannedLines": 1100,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        },
+        "candidate": {
+          "chunks": 700,
+          "finalCharacters": 11480,
+          "streaming": {
+            "nodes": 4600,
+            "parsedCharacters": 25040,
+            "renders": 1100,
+            "scannedCharacters": 11480,
+            "scannedLines": 1100,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 6400,
+            "parsedCharacters": 36520,
+            "renders": 1101,
+            "scannedCharacters": 11480,
+            "scannedLines": 1100,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        }
+      },
+      "markupHeavySingleBlock": {
+        "current": {
+          "chunks": 477,
+          "finalCharacters": 8100,
+          "streaming": {
+            "nodes": 388623,
+            "parsedCharacters": 1938042,
+            "renders": 477,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 390245,
+            "parsedCharacters": 1946142,
+            "renders": 478,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        },
+        "candidate": {
+          "chunks": 477,
+          "finalCharacters": 8100,
+          "streaming": {
+            "nodes": 388623,
+            "parsedCharacters": 1938042,
+            "renders": 477,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 390245,
+            "parsedCharacters": 1946142,
+            "renders": 478,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        }
+      },
+      "manyTinyChunks": {
+        "current": {
+          "chunks": 12006,
+          "finalCharacters": 12006,
+          "streaming": {
+            "nodes": 24012,
+            "parsedCharacters": 72078021,
+            "renders": 12006,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 24014,
+            "parsedCharacters": 72090027,
+            "renders": 12007,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        },
+        "candidate": {
+          "chunks": 12006,
+          "finalCharacters": 12006,
+          "streaming": {
+            "nodes": 2,
+            "parsedCharacters": 1,
+            "renders": 1,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 12005,
+            "appendedCharacters": 12005,
+            "priorTextAtAppend": 72066015
+          },
+          "includingFinalRender": {
+            "nodes": 4,
+            "parsedCharacters": 12007,
+            "renders": 2,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 12005,
+            "appendedCharacters": 12005,
+            "priorTextAtAppend": 72066015
+          }
+        }
+      },
+      "fallbackLeadingWhitespace": {
+        "current": {
+          "chunks": 1295,
+          "finalCharacters": 22001,
+          "streaming": {
+            "nodes": 2590,
+            "parsedCharacters": 14265706,
+            "renders": 1295,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 2592,
+            "parsedCharacters": 14287707,
+            "renders": 1296,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        },
+        "candidate": {
+          "chunks": 1295,
+          "finalCharacters": 22001,
+          "streaming": {
+            "nodes": 2590,
+            "parsedCharacters": 14265706,
+            "renders": 1295,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 2592,
+            "parsedCharacters": 14287707,
+            "renders": 1296,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        }
+      },
+      "fallbackNumericPrefix": {
+        "current": {
+          "chunks": 1295,
+          "finalCharacters": 22002,
+          "streaming": {
+            "nodes": 2590,
+            "parsedCharacters": 14265707,
+            "renders": 1295,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 2592,
+            "parsedCharacters": 14287709,
+            "renders": 1296,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        },
+        "candidate": {
+          "chunks": 1295,
+          "finalCharacters": 22002,
+          "streaming": {
+            "nodes": 2590,
+            "parsedCharacters": 14265707,
+            "renders": 1295,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          },
+          "includingFinalRender": {
+            "nodes": 2592,
+            "parsedCharacters": 14287709,
+            "renders": 1296,
+            "scannedCharacters": 0,
+            "scannedLines": 0,
+            "appendCalls": 0,
+            "appendedCharacters": 0,
+            "priorTextAtAppend": 0
+          }
+        }
+      }
+    },
+    "countInterpretation": "nodes counts explicit fixture DOM allocations, parsedCharacters counts full-parser UTF-16 input, scannedCharacters counts line-scanner input. appendedCharacters counts only incoming appendData units. priorTextAtAppend sums existing Text length before appends, an exposure-to-copy measure, not measured copying. On long plain text it is 66,609,361 units despite only 70,169 appended units; on tiny chunks 72,066,015 versus 12,005. Do not infer linear browser CPU or physical RAM improvement. Strings tail and panel message.text are still retained, unchanged, with final full render still required.",
+    "timing": {
+      "scope": "Offline Node VM minimal DOM model only. Compiled actual renderer sources. No counter increments or parser hooks. Includes append loop, disposal and final full render; excludes VM setup. Three paired warmups, eleven alternating-order paired samples. JS string append model does not measure browser CharacterData, layout, paint, selection, GC attribution, CPU complexity or physical RAM.",
+      "node": "v22.14.0",
+      "results": {
+        "longPlainParagraph": {
+          "samples": [
+            {
+              "currentMs": 146.61650000000003,
+              "candidateMs": 11.42591600000003
+            },
+            {
+              "currentMs": 164.775041,
+              "candidateMs": 11.030624999999986
+            },
+            {
+              "currentMs": 165.411333,
+              "candidateMs": 11.23337499999991
+            },
+            {
+              "currentMs": 164.34345899999994,
+              "candidateMs": 11.281458000000043
+            },
+            {
+              "currentMs": 163.74633300000005,
+              "candidateMs": 11.028542000000016
+            },
+            {
+              "currentMs": 164.308667,
+              "candidateMs": 11.120957999999973
+            },
+            {
+              "currentMs": 163.80716699999994,
+              "candidateMs": 10.79862500000013
+            },
+            {
+              "currentMs": 166.14425000000006,
+              "candidateMs": 13.970708999999943
+            },
+            {
+              "currentMs": 166.0379579999999,
+              "candidateMs": 11.172333999999864
+            },
+            {
+              "currentMs": 163.66529199999968,
+              "candidateMs": 10.85787500000015
+            },
+            {
+              "currentMs": 164.82241600000043,
+              "candidateMs": 11.92629100000022
+            }
+          ],
+          "currentMedianMs": 164.34345899999994,
+          "candidateMedianMs": 11.172333999999864,
+          "ratio": 0.06798161647552926
+        },
+        "formattedStableBlocks": {
+          "samples": [
+            {
+              "currentMs": 3.600666999999703,
+              "candidateMs": 4.441667000000052
+            },
+            {
+              "currentMs": 3.534958000000188,
+              "candidateMs": 4.393125000000055
+            },
+            {
+              "currentMs": 3.5141670000002705,
+              "candidateMs": 4.059042000000318
+            },
+            {
+              "currentMs": 4.564374999999927,
+              "candidateMs": 4.182207999999719
+            },
+            {
+              "currentMs": 4.087708999999904,
+              "candidateMs": 4.202125000000251
+            },
+            {
+              "currentMs": 3.802874999999858,
+              "candidateMs": 4.1782499999999345
+            },
+            {
+              "currentMs": 3.962499999999636,
+              "candidateMs": 3.6110419999999976
+            },
+            {
+              "currentMs": 3.505750000000262,
+              "candidateMs": 3.5715829999999187
+            },
+            {
+              "currentMs": 3.5109999999999673,
+              "candidateMs": 3.954041999999845
+            },
+            {
+              "currentMs": 3.497750000000451,
+              "candidateMs": 3.5757079999998496
+            },
+            {
+              "currentMs": 3.487500000000182,
+              "candidateMs": 3.689791000000241
+            }
+          ],
+          "currentMedianMs": 3.534958000000188,
+          "candidateMedianMs": 4.059042000000318,
+          "ratio": 1.1482574899051423
+        },
+        "markupHeavySingleBlock": {
+          "samples": [
+            {
+              "currentMs": 117.46716700000025,
+              "candidateMs": 116.82920800000011
+            },
+            {
+              "currentMs": 119.07650000000012,
+              "candidateMs": 116.4502080000002
+            },
+            {
+              "currentMs": 115.24512499999992,
+              "candidateMs": 119.81379100000004
+            },
+            {
+              "currentMs": 115.50241600000027,
+              "candidateMs": 118.17341699999997
+            },
+            {
+              "currentMs": 115.38991600000008,
+              "candidateMs": 115.93683400000009
+            },
+            {
+              "currentMs": 115.15095800000017,
+              "candidateMs": 116.17891700000018
+            },
+            {
+              "currentMs": 115.26308299999982,
+              "candidateMs": 116.36116700000002
+            },
+            {
+              "currentMs": 115.31929200000013,
+              "candidateMs": 116.1537500000004
+            },
+            {
+              "currentMs": 115.2877499999995,
+              "candidateMs": 116.12583300000006
+            },
+            {
+              "currentMs": 115.39224999999988,
+              "candidateMs": 116.57204200000069
+            },
+            {
+              "currentMs": 115.1782919999996,
+              "candidateMs": 115.90562500000033
+            }
+          ],
+          "currentMedianMs": 115.31929200000013,
+          "candidateMedianMs": 116.36116700000002,
+          "ratio": 1.0090346982012333
+        },
+        "manyTinyChunks": {
+          "samples": [
+            {
+              "currentMs": 173.04362499999934,
+              "candidateMs": 11.01458300000013
+            },
+            {
+              "currentMs": 180.3883339999993,
+              "candidateMs": 11.92987499999981
+            },
+            {
+              "currentMs": 172.0499579999996,
+              "candidateMs": 11.7309580000001
+            },
+            {
+              "currentMs": 175.66625000000022,
+              "candidateMs": 11.40545800000018
+            },
+            {
+              "currentMs": 169.23675000000003,
+              "candidateMs": 11.390291000000616
+            },
+            {
+              "currentMs": 173.94008399999984,
+              "candidateMs": 11.658207999999831
+            },
+            {
+              "currentMs": 173.44850000000042,
+              "candidateMs": 12.138167000000067
+            },
+            {
+              "currentMs": 186.62595799999963,
+              "candidateMs": 12.036790999999539
+            },
+            {
+              "currentMs": 190.2766670000001,
+              "candidateMs": 12.269042000000809
+            },
+            {
+              "currentMs": 173.77554099999998,
+              "candidateMs": 12.214375000000473
+            },
+            {
+              "currentMs": 168.15333299999838,
+              "candidateMs": 11.325040999998237
+            }
+          ],
+          "currentMedianMs": 173.77554099999998,
+          "candidateMedianMs": 11.7309580000001,
+          "ratio": 0.06750638169499414
+        }
+      }
+    },
+    "timingConfirmation": {
+      "scope": "Confirmation of apparent formatted-stable-block regression only, same uninstrumented offline VM model; fifteen alternating paired batches of thirty complete streams, fifteen warmup streams per source. No browser inference.",
+      "samples": [
+        {
+          "currentMs": 1.6253722000000002,
+          "candidateMs": 1.6405611333333334,
+          "ratio": 1.009344895485067
+        },
+        {
+          "currentMs": 1.661826366666666,
+          "candidateMs": 1.6716097333333333,
+          "ratio": 1.0058871172481703
+        },
+        {
+          "currentMs": 1.582751399999999,
+          "candidateMs": 1.6159305666666663,
+          "ratio": 1.0209629678208894
+        },
+        {
+          "currentMs": 1.5746375000000001,
+          "candidateMs": 1.6560194333333318,
+          "ratio": 1.0516829640684486
+        },
+        {
+          "currentMs": 1.5718402666666653,
+          "candidateMs": 1.6209514000000014,
+          "ratio": 1.0312443537519775
+        },
+        {
+          "currentMs": 1.5935999999999997,
+          "candidateMs": 1.6898666666666675,
+          "ratio": 1.060408299866132
+        },
+        {
+          "currentMs": 1.6059000000000008,
+          "candidateMs": 1.6527000000000005,
+          "ratio": 1.0291425368951987
+        },
+        {
+          "currentMs": 1.6569889000000027,
+          "candidateMs": 1.659436100000001,
+          "ratio": 1.0014768958319507
+        },
+        {
+          "currentMs": 1.679338900000001,
+          "candidateMs": 1.7343180666666664,
+          "ratio": 1.0327385774644209
+        },
+        {
+          "currentMs": 1.778297200000001,
+          "candidateMs": 1.726086133333331,
+          "ratio": 0.97063985330086
+        },
+        {
+          "currentMs": 1.8375791666666677,
+          "candidateMs": 1.9865444333333395,
+          "ratio": 1.081066040238632
+        },
+        {
+          "currentMs": 1.937773599999999,
+          "candidateMs": 1.9951750000000024,
+          "ratio": 1.0296223459747844
+        },
+        {
+          "currentMs": 1.9428514000000026,
+          "candidateMs": 1.9930666666666639,
+          "ratio": 1.0258461695354886
+        },
+        {
+          "currentMs": 1.9512458333333371,
+          "candidateMs": 1.9986708333333278,
+          "ratio": 1.0243049846358796
+        },
+        {
+          "currentMs": 1.950912500000004,
+          "candidateMs": 1.9965555333333365,
+          "ratio": 1.0233957357561307
+        }
+      ],
+      "currentMedianMs": 1.661826366666666,
+      "candidateMedianMs": 1.6898666666666675,
+      "medianPairedRatio": 1.0258461695354886
+    },
+    "timingAssessment": "Model timings only. Long plain and tiny chunk timings favour candidate in this JS fixture. Formatted first trial +14.8% triggered a separate longer paired-batch confirmation. Confirmation median paired ratio 1.025846; current/candidate separate medians 1.661826/1.689867 ms. No claim of statistical significance or browser equivalence. Markup-heavy first-trial ratio 1.009035. General full-parser input and allocations remain exactly equal on formatted, markup-heavy, leading-whitespace and numeric-prefix cases.",
+    "fullRendererByteIdentical": true,
+    "finalSourceDrift": false
+  },
+  "objections": [
+    "Real CharacterData appendData can allocate/copy existing DOM string storage; JS concatenation in this fixture can use ropes. Saved parser input/node count does not establish linear CPU, peak RSS or physical RAM gain.",
+    "Candidate still retains full tail, panel message text, initial full parse and final full parse. No transcript truncation, virtualisation, hidden DOM, innerHTML or CSS changes.",
+    "Candidate adds a state flag, a DOM reference and boundary/fallback reset obligations. Conservative exclusions trade coverage for a short auditable safety rule; do not add prefix-state machinery for more formatting coverage.",
+    "Small formatted timing overhead remains possible. Longer model timings did not confirm the first material slowdown; only real-browser measurements can determine the result.",
+    "Tree equality does not prove native Find indexing, accessibility announcements, caret/range stability, shaping of temporary lone surrogates, layout/scroll anchoring or GC release. Retaining a Text node changes mutation type even while the resulting tree matches.",
+    "Source-bound panel tests cover current RAF/final-render/disposal and scroll decisions in a model. They do not emulate browser event-loop timing or layout."
+  ],
+  "requiredRealBrowserAcceptance": [
+    "Separately authorise an isolated offline browser test without touching installed Breezer/profile/providers. Compare frozen current and candidate under identical visible workloads and chunk/RAF cadence.",
+    "At every visible prefix and fallback transition verify exact tree and text, rendered formatting, blank/fence commits, no duplicated committed prefix, split surrogate pairs and partial block prefixes.",
+    "Measure main-thread time, frame latency/long tasks, parser/node allocation and GC, peak heap and post-disposal detached-node retention. Measure CharacterData append cost at growing paragraph sizes instead of assuming linearity. Repeat warmed alternating trials, especially formatted and markup-heavy fallback paths; reject material regression.",
+    "Check native Find during streaming and after fallback/final render, including matches across appends and committed blocks. Verify native selection/copy, held ranges, cursor/selection stability and accessibility tree/screen-reader behavior.",
+    "Check bottom following and readers scrolled away, scroll anchoring, long paragraphs, zoom, reduced motion as applicable; complete/stop/error/New Chat with pending RAF, dispose then late delta, and new run after queued RAF. Confirm final full parser remains authoritative."
+  ],
+  "commands": "Working directory: /Users/likht.ethan/.t3/worktrees/breezer/t3-13d2d906\nOffline only. No Python used. No browser, app, Chromium, provider, network, profile, credentials, Keychain, PC contact, installation or git commands.\n\nInitial freeze, before candidate work:\nmkdir -p build/efficiency-20261103/plain-stream-experiment/frozen\ncp features/ai/extension/render-message.js build/efficiency-20261103/plain-stream-experiment/frozen/render-message.js\ncp features/ai/extension/panel.js build/efficiency-20261103/plain-stream-experiment/frozen/panel.js\ncp script/verify_stream_render_efficiency.mjs build/efficiency-20261103/plain-stream-experiment/frozen/verify_stream_render_efficiency.mjs\ncp tests/ai/stream-render.test.mjs build/efficiency-20261103/plain-stream-experiment/frozen/stream-render.test.mjs\ncp tests/ai/fixtures/render-message-before.js build/efficiency-20261103/plain-stream-experiment/frozen/render-message-before.js\nshasum -a 256 build/efficiency-20261103/plain-stream-experiment/frozen/*\n\nScratch generator and experiment scripts were authored using shell heredocs. Exact scripts are retained with hashes. Reproduction commands, after freeze:\nnode build/efficiency-20261103/plain-stream-experiment/prepare.mjs\nnode --test build/efficiency-20261103/plain-stream-experiment/original-stream-render.test.mjs > build/efficiency-20261103/plain-stream-experiment/original-tests.tap 2>&1\nnode build/efficiency-20261103/plain-stream-experiment/experiment.mjs > build/efficiency-20261103/plain-stream-experiment/experiment.log 2>&1\nnode --test build/efficiency-20261103/plain-stream-experiment/plain-panel.test.mjs > build/efficiency-20261103/plain-stream-experiment/plain-panel-tests.tap 2>&1\nnode build/efficiency-20261103/plain-stream-experiment/timing.mjs > build/efficiency-20261103/plain-stream-experiment/timing.log 2>&1\nnode build/efficiency-20261103/plain-stream-experiment/confirm-timing.mjs > build/efficiency-20261103/plain-stream-experiment/confirm-timing.log 2>&1\ndiff -u --label frozen/render-message.js --label render-message.candidate.js build/efficiency-20261103/plain-stream-experiment/frozen/render-message.js build/efficiency-20261103/plain-stream-experiment/render-message.candidate.js > build/efficiency-20261103/plain-stream-experiment/candidate.diff\nThe diff command exits 1 because it found the intended changes.\nnode build/efficiency-20261103/plain-stream-experiment/finalize.mjs\n\nRead-only inspection also used cat, rg, sed, tail and ls on the named sources/owned scratch. No other research agent's scratch was read or written.\n",
+  "limitations": "No production adoption or browser acceptance performed. Raw TAP, differential JSON, counts, timing samples, full candidate, exact diff, source copies and SHA-256 manifests are all retained under owned scratch. SHA-256 manifest excludes itself to avoid self-reference; its digest is supplied in this report."
+}

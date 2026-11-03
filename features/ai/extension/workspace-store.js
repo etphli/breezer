@@ -226,11 +226,11 @@ export function findNode(store, id) {
 
 // Rebuilt for each operation so mutations never leave stale node references.
 function indexNodes(store) {
-  const nodes = new Map(store.favorites.map(node => [node.id, { node, space: null }]));
+  const nodes = new Map(store.favorites.map(node => [node.id, null]));
   for (const space of store.spaces) {
     for (const node of space.pinned) {
-      nodes.set(node.id, { node, space });
-      if (node.kind === 'folder') for (const child of node.children) nodes.set(child.id, { node: child, space });
+      nodes.set(node.id, space);
+      if (node.kind === 'folder') for (const child of node.children) nodes.set(child.id, space);
     }
   }
   return nodes;
@@ -533,10 +533,10 @@ export function buildSidebarModel({ store, records, tabs, activeSpaceId }) {
   const sorted = [...tabs].sort((a, b) => a.index - b.index);
   for (const tab of sorted) {
     const record = records[tab.id];
-    const found = record?.e ? nodes.get(record.e) : null;
-    if (found && !bound.has(record.e)) {
+    const found = record?.e ? nodes.get(record.e) : undefined;
+    if (found !== undefined && !bound.has(record.e)) {
       bound.set(record.e, tab);
-      if (found.space) counts[found.space.id] += 1;
+      if (found) counts[found.id] += 1;
       continue;
     }
     const tabSpace = resolveSpaceId(store, record?.s);
@@ -634,13 +634,19 @@ export class WorkspaceStore {
 
   // Applies this window's membership changes without touching other windows' tabs.
   patchMembers(set = {}, remove = []) {
-    return this.transact(({ members, session }) => {
+    return this.locks.request(LOCK_NAME, async () => {
+      const values = await this.storage.local.get([MEMBERS_KEY]);
+      const members = normalizeMembers(values[MEMBERS_KEY]);
+      const beforeMembers = JSON.stringify(members);
+      const session = await this.sessionToken();
+      rollSession(members, session);
       for (const [id, record] of Object.entries(set)) members.tabs[id] = { ...record, k: session };
       for (const id of remove) delete members.tabs[id];
+      if (JSON.stringify(members) !== beforeMembers) await this.storage.local.set({ [MEMBERS_KEY]: members });
     });
   }
 
-  // Must run inside a lock (transact does). Token creation is idempotent per browser session.
+  // Must run inside a lock. Token creation is idempotent per browser session.
   async sessionToken() {
     const values = await this.storage.session.get(SESSION_KEY);
     if (typeof values[SESSION_KEY] === 'string' && values[SESSION_KEY]) return values[SESSION_KEY];

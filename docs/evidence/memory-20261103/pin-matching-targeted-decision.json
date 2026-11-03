@@ -1,0 +1,9 @@
+{
+  "decision": "Reject C as written; freeze accepted source and begin authorized PC build.",
+  "reason": "Fails predeclared fast-path CPU bound with empty saved store and one pending pin. Targeted buckets reduce B live ownership but C still uses more in-operation live heap than baseline. Browser physical evidence is component-only and cannot establish whole Breezer acceptance.",
+  "sourceSha256": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+  "noCandidateAdopted": true,
+  "currentAcceptedChecks": "381 combined,9 disposable browser,8 packaging; independent index review accepted.",
+  "pcStatus": "User authorized PC contact/start after final checks; packet uploaded and WSL fixtures passed; checked migration in progress.",
+  "scope": "No more optimization edits before this build; preserve previous experimental evidence."
+}

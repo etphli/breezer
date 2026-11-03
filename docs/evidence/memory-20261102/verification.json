@@ -1,0 +1,178 @@
+{
+  "sourceTests": {
+    "command": "node --test tests/ai/browser-tools.test.mjs tests/ai/docs-editor.test.mjs",
+    "passed": 44,
+    "failed": 0,
+    "skipped": 0
+  },
+  "pythonTests": {
+    "command": "python3 -m unittest discover -s tests/windows -p '*_test.py' -v",
+    "passed": 22,
+    "failed": 0,
+    "skipped": 1,
+    "total": 23,
+    "skipReason": "Linux orphan-adoption test requires PC/WSL",
+    "platform": "Darwin",
+    "output": "test_corrupt_packet_is_not_applied (memory_update_test.MemoryUpdateTest.test_corrupt_packet_is_not_applied) ... ok\ntest_corrupt_second_packet_resource_is_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_corrupt_second_packet_resource_is_rejected_before_any_writes) ... ok\ntest_corrupt_third_packet_is_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_corrupt_third_packet_is_rejected_before_any_writes) ... ok\ntest_idempotent_update_keeps_pins_backups_and_object_cache (memory_update_test.MemoryUpdateTest.test_idempotent_update_keeps_pins_backups_and_object_cache) ... ok\ntest_resume_after_all_resource_writes_before_pin_write (memory_update_test.MemoryUpdateTest.test_resume_after_all_resource_writes_before_pin_write) ... ok\ntest_resume_after_resource_write_before_pin_write (memory_update_test.MemoryUpdateTest.test_resume_after_resource_write_before_pin_write) ... ok\ntest_unexpected_pin_is_not_overwritten (memory_update_test.MemoryUpdateTest.test_unexpected_pin_is_not_overwritten) ... ok\ntest_unexpected_second_resource_preserves_both_resources_and_plan (memory_update_test.MemoryUpdateTest.test_unexpected_second_resource_preserves_both_resources_and_plan) ... ok\ntest_unexpected_source_is_not_overwritten (memory_update_test.MemoryUpdateTest.test_unexpected_source_is_not_overwritten) ... ok\ntest_unexpected_third_resource_is_rejected_before_any_writes (memory_update_test.MemoryUpdateTest.test_unexpected_third_resource_is_rejected_before_any_writes) ... ok\ntest_compiler_failure_after_paging_backoff_does_not_retry (unattended_build_test.UnattendedBuildTest.test_compiler_failure_after_paging_backoff_does_not_retry) ... ok\ntest_default_checkpoint_at_ten_thousand_real_actions_survives_interruption (unattended_build_test.UnattendedBuildTest.test_default_checkpoint_at_ten_thousand_real_actions_survives_interruption) ... ok\ntest_freeze_timeout_still_terminates_a_driver_without_state (unattended_build_test.UnattendedBuildTest.test_freeze_timeout_still_terminates_a_driver_without_state) ... ok\ntest_killed_worker_before_state_write_does_not_orphan_driver (unattended_build_test.UnattendedBuildTest.test_killed_worker_before_state_write_does_not_orphan_driver) ... skipped 'Linux subreaper requires the PC/WSL environment'\ntest_logged_failed_action_cannot_be_success_even_with_zero_worker_exit (unattended_build_test.UnattendedBuildTest.test_logged_failed_action_cannot_be_success_even_with_zero_worker_exit) ... ok\ntest_manual_stop_cleans_up_a_separate_ninja_group (unattended_build_test.UnattendedBuildTest.test_manual_stop_cleans_up_a_separate_ninja_group) ... ok\ntest_manual_stop_does_not_restart_and_lock_rejects_another_runner (unattended_build_test.UnattendedBuildTest.test_manual_stop_does_not_restart_and_lock_rejects_another_runner) ... ok\ntest_real_ninja_continues_after_failure_and_resumes_completed_outputs (unattended_build_test.UnattendedBuildTest.test_real_ninja_continues_after_failure_and_resumes_completed_outputs) ... ok\ntest_recovery_can_succeed_after_one_resource_interruption (unattended_build_test.UnattendedBuildTest.test_recovery_can_succeed_after_one_resource_interruption) ... ok\ntest_resource_failure_retries_but_stops_at_limit (unattended_build_test.UnattendedBuildTest.test_resource_failure_retries_but_stops_at_limit) ... ok\ntest_stale_resource_state_does_not_retry_a_compiler_failure (unattended_build_test.UnattendedBuildTest.test_stale_resource_state_does_not_retry_a_compiler_failure) ... ok\ntest_stop_before_driver_state_is_published_cleans_detached_group (unattended_build_test.UnattendedBuildTest.test_stop_before_driver_state_is_published_cleans_detached_group) ... ok\ntest_stubborn_driver_is_terminated_without_leaving_worker_alive (unattended_build_test.UnattendedBuildTest.test_stubborn_driver_is_terminated_without_leaving_worker_alive) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 18.451s\n\nOK (skipped=1)\nMemory resources and worker pins verified. Graph and compiled outputs preserved.\nMemory resources and worker pins verified. Graph and compiled outputs preserved.\nMemory resources and worker pins verified. Graph and compiled outputs preserved.\nMemory resources and worker pins verified. Graph and compiled outputs preserved.\n",
+    "rawOutput": "windows-tests-final.log"
+  },
+  "browserFixtures": {
+    "tests/ai/browser-page.mjs": "PASS: real Chromium isolated-world snapshots, secret exclusion and pixel redaction, flowing blue wave (transform/opacity only, input pass-through, reduced motion, clean removal) and visible AI pointer, trusted replacement/click, cross-origin tool and link navigation, stale-target/password refusal, Escape/Stop cancellation including a loading page.\nEvidence: build/efficiency-20261102/browser-page/browser-control.png\n",
+    "tests/ai/docs-editor-browser.mjs": "PASS frame restrictions: stale handles, secret fields, detached/navigated/cross-origin frames, site scope, late focus changes, cancellation and frame Escape.\nPASS synthetic Docs workflow: capture, editor hit layer, focused frame typing, selection and follow-up edit. Authenticated Docs/native acceptance NOT tested.\n"
+  },
+  "notVerified": [
+    "Windows PowerShell and WSL launch",
+    "PC deployment",
+    "Native candidate whole-browser RAM/CPU",
+    "Full feature acceptance"
+  ],
+  "reviews": {
+    "model": "GPT-6 Luna",
+    "findingsAddressed": [
+      "driver ownership before state publication",
+      "bounded termination escalation",
+      "failed-action success gate",
+      "freeze-timeout cleanup"
+    ],
+    "limits": "Linux adoption and Windows launch remain unverified"
+  },
+  "translationSourceTests": {
+    "command": "node --test tests/ai/translation.test.mjs",
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0
+  },
+  "translationBrowserTests": {
+    "command": "node --test tests/ai/translation-browser.test.mjs",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Live LibreTranslate model server unavailable",
+    "result": "TAP version 13\n# Subtest: real disposable Chromium extension: provider path, DOM identity, restore, dynamic content, failure/cancel/retry and navigation\nok 1 - real disposable Chromium extension: provider path, DOM identity, restore, dynamic content, failure/cancel/retry and navigation\n  ---\n  duration_ms: 40851.918125\n  ...\n# Subtest: live local LibreTranslate model translates the actual page in disposable Chromium\nok 2 - live local LibreTranslate model translates the actual page in disposable Chromium # SKIP Set BREEZER_TRANSLATION_LIVE=1 with your local server running\n  ---\n  duration_ms: 0.630917\n  ...\n1..2\n# tests 2\n# suites 0\n# pass 1\n# fail 0\n# cancelled 0\n# skipped 1\n# todo 0\n# duration_ms 41195.959667\n"
+  },
+  "translationReview": {
+    "model": "GPT-6 Luna",
+    "findings": [],
+    "limits": [
+      "Native app RAM unverified",
+      "PC and WSL not executed",
+      "Live translation provider acceptance skipped"
+    ]
+  },
+  "retentionWorld": "CDP isolated contexts, matching production script isolation",
+  "sidebarTests": {
+    "browser": {
+      "command": "node --test tests/ai/workspace-browser.test.mjs",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "output": "TAP version 13\n# Subtest: sidebar releases unused route markup and reloads Settings and welcome intact\nok 1 - sidebar releases unused route markup and reloads Settings and welcome intact\n  ---\n  duration_ms: 2913.666416\n  ...\n# Subtest: empty Settings-created spaces and sidebar controls respond to held clicks\nok 2 - empty Settings-created spaces and sidebar controls respond to held clicks\n  ---\n  duration_ms: 2847.817292\n  ...\n# Subtest: dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops\nok 3 - dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops\n  ---\n  duration_ms: 1646.886542\n  ...\n# Subtest: delayed tab queries cannot revive closed rows or overwrite navigation and activation\nok 4 - delayed tab queries cannot revive closed rows or overwrite navigation and activation\n  ---\n  duration_ms: 1497.5725\n  ...\n# Subtest: Arc-style sidebar and settings work against the chrome.* fixture\nok 5 - Arc-style sidebar and settings work against the chrome.* fixture\n  ---\n  duration_ms: 6737.602875\n  ...\n# Subtest: tab updates leave unchanged rows and their audio controls intact\nok 6 - tab updates leave unchanged rows and their audio controls intact\n  ---\n  duration_ms: 823.317416\n  ...\n# Subtest: numbered favorite command lazily opens the saved first slot, once under rapid repeat\nok 7 - numbered favorite command lazily opens the saved first slot, once under rapid repeat\n  ---\n  duration_ms: 768.866584\n  ...\n# Subtest: numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart\nok 8 - numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart\n  ---\n  duration_ms: 799.228625\n  ...\n# Subtest: numbered favorite activation is scoped to the host window, including another window with a live target\nok 9 - numbered favorite activation is scoped to the host window, including another window with a live target\n  ---\n  duration_ms: 860.779583\n  ...\n1..9\n# tests 9\n# suites 0\n# pass 9\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 19208.594083\n"
+    },
+    "static": {
+      "command": "node --test tests/ai/workspace-static.test.mjs",
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    },
+    "accepted": "Prune only unused Settings/welcome roots from sidebar boot",
+    "rejected": "Lazy collapsed-folder row rendering regressed expansion readiness",
+    "timingLimit": "Three balanced pairs per case, synthetic fixture; no browser-wide speed or CPU claim"
+  },
+  "sidebarReview": {
+    "model": "GPT-6 Luna",
+    "findings": [],
+    "evidenceFollowup": "Added per-run source hashes and browser identities from raw trial files after review flagged missing metadata",
+    "limits": "DOM/document observations only; native app RAM/CPU and Windows/WSL launch remain unverified"
+  },
+  "checkpointProof": {
+    "type": "Real Ninja graph using the CLI default interval, interrupted before completion",
+    "actions": 10001,
+    "checkpointAtActions": 10000,
+    "assertions": [
+      "CLI interval override removed; saved interval is10000",
+      "First10000outputs and their Ninja journal entries exist while final action is still running",
+      "Controlled stop leaves state stopped and preserves completed outputs",
+      "Resume completes the remaining action and preserves every earlier output mtime",
+      "Third invocation does no work and preserves all10001outputs"
+    ],
+    "scope": "POSIX local runner on macOS; Windows/WSL and browser compilation remain unverified"
+  },
+  "checkpointReview": {
+    "model": "GPT-6 Luna",
+    "findingsAddressed": [
+      "Use actual CLI default rather than configuring10000",
+      "Interrupt at checkpoint and resume, rather than only rerunning a completed graph"
+    ],
+    "evidence": "Real Ninja regression test passes with the stricter lifecycle",
+    "limits": "Linux orphan-adoption and Windows/WSL/native browser checks remain unverified"
+  },
+  "historicalPcProbeBeforeUnavailabilityInstruction": "Connection timed out during banner exchange\nConnection to UNKNOWN port 65535 timed out\n",
+  "nativeDecoder": {
+    "sourceSha256": "da4a39a7a390b8418e715f98db9d9e1d192adec471980dd1daeecfc53406e90e",
+    "hostTests": {
+      "command": "PACKAGED_NODE --test tests/ai/host.test.mjs tests/ai/host-loading.test.mjs tests/ai/native-frame-memory.test.mjs",
+      "runtime": "v24.22.1",
+      "passed": 35,
+      "failed": 0,
+      "skipped": 0,
+      "output": "decoder-host-tests-pinned.tap"
+    },
+    "directAssembly": {
+      "before": "decoder-before-pinned.json",
+      "after": "decoder-after-pinned.json",
+      "bytes": 8388608,
+      "chunkBytes": 32768,
+      "rounds": 5,
+      "scope": "Bounded assembly copying and completed-buffer retention, forced GC"
+    },
+    "actualHelper": {
+      "summary": "native-transport-summary.json",
+      "payloadMiB": [
+        0.00390625,
+        0.0625,
+        1.0,
+        4.0,
+        8.0
+      ],
+      "balancedPairsPerPayload": 6,
+      "scope": "Single actual native host, synthetic invalid settings frames, forced GC, no provider/Keychain/network/config changes; not whole-browser RAM or AI latency. CPU includes validation, transport and post-request forced GC.",
+      "rawFiles": [
+        "native-transport-final-4096.json",
+        "native-transport-final-65536.json",
+        "native-transport-final-1048576.json",
+        "native-transport-final-4194304.json",
+        "native-transport-final-8388608.json"
+      ],
+      "totalHelperLaunches": 60,
+      "smallFrameResult": "4 KiB and 64 KiB ranges overlap; no improvement claimed. 64 KiB CPU median is 0.107 ms higher, including forced GC; not established as a decode regression.",
+      "recomputeCommand": "python3 script/summarize_native_transport.py docs/evidence/memory-20261102/native-transport-final-*.json --output build/efficiency-20261102/native-transport-recomputed.json"
+    },
+    "packagingTests": {
+      "passed": 5,
+      "failed": 0,
+      "output": "memory-package-tests.log",
+      "gate": "package_breezer_ai.py --memory-packet, exercised with synthetic app fixtures"
+    },
+    "existingPackagingTests": {
+      "passed": 5,
+      "failed": 0,
+      "output": "ai-packaging-tests.log"
+    },
+    "packet": {
+      "currentSourceMatches": true,
+      "allChecksumsVerified": true,
+      "deployed": false
+    },
+    "review": {
+      "model": "GPT-6 Luna",
+      "decoderFindings": [],
+      "findingAddressed": "Added enforced packaging receipt option and package-command test after review identified the missing automatic gate"
+    },
+    "finalChecks": [
+      "Packet regenerated and every SHA256SUMS entry verified",
+      "Current decoder matches every candidate trial and host receipt",
+      "bash -n script/build_and_run.sh passes",
+      "git diff --check passes"
+    ]
+  }
+}

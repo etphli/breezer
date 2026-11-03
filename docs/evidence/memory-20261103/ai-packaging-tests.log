@@ -1,0 +1,10 @@
+test_current_version_symlink_is_one_bundled_framework (__main__.RuntimePackagingTests.test_current_version_symlink_is_one_bundled_framework) ... ok
+test_extracts_only_pinned_binary_and_licence (__main__.RuntimePackagingTests.test_extracts_only_pinned_binary_and_licence) ... ok
+test_framework_cannot_point_outside_the_app (__main__.RuntimePackagingTests.test_framework_cannot_point_outside_the_app) ... ok
+test_rejects_symlink_in_place_of_runtime (__main__.RuntimePackagingTests.test_rejects_symlink_in_place_of_runtime) ... ok
+test_rejects_tampered_archive_before_extracting (__main__.RuntimePackagingTests.test_rejects_tampered_archive_before_extracting) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.008s
+
+OK

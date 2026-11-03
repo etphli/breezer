@@ -31,6 +31,49 @@ test('persistent identity preserves duplicate URLs; local IDs and folder expansi
   assert.equal(restored.favorites.length, 1);
 });
 
+test('restoring many folder states reads local pins a linear number of times', t => {
+  const store = defaultStore(), count = 1000;
+  store.spaces[0].pinned = Array.from({ length: count }, (_, i) => ({ kind: 'folder', id: `folder-${i}`, name: `Folder ${i}`, open: i % 2 === 0, children: [] }));
+  const model = recordWorkspaceChanges(emptySyncModel(), {}, projectWorkspace(store), 'client_alpha');
+  let reads = 0;
+  store.spaces[0].pinned = new Proxy(store.spaces[0].pinned, { get(target, key, receiver) {
+    if (typeof key === 'string' && /^\d+$/.test(key)) reads += 1;
+    return Reflect.get(target, key, receiver);
+  } });
+  const restored = materializeWorkspace(model, store).store;
+  assert.equal(restored.spaces[0].pinned.length, count);
+  assert.ok(restored.spaces[0].pinned.every((node, i) => node.open === (i % 2 === 0)));
+  t.diagnostic(`${reads} local pin reads for ${count} folders`);
+  assert.ok(reads <= count * 2, `Repeated local scans read ${reads} pins`);
+});
+
+test('folder expansion preserves the first match within the last matching local space', () => {
+  const { store, model, folder } = initial();
+  store.spaces[0].pinned = [{ ...folder, open: true }, { ...folder, open: false }];
+  store.spaces[1].pinned = [{ ...folder, open: false }, { ...folder, open: true }];
+  assert.equal(materializeWorkspace(model, store).store.spaces[0].pinned[0].open, false);
+  store.spaces[1].pinned = [];
+  assert.equal(materializeWorkspace(model, store).store.spaces[0].pinned[0].open, true);
+  store.spaces[0].pinned = [];
+  assert.equal(materializeWorkspace(model, store).store.spaces[0].pinned[0].open, true);
+});
+
+test('folder restoration skips unrelated pins once all matching states are found', () => {
+  for (const count of [0, 1, 2]) {
+    const store = defaultStore();
+    store.spaces[0].pinned = Array.from({ length: count }, (_, i) => ({ kind: 'folder', id: `folder-${i}`, name: 'Folder', open: false, children: [] }));
+    const model = recordWorkspaceChanges(emptySyncModel(), {}, projectWorkspace(store), 'client_alpha');
+    store.spaces[0].pinned.push(...Array.from({ length: 1000 }, (_, i) => ({ kind: 'entry', id: `entry-${i}`, url: 'https://example.test/', title: 'Unrelated' })));
+    let reads = 0;
+    store.spaces[0].pinned = new Proxy(store.spaces[0].pinned, { get(target, key, receiver) {
+      if (typeof key === 'string' && /^\d+$/.test(key)) reads += 1;
+      return Reflect.get(target, key, receiver);
+    } });
+    materializeWorkspace(model, store);
+    assert.ok(reads <= count * 2, `${count} folders caused ${reads} unrelated pin reads`);
+  }
+});
+
 test('two offline clients converge with concurrent rename, move, independent field edits and restart', () => {
   const { store, model, entry, second } = initial();
   const alpha = edit(model, store, 'client_alpha', s => { renameSpace(s, second.id, 'Team'); renameNode(s, entry.id, 'Changed'); });

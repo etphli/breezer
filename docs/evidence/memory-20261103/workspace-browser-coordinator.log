@@ -1,0 +1,55 @@
+TAP version 13
+# Subtest: sidebar releases unused route markup and reloads Settings and welcome intact
+ok 1 - sidebar releases unused route markup and reloads Settings and welcome intact
+  ---
+  duration_ms: 8740.602792
+  ...
+# Subtest: empty Settings-created spaces and sidebar controls respond to held clicks
+ok 2 - empty Settings-created spaces and sidebar controls respond to held clicks
+  ---
+  duration_ms: 2797.974542
+  ...
+# Subtest: dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+ok 3 - dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+  ---
+  duration_ms: 1441.48975
+  ...
+# Subtest: delayed tab queries cannot revive closed rows or overwrite navigation and activation
+ok 4 - delayed tab queries cannot revive closed rows or overwrite navigation and activation
+  ---
+  duration_ms: 1611.267333
+  ...
+# Subtest: Arc-style sidebar and settings work against the chrome.* fixture
+ok 5 - Arc-style sidebar and settings work against the chrome.* fixture
+  ---
+  duration_ms: 5865.995708
+  ...
+# Subtest: tab updates leave unchanged rows and their audio controls intact
+ok 6 - tab updates leave unchanged rows and their audio controls intact
+  ---
+  duration_ms: 966.340083
+  ...
+# Subtest: numbered favorite command lazily opens the saved first slot, once under rapid repeat
+ok 7 - numbered favorite command lazily opens the saved first slot, once under rapid repeat
+  ---
+  duration_ms: 948.123042
+  ...
+# Subtest: numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+ok 8 - numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+  ---
+  duration_ms: 967.521291
+  ...
+# Subtest: numbered favorite activation is scoped to the host window, including another window with a live target
+ok 9 - numbered favorite activation is scoped to the host window, including another window with a live target
+  ---
+  duration_ms: 1070.93125
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 24759.196917

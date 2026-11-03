@@ -1,0 +1,96 @@
+{
+  "scope": "Coordinator complete-file reads of transport implementation/test sources and harness checker; C probe also independently fully read by transport delegate.",
+  "files": [
+    {
+      "path": "script/summarize_native_transport.py",
+      "sha256": "d74d995257f998428972f206693f8bf1c910fa338d9d6d921797eea308d8d83a",
+      "lines": 172,
+      "readRanges": [
+        [
+          1,
+          172
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    },
+    {
+      "path": "script/benchmark_native_transport.mjs",
+      "sha256": "02bf990ce3b2aa9ba2e70ab2a0449f94f0a89cfd0b646824da39ae7c550d4a76",
+      "lines": 101,
+      "readRanges": [
+        [
+          1,
+          101
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    },
+    {
+      "path": "script/native_transport_diagnostic.mjs",
+      "sha256": "8c5bae242b736b48d5a04fd0db0df091d802235ad91cbf88f8332730d67adcf3",
+      "lines": 103,
+      "readRanges": [
+        [
+          1,
+          103
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    },
+    {
+      "path": "script/macos_process_usage.c",
+      "sha256": "941a6f30d20bbe014beaaf882c27b2999d6f5e570d86a7665ac2bb34d282fe27",
+      "lines": 63,
+      "readRanges": [
+        [
+          1,
+          63
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    },
+    {
+      "path": "tests/native_transport_summary_test.py",
+      "sha256": "fd9711a768291ead5ffe46ad2f538f054d12465d6677a1990081ba9608b06491",
+      "lines": 105,
+      "readRanges": [
+        [
+          1,
+          105
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    },
+    {
+      "path": "tests/ai/native-transport-lifecycle.test.mjs",
+      "sha256": "f37608abac6b7b0403c747d0fab8ade06780c25219b7109ca2203ed7c946c925",
+      "lines": 82,
+      "readRanges": [
+        [
+          1,
+          82
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    },
+    {
+      "path": "tests/ai/harness-cleanup.test.mjs",
+      "sha256": "37a6bef80ce1e6207c5792fa219144d89bcc2cffaf72962cb499a438428a49a6",
+      "lines": 66,
+      "readRanges": [
+        [
+          1,
+          66
+        ]
+      ],
+      "status": "fully-read",
+      "notes": "Complete source output read, edits inspected and focused offline checks executed. This records reading, not native performance acceptance."
+    }
+  ]
+}

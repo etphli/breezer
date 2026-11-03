@@ -1,0 +1,27 @@
+✔ an idle native helper exits cleanly without loading AI providers or their controllers (68.758458ms)
+✔ invalid native origins are still rejected without loading AI providers (51.129ms)
+✔ the first AI message loads the real controller and preserves validation (68.901166ms)
+✔ oversized responses stop consumption and cancel the body at the existing character limit (24.070834ms)
+ℹ 2031616 bytes consumed from 4194304
+✔ UTF-8 splitting, replacement and BOM behavior matches Response.text (4.426625ms)
+✔ one oversized transport chunk is decoded only up to the rejection boundary (1.6195ms)
+ℹ 2031616 bytes decoded from one 4194304-byte chunk
+✔ non-byte stream chunks retain Response.text rejection (0.686959ms)
+✔ the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes (54.321125ms)
+✔ the limit includes replacement characters emitted by the final decoder flush (4.121667ms)
+✔ empty, malformed and failed bodies preserve their error behavior (0.532167ms)
+✔ abort and HTTP status still follow the original request contract (2.889333ms)
+✔ default dashboard is enabled without sending requests or persisting a key in config (25.058125ms)
+✔ fixed API contract supports reading, creation and versioned updates with explicit permissions (5.592208ms)
+✔ invalid paths, fields and dates cannot become API mutations (9.340834ms)
+✔ Connect reports validation/save stages and avoids an unnecessary second Keychain read (1.992375ms)
+✔ invalid or expired credentials fail before any Keychain write (0.616ms)
+✔ dashboard items link directly to their task in Organato (2.183167ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 253.728417

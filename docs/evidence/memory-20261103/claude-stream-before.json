@@ -1,0 +1,34 @@
+{
+  "runtime": "v22.14.0",
+  "scope": "Actual round, fake RPC; deterministic code-unit counts only. No provider or timing measurements.",
+  "measurement": {
+    "path": "build/efficiency-20261103/claude-stream-before.mjs",
+    "sha256": "ed5c48e871aa968cec7041c8fa70fdfec4a655a78144ae9e6481905c591d8733",
+    "cases": [
+      {
+        "chunks": 128,
+        "arrivedCodeUnits": 16393,
+        "emittedCodeUnits": 16384,
+        "scanned": 0,
+        "parsed": 1057024,
+        "parses": 128
+      },
+      {
+        "chunks": 256,
+        "arrivedCodeUnits": 32777,
+        "emittedCodeUnits": 32768,
+        "scanned": 0,
+        "parsed": 4211200,
+        "parses": 256
+      },
+      {
+        "chunks": 512,
+        "arrivedCodeUnits": 65545,
+        "emittedCodeUnits": 65536,
+        "scanned": 0,
+        "parsed": 16811008,
+        "parses": 512
+      }
+    ]
+  }
+}
