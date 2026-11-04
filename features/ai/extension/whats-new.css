@@ -830,3 +830,14 @@ body {
 .patch-details { margin-top: 24px; }
 .patch-details > .notes { max-width: 76ch; margin-top: 18px; }
 .pending .feature-details { margin-top: 12px; padding-top: 10px; }
+
+.feature:has(.feature-details[open]) { align-items: start; }
+.features + .results { margin-top: 48px; }
+.results + .patch-notes { margin-top: 32px; padding-top: 12px; border-top: 0; }
+.verification-group { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--plate-edge); }
+.verification-group > h2 { margin: 0 0 12px; font: 500 1.5rem/1.25 var(--serif); letter-spacing: -.01em; }
+.verification-group .pending { margin: 0; padding: 20px 0; border-radius: 0; background: none; box-shadow: none; }
+.verification-group .pending + .pending { border-top: 1px solid var(--plate-edge); }
+.verification-group .pending h3 { margin: 0 0 6px; font: 600 1rem/1.4 var(--sans); }
+.verification-group .feature-details { margin-top: 10px; padding-top: 0; border-top: 0; }
+.verification-group .feature-details[open] > summary { margin-bottom: 10px; }

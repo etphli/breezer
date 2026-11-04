@@ -376,9 +376,13 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-passkeys">Clearer passkey settings</h3>
-          <p>Passwords settings now explains where passkeys are stored and opens native local passkey management.</p>
-          <p>Touch ID and Apple Passwords remain unavailable until Breezer has the required Apple signing entitlements. Saving passwords and importing them from CSV work as before.</p>
-          <p>Password suggestions close in Chromium's usual way again as you type. The Microsoft sign-in Enter behavior remains unconfirmed, as noted below.</p>
+          <p>The Passwords page explains where passkeys are stored and opens native local passkey management.</p>
+          <p class="feature-limit">Touch ID and Apple Passwords remain unavailable. Saving passwords and CSV import work as before.</p>
+          <details class="feature-details">
+            <summary>Password and passkey details</summary>
+            <p>Touch ID and Apple Passwords remain unavailable until Breezer has the required Apple signing entitlements. Saving passwords and importing them from CSV work as before.</p>
+            <p>Password suggestions close in Chromium's usual way again as you type. The Microsoft sign-in Enter behavior remains unconfirmed, as noted below.</p>
+          </details>
         </div>
       </article>
       <article class="feature" aria-labelledby="f-research">
@@ -659,13 +663,15 @@
       </details>
     </section>
 
+    <section class="verification-group" aria-labelledby="verification-title">
+      <h2 id="verification-title">Known limitations</h2>
     <aside class="pending" aria-labelledby="pending-sync-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h12l-3-3M19 16H7l3 3M5 8v5M19 16v-5"/></svg>
       <div>
-        <h2 id="pending-sync-title">Still to verify: encrypted sync</h2>
+        <h3 id="pending-sync-title">Encrypted sync</h3>
         <p class="pending-summary">Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
         <details class="feature-details">
-          <summary>Verification details</summary>
+          <summary>Details</summary>
           <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
         </details>
       </div>
@@ -674,10 +680,10 @@
     <aside class="pending" aria-labelledby="pending-docs-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
       <div>
-        <h2 id="pending-docs-title">Still to verify: Google Docs editing</h2>
+        <h3 id="pending-docs-title">Google Docs editing</h3>
         <p class="pending-summary">Typing, editing and saved changes still need real-document checks with both AI providers.</p>
         <details class="feature-details">
-          <summary>Verification details</summary>
+          <summary>Details</summary>
           <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
         </details>
       </div>
@@ -686,10 +692,10 @@
     <aside class="pending" aria-labelledby="pending-passwords-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg>
       <div>
-        <h2 id="pending-passwords-title">Still to confirm: Enter on Microsoft sign-in</h2>
+        <h3 id="pending-passwords-title">Enter on Microsoft sign-in</h3>
         <p class="pending-summary">Enter on Microsoft's password step remains unconfirmed.</p>
         <details class="feature-details">
-          <summary>Verification details</summary>
+          <summary>Details</summary>
           <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
         <p>A narrow Enter fallback is included for explicit username/current-password forms. Native password-picker, IME, validation and site checks remain pending.</p>
         </details>
@@ -699,14 +705,15 @@
     <aside class="pending" aria-labelledby="pending-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
       <div>
-        <h2 id="pending-title">Not yet: Touch ID passkeys</h2>
-        <p class="pending-summary">Touch ID needs Apple-approved signing entitlements. Saving and filling passwords are separate.</p>
+        <h3 id="pending-title">Touch ID passkeys</h3>
+        <p class="pending-summary">Touch ID passkeys are unavailable without Apple-approved signing entitlements. Saving and filling passwords are separate.</p>
         <details class="feature-details">
-          <summary>Verification details</summary>
+          <summary>Details</summary>
           <p>Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements that Breezer does not have yet. This is separate from saving and filling passwords.</p>
         </details>
       </div>
     </aside>
+    </section>
 
     <footer class="closing">
       <p>That's everything in this release.</p>

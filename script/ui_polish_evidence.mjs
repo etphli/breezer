@@ -12,11 +12,16 @@ if (command === 'capture' && args.length === 1) {
   const evidence = resolve(args[0]);
   await mkdir(evidence, { recursive: true });
   const env = { ...process.env, BREEZER_AI_EVIDENCE: evidence };
+  const testFiles = [];
+  for (const folder of ['tests', 'tests/ai']) {
+    for (const file of (await readdir(resolve(root, folder))).sort()) {
+      if (file.endsWith('.test.mjs')) testFiles.push(`${folder}/${file}`);
+    }
+  }
   for (const tests of [
-    ['--test', '--test-concurrency=2', 'tests/ai/workspace-browser.test.mjs', 'tests/ai/workspace-frame.test.mjs', 'tests/ai/settings-redesign-browser.test.mjs', 'tests/ai/newtab-browser.test.mjs', 'tests/ai/ui-polish-browser.test.mjs'],
+    ['--test', '--test-concurrency=2', ...testFiles],
     ['tests/ai/panel-browser.mjs'],
     ['tests/ai/research-browser.mjs'],
-    ['--test', '--test-concurrency=2', 'tests/ai/onboarding-browser.test.mjs', 'tests/ai/settings-onboarding-browser.test.mjs', 'tests/ai/translation-browser.test.mjs', 'tests/ai/whats-new-browser.test.mjs'],
   ]) execFileSync(process.execPath, tests, { cwd: root, env, stdio: 'inherit' });
 } else if (command === 'compare' && [3, 4].includes(args.length)) {
   const [before, after, output] = args.slice(0, 3).map(value => resolve(value));
@@ -72,7 +77,7 @@ if (command === 'capture' && args.length === 1) {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined) });
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
-    for (const file of (await readdir(output)).filter(file => /^whats-new-.*-tiles\.json$/.test(file))) {
+    for (const file of (await readdir(output)).filter(file => /^(?:whats-new|efficiency)-.*-tiles\.json$/.test(file))) {
       const report = JSON.parse(await readFile(resolve(output, file), 'utf8'));
       const tiles = await Promise.all(report.tiles.map(async tile => `<figure><figcaption>Scroll ${tile.scrollY}px</figcaption><img src="data:image/png;base64,${(await readFile(resolve(output, tile.file))).toString('base64')}"/></figure>`));
       await page.setContent(`<!doctype html><style>body{margin:16px;font:14px system-ui;background:#fff;color:#20262b}main{display:grid;grid-template-columns:repeat(${report.viewport.width < 500 ? 5 : 3},1fr);gap:12px}figure{margin:0;min-width:0}figcaption{padding:6px 0}img{width:100%;display:block;border:1px solid #ccd4d7}</style><h1>${file.replace('-tiles.json', '')}</h1><p>Overlapping viewport captures. Open the original tiles to inspect text.</p><main>${tiles.join('')}</main>`);

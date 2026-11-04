@@ -91,9 +91,10 @@ test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
   assert.match(text, /hasn't yet been confirmed to fix pressing Enter on Microsoft's password step/);
   assert.doesNotMatch(text, /Microsoft (?:sign-in|password step) (?:is |now )?(?:fixed|works)/i);
   // Touch ID is listed as not done, never as fixed or available.
-  assert.match(text, /Not yet: Touch ID passkeys/);
+  assert.match(text, /Known limitations/);
+  assert.match(text, /Touch ID passkeys are unavailable/);
   assert.match(text, /Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements/);
-  assert.match(text, /Passwords settings now explains where passkeys are stored and opens native local passkey management/);
+  assert.match(text, /The Passwords page explains where passkeys are stored and opens native local passkey management/);
   assert.match(text, /Touch ID and Apple Passwords remain unavailable until Breezer has the required Apple signing entitlements/);
   assert.match(text, /Choose source tabs in the assistant to compare and summarize up to six pages, with source references and clear text-only sharing/);
   assert.match(text, /Research sources never enable browser control/);
@@ -123,7 +124,7 @@ test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
   assert.match(text, /saved changes still need checks in the compiled browser with both AI providers/);
   assert.doesNotMatch(text, /Google Docs (?:now works|is fixed|works correctly)|AI browser control can focus Google Docs/i);
   assert.equal([...html.matchAll(/class="pending"/g)].length, 4);
-  assert.match(text, /Still to verify: encrypted sync/);
+  assert.match(text, /Encrypted sync/);
   assert.match(text, /Encrypted two-profile and password-sync checks remain pending/);
   assert.equal([...html.matchAll(/data-action="continue"/g)].length, 2);
   assert.equal([...html.matchAll(/>Open Settings</g)].length, 2);

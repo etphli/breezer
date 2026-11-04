@@ -1158,3 +1158,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 #custom-theme-note { color: var(--muted); }
 .setting-label:has(+ .control-cluster #custom-theme-apply[aria-pressed="true"]) #custom-theme-note { color: var(--accent); }
 input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+
+[data-password-import-guide] li + li { margin-top: 14px; }
+[data-password-import-guide] li strong { display: block; margin-bottom: 3px; font-weight: 600; color: var(--ink); }
+[data-password-import-guide] li span { color: var(--muted); line-height: 1.5; }

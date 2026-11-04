@@ -1,0 +1,107 @@
+[
+  {
+    "id": "sharing",
+    "title": "Sharing status at 320px",
+    "file": "mint-light-assistant-narrow.png",
+    "notes": [
+      [
+        84,
+        65,
+        50,
+        82,
+        "Inclusion and sharing scope use larger text on separate lines."
+      ]
+    ]
+  },
+  {
+    "id": "working",
+    "title": "Browser-control status",
+    "file": "sidebar-working.png",
+    "notes": [
+      [
+        84,
+        77,
+        44,
+        87,
+        "The active capability has a readable line of its own."
+      ]
+    ]
+  },
+  {
+    "id": "limits",
+    "title": "Release limitations",
+    "file": "whats-new-limitations-narrow.png",
+    "notes": [
+      [
+        85,
+        10,
+        42,
+        6,
+        "One heading groups the limitations."
+      ],
+      [
+        85,
+        34,
+        48,
+        30,
+        "Lighter separators replace repeated cards. All four limitations stay visible."
+      ]
+    ]
+  },
+  {
+    "id": "guide",
+    "title": "Password import guidance",
+    "file": "settings-password-guide-light.png",
+    "notes": [
+      [
+        85,
+        38,
+        42,
+        43,
+        "Each step starts with a clear action."
+      ],
+      [
+        85,
+        77,
+        47,
+        65,
+        "The import action and reference link sit together."
+      ]
+    ]
+  },
+  {
+    "id": "translation",
+    "title": "Translation setup",
+    "file": "mint-dark-settings-languages-narrow.png",
+    "notes": [
+      [
+        85,
+        17,
+        52,
+        29,
+        "Setup help follows the selected provider."
+      ],
+      [
+        85,
+        72,
+        44,
+        78,
+        "The setup reference stays visible."
+      ]
+    ]
+  },
+  {
+    "id": "newtab",
+    "title": "Narrow new-tab spacing",
+    "file": "newtab-narrow.png",
+    "notes": [
+      [
+        85,
+        20,
+        53,
+        30,
+        "Shorter shortcut rows bring deadlines higher. All eight shortcuts and Add remain."
+      ]
+    ]
+  }
+]

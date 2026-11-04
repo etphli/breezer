@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 // Drives the shipped whats-new.html in headless Chrome. release-info.js is
 // served from the synthetic fixture below (Main ships the real one), and
@@ -12,6 +13,8 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../features/ai/extension');
 const evidence = process.env.BREEZER_AI_EVIDENCE || '/tmp/breezer-ai-evidence';
 const executablePath = process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined);
+const baseline = process.env.BREEZER_UI_BASELINE;
+if (baseline && !/^[a-f0-9]{7,40}$/.test(baseline)) throw new Error('BREEZER_UI_BASELINE must be a commit hash');
 let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
@@ -32,7 +35,9 @@ async function startServer() {
       }
       const path = resolve(root, `.${url.pathname}`);
       if (!path.startsWith(`${root}/`)) throw new Error('Outside fixture root');
-      const content = await readFile(path);
+      const content = baseline
+        ? execFileSync('git', ['show', `${baseline}:features/ai/extension/${url.pathname.slice(1)}`], { cwd: resolve(root, '../../..') })
+        : await readFile(path);
       response.setHeader('Content-Type', ({ '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png' })[extname(path)] || 'application/octet-stream');
       response.end(content);
     } catch { response.writeHead(404).end(); }
@@ -255,7 +260,31 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({ path: `${evidence}/whats-new-narrow.png` });
       await captureLongPage(page, 'whats-new-narrow');
+      const limits = await page.evaluate(() => {
+        const group = document.querySelector('.verification-group');
+        const rows = [...document.querySelectorAll('.pending')];
+        const top = (group || rows[0]).getBoundingClientRect().top + scrollY;
+        const bottom = (group || rows.at(-1)).getBoundingClientRect().bottom + scrollY;
+        return { x: 0, y: top, width: innerWidth, height: bottom - top };
+      });
+      await page.screenshot({ path: `${evidence}/whats-new-limitations-narrow.png`, clip: limits, fullPage: true });
     });
+
+    // The linked reference article is part of the app's rendered UI too.
+    for (const [name, options] of [['desktop', {}], ['narrow', { viewport: { width: 390, height: 844 } }], ['dark', { colorScheme: 'dark' }]]) {
+      await withPage(browser, base, options, async page => {
+        await page.goto(`${base}/efficiency.html`);
+        await page.evaluate(() => document.fonts.ready);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} reference article stays contained`);
+        assert.ok(await contrast(page, '.benchmark-story-body p') >= 4.5, `${name} reference article contrast`);
+        await page.screenshot({ path: `${evidence}/efficiency-${name}.png` });
+        if (name !== 'dark') await captureLongPage(page, `efficiency-${name}`);
+        await page.getByRole('link', { name: 'Read the full benchmark results', exact: true }).click();
+        await page.locator('.results-table').first().waitFor();
+        assert.equal(await page.locator('.measurement-details').evaluate(node => node.open), true);
+        assert.equal(await page.locator('.full-results').evaluate(node => node.open), true);
+      });
+    }
 
     // Not in a tab, or the tabs API fails: fall back to window.close(); if
     // that does nothing, say how to leave.

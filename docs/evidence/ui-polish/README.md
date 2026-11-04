@@ -25,6 +25,8 @@ Set `BREEZER_TEST_BROWSER` to use another Chromium executable. Capture the
 original checkout before editing to generate a new baseline. The checked-in
 `before` images are from commit `0d9e9d47`.
 
+The capture command runs the complete Node suite and writes the workflow screenshots in the same pass, followed by the assistant and research walkthroughs.
+
 The comparisons retain the original screenshots and draw numbered arrows over
 the after image. The text below each pair identifies what changed.
 
@@ -89,6 +91,7 @@ are retained in the adjacent Markdown files.
 | Breezer, round 4 attempt | 8.2 | 8.1 | No score: API rate limit |
 | Breezer, round 5 attempt | 8.4 | 8.3 | No score: API rate limit |
 | Breezer, round 6 attempt | 8.5 | 8.3 | No score: API rate limit |
+| Breezer, round 7 attempt | 8.5 | 8.3 | No score: API rate limit |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -99,3 +102,11 @@ The rubric covers hierarchy, typography, alignment, spacing, rhythm, consistency
 craft, color, contrast, navigation, sidebar, settings and controls, assistant,
 new tab, responsive layout and custom UI motion. Reviewers also identify empty,
 error and keyboard states. Native top tabs and toolbar remain unverified.
+
+Historical release-page captures can be reproduced without changing the worktree:
+
+```sh
+BREEZER_UI_BASELINE=a063a3c0 BREEZER_AI_EVIDENCE=/tmp/breezer-ui/baseline node --test tests/ai/whats-new-browser.test.mjs
+```
+
+The fixture reads that commit’s resources directly from Git. The linked efficiency article is captured at desktop and narrow widths, and in dark system appearance. Its editorial page intentionally remains light.

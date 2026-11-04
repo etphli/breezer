@@ -132,7 +132,9 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     document.body.replaceChildren(); const container = document.createElement('div'); document.body.append(container);
     await mountTranslationSettings({ container, api: chrome });
   });
+  await settings.locator('#translation-key').fill('local-draft-secret');
   await settings.locator('#translation-provider').selectOption('hosted');
+  assert.equal(await settings.locator('#translation-key').inputValue(), '', 'changing providers clears an unsubmitted key draft');
   await settings.locator('#translation-key').fill('fixture-secret');
   await settings.getByRole('button', { name: 'Save translation settings' }).click();
   await settings.waitForFunction(() => document.body.textContent.includes('Saved.'));

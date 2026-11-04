@@ -108,20 +108,25 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   guide.append(node('summary', 'Import passwords from Chrome'));
   guide.append(node('p', 'Export from Chrome, then import the CSV into Breezer. This copies passwords once and does not sync later changes.'));
   const steps = node('ol');
-  for (const step of [
-    'In Chrome, open the menu, then Passwords and autofill, Google Password Manager, and Settings.',
-    'Under Export passwords, choose Download file. Complete Chrome\'s authentication prompt if shown.',
-    'Return to Breezer and choose Import Chrome CSV below. Select the exported .csv file in the native file picker.',
-    'Review any conflicts or errors in the native importer. Check the imported entries in Breezer\'s password manager.',
-    'After a successful import, delete the exported CSV, including any copy in the Trash. The CSV contains readable passwords.',
-  ]) steps.append(node('li', step));
+  for (const [title, description] of [
+    ["Open Chrome's password settings", 'Choose the menu, Passwords and autofill, Google Password Manager, then Settings.'],
+    ['Export the CSV', 'Under Export passwords, choose Download file and authenticate if asked.'],
+    ['Import into Breezer', 'Choose Import Chrome CSV below and select the exported file.'],
+    ['Check the import', "Review conflicts or errors, then check the saved entries in Breezer's password manager."],
+    ['Delete the export', 'After import succeeds, remove the CSV and any copy in the Trash. It contains readable passwords.'],
+  ]) {
+    const item = node('li');
+    item.append(node('strong', title), node('span', ` ${description}`));
+    steps.append(item);
+  }
   guide.append(steps);
   const help = node('a', 'Chrome export instructions');
   help.href = CHROME_EXPORT_HELP;
   help.target = '_blank';
   help.rel = 'noopener noreferrer';
-  guide.append(help, node('p', 'Keep the CSV private. Do not send it to Breezer AI, attach it to feedback, or keep it in a shared folder.'));
-  guide.append(button('Import Chrome CSV', 'import'));
+  const importActions = node('div', '', 'setting-actions');
+  importActions.append(button('Import Chrome CSV', 'import'), help);
+  guide.append(importActions, node('p', 'Keep the CSV private. Do not send it to Breezer AI, attach it to feedback, or keep it in a shared folder.'));
   section.append(guide, status, error);
 
   if (!api?.tabs?.create) {

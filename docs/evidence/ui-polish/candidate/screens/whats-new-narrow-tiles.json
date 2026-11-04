@@ -1,5 +1,5 @@
 {
-  "height": 8387,
+  "height": 8047,
   "viewport": {
     "width": 390,
     "height": 844
@@ -58,13 +58,8 @@
     },
     {
       "file": "whats-new-narrow-tile-11.png",
-      "scrollY": 7440,
-      "mastheadBottom": -6880.53125
-    },
-    {
-      "file": "whats-new-narrow-tile-12.png",
-      "scrollY": 7543,
-      "mastheadBottom": -6983.53125
+      "scrollY": 7203,
+      "mastheadBottom": -6643.53125
     }
   ]
 }
