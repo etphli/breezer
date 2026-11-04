@@ -48,14 +48,18 @@
         <span id="context-hint" class="context-hint" data-state="shared">Page + screenshot</span>
       </div>
       <form id="composer" class="composer">
+        <div id="attachment-list" class="attachment-list" aria-label="Attached files"></div>
+        <input id="file-input" type="file" multiple hidden>
         <label for="prompt" class="sr-only">Message Breezer</label>
         <textarea id="prompt" rows="2" maxlength="24000" placeholder="Ask about this page…" autocomplete="off" spellcheck="true" aria-describedby="prompt-keys" aria-keyshortcuts="Enter"></textarea>
         <span id="prompt-keys" class="sr-only">Enter sends. Shift+Enter adds a new line. Escape stops a reply.</span>
         <div class="composer-tools">
+          <button type="button" id="attach-files" class="icon-button" aria-label="Attach files" title="Attach text, code, CSV, or images"><svg viewBox="0 0 24 24"><path d="m8 13 7-7a3 3 0 0 1 4 4l-9 9a5 5 0 0 1-7-7l9-9M6 15l9-9"/></svg></button>
           <button type="button" id="control-toggle" class="control-toggle" aria-pressed="false" aria-describedby="context-hint" title="Let Breezer click, type, scroll, and navigate in this tab until you turn this off"><svg viewBox="0 0 24 24"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Browser control</span><span class="switch" aria-hidden="true"></span></button>
           <button type="submit" id="send" class="send-button" aria-label="Send message" title="Send message" disabled><svg id="send-arrow" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></svg><span id="send-stop" hidden></span></button>
         </div>
       </form>
+      <p class="attachment-hint">Drop text, code, CSV, or images here. Shared with your model when you send.</p>
       <div class="bottom-row">
         <button type="button" id="model-button" class="model-button" aria-controls="model-menu" aria-haspopup="dialog" aria-expanded="false"><span id="provider-dot" class="provider-dot"></span><span id="model-label">Connecting your accounts</span><svg viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></button>
         <label class="setting-select" title="Reasoning effort">

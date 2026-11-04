@@ -304,7 +304,7 @@ export function installBackground(api) {
         type: 'chat', id: run.id, provider: message.provider, model: message.model,
         ...(message.reasoning !== undefined ? { reasoning: message.reasoning } : {}),
         ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
-        message: message.message, history: Array.isArray(message.history) ? message.history.slice(-40) : [],
+        message: message.message, attachments: message.attachments, history: Array.isArray(message.history) ? message.history.slice(-40) : [],
         profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
         ...(researchSources ? { researchSources } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
