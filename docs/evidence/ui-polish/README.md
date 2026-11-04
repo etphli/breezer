@@ -110,3 +110,7 @@ BREEZER_UI_BASELINE=a063a3c0 BREEZER_AI_EVIDENCE=/tmp/breezer-ui/baseline node -
 ```
 
 The fixture reads that commit’s resources directly from Git. The linked efficiency article is captured at desktop and narrow widths, and in dark system appearance. Its editorial page intentionally remains light.
+
+The translation window has 28 additional appearance captures (seven palettes, light/dark, desktop/narrow), plus eight before-sharing and error states. These use a real disposable MV3 translation session with a fixture appearance bridge. The enabled primary action is measured at at least 5.21:1 text contrast across the matrix; native window geometry and bridge execution remain unverified.
+
+Static assistant and research captures disable animation during capture, so they show settled text and controls. The separate recordings preserve normal and reduced-motion behavior.

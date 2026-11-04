@@ -44,7 +44,7 @@ try {
   assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
   assert.equal(await page.locator('#welcome-status').isVisible(), false);
   assert.equal(await page.locator('#context-hint').innerText(), 'Page + screenshot');
-  await page.screenshot({ path: `${evidence}/sidebar-welcome.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-welcome.png` });
 
   // Keyboard: the model menu opens onto the selected model, arrows move, Escape returns focus.
   await page.locator('#model-button').focus();
@@ -52,7 +52,7 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.textContent), 'GPT-6.1 Sol✓');
   await page.keyboard.press('ArrowDown');
   assert.equal(await page.evaluate(() => document.activeElement.textContent), 'GPT-6 Luna');
-  await page.screenshot({ path: `${evidence}/sidebar-model-menu.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-menu.png` });
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#model-menu').isVisible(), false);
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
@@ -81,10 +81,10 @@ try {
 
   await page.getByRole('button', { name: 'Edit your personal context' }).click();
   await page.getByLabel('Your name', { exact: true }).fill('Ethan');
-  await page.screenshot({ path: `${evidence}/sidebar-profile-dialog.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-profile-dialog.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   assert.equal(await page.locator('#profile-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true);
-  await page.screenshot({ path: `${evidence}/sidebar-profile-dialog-narrow.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-profile-dialog-narrow.png` });
   await page.setViewportSize({ width: 400, height: 850 });
   await page.getByLabel('What should Breezer know?').fill('I build thoughtful software. Keep explanations clear and concise.');
   await page.getByRole('button', { name: 'Save context' }).click();
@@ -94,12 +94,12 @@ try {
   await page.getByRole('button', { name: 'Model options', exact: true }).click();
   await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
   await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
-  await page.screenshot({ path: `${evidence}/sidebar-model-options.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const optionsBounds = await page.locator('#inference-options').boundingBox();
   assert.ok(optionsBounds.x >= 0 && optionsBounds.x + optionsBounds.width <= 320 && optionsBounds.y >= 0 && optionsBounds.y + optionsBounds.height <= 640);
-  await page.screenshot({ path: `${evidence}/sidebar-model-options-narrow.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options-narrow.png` });
   await page.setViewportSize({ width: 400, height: 850 });
   await page.getByRole('button', { name: 'Model options', exact: true }).click();
   assert.match(await page.locator('#speed-note').innerText(), /more Codex allowance/);
@@ -161,7 +161,7 @@ try {
   assert.equal(await page.locator('#speed-setting').isVisible(), true);
   assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
   await page.locator('#reasoning-select').selectOption('xhigh');
-  await page.screenshot({ path: `${evidence}/sidebar-settings.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-settings.png` });
   await page.getByRole('button', { name: 'Model options', exact: true }).click();
 
   await page.getByRole('button', { name: 'Summarize this page' }).click();
@@ -183,7 +183,7 @@ try {
   assert.equal(await page.locator('.assistant .message-body li').count(), 3);
   assert.equal(await page.getByRole('button', { name: 'Send message', exact: true }).isVisible(), true);
   for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), false);
-  await page.screenshot({ path: `${evidence}/sidebar-conversation.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-conversation.png` });
 
   const controlToggle = page.getByRole('button', { name: 'Browser control', exact: true });
   await controlToggle.click();
@@ -218,7 +218,7 @@ try {
   await page.evaluate((id) => window.emit({ type: 'activity', id, active: true, label: 'Scrolling this page' }), controlChat.id);
   assert.equal(await page.locator('#activity-label').innerText(), 'Scrolling this page');
   assert.equal(await page.locator('#send-arrow').isVisible(), false);
-  await page.screenshot({ path: `${evidence}/sidebar-working.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-working.png` });
   await page.getByRole('button', { name: 'Stop response', exact: true }).click();
   assert.equal(await page.evaluate((id) => window.sent.some((message) => message.type === 'cancel' && message.id === id), controlChat.id), true);
   assert.equal(await page.locator('#activity').isVisible(), false);
@@ -241,7 +241,7 @@ try {
 
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.setViewportSize({ width: 320, height: 640 });
-  await page.screenshot({ path: `${evidence}/sidebar-narrow.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   await page.evaluate(() => {
     window.testProviders[0].models.push(
@@ -264,7 +264,7 @@ try {
   assert.equal(await page.locator('.message.failed').count(), 1);
   assert.equal(await page.locator('#notice').isVisible(), false, 'The failure is shown once, in the reply');
   assert.match(await page.locator('#announcer').textContent(), /CLI test rejection/);
-  await page.screenshot({ path: `${evidence}/sidebar-error-narrow.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-error-narrow.png` });
   await page.getByRole('button', { name: 'Edit and resend' }).click();
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Exercise the error path');
   assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1).id), failedChat.id, 'No automatic retry');
@@ -297,7 +297,7 @@ try {
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'xhigh');
   assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
-  await page.screenshot({ path: `${evidence}/sidebar-dark.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-dark.png` });
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'New tab', url: 'chrome://newtab/' } }));
   assert.equal(await page.locator('#context-toggle').isDisabled(), true);
   assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Ask anything…');
@@ -305,7 +305,7 @@ try {
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.match(await page.locator('#welcome-status').innerText(), /Open a web page/);
   assert.equal(await page.getByRole('button', { name: 'Summarize this page' }).isDisabled(), true);
-  await page.screenshot({ path: `${evidence}/sidebar-dark-no-page.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-dark-no-page.png` });
   // Reduced motion: the thinking indicator does not animate.
   await page.getByLabel('Message Breezer').fill('Plain question');
   await page.getByLabel('Message Breezer').press('Enter');
@@ -350,7 +350,7 @@ try {
       return { prefixesMatch: first && second && third && fourth, staysAbove, keptNode, followsBottom, finalMatches: body.innerHTML === expected.innerHTML };
     });
     assert.deepEqual(streamed, { prefixesMatch: true, staysAbove: true, keptNode: true, followsBottom: true, finalMatches: true });
-    await page.screenshot({ path: `${evidence}/sidebar-stream-scroll-${width}.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-stream-scroll-${width}.png` });
   }
 
   // Signed out everywhere: the empty state says how to connect, and Enter opens the model menu instead of failing silently.
@@ -376,7 +376,7 @@ try {
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   const signInGap = await page.evaluate(() => document.querySelector('#welcome-status').getBoundingClientRect().top - document.querySelector('#welcome h1').getBoundingClientRect().bottom);
   assert.ok(signInGap >= 16, `Signed-out heading and recovery card must not overlap: ${signInGap}px`);
-  await page.screenshot({ path: `${evidence}/sidebar-signed-out-narrow.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
   await page.getByRole('button', { name: 'Refresh accounts' }).click();

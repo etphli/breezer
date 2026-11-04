@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { mkdtemp, mkdir, cp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -38,6 +39,10 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   const port = await listen(server);
   const extension = join(temporary, 'extension');
   await cp(resolve('features/ai/extension'), extension, { recursive: true });
+  if (process.env.BREEZER_UI_BASELINE) {
+    assert.match(process.env.BREEZER_UI_BASELINE, /^[0-9a-f]{7,40}$/i);
+    await writeFile(join(extension, 'translation.css'), execFileSync('git', ['show', `${process.env.BREEZER_UI_BASELINE}:features/ai/extension/translation.css`]));
+  }
   // Only the shipped translation subsystem runs. Fixture-only host grants replace
   // native activeTab invocation and optional permission prompts in this test.
   await writeFile(join(extension, 'manifest.json'), JSON.stringify({ manifest_version: 3, name: 'Breezer translation acceptance fixture', version: '1.0', permissions: ['activeTab', 'scripting', 'tabs', 'contextMenus', 'storage'], host_permissions: ['http://127.0.0.1/*', 'http://localhost/*'], background: { service_worker: 'fixture-worker.js', type: 'module' } }));
@@ -53,14 +58,62 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   });
   const tabId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, page.url());
   let ui = await context.newPage();
+  const setAppearance = appearance => ui.evaluate(async appearance => {
+    const { startPanelTheme } = await import('./panel-theme.js');
+    await startPanelTheme({ api: { breezerPrivate: { getAppearance: async () => appearance } } });
+  }, appearance);
+  const captureState = async state => {
+    if (!process.env.BREEZER_AI_EVIDENCE) return;
+    for (const colorMode of ['light', 'dark']) {
+      await setAppearance({ theme: 'mint', colorMode });
+      for (const width of [1200, 390]) {
+        await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
+        await ui.mouse.move(width - 2, 2);
+        await ui.screenshot({ path: join(evidence, `translation-${state}-${colorMode}${width === 390 ? '-narrow' : ''}.png`), animations: 'disabled' });
+      }
+    }
+  };
   await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
   let status = ui.locator('#status');
   await ui.locator('#languages').click();
   await ui.waitForFunction(() => document.getElementById('source').options.length > 1);
   assert.equal(requests.length, 0, 'loading languages sends no page text');
   assert.equal(await ui.locator('#translate').isDisabled(), true, 'consent is required');
+  await captureState('before-sharing');
   await ui.locator('#source').selectOption('es'); await ui.locator('#target').selectOption('en');
   await ui.locator('#dynamic').check(); await ui.locator('#consent').check();
+  if (process.env.BREEZER_AI_EVIDENCE) {
+    const captures = [];
+    for (const theme of ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#3979bd']) for (const colorMode of ['light', 'dark']) {
+      // The real MV3 translation session is ready; only the native appearance
+      // bridge is supplied by this fixture, as in the other theme walkthroughs.
+      await setAppearance({ theme, colorMode });
+      for (const width of [1200, 390]) {
+        await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
+        assert.equal(await ui.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${theme}/${colorMode}/${width} translation overflow`);
+        const file = `translation-${theme.startsWith('#') ? 'custom' : theme}-${colorMode}${width === 390 ? '-narrow' : ''}.png`;
+        await ui.mouse.move(width - 2, 2);
+        await ui.screenshot({ path: join(evidence, file), animations: 'disabled' });
+        const contrast = await ui.locator('#translate').evaluate(button => {
+          const context = document.createElement('canvas').getContext('2d');
+          const luminance = color => {
+            context.fillStyle = color; context.fillRect(0, 0, 1, 1);
+            return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).reduce((sum, value, index) => {
+              const channel = value / 255;
+              return sum + (channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4) * [.2126, .7152, .0722][index];
+            }, 0);
+          };
+          const style = getComputedStyle(button), ink = luminance(style.color), background = luminance(style.backgroundColor);
+          return (Math.max(ink, background) + .05) / (Math.min(ink, background) + .05);
+        });
+        assert.ok(contrast >= 4.5, `${theme}/${colorMode} enabled translation action contrast: ${contrast}`);
+        captures.push({ theme, colorMode, width, file, actionContrast: contrast });
+      }
+    }
+    await writeFile(join(evidence, 'translation-appearance.json'), JSON.stringify({ captures, note: 'Real disposable MV3 translation session with a fixture appearance bridge. Native window geometry and native bridge execution remain unverified.' }, null, 2));
+    await setAppearance({ theme: 'mint', colorMode: 'light' });
+    await ui.setViewportSize({ width: 960, height: 950 });
+  }
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('Watching'));
   assert.equal(await ui.locator('#cancel').isEnabled(), true, 'watching can be stopped without restoring');
   assert.match(await page.locator('#article').textContent(), /^English:/);
@@ -103,6 +156,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   fail = true;
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('rate limit'));
   assert.match(await status.textContent(), /Wait before retrying/);
+  await captureState('error');
   fail = false; delay = 800;
   const incoming = new Promise(resolve => { onRequest = resolve; });
   await ui.locator('#translate').click(); await incoming;

@@ -99,7 +99,7 @@ try {
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.equal(await page.locator('#context-toggle').isVisible(), false);
   assert.match(await page.locator('#context-hint').innerText(), /2 selected tabs.*text only.*no control/);
-  await page.screenshot({ path: `${evidence}/research-selected-tabs.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/research-selected-tabs.png` });
   await page.locator('#prompt').fill('Compare these two pages and cite sources.');
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => window.sent.some(message => message.type === 'chat'));
@@ -117,7 +117,7 @@ try {
   assert.equal(partial.researchSources[1].status, 'unavailable');
   assert.match(await page.locator('.message-meta').last().innerText(), /S2[\s\S]*closed/);
   await page.evaluate(id => window.emit({ type: 'complete', id }), partial.id);
-  await page.screenshot({ path: `${evidence}/research-partial-failure.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/research-partial-failure.png` });
   await page.getByRole('button', { name: 'Remove source 2:', exact: false }).click();
   assert.equal(await page.locator('#research-chips button').count(), 1);
   await page.evaluate(() => { window.holdRead = true; window.sent.length = 0; });
@@ -138,10 +138,10 @@ try {
   assert.equal(await checkboxes.nth(7).isChecked(), false);
   assert.match(await page.locator('#research-limit').innerText(), /6 selected/);
   assert.equal(await page.locator('#research-chips button').count(), 6);
-  await page.screenshot({ path: `${evidence}/research-picker.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/research-picker.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   assert.equal(await page.locator('#research-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true, 'Narrow source picker stays inside its dialog');
-  await page.screenshot({ path: `${evidence}/research-picker-narrow.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/research-picker-narrow.png` });
   await page.setViewportSize({ width: 400, height: 850 });
   await page.keyboard.press('Escape');
   await page.locator('#research-clear').click();

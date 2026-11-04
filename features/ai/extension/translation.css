@@ -10,14 +10,17 @@ p { margin: 14px 0; }
 select { width: 100%; min-width: 0; }
 button, select { color: var(--ink); border: 1px solid var(--line); background: var(--raised); border-radius: 7px; padding: 8px 12px; font: inherit; }
 button { cursor: pointer; }
-button:hover { background: var(--hover); }
+button:hover:not(:disabled) { background: var(--hover); }
 button:disabled { opacity: .5; cursor: default; }
 .check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; }
 .check input { flex: none; width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 8px; }
 .primary { background: var(--accent); color: #fff; border-color: transparent; font-weight: 600; }
+.primary:not(:disabled) { background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
 :root[data-scheme="dark"] .primary { color: var(--air); }
-.primary:hover { background: color-mix(in srgb, var(--accent) 85%, var(--ink)); }
+:root[data-scheme="dark"] .primary:not(:disabled) { background: var(--accent); }
+.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 76%, var(--ink)); }
+:root[data-scheme="dark"] .primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
 #status { min-height: 36px; overflow-wrap: anywhere; }
 #status[data-state="error"] { padding: 10px 12px; border: 1px solid color-mix(in srgb,var(--danger) 28%,transparent); border-radius: 8px; background: color-mix(in srgb,var(--danger) 6%,transparent); color: var(--danger); }
 .sharing-details { margin: 16px 0; color: var(--muted); font-size: 13px; }

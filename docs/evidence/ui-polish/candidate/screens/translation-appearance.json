@@ -1,0 +1,201 @@
+{
+  "captures": [
+    {
+      "theme": "mint",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-mint-light.png",
+      "actionContrast": 5.217587774641498
+    },
+    {
+      "theme": "mint",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-mint-light-narrow.png",
+      "actionContrast": 5.217587774641498
+    },
+    {
+      "theme": "mint",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-mint-dark.png",
+      "actionContrast": 8.192088682754136
+    },
+    {
+      "theme": "mint",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-mint-dark-narrow.png",
+      "actionContrast": 8.192088682754136
+    },
+    {
+      "theme": "tide",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-tide-light.png",
+      "actionContrast": 6.113264626249791
+    },
+    {
+      "theme": "tide",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-tide-light-narrow.png",
+      "actionContrast": 6.113264626249791
+    },
+    {
+      "theme": "tide",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-tide-dark.png",
+      "actionContrast": 6.941403258710431
+    },
+    {
+      "theme": "tide",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-tide-dark-narrow.png",
+      "actionContrast": 6.941403258710431
+    },
+    {
+      "theme": "dusk",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-dusk-light.png",
+      "actionContrast": 7.058470643033704
+    },
+    {
+      "theme": "dusk",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-dusk-light-narrow.png",
+      "actionContrast": 7.058470643033704
+    },
+    {
+      "theme": "dusk",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-dusk-dark.png",
+      "actionContrast": 6.525413283971089
+    },
+    {
+      "theme": "dusk",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-dusk-dark-narrow.png",
+      "actionContrast": 6.525413283971089
+    },
+    {
+      "theme": "rose",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-rose-light.png",
+      "actionContrast": 6.13394690460501
+    },
+    {
+      "theme": "rose",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-rose-light-narrow.png",
+      "actionContrast": 6.13394690460501
+    },
+    {
+      "theme": "rose",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-rose-dark.png",
+      "actionContrast": 7.045592624913236
+    },
+    {
+      "theme": "rose",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-rose-dark-narrow.png",
+      "actionContrast": 7.045592624913236
+    },
+    {
+      "theme": "pollen",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-pollen-light.png",
+      "actionContrast": 5.523634850975938
+    },
+    {
+      "theme": "pollen",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-pollen-light-narrow.png",
+      "actionContrast": 5.523634850975938
+    },
+    {
+      "theme": "pollen",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-pollen-dark.png",
+      "actionContrast": 10.220687941514658
+    },
+    {
+      "theme": "pollen",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-pollen-dark-narrow.png",
+      "actionContrast": 10.220687941514658
+    },
+    {
+      "theme": "graphite",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-graphite-light.png",
+      "actionContrast": 7.5434785256268215
+    },
+    {
+      "theme": "graphite",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-graphite-light-narrow.png",
+      "actionContrast": 7.5434785256268215
+    },
+    {
+      "theme": "graphite",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-graphite-dark.png",
+      "actionContrast": 7.520213685448128
+    },
+    {
+      "theme": "graphite",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-graphite-dark-narrow.png",
+      "actionContrast": 7.520213685448128
+    },
+    {
+      "theme": "#3979bd",
+      "colorMode": "light",
+      "width": 1200,
+      "file": "translation-custom-light.png",
+      "actionContrast": 10.322098785994983
+    },
+    {
+      "theme": "#3979bd",
+      "colorMode": "light",
+      "width": 390,
+      "file": "translation-custom-light-narrow.png",
+      "actionContrast": 10.322098785994983
+    },
+    {
+      "theme": "#3979bd",
+      "colorMode": "dark",
+      "width": 1200,
+      "file": "translation-custom-dark.png",
+      "actionContrast": 9.73731672896065
+    },
+    {
+      "theme": "#3979bd",
+      "colorMode": "dark",
+      "width": 390,
+      "file": "translation-custom-dark-narrow.png",
+      "actionContrast": 9.73731672896065
+    }
+  ],
+  "note": "Real disposable MV3 translation session with a fixture appearance bridge. Native window geometry and native bridge execution remain unverified."
+}

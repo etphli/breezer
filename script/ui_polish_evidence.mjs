@@ -77,11 +77,20 @@ if (command === 'capture' && args.length === 1) {
   const browser = await chromium.launch({ headless: true, executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined) });
   try {
     const page = await browser.newPage({ viewport: { width: 1200, height: 900 } });
-    for (const file of (await readdir(output)).filter(file => /^(?:whats-new|efficiency)-.*-tiles\.json$/.test(file))) {
+    const files = await readdir(output);
+    for (const file of files.filter(file => /^(?:whats-new|efficiency)-.*-tiles\.json$/.test(file))) {
       const report = JSON.parse(await readFile(resolve(output, file), 'utf8'));
       const tiles = await Promise.all(report.tiles.map(async tile => `<figure><figcaption>Scroll ${tile.scrollY}px</figcaption><img src="data:image/png;base64,${(await readFile(resolve(output, tile.file))).toString('base64')}"/></figure>`));
       await page.setContent(`<!doctype html><style>body{margin:16px;font:14px system-ui;background:#fff;color:#20262b}main{display:grid;grid-template-columns:repeat(${report.viewport.width < 500 ? 5 : 3},1fr);gap:12px}figure{margin:0;min-width:0}figcaption{padding:6px 0}img{width:100%;display:block;border:1px solid #ccd4d7}</style><h1>${file.replace('-tiles.json', '')}</h1><p>Overlapping viewport captures. Open the original tiles to inspect text.</p><main>${tiles.join('')}</main>`);
       await page.screenshot({ path: resolve(output, `sheet-${file.replace('-tiles.json', '.png')}`), fullPage: true });
+    }
+    if (files.includes('translation-appearance.json')) {
+      const report = JSON.parse(await readFile(resolve(output, 'translation-appearance.json'), 'utf8'));
+      for (const mode of ['light', 'dark']) {
+        const tiles = await Promise.all(report.captures.filter(capture => capture.colorMode === mode).map(async capture => `<figure><figcaption>${capture.theme} · ${capture.width}px</figcaption><img src="data:image/png;base64,${(await readFile(resolve(output, capture.file))).toString('base64')}"/></figure>`));
+        await page.setContent(`<!doctype html><style>body{margin:16px;font:14px system-ui;background:#fff;color:#20262b}main{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}figure{margin:0;min-width:0}figcaption{padding:6px 0}img{width:100%;display:block;border:1px solid #ccd4d7}</style><h1>Translation · ${mode}</h1><p>Real MV3 translation session with fixture appearance. Open raw captures to inspect text.</p><main>${tiles.join('')}</main>`);
+        await page.screenshot({ path: resolve(output, `sheet-translation-${mode}.png`), fullPage: true });
+      }
     }
   } finally { await browser.close(); }
 } else if (command === 'png' && args.length === 1) {
