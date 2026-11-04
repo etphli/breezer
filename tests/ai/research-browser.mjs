@@ -98,7 +98,8 @@ try {
   assert.equal(await page.locator('#research-chips button').count(), 2);
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.equal(await page.locator('#context-toggle').isVisible(), false);
-  assert.match(await page.locator('#context-hint').innerText(), /2 selected tabs.*text only.*no control/);
+  assert.equal(await page.locator('#research-label').innerText(), '2 sources');
+  assert.match(await page.locator('#context-hint').innerText(), /Text only.*screenshots and control off/);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/research-selected-tabs.png` });
   await page.locator('#prompt').fill('Compare these two pages and cite sources.');
   await page.keyboard.press('Enter');
@@ -143,9 +144,9 @@ try {
   assert.equal(await page.locator('#research-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true, 'Narrow source picker stays inside its dialog');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/research-picker-narrow.png` });
   await page.setViewportSize({ width: 400, height: 850 });
-  await page.keyboard.press('Escape');
   await page.locator('#research-clear').click();
   assert.equal(await page.locator('#control-toggle').isDisabled(), false);
+  await page.keyboard.press('Escape');
 
   // Run the actual fixed native extractor script in real browser documents.
   const nativeHeader = await readFile(resolve(root, '../../workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h'), 'utf8');

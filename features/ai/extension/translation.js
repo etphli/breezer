@@ -18,6 +18,16 @@ function controls() {
   $('languages').disabled = !connected || !prefs || running;
   $('source').disabled = $('target').disabled = !ready || running;
   $('dynamic').disabled = $('consent').disabled = running;
+  $('languages').textContent = ready ? 'Reload languages' : 'Connect and load languages';
+  $('languages').classList.toggle('reload', ready);
+  $('setup-help').hidden = ready;
+}
+function readinessStatus() {
+  if (!connected || !ready || running) return;
+  const target = $('target').value;
+  status(!target || $('source').value === target ? 'Choose different source and target languages.'
+    : $('consent').checked ? 'Ready to translate.' : 'Confirm sharing to translate this page.', 'ready');
+  $('translate').textContent = 'Translate page';
 }
 const option = (value, text) => { const node = document.createElement('option'); node.value = value; node.textContent = text; return node; };
 function targets() {
@@ -39,7 +49,7 @@ port.onMessage.addListener(message => {
     $('source').value = languages.some(l => l.code === prefs.source) ? prefs.source : 'auto';
     targets();
     if ([...$('target').options].some(o => o.value === prefs.target)) $('target').value = prefs.target;
-    ready = true; status('Languages loaded. Confirm sharing, then translate.');
+    ready = true; readinessStatus();
   }
   if (message.type === 'status') {
     running = message.state === 'loading' || (message.state === 'done' && prefs?.dynamic);
@@ -63,8 +73,7 @@ $('translate').addEventListener('click', () => {
   port.postMessage({ type: 'start', source: $('source').value, target: $('target').value, dynamic: $('dynamic').checked, consent: $('consent').checked });
 });
 for (const [id, type] of [['cancel', 'cancel'], ['restore', 'restore']]) $(id).addEventListener('click', () => port.postMessage({ type }));
-$('source').addEventListener('change', () => { targets(); controls(); });
-$('target').addEventListener('change', controls);
-$('consent').addEventListener('change', controls);
+$('source').addEventListener('change', () => { targets(); readinessStatus(); controls(); });
+for (const id of ['target', 'consent']) $(id).addEventListener('change', () => { readinessStatus(); controls(); });
 $('settings').addEventListener('click', () => api.tabs.create({ url: api.runtime.getURL('workspace.html#/settings/languages') }));
 controls();

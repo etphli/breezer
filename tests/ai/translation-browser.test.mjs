@@ -58,6 +58,45 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   });
   const tabId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, page.url());
   let ui = await context.newPage();
+  const captureGeometry = [];
+  const capture = async file => {
+    const geometry = await ui.evaluate(() => ({
+      headings: [...document.querySelectorAll('h1')].map(node => ({ text: node.textContent, rect: node.getBoundingClientRect().toJSON() })),
+      main: document.querySelector('main').getBoundingClientRect().toJSON(),
+      viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+    }));
+    assert.equal(geometry.headings.length, 1, `${file} has one heading`);
+    await ui.mouse.move(geometry.viewport.width - 2, 2);
+    let previous;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await ui.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const image = await ui.screenshot({ animations: 'disabled' });
+      const clearBelowContent = await ui.evaluate(async ({ png, bottom }) => {
+        const image = new Image(); image.src = `data:image/png;base64,${png}`; await image.decode();
+        const start = Math.ceil((bottom + 8) * image.height / innerHeight);
+        if (start >= image.height) return true;
+        const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+        const context = canvas.getContext('2d');
+        context.fillStyle = getComputedStyle(document.body).backgroundColor; context.fillRect(0, 0, 1, 1);
+        const background = context.getImageData(0, 0, 1, 1).data;
+        context.drawImage(image, 0, 0);
+        const pixels = context.getImageData(0, start, image.width, image.height - start).data;
+        for (let y = 0; y < image.height - start; y += 8) for (let x = 8; x < image.width - 24; x += 8) {
+          const index = (y * image.width + x) * 4;
+          if ([0, 1, 2].some(channel => Math.abs(pixels[index + channel] - background[channel]) > 3)) return false;
+        }
+        return true;
+      }, { png: image.toString('base64'), bottom: geometry.main.bottom });
+      if (!clearBelowContent) { previous = undefined; continue; }
+      if (previous?.equals(image)) {
+        await writeFile(join(evidence, file), image);
+        captureGeometry.push({ file, ...geometry, stableCaptures: attempt + 1, clearBelowContent });
+        return;
+      }
+      previous = image;
+    }
+    assert.fail(`${file} did not settle across consecutive viewport captures`);
+  };
   const setAppearance = appearance => ui.evaluate(async appearance => {
     const { startPanelTheme } = await import('./panel-theme.js');
     await startPanelTheme({ api: { breezerPrivate: { getAppearance: async () => appearance } } });
@@ -68,8 +107,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
       await setAppearance({ theme: 'mint', colorMode });
       for (const width of [1200, 390]) {
         await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
-        await ui.mouse.move(width - 2, 2);
-        await ui.screenshot({ path: join(evidence, `translation-${state}-${colorMode}${width === 390 ? '-narrow' : ''}.png`), animations: 'disabled' });
+        await capture(`translation-${state}-${colorMode}${width === 390 ? '-narrow' : ''}.png`);
       }
     }
   };
@@ -82,6 +120,14 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   await captureState('before-sharing');
   await ui.locator('#source').selectOption('es'); await ui.locator('#target').selectOption('en');
   await ui.locator('#dynamic').check(); await ui.locator('#consent').check();
+  assert.equal(await status.textContent(), 'Ready to translate.', 'sharing confirmation updates readiness');
+  assert.equal(await ui.locator('#setup-help').isVisible(), false, 'connected setup instructions step aside');
+  assert.equal(await ui.locator('#languages').textContent(), 'Reload languages');
+  await ui.locator('#consent').uncheck();
+  assert.equal(await ui.locator('#translate').isDisabled(), true);
+  assert.match(await status.textContent(), /Confirm sharing/);
+  await ui.locator('#consent').check();
+  assert.equal(await status.textContent(), 'Ready to translate.');
   if (process.env.BREEZER_AI_EVIDENCE) {
     const captures = [];
     for (const theme of ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#3979bd']) for (const colorMode of ['light', 'dark']) {
@@ -92,8 +138,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
         await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
         assert.equal(await ui.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${theme}/${colorMode}/${width} translation overflow`);
         const file = `translation-${theme.startsWith('#') ? 'custom' : theme}-${colorMode}${width === 390 ? '-narrow' : ''}.png`;
-        await ui.mouse.move(width - 2, 2);
-        await ui.screenshot({ path: join(evidence, file), animations: 'disabled' });
+        await capture(file);
         const contrast = await ui.locator('#translate').evaluate(button => {
           const context = document.createElement('canvas').getContext('2d');
           const luminance = color => {
@@ -157,6 +202,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('rate limit'));
   assert.match(await status.textContent(), /Wait before retrying/);
   await captureState('error');
+  if (process.env.BREEZER_AI_EVIDENCE) await writeFile(join(evidence, 'translation-capture-geometry.json'), JSON.stringify(captureGeometry, null, 2));
   fail = false; delay = 800;
   const incoming = new Promise(resolve => { onRequest = resolve; });
   await ui.locator('#translate').click(); await incoming;

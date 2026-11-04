@@ -120,10 +120,10 @@ function updateControls() {
   $('context-action').textContent = state.includeContext ? 'Included' : 'Include';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
-  $('context-hint').textContent = research.size ? `${research.size} selected tabs · text only · no control` : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
-  $('control-toggle').title = state.page
-    ? 'Let Breezer click, type, scroll, and navigate in this tab until you turn this off'
-    : 'Browser control works only on ordinary web pages';
+  $('context-hint').textContent = research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('research-label').textContent = research.size ? `${research.size} ${research.size === 1 ? 'source' : 'sources'}` : 'Sources';
+  $('research-open').dataset.active = String(research.size > 0);
+  $('control-tip').textContent = state.page ? 'Click, type, scroll, and navigate in this tab.' : 'Available on ordinary web pages.';
   $('prompt').placeholder = research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
   const selected = selectedModel();
   if (!selected && !state.discoveryPending) $('prompt').placeholder = 'Draft a message…';
@@ -133,8 +133,8 @@ function updateControls() {
   $('provider-dot').classList.toggle('connected', Boolean(selected));
   $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
   $('model-button').disabled = running;
-  $('inference-options-toggle').disabled = running || !selected;
-  if (running && $('inference-options').matches(':popover-open')) $('inference-options').hidePopover();
+  $('inference-options').hidden = !selected;
+  if (running) setModelMenu(false);
   const summarize = document.querySelector('[data-prompt^="Summarize"]');
   if (summarize) {
     summarize.dataset.prompt = research.size ? 'Summarize these selected pages and cite the sources.' : 'Summarize this page. What should I take away from it?';
@@ -580,9 +580,6 @@ function resizePrompt() {
 
 $('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
 $('prompt').addEventListener('input', resizePrompt);
-$('prompt').addEventListener('focus', () => {
-  if ($('inference-options').matches(':popover-open')) $('inference-options').hidePopover();
-});
 $('prompt').addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
     event.preventDefault();
@@ -602,9 +599,17 @@ $('context-toggle').addEventListener('click', () => {
   updateControls();
 });
 $('control-toggle').addEventListener('click', () => {
+  $('control-toggle').dataset.tipDismissed = 'true';
   setControl(!state.control);
   notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
+});
+const resetControlTip = () => {
+  if (!$('control-toggle').matches(':hover, :focus-visible')) delete $('control-toggle').dataset.tipDismissed;
+};
+for (const type of ['pointerleave', 'blur']) $('control-toggle').addEventListener(type, resetControlTip);
+$('control-toggle').addEventListener('keydown', event => {
+  if (event.key === 'Escape') $('control-toggle').dataset.tipDismissed = 'true';
 });
 document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => {
   $('prompt').value = button.dataset.prompt;

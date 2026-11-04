@@ -29,6 +29,13 @@ try {
     headless: true,
   });
   const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
+  const openModelOptions = async () => {
+    if (await page.locator('#model-menu').isHidden()) await page.locator('#model-button').click();
+    if (!await page.locator('#inference-options').evaluate(node => node.open)) {
+      await page.locator('#inference-options > summary').focus();
+      await page.keyboard.press('Enter');
+    }
+  };
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
@@ -45,6 +52,19 @@ try {
   assert.equal(await page.locator('#welcome-status').isVisible(), false);
   assert.equal(await page.locator('#context-hint').innerText(), 'Page + screenshot');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-welcome.png` });
+  for (const width of [400, 320]) {
+    await page.setViewportSize({ width, height: width === 320 ? 640 : 850 });
+    await page.locator('#control-toggle').hover();
+    await page.locator('#control-tip').waitFor({ state: 'visible' });
+    const tip = await page.locator('#control-tip').boundingBox();
+    assert.ok(tip.x >= 0 && tip.x + tip.width <= width && tip.y >= 0, 'Control explanation stays in the panel');
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
+    await page.mouse.move(1, 1);
+  }
+  await page.setViewportSize({ width: 400, height: 850 });
+  await page.locator('#control-toggle').focus();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#control-tip').isVisible(), false, 'Escape dismisses the control explanation');
 
   // Keyboard: the model menu opens onto the selected model, arrows move, Escape returns focus.
   await page.locator('#model-button').focus();
@@ -91,7 +111,7 @@ try {
   assert.equal(await page.locator('#profile-dialog').isVisible(), false);
   assert.equal(await page.evaluate(() => window.testStorage.local.breezerProfile.context), 'I build thoughtful software. Keep explanations clear and concise.');
 
-  await page.getByRole('button', { name: 'Model options', exact: true }).click();
+  await openModelOptions();
   await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
   await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options.png` });
@@ -101,9 +121,9 @@ try {
   assert.ok(optionsBounds.x >= 0 && optionsBounds.x + optionsBounds.width <= 320 && optionsBounds.y >= 0 && optionsBounds.y + optionsBounds.height <= 640);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options-narrow.png` });
   await page.setViewportSize({ width: 400, height: 850 });
-  await page.getByRole('button', { name: 'Model options', exact: true }).click();
   assert.match(await page.locator('#speed-note').innerText(), /more Codex allowance/);
   assert.equal(await page.locator('#notice').isVisible(), false, 'Speed guidance stays beside its setting');
+  await page.keyboard.press('Escape');
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6 Luna', exact: true }).click();
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6 Luna');
@@ -130,7 +150,7 @@ try {
   });
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
-  await page.getByRole('button', { name: 'Model options', exact: true }).click();
+  await openModelOptions();
   assert.equal(await page.locator('#speed-setting').isVisible(), false);
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
   await page.locator('#reasoning-select').selectOption('low');
@@ -157,12 +177,12 @@ try {
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
-  await page.getByRole('button', { name: 'Model options', exact: true }).click();
+  await openModelOptions();
   assert.equal(await page.locator('#speed-setting').isVisible(), true);
   assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
   await page.locator('#reasoning-select').selectOption('xhigh');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-settings.png` });
-  await page.getByRole('button', { name: 'Model options', exact: true }).click();
+  await page.keyboard.press('Escape');
 
   await page.getByRole('button', { name: 'Summarize this page' }).click();
   await page.getByRole('button', { name: 'Send message', exact: true }).click();

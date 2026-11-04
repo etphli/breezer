@@ -303,6 +303,24 @@
     },
     {
       "name": "mint-light",
+      "id": "assistant-options",
+      "file": "mint-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "assistant-options-narrow",
+      "file": "mint-light-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "mint-light",
       "id": "onboarding",
       "file": "mint-light-onboarding.png",
       "viewport": {
@@ -593,6 +611,24 @@
       "name": "tide-light",
       "id": "assistant-narrow",
       "file": "tide-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "assistant-options",
+      "file": "tide-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "assistant-options-narrow",
+      "file": "tide-light-assistant-options-narrow.png",
       "viewport": {
         "width": 320,
         "height": 640
@@ -897,6 +933,24 @@
     },
     {
       "name": "dusk-light",
+      "id": "assistant-options",
+      "file": "dusk-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "assistant-options-narrow",
+      "file": "dusk-light-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "dusk-light",
       "id": "onboarding",
       "file": "dusk-light-onboarding.png",
       "viewport": {
@@ -1187,6 +1241,24 @@
       "name": "rose-light",
       "id": "assistant-narrow",
       "file": "rose-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "assistant-options",
+      "file": "rose-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "assistant-options-narrow",
+      "file": "rose-light-assistant-options-narrow.png",
       "viewport": {
         "width": 320,
         "height": 640
@@ -1491,6 +1563,24 @@
     },
     {
       "name": "pollen-light",
+      "id": "assistant-options",
+      "file": "pollen-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "assistant-options-narrow",
+      "file": "pollen-light-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "pollen-light",
       "id": "onboarding",
       "file": "pollen-light-onboarding.png",
       "viewport": {
@@ -1781,6 +1871,24 @@
       "name": "graphite-light",
       "id": "assistant-narrow",
       "file": "graphite-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "assistant-options",
+      "file": "graphite-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "assistant-options-narrow",
+      "file": "graphite-light-assistant-options-narrow.png",
       "viewport": {
         "width": 320,
         "height": 640
@@ -2085,6 +2193,24 @@
     },
     {
       "name": "custom-light",
+      "id": "assistant-options",
+      "file": "custom-light-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "assistant-options-narrow",
+      "file": "custom-light-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "custom-light",
       "id": "onboarding",
       "file": "custom-light-onboarding.png",
       "viewport": {
@@ -2375,6 +2501,24 @@
       "name": "mint-dark",
       "id": "assistant-narrow",
       "file": "mint-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "assistant-options",
+      "file": "mint-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "assistant-options-narrow",
+      "file": "mint-dark-assistant-options-narrow.png",
       "viewport": {
         "width": 320,
         "height": 640
@@ -2679,6 +2823,24 @@
     },
     {
       "name": "tide-dark",
+      "id": "assistant-options",
+      "file": "tide-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "assistant-options-narrow",
+      "file": "tide-dark-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "tide-dark",
       "id": "onboarding",
       "file": "tide-dark-onboarding.png",
       "viewport": {
@@ -2969,6 +3131,24 @@
       "name": "dusk-dark",
       "id": "assistant-narrow",
       "file": "dusk-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "assistant-options",
+      "file": "dusk-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "assistant-options-narrow",
+      "file": "dusk-dark-assistant-options-narrow.png",
       "viewport": {
         "width": 320,
         "height": 640
@@ -3273,6 +3453,24 @@
     },
     {
       "name": "rose-dark",
+      "id": "assistant-options",
+      "file": "rose-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "assistant-options-narrow",
+      "file": "rose-dark-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "rose-dark",
       "id": "onboarding",
       "file": "rose-dark-onboarding.png",
       "viewport": {
@@ -3563,6 +3761,24 @@
       "name": "pollen-dark",
       "id": "assistant-narrow",
       "file": "pollen-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "assistant-options",
+      "file": "pollen-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "assistant-options-narrow",
+      "file": "pollen-dark-assistant-options-narrow.png",
       "viewport": {
         "width": 320,
         "height": 640
@@ -3867,6 +4083,24 @@
     },
     {
       "name": "graphite-dark",
+      "id": "assistant-options",
+      "file": "graphite-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "assistant-options-narrow",
+      "file": "graphite-dark-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "graphite-dark",
       "id": "onboarding",
       "file": "graphite-dark-onboarding.png",
       "viewport": {
@@ -4164,6 +4398,24 @@
     },
     {
       "name": "custom-dark",
+      "id": "assistant-options",
+      "file": "custom-dark-assistant-options.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "assistant-options-narrow",
+      "file": "custom-dark-assistant-options-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "custom-dark",
       "id": "onboarding",
       "file": "custom-dark-onboarding.png",
       "viewport": {
@@ -4194,20 +4446,20 @@
     "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
     "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
     "context-settings.js": "117dd2815ba64b93426b5fceee7a80e0e800ec7994bdc9b7ead14cc1e30c7dea",
-    "efficiency.html": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583",
+    "efficiency.html": "b63b3a69b1e597d567abf1b905115406b7d9bfb274c1223cc8584d00643dc9fe",
     "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
     "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
     "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
-    "newtab.css": "be348f49cdff097981bc2d708923ad35755aaf8eef1bceb918a69b245c69b66e",
+    "newtab.css": "c00d815ec95b1a857f01ee84843d8b7543fa9f676ea1b2d71d7d3f7edc4ce56d",
     "newtab.html": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
     "newtab.js": "ea7c2f6779273dff7e39f5828aa3b59fdd56ebf4be64e5a478aa847f0c45cb36",
     "onboarding.css": "f1e519650e2c65411f8a0f490df510504c48710ddd49aca5fb586d6919797236",
     "onboarding.js": "aaebca22b121d5563112c7c781e794e4b12b4c9e9de1123a62b114e8d0299b89",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "53c851df0891d018daee8dbb88d59ece069677cc526c5f98b1203bee315965b7",
-    "panel.html": "da0a8215079896aec606cc68e7fcd4d4bd7a5939a7207fd4f478a024d1637c60",
-    "panel.js": "6f8561aa94ed7d5308071cddcb7baef67dc67cfbba2acdca59cf79a026af1ab6",
+    "panel.css": "bf11e6cec9d8bfb1390f763fe880226ca269993d893aadee8a60eff88c3e9837",
+    "panel.html": "8fd6b8b3054095c39a96a177fe4149a8be8d0424d0f7efd577bf85fea6775d81",
+    "panel.js": "eea345e3a75209d12bd428630643cf7bae2b445613f18070dc4826930deec4e4",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -4225,18 +4477,18 @@
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
     "translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
     "translation-settings.js": "362b1556337bec4c2dfbee30f17de8b17f083357d793cc7fcb2b66d7a1c203f4",
-    "translation.css": "2b707b6f983a1207d7f998ba4f336fda6ae894da21a4a6b0c53e2a71cbfdd57b",
-    "translation.html": "5e8f75dc50d87b714a2322c2615fe1442000b3174f7ca127788bcce08dcdca01",
-    "translation.js": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
+    "translation.css": "7197eac85df70590b6f095849211b15057792e07fd82c83056957ae10a982195",
+    "translation.html": "a784e0c8411e07b662289c63eaac023887521044fe7e62e0c5b8fe71d7627789",
+    "translation.js": "551966278a671f31b99e5997e149a4a8a9c72757037dd32bc6b56d17bec5c474",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "8611f88a813251ab7efba7da9f82977f8848a04d64eab2d23d00b7b032c4e573",
-    "whats-new.html": "28450afc1e90078801d82c6adb11bfece5965c6c1851565a3e268a33a03382fe",
+    "whats-new.css": "536d1871e3f2a8d3cca4ad5a54d6167c59f54f2042870d99ce313f19b6b315b0",
+    "whats-new.html": "251b3099141c41d96177784ec4d37a1993ec42b9e535445d440ec05adb2ef765",
     "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
-    "workspace.css": "0de71ccde1d658f927579c619679cc3dd875440d2d144c7f4dae4982102debc6",
+    "workspace.css": "a0e24defb4304a2de7cb82b1f925d830420226f006fe173127fa7559b121a97d",
     "workspace.html": "1f120625c61cd9ba0df3611ca4318a4626f59208f7c62edcd5414b716ea5541e",
     "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
   }

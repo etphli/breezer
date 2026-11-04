@@ -27,4 +27,6 @@ button:disabled { opacity: .5; cursor: default; }
 .sharing-details summary { cursor: pointer; border-radius: 4px; }
 @media (max-width: 420px) { main { padding: 20px; } .languages { gap: 12px; padding: 12px; } }
 .settings-link { color: var(--muted); padding: 0; border: 0; background: none; text-decoration: underline; }
+#languages.reload { min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; }
+#languages.reload:hover:not(:disabled) { color: var(--ink); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }

@@ -54,9 +54,9 @@ screenshots, evidence scope and a request for a candid design score out of ten.
 Their briefs omit any desired score or stopping criterion. Each round records
 all three scores and specific findings, including disagreements.
 
-The expanded matrix contains 462 raw captures: all eleven custom Settings
+The expanded matrix contains 490 raw captures: all eleven custom Settings
 categories at desktop and narrow widths in seven palettes and light/dark modes,
-plus Assistant activity memory enabled, three sidebar modes, desktop/narrow new tabs, assistant panels and setup screens in every palette and mode.
+plus Assistant activity memory enabled, three sidebar modes, desktop/narrow new tabs, assistant panels, expanded model options and setup screens in every palette and mode.
 Checked-in contact sheets index every combination; rerun the command for the raw
 full-size set. Selected workflow screenshots and annotated comparisons are also
 checked in. Desktop matrix captures use tall viewports to expose every setting.
@@ -67,12 +67,12 @@ outside these captures. Machine policy adds an organization-managed notice.
 The source hashes record the extension files used for the captured design.
 
 Custom UI motion was recorded for space switching, the import card and the new-tab
-agenda, setup illustration and assistant source picker. `motion.json` records observed animation timings. The runner also checks
+agenda, setup illustration, assistant source picker and browser-control tooltip. `motion.json` records observed animation timings. The runner also checks
 that Reduce motion disables those animations. It decodes each recording in Chrome
-and exports twelve frames from its first second, with a contact sheet for each
-normal/reduced-motion sequence. These include the initial transition rather than
-only screenshots taken after a locator settles. They do not establish native
-frame pacing. The release page uses overlapping viewport tiles and a scroll-position index instead of a very tall HiDPI full-page image. The capture asserts a single masthead and includes both default and expanded technical disclosures.
+and exports twelve frames from the first second of visible UI, with a contact sheet for each
+of twelve normal/reduced-motion sequences. The detector requires visible edges across columns to exclude blank white/gray recording lead-ins. Each sequence records its video offset and detection thresholds; original videos retain their lead-ins. These samples include transitions rather than
+only screenshots taken after a locator settles. They establish neither input latency nor native
+frame pacing. Use `node tests/ai/ui-polish-motion.mjs DIRECTORY --decode-only` to regenerate sheets from the same recordings. The release page uses overlapping viewport tiles and a scroll-position index instead of a very tall HiDPI full-page image. The capture asserts a single masthead and includes both default and expanded technical disclosures.
 
 Native macOS motion, top tabs,
 toolbar geometry and menus remain explicitly unverified, as requested.
@@ -92,16 +92,16 @@ are retained in the adjacent Markdown files.
 | Breezer, round 5 attempt | 8.4 | 8.3 | No score: API rate limit |
 | Breezer, round 6 attempt | 8.5 | 8.3 | No score: API rate limit |
 | Breezer, round 7 attempt | 8.5 | 8.3 | No score: API rate limit |
+| Breezer, round 8 attempt | 8.4 | 8.5 | No score: account limit |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
 Baseline scores use the evidence scope described above. They are independent
 overall design judgments, not direct browser comparisons or usability benchmarks.
 
-The rubric covers hierarchy, typography, alignment, spacing, rhythm, consistency,
-craft, color, contrast, navigation, sidebar, settings and controls, assistant,
-new tab, responsive layout and custom UI motion. Reviewers also identify empty,
-error and keyboard states. Native top tabs and toolbar remain unverified.
+The 22-category rubric covers hierarchy, typography, alignment, spacing, rhythm/density, consistency,
+craft/polish, color across modes, contrast, navigation, sidebar, settings/controls, assistant,
+new tab, responsive layouts, custom UI motion, empty/error states, keyboard/focus appearance, onboarding, What's New, the linked efficiency article and the translation window. Native top tabs and toolbar remain unverified.
 
 Historical release-page captures can be reproduced without changing the worktree:
 
@@ -113,4 +113,8 @@ The fixture reads that commit’s resources directly from Git. The linked effici
 
 The translation window has 28 additional appearance captures (seven palettes, light/dark, desktop/narrow), plus eight before-sharing and error states. These use a real disposable MV3 translation session with a fixture appearance bridge. The enabled primary action is measured at at least 5.21:1 text contrast across the matrix; native window geometry and bridge execution remain unverified.
 
+Translation captures also assert one DOM page heading, require two identical consecutive viewport PNGs, and check the empty area below the content for stray painted text. `translation-capture-geometry.json` records those checks for all 36 images. An earlier frozen capture had a duplicate painted heading without a duplicate DOM heading; its renderer/compositor cause remains unestablished. The current capture guard rejects that artifact.
+
 Static assistant and research captures disable animation during capture, so they show settled text and controls. The separate recordings preserve normal and reduced-motion behavior.
+
+Attempt 8 did not achieve concurrent execution: wait-mode delegation calls were serialized despite parallel invocation. Sol 2 started at 18:22 UTC, Sol 1 at 18:31 UTC and Opus at 18:38 UTC on 4 November 2026. It is incomplete and does not count as a full council round. Future cohorts use asynchronous starts, then collect completion notifications.

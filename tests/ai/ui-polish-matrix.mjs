@@ -110,6 +110,13 @@ try {
     await shot(panel, 'assistant');
     await panel.setViewportSize({ width: 320, height: 640 });
     await shot(panel, 'assistant-narrow');
+    await panel.locator('#model-button').click();
+    await panel.locator('#inference-options > summary').click();
+    await panel.getByLabel('Codex speed', { exact: true }).selectOption('fast');
+    for (const width of [400, 320]) {
+      await panel.setViewportSize({ width, height: width === 320 ? 640 : 850 });
+      await shot(panel, width === 320 ? 'assistant-options-narrow' : 'assistant-options');
+    }
     const setup = await context.newPage();
     await setup.addInitScript(settingsFixture, { colorMode, theme });
     await setup.goto(`${base}/workspace.html#/welcome`);

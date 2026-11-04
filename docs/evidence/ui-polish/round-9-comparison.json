@@ -1,0 +1,13 @@
+[
+  {"id":"assistant","title":"Assistant composer","file":"mint-light-assistant-narrow.png","notes":[[85,73,76,95,"Sources has a visible label; model configuration moves into the model menu."],[85,59,34,84,"The sharing line stays at 12px in narrow panels."]]},
+  {"id":"model","title":"Model settings","file":"sidebar-model-options-narrow.png","notes":[[85,28,50,50,"Reasoning and Speed sit together inside the model menu."]]},
+  {"id":"research","title":"Selected sources","file":"research-selected-tabs.png","notes":[[85,72,78,96,"The source count is readable in the composer."],[85,65,50,87,"Sharing scope states that screenshots and control are off."]]},
+  {"id":"picker","title":"Source picker","file":"research-picker-narrow.png","notes":[[85,28,55,13,"Clear all belongs beside the source choices."]]},
+  {"id":"translation","title":"Translation readiness","file":"translation-mint-light-narrow.png","notes":[[85,46,30,64,"The status reflects the current sharing consent."],[85,14,35,19,"Connected setup becomes a quieter reload action."]]},
+  {"id":"release","title":"Expanded feature details","file":"whats-new-feature-expanded.png","notes":[[85,25,45,62,"Expanded explanations use a wider reading area below the introduction."]]},
+  {"id":"release-art","title":"Release illustrations","file":"whats-new-feature-default.png","notes":[[55,15,80,45,"Lighter shadows and fewer framing layers integrate the illustration."]]},
+  {"id":"measurements","title":"Efficiency measurements","file":"efficiency-saved-tabs-narrow.png","notes":[[85,16,50,52,"Exact code timings align in a comparison table; their scope stays visible."]]},
+  {"id":"method","title":"Measurement notes","file":"efficiency-method-narrow.png","notes":[[85,16,25,25,"Labels replace nested bullet padding without removing qualifications."]]},
+  {"id":"newtab","title":"Narrow new-tab layout","file":"newtab-narrow.png","notes":[[85,12,40,38,"A tighter header brings the agenda higher; all eight shortcuts and Add remain."]]},
+  {"id":"spaces","title":"Space transition","file":"space-transition.png","notes":[[85,22,55,58,"Space content and its color stay in sync. The short content slide remains."]]}
+]

@@ -7,17 +7,6 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 180,
-        "easing": "ease",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
         "duration": 120,
         "easing": "ease",
         "endDelay": 0,
@@ -103,7 +92,7 @@
         "iterations": 1
       }
     ],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -118,7 +107,15 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 40,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "settings",
@@ -136,7 +133,7 @@
         "iterations": 1
       }
     ],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -151,13 +148,21 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 440,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "newtab",
     "reducedMotion": "no-preference",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -172,7 +177,15 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "onboarding",
@@ -281,72 +294,6 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 440.9880080070699,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 295.0483322568515,
-        "easing": "ease",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9880080070699,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9880080070699,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9880080070699,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 320,
-        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
         "duration": 200,
         "easing": "ease",
         "endDelay": 0,
@@ -380,6 +327,17 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
+        "duration": 200,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
         "duration": 320,
         "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
         "endDelay": 0,
@@ -391,7 +349,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 140,
+        "duration": 86.45144056139763,
         "easing": "ease",
         "endDelay": 0,
         "fill": "backwards",
@@ -402,7 +360,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 160,
+        "duration": 134.43701331051523,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
         "fill": "backwards",
@@ -608,7 +566,7 @@
         "iterations": 1
       }
     ],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -623,7 +581,15 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 360,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "assistant",
@@ -685,7 +651,7 @@
         "iterations": 1
       }
     ],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -700,13 +666,50 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 360,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "control",
+    "reducedMotion": "no-preference",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 360,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "spaces",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -721,13 +724,21 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "settings",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -742,13 +753,21 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 0,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "newtab",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -763,13 +782,21 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "onboarding",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -784,13 +811,21 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   },
   {
     "area": "assistant",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -805,6 +840,43 @@
       800,
       1000
     ],
-    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+    "videoFrameOriginMs": 360,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "control",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
   }
 ]

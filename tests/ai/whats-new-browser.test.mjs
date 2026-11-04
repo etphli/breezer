@@ -163,12 +163,14 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
 
     // Technical explanations and extra measurements remain available on demand.
     await withPage(browser, base, {}, async page => {
+      await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-default.png`, animations: 'disabled' });
       await page.locator('.measurement-details > summary').click();
       await page.locator('.results-more > summary').click();
       const explanations = await page.locator('.feature-details > summary').all();
       for (const summary of explanations) await summary.click();
       assert.equal(await page.locator('.feature-details[open]').count(), explanations.length);
       await captureLongPage(page, 'whats-new-expanded-desktop');
+      await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-expanded.png`, animations: 'disabled' });
     });
 
     // Settings opens in the same tab.
@@ -278,7 +280,20 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} reference article stays contained`);
         assert.ok(await contrast(page, '.benchmark-story-body p') >= 4.5, `${name} reference article contrast`);
         await page.screenshot({ path: `${evidence}/efficiency-${name}.png` });
-        if (name !== 'dark') await captureLongPage(page, `efficiency-${name}`);
+        if (name !== 'dark') {
+          await captureLongPage(page, `efficiency-${name}`);
+          await page.locator('.benchmark-story-note').screenshot({ path: `${evidence}/efficiency-method-${name}.png`, animations: 'disabled' });
+          await page.getByRole('heading', { name: 'Saved tabs', exact: true }).evaluate(node => node.scrollIntoView({ block: 'start' }));
+          const savedTabs = await page.evaluate(() => {
+            const headings = [...document.querySelectorAll('.benchmark-story-heading')];
+            const range = document.createRange();
+            range.setStartBefore(headings.find(node => node.textContent === 'Saved tabs'));
+            range.setEndBefore(headings.find(node => node.textContent === 'Less idle work'));
+            return range.getBoundingClientRect().toJSON();
+          });
+          assert.ok(savedTabs.top >= 0 && savedTabs.bottom <= await page.evaluate(() => innerHeight), 'Saved-tab explanation fits its capture');
+          await page.screenshot({ path: `${evidence}/efficiency-saved-tabs-${name}.png`, clip: savedTabs, animations: 'disabled' });
+        }
         await page.getByRole('link', { name: 'Read the full benchmark results', exact: true }).click();
         await page.locator('.results-table').first().waitFor();
         assert.equal(await page.locator('.measurement-details').evaluate(node => node.open), true);

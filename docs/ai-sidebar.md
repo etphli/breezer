@@ -2,9 +2,9 @@
 
 The first Breezer feature is a contextual assistant in Chromium's native side panel. Press **Command K** on a web page to open or close it. The page chip above the composer shows the current tab. With that chip enabled, sending a message includes the page's text, visible interactive elements, and a screenshot.
 
-The model menu sits below the composer. It lists models returned by the installed, signed-in Codex and Claude CLIs. GPT-6.1 Sol is the default when Codex reports it. Claude uses its own catalog and authentication. Missing CLIs, signed-out accounts, and unavailable models are shown explicitly. Use Refresh after installing or signing in from Terminal.
+Choose the model at the bottom of the composer. Its menu lists models returned by the installed, signed-in Codex and Claude CLIs. GPT-6.1 Sol is the default when Codex reports it. Claude uses its own catalog and authentication. Missing CLIs, signed-out accounts, and unavailable models are shown explicitly. Use Refresh after installing or signing in from Terminal.
 
-The reasoning menu beside it lists the selected model's reported effort levels. It starts at High when supported, otherwise the reported default. Default lets the CLI choose when it does not report a default level. Models without adjustable effort show a disabled Default menu. Breezer remembers your choice separately for each provider and model.
+Expand **Model options** inside the model menu to choose the selected model's reasoning effort and Codex speed. Reasoning starts at High when supported, otherwise the reported default. Default lets the CLI choose when it does not report a default level. Models without adjustable effort show a disabled Default menu. Breezer remembers your choice separately for each provider and model.
 
 Codex also has a Standard / Fast menu. Standard is the initial setting. Fast uses more of your Codex allowance and is enabled only when the model advertises a Fast service tier and the installed CLI passes a local request check. Account eligibility and capacity are checked by Codex when you send; a failed Fast request offers Standard as the retry option. Claude has no speed menu. Model, reasoning, and speed controls are locked during a reply.
 
@@ -14,7 +14,7 @@ Enter sends and Shift+Enter adds a line. The hint beside the page chip says what
 
 ## Research across selected tabs
 
-Choose **Choose source tabs** to select up to six HTTP(S) pages in this window for a comparison, summary or synthesis. The source chips show what the next message shares. Research sends text only, with labeled source references, truncation and individual errors. It does not share screenshots or authorize browser actions. Clear sources to return to the ordinary current-page mode or enable Browser control.
+Choose **Sources** to select up to six HTTP(S) pages in this window for a comparison, summary or synthesis. The source chips show what the next message shares. Research sends text only, with labeled source references, truncation and individual errors. It does not share screenshots or authorize browser actions. Use **Clear all** inside the picker to return to the ordinary current-page mode or enable Browser control.
 
 See [Selected-tab research](ai-research.md) for the native document-read boundary, cancellation rules and verification limits.
 

@@ -12,6 +12,7 @@ chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/whats-new.html
 | --- | --- |
 | `whats-new.html` | Feature copy, patch sections and local illustrations. |
 | `whats-new.css` | Cream palette, layout, artwork, focus, forced colors and reduced motion. |
+| `efficiency.html` | Linked measurement article, comparison tables and methodology. Reuses `whats-new.css`. |
 | `whats-new.js` | Reads `RELEASE_VERSION`, sets the masthead/title with `textContent`, closes this tab on Continue browsing and handles close refusal. |
 | `release-info.js` | Published version and derived minor-page version. For example, `1.1.2` maps to `1.1.0`. |
 | `release-notes.js` | Opens the page once per minor release in a regular window, deduplicates existing tabs and records `breezer.releaseNotesSeen`. Private windows are excluded. A brand-new profile gets the setup guide (`workspace.html#/welcome`) instead and skips the current notes; see [workspace.md](workspace.md#first-run-setup). |
@@ -20,6 +21,8 @@ chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/whats-new.html
 ## Template and release workflow
 
 Use [templates/whats-new-release.md](templates/whats-new-release.md) for the authoring template and checklist. The live HTML and CSS are the canonical visual template, so copy their structure rather than maintaining another full stylesheet.
+
+Keep each feature's heading and short introduction in `.feature-copy`, beside its illustration. Put optional `.feature-details` directly inside the `.feature` article, after the introduction and illustration. The disclosure spans both columns so expanded explanations have a readable line length without leaving a tall empty illustration column.
 
 For a new `1.x.0` edition, replace the previous edition's feature and patch content with the new release's illustrated feature rows. Keep the shell, version hooks, actions, accessibility and known-limitations section. Historical editions remain in Git tags and published release evidence. The stable URL stays the same; a new edition does not require another browser route.
 
