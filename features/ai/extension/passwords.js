@@ -39,7 +39,7 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   section.dataset.passwords = '';
   section.setAttribute('aria-label', 'Passwords');
   section.append(
-    node('h2', 'Passwords'),
+    node('h2', 'Passwords', 'sr-only'),
     node('p', 'Your saved passwords are encrypted on this Mac.', 'section-note'),
   );
 

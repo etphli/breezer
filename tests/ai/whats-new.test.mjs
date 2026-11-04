@@ -103,7 +103,7 @@ test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
   assert.match(text, /Breezer does not bundle translation models or use your AI account/);
   assert.match(text, /Settings has a new look\. Categories sit in a list on the left/);
   assert.match(text, /Press \/ to search by name, description or keyword/);
-  assert.match(text, /Choose Other to open the full browser settings page/);
+  assert.match(text, /Choose All settings to open the full browser settings page/);
   assert.match(text, /Matching saved tabs and preparing the sidebar no longer repeatedly scan the whole saved workspace/);
   assert.match(text, /Keyboard focus stays on the existing row/);
   assert.match(text, /Organato requests from Settings and new tabs share a helper/);
@@ -155,6 +155,7 @@ test('leads with selected measured wins, each naming its comparator and workload
   const hero = toText(highlights);
   const headings = [...highlights.matchAll(/<h[34][^>]*>([^<]+)<\/h[34]>/g)].map((m) => m[1].replace(/ /g, ' '));
   assert.deepEqual(headings, [
+    'Measured against Chrome and the previous Breezer',
     'New in this build',
     'First local page after opening tabs: 63.5% less time than the previous Breezer',
     'Saved-tab records: restoring 1,000 took 2.90 ms instead of 189.96 ms',

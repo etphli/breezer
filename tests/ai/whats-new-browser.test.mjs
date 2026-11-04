@@ -158,9 +158,10 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
 
     // Technical explanations and extra measurements remain available on demand.
     await withPage(browser, base, {}, async page => {
+      await page.locator('.measurement-details > summary').click();
       await page.locator('.results-more > summary').click();
       for (const summary of await page.locator('.feature-details > summary').all()) await summary.click();
-      assert.equal(await page.locator('.feature-details[open]').count(), 3);
+      assert.equal(await page.locator('.feature-details[open]').count(), 9);
       await captureLongPage(page, 'whats-new-expanded-desktop');
     });
 
@@ -180,6 +181,9 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
     // asked for, and bars drawn to scale from zero.
     await withPage(browser, base, {}, async (page) => {
       assert.equal(await page.$eval('.full-results', (details) => details.open), false);
+      assert.equal(await page.$eval('.measurement-details', details => details.open), false);
+      await page.screenshot({ path: `${evidence}/whats-new-results-collapsed.png`, clip: await page.$eval('.results', node => ({ x: 0, y: node.getBoundingClientRect().top + scrollY, width: 1440, height: node.getBoundingClientRect().height })), fullPage: true });
+      await page.locator('.measurement-details > summary').click();
       assert.deepEqual(await page.$$eval('.results .reading h3, .results .reading h4', (nodes) => nodes.map((node) => node.id)), ['r-first-load', 'r-saved-records', 'r-new-tab', 'r-relaunch']);
       const [candidate, previous] = await page.$$eval('#r-first-load ~ * .bar-mark rect, .reading:first-child .bar-mark rect', (rects) => rects.slice(0, 2).map((rect) => rect.getBoundingClientRect().width));
       assert.ok(Math.abs(candidate / previous - 262.21 / 717.402) < 0.01, `bar ratio ${candidate / previous}`);
@@ -235,6 +239,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       assert.deepEqual(stacked, [true, true, true, true, true, true, true, true, true, true], 'every feature stacks plate above text');
       assert.equal(await page.$$eval('.plate, .pending, .feature-copy .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
       // Every comparison remains visible in the narrow card layout.
+      await page.locator('.measurement-details > summary').click();
       await page.click('.full-results summary');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true, 'open full results stay within 390px');
       assert.equal(await page.$$eval('.reading, .full-results, .component-table, .results-article .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
@@ -245,6 +250,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.screenshot({ path: `${evidence}/whats-new-table-narrow.png`, clip: await page.$eval('.full-results', node => ({ x: 0, y: node.getBoundingClientRect().top + scrollY, width: 390, height: 900 })), fullPage: true });
       await page.screenshot({ path: `${evidence}/whats-new-results-narrow.png`, clip: await page.$eval('.results', (node) => { const box = node.getBoundingClientRect(); return { x: 0, y: box.top + scrollY, width: 390, height: box.height }; }), fullPage: true });
       await page.click('.full-results summary');
+      await page.locator('.measurement-details > summary').click();
+      await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({ path: `${evidence}/whats-new-narrow.png` });
       await captureLongPage(page, 'whats-new-narrow');
     });

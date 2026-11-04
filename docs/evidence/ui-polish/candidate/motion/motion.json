@@ -1,0 +1,240 @@
+[
+  {
+    "area": "spaces",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 180,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "slide-next",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "settings",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "onboarding-in",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "newtab",
+    "reducedMotion": "no-preference",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "spaces",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "settings",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "newtab",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  }
+]

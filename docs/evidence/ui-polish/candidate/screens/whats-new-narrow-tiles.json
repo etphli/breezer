@@ -1,0 +1,75 @@
+{
+  "height": 9139,
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "mastheads": 1,
+  "tiles": [
+    {
+      "file": "whats-new-narrow-tile-01.png",
+      "scrollY": 0,
+      "mastheadBottom": 559.46875
+    },
+    {
+      "file": "whats-new-narrow-tile-02.png",
+      "scrollY": 744,
+      "mastheadBottom": -184.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-03.png",
+      "scrollY": 1488,
+      "mastheadBottom": -928.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-04.png",
+      "scrollY": 2232,
+      "mastheadBottom": -1672.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-05.png",
+      "scrollY": 2976,
+      "mastheadBottom": -2416.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-06.png",
+      "scrollY": 3720,
+      "mastheadBottom": -3160.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-07.png",
+      "scrollY": 4464,
+      "mastheadBottom": -3904.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-08.png",
+      "scrollY": 5208,
+      "mastheadBottom": -4648.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-09.png",
+      "scrollY": 5952,
+      "mastheadBottom": -5392.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-10.png",
+      "scrollY": 6696,
+      "mastheadBottom": -6136.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-11.png",
+      "scrollY": 7440,
+      "mastheadBottom": -6880.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-12.png",
+      "scrollY": 8184,
+      "mastheadBottom": -7624.53125
+    },
+    {
+      "file": "whats-new-narrow-tile-13.png",
+      "scrollY": 8295,
+      "mastheadBottom": -7735.53125
+    }
+  ]
+}

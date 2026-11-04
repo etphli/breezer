@@ -1,0 +1,80 @@
+{
+  "height": 10974,
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "mastheads": 1,
+  "tiles": [
+    {
+      "file": "whats-new-expanded-desktop-tile-01.png",
+      "scrollY": 0,
+      "mastheadBottom": 789.28125
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-02.png",
+      "scrollY": 800,
+      "mastheadBottom": -10.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-03.png",
+      "scrollY": 1600,
+      "mastheadBottom": -810.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-04.png",
+      "scrollY": 2400,
+      "mastheadBottom": -1610.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-05.png",
+      "scrollY": 3200,
+      "mastheadBottom": -2410.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-06.png",
+      "scrollY": 4000,
+      "mastheadBottom": -3210.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-07.png",
+      "scrollY": 4800,
+      "mastheadBottom": -4010.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-08.png",
+      "scrollY": 5600,
+      "mastheadBottom": -4810.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-09.png",
+      "scrollY": 6400,
+      "mastheadBottom": -5610.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-10.png",
+      "scrollY": 7200,
+      "mastheadBottom": -6410.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-11.png",
+      "scrollY": 8000,
+      "mastheadBottom": -7210.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-12.png",
+      "scrollY": 8800,
+      "mastheadBottom": -8010.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-13.png",
+      "scrollY": 9600,
+      "mastheadBottom": -8810.71875
+    },
+    {
+      "file": "whats-new-expanded-desktop-tile-14.png",
+      "scrollY": 10074,
+      "mastheadBottom": -9284.71875
+    }
+  ]
+}

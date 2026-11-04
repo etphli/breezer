@@ -88,7 +88,7 @@ if (command === 'capture' && args.length === 1) {
     for (const file of (await readdir(output)).filter(file => file.startsWith('comparison-') && file.endsWith('.html'))) {
       await page.goto(pathToFileURL(resolve(output, file)).href);
       const clip = await page.locator('body').boundingBox();
-      await page.screenshot({ path: resolve(output, file.replace(/\.html$/, '.png')), clip });
+      await page.screenshot({ path: resolve(output, file.replace(/\.html$/, '.png')), fullPage: true, clip });
     }
   } finally { await browser.close(); }
 } else {

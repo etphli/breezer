@@ -750,6 +750,7 @@ h1 {
   box-shadow: var(--shadow);
 }
 .inference-options .setting-select + .setting-select { margin-top: 12px; }
+.inference-options .option-note { margin: 10px 0 0; max-width: 26ch; color: var(--muted); font-size: 12px; line-height: 1.45; }
 .inference-options .setting-select > span { font-size: 12px; margin-bottom: 4px; }
 .inference-options select { width: 100%; max-width: none; padding: 7px 20px 7px 8px; background: var(--canvas); border: 1px solid var(--hairline); border-radius: 6px; }
 .inference-options .setting-select svg { bottom: 11px; right: 8px; }

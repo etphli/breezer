@@ -19,7 +19,7 @@ const manifest = { themes, categories, captures: [], notes: [
   'Shipped UI with deterministic extension APIs. No installed app or personal data.',
   'Desktop settings use a tall enough real viewport to show every row. Narrow captures use fullPage.',
   'Compact sidebar uses a 72px viewport. Auto-hide captures its expanded document, not native reveal behavior.',
-  'Other is a native Settings destination, not a Breezer category document.',
+  'All settings is a native Settings destination, not a Breezer category document.',
   'Native top tabs, toolbar, menus and physical auto-hide integration are not captured by this script.',
 ] };
 await mkdir(output, { recursive: true });

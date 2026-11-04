@@ -311,8 +311,8 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 .item-more { padding-left: 52px; }
 
 /* The one entrance: the lanes settle in when Organato's answer arrives. */
-.organato[data-state="ready"] .lanes { animation: settle 280ms ease-out; }
-@keyframes settle { from { opacity: 0; transform: translateY(6px); } }
+.organato[data-state="ready"] .lanes { animation: settle 180ms ease-out; }
+@keyframes settle { from { transform: translateY(4px); } }
 
 @media (max-width: 860px) {
   .lanes { grid-template-columns: minmax(0, 1fr); gap: 30px; }

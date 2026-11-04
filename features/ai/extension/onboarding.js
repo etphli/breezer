@@ -319,7 +319,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     const slides = tourSlides(appearance.layout);
     slide = Math.min(slide, slides.length - 1);
     const current = slides[slide];
-    $('wl-tour-count').textContent = `${slide + 1} of ${slides.length}`;
+    $('wl-tour-count').textContent = `Tour · ${slide + 1} of ${slides.length}`;
     $('wl-h-tour').textContent = current.title;
     $('wl-tour-body').textContent = current.body;
     $('wl-tour-keys').replaceChildren(...current.keys.map(([keys, label]) => {

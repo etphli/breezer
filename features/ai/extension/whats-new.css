@@ -361,7 +361,7 @@ body {
 .patch-lead {
   display: grid;
   grid-template-columns: minmax(260px, 420px) minmax(0, 1fr);
-  align-items: center;
+  align-items: start;
   gap: clamp(24px, 4.5vw, 56px);
 }
 
@@ -521,6 +521,11 @@ body {
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
+.measurement-details { margin-top: 16px; border-block: 1px solid var(--plate-edge); }
+.measurement-details > summary { padding: 16px 0; color: var(--accent); font-size: 1rem; font-weight: 600; cursor: pointer; }
+.measurement-details > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+.measurement-details[open] { padding-bottom: 24px; }
+.measurement-heading { margin-top: 28px; font-family: var(--serif); font-size: 1.5rem; font-weight: 500; line-height: 1.25; }
 .results-lede {
   max-width: 60ch;
   margin: 14px 0 0;

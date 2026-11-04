@@ -35,7 +35,10 @@
          results.json. Bar widths are each median over the largest in its comparison.
          The efficiency article is its own page, efficiency.html, linked from here. -->
     <section class="results" aria-labelledby="results-title">
-      <h2 id="results-title">Measured against Chrome and the previous Breezer</h2>
+      <h2 id="results-title">Performance measurements</h2>
+      <details class="measurement-details">
+        <summary>Browser and saved-tab tests, including slower results</summary>
+      <h3 class="measurement-heading">Measured against Chrome and the previous Breezer</h3>
       <p class="results-lede">We timed a pre-release Breezer 1.2.0 build beside the previous Breezer and Chrome 156. Two measurements improved in this build, and two leads over Chrome carried over from before. <a href="#results-table">See the full results</a>, including slower and unavailable measurements.</p>
 
       <h3 class="results-group">New in this build</h3>
@@ -160,6 +163,7 @@
           <li>The candidate is a private ad hoc signed build of the combined 1.2.0 source (snapshot fa19c37); its internal version still reads 0.20.1.1. Its release identity and full feature checks are still pending, so the published release may measure differently.</li>
         </ul>
       </details>
+      </details>
     </section>
 
     <section class="features" aria-labelledby="features-title">
@@ -210,9 +214,14 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-setup">A setup guide for new profiles</h3>
-          <p>A new profile now opens a short setup guide instead of these notes. Pick the name Breezer AI greets you by, where your tabs sit, a theme color and appearance, then import from Chrome and connect Organato if you use it. A quick tour of the sidebar and the assistant finishes it, and you can skip at any step.</p>
+          <p>A short guide helps you choose tabs, appearance, Chrome import and an optional Organato connection.</p>
+          <details class="feature-details">
+            <summary>Setup choices</summary>
+            <p>A new profile now opens a short setup guide instead of these notes. Pick the name Breezer AI greets you by, where your tabs sit, a theme color and appearance, then import from Chrome and connect Organato if you use it. A quick tour of the sidebar and the assistant finishes it, and you can skip at any step.</p>
           <p>Already set up? Open the guide whenever you like with the Setup guide button in Settings.</p>
           <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
+          </details>
+          <p>Skip any step, or reopen the guide in Settings.</p>
           <a class="button secondary" href="workspace.html#/welcome">Open the setup guide</a>
         </div>
       </article>
@@ -258,8 +267,12 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-shortcuts">Shortcuts you choose</h3>
-          <p>On a new tab, the Add tile after your sites takes a web address or one of your open tabs. Arrow keys move through the tabs and Enter adds the one you pick. Your shortcuts are saved in this profile on your Mac, and they use the same Remove, Undo and Restore controls as the suggested sites. On a smaller window, the row makes room for them.</p>
+          <p>Add a website or an open tab to your new-tab shortcuts. Command-number also opens saved favorites and pins.</p>
+          <details class="feature-details">
+            <summary>Keyboard and saved shortcuts</summary>
+            <p>On a new tab, the Add tile after your sites takes a web address or one of your open tabs. Arrow keys move through the tabs and Enter adds the one you pick. Your shortcuts are saved in this profile on your Mac, and they use the same Remove, Undo and Restore controls as the suggested sites. On a smaller window, the row makes room for them.</p>
           <p>For sidebar favorites and pins, Command-number shortcuts now open the saved page even when it is asleep. Only the selected page opens, repeated presses reuse it, and favorite slots stay consistent across spaces and restarts.</p>
+          </details>
           <p>Top tabs, private windows and Command+9 keep their usual numbered-tab behavior. A slot without a saved favorite or pin falls back to the ordinary tab shortcut.</p>
         </div>
       </article>
@@ -300,9 +313,14 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-tasks">Tasks open where they live</h3>
-          <p>Assignment titles in the new tab's Upcoming list now link to that task's own page in Organato, so one click takes you to the details.</p>
+          <p>Open assignments from Upcoming with one click. Turn Organato off for a new tab with only the date and shortcuts.</p>
+          <details class="feature-details">
+            <summary>Organato behavior</summary>
+            <p>Assignment titles in the new tab's Upcoming list now link to that task's own page in Organato, so one click takes you to the details.</p>
           <p>With Organato turned off, new tabs show just the date and your shortcuts, with no empty Organato panel or reserved space. Open new tabs update straight away, and the choice survives reloads and restarts.</p>
           <p>Those new tabs do not start the Organato helper or request Organato data while it is off. Turning it back on restores the panel and fetches fresh data.</p>
+          </details>
+          <p class="feature-limit">When off, new tabs make no Organato data requests.</p>
         </div>
       </article>
 
@@ -348,7 +366,7 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-sidebar">No more ghost tabs</h3>
-          <p>Older tab snapshots no longer restore closed pages or overwrite newer titles and selections.</p>
+          <p>Closed tabs stay closed, and newer titles and selections take priority.</p>
           <details class="feature-details">
             <summary>How it works</summary>
             <p>A tab you closed could come back to the sidebar when an older list of tabs arrived late, sometimes with an outdated title or the wrong tab highlighted. The sidebar now ignores lists older than what it already shows.</p>
@@ -528,7 +546,10 @@
         <div class="feature-copy">
           <h3 id="f-research">Research across tabs you choose</h3>
           <p>Choose source tabs in the assistant to compare and summarize up to six pages, with source references and clear text-only sharing. Research sources never enable browser control.</p>
-          <p>Review the selected pages before sharing their text. Source labels, URLs, captured lengths, truncation and individual page errors stay visible. Remove a source, clear the list or cancel a pending capture whenever you need to.</p>
+          <details class="feature-details">
+            <summary>Source and sharing details</summary>
+            <p>Review the selected pages before sharing their text. Source labels, URLs, captured lengths, truncation and individual page errors stay visible. Remove a source, clear the list or cancel a pending capture whenever you need to.</p>
+          </details>
         </div>
       </article>
       <article class="feature" aria-labelledby="f-translation">
@@ -554,9 +575,14 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-translation">Translate a page, keep the original</h3>
-          <p>Translate page text in place, choose languages and restore the original. Connect your local LibreTranslate server or use your own LibreTranslate.com key, with explicit confirmation before sharing page text.</p>
+          <p>Right-click a page and choose Translate page. Read in another language, then restore the original at any time.</p>
+          <details class="feature-details">
+            <summary>Translation options</summary>
+            <p>Translate page text in place, choose languages and restore the original. Connect your local LibreTranslate server or use your own LibreTranslate.com key, with explicit confirmation before sharing page text.</p>
           <p>Right-click a page and choose Translate page to begin. Translation needs your provider to be running; Breezer does not bundle translation models or use your AI account.</p>
           <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
+          </details>
+          <p class="feature-limit">Requires your LibreTranslate server or key. Breezer asks before sharing page text.</p>
         </div>
       </article>
       <article class="feature" aria-labelledby="f-settings">
@@ -571,15 +597,15 @@
             <text class="quiet" x="40" y="97">Passwords</text>
             <rect class="mint-soft" x="17" y="111" width="86" height="27" rx="7"/>
             <circle class="accent" cx="28" cy="124" r="4"/>
-            <text class="label" x="40" y="128">Languages</text>
+            <text class="label" x="40" y="128">Translation</text>
             <path class="stroke-quiet" d="M23 181 h10 v10 H23 Z M28 186 l6 -6 m-5 0 h5 v5"/>
-            <text class="quiet" x="40" y="190">Other</text>
-            <text class="quiet" x="122" y="32">Settings / Languages</text>
+            <text class="quiet" x="40" y="190">All settings</text>
+            <text class="quiet" x="122" y="32">Settings / Translation</text>
             <rect class="box" x="120.5" y="47.5" width="187" height="30" rx="8"/>
             <circle class="stroke-quiet" cx="134" cy="61" r="5"/>
             <path class="stroke-quiet" d="M138 65 l4 4"/>
             <text class="label" x="151" y="67">translate</text>
-            <text class="quiet" x="122" y="100">Languages</text>
+            <text class="quiet" x="122" y="100">Translation</text>
             <rect class="mint-soft" x="120" y="111" width="188" height="47" rx="9"/>
             <text class="label" x="132" y="130">Translate page</text>
             <rect class="bar" x="132" y="140" width="128" height="4" rx="2"/>
@@ -590,9 +616,13 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-settings">Find settings by category or search</h3>
-          <p>Settings has a new look. Categories sit in a list on the left, and search takes you straight to the setting you need.</p>
-          <p>Press / to search by name, description or keyword. Search also offers Chromium's own settings. Choose Other to open the full browser settings page.</p>
+          <p>Search by name, description or keyword. Press / to start, or choose a category. All settings opens the full browser settings.</p>
+          <details class="feature-details">
+            <summary>Navigation and appearance</summary>
+            <p>Settings has a new look. Categories sit in a list on the left, and search takes you straight to the setting you need.</p>
+          <p>Press / to search by name, description or keyword. Search also offers Chromium's own settings. Choose All settings to open the full browser settings page.</p>
           <p>Back and Forward move between categories. Use the keyboard to move through categories and search results; the layout follows your Breezer theme and light or dark appearance.</p>
+          </details>
         </div>
       </article>
     </section>

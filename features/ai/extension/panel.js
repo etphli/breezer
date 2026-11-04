@@ -86,6 +86,7 @@ function renderSettings(selected, running) {
   speed.add(fast);
   speed.value = settings.speed;
   speed.disabled = running || !codex;
+  $('speed-note').hidden = !codex || settings.speed !== 'fast';
   $('speed-setting').title = fast.disabled ? 'Fast is not available for this model and CLI' : 'Fast uses more of your Codex allowance. Account eligibility is checked when you send.';
 }
 
@@ -648,7 +649,7 @@ $('welcome-action').addEventListener('click', () => {
 $('reasoning-select').addEventListener('change', saveSettings);
 $('speed-select').addEventListener('change', () => {
   saveSettings();
-  notify($('speed-select').value === 'fast' ? 'Fast uses more of your Codex allowance. Availability depends on your account.' : '');
+  $('speed-note').hidden = $('speed-select').value !== 'fast';
 });
 $('refresh-models').addEventListener('click', refreshModels);
 document.addEventListener('click', (event) => {

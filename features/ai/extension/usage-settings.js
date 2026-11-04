@@ -28,7 +28,7 @@ export async function mountUsageSettings({ api, container }) {
   const details = el('details', '', { class: 'setting-details' });
   details.append(el('summary', 'About usage statistics'),
     el('p', 'A random identifier changes each month. Time counts only while a regular Breezer window is focused and your computer is active. Turning this off stops future reporting and clears the local counter. Reports already received expire within 63 days.'), policy);
-  section.append(el('h2', 'Privacy', { id: 'usage-heading' }), group, details,
+  section.append(el('h2', 'Privacy', { id: 'usage-heading', class: 'sr-only' }), group, details,
     el('p', '', { class: 'field-note', role: 'status', id: 'usage-status' }));
   container.append(section);
   const control = container.querySelector('#usage-enabled');

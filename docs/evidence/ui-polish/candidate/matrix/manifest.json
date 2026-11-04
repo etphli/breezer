@@ -1,0 +1,3739 @@
+{
+  "themes": [
+    "mint",
+    "tide",
+    "dusk",
+    "rose",
+    "pollen",
+    "graphite",
+    "#3979bd"
+  ],
+  "categories": [
+    "general",
+    "appearance",
+    "layout",
+    "spaces",
+    "passwords",
+    "sync",
+    "privacy",
+    "assistant",
+    "newtab",
+    "languages",
+    "browser"
+  ],
+  "captures": [
+    {
+      "name": "mint-light",
+      "id": "settings-general",
+      "file": "mint-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-general-narrow",
+      "file": "mint-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-appearance",
+      "file": "mint-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-appearance-narrow",
+      "file": "mint-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-layout",
+      "file": "mint-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-layout-narrow",
+      "file": "mint-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-spaces",
+      "file": "mint-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-spaces-narrow",
+      "file": "mint-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-passwords",
+      "file": "mint-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-passwords-narrow",
+      "file": "mint-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-sync",
+      "file": "mint-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-sync-narrow",
+      "file": "mint-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-privacy",
+      "file": "mint-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-privacy-narrow",
+      "file": "mint-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-assistant",
+      "file": "mint-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-assistant-narrow",
+      "file": "mint-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-newtab",
+      "file": "mint-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-newtab-narrow",
+      "file": "mint-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-languages",
+      "file": "mint-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-languages-narrow",
+      "file": "mint-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-browser",
+      "file": "mint-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-browser-narrow",
+      "file": "mint-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-assistant-enabled",
+      "file": "mint-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "mint-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "sidebar-expanded",
+      "file": "mint-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "sidebar-compact",
+      "file": "mint-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "sidebar-autoHide",
+      "file": "mint-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "newtab",
+      "file": "mint-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "assistant",
+      "file": "mint-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-general",
+      "file": "tide-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-general-narrow",
+      "file": "tide-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-appearance",
+      "file": "tide-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-appearance-narrow",
+      "file": "tide-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-layout",
+      "file": "tide-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-layout-narrow",
+      "file": "tide-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-spaces",
+      "file": "tide-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-spaces-narrow",
+      "file": "tide-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-passwords",
+      "file": "tide-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-passwords-narrow",
+      "file": "tide-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-sync",
+      "file": "tide-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-sync-narrow",
+      "file": "tide-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-privacy",
+      "file": "tide-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-privacy-narrow",
+      "file": "tide-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-assistant",
+      "file": "tide-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-assistant-narrow",
+      "file": "tide-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-newtab",
+      "file": "tide-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-newtab-narrow",
+      "file": "tide-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-languages",
+      "file": "tide-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-languages-narrow",
+      "file": "tide-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-browser",
+      "file": "tide-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-browser-narrow",
+      "file": "tide-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-assistant-enabled",
+      "file": "tide-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "tide-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "sidebar-expanded",
+      "file": "tide-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "sidebar-compact",
+      "file": "tide-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "sidebar-autoHide",
+      "file": "tide-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "newtab",
+      "file": "tide-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "assistant",
+      "file": "tide-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-general",
+      "file": "dusk-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-general-narrow",
+      "file": "dusk-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-appearance",
+      "file": "dusk-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-appearance-narrow",
+      "file": "dusk-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-layout",
+      "file": "dusk-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-layout-narrow",
+      "file": "dusk-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-spaces",
+      "file": "dusk-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-spaces-narrow",
+      "file": "dusk-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-passwords",
+      "file": "dusk-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-passwords-narrow",
+      "file": "dusk-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-sync",
+      "file": "dusk-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-sync-narrow",
+      "file": "dusk-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-privacy",
+      "file": "dusk-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-privacy-narrow",
+      "file": "dusk-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-assistant",
+      "file": "dusk-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-assistant-narrow",
+      "file": "dusk-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-newtab",
+      "file": "dusk-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-newtab-narrow",
+      "file": "dusk-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-languages",
+      "file": "dusk-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-languages-narrow",
+      "file": "dusk-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-browser",
+      "file": "dusk-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-browser-narrow",
+      "file": "dusk-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-assistant-enabled",
+      "file": "dusk-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "dusk-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "sidebar-expanded",
+      "file": "dusk-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "sidebar-compact",
+      "file": "dusk-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "sidebar-autoHide",
+      "file": "dusk-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "newtab",
+      "file": "dusk-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "assistant",
+      "file": "dusk-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-general",
+      "file": "rose-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-general-narrow",
+      "file": "rose-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-appearance",
+      "file": "rose-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-appearance-narrow",
+      "file": "rose-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-layout",
+      "file": "rose-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-layout-narrow",
+      "file": "rose-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-spaces",
+      "file": "rose-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-spaces-narrow",
+      "file": "rose-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-passwords",
+      "file": "rose-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-passwords-narrow",
+      "file": "rose-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-sync",
+      "file": "rose-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-sync-narrow",
+      "file": "rose-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-privacy",
+      "file": "rose-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-privacy-narrow",
+      "file": "rose-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-assistant",
+      "file": "rose-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-assistant-narrow",
+      "file": "rose-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-newtab",
+      "file": "rose-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-newtab-narrow",
+      "file": "rose-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-languages",
+      "file": "rose-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-languages-narrow",
+      "file": "rose-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-browser",
+      "file": "rose-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-browser-narrow",
+      "file": "rose-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-assistant-enabled",
+      "file": "rose-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "rose-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "sidebar-expanded",
+      "file": "rose-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "sidebar-compact",
+      "file": "rose-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "sidebar-autoHide",
+      "file": "rose-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "newtab",
+      "file": "rose-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "assistant",
+      "file": "rose-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-general",
+      "file": "pollen-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-general-narrow",
+      "file": "pollen-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-appearance",
+      "file": "pollen-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-appearance-narrow",
+      "file": "pollen-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-layout",
+      "file": "pollen-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-layout-narrow",
+      "file": "pollen-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-spaces",
+      "file": "pollen-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-spaces-narrow",
+      "file": "pollen-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-passwords",
+      "file": "pollen-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-passwords-narrow",
+      "file": "pollen-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-sync",
+      "file": "pollen-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-sync-narrow",
+      "file": "pollen-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-privacy",
+      "file": "pollen-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-privacy-narrow",
+      "file": "pollen-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-assistant",
+      "file": "pollen-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-assistant-narrow",
+      "file": "pollen-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-newtab",
+      "file": "pollen-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-newtab-narrow",
+      "file": "pollen-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-languages",
+      "file": "pollen-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-languages-narrow",
+      "file": "pollen-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-browser",
+      "file": "pollen-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-browser-narrow",
+      "file": "pollen-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-assistant-enabled",
+      "file": "pollen-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "pollen-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "sidebar-expanded",
+      "file": "pollen-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "sidebar-compact",
+      "file": "pollen-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "sidebar-autoHide",
+      "file": "pollen-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "newtab",
+      "file": "pollen-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "assistant",
+      "file": "pollen-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-general",
+      "file": "graphite-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-general-narrow",
+      "file": "graphite-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-appearance",
+      "file": "graphite-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-appearance-narrow",
+      "file": "graphite-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-layout",
+      "file": "graphite-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-layout-narrow",
+      "file": "graphite-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-spaces",
+      "file": "graphite-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-spaces-narrow",
+      "file": "graphite-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-passwords",
+      "file": "graphite-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-passwords-narrow",
+      "file": "graphite-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-sync",
+      "file": "graphite-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-sync-narrow",
+      "file": "graphite-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-privacy",
+      "file": "graphite-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-privacy-narrow",
+      "file": "graphite-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-assistant",
+      "file": "graphite-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-assistant-narrow",
+      "file": "graphite-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-newtab",
+      "file": "graphite-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-newtab-narrow",
+      "file": "graphite-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-languages",
+      "file": "graphite-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-languages-narrow",
+      "file": "graphite-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-browser",
+      "file": "graphite-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-browser-narrow",
+      "file": "graphite-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-assistant-enabled",
+      "file": "graphite-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "graphite-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "sidebar-expanded",
+      "file": "graphite-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "sidebar-compact",
+      "file": "graphite-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "sidebar-autoHide",
+      "file": "graphite-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "newtab",
+      "file": "graphite-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "assistant",
+      "file": "graphite-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-general",
+      "file": "custom-light-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-general-narrow",
+      "file": "custom-light-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-appearance",
+      "file": "custom-light-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-appearance-narrow",
+      "file": "custom-light-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-layout",
+      "file": "custom-light-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-layout-narrow",
+      "file": "custom-light-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-spaces",
+      "file": "custom-light-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-spaces-narrow",
+      "file": "custom-light-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-passwords",
+      "file": "custom-light-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-passwords-narrow",
+      "file": "custom-light-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-sync",
+      "file": "custom-light-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-sync-narrow",
+      "file": "custom-light-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-privacy",
+      "file": "custom-light-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-privacy-narrow",
+      "file": "custom-light-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-assistant",
+      "file": "custom-light-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-assistant-narrow",
+      "file": "custom-light-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-newtab",
+      "file": "custom-light-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-newtab-narrow",
+      "file": "custom-light-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-languages",
+      "file": "custom-light-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-languages-narrow",
+      "file": "custom-light-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-browser",
+      "file": "custom-light-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-browser-narrow",
+      "file": "custom-light-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-assistant-enabled",
+      "file": "custom-light-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "custom-light-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "sidebar-expanded",
+      "file": "custom-light-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "sidebar-compact",
+      "file": "custom-light-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "sidebar-autoHide",
+      "file": "custom-light-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "newtab",
+      "file": "custom-light-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "assistant",
+      "file": "custom-light-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-general",
+      "file": "mint-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-general-narrow",
+      "file": "mint-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-appearance",
+      "file": "mint-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-appearance-narrow",
+      "file": "mint-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-layout",
+      "file": "mint-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-layout-narrow",
+      "file": "mint-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-spaces",
+      "file": "mint-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-spaces-narrow",
+      "file": "mint-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-passwords",
+      "file": "mint-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-passwords-narrow",
+      "file": "mint-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-sync",
+      "file": "mint-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-sync-narrow",
+      "file": "mint-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-privacy",
+      "file": "mint-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-privacy-narrow",
+      "file": "mint-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-assistant",
+      "file": "mint-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-assistant-narrow",
+      "file": "mint-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-newtab",
+      "file": "mint-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-newtab-narrow",
+      "file": "mint-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-languages",
+      "file": "mint-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-languages-narrow",
+      "file": "mint-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-browser",
+      "file": "mint-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-browser-narrow",
+      "file": "mint-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-assistant-enabled",
+      "file": "mint-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "mint-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "sidebar-expanded",
+      "file": "mint-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "sidebar-compact",
+      "file": "mint-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "sidebar-autoHide",
+      "file": "mint-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "newtab",
+      "file": "mint-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "assistant",
+      "file": "mint-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-general",
+      "file": "tide-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-general-narrow",
+      "file": "tide-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-appearance",
+      "file": "tide-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-appearance-narrow",
+      "file": "tide-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-layout",
+      "file": "tide-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-layout-narrow",
+      "file": "tide-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-spaces",
+      "file": "tide-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-spaces-narrow",
+      "file": "tide-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-passwords",
+      "file": "tide-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-passwords-narrow",
+      "file": "tide-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-sync",
+      "file": "tide-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-sync-narrow",
+      "file": "tide-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-privacy",
+      "file": "tide-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-privacy-narrow",
+      "file": "tide-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-assistant",
+      "file": "tide-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-assistant-narrow",
+      "file": "tide-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-newtab",
+      "file": "tide-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-newtab-narrow",
+      "file": "tide-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-languages",
+      "file": "tide-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-languages-narrow",
+      "file": "tide-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-browser",
+      "file": "tide-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-browser-narrow",
+      "file": "tide-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-assistant-enabled",
+      "file": "tide-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "tide-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "sidebar-expanded",
+      "file": "tide-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "sidebar-compact",
+      "file": "tide-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "sidebar-autoHide",
+      "file": "tide-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "newtab",
+      "file": "tide-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "assistant",
+      "file": "tide-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-general",
+      "file": "dusk-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-general-narrow",
+      "file": "dusk-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-appearance",
+      "file": "dusk-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-appearance-narrow",
+      "file": "dusk-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-layout",
+      "file": "dusk-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-layout-narrow",
+      "file": "dusk-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-spaces",
+      "file": "dusk-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-spaces-narrow",
+      "file": "dusk-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-passwords",
+      "file": "dusk-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-passwords-narrow",
+      "file": "dusk-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-sync",
+      "file": "dusk-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-sync-narrow",
+      "file": "dusk-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-privacy",
+      "file": "dusk-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-privacy-narrow",
+      "file": "dusk-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-assistant",
+      "file": "dusk-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-assistant-narrow",
+      "file": "dusk-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-newtab",
+      "file": "dusk-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-newtab-narrow",
+      "file": "dusk-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-languages",
+      "file": "dusk-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-languages-narrow",
+      "file": "dusk-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-browser",
+      "file": "dusk-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-browser-narrow",
+      "file": "dusk-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-assistant-enabled",
+      "file": "dusk-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "dusk-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "sidebar-expanded",
+      "file": "dusk-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "sidebar-compact",
+      "file": "dusk-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "sidebar-autoHide",
+      "file": "dusk-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "newtab",
+      "file": "dusk-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "assistant",
+      "file": "dusk-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-general",
+      "file": "rose-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-general-narrow",
+      "file": "rose-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-appearance",
+      "file": "rose-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-appearance-narrow",
+      "file": "rose-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-layout",
+      "file": "rose-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-layout-narrow",
+      "file": "rose-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-spaces",
+      "file": "rose-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-spaces-narrow",
+      "file": "rose-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-passwords",
+      "file": "rose-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-passwords-narrow",
+      "file": "rose-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-sync",
+      "file": "rose-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-sync-narrow",
+      "file": "rose-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-privacy",
+      "file": "rose-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-privacy-narrow",
+      "file": "rose-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-assistant",
+      "file": "rose-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-assistant-narrow",
+      "file": "rose-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-newtab",
+      "file": "rose-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-newtab-narrow",
+      "file": "rose-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-languages",
+      "file": "rose-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-languages-narrow",
+      "file": "rose-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-browser",
+      "file": "rose-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-browser-narrow",
+      "file": "rose-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-assistant-enabled",
+      "file": "rose-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "rose-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "sidebar-expanded",
+      "file": "rose-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "sidebar-compact",
+      "file": "rose-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "sidebar-autoHide",
+      "file": "rose-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "newtab",
+      "file": "rose-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "assistant",
+      "file": "rose-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-general",
+      "file": "pollen-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-general-narrow",
+      "file": "pollen-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-appearance",
+      "file": "pollen-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-appearance-narrow",
+      "file": "pollen-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-layout",
+      "file": "pollen-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-layout-narrow",
+      "file": "pollen-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-spaces",
+      "file": "pollen-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-spaces-narrow",
+      "file": "pollen-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-passwords",
+      "file": "pollen-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-passwords-narrow",
+      "file": "pollen-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-sync",
+      "file": "pollen-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-sync-narrow",
+      "file": "pollen-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-privacy",
+      "file": "pollen-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-privacy-narrow",
+      "file": "pollen-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-assistant",
+      "file": "pollen-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-assistant-narrow",
+      "file": "pollen-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-newtab",
+      "file": "pollen-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-newtab-narrow",
+      "file": "pollen-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-languages",
+      "file": "pollen-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-languages-narrow",
+      "file": "pollen-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-browser",
+      "file": "pollen-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-browser-narrow",
+      "file": "pollen-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-assistant-enabled",
+      "file": "pollen-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "pollen-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "sidebar-expanded",
+      "file": "pollen-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "sidebar-compact",
+      "file": "pollen-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "sidebar-autoHide",
+      "file": "pollen-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "newtab",
+      "file": "pollen-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "assistant",
+      "file": "pollen-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-general",
+      "file": "graphite-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-general-narrow",
+      "file": "graphite-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-appearance",
+      "file": "graphite-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-appearance-narrow",
+      "file": "graphite-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-layout",
+      "file": "graphite-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-layout-narrow",
+      "file": "graphite-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-spaces",
+      "file": "graphite-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-spaces-narrow",
+      "file": "graphite-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-passwords",
+      "file": "graphite-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-passwords-narrow",
+      "file": "graphite-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-sync",
+      "file": "graphite-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-sync-narrow",
+      "file": "graphite-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-privacy",
+      "file": "graphite-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-privacy-narrow",
+      "file": "graphite-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-assistant",
+      "file": "graphite-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-assistant-narrow",
+      "file": "graphite-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-newtab",
+      "file": "graphite-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-newtab-narrow",
+      "file": "graphite-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-languages",
+      "file": "graphite-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-languages-narrow",
+      "file": "graphite-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-browser",
+      "file": "graphite-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-browser-narrow",
+      "file": "graphite-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-assistant-enabled",
+      "file": "graphite-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "graphite-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "sidebar-expanded",
+      "file": "graphite-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "sidebar-compact",
+      "file": "graphite-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "sidebar-autoHide",
+      "file": "graphite-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "newtab",
+      "file": "graphite-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "assistant",
+      "file": "graphite-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-general",
+      "file": "custom-dark-settings-general.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-general-narrow",
+      "file": "custom-dark-settings-general-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-appearance",
+      "file": "custom-dark-settings-appearance.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-appearance-narrow",
+      "file": "custom-dark-settings-appearance-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-layout",
+      "file": "custom-dark-settings-layout.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1011
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-layout-narrow",
+      "file": "custom-dark-settings-layout-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-spaces",
+      "file": "custom-dark-settings-spaces.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-spaces-narrow",
+      "file": "custom-dark-settings-spaces-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-passwords",
+      "file": "custom-dark-settings-passwords.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-passwords-narrow",
+      "file": "custom-dark-settings-passwords-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-sync",
+      "file": "custom-dark-settings-sync.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-sync-narrow",
+      "file": "custom-dark-settings-sync-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-privacy",
+      "file": "custom-dark-settings-privacy.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-privacy-narrow",
+      "file": "custom-dark-settings-privacy-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-assistant",
+      "file": "custom-dark-settings-assistant.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-assistant-narrow",
+      "file": "custom-dark-settings-assistant-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-newtab",
+      "file": "custom-dark-settings-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-newtab-narrow",
+      "file": "custom-dark-settings-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-languages",
+      "file": "custom-dark-settings-languages.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-languages-narrow",
+      "file": "custom-dark-settings-languages-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-browser",
+      "file": "custom-dark-settings-browser.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1360
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-browser-narrow",
+      "file": "custom-dark-settings-browser-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-assistant-enabled",
+      "file": "custom-dark-settings-assistant-enabled.png",
+      "viewport": {
+        "width": 1200,
+        "height": 1100
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "settings-assistant-enabled-narrow",
+      "file": "custom-dark-settings-assistant-enabled-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "sidebar-expanded",
+      "file": "custom-dark-sidebar-expanded.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "sidebar-compact",
+      "file": "custom-dark-sidebar-compact.png",
+      "viewport": {
+        "width": 72,
+        "height": 820
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "sidebar-autoHide",
+      "file": "custom-dark-sidebar-autoHide.png",
+      "viewport": {
+        "width": 240,
+        "height": 820
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "newtab",
+      "file": "custom-dark-newtab.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "assistant",
+      "file": "custom-dark-assistant.png",
+      "viewport": {
+        "width": 400,
+        "height": 850
+      }
+    }
+  ],
+  "notes": [
+    "Shipped UI with deterministic extension APIs. No installed app or personal data.",
+    "Desktop settings use a tall enough real viewport to show every row. Narrow captures use fullPage.",
+    "Compact sidebar uses a 72px viewport. Auto-hide captures its expanded document, not native reveal behavior.",
+    "Other is a native Settings destination, not a Breezer category document.",
+    "Native top tabs, toolbar, menus and physical auto-hide integration are not captured by this script."
+  ],
+  "sourceHashes": {
+    "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "context-settings.js": "117dd2815ba64b93426b5fceee7a80e0e800ec7994bdc9b7ead14cc1e30c7dea",
+    "efficiency.html": "653e9fee11e94df99820800a313f4c3e6d54eefc288ce164402ac13edcbe6583",
+    "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+    "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "newtab.css": "4862a91ea630e8318170f0607adbe1eb08dca6d69b257b1a9cdfc1aaa0746f59",
+    "newtab.html": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
+    "newtab.js": "ea7c2f6779273dff7e39f5828aa3b59fdd56ebf4be64e5a478aa847f0c45cb36",
+    "onboarding.css": "1e98a2829e9cf3a9c26b77cb98a38bda7bea012f0a2c5de11c83febe630dc6a6",
+    "onboarding.js": "aaebca22b121d5563112c7c781e794e4b12b4c9e9de1123a62b114e8d0299b89",
+    "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "panel.css": "3432fe76730e8a3b6224d1e9ce3476b2ee8edc3583c603c657eb2842c54b0e95",
+    "panel.html": "e8ae1362d05296bb1fe82e4eaa3355e49ace144f6f9a8e3f97c58f4f0c281b95",
+    "panel.js": "7159727e72dc2cfb72cd12beabfd9f9986c2d92cf2b7e22cc98de1ca0c8e4eda",
+    "passwords.js": "b9dfe28fcae1ae167eda0135c560f7d2bfc0086e6a82af9dd12b672c063a30d2",
+    "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+    "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "research-sources.js": "a9c65544f953cb35b8a678d76dfe113abe3efe137e1920ae5b57397eae2c092b",
+    "settings-nav.js": "e7c3c04ee4153901bc04fa81be21939efb954a4acdfafa4deb866efa0f813374",
+    "settings-onboarding.js": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae",
+    "settings.js": "c24c315e1670b67411b976d1ad5a2e5b8c0059cddf23fdb3cac45bf05f343fdb",
+    "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "sync-settings.js": "17178927c6c8a4c29d5e8c78ebd1c620a0415ba647bec8fdaca19abb1335e63c",
+    "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "translation-settings.js": "32ed4d1fa9b5eef7c9501b40f18566b443053eb5808f7117b31097954a97328d",
+    "translation.css": "698e2701968c898e239a68ebb4f7edf3aa8cf021987a50320e060a43a9976d9f",
+    "translation.html": "5e8f75dc50d87b714a2322c2615fe1442000b3174f7ca127788bcce08dcdca01",
+    "translation.js": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
+    "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+    "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "whats-new.css": "78bf8afca888e4930abc7fc98f8f3bb64e248f65b0d29370c62af87eac932001",
+    "whats-new.html": "4922186384e844daabf11a6c6194e630add6fb65f8298e82610937ddb3439521",
+    "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+    "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "workspace.css": "340d32aa24345d20f20db668fd0f4e3fabe533390f538b03133c3de0c8e80c74",
+    "workspace.html": "837ff892927cf44c2e851f9bb1b9a05c84fa8f92c78af5e91ab11a3d2d6dabf3",
+    "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
+  }
+}

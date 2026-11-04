@@ -70,9 +70,10 @@
         </label>
         <label id="speed-setting" class="setting-select" title="Codex speed" hidden>
           <span>Speed</span>
-          <select id="speed-select" aria-label="Codex speed" disabled><option value="standard">Standard</option></select>
+          <select id="speed-select" aria-label="Codex speed" aria-describedby="speed-note" disabled><option value="standard">Standard</option></select>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
         </label>
+        <p id="speed-note" class="option-note" hidden>Fast uses more Codex allowance. Availability depends on your account.</p>
       </div>
       <section id="model-menu" class="model-menu" role="dialog" aria-label="Choose a model" hidden>
         <div class="menu-heading"><span>Your models</span><button type="button" id="refresh-models" class="text-button">Refresh</button></div>

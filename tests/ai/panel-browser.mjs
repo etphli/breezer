@@ -102,8 +102,8 @@ try {
   await page.screenshot({ path: `${evidence}/sidebar-model-options-narrow.png` });
   await page.setViewportSize({ width: 400, height: 850 });
   await page.getByRole('button', { name: 'Model options', exact: true }).click();
-  assert.match(await page.locator('#notice-text').innerText(), /more of your Codex allowance/);
-  await page.locator('#dismiss-notice').click();
+  assert.match(await page.locator('#speed-note').innerText(), /more Codex allowance/);
+  assert.equal(await page.locator('#notice').isVisible(), false, 'Speed guidance stays beside its setting');
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6 Luna', exact: true }).click();
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6 Luna');

@@ -248,7 +248,7 @@
 
           <section class="settings-page" data-page="spaces" aria-label="Spaces" hidden>
             <section class="settings-section" aria-labelledby="spaces-heading" data-search-terms="space workspace profile rename color reorder delete add">
-              <h2 id="spaces-heading">Spaces</h2>
+              <h2 id="spaces-heading" class="sr-only">Spaces</h2>
               <p class="section-note">Each space keeps its own pinned tabs and open tabs. Deleting a space moves its tabs to the first space.</p>
               <ol id="space-list" class="space-list setting-group"></ol>
               <button id="settings-add-space" class="text-button"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg>Add space</button>
@@ -274,7 +274,7 @@
 
           <section class="settings-page" data-page="newtab" aria-label="New tab and Organato" hidden>
             <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading" data-search-terms="organato dashboard deadlines assignments homework api key">
-              <h2 id="organato-heading">New tab and Organato</h2>
+              <h2 id="organato-heading" class="sr-only">New tab and Organato</h2>
               <p class="section-note">Connect Organato to see deadlines and let Breezer AI manage the items you ask it to. Your API key stays in macOS Keychain.</p>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="new tab page dashboard home">
@@ -450,7 +450,7 @@
           <p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p>
           <div class="wl-optout">
             <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
-            <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Continue skips setup. Change this later in Settings.</p>
+            <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Change this later in Settings.</p>
           </div>
         </section>
 

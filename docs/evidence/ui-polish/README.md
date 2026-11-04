@@ -88,6 +88,7 @@ are retained in the adjacent Markdown files.
 | Breezer, formal round 2 | 8.3 | 8.1 | 8.0 |
 | Breezer, round 3 attempt | 8.7 | 8.4 | No score: API rate limit |
 | Breezer, round 4 attempt | 8.2 | 8.1 | No score: API rate limit |
+| Breezer, round 5 attempt | 8.4 | 8.3 | No score: API rate limit |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
