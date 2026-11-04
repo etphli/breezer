@@ -824,3 +824,9 @@ body {
 @media (forced-colors: active) { .benchmark-story-note { border-color: CanvasText; } }
 
 .benchmark-story-note code { overflow-wrap: anywhere; }
+
+.feature-copy:has(> .feature-details[open]) > .feature-limit,
+.pending:has(.feature-details[open]) .pending-summary { display: none; }
+.patch-details { margin-top: 24px; }
+.patch-details > .notes { max-width: 76ch; margin-top: 18px; }
+.pending .feature-details { margin-top: 12px; padding-top: 10px; }

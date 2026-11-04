@@ -52,10 +52,9 @@ screenshots, evidence scope and a request for a candid design score out of ten.
 Their briefs omit any desired score or stopping criterion. Each round records
 all three scores and specific findings, including disagreements.
 
-The expanded matrix contains 406 raw captures: all eleven custom Settings
+The expanded matrix contains 462 raw captures: all eleven custom Settings
 categories at desktop and narrow widths in seven palettes and light/dark modes,
-plus Assistant activity memory enabled, three sidebar modes, new tab and the
-assistant panel in every palette and mode.
+plus Assistant activity memory enabled, three sidebar modes, desktop/narrow new tabs, assistant panels and setup screens in every palette and mode.
 Checked-in contact sheets index every combination; rerun the command for the raw
 full-size set. Selected workflow screenshots and annotated comparisons are also
 checked in. Desktop matrix captures use tall viewports to expose every setting.
@@ -66,7 +65,7 @@ outside these captures. Machine policy adds an organization-managed notice.
 The source hashes record the extension files used for the captured design.
 
 Custom UI motion was recorded for space switching, the import card and the new-tab
-agenda. `motion.json` records observed animation timings. The runner also checks
+agenda, setup illustration and assistant source picker. `motion.json` records observed animation timings. The runner also checks
 that Reduce motion disables those animations. It decodes each recording in Chrome
 and exports twelve frames from its first second, with a contact sheet for each
 normal/reduced-motion sequence. These include the initial transition rather than
@@ -89,6 +88,7 @@ are retained in the adjacent Markdown files.
 | Breezer, round 3 attempt | 8.7 | 8.4 | No score: API rate limit |
 | Breezer, round 4 attempt | 8.2 | 8.1 | No score: API rate limit |
 | Breezer, round 5 attempt | 8.4 | 8.3 | No score: API rate limit |
+| Breezer, round 6 attempt | 8.5 | 8.3 | No score: API rate limit |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 

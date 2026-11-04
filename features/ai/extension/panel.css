@@ -634,15 +634,19 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-top: 6px;
+  gap: 4px;
+  margin-top: 8px;
 }
 
 .control-toggle {
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 1px;
+  padding: 0;
   color: var(--muted);
   font-size: 12px;
   white-space: nowrap;
@@ -654,38 +658,8 @@ h1 {
 }
 
 .control-toggle[aria-pressed=true] {
+  background: var(--tint);
   color: var(--accent-ink);
-}
-
-.switch {
-  width: 24px;
-  height: 14px;
-  border-radius: 7px;
-  background: color-mix(in srgb,var(--ink) 16%,transparent);
-  position: relative;
-  margin-left: 2px;
-}
-
-.switch:after {
-  content: "";
-  width: 10px;
-  height: 10px;
-  position: absolute;
-  left: 2px;
-  top: 2px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 2px rgb(0 0 0 / .2);
-  transition: transform .15s;
-}
-
-.control-toggle[aria-pressed=true] .switch {
-  background: var(--accent);
-}
-
-.control-toggle[aria-pressed=true] .switch:after {
-  transform: translateX(10px);
-  background: var(--on-accent);
 }
 
 .send-button {
@@ -729,14 +703,6 @@ h1 {
   background: currentColor;
 }
 
-.bottom-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 6px 4px 0;
-  min-width: 0;
-}
 .inference-options {
   position: fixed;
   inset: auto 14px 46px auto;
@@ -767,7 +733,9 @@ h1 {
   border-radius: 6px;
 }
 .source-tools { display: flex; align-items: center; gap: 2px; }
-.panel[data-running="true"] #research-open { display: none; }
+.panel[data-running="true"] .source-tools { display: none; }
+.compose-area:has(.research-chips:not(:empty)) .control-toggle { display: none; }
+.panel[data-running="true"] .context-chip { background: transparent; box-shadow: none; color: var(--muted); }
 .panel[data-running="true"] #inference-options-toggle,
 .panel[data-running="true"] .control-toggle { visibility: hidden; }
 .panel[data-running="true"] .model-button { opacity: .65; }
@@ -775,6 +743,7 @@ h1 {
 .panel[data-account-state="signed-out"] .composer { background: transparent; box-shadow: none; }
 
 .model-button>svg {
+  flex-shrink: 0;
   width: 12px;
   height: 12px;
 }
@@ -1126,3 +1095,8 @@ dialog .privacy-note {
 .source-details small { display:block; margin-top:3px; font-size:11px; line-height:1.45; }
 .source-details li[data-state="unavailable"] { border-color:color-mix(in srgb,var(--danger) 25%,transparent); background:color-mix(in srgb,var(--danger) 5%,var(--raised)); }
 .source-details li[data-state="unavailable"] small { color:var(--danger); }
+
+.account-options { margin: 14px 0; }
+.account-options > div { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 8px; }
+.account-options > div > span { font-size: 12px; color: var(--muted); }
+.account-options code { font-size: 12px; user-select: text; }

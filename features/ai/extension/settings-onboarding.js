@@ -96,7 +96,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
     'Export a password file from Chrome, then import it in Breezer’s password manager. The steps are in Passwords below. Passkeys are not included.',
     passwordSteps);
 
-  const footnote = node('p', 'After you hide this, both imports stay available in Passwords and More browser settings.', 'field-note');
+  const footnote = node('p', 'After you hide this, both imports stay available in Passwords and Browser settings.', 'field-note');
   section.append(head, intro, paths, status, error, footnote);
 
   if (!api?.tabs?.create) {

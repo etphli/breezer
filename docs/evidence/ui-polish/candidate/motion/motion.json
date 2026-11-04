@@ -103,7 +103,7 @@
         "iterations": 1
       }
     ],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -136,7 +136,7 @@
         "iterations": 1
       }
     ],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -157,7 +157,425 @@
     "area": "newtab",
     "reducedMotion": "no-preference",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "onboarding",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 200,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 260,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 260,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 140,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-in-next",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 380,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-rise",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 600,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-rise",
+        "delay": 90,
+        "direction": "normal",
+        "duration": 600,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-rise",
+        "delay": 180,
+        "direction": "normal",
+        "duration": 600,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-tab-wiggle",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-tab-wiggle",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-tab-wiggle",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-rise",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 600,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-window",
+        "delay": 120,
+        "direction": "normal",
+        "duration": 760,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 420,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 470,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 520,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 570,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 640,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 700,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 760,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-drop",
+        "delay": 820,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-rise",
+        "delay": 520,
+        "direction": "normal",
+        "duration": 620,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "assistant",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -178,7 +596,7 @@
     "area": "spaces",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -199,7 +617,7 @@
     "area": "settings",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
     "videoFrameTimesMs": [
       0,
       50,
@@ -220,7 +638,49 @@
     "area": "newtab",
     "reducedMotion": "reduce",
     "animations": [],
-    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.",
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "onboarding",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameNote": "Decoded from the actual recording, including the initial action/load. Recording start is not an exact animation-onset timestamp. Frame pacing on native macOS remains unverified."
+  },
+  {
+    "area": "assistant",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.",
     "videoFrameTimesMs": [
       0,
       50,

@@ -28,10 +28,10 @@ I am satisfied with the overall observed design. I found no blocking visual defe
 
 Necessary fixes:
 
-1. **Correct the settings navigation names in release guidance.**  
+1. **Correct the settings navigation names in release guidance.**
    [whats-new-narrow-tile-13.png](/tmp/breezer-ui-polish/round-5-workflows/whats-new-narrow-tile-13.png) says “Choose Other” and illustrates “Languages” and “Other.” The current rendered settings use “Translation,” “Browser settings,” and “All settings,” as visible in `mint-light-settings-languages.png`. Update the instructions and illustration together so users can find the named destination.
 
-2. **Remove contradictory Organato guidance after connection.**  
+2. **Remove contradictory Organato guidance after connection.**
    [onboarding-6-organato.png](/tmp/breezer-ui-polish/round-5-workflows/onboarding-6-organato.png) shows “Organato is connected” while the lower explanation still says “Continue skips setup.” Make that sentence conditional on connection state, or say that Continue proceeds to the tour.
 
 Concrete refinements beyond broken states, all optional:

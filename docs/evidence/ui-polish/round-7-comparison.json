@@ -1,0 +1,86 @@
+[
+  {
+    "id": "composer",
+    "title": "One composer row",
+    "file": "sidebar-welcome.png",
+    "notes": [
+      [
+        84,
+        78,
+        53,
+        96,
+        "Model and context tools now share the composer."
+      ]
+    ]
+  },
+  {
+    "id": "working",
+    "title": "A quieter working state",
+    "file": "sidebar-working.png",
+    "notes": [
+      [
+        85,
+        78,
+        40,
+        84,
+        "Persistent page metadata has less visual weight."
+      ],
+      [
+        83,
+        89,
+        52,
+        96,
+        "Model and Stop sit in the same composer."
+      ]
+    ]
+  },
+  {
+    "id": "accounts",
+    "title": "Clear account choices",
+    "file": "sidebar-signed-out-narrow.png",
+    "notes": [
+      [
+        84,
+        25,
+        55,
+        44,
+        "Each provider has a separate sign-in command."
+      ]
+    ]
+  },
+  {
+    "id": "setup",
+    "title": "Narrow setup spacing",
+    "file": "onboarding-6-organato-optout-failed-narrow.png",
+    "notes": [
+      [
+        85,
+        19,
+        56,
+        27,
+        "The illustration stays. The form follows with a regular gap."
+      ]
+    ]
+  },
+  {
+    "id": "release",
+    "title": "Features appear earlier",
+    "file": "whats-new-narrow-tile-02.png",
+    "notes": [
+      [
+        85,
+        11,
+        51,
+        19,
+        "The feature tour leads. Optional measurements follow it."
+      ],
+      [
+        86,
+        48,
+        51,
+        64,
+        "More of the next feature is visible at the same scroll position."
+      ]
+    ]
+  }
+]

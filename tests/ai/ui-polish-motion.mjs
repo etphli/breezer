@@ -8,6 +8,7 @@ import { chromium } from 'playwright';
 import { installFixture as workspaceFixture, seed } from './workspace-browser-fixture.mjs';
 import { installFixture as settingsFixture } from './settings-browser-fixture.mjs';
 import { installFixture as newtabFixture, CONNECTED, NOW } from './newtab-browser-fixture.mjs';
+import { installPanelFixture } from './panel-browser-fixture.mjs';
 
 const root = resolve('features/ai/extension');
 const output = resolve(process.argv[2] || '/tmp/breezer-ui-motion');
@@ -25,8 +26,8 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({ headless: true, executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined) });
 const report = [];
 try {
-  for (const reducedMotion of ['no-preference', 'reduce']) for (const area of ['spaces', 'settings', 'newtab']) {
-    const viewport = area === 'spaces' ? { width: 280, height: 820 } : { width: 1200, height: 900 };
+  for (const reducedMotion of ['no-preference', 'reduce']) for (const area of ['spaces', 'settings', 'newtab', 'onboarding', 'assistant']) {
+    const viewport = area === 'spaces' ? { width: 280, height: 820 } : area === 'assistant' ? { width: 400, height: 850 } : { width: 1200, height: 900 };
     const context = await browser.newContext({ viewport, reducedMotion, recordVideo: { dir: output, size: viewport } });
     const page = await context.newPage();
     const video = page.video();
@@ -38,11 +39,23 @@ try {
       await page.addInitScript(settingsFixture, { theme: 'mint', colorMode: 'light' });
       await page.goto(`${base}/workspace.html#/settings`);
       await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer' }).waitFor();
-    } else {
+    } else if (area === 'newtab') {
       await page.addInitScript(newtabFixture, { view: CONNECTED, appearance: { theme: 'mint', colorMode: 'light' }, delay: 400 });
       await page.clock.setFixedTime(NOW);
       await page.goto(`${base}/newtab.html`);
       await page.locator('.organato[data-state="ready"]').waitFor();
+    } else if (area === 'onboarding') {
+      await page.addInitScript(settingsFixture, { theme: 'mint', colorMode: 'light' });
+      await page.goto(`${base}/workspace.html#/welcome`);
+      await page.locator('#wl-next').click();
+      await page.locator('#wl-next').click();
+      await page.locator('#wl-layout [data-value="top"]').click();
+    } else {
+      await page.addInitScript(installPanelFixture);
+      await page.goto(`${base}/panel.html`);
+      await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+      await page.getByRole('button', { name: 'Choose source tabs', exact: true }).click();
+      await page.getByRole('dialog', { name: 'Source tabs', exact: true }).waitFor();
     }
     const animations = await page.evaluate(() => document.getAnimations().map(animation => ({ name: animation.animationName || 'transition', ...animation.effect.getTiming() })));
     if (reducedMotion === 'reduce') assert.equal(animations.length, 0, `${area} respects Reduce motion`);
@@ -53,7 +66,7 @@ try {
     await page.waitForTimeout(600);
     await context.close();
     await video.saveAs(resolve(output, `${area}-${reducedMotion}.webm`));
-    report.push({ area, reducedMotion, animations, note: 'Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset.' });
+    report.push({ area, reducedMotion, animations, note: 'Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset. Setup depicts an animated illustration, not native browser tabs.' });
   }
   // Decode the recordings themselves so review frames include animation onset.
   // The earlier timed screenshots start after locator settlement.

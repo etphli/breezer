@@ -148,9 +148,10 @@ const measured = [
 const shown = (value, unit) => `${value.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 
 test('leads with selected measured wins, each naming its comparator and workload', () => {
-  // The section sits after the masthead and before the feature rows.
+  // Feature changes lead; the complete measurements precede the patch notes.
   assert.ok(html.indexOf('</header>') < html.indexOf('<section class="results"'));
-  assert.ok(html.indexOf('<section class="results"') < html.indexOf('<section class="features"'));
+  assert.ok(html.indexOf('<section class="features"') < html.indexOf('<section class="results"'));
+  assert.ok(html.indexOf('<section class="results"') < html.indexOf('<section class="patch-notes"'));
   const highlights = resultsHtml.slice(0, resultsHtml.indexOf('<details class="full-results">'));
   const hero = toText(highlights);
   const headings = [...highlights.matchAll(/<h[34][^>]*>([^<]+)<\/h[34]>/g)].map((m) => m[1].replace(/ /g, ' '));

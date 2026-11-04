@@ -160,8 +160,9 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
     await withPage(browser, base, {}, async page => {
       await page.locator('.measurement-details > summary').click();
       await page.locator('.results-more > summary').click();
-      for (const summary of await page.locator('.feature-details > summary').all()) await summary.click();
-      assert.equal(await page.locator('.feature-details[open]').count(), 9);
+      const explanations = await page.locator('.feature-details > summary').all();
+      for (const summary of explanations) await summary.click();
+      assert.equal(await page.locator('.feature-details[open]').count(), explanations.length);
       await captureLongPage(page, 'whats-new-expanded-desktop');
     });
 

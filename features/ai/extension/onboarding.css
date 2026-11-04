@@ -285,7 +285,8 @@ body.route-welcome { overflow: auto; background: var(--air); }
 .mini-compose span { flex: 1; height: 6px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 9%, transparent); }
 .mini-compose i { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); }
 .mini-control { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
-.mini-control span { width: 18px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--ink) 16%, transparent); transition: background-color 200ms ease; }
+.mini-control span { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; background: color-mix(in srgb, var(--ink) 8%, transparent); transition: background-color 200ms ease; }
+.mini-control svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
 
 /* Steps that show the assistant */
 .mini:is([data-step="you"], [data-step="theme"], [data-step="done"], [data-focus="ai"], [data-focus="control"]) .mini-ai { width: 30%; margin-left: 10px; padding: 14px 12px; opacity: 1; }
@@ -327,7 +328,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent), 0 0 0 9px color-mix(in srgb, var(--accent) 14%, transparent);
   animation: wl-ring 1.8s ease-in-out infinite;
 }
-.mini[data-focus="control"] .mini-control span { background: var(--accent); }
+.mini[data-focus="control"] .mini-control span { background: var(--accent); color: var(--air); }
 .mini[data-focus="tabs"] .mini-rows i.on { animation: wl-row-hop 2.4s var(--ease-spring) infinite; }
 
 .mini-cursor {
@@ -428,7 +429,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
 @media (max-width: 560px) {
   .mini { width: 200px; max-width: 70%; max-height: none; }
   .mini-frame { width: 220%; height: 220%; scale: .454545; transform-origin: top left; }
-  .wl-stage { gap: 16px; padding: 12px 0; }
+  .wl-stage { gap: 16px; padding: 12px 0; align-content: start; align-items: start; }
   .wl-choices, .wl-swatches { grid-template-columns: 1fr 1fr; }
   .wl-progress li { width: 10px; }
   .wl-progress li[aria-current="step"] { width: 24px; }

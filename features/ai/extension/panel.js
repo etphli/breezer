@@ -129,7 +129,7 @@ function updateControls() {
   if (!selected && !state.discoveryPending) $('prompt').placeholder = 'Draft a message…';
   renderWelcomeStatus(selected);
   document.querySelector('.panel').dataset.accountState = selected ? 'ready' : state.discoveryPending ? 'connecting' : 'signed-out';
-  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
+  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Accounts';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
   $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
   $('model-button').disabled = running;
@@ -147,18 +147,18 @@ function updateControls() {
 function renderWelcomeStatus(selected) {
   let text = '';
   let action = '';
+  let showAccounts = false;
   if (!selected && !state.discoveryPending) {
     const connected = state.providers.some((item) => item.available && item.authenticated);
-    text = connected ? 'Choose a model to start.' : 'Sign in to Codex or Claude to start. Run codex login or claude auth login in Terminal, then refresh.';
+    showAccounts = !connected;
+    text = connected ? 'Choose a model to start.' : 'Sign in to one account in Terminal, then refresh.';
     action = connected ? 'Choose a model' : 'Refresh accounts';
   } else if (state.pageKnown && !state.page) {
     text = 'Open a web page to summarize it or get help with it. You can still ask anything below.';
   }
   $('welcome-status').hidden = !text;
-  $('welcome-status-text').replaceChildren(...text.split(/(codex login|claude auth login)/g).map(part => {
-    if (part !== 'codex login' && part !== 'claude auth login') return document.createTextNode(part);
-    const command = document.createElement('code'); command.textContent = part; return command;
-  }));
+  $('welcome-status-text').textContent = text;
+  $('welcome-account-steps').hidden = !showAccounts;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
   document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending;

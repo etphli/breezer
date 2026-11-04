@@ -99,6 +99,8 @@ try {
     await newtab.locator('.organato[data-state="ready"]').waitFor();
     await newtab.setViewportSize({ width: 1200, height: 900 });
     await shot(newtab, 'newtab');
+    await newtab.setViewportSize({ width: 390, height: 844 });
+    await shot(newtab, 'newtab-narrow');
     const panel = await context.newPage();
     await panel.addInitScript(installPanelFixture);
     await panel.addInitScript(appearance => { chrome.breezerPrivate.getAppearance = async () => appearance; }, { theme, colorMode });
@@ -106,6 +108,17 @@ try {
     await panel.goto(`${base}/panel.html`);
     await panel.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
     await shot(panel, 'assistant');
+    await panel.setViewportSize({ width: 320, height: 640 });
+    await shot(panel, 'assistant-narrow');
+    const setup = await context.newPage();
+    await setup.addInitScript(settingsFixture, { colorMode, theme });
+    await setup.goto(`${base}/workspace.html#/welcome`);
+    for (let step = 0; step < 5; step++) await setup.locator('#wl-next').click();
+    await setup.locator('.wl-step[data-step="organato"]:not([hidden])').waitFor();
+    await setup.setViewportSize({ width: 1200, height: 900 });
+    await shot(setup, 'onboarding');
+    await setup.setViewportSize({ width: 390, height: 844 });
+    await shot(setup, 'onboarding-narrow');
     // Contact sheet is an index. Raw captures above are the source for text/detail review.
     const tiles = await Promise.all(captures.filter(item => !item.id.endsWith('-narrow')).map(async item => `<figure><figcaption>${item.id}</figcaption><img src="data:image/png;base64,${(await readFile(resolve(output, item.file))).toString('base64')}"/></figure>`));
     const sheet = await context.newPage();

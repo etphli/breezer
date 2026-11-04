@@ -34,137 +34,6 @@
          presentation-data.json; saved-tab records: build/benchmark-1.2.0-components-20261101/
          results.json. Bar widths are each median over the largest in its comparison.
          The efficiency article is its own page, efficiency.html, linked from here. -->
-    <section class="results" aria-labelledby="results-title">
-      <h2 id="results-title">Performance measurements</h2>
-      <details class="measurement-details">
-        <summary>Browser and saved-tab tests, including slower results</summary>
-      <h3 class="measurement-heading">Measured against Chrome and the previous Breezer</h3>
-      <p class="results-lede">We timed a pre-release Breezer 1.2.0 build beside the previous Breezer and Chrome 156. Two measurements improved in this build, and two leads over Chrome carried over from before. <a href="#results-table">See the full results</a>, including slower and unavailable measurements.</p>
-
-      <h3 class="results-group">New in this build</h3>
-      <div class="readings">
-        <article class="reading reading-wide" aria-labelledby="r-first-load">
-          <div class="reading-copy">
-            <h4 id="r-first-load">First local page after opening tabs: 63.5% less time than the previous Breezer</h4>
-            <p>After each launch the test opens and switches tabs, then loads a small local page three times. The first of those loads took 262.2 ms instead of 717.4 ms (medians of 6 launches). Chrome took 52.4 ms on the same workload, so it is still quicker here.</p>
-          </div>
-          <div class="reading-chart">
-            <ul class="bars">
-              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="36.55%" height="100%" rx="4"/></svg> <span class="bar-value">262.2 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">717.4 ms</span></li>
-            </ul>
-          </div>
-        </article>
-        <article class="reading reading-wide" aria-labelledby="r-saved-records">
-          <div class="reading-copy">
-            <h4 id="r-saved-records">Saved-tab records: restoring 1,000 took 2.90 ms instead of 189.96 ms</h4>
-            <p>A separate synthetic test of the sidebar’s workspace code, comparing the previous Breezer code with the 1.2.0 candidate code. Building the sidebar model for the same records took 0.187 ms instead of 3.299 ms. It times this code alone, not 1,000 open tabs or overall browser speed.</p>
-          </div>
-          <div class="reading-chart">
-            <p class="bars-caption">Restore 1,000 records</p>
-            <ul class="bars" aria-label="Restore 1,000 records">
-              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="1.53%" height="100%" rx="4"/></svg> <span class="bar-value">2.90 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">189.96 ms</span></li>
-            </ul>
-            <p class="bars-caption">Build the sidebar model</p>
-            <ul class="bars" aria-label="Build the sidebar model">
-              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="5.66%" height="100%" rx="4"/></svg> <span class="bar-value">0.187 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">3.299 ms</span></li>
-            </ul>
-          </div>
-        </article>
-      </div>
-
-      <details class="results-more">
-        <summary>More browser measurements</summary>
-      <h3 class="results-group">Still ahead of Chrome, as before</h3>
-      <div class="readings">
-        <article class="reading" aria-labelledby="r-new-tab">
-          <div class="reading-copy">
-            <h4 id="r-new-tab">New tab: 50.3% less time than Chrome</h4>
-            <p>Breezer’s own new-tab page was ready in 98.8 ms, against 198.7 ms for Chrome’s (medians of 18 tabs). The previous Breezer measured 99.2 ms, so this lead isn’t new in 1.2.</p>
-          </div>
-          <div class="reading-chart">
-            <ul class="bars">
-              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.73%" height="100%" rx="4"/></svg> <span class="bar-value">98.8 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.90%" height="100%" rx="4"/></svg> <span class="bar-value">99.2 ms</span></li>
-              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">198.7 ms</span></li>
-            </ul>
-          </div>
-        </article>
-        <article class="reading" aria-labelledby="r-relaunch">
-          <div class="reading-copy">
-            <h4 id="r-relaunch">Relaunch: 19.5% less time than Chrome</h4>
-            <p>Quitting and reopening a set-up test profile until the page was usable took 861.3 ms, against 1,070.2 ms for Chrome (medians of 6 launches). The previous Breezer measured 846.6 ms, so this lead isn’t new either.</p>
-          </div>
-          <div class="reading-chart">
-            <ul class="bars">
-              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="80.48%" height="100%" rx="4"/></svg> <span class="bar-value">861.3 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="79.10%" height="100%" rx="4"/></svg> <span class="bar-value">846.6 ms</span></li>
-              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">1,070.2 ms</span></li>
-            </ul>
-          </div>
-        </article>
-      </div>
-      </details>
-      <p class="results-method">Measured on one Apple M1 Mac with 8 GB of memory, 6 rounds per browser. Bars show medians, start at zero and use a separate scale in each comparison. These are selected results for specific workloads, not overall browser speed.</p>
-      <p class="results-article"><a class="button secondary" href="efficiency.html">Read about the efficiency work in 1.2</a></p>
-
-      <details class="full-results">
-        <summary>Full results: all 11 measurements, including slower and unavailable ones</summary>
-        <p>Some results are slower or use more memory than Chrome or the previous Breezer, and two Chrome values couldn’t be measured. Every result is listed here.</p>
-        <div class="table-scroll" role="region" aria-labelledby="results-table" tabindex="0">
-          <table class="results-table">
-            <caption id="results-table">All 11 measurements: medians, with the lowest and highest observation beneath. Lower is better in every row.</caption>
-            <thead><tr><th scope="col">Measurement</th><th scope="col">Breezer 1.2.0 candidate</th><th scope="col">Previous Breezer</th><th scope="col">Chrome 156</th><th scope="col">Result</th></tr></thead>
-            <tbody>
-              <tr class="table-group"><th scope="colgroup" colspan="5">Speed, in milliseconds</th></tr>
-              <tr><th scope="row">Initialized-profile usable startup<span class="measure-note">Launch with a set-up test profile until the page is usable. 6 launches.</span></th><td data-label="Candidate">742.1 ms<span class="range"><span class="visually-hidden">range </span>712.8–851.2</span></td><td data-label="Previous Breezer">730.4 ms<span class="range"><span class="visually-hidden">range </span>720.8–762.6</span></td><td data-label="Chrome 156">734.9 ms<span class="range"><span class="visually-hidden">range </span>671.0–877.7</span></td><td data-label="Result" class="verdict">Within 2% of both</td></tr>
-              <tr><th scope="row">Reused-profile usable startup<span class="measure-note">Quit, then relaunch the same profile until the page is usable. 6 launches.</span></th><td data-label="Candidate">861.3 ms<span class="range"><span class="visually-hidden">range </span>784.9–990.3</span></td><td data-label="Previous Breezer">846.6 ms<span class="range"><span class="visually-hidden">range </span>764.0–1,026.2</span></td><td data-label="Chrome 156">1,070.2 ms<span class="range"><span class="visually-hidden">range </span>1,010.3–1,754.7</span></td><td data-label="Result" class="verdict">19.5% lower than Chrome; similar to previous Breezer</td></tr>
-              <tr><th scope="row">Blank-tab readiness<span class="measure-note">Open an empty tab until it is ready. 18 tabs, 3 per launch.</span></th><td data-label="Candidate">68.8 ms<span class="range"><span class="visually-hidden">range </span>50.0–228.3</span></td><td data-label="Previous Breezer">65.0 ms<span class="range"><span class="visually-hidden">range </span>49.4–84.3</span></td><td data-label="Chrome 156">66.2 ms<span class="range"><span class="visually-hidden">range </span>41.5–82.8</span></td><td data-label="Result" class="verdict">4–6% higher than both</td></tr>
-              <tr><th scope="row">Product new-tab readiness<span class="measure-note">Open the browser’s own new-tab page until it is ready. 18 tabs.</span></th><td data-label="Candidate">98.8 ms<span class="range"><span class="visually-hidden">range </span>78.1–216.5</span></td><td data-label="Previous Breezer">99.2 ms<span class="range"><span class="visually-hidden">range </span>81.1–148.9</span></td><td data-label="Chrome 156">198.7 ms<span class="range"><span class="visually-hidden">range </span>149.5–249.2</span></td><td data-label="Result" class="verdict">50.3% lower than Chrome; same as previous Breezer</td></tr>
-              <tr><th scope="row">Local-page navigation readiness<span class="measure-note">Load the same local test page until it is usable. 18 loads.</span></th><td data-label="Candidate">48.9 ms<span class="range"><span class="visually-hidden">range </span>31.9–453.0</span></td><td data-label="Previous Breezer">33.9 ms<span class="range"><span class="visually-hidden">range </span>31.3–792.8</span></td><td data-label="Chrome 156">33.1 ms<span class="range"><span class="visually-hidden">range </span>31.1–71.7</span></td><td data-label="Result" class="verdict">47.8% higher than Chrome; 44.3% higher than previous Breezer</td></tr>
-              <tr><th scope="row">Local-page loadEventEnd<span class="measure-note">The page’s own load-finished time for those loads. 18 loads.</span></th><td data-label="Candidate">11.2 ms<span class="range"><span class="visually-hidden">range </span>9.1–416.7</span></td><td data-label="Previous Breezer">11.5 ms<span class="range"><span class="visually-hidden">range </span>10.4–754.1</span></td><td data-label="Chrome 156">6.6 ms<span class="range"><span class="visually-hidden">range </span>5.3–9.8</span></td><td data-label="Result" class="verdict">69.7% higher than Chrome; similar to previous Breezer</td></tr>
-              <tr><th scope="row">First local navigation after tab exercises<span class="measure-note">The first of those three loads after each launch’s tab exercises. 6 loads.</span></th><td data-label="Candidate">262.2 ms<span class="range"><span class="visually-hidden">range </span>154.9–453.0</span></td><td data-label="Previous Breezer">717.4 ms<span class="range"><span class="visually-hidden">range </span>703.8–792.8</span></td><td data-label="Chrome 156">52.4 ms<span class="range"><span class="visually-hidden">range </span>35.5–71.7</span></td><td data-label="Result" class="verdict">63.5% lower than previous Breezer; still about 5 times Chrome’s</td></tr>
-            </tbody>
-            <tbody>
-              <tr class="table-group"><th scope="colgroup" colspan="5">Memory, in MiB</th></tr>
-              <tr><th scope="row">One-tab process-tree RSS<span class="measure-note">Resident memory of all browser processes with one tab. 6 launches, 5 samples each.</span></th><td data-label="Candidate">1,417.6 MiB<span class="range"><span class="visually-hidden">range </span>1,250.9–1,439.4</span></td><td data-label="Previous Breezer">1,245.5 MiB<span class="range"><span class="visually-hidden">range </span>1,204.0–1,349.8</span></td><td data-label="Chrome 156">1,418.3 MiB<span class="range"><span class="visually-hidden">range </span>1,349.5–1,518.0</span></td><td data-label="Result" class="verdict">Same as Chrome; 13.8% higher than previous Breezer</td></tr>
-              <tr><th scope="row">Ten-tab process-tree RSS<span class="measure-note">The same with ten tabs open. 6 launches, 5 samples each.</span></th><td data-label="Candidate">2,756.1 MiB<span class="range"><span class="visually-hidden">range </span>2,658.9–2,837.4</span></td><td data-label="Previous Breezer">2,560.8 MiB<span class="range"><span class="visually-hidden">range </span>2,524.8–2,652.1</span></td><td data-label="Chrome 156">2,515.1 MiB<span class="range"><span class="visually-hidden">range </span>2,426.3–2,568.1</span></td><td data-label="Result" class="verdict">9.6% higher than Chrome; 7.6% higher than previous Breezer</td></tr>
-              <tr><th scope="row">One-tab macOS physical footprint<span class="measure-note">Memory macOS charges to the browser’s processes, one tab. 6 launches.</span></th><td data-label="Candidate">454.8 MiB<span class="range"><span class="visually-hidden">range </span>446.6–484.7</span></td><td data-label="Previous Breezer">461.3 MiB<span class="range"><span class="visually-hidden">range </span>450.9–472.7</span></td><td data-label="Chrome 156" class="unavailable">Unavailable</td><td data-label="Result" class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
-              <tr><th scope="row">Ten-tab macOS physical footprint<span class="measure-note">The same with ten tabs open. 6 launches.</span></th><td data-label="Candidate">959.5 MiB<span class="range"><span class="visually-hidden">range </span>946.9–966.1</span></td><td data-label="Previous Breezer">956.2 MiB<span class="range"><span class="visually-hidden">range </span>952.8–976.4</span></td><td data-label="Chrome 156" class="unavailable">Unavailable</td><td data-label="Result" class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <h3>Saved-tab records code test</h3>
-        <p>This synthetic test runs the sidebar’s workspace code on its own in Node, comparing the previous Breezer code with the 1.2.0 candidate code. It isn’t a measurement of open tabs or the browser.</p>
-        <table class="results-table component-table">
-          <caption>Milliseconds; medians of 6 alternating rounds, 11 repetitions each.</caption>
-          <thead>
-            <tr><td></td><th scope="colgroup" colspan="2">Restore</th><th scope="colgroup" colspan="2">Sidebar model</th></tr>
-            <tr><th scope="col">Records</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">10</th><td data-label="Restore · Previous">0.15</td><td data-label="Restore · 1.2.0">0.08</td><td data-label="Sidebar model · Previous">0.007</td><td data-label="Sidebar model · 1.2.0">0.005</td></tr>
-            <tr><th scope="row">100</th><td data-label="Restore · Previous">2.53</td><td data-label="Restore · 1.2.0">0.59</td><td data-label="Sidebar model · Previous">0.049</td><td data-label="Sidebar model · 1.2.0">0.028</td></tr>
-            <tr><th scope="row">500</th><td data-label="Restore · Previous">48.07</td><td data-label="Restore · 1.2.0">1.72</td><td data-label="Sidebar model · Previous">0.809</td><td data-label="Sidebar model · 1.2.0">0.092</td></tr>
-            <tr><th scope="row">1,000</th><td data-label="Restore · Previous">189.96</td><td data-label="Restore · 1.2.0">2.90</td><td data-label="Sidebar model · Previous">3.299</td><td data-label="Sidebar model · 1.2.0">0.187</td></tr>
-          </tbody>
-        </table>
-        <h3>How this was measured, and what it doesn’t show</h3>
-        <ul class="results-limits">
-          <li>One Apple M1 Mac with 8 GB of memory, macOS 26.7, on AC power with no thermal warning. 6 rounds rotated the launch order: 36 timed launches after 18 untimed setup launches, and all 36 timed launches passed their foreground check.</li>
-          <li>Startups use test profiles that were already set up, then reused. They aren’t cold starts after a reboot, and no caches were flushed.</li>
-          <li>Page loads use the same small local test page in every browser, not real websites over the internet.</li>
-          <li>Process-tree RSS adds up the resident memory of every browser process and can count shared memory more than once. It isn’t the memory Activity Monitor shows. Physical footprint is the memory macOS charges to those processes, including compressed memory.</li>
-          <li>Chrome’s physical footprint is unavailable: 11 of its 60 samples failed process-identity or process-tree checks, and the remaining samples aren’t summarized on their own.</li>
-          <li>CPU use couldn’t be measured: in all 36 sampling windows the CPU time stayed within the counters’ uncertainty. These results make no CPU, energy or battery-life claims.</li>
-          <li>Six rounds give medians and ranges, not statistically significant differences.</li>
-          <li>The candidate is a private ad hoc signed build of the combined 1.2.0 source (snapshot fa19c37); its internal version still reads 0.20.1.1. Its release identity and full feature checks are still pending, so the published release may measure differently.</li>
-        </ul>
-      </details>
-      </details>
-    </section>
 
     <section class="features" aria-labelledby="features-title">
       <h2 id="features-title" class="visually-hidden">New in this release</h2>
@@ -221,7 +90,7 @@
           <p>Already set up? Open the guide whenever you like with the Setup guide button in Settings.</p>
           <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
           </details>
-          <p>Skip any step, or reopen the guide in Settings.</p>
+          <p class="feature-limit">Skip any step, or reopen the guide in Settings.</p>
           <a class="button secondary" href="workspace.html#/welcome">Open the setup guide</a>
         </div>
       </article>
@@ -627,6 +496,138 @@
       </article>
     </section>
 
+    <section class="results" aria-labelledby="results-title">
+      <h2 id="results-title">Performance measurements</h2>
+      <details class="measurement-details">
+        <summary>Browser and saved-tab tests, including slower results</summary>
+      <h3 class="measurement-heading">Measured against Chrome and the previous Breezer</h3>
+      <p class="results-lede">We timed a pre-release Breezer 1.2.0 build beside the previous Breezer and Chrome 156. Two measurements improved in this build, and two leads over Chrome carried over from before. <a href="#results-table">See the full results</a>, including slower and unavailable measurements.</p>
+
+      <h3 class="results-group">New in this build</h3>
+      <div class="readings">
+        <article class="reading reading-wide" aria-labelledby="r-first-load">
+          <div class="reading-copy">
+            <h4 id="r-first-load">First local page after opening tabs: 63.5% less time than the previous Breezer</h4>
+            <p>After each launch the test opens and switches tabs, then loads a small local page three times. The first of those loads took 262.2 ms instead of 717.4 ms (medians of 6 launches). Chrome took 52.4 ms on the same workload, so it is still quicker here.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="36.55%" height="100%" rx="4"/></svg> <span class="bar-value">262.2 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">717.4 ms</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="reading reading-wide" aria-labelledby="r-saved-records">
+          <div class="reading-copy">
+            <h4 id="r-saved-records">Saved-tab records: restoring 1,000 took 2.90 ms instead of 189.96 ms</h4>
+            <p>A separate synthetic test of the sidebar’s workspace code, comparing the previous Breezer code with the 1.2.0 candidate code. Building the sidebar model for the same records took 0.187 ms instead of 3.299 ms. It times this code alone, not 1,000 open tabs or overall browser speed.</p>
+          </div>
+          <div class="reading-chart">
+            <p class="bars-caption">Restore 1,000 records</p>
+            <ul class="bars" aria-label="Restore 1,000 records">
+              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="1.53%" height="100%" rx="4"/></svg> <span class="bar-value">2.90 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">189.96 ms</span></li>
+            </ul>
+            <p class="bars-caption">Build the sidebar model</p>
+            <ul class="bars" aria-label="Build the sidebar model">
+              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="5.66%" height="100%" rx="4"/></svg> <span class="bar-value">0.187 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">3.299 ms</span></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <details class="results-more">
+        <summary>More browser measurements</summary>
+      <h3 class="results-group">Still ahead of Chrome, as before</h3>
+      <div class="readings">
+        <article class="reading" aria-labelledby="r-new-tab">
+          <div class="reading-copy">
+            <h4 id="r-new-tab">New tab: 50.3% less time than Chrome</h4>
+            <p>Breezer’s own new-tab page was ready in 98.8 ms, against 198.7 ms for Chrome’s (medians of 18 tabs). The previous Breezer measured 99.2 ms, so this lead isn’t new in 1.2.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.73%" height="100%" rx="4"/></svg> <span class="bar-value">98.8 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.90%" height="100%" rx="4"/></svg> <span class="bar-value">99.2 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">198.7 ms</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="reading" aria-labelledby="r-relaunch">
+          <div class="reading-copy">
+            <h4 id="r-relaunch">Relaunch: 19.5% less time than Chrome</h4>
+            <p>Quitting and reopening a set-up test profile until the page was usable took 861.3 ms, against 1,070.2 ms for Chrome (medians of 6 launches). The previous Breezer measured 846.6 ms, so this lead isn’t new either.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="80.48%" height="100%" rx="4"/></svg> <span class="bar-value">861.3 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="79.10%" height="100%" rx="4"/></svg> <span class="bar-value">846.6 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">1,070.2 ms</span></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+      </details>
+      <p class="results-method">Measured on one Apple M1 Mac with 8 GB of memory, 6 rounds per browser. Bars show medians, start at zero and use a separate scale in each comparison. These are selected results for specific workloads, not overall browser speed.</p>
+      <p class="results-article"><a class="button secondary" href="efficiency.html">Read about the efficiency work in 1.2</a></p>
+
+      <details class="full-results">
+        <summary>Full results: all 11 measurements, including slower and unavailable ones</summary>
+        <p>Some results are slower or use more memory than Chrome or the previous Breezer, and two Chrome values couldn’t be measured. Every result is listed here.</p>
+        <div class="table-scroll" role="region" aria-labelledby="results-table" tabindex="0">
+          <table class="results-table">
+            <caption id="results-table">All 11 measurements: medians, with the lowest and highest observation beneath. Lower is better in every row.</caption>
+            <thead><tr><th scope="col">Measurement</th><th scope="col">Breezer 1.2.0 candidate</th><th scope="col">Previous Breezer</th><th scope="col">Chrome 156</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr class="table-group"><th scope="colgroup" colspan="5">Speed, in milliseconds</th></tr>
+              <tr><th scope="row">Initialized-profile usable startup<span class="measure-note">Launch with a set-up test profile until the page is usable. 6 launches.</span></th><td data-label="Candidate">742.1 ms<span class="range"><span class="visually-hidden">range </span>712.8–851.2</span></td><td data-label="Previous Breezer">730.4 ms<span class="range"><span class="visually-hidden">range </span>720.8–762.6</span></td><td data-label="Chrome 156">734.9 ms<span class="range"><span class="visually-hidden">range </span>671.0–877.7</span></td><td data-label="Result" class="verdict">Within 2% of both</td></tr>
+              <tr><th scope="row">Reused-profile usable startup<span class="measure-note">Quit, then relaunch the same profile until the page is usable. 6 launches.</span></th><td data-label="Candidate">861.3 ms<span class="range"><span class="visually-hidden">range </span>784.9–990.3</span></td><td data-label="Previous Breezer">846.6 ms<span class="range"><span class="visually-hidden">range </span>764.0–1,026.2</span></td><td data-label="Chrome 156">1,070.2 ms<span class="range"><span class="visually-hidden">range </span>1,010.3–1,754.7</span></td><td data-label="Result" class="verdict">19.5% lower than Chrome; similar to previous Breezer</td></tr>
+              <tr><th scope="row">Blank-tab readiness<span class="measure-note">Open an empty tab until it is ready. 18 tabs, 3 per launch.</span></th><td data-label="Candidate">68.8 ms<span class="range"><span class="visually-hidden">range </span>50.0–228.3</span></td><td data-label="Previous Breezer">65.0 ms<span class="range"><span class="visually-hidden">range </span>49.4–84.3</span></td><td data-label="Chrome 156">66.2 ms<span class="range"><span class="visually-hidden">range </span>41.5–82.8</span></td><td data-label="Result" class="verdict">4–6% higher than both</td></tr>
+              <tr><th scope="row">Product new-tab readiness<span class="measure-note">Open the browser’s own new-tab page until it is ready. 18 tabs.</span></th><td data-label="Candidate">98.8 ms<span class="range"><span class="visually-hidden">range </span>78.1–216.5</span></td><td data-label="Previous Breezer">99.2 ms<span class="range"><span class="visually-hidden">range </span>81.1–148.9</span></td><td data-label="Chrome 156">198.7 ms<span class="range"><span class="visually-hidden">range </span>149.5–249.2</span></td><td data-label="Result" class="verdict">50.3% lower than Chrome; same as previous Breezer</td></tr>
+              <tr><th scope="row">Local-page navigation readiness<span class="measure-note">Load the same local test page until it is usable. 18 loads.</span></th><td data-label="Candidate">48.9 ms<span class="range"><span class="visually-hidden">range </span>31.9–453.0</span></td><td data-label="Previous Breezer">33.9 ms<span class="range"><span class="visually-hidden">range </span>31.3–792.8</span></td><td data-label="Chrome 156">33.1 ms<span class="range"><span class="visually-hidden">range </span>31.1–71.7</span></td><td data-label="Result" class="verdict">47.8% higher than Chrome; 44.3% higher than previous Breezer</td></tr>
+              <tr><th scope="row">Local-page loadEventEnd<span class="measure-note">The page’s own load-finished time for those loads. 18 loads.</span></th><td data-label="Candidate">11.2 ms<span class="range"><span class="visually-hidden">range </span>9.1–416.7</span></td><td data-label="Previous Breezer">11.5 ms<span class="range"><span class="visually-hidden">range </span>10.4–754.1</span></td><td data-label="Chrome 156">6.6 ms<span class="range"><span class="visually-hidden">range </span>5.3–9.8</span></td><td data-label="Result" class="verdict">69.7% higher than Chrome; similar to previous Breezer</td></tr>
+              <tr><th scope="row">First local navigation after tab exercises<span class="measure-note">The first of those three loads after each launch’s tab exercises. 6 loads.</span></th><td data-label="Candidate">262.2 ms<span class="range"><span class="visually-hidden">range </span>154.9–453.0</span></td><td data-label="Previous Breezer">717.4 ms<span class="range"><span class="visually-hidden">range </span>703.8–792.8</span></td><td data-label="Chrome 156">52.4 ms<span class="range"><span class="visually-hidden">range </span>35.5–71.7</span></td><td data-label="Result" class="verdict">63.5% lower than previous Breezer; still about 5 times Chrome’s</td></tr>
+            </tbody>
+            <tbody>
+              <tr class="table-group"><th scope="colgroup" colspan="5">Memory, in MiB</th></tr>
+              <tr><th scope="row">One-tab process-tree RSS<span class="measure-note">Resident memory of all browser processes with one tab. 6 launches, 5 samples each.</span></th><td data-label="Candidate">1,417.6 MiB<span class="range"><span class="visually-hidden">range </span>1,250.9–1,439.4</span></td><td data-label="Previous Breezer">1,245.5 MiB<span class="range"><span class="visually-hidden">range </span>1,204.0–1,349.8</span></td><td data-label="Chrome 156">1,418.3 MiB<span class="range"><span class="visually-hidden">range </span>1,349.5–1,518.0</span></td><td data-label="Result" class="verdict">Same as Chrome; 13.8% higher than previous Breezer</td></tr>
+              <tr><th scope="row">Ten-tab process-tree RSS<span class="measure-note">The same with ten tabs open. 6 launches, 5 samples each.</span></th><td data-label="Candidate">2,756.1 MiB<span class="range"><span class="visually-hidden">range </span>2,658.9–2,837.4</span></td><td data-label="Previous Breezer">2,560.8 MiB<span class="range"><span class="visually-hidden">range </span>2,524.8–2,652.1</span></td><td data-label="Chrome 156">2,515.1 MiB<span class="range"><span class="visually-hidden">range </span>2,426.3–2,568.1</span></td><td data-label="Result" class="verdict">9.6% higher than Chrome; 7.6% higher than previous Breezer</td></tr>
+              <tr><th scope="row">One-tab macOS physical footprint<span class="measure-note">Memory macOS charges to the browser’s processes, one tab. 6 launches.</span></th><td data-label="Candidate">454.8 MiB<span class="range"><span class="visually-hidden">range </span>446.6–484.7</span></td><td data-label="Previous Breezer">461.3 MiB<span class="range"><span class="visually-hidden">range </span>450.9–472.7</span></td><td data-label="Chrome 156" class="unavailable">Unavailable</td><td data-label="Result" class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
+              <tr><th scope="row">Ten-tab macOS physical footprint<span class="measure-note">The same with ten tabs open. 6 launches.</span></th><td data-label="Candidate">959.5 MiB<span class="range"><span class="visually-hidden">range </span>946.9–966.1</span></td><td data-label="Previous Breezer">956.2 MiB<span class="range"><span class="visually-hidden">range </span>952.8–976.4</span></td><td data-label="Chrome 156" class="unavailable">Unavailable</td><td data-label="Result" class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Saved-tab records code test</h3>
+        <p>This synthetic test runs the sidebar’s workspace code on its own in Node, comparing the previous Breezer code with the 1.2.0 candidate code. It isn’t a measurement of open tabs or the browser.</p>
+        <table class="results-table component-table">
+          <caption>Milliseconds; medians of 6 alternating rounds, 11 repetitions each.</caption>
+          <thead>
+            <tr><td></td><th scope="colgroup" colspan="2">Restore</th><th scope="colgroup" colspan="2">Sidebar model</th></tr>
+            <tr><th scope="col">Records</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">10</th><td data-label="Restore · Previous">0.15</td><td data-label="Restore · 1.2.0">0.08</td><td data-label="Sidebar model · Previous">0.007</td><td data-label="Sidebar model · 1.2.0">0.005</td></tr>
+            <tr><th scope="row">100</th><td data-label="Restore · Previous">2.53</td><td data-label="Restore · 1.2.0">0.59</td><td data-label="Sidebar model · Previous">0.049</td><td data-label="Sidebar model · 1.2.0">0.028</td></tr>
+            <tr><th scope="row">500</th><td data-label="Restore · Previous">48.07</td><td data-label="Restore · 1.2.0">1.72</td><td data-label="Sidebar model · Previous">0.809</td><td data-label="Sidebar model · 1.2.0">0.092</td></tr>
+            <tr><th scope="row">1,000</th><td data-label="Restore · Previous">189.96</td><td data-label="Restore · 1.2.0">2.90</td><td data-label="Sidebar model · Previous">3.299</td><td data-label="Sidebar model · 1.2.0">0.187</td></tr>
+          </tbody>
+        </table>
+        <h3>How this was measured, and what it doesn’t show</h3>
+        <ul class="results-limits">
+          <li>One Apple M1 Mac with 8 GB of memory, macOS 26.7, on AC power with no thermal warning. 6 rounds rotated the launch order: 36 timed launches after 18 untimed setup launches, and all 36 timed launches passed their foreground check.</li>
+          <li>Startups use test profiles that were already set up, then reused. They aren’t cold starts after a reboot, and no caches were flushed.</li>
+          <li>Page loads use the same small local test page in every browser, not real websites over the internet.</li>
+          <li>Process-tree RSS adds up the resident memory of every browser process and can count shared memory more than once. It isn’t the memory Activity Monitor shows. Physical footprint is the memory macOS charges to those processes, including compressed memory.</li>
+          <li>Chrome’s physical footprint is unavailable: 11 of its 60 samples failed process-identity or process-tree checks, and the remaining samples aren’t summarized on their own.</li>
+          <li>CPU use couldn’t be measured: in all 36 sampling windows the CPU time stayed within the counters’ uncertainty. These results make no CPU, energy or battery-life claims.</li>
+          <li>Six rounds give medians and ranges, not statistically significant differences.</li>
+          <li>The candidate is a private ad hoc signed build of the combined 1.2.0 source (snapshot fa19c37); its internal version still reads 0.20.1.1. Its release identity and full feature checks are still pending, so the published release may measure differently.</li>
+        </ul>
+      </details>
+      </details>
+    </section>
+
     <section class="patch-notes" aria-labelledby="patch-121-title">
       <p class="release">Update 1.2.1</p>
       <h2 id="patch-121-title">Less repeated work</h2>
@@ -642,23 +643,31 @@
           </svg>
         </figure>
         <div class="patch-copy">
-          <h3>Keep useful work, skip unchanged work</h3>
+          <h3>Tabs, translation and replies</h3>
+          <p>Tabs, translation and AI replies skip work that has already been done.</p>
+          <p class="patch-limit">These changes reduce repeated work in the checked components. Whole-browser RAM and CPU savings have not yet been measured. Existing translation sharing, browser permissions and update verification remain in place.</p>
+        </div>
+      </div>
+      <details class="feature-details patch-details">
+        <summary>Engineering details</summary>
           <ul class="notes">
             <li>Sidebar membership updates avoid reading and serializing saved tabs. Nonvisual tab changes avoid an unnecessary sidebar redraw.</li>
             <li>Unchanged sync recovery data is no longer written repeatedly. Disposed sync clients cannot recreate their repeating alarm.</li>
             <li>Translation rescans skip repeated visibility measurements for unchanged translated text.</li>
             <li>Streamed replies keep completed content in place. Native helper messages avoid redundant copying and repeated parsing, and cancelled requests release setup work sooner.</li>
           </ul>
-          <p class="patch-limit">These changes reduce repeated work in the checked components. Whole-browser RAM and CPU savings have not yet been measured. Existing translation sharing, browser permissions and update verification remain in place.</p>
-        </div>
-      </div>
+      </details>
     </section>
 
     <aside class="pending" aria-labelledby="pending-sync-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h12l-3-3M19 16H7l3 3M5 8v5M19 16v-5"/></svg>
       <div>
         <h2 id="pending-sync-title">Still to verify: encrypted sync</h2>
-        <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+        <p class="pending-summary">Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+        <details class="feature-details">
+          <summary>Verification details</summary>
+          <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+        </details>
       </div>
     </aside>
 
@@ -666,7 +675,11 @@
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
       <div>
         <h2 id="pending-docs-title">Still to verify: Google Docs editing</h2>
-        <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
+        <p class="pending-summary">Typing, editing and saved changes still need real-document checks with both AI providers.</p>
+        <details class="feature-details">
+          <summary>Verification details</summary>
+          <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
+        </details>
       </div>
     </aside>
 
@@ -674,8 +687,12 @@
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg>
       <div>
         <h2 id="pending-passwords-title">Still to confirm: Enter on Microsoft sign-in</h2>
-        <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
+        <p class="pending-summary">Enter on Microsoft's password step remains unconfirmed.</p>
+        <details class="feature-details">
+          <summary>Verification details</summary>
+          <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
         <p>A narrow Enter fallback is included for explicit username/current-password forms. Native password-picker, IME, validation and site checks remain pending.</p>
+        </details>
       </div>
     </aside>
 
@@ -683,7 +700,11 @@
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
       <div>
         <h2 id="pending-title">Not yet: Touch ID passkeys</h2>
-        <p>Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements that Breezer does not have yet. This is separate from saving and filling passwords.</p>
+        <p class="pending-summary">Touch ID needs Apple-approved signing entitlements. Saving and filling passwords are separate.</p>
+        <details class="feature-details">
+          <summary>Verification details</summary>
+          <p>Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements that Breezer does not have yet. This is separate from saving and filling passwords.</p>
+        </details>
       </div>
     </aside>
 

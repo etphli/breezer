@@ -276,11 +276,47 @@
     },
     {
       "name": "mint-light",
+      "id": "newtab-narrow",
+      "file": "mint-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-light",
       "id": "assistant",
       "file": "mint-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "assistant-narrow",
+      "file": "mint-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "onboarding",
+      "file": "mint-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-light",
+      "id": "onboarding-narrow",
+      "file": "mint-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -537,11 +573,47 @@
     },
     {
       "name": "tide-light",
+      "id": "newtab-narrow",
+      "file": "tide-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-light",
       "id": "assistant",
       "file": "tide-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "assistant-narrow",
+      "file": "tide-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "onboarding",
+      "file": "tide-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-light",
+      "id": "onboarding-narrow",
+      "file": "tide-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -798,11 +870,47 @@
     },
     {
       "name": "dusk-light",
+      "id": "newtab-narrow",
+      "file": "dusk-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-light",
       "id": "assistant",
       "file": "dusk-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "assistant-narrow",
+      "file": "dusk-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "onboarding",
+      "file": "dusk-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-light",
+      "id": "onboarding-narrow",
+      "file": "dusk-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -1059,11 +1167,47 @@
     },
     {
       "name": "rose-light",
+      "id": "newtab-narrow",
+      "file": "rose-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-light",
       "id": "assistant",
       "file": "rose-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "assistant-narrow",
+      "file": "rose-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "onboarding",
+      "file": "rose-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-light",
+      "id": "onboarding-narrow",
+      "file": "rose-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -1320,11 +1464,47 @@
     },
     {
       "name": "pollen-light",
+      "id": "newtab-narrow",
+      "file": "pollen-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-light",
       "id": "assistant",
       "file": "pollen-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "assistant-narrow",
+      "file": "pollen-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "onboarding",
+      "file": "pollen-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-light",
+      "id": "onboarding-narrow",
+      "file": "pollen-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -1581,11 +1761,47 @@
     },
     {
       "name": "graphite-light",
+      "id": "newtab-narrow",
+      "file": "graphite-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-light",
       "id": "assistant",
       "file": "graphite-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "assistant-narrow",
+      "file": "graphite-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "onboarding",
+      "file": "graphite-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-light",
+      "id": "onboarding-narrow",
+      "file": "graphite-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -1842,11 +2058,47 @@
     },
     {
       "name": "custom-light",
+      "id": "newtab-narrow",
+      "file": "custom-light-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-light",
       "id": "assistant",
       "file": "custom-light-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "assistant-narrow",
+      "file": "custom-light-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "onboarding",
+      "file": "custom-light-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-light",
+      "id": "onboarding-narrow",
+      "file": "custom-light-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -2103,11 +2355,47 @@
     },
     {
       "name": "mint-dark",
+      "id": "newtab-narrow",
+      "file": "mint-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "mint-dark",
       "id": "assistant",
       "file": "mint-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "assistant-narrow",
+      "file": "mint-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "onboarding",
+      "file": "mint-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "mint-dark",
+      "id": "onboarding-narrow",
+      "file": "mint-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -2364,11 +2652,47 @@
     },
     {
       "name": "tide-dark",
+      "id": "newtab-narrow",
+      "file": "tide-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "tide-dark",
       "id": "assistant",
       "file": "tide-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "assistant-narrow",
+      "file": "tide-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "onboarding",
+      "file": "tide-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "tide-dark",
+      "id": "onboarding-narrow",
+      "file": "tide-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -2625,11 +2949,47 @@
     },
     {
       "name": "dusk-dark",
+      "id": "newtab-narrow",
+      "file": "dusk-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "dusk-dark",
       "id": "assistant",
       "file": "dusk-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "assistant-narrow",
+      "file": "dusk-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "onboarding",
+      "file": "dusk-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "dusk-dark",
+      "id": "onboarding-narrow",
+      "file": "dusk-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -2886,11 +3246,47 @@
     },
     {
       "name": "rose-dark",
+      "id": "newtab-narrow",
+      "file": "rose-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "rose-dark",
       "id": "assistant",
       "file": "rose-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "assistant-narrow",
+      "file": "rose-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "onboarding",
+      "file": "rose-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "rose-dark",
+      "id": "onboarding-narrow",
+      "file": "rose-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -3147,11 +3543,47 @@
     },
     {
       "name": "pollen-dark",
+      "id": "newtab-narrow",
+      "file": "pollen-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "pollen-dark",
       "id": "assistant",
       "file": "pollen-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "assistant-narrow",
+      "file": "pollen-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "onboarding",
+      "file": "pollen-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "pollen-dark",
+      "id": "onboarding-narrow",
+      "file": "pollen-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -3408,11 +3840,47 @@
     },
     {
       "name": "graphite-dark",
+      "id": "newtab-narrow",
+      "file": "graphite-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "graphite-dark",
       "id": "assistant",
       "file": "graphite-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "assistant-narrow",
+      "file": "graphite-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "onboarding",
+      "file": "graphite-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "graphite-dark",
+      "id": "onboarding-narrow",
+      "file": "graphite-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     },
     {
@@ -3669,11 +4137,47 @@
     },
     {
       "name": "custom-dark",
+      "id": "newtab-narrow",
+      "file": "custom-dark-newtab-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "custom-dark",
       "id": "assistant",
       "file": "custom-dark-assistant.png",
       "viewport": {
         "width": 400,
         "height": 850
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "assistant-narrow",
+      "file": "custom-dark-assistant-narrow.png",
+      "viewport": {
+        "width": 320,
+        "height": 640
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "onboarding",
+      "file": "custom-dark-onboarding.png",
+      "viewport": {
+        "width": 1200,
+        "height": 900
+      }
+    },
+    {
+      "name": "custom-dark",
+      "id": "onboarding-narrow",
+      "file": "custom-dark-onboarding-narrow.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
       }
     }
   ],
@@ -3681,7 +4185,7 @@
     "Shipped UI with deterministic extension APIs. No installed app or personal data.",
     "Desktop settings use a tall enough real viewport to show every row. Narrow captures use fullPage.",
     "Compact sidebar uses a 72px viewport. Auto-hide captures its expanded document, not native reveal behavior.",
-    "Other is a native Settings destination, not a Breezer category document.",
+    "All settings is a native Settings destination, not a Breezer category document.",
     "Native top tabs, toolbar, menus and physical auto-hide integration are not captured by this script."
   ],
   "sourceHashes": {
@@ -3697,13 +4201,13 @@
     "newtab.css": "4862a91ea630e8318170f0607adbe1eb08dca6d69b257b1a9cdfc1aaa0746f59",
     "newtab.html": "aed2884f8d34a6f3a0378ce7f84719dbd3b7acaf16b88dc296c3d96d661cfe91",
     "newtab.js": "ea7c2f6779273dff7e39f5828aa3b59fdd56ebf4be64e5a478aa847f0c45cb36",
-    "onboarding.css": "1e98a2829e9cf3a9c26b77cb98a38bda7bea012f0a2c5de11c83febe630dc6a6",
+    "onboarding.css": "f1e519650e2c65411f8a0f490df510504c48710ddd49aca5fb586d6919797236",
     "onboarding.js": "aaebca22b121d5563112c7c781e794e4b12b4c9e9de1123a62b114e8d0299b89",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "3432fe76730e8a3b6224d1e9ce3476b2ee8edc3583c603c657eb2842c54b0e95",
-    "panel.html": "e8ae1362d05296bb1fe82e4eaa3355e49ace144f6f9a8e3f97c58f4f0c281b95",
-    "panel.js": "7159727e72dc2cfb72cd12beabfd9f9986c2d92cf2b7e22cc98de1ca0c8e4eda",
+    "panel.css": "26bb66e4d3a24e7486e6c9fad862f28cd8cdd60bb75bbe5b7ee3b69b1df1d212",
+    "panel.html": "da0a8215079896aec606cc68e7fcd4d4bd7a5939a7207fd4f478a024d1637c60",
+    "panel.js": "6f8561aa94ed7d5308071cddcb7baef67dc67cfbba2acdca59cf79a026af1ab6",
     "passwords.js": "b9dfe28fcae1ae167eda0135c560f7d2bfc0086e6a82af9dd12b672c063a30d2",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -3711,7 +4215,7 @@
     "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
     "research-sources.js": "a9c65544f953cb35b8a678d76dfe113abe3efe137e1920ae5b57397eae2c092b",
     "settings-nav.js": "e7c3c04ee4153901bc04fa81be21939efb954a4acdfafa4deb866efa0f813374",
-    "settings-onboarding.js": "e79b3d4969729058a5847d51c8062ba7f80ed96a5f26cac222b03d1ddbc824ae",
+    "settings-onboarding.js": "7e5dc0aa8258662cb1105a922dd766a87e6145c304ce861d054a2137751381d0",
     "settings.js": "c24c315e1670b67411b976d1ad5a2e5b8c0059cddf23fdb3cac45bf05f343fdb",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
@@ -3726,14 +4230,14 @@
     "translation.js": "d821172c990fa86258eef1beabcccd458c19eff79b442a03a7fb78d12590cb4a",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "78bf8afca888e4930abc7fc98f8f3bb64e248f65b0d29370c62af87eac932001",
-    "whats-new.html": "4922186384e844daabf11a6c6194e630add6fb65f8298e82610937ddb3439521",
+    "whats-new.css": "a119c752bc13bbad8d169d2249291e90640cd8e6e29016df2013cff5711cc258",
+    "whats-new.html": "70b8b752bd53479b3e26bf4d17f49a565f98540ec62e6cb9e97ebe8ee3f4701a",
     "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
     "workspace.css": "340d32aa24345d20f20db668fd0f4e3fabe533390f538b03133c3de0c8e80c74",
-    "workspace.html": "837ff892927cf44c2e851f9bb1b9a05c84fa8f92c78af5e91ab11a3d2d6dabf3",
+    "workspace.html": "1f120625c61cd9ba0df3611ca4318a4626f59208f7c62edcd5414b716ea5541e",
     "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
   }
 }
