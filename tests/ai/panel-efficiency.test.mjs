@@ -5,9 +5,9 @@ import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
-const baselineSHA = 'ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb';
+const baselineSHA = '88d126dbf5287ee25cc4a55db761670ac738bad4b6fc22340c20c0d59d1f8a61';
 const hash = text => createHash('sha256').update(text).digest('hex');
-// Inline inverse patch keeps the entire original controller pinned without a build fixture.
+// Pin the attachment-capable controller with only the transcript memory optimization reversed.
 function originalSource(current) {
   if (hash(current) === baselineSHA) return current;
   return current
