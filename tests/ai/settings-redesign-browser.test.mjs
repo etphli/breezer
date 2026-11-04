@@ -43,7 +43,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(`${message.text()} ${message.location().url}`); });
     await page.goto(`${base}${hash}`);
-    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('#settings-title').waitFor();
     await page.locator('#theme-swatches [role="radio"]').first().waitFor({ state: 'attached' });
     return page;
   };
@@ -69,6 +69,23 @@ test('settings categories, search, Other and narrow layout work in a real browse
     // Feature modules from FEATURE_MOUNTS add their category once rendered.
     await page.locator('.nav-item[data-category="languages"]').waitFor();
     assert.equal(await page.locator('.nav-item[data-category="assistant"]').isVisible(), true, 'context settings mounted');
+    await page.getByRole('link', { name: 'Assistant', exact: true }).click();
+    await page.getByText('Local context is off. No browsing activity is being remembered.', { exact: true }).waitFor({ state: 'attached' });
+    const contextError = page.locator('#context-settings [role="alert"]');
+    assert.equal(await contextError.isHidden(), true, await contextError.textContent());
+    for (const toggle of await page.locator('#context-settings .toggle:visible').all()) {
+      const box = await toggle.boundingBox();
+      assert.ok(box.width >= 32 && box.height >= 20, 'activity toggles retain the shared switch geometry');
+    }
+    await page.locator('[data-context-control="enabled"]').check();
+    await page.getByRole('button', { name: 'Save choices', exact: true }).click();
+    await page.getByRole('heading', { name: 'Activity summary', exact: true }).waitFor();
+    const consent = page.locator('[data-context-control="consent"]');
+    assert.equal(await consent.isChecked(), false, 'local memory never enables provider consent');
+    assert.equal(await page.getByRole('button', { name: 'Summarize with GPT-6 Luna', exact: true }).isDisabled(), true);
+    await page.getByRole('button', { name: 'Disable and erase', exact: true }).click();
+    await page.getByRole('heading', { name: 'Activity summary', exact: true }).waitFor({ state: 'hidden' });
+    await page.getByRole('link', { name: 'General', exact: true }).click();
 
     await page.getByRole('link', { name: 'Appearance' }).click();
     assert.equal(await current(page), 'Appearance');
@@ -99,7 +116,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
 
     // Deep links and reloads keep the category; persisted values render.
     await page.reload();
-    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('#settings-title').waitFor();
     await page.waitForFunction(() => document.getElementById('frameless').getAttribute('aria-checked') === 'false');
     assert.equal(await current(page), 'Layout');
     await page.locator('#frameless').click();
@@ -129,7 +146,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.ok(passkeys.includes('Passwords'), `passkeys finds Passwords: ${passkeys}`);
     await page.locator('#settings-search').fill('translate');
     await page.locator('#settings-results [aria-selected="true"]').click();
-    assert.equal(await current(page), 'Languages');
+    assert.equal(await current(page), 'Translation');
     assert.equal(await page.evaluate(() => document.activeElement.closest('#translation-settings') !== null), true);
     await page.locator('#settings-search').fill('organato key');
     await page.locator('#settings-results [role="option"]', { hasText: 'Organato API key' }).click();
@@ -155,7 +172,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await page.locator('.settings-page:not([hidden])').count(), 1);
 
     // ---------------------------------------------------------- Other
-    await page.getByRole('button', { name: 'Other' }).click();
+    await page.getByRole('button', { name: 'All settings' }).click();
     await page.waitForFunction(() => window.fx.calls.some(([name, id, props]) => name === 'tabs.update' && id === 42 && props.url === 'chrome://settings/'));
     assert.equal(await page.locator('#native-settings-error').isHidden(), true);
 
@@ -165,7 +182,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await dark.screenshot({ path: join(evidence, 'settings-redesign-general-dark.png') });
     await dark.getByRole('link', { name: 'Layout' }).click();
     await dark.screenshot({ path: join(evidence, 'settings-redesign-layout-dark.png') });
-    for (const [name, file] of [['Passwords', 'passwords'], ['Languages', 'languages'], ['Browser settings', 'browser'], ['Spaces', 'spaces'], ['Assistant', 'assistant'], ['Layout', 'layout']]) {
+    for (const [name, file] of [['Passwords', 'passwords'], ['Translation', 'languages'], ['Browser settings', 'browser'], ['Spaces', 'spaces'], ['Assistant', 'assistant'], ['Layout', 'layout']]) {
       await dark.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
       await dark.screenshot({ path: join(evidence, `settings-redesign-${file}-dark.png`) });
     }
@@ -185,7 +202,10 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await current(narrow), 'Layout');
     const overflow = await narrow.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert.equal(overflow, 0, 'no horizontal page scroll at 390 px');
-    assert.equal(await narrow.locator('.nav-item[aria-current="page"]').evaluate((node) => { const box = node.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth; }), true, 'selected category is in view');
+    assert.equal(await narrow.getByRole('combobox', { name: 'Settings category' }).inputValue(), 'layout');
+    await narrow.getByRole('combobox', { name: 'Settings category' }).selectOption('privacy');
+    assert.equal(await current(narrow), 'Privacy');
+    await narrow.getByRole('combobox', { name: 'Settings category' }).selectOption('layout');
     assert.equal(await narrow.locator('#settings-search').evaluate((node) => node.getBoundingClientRect().top >= 0), true);
     await narrow.screenshot({ path: join(evidence, 'settings-redesign-layout-narrow.png') });
     await narrow.locator('#settings-search').fill('font');

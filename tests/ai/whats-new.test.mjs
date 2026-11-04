@@ -151,8 +151,9 @@ test('leads with selected measured wins, each naming its comparator and workload
   // The section sits after the masthead and before the feature rows.
   assert.ok(html.indexOf('</header>') < html.indexOf('<section class="results"'));
   assert.ok(html.indexOf('<section class="results"') < html.indexOf('<section class="features"'));
-  const hero = toText(resultsHtml.slice(0, resultsHtml.indexOf('<details')));
-  const headings = [...resultsHtml.slice(0, resultsHtml.indexOf('<details')).matchAll(/<h[34][^>]*>([^<]+)<\/h[34]>/g)].map((m) => m[1].replace(/ /g, ' '));
+  const highlights = resultsHtml.slice(0, resultsHtml.indexOf('<details class="full-results">'));
+  const hero = toText(highlights);
+  const headings = [...highlights.matchAll(/<h[34][^>]*>([^<]+)<\/h[34]>/g)].map((m) => m[1].replace(/ /g, ' '));
   assert.deepEqual(headings, [
     'New in this build',
     'First local page after opening tabs: 63.5% less time than the previous Breezer',
@@ -161,6 +162,11 @@ test('leads with selected measured wins, each naming its comparator and workload
     'New tab: 50.3% less time than Chrome',
     'Relaunch: 19.5% less time than Chrome',
   ]);
+  const more = highlights.slice(highlights.indexOf('<details class="results-more">'));
+  assert.match(more, /^<details class="results-more">\s*<summary>More browser measurements<\/summary>/);
+  assert.doesNotMatch(more, /<details[^>]*\sopen/);
+  assert.ok(highlights.indexOf('Saved-tab records:') < highlights.indexOf('<details class="results-more">'));
+  assert.ok(more.includes('Still ahead of Chrome, as before'));
   // Leads over Chrome are attributed to the earlier Breezer, not to 1.2.
   assert.match(hero, /previous Breezer measured 99\.2\s?ms, so this lead isn’t new in 1\.2/);
   assert.match(hero, /previous Breezer measured 846\.6\s?ms, so this lead isn’t new either/);
@@ -182,7 +188,7 @@ test('leads with selected measured wins, each naming its comparator and workload
 });
 
 test('keeps every measurement, range and limit in the full results', () => {
-  const full = resultsHtml.slice(resultsHtml.indexOf('<details'));
+  const full = resultsHtml.slice(resultsHtml.indexOf('<details class="full-results">'));
   assert.match(full, /^<details class="full-results">\s*<summary>Full results: all 11 measurements, including slower and unavailable ones<\/summary>/);
   assert.doesNotMatch(full, /<details[^>]*\sopen/);
   assert.match(full, /<div class="table-scroll" role="region" aria-labelledby="results-table" tabindex="0">/);
@@ -205,7 +211,7 @@ test('keeps every measurement, range and limit in the full results', () => {
   assert.equal([...table.matchAll(/class="unavailable">Unavailable</g)].length, 2);
   // Separate component table, then limits.
   assert.match(fullText, /Saved-tab records code test/);
-  assert.match(full, /<tr><th scope="row">1,000<\/th><td>189\.96<\/td><td>2\.90<\/td><td>3\.299<\/td><td>0\.187<\/td><\/tr>/);
+  assert.match(full, /<tr><th scope="row">1,000<\/th><td[^>]*>189\.96<\/td><td[^>]*>2\.90<\/td><td[^>]*>3\.299<\/td><td[^>]*>0\.187<\/td><\/tr>/);
   for (const limit of [/One Apple M1 Mac with 8 GB of memory, macOS 26\.7, on AC power/, /36 timed launches after 18 untimed setup launches/,
     /aren’t cold starts after a reboot/, /not real websites over the internet/, /can count shared memory more than once/,
     /Chrome’s physical footprint is unavailable: 11 of its 60 samples failed/, /in all 36 sampling windows/, /no CPU, energy or battery-life claims/,

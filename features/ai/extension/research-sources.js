@@ -36,6 +36,7 @@ export class ResearchSources {
     }
   }
   render() {
+    this.root.querySelector('#research-limit').textContent = `${this.size} of ${MAX_RESEARCH_SOURCES} selected`;
     this.root.querySelector('#research-open').disabled = this.busy;
     this.root.querySelector('#research-clear').hidden = !this.size;
     for (const input of this.root.querySelectorAll('#research-options input[data-tab-id]')) input.checked = this.selected.has(Number(input.dataset.tabId));
@@ -67,7 +68,7 @@ export class ResearchSources {
         const url = document.createElement('small'); url.textContent = `${sourceURL(tab.url)}${tab.loading ? ' · Loading, try again when ready' : ''}`;
         text.append(title, url); label.append(input, text); list.append(label);
         input.addEventListener('change', () => {
-          if (input.checked && this.size >= MAX_RESEARCH_SOURCES) { input.checked = false; this.root.querySelector('#research-limit').textContent = 'Choose up to six tabs.'; return; }
+          if (input.checked && this.size >= MAX_RESEARCH_SOURCES) { input.checked = false; this.root.querySelector('#research-limit').textContent = `Choose up to six tabs. ${this.size} selected.`; return; }
           if (input.checked) this.selected.set(tab.tabId, { ...tab }); else this.selected.delete(tab.tabId);
           this.revision++; this.render(); this.onChange();
         });

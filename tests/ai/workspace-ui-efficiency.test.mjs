@@ -46,12 +46,13 @@ globalThis.run=()=>startNewTab({api,root});`;
   return { context, callbacks, counters, nodes, storageListeners, async resize(width) { context.innerWidth = width; callbacks.get('resize')?.(); await settle(); } };
 }
 
-test('same-bucket new-tab resizes skip shortcut storage, filtering and painting', async () => {
+test('new-tab resizes keep every shortcut without storage, filtering or painting', async () => {
   const h = await newtab();
   for (let i = 0; i < 20; i++) await h.resize(1000 + i);
   assert.deepEqual([h.counters.loads, h.counters.filters, h.counters.sites, h.counters.organato], [0, 0, 0, 0]);
   for (const width of [900, 850, 700, 400, 401]) await h.resize(width);
-  assert.deepEqual(h.counters.limits, [5, 3, 2, 3]);
+  assert.deepEqual(h.counters.limits, []);
+  assert.deepEqual([h.counters.loads, h.counters.filters, h.counters.sites, h.counters.organato], [0, 0, 0, 0]);
 });
 
 test('shortcut changes and explicit Reset still refresh at the same width', async () => {
@@ -63,25 +64,27 @@ test('shortcut changes and explicit Reset still refresh at the same width', asyn
   assert.equal(h.counters.loads, 2);
 });
 
-test('resize during initial shortcut filtering cannot leave the wrong number of sites', async () => {
+test('resize during initial shortcut filtering preserves all eight shortcuts', async () => {
   const h = await newtab({ duringInitialFilter: async (context, callbacks) => {
     context.innerWidth = 900;
-    callbacks.get('resize')();
+    callbacks.get('resize')?.();
     await settle();
   } });
-  assert.equal(h.counters.shown, 5);
+  assert.equal(h.counters.shown, 8);
   await h.resize(900);
-  assert.equal(h.counters.shown, 5);
+  assert.equal(h.counters.shown, 8);
 });
 
-test('failed resize refreshes can retry and pagehide releases the resize listener', async () => {
+test('failed shortcut refreshes can retry and pagehide releases storage listeners', async () => {
   const h = await newtab();
   h.counters.failLoad = true;
-  await h.resize(900);
+  h.storageListeners[0]({ hidden: { newValue: [] } }, 'local');
+  await settle();
   h.counters.failLoad = false;
-  await h.resize(900);
+  h.storageListeners[0]({ hidden: { newValue: [] } }, 'local');
+  await settle();
   assert.equal(h.counters.loads, 2);
-  assert.deepEqual(h.counters.limits, [5]);
+  assert.deepEqual(h.counters.limits, [8]);
   h.callbacks.get('pagehide')();
   assert.equal(h.callbacks.has('resize'), false);
   assert.equal(h.storageListeners.length, 0);

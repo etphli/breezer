@@ -78,6 +78,6 @@ node --test tests/ai/whats-new.test.mjs tests/ai/release-notes.test.mjs
 BREEZER_AI_EVIDENCE=/tmp/breezer-whats-new node --test tests/ai/whats-new-browser.test.mjs
 ```
 
-The browser fixture uses headless Chrome, synthetic release metadata and a stub for tab-closing APIs. It checks desktop and 390px layouts, contrast, keyboard focus, action fallbacks, reduced motion and malformed metadata. Inspect its full-page screenshots, including every new illustration. Report skips as missing coverage.
+The browser fixture uses headless Chrome, synthetic release metadata and a stub for tab-closing APIs. It checks desktop and 390px layouts, contrast, keyboard focus, action fallbacks, reduced motion and malformed metadata. Inspect its overlapping viewport screenshots and scroll-position indexes, including every new illustration and the expanded technical disclosures. A single very tall HiDPI capture can repeat compositor tiles. Report skips as missing coverage.
 
 These checks do not verify the compiled extension or updater. A release also needs the native build, actual-app checks and artifact verification in [RELEASE_POLICY.md](../RELEASE_POLICY.md). Native acceptance must respect the local-install hold.

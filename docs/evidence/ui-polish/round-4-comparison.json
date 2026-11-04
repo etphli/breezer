@@ -1,0 +1,58 @@
+[
+  {
+    "id": "motion",
+    "title": "Space switching",
+    "file": "spaces-no-preference-0.png",
+    "notes": [
+      [
+        86,
+        45,
+        45,
+        20,
+        "Incoming tabs stay visible during the short slide."
+      ]
+    ]
+  },
+  {
+    "id": "summary",
+    "title": "Summary control",
+    "file": "mint-light-settings-assistant-enabled.png",
+    "notes": [
+      [
+        85,
+        80,
+        43,
+        64,
+        "The action names GPT-6 Luna. Consent wording is shorter."
+      ]
+    ]
+  },
+  {
+    "id": "tour",
+    "title": "Assistant tour",
+    "file": "onboarding-7-tour-4.png",
+    "notes": [
+      [
+        18,
+        22,
+        32,
+        49,
+        "The tour teaches the Include control that appears in the assistant."
+      ]
+    ]
+  },
+  {
+    "id": "spacing",
+    "title": "New-tab spacing",
+    "file": "newtab-narrow.png",
+    "notes": [
+      [
+        87,
+        25,
+        50,
+        38,
+        "Less empty space brings deadlines closer to the shortcuts."
+      ]
+    ]
+  }
+]

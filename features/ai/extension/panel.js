@@ -26,6 +26,7 @@ const research = new ResearchSources({ api: chrome, root: document,
   onRevoke: reason => { if (state.running) stop(); notify(reason); },
 });
 const messageNodes = new Map();
+let lastContextTitle = null;
 let scheduledRender = false;
 
 function notify(text) {
@@ -101,6 +102,7 @@ function saveSettings() {
 
 function updateControls() {
   const running = Boolean(state.running);
+  document.querySelector('.panel').dataset.running = String(running);
   $('send').disabled = !running && (!selectedModel() || !$('prompt').value.trim());
   $('send').dataset.running = String(running);
   $('send').setAttribute('aria-label', running ? 'Stop response' : 'Send message');
@@ -123,11 +125,15 @@ function updateControls() {
     : 'Browser control works only on ordinary web pages';
   $('prompt').placeholder = research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
   const selected = selectedModel();
+  if (!selected && !state.discoveryPending) $('prompt').placeholder = 'Draft a message…';
   renderWelcomeStatus(selected);
+  document.querySelector('.panel').dataset.accountState = selected ? 'ready' : state.discoveryPending ? 'connecting' : 'signed-out';
   $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
   $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
   $('model-button').disabled = running;
+  $('inference-options-toggle').disabled = running || !selected;
+  if (running && $('inference-options').matches(':popover-open')) $('inference-options').hidePopover();
   const summarize = document.querySelector('[data-prompt^="Summarize"]');
   if (summarize) {
     summarize.dataset.prompt = research.size ? 'Summarize these selected pages and cite the sources.' : 'Summarize this page. What should I take away from it?';
@@ -148,9 +154,13 @@ function renderWelcomeStatus(selected) {
     text = 'Open a web page to summarize it or get help with it. You can still ask anything below.';
   }
   $('welcome-status').hidden = !text;
-  $('welcome-status-text').textContent = text;
+  $('welcome-status-text').replaceChildren(...text.split(/(codex login|claude auth login)/g).map(part => {
+    if (part !== 'codex login' && part !== 'claude auth login') return document.createTextNode(part);
+    const command = document.createElement('code'); command.textContent = part; return command;
+  }));
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
+  document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending;
   document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
 
@@ -281,6 +291,8 @@ function applyProfile() {
 }
 
 function appendMessage(message) {
+  const repeatedContext = message.role === 'user' && message.contextTitle === lastContextTitle && !Array.isArray(message.sourceMetadata);
+  if (message.role === 'user') lastContextTitle = message.contextTitle || '';
   const article = document.createElement('article');
   article.className = `message ${message.role}`;
   article.setAttribute('aria-label', message.role === 'user' ? 'You' : 'Breezer');
@@ -309,13 +321,41 @@ function appendMessage(message) {
   if (message.contextTitle) {
     const meta = document.createElement('div');
     meta.className = 'message-meta';
+    if (repeatedContext) { meta.classList.add('sr-only'); article.title = `Included context: ${message.contextTitle}`; }
     meta.textContent = message.contextTitle;
+    if (Array.isArray(message.sourceMetadata)) renderSourceMetadata(meta, message.sourceMetadata);
     article.append(meta);
   }
   $('messages').append(article);
   messageNodes.set(message.id, body);
   $('welcome').hidden = true;
   return body;
+}
+
+function renderSourceMetadata(meta, sources) {
+  meta.classList.remove('sr-only');
+  const unavailable = sources.filter(source => source.status !== 'available').length;
+  const details = document.createElement('details');
+  details.className = 'source-details';
+  details.open = unavailable > 0;
+  const summary = document.createElement('summary');
+  summary.textContent = `${sources.length} sources${unavailable ? ` · ${unavailable} unavailable` : ''}`;
+  details.append(summary);
+  const list = document.createElement('ul');
+  for (const source of sources) {
+    const row = document.createElement('li');
+    row.dataset.state = source.status;
+    const title = document.createElement('span');
+    title.className = 'source-title';
+    title.textContent = `[${source.sourceId}] ${source.title || 'Source'}`;
+    title.title = source.url;
+    const status = document.createElement('small');
+    status.textContent = source.status === 'available'
+      ? `${source.capturedCharacters} characters${source.truncated ? ' · Truncated' : ''}`
+      : `Unavailable · ${source.error}`;
+    row.append(title, status); list.append(row);
+  }
+  details.append(list); meta.replaceChildren(details);
 }
 
 function recentMessages(limit) {
@@ -401,7 +441,7 @@ function finish(label, keepControl = false) {
   updateControls();
   saveConversation();
   // The stop button turns into a disabled send button; keep keyboard focus in the composer.
-  if (document.activeElement === $('send') || document.activeElement === $('activity-stop') || document.activeElement === document.body) $('prompt').focus();
+  if (document.activeElement === $('send') || document.activeElement === document.body) $('prompt').focus();
 }
 
 function stop() {
@@ -437,7 +477,7 @@ async function send() {
   if (text && !selected) {
     const connected = state.providers.some((item) => item.available && item.authenticated);
     notify(state.discoveryPending ? 'Still checking your Codex and Claude accounts. Send again in a moment.'
-      : connected ? 'Choose a connected model to send this message.' : 'Sign in to Codex or Claude to send this message. Your text is still here.');
+      : connected ? 'Choose a connected model to send this message.' : '');
     if (!state.discoveryPending) setModelMenu(true, true);
     return;
   }
@@ -475,8 +515,9 @@ async function send() {
       if (state.running?.id !== id) return;
       const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
       userMessage.contextTitle = summary;
+      userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
       const meta = messageNodes.get(id)?.parentElement.querySelector('.message-meta');
-      if (meta) meta.textContent = summary;
+      if (meta) renderSourceMetadata(meta, userMessage.sourceMetadata);
       if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');
     } catch (error) {
       if (state.running?.id === id) fail(error.message, `Could not read selected sources. ${error.message}`);
@@ -518,7 +559,12 @@ function receive(message) {
     const reply = state.running.message;
     reply.text += message.text || '';
     renderDelta();
-  } else if (message.type === 'complete') finish(undefined, !message.cancelled);
+  } else if (message.type === 'complete') {
+    const run = state.running;
+    const empty = run && !run.message.text;
+    finish(undefined, !message.cancelled);
+    if (empty && !message.cancelled) offerRetry(run);
+  }
   else if (message.type === 'activity' && state.running) {
     $('activity').hidden = !message.active;
     $('activity-label').textContent = message.label || 'Working in this tab';
@@ -533,13 +579,15 @@ function resizePrompt() {
 
 $('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
 $('prompt').addEventListener('input', resizePrompt);
+$('prompt').addEventListener('focus', () => {
+  if ($('inference-options').matches(':popover-open')) $('inference-options').hidePopover();
+});
 $('prompt').addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
     event.preventDefault();
     if (!state.running) send();
   }
 });
-$('activity-stop').addEventListener('click', stop);
 $('close-panel').addEventListener('click', async () => {
   stop();
   try { await chrome.sidePanel.close({ windowId: state.windowId }); }
@@ -570,6 +618,7 @@ $('new-chat').addEventListener('click', () => {
   stop();
   research.clear();
   state.messages = [];
+  lastContextTitle = null;
   messageNodes.clear();
   $('messages').replaceChildren();
   $('welcome').hidden = false;

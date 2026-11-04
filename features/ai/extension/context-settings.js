@@ -66,27 +66,41 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   section.setAttribute('aria-label', 'Context and habits');
   const note = text => el('p', text, 'section-note');
   section.append(el('h2', 'Context and habits'),
-    note('Off by default. Remember activity only on the public sites you choose and grant page access to with the AI toolbar button or keyboard shortcut.'),
-    note('Stored on this device: site names and daily activity counts for seven calendar days. Older activity is erased next time Breezer checks context. No titles, page text, forms, passwords, URL paths or query strings. Private browsing and known sensitive sites are excluded.'),
-    note('Activity is sampled at most once per site per half hour. Suggestions are uncertain inferences, not saved preferences. Nothing is added to ordinary AI chats.'),
+    note('Optional activity memory for the sites you choose. Stored on this device for seven days.'),
   );
-  const check = (text, key) => {
+  const localGroup = el('div', '', 'setting-group');
+  const localActions = el('div', '', 'context-actions');
+  const saveActions = el('div', '', 'setting-actions');
+  const maintenanceActions = el('div', '', 'setting-actions');
+  localActions.append(saveActions, maintenanceActions);
+  const summarySection = el('section', '', 'settings-section context-settings');
+  const summaryGroup = el('div', '', 'setting-group panel');
+  summarySection.append(el('h2', 'Activity summary'),
+    note('Summarize sends the site names and counts below to OpenAI through your Codex account. Nothing is added to ordinary chats.'), summaryGroup);
+  const check = (text, key, parent = localGroup) => {
     const label = el('label', '', 'setting-row');
-    const input = el('input'); input.type = 'checkbox'; input.checked = false; input.dataset.contextControl = key;
-    label.append(el('span', text, 'setting-label'), input); section.append(label);
+    const input = el('input', '', 'toggle'); input.type = 'checkbox'; input.checked = false; input.dataset.contextControl = key;
+    label.append(el('span', text, 'setting-label'), input); parent.append(label);
     return input;
   };
   const enabled = check('Remember activity on the sites I choose', 'enabled');
-  const sitesLabel = el('label', 'Sites to remember, one exact hostname per line. Up to 20 sites. Subdomains are separate.');
-  const sites = el('textarea'); sites.rows = 4; sites.placeholder = 'docs.example.org'; sites.spellcheck = false;
-  sitesLabel.append(sites); section.append(sitesLabel);
-  const button = (text, action) => {
-    const node = el('button', text, 'text-button'); node.type = 'button';
+  const sitesLabel = el('label', 'Sites', 'setting-field');
+  const sites = el('textarea'); sites.rows = 3; sites.placeholder = 'docs.example.org'; sites.spellcheck = false;
+  sitesLabel.append(sites, el('small', 'One hostname per line, up to 20. Subdomains are separate.', 'field-note'));
+  localGroup.append(sitesLabel);
+  const details = el('details', '', 'setting-details');
+  details.append(el('summary', 'What is remembered'),
+    note('Only sites you choose and grant page access to. Site names and daily counts are stored for seven calendar days, sampled at most once per site per half hour. No titles, page text, forms, passwords, URL paths or query strings. Private browsing and known sensitive sites are excluded.'),
+    note('Older activity is erased next time Breezer checks context. Suggestions are uncertain inferences, not saved preferences.'),
+  );
+  section.append(localGroup, localActions, details);
+  const button = (text, action, parent = localActions, className = 'button') => {
+    const node = el('button', text, className); node.type = 'button';
     node.addEventListener('click', action, { signal: events.signal });
-    section.append(node); return node;
+    parent.append(node); return node;
   };
   const error = el('p', '', 'field-error'); error.setAttribute('role', 'alert'); error.hidden = true;
-  const status = el('p', '', 'section-note'); status.setAttribute('role', 'status');
+  const status = el('p', '', 'sr-only'); status.setAttribute('role', 'status');
   const table = el('table');
   const caption = el('caption', 'Stored activity and provider preview'); table.append(caption);
   const head = el('thead'), headings = el('tr');
@@ -99,37 +113,45 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     if (disposed) return;
     error.hidden = true;
     try { await work(); }
-    catch (failure) { if (!disposed) { error.textContent = failure.message; error.hidden = false; } }
+    catch (failure) { if (!disposed) { error.textContent = failure instanceof TypeError ? 'Activity settings could not load. Reopen Settings to try again.' : failure.message; error.hidden = false; } }
   };
-  button('Save local context choices', () => run(async () => {
+  button('Save choices', () => run(async () => {
     await client.request('configure', { enabled: enabled.checked, sites: sites.value.split(/[\n,]+/).map(value => value.trim()).filter(Boolean) });
     await refresh();
-  }));
-  button('Disable and erase', () => run(async () => { output.textContent = ''; await client.request('configure', { enabled: false }); await refresh(); }));
-  button('Clear learned activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }));
-  section.append(table, suggestions,
-    note('Provider summaries are separate. OpenAI receives the site names and counts shown above through your signed-in Codex account. Requests may use your plan allowance. Send only information you are comfortable sharing. Previously sent data cannot be recalled by clearing local activity.'),
-  );
-  const consent = check('Allow these browsing aggregates to be sent to OpenAI only when I click Summarize with Luna', 'consent');
+  }), saveActions, 'button primary');
+  const disable = button('Disable and erase', () => run(async () => { output.textContent = ''; await client.request('configure', { enabled: false }); await refresh(); }), maintenanceActions, 'button danger');
+  const clear = button('Clear activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }), maintenanceActions, 'button danger');
+  const empty = el('p', 'No activity recorded.', 'empty-state');
+  summaryGroup.append(table, empty, suggestions);
+  const consent = check('Allow OpenAI summaries when I click Summarize', 'consent', summaryGroup);
   consent.addEventListener('change', () => run(async () => { output.textContent = ''; await client.request('consent', { consent: consent.checked }); await refresh(); }), { signal: events.signal });
-  const summarize = button('Summarize with Luna', () => run(async () => {
+  const summaryActions = el('div', '', 'setting-actions');
+  summaryGroup.append(summaryActions);
+  const summarize = button('Summarize with GPT-6 Luna', () => run(async () => {
     if (summarizing) return;
-    summarizing = true; summarize.disabled = true; output.textContent = '';
+    summarizing = true; summarize.disabled = true; stop.hidden = false; output.textContent = '';
     try {
       const result = await client.request('summarize');
       if (!disposed) output.textContent = result.localOnly ? result.notice : result.text;
-    } finally { summarizing = false; if (!disposed) await refresh(false); }
-  }));
-  button('Stop summary', () => run(async () => { output.textContent = ''; await client.request('cancel'); }));
-  section.append(note('At least three activity samples are needed. One manual request per hour, when activity has changed. GPT-6 Luna uses Standard speed and light reasoning when supported. If Luna is unavailable, local suggestions remain available.'), output, status, error);
-  container.replaceChildren(section);
+    } finally { summarizing = false; stop.hidden = true; if (!disposed) await refresh(false); }
+  }), summaryActions, 'button primary');
+  const stop = button('Stop summary', () => run(async () => { output.textContent = ''; await client.request('cancel'); }), summaryActions); stop.hidden = true;
+  const summaryDetails = el('details', '', 'setting-details');
+  summaryDetails.append(el('summary', 'Summary limits and privacy'), note('At least three samples are needed. One request per hour when activity changes. GPT-6 Luna uses your Codex plan allowance. If Luna is unavailable, local suggestions remain. Clearing local activity cannot recall data already sent to OpenAI.'));
+  summaryGroup.append(output);
+  summarySection.append(summaryDetails);
+  section.append(status, error);
+  container.replaceChildren(section, summarySection);
   async function refresh(clearOutput = true) {
     const current = ++revision;
     const state = await client.request('view');
     if (disposed || revision !== current) return;
+    summarySection.hidden = !state.enabled && !state.habits.length;
     enabled.checked = state.enabled; consent.checked = state.providerConsent;
     consent.disabled = !state.enabled;
     sites.value = state.sites.join('\n');
+    disable.disabled = !state.enabled && !state.habits.length;
+    clear.disabled = !state.habits.length;
     summarize.disabled = summarizing || !state.enabled || !state.providerConsent;
     status.textContent = state.enabled ? 'Local context is on. Provider summaries run only when you request one.' : 'Local context is off. No browsing activity is being remembered.';
     if (clearOutput) output.textContent = '';
@@ -139,10 +161,11 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
       for (const value of [row.site, row.observations, row.days]) tr.append(el('td', String(value)));
       body.append(tr);
     }
-    if (!state.habits.length) { const tr = el('tr'), td = el('td', 'No learned activity. Enable local context, choose a site, then grant page access there.'); td.setAttribute('colspan', '3'); tr.append(td); body.append(tr); }
+    table.hidden = !state.habits.length;
+    empty.hidden = Boolean(state.habits.length);
     suggestions.replaceChildren(...state.suggestions.map(text => el('li', text)));
   }
   const unsubscribe = client.onChange(() => { void run(() => refresh()); });
   const ready = run(() => refresh());
-  return { ready, dispose() { disposed = true; events.abort(); unsubscribe(); client.dispose(); section.remove(); } };
+  return { ready, dispose() { disposed = true; events.abort(); unsubscribe(); client.dispose(); section.remove(); summarySection.remove(); } };
 }

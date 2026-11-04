@@ -89,7 +89,7 @@ test('settings flow keeps local and provider consent separate and renders provid
   let state = { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 };
   const client = { onChange(fn) { changed = fn; return () => {}; }, dispose() {}, async request(type, fields) {
     calls.push({ type, fields });
-    if (type === 'configure') state = { ...state, enabled: fields.enabled, sites: fields.sites, providerConsent: false };
+    if (type === 'configure') state = { ...state, enabled: fields.enabled, sites: fields.enabled ? fields.sites : [], providerConsent: false };
     if (type === 'consent') state = { ...state, providerConsent: fields.consent };
     if (type === 'summarize') return { text: '<img src=x onerror=alert(1)>', model: 'gpt-6-luna', provider: 'codex' };
     return state;
@@ -105,11 +105,11 @@ test('settings flow keeps local and provider consent separate and renders provid
   assert.equal(local.checked, false); assert.equal(consent.checked, false);
   assert.equal(calls.some(call => call.type === 'summarize'), false);
   local.checked = true; sites.value = 'docs.example.org';
-  await button('Save local context choices').fire('click');
+  await button('Save choices').fire('click');
   assert.equal(state.enabled, true); assert.equal(state.providerConsent, false);
   consent.checked = true; await consent.fire('change');
   assert.equal(state.providerConsent, true);
-  await button('Summarize with Luna').fire('click');
+  await button('Summarize with GPT-6 Luna').fire('click');
   assert.ok(all().some(node => node.textContent === '<img src=x onerror=alert(1)>'));
   assert.equal(all().some(node => node.tagName === 'img'), false);
   await button('Disable and erase').fire('click');

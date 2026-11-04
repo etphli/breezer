@@ -181,12 +181,18 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
     await withPage(browser, base, { view: CONNECTED, viewport: { width: 420, height: 860 } }, async (page) => {
       await page.waitForSelector('html[data-loaded="true"]');
       const visible = await page.$$eval('.site', (items) => items.filter((item) => item.offsetParent).map((item) => Math.round(item.getBoundingClientRect().top)));
-      assert.equal(visible.length, 4);
-      assert.equal(new Set(visible).size, 1);
+      assert.equal(visible.length, 9, 'all eight shortcuts and Add remain available at narrow widths');
+      assert.equal(new Set(visible).size, 3, 'shortcuts form complete rows without clipped tiles');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 420), true);
       const lanes = await page.$$eval('.lane', (nodes) => nodes.map((node) => node.getBoundingClientRect().top));
       assert.ok(lanes[1] > lanes[0], 'lanes stack on narrow windows');
       await page.screenshot({ path: `${evidence}/newtab-narrow.png`, fullPage: true });
+      const lastSite = page.locator('.site:not(.site-add) a').last();
+      await lastSite.focus();
+      const lastBox = await lastSite.boundingBox();
+      assert.ok(lastBox.x >= 0 && lastBox.x + lastBox.width <= 420, 'keyboard focus reveals the last shortcut');
+      const addBox = await page.locator('.site-add-button').boundingBox();
+      assert.ok(addBox.x >= 0 && addBox.x + addBox.width <= 420, 'Add stays inside the window');
     });
 
     await withPage(browser, base, { view: { topSites: SITES.slice(0, 5), organato: { enabled: true, connected: false } } }, async (page) => {

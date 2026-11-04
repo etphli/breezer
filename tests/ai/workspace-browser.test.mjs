@@ -303,6 +303,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
 
     // Pin from the context menu, then it shows in the pinned tree.
     await tree.getByRole('treeitem', { name: /Arc review notes/ }).click({ button: 'right' });
+    await page.screenshot({ path: `${evidence}/workspace-tab-menu.png` });
     await page.getByRole('menuitem', { name: 'Pin tab' }).click();
     await page.locator('#pinned').getByRole('treeitem', { name: 'Arc review notes' }).waitFor();
     assert.equal(await tree.getByRole('treeitem', { name: /Arc review notes/ }).count(), 0);
@@ -364,7 +365,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     // ---------------------------------------------------------- settings
     const settings = await newPage({ bridge: true }, { width: 1000, height: 1400 });
     await settings.goto(`${base}/workspace.html#/settings`);
-    await settings.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await settings.locator('#settings-title').waitFor();
     // Categories show one at a time, like the browser's own settings.
     const go = (page, name) => page.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
     await go(settings, 'Appearance');
@@ -393,7 +394,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await go(settings, 'Browser settings');
     await settings.getByRole('button', { name: 'Privacy and security', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/privacy'));
-    await settings.getByRole('button', { name: 'All native browser settings', exact: true }).click();
+    await settings.getByRole('button', { name: 'All browser settings', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/'));
     await go(settings, 'Layout');
     for (const [label, mode] of [['Compact', 'compact'], ['Auto-hide', 'autoHide'], ['Expanded', 'expanded']]) {

@@ -87,7 +87,8 @@ try {
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   await page.locator('#research-open').focus();
   await page.keyboard.press('Enter');
-  await page.getByRole('dialog', { name: 'Research source tabs' }).waitFor();
+  await page.getByRole('dialog', { name: 'Source tabs' }).waitFor();
+  assert.equal(await page.locator('#research-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true, 'Source picker content stays inside its dialog');
   const checkboxes = page.locator('#research-options input');
   await checkboxes.nth(0).focus(); await page.keyboard.press('Space');
   await checkboxes.nth(1).focus(); await page.keyboard.press('Space');
@@ -114,7 +115,7 @@ try {
   await page.waitForFunction(() => window.sent.some(message => message.type === 'chat'));
   const partial = await page.evaluate(() => window.sent.find(message => message.type === 'chat'));
   assert.equal(partial.researchSources[1].status, 'unavailable');
-  assert.match(await page.locator('.message-meta').last().innerText(), /S2.*closed/);
+  assert.match(await page.locator('.message-meta').last().innerText(), /S2[\s\S]*closed/);
   await page.evaluate(id => window.emit({ type: 'complete', id }), partial.id);
   await page.screenshot({ path: `${evidence}/research-partial-failure.png` });
   await page.getByRole('button', { name: 'Remove source 2:', exact: false }).click();
@@ -135,8 +136,13 @@ try {
   for (let index = 3; index < 7; index++) await checkboxes.nth(index).check();
   await checkboxes.nth(7).click();
   assert.equal(await checkboxes.nth(7).isChecked(), false);
+  assert.match(await page.locator('#research-limit').innerText(), /6 selected/);
   assert.equal(await page.locator('#research-chips button').count(), 6);
   await page.screenshot({ path: `${evidence}/research-picker.png` });
+  await page.setViewportSize({ width: 320, height: 640 });
+  assert.equal(await page.locator('#research-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true, 'Narrow source picker stays inside its dialog');
+  await page.screenshot({ path: `${evidence}/research-picker-narrow.png` });
+  await page.setViewportSize({ width: 400, height: 850 });
   await page.keyboard.press('Escape');
   await page.locator('#research-clear').click();
   assert.equal(await page.locator('#control-toggle').isDisabled(), false);

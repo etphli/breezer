@@ -16,6 +16,7 @@ node script/ui_polish_evidence.mjs compare docs/evidence/ui-polish/before /tmp/b
 node script/ui_polish_evidence.mjs png /tmp/breezer-ui/comparisons
 node tests/ai/ui-polish-matrix.mjs /tmp/breezer-ui/matrix
 node tests/ai/ui-polish-motion.mjs /tmp/breezer-ui/motion
+node script/ui_polish_evidence.mjs sheets /tmp/breezer-ui/after
 node tests/ai/ui-polish-chrome.mjs /tmp/breezer-ui/chrome
 ```
 
@@ -29,7 +30,7 @@ the after image. The text below each pair identifies what changed.
 
 ## Browser references
 
-The first council round includes official vendor UI images for visual comparison:
+The initial reviews included official vendor UI references:
 
 - [Safari profiles](https://www.apple.com/v/safari/u/images/overview/customization_profiles__cjv86k82hvo2_large_2x.png), from [Apple's Safari page](https://www.apple.com/safari/).
 - [Chrome with Gemini](https://www.google.com/chrome/static/images/gen-ai/ai-innovation/glitter/gemini-in-chrome_desktop.webp), from [Google's Chrome page](https://www.google.com/chrome/). This is a Windows desktop and mobile marketing composite, not a macOS capture.
@@ -51,9 +52,10 @@ screenshots, evidence scope and a request for a candid design score out of ten.
 Their briefs omit any desired score or stopping criterion. Each round records
 all three scores and specific findings, including disagreements.
 
-The expanded matrix contains 378 raw captures: all eleven custom Settings
+The expanded matrix contains 406 raw captures: all eleven custom Settings
 categories at desktop and narrow widths in seven palettes and light/dark modes,
-plus three sidebar modes, new tab and assistant in every palette and mode.
+plus Assistant activity memory enabled, three sidebar modes, new tab and the
+assistant panel in every palette and mode.
 Checked-in contact sheets index every combination; rerun the command for the raw
 full-size set. Selected workflow screenshots and annotated comparisons are also
 checked in. Desktop matrix captures use tall viewports to expose every setting.
@@ -65,10 +67,34 @@ The source hashes record the extension files used for the captured design.
 
 Custom UI motion was recorded for space switching, the import card and the new-tab
 agenda. `motion.json` records observed animation timings. The runner also checks
-that Reduce motion disables those animations. Native macOS motion, top tabs,
+that Reduce motion disables those animations. It decodes each recording in Chrome
+and exports twelve frames from its first second, with a contact sheet for each
+normal/reduced-motion sequence. These include the initial transition rather than
+only screenshots taken after a locator settles. They do not establish native
+frame pacing. The release page uses overlapping viewport tiles and a scroll-position index instead of a very tall HiDPI full-page image. The capture asserts a single masthead and includes both default and expanded technical disclosures.
+
+Native macOS motion, top tabs,
 toolbar geometry and menus remain explicitly unverified, as requested.
+
+Chrome and Safari each received a separate overall review by all three council
+members. Chrome's review included real WebUI captures; Safari's used six official
+vendor UI references. Neither establishes native runtime or animation quality.
+Subsequent rounds review Breezer alone. The full reviews and their evidence limits
+are retained in the adjacent Markdown files.
+
+| Review | Sol 1, high | Sol 2, high | Opus 5.5, medium |
+| --- | ---: | ---: | ---: |
+| Breezer, formal round 1 | 7.6 | 7.7 | 7.5 |
+| Breezer, formal round 2 | 8.3 | 8.1 | 8.0 |
+| Breezer, round 3 attempt | 8.7 | 8.4 | No score: API rate limit |
+| Breezer, round 4 attempt | 8.2 | 8.1 | No score: API rate limit |
+| Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
+| Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
+
+Baseline scores use the evidence scope described above. They are independent
+overall design judgments, not direct browser comparisons or usability benchmarks.
 
 The rubric covers hierarchy, typography, alignment, spacing, rhythm, consistency,
 craft, color, contrast, navigation, sidebar, settings and controls, assistant,
-new tab, responsive layout and custom UI motion. Reviewers compare Chrome where
-the captures support it and mark other comparisons unavailable.
+new tab, responsive layout and custom UI motion. Reviewers also identify empty,
+error and keyboard states. Native top tabs and toolbar remain unverified.

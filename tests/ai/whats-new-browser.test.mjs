@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -73,6 +73,29 @@ async function withPage(browser, base, options, fn) {
   }
 }
 
+// Keep each capture within the viewport. Very tall HiDPI full-page captures
+// can repeat compositor tiles, even when the document has only one masthead.
+async function captureLongPage(page, name) {
+  const height = await page.evaluate(() => document.documentElement.scrollHeight);
+  const viewport = page.viewportSize();
+  const tiles = [];
+  for (let target = 0; target < height; target += viewport.height - 100) {
+    await page.evaluate(y => scrollTo(0, y), target);
+    await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    const scrollY = await page.evaluate(() => window.scrollY);
+    if (tiles.at(-1)?.scrollY === scrollY) break;
+    const file = `${name}-tile-${String(tiles.length + 1).padStart(2, '0')}.png`;
+    await page.screenshot({ path: `${evidence}/${file}`, fullPage: false });
+    tiles.push({ file, scrollY, mastheadBottom: await page.locator('.masthead').evaluate(node => node.getBoundingClientRect().bottom) });
+    if (scrollY + viewport.height >= height) break;
+  }
+  assert.equal(await page.locator('main.sheet').count(), 1);
+  assert.equal(await page.locator('.masthead .title').count(), 1);
+  await writeFile(`${evidence}/${name}-tiles.json`, JSON.stringify({ height, viewport, mastheads: 1, tiles }, null, 2));
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+}
+
 // WCAG relative-luminance contrast between an element's text and the paper.
 const contrast = (page, selector) => page.$eval(selector, (node) => {
   // color-mix() computes to color(srgb r g b) with 0-1 channels.
@@ -118,7 +141,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
         return box.width > 200 && box.height > 120 && box.right <= plate.right + 0.5 && box.bottom <= plate.bottom + 0.5;
       })), true);
       await page.screenshot({ path: `${evidence}/whats-new-desktop.png` });
-      await page.screenshot({ path: `${evidence}/whats-new-desktop-full.png`, fullPage: true });
+      await captureLongPage(page, 'whats-new-desktop');
 
       // Keyboard: Continue browsing first, then Settings, with a visible ring.
       await page.keyboard.press('Tab');
@@ -131,6 +154,14 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.click('.masthead [data-action="continue"]');
       await page.waitForFunction(() => window.fx.removed.length === 1);
       assert.deepEqual(await page.evaluate(() => window.fx), { removed: [42], closed: 0 });
+    });
+
+    // Technical explanations and extra measurements remain available on demand.
+    await withPage(browser, base, {}, async page => {
+      await page.locator('.results-more > summary').click();
+      for (const summary of await page.locator('.feature-details > summary').all()) await summary.click();
+      assert.equal(await page.locator('.feature-details[open]').count(), 3);
+      await captureLongPage(page, 'whats-new-expanded-desktop');
     });
 
     // Settings opens in the same tab.
@@ -158,6 +189,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
         assert.ok(ratio >= 4.5, `${selector} contrast ${ratio.toFixed(2)}`);
       }
       await page.screenshot({ path: `${evidence}/whats-new-results.png`, clip: await page.$eval('.results', (node) => { const box = node.getBoundingClientRect(); return { x: 0, y: box.top + scrollY, width: 1440, height: box.height }; }), fullPage: true });
+      await page.locator('.results-more > summary').click();
+      await page.screenshot({ path: `${evidence}/whats-new-results-expanded.png`, clip: await page.$eval('.results', node => ({ x: 0, y: node.getBoundingClientRect().top + scrollY, width: 1440, height: node.getBoundingClientRect().height })), fullPage: true });
 
       // "See the full results" opens the details and lands on the table.
       await page.click('.results-lede a');
@@ -201,15 +234,19 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       const stacked = await page.$$eval('.feature', (rows) => rows.map((row) => row.querySelector('.feature-copy').getBoundingClientRect().top > row.querySelector('.plate').getBoundingClientRect().bottom));
       assert.deepEqual(stacked, [true, true, true, true, true, true, true, true, true, true], 'every feature stacks plate above text');
       assert.equal(await page.$$eval('.plate, .pending, .feature-copy .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
-      // Results stack, and the open full results scroll inside their region.
+      // Every comparison remains visible in the narrow card layout.
       await page.click('.full-results summary');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true, 'open full results stay within 390px');
       assert.equal(await page.$$eval('.reading, .full-results, .component-table, .results-article .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
-      assert.equal(await page.$eval('.table-scroll', (region) => region.scrollWidth > region.clientWidth), true, 'the 11-row table scrolls sideways');
+      assert.equal(await page.$eval('.table-scroll', (region) => region.scrollWidth <= region.clientWidth), true, 'all comparison columns fit without sideways scrolling');
+      assert.equal(await page.$$eval('.results-table tbody td', cells => cells.every(cell => { const box = cell.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth && cell.scrollWidth <= cell.clientWidth; })), true, 'all values and ranges are readable inside the window');
+      const tableCrop = await page.evaluate(() => ({ offsetY: Math.round(document.querySelector('.full-results').getBoundingClientRect().top - document.querySelector('.results').getBoundingClientRect().top), width: 390, height: 900 }));
+      await writeFile(`${evidence}/whats-new-table-crop.json`, JSON.stringify(tableCrop));
+      await page.screenshot({ path: `${evidence}/whats-new-table-narrow.png`, clip: await page.$eval('.full-results', node => ({ x: 0, y: node.getBoundingClientRect().top + scrollY, width: 390, height: 900 })), fullPage: true });
       await page.screenshot({ path: `${evidence}/whats-new-results-narrow.png`, clip: await page.$eval('.results', (node) => { const box = node.getBoundingClientRect(); return { x: 0, y: box.top + scrollY, width: 390, height: box.height }; }), fullPage: true });
       await page.click('.full-results summary');
       await page.screenshot({ path: `${evidence}/whats-new-narrow.png` });
-      await page.screenshot({ path: `${evidence}/whats-new-narrow-full.png`, fullPage: true });
+      await captureLongPage(page, 'whats-new-narrow');
     });
 
     // Not in a tab, or the tabs API fails: fall back to window.close(); if

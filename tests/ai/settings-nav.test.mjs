@@ -22,7 +22,7 @@ test('every navigation category has a page, and Other leaves for native settings
     assert.equal(href, category);
     assert.match(html, new RegExp(`data-page="${category}"`), category);
   }
-  assert.match(html, /id="open-native-settings" class="nav-item" type="button"[^>]*>.*<span>Other<\/span>/);
+  assert.match(html, /id="open-native-settings" class="nav-item" type="button"[^>]*>.*<span>All settings<\/span>/);
   // Peer feature mounts keep their containers and categories.
   for (const [id, page] of [['password-settings', 'passwords'], ['sync-settings', 'sync'], ['translation-settings', 'languages']]) {
     assert.match(html, new RegExp(`data-page="${page}"[^>]*>\\s*<div id="${id}"`), id);

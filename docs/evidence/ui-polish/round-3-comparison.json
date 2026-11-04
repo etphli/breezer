@@ -1,0 +1,128 @@
+[
+  {
+    "id": "custom",
+    "title": "Custom color selection",
+    "file": "custom-light-settings-appearance.png",
+    "notes": [
+      [
+        86,
+        68,
+        44,
+        55,
+        "The selected custom color has a persistent label."
+      ]
+    ]
+  },
+  {
+    "id": "picker",
+    "title": "Research source picker",
+    "file": "research-picker.png",
+    "notes": [
+      [
+        86,
+        28,
+        40,
+        33,
+        "Selection count stays visible."
+      ],
+      [
+        86,
+        48,
+        12,
+        38,
+        "Compact rows use the theme’s controls."
+      ]
+    ]
+  },
+  {
+    "id": "sources",
+    "title": "Source status and recovery",
+    "file": "research-partial-failure.png",
+    "notes": [
+      [
+        86,
+        65,
+        53,
+        46,
+        "Sources and capture failures have separate readable rows."
+      ],
+      [
+        85,
+        76,
+        20,
+        62,
+        "An empty reply offers Edit and resend."
+      ]
+    ]
+  },
+  {
+    "id": "shortcuts",
+    "title": "Narrow new tab",
+    "file": "newtab-narrow.png",
+    "notes": [
+      [
+        85,
+        20,
+        50,
+        23,
+        "Complete tiles replace the clipped shortcut rail."
+      ]
+    ]
+  },
+  {
+    "id": "organato",
+    "title": "Organato setup",
+    "file": "onboarding-6-organato-optout-failed-narrow.png",
+    "notes": [
+      [
+        85,
+        10,
+        52,
+        19,
+        "The compact illustration now shows every row."
+      ],
+      [
+        85,
+        68,
+        50,
+        73,
+        "A clear error card keeps recovery close to the controls."
+      ]
+    ]
+  },
+  {
+    "id": "passkeys",
+    "title": "Passkey availability",
+    "file": "mint-light-settings-passwords.png",
+    "notes": [
+      [
+        85,
+        65,
+        76,
+        33,
+        "The action states that it checks availability."
+      ]
+    ]
+  },
+  {
+    "id": "signed-out",
+    "title": "Assistant sign-in",
+    "file": "sidebar-signed-out-narrow.png",
+    "notes": [
+      [
+        85,
+        20,
+        52,
+        27,
+        "The sign-in card clears the heading."
+      ],
+      [
+        85,
+        55,
+        48,
+        35,
+        "Terminal commands have distinct formatting."
+      ]
+    ]
+  }
+]

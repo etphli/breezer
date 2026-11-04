@@ -51,6 +51,7 @@
         <input id="settings-search" type="search" role="combobox" aria-label="Search settings" aria-expanded="false" aria-controls="settings-results" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Search">
         <kbd aria-hidden="true">/</kbd>
       </div>
+      <select id="settings-category-select" class="settings-category-select" aria-label="Settings category"></select>
       <div id="settings-categories" class="nav-groups">
         <ul class="nav-list" aria-label="Breezer">
           <li><a class="nav-item" href="#/settings/general" data-category="general"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg><span>General</span></a></li>
@@ -71,11 +72,11 @@
         </ul>
         <h2 id="nav-group-browser" class="nav-group">Browser</h2>
         <ul class="nav-list" aria-labelledby="nav-group-browser">
-          <li><a class="nav-item" href="#/settings/languages" data-category="languages"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.3 3.4 2.3 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.7 5.9 5.7 8s.7 3.9 2.3 5.5"/></svg><span>Languages</span></a></li>
+          <li><a class="nav-item" href="#/settings/languages" data-category="languages"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.3 3.4 2.3 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.7 5.9 5.7 8s.7 3.9 2.3 5.5"/></svg><span>Translation</span></a></li>
           <li><a class="nav-item" href="#/settings/browser" data-category="browser"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Browser settings</span></a></li>
-          <li><button id="open-native-settings" class="nav-item" type="button" aria-describedby="native-settings-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 8 8"/><path d="M11.5 9.5v2.5a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h2.5"/></svg><span>Other</span></button></li>
+          <li><button id="open-native-settings" class="nav-item" type="button" aria-describedby="native-settings-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 8 8"/><path d="M11.5 9.5v2.5a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h2.5"/></svg><span>All settings</span></button></li>
         </ul>
-        <p id="native-settings-hint" class="nav-hint">Opens Chromium settings in this tab. Use Back to return.</p>
+        <p id="native-settings-hint" class="nav-hint sr-only">Open all browser settings. Use Back to return.</p>
         <p id="native-settings-error" class="field-error nav-error" role="alert" hidden></p>
       </div>
     </nav>
@@ -83,9 +84,8 @@
     <div class="settings-main">
       <header class="settings-head">
         <div class="crumbs">
-          <h1 id="settings-title" tabindex="-1">Settings</h1>
-          <span class="crumb-sep" aria-hidden="true">/</span>
-          <span id="settings-crumb" class="crumb-current" aria-live="polite">General</span>
+          <span class="settings-label">Settings</span>
+          <h1 id="settings-title" tabindex="-1"><span id="settings-crumb" class="crumb-current" aria-live="polite">General</span></h1>
         </div>
         <a id="run-setup" class="button subtle setup-link" href="#/welcome">Setup guide</a>
       </header>
@@ -139,7 +139,7 @@
               <div id="theme-swatches" class="swatches" role="radiogroup" aria-labelledby="theme-heading"></div>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="custom theme colour picker">
-                  <label class="setting-label" for="custom-theme-color">Custom color<small>Create a theme for the browser and sidebar.</small></label>
+                  <label class="setting-label" for="custom-theme-color">Custom color<small id="custom-theme-note">Create a theme for the browser and sidebar.</small></label>
                   <span class="control-cluster">
                     <input id="custom-theme-color" type="color" value="#23866b">
                     <button id="custom-theme-apply" class="button" type="button">Apply color</button>
@@ -269,7 +269,7 @@
           </section>
 
           <section class="settings-page" data-page="assistant" aria-label="Assistant" data-optional hidden>
-            <div id="context-settings" data-search-terms="ai assistant context habits memory activity sites suggestions"></div>
+            <div id="context-settings" data-search-terms="ai assistant context habits memory activity sites suggestions summary luna openai"></div>
           </section>
 
           <section class="settings-page" data-page="newtab" aria-label="New tab and Organato" hidden>
@@ -303,29 +303,39 @@
             </section>
           </section>
 
-          <section class="settings-page" data-page="languages" aria-label="Languages" data-optional hidden>
+          <section class="settings-page" data-page="languages" aria-label="Translation" data-optional hidden>
             <div id="translation-settings" data-search-terms="translate translation page language original libretranslate privacy"></div>
           </section>
 
           <section class="settings-page" data-page="browser" aria-label="Browser settings" hidden>
             <section class="settings-section" aria-labelledby="browser-heading">
-              <h2 id="browser-heading">More browser settings</h2>
-              <p class="section-note">These categories open native browser settings in a new tab.</p>
+              <h2 id="browser-heading">Browsing</h2>
+              <p class="section-note">Opens in a new tab.</p>
               <ul class="link-list setting-group">
-                <li data-search-terms="page fonts zoom font size native theme"><button data-url="chrome://settings/appearance">Native appearance, page fonts and zoom</button><small>Web page fonts, default zoom and browser theme.</small></li>
+                <li data-search-terms="page fonts zoom font size native theme"><button data-url="chrome://settings/appearance">Web page fonts and zoom</button><small>Web page fonts, default zoom and browser theme.</small></li>
                 <li data-search-terms="search engine google duckduckgo bing address bar"><button data-url="chrome://settings/search">Search engine</button><small>Choose the search engine used in the address bar.</small></li>
                 <li data-search-terms="startup restore session open pages"><button data-url="chrome://settings/onStartup">On startup</button><small>Restore your last session or open specific pages.</small></li>
+                <li data-search-terms="languages spell check spelling"><button data-url="chrome://settings/languages">Languages</button><small>Preferred languages and spell check.</small></li>
+                <li data-search-terms="accessibility captions focus highlight"><button data-url="chrome://settings/accessibility">Accessibility</button><small>Live captions, focus highlighting and more.</small></li>
+              </ul>
+            </section>
+            <section class="settings-section" aria-labelledby="browser-privacy-heading">
+              <h2 id="browser-privacy-heading">Privacy and permissions</h2>
+              <ul class="link-list setting-group">
                 <li data-search-terms="privacy security cookies safe browsing https clear browsing data history cache"><button data-url="chrome://settings/privacy">Privacy and security</button><small>Cookies, Safe Browsing, HTTPS and clearing browsing data.</small></li>
                 <li data-search-terms="permissions camera microphone location notifications pop-ups javascript site settings"><button data-url="chrome://settings/content">Site permissions</button><small>Camera, microphone, location, notifications and pop-ups.</small></li>
                 <li data-search-terms="autofill addresses credit cards payment"><button data-url="chrome://settings/autofill">Addresses and payment methods</button><small>Saved addresses and payment cards.</small></li>
+              </ul>
+            </section>
+            <section class="settings-section" aria-labelledby="browser-data-heading">
+              <h2 id="browser-data-heading">Data and tools</h2>
+              <ul class="link-list setting-group">
                 <li data-search-terms="downloads folder location ask where to save"><button data-url="chrome://settings/downloads">Downloads</button><small>Download location and whether to ask each time.</small></li>
-                <li data-search-terms="languages spell check spelling"><button data-url="chrome://settings/languages">Languages</button><small>Preferred languages and spell check.</small></li>
-                <li data-search-terms="accessibility captions focus highlight"><button data-url="chrome://settings/accessibility">Accessibility</button><small>Live captions, focus highlighting and more.</small></li>
                 <li data-search-terms="system proxy hardware acceleration background apps"><button data-url="chrome://settings/system">System</button><small>Proxy, hardware acceleration and background activity.</small></li>
-                <li data-search-terms="reset restore defaults"><button data-url="chrome://settings/reset">Reset settings</button><small>Restore Chromium settings to their defaults.</small></li>
+                <li data-search-terms="reset restore defaults"><button data-url="chrome://settings/reset">Reset settings</button><small>Restore browser settings to their defaults.</small></li>
                 <li data-search-terms="about version build"><button data-url="chrome://settings/help">About Breezer</button><small>Version and build information.</small></li>
                 <li data-search-terms="import chrome safari firefox bookmarks history"><button data-url="chrome://settings/importData">Import bookmarks and history</button><small>Copy bookmarks and history from another browser.</small></li>
-                <li data-search-terms="other chromium chrome native all settings"><button data-url="chrome://settings/">All native browser settings</button><small>Every Chromium setting in one page.</small></li>
+                <li data-search-terms="other chromium chrome native all settings"><button data-url="chrome://settings/">All browser settings</button><small>Every browser setting in one page.</small></li>
                 <li data-search-terms="keyboard shortcuts hotkeys extensions commands"><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button><small>Shortcuts for extensions and Breezer AI.</small></li>
                 <li data-search-terms="bookmarks manager organize"><button data-url="chrome://bookmarks">Bookmarks</button><small>Organize and edit your bookmarks.</small></li>
               </ul>
@@ -342,17 +352,12 @@
       <button id="wl-skip" class="button subtle" type="button">Skip setup</button>
     </header>
 
+    <p id="wl-bridge-note" class="wl-bridge-note" role="status" hidden></p>
     <div class="wl-stage">
       <div class="wl-copy">
         <section class="wl-step" data-step="welcome" aria-labelledby="wl-h-welcome">
           <h1 id="wl-h-welcome" tabindex="-1">Welcome to Breezer</h1>
-          <p class="wl-lede">Let’s set it up the way you like it. It takes about a minute, and everything here can be changed later in Settings.</p>
-          <ul class="wl-agenda">
-            <li>Your name for Breezer AI</li>
-            <li>Tabs and colors</li>
-            <li>Your Chrome data and Organato</li>
-            <li>A short tour</li>
-          </ul>
+          <p class="wl-lede">Choose your name, tabs and color. Connect services now or later. Everything can be changed in Settings.</p>
         </section>
 
         <section class="wl-step" data-step="you" aria-labelledby="wl-h-you" hidden>
@@ -433,19 +438,19 @@
 
         <section class="wl-step" data-step="organato" aria-labelledby="wl-h-organato" hidden>
           <h1 id="wl-h-organato" tabindex="-1">Connect Organato?</h1>
-          <p class="wl-lede">Organato puts your upcoming exams, assignments and to-dos on new tabs, and lets Breezer AI update them when you ask. It’s optional.</p>
+          <p class="wl-lede">See Organato exams, assignments and to-dos on new tabs. Breezer AI can update them when you ask. It’s optional.</p>
           <div class="key-field wl-key">
             <label for="wl-organato-key">Organato API key</label>
             <div class="key-row">
               <input id="wl-organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="wl-organato-note">
               <button id="wl-organato-connect" class="button primary" type="button">Connect</button>
             </div>
-            <p id="wl-organato-note" class="field-note">Create a key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>. It’s stored in macOS Keychain, never in this page.</p>
+            <p id="wl-organato-note" class="field-note">Get a key from <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>. Saved in macOS Keychain.</p>
           </div>
           <p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p>
           <div class="wl-optout">
             <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
-            <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Continue leaves it for later. You can change either in Settings.</p>
+            <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Continue skips setup. Change this later in Settings.</p>
           </div>
         </section>
 
@@ -484,8 +489,8 @@
               <div class="mini-deadlines"><span><b></b>Essay draft</span><span><b></b>Chem quiz</span><span><b></b>Lab report</span></div>
             </div>
             <div class="mini-ai">
-              <p class="mini-greet">What are we working on, <span id="wl-mini-name">there</span>?</p>
-              <div class="mini-chip">Current page</div>
+              <p class="mini-greet">What are we working on<span id="wl-mini-name"></span>?</p>
+              <div class="mini-chip">This page · Included</div>
               <div class="mini-compose"><span></span><i></i></div>
               <div class="mini-control"><span></span>Browser control</div>
             </div>
@@ -501,7 +506,6 @@
       <ol id="wl-progress" class="wl-progress" aria-label="Setup steps"></ol>
       <button id="wl-next" class="button primary wl-next" type="button">Get started</button>
     </footer>
-    <p id="wl-bridge-note" class="wl-bridge-note" role="status" hidden></p>
   </main>
   <script type="module" src="workspace.js"></script>
 </body>

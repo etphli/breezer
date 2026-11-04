@@ -1,8 +1,9 @@
 // Capture every Settings category and theme, plus sidebar modes, new tab and AI.
 // node tests/ai/ui-polish-matrix.mjs /tmp/breezer-ui/matrix
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { chromium } from 'playwright';
 import { installFixture as settingsFixture } from './settings-browser-fixture.mjs';
@@ -22,6 +23,8 @@ const manifest = { themes, categories, captures: [], notes: [
   'Native top tabs, toolbar, menus and physical auto-hide integration are not captured by this script.',
 ] };
 await mkdir(output, { recursive: true });
+const sourceHashes = async () => Object.fromEntries(await Promise.all((await readdir(root)).sort().map(async file => [file, createHash('sha256').update(await readFile(resolve(root, file))).digest('hex')])));
+manifest.sourceHashes = await sourceHashes();
 const server = createServer(async (request, response) => {
   try {
     const url = new URL(request.url, 'http://localhost');
@@ -47,6 +50,7 @@ try {
     const captures = [];
     const shot = async (page, id) => {
       const file = `${name}-${id}.png`;
+      await page.mouse.move(page.viewportSize().width - 2, 2);
       await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
       await page.screenshot({ path: resolve(output, file), fullPage: id.endsWith('-narrow'), animations: 'disabled' });
       const entry = { name, id, file, viewport: page.viewportSize() };
@@ -68,8 +72,18 @@ try {
       assert.equal(await settings.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${name}/${category} narrow overflow`);
       await shot(settings, `settings-${category}-narrow`);
     }
+    await settings.evaluate(() => { location.hash = '#/settings/assistant'; });
+    await settings.locator('[data-context-control="enabled"]').check();
+    await settings.getByRole('button', { name: 'Save choices', exact: true }).click();
+    await settings.getByRole('heading', { name: 'Activity summary', exact: true }).waitFor();
+    for (const width of [1200, 390]) {
+      await settings.setViewportSize({ width, height: width === 1200 ? 1100 : 844 });
+      await shot(settings, width === 1200 ? 'settings-assistant-enabled' : 'settings-assistant-enabled-narrow');
+    }
     const workspace = await context.newPage();
-    await workspace.addInitScript(workspaceFixture, { seed: seed(), bridge: true });
+    const workspaceSeed = seed();
+    if (!theme.startsWith('#')) workspaceSeed.local['workspace.v1'].spaces[0].tone = theme;
+    await workspace.addInitScript(workspaceFixture, { seed: workspaceSeed, bridge: true });
     await workspace.addInitScript(({ theme, colorMode }) => Object.assign(window.fx.appearance, { theme, colorMode }), { theme, colorMode });
     await workspace.goto(`${base}/workspace.html#/sidebar?w=7`);
     await workspace.locator('#today [data-key="t:3"]').waitFor();
@@ -101,6 +115,7 @@ try {
     await context.close();
     console.log(`Captured ${name}: ${captures.length} screens`);
   }
+  assert.deepEqual(await sourceHashes(), manifest.sourceHashes, 'extension source must stay frozen during a matrix capture');
   await writeFile(resolve(output, 'manifest.json'), JSON.stringify(manifest, null, 2));
 } finally {
   await browser?.close();

@@ -134,7 +134,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.equal(await heading(), 'What should Breezer AI call you?');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-name');
     await page.locator('#wl-name').pressSequentially('  Sam  ', { delay: videoDir ? 140 : 0 });
-    assert.equal(await page.locator('#wl-mini-name').innerText(), 'Sam');
+    assert.equal(await page.locator('#wl-mini-name').innerText(), ', Sam');
     await pause(900);
     await shot(page, '2-name');
     await page.keyboard.press('Enter');

@@ -2,6 +2,7 @@
 export function installFixture({ colorMode, theme }) {
   const load = (key, fallback) => JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
   const fx = { local: load('fx-local', {}), appearance: load('fx-appearance', null), calls: [], ports: {}, listeners: [] };
+  fx.context = { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 };
   fx.appearance ??= { layout: 'sidebar', sidebarMode: 'expanded', theme, colorMode, showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true };
   window.fx = fx;
   const save = () => { localStorage.setItem('fx-local', JSON.stringify(fx.local)); localStorage.setItem('fx-appearance', JSON.stringify(fx.appearance)); };
@@ -24,7 +25,15 @@ export function installFixture({ colorMode, theme }) {
         const port = { name, sent: [], onMessage: event(), onDisconnect: event(), postMessage(message) { this.sent.push(message); }, disconnect() {} };
         port.reply = (message) => port.onMessage.list.forEach((fn) => fn(structuredClone(message)));
         fx.ports[name] = port;
-        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, sites: [] } }), 0);
+        if (name === 'breezer-context-settings') port.postMessage = (message) => {
+          if (message.type === 'configure') {
+            Object.assign(fx.context, { enabled: message.enabled, sites: message.enabled ? message.sites : [], providerConsent: false });
+            if (!message.enabled) Object.assign(fx.context, { habits: [], suggestions: [] });
+          }
+          if (message.type === 'consent') fx.context.providerConsent = message.consent;
+          if (message.type === 'clear') Object.assign(fx.context, { habits: [], suggestions: [] });
+          setTimeout(() => port.reply({ id: message.id, ok: true, value: structuredClone(fx.context) }), 0);
+        };
         if (name === 'breezer-organato-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { connected: false, dashboardEnabled: true, enabled: true, allowAI: true } }), 0);
         if (name === 'breezer-updates') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { available: false, notice: 'Breezer is up to date.' } }), 0);
         return port;

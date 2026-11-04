@@ -134,11 +134,20 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
   const pages = new Map([...root.querySelectorAll('.settings-page[data-page]')].map((page) => [page.dataset.page, page]));
   const links = [...nav.querySelectorAll('a.nav-item[data-category]')];
   const native = $('open-native-settings');
+  const categorySelect = $('settings-category-select');
   const categories = new Map(links.map((link) => {
     const page = pages.get(link.dataset.category);
     const available = () => Boolean(page) && (!page.hasAttribute('data-optional') || page.querySelector('[id] > *') !== null);
     return [link.dataset.category, { label: clean(link.textContent), link, page, available }];
   }));
+  for (const [value, category] of categories) {
+    const option = doc.createElement('option');
+    option.value = value; option.textContent = category.label;
+    categorySelect.append(option);
+  }
+  const allSettings = doc.createElement('option');
+  allSettings.value = 'all'; allSettings.textContent = 'All browser settings';
+  categorySelect.append(allSettings);
   const reduceMotion = () => Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   let current = null;
   let options = [];
@@ -147,12 +156,14 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
 
   function refreshAvailability() {
     for (const { link, available } of categories.values()) link.closest('li').hidden = !available();
+    for (const option of categorySelect.options) if (categories.has(option.value)) option.hidden = !categories.get(option.value).available();
     if (current && !categories.get(current)?.available()) show(DEFAULT_CATEGORY);
   }
 
   function show(category, { scrollTop = true } = {}) {
     const next = categories.get(category)?.available() ? category : DEFAULT_CATEGORY;
     current = next;
+    categorySelect.value = next;
     for (const [name, page] of pages) page.hidden = name !== next || searching();
     for (const [name, { link }] of categories) {
       const selected = name === next;
@@ -160,7 +171,7 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
       link.tabIndex = selected ? 0 : -1;
     }
     native.tabIndex = -1;
-    // Narrow windows show categories as a scrolling strip; keep the selected one in view.
+    // Desktop navigation keeps the selected category in view; narrow windows use the select.
     categories.get(next).link.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     crumb.textContent = searching() ? 'Search' : categories.get(next).label;
     doc.title = searching() ? 'Settings' : `${categories.get(next).label} – Settings`;
@@ -177,6 +188,11 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
     const hash = `#/settings/${current}`;
     if (loc && loc.hash !== hash) loc.hash = hash;
   }
+  categorySelect.addEventListener('change', () => {
+    const category = categorySelect.value;
+    if (category === 'all') { categorySelect.value = current; void openNativeSettings(); }
+    else { if (searching()) clearSearch(); navigate(category); }
+  });
 
   nav.addEventListener('click', (event) => {
     const link = event.target.closest('a.nav-item[data-category]');
@@ -283,7 +299,7 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
     if (!found.length) {
       const empty = node('div', 'results-empty');
       empty.append(node('p', 'results-empty-title', `No Breezer settings match “${query}”.`),
-        node('p', 'results-empty-note', 'Try a shorter word, or search Chromium’s browser settings.'));
+        node('p', 'results-empty-note', 'Try a shorter word, or search all browser settings.'));
       fragment.push(empty);
     }
     groupResults(found).forEach((group, groupIndex) => {
@@ -302,8 +318,8 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
     const fallback = node('div', 'results-group');
     fallback.setAttribute('role', 'group');
     fallback.setAttribute('aria-labelledby', 'settings-results-native');
-    fallback.append(head('Chromium settings', 'settings-results-native'),
-      option({ kind: 'native-search', query }, `Search browser settings for “${query}”`, 'Opens chrome://settings in a new tab with this search.', 'Opens in a new tab'));
+    fallback.append(head('All browser settings', 'settings-results-native'),
+      option({ kind: 'native-search', query }, `Search browser settings for “${query}”`, 'Search all browser settings in a new tab.', 'Opens in a new tab'));
     fragment.push(fallback);
     results.replaceChildren(...fragment);
     status.textContent = found.length

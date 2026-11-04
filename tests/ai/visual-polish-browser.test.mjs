@@ -391,14 +391,17 @@ const siteGeometry = (page) => page.evaluate(() => [...document.querySelectorAll
 }));
 
 function assertSiteRow(sites, visible, label, viewport) {
-  assert.equal(sites.length, visible, `${label}: visible sites`);
-  assert.equal(new Set(sites.map((s) => s.top)).size, 1, `${label}: one row`);
+  assert.equal(sites.length, visible, `${label}: accessible sites`);
+  if (viewport > 920) assert.equal(new Set(sites.map((s) => s.top)).size, 1, `${label}: one row`);
   assert.ok(spread(sites.map((s) => s.width)) < 0.5, `${label}: equal slots ${sites.map((s) => s.width)}`);
-  assert.ok(spread(intervals(sites.map((s) => s.cx))) <= 0.5, `${label}: even icon centres ${intervals(sites.map((s) => s.cx))}`);
+  for (const top of new Set(sites.map((s) => s.top))) {
+    const row = sites.filter((s) => s.top === top);
+    if (row.length > 2) assert.ok(spread(intervals(row.map((s) => s.cx))) <= 0.5, `${label}: even icon centres`);
+  }
   for (const site of sites) {
     assert.ok(site.labelLeft >= site.left - 0.5 && site.labelRight <= site.right + 0.5, `${label}: "${site.text}" stays in its slot`);
     if (!site.add) assert.ok(site.title.startsWith(`${site.text}\n`), `${label}: full title tooltip kept`);
-    assert.ok(site.right <= viewport, `${label}: inside the window`);
+    assert.ok(site.left >= 0 && site.right <= viewport, `${label}: every tile inside the window`);
   }
 }
 
@@ -409,19 +412,28 @@ test('new-tab sites keep equal slots and icon spacing whatever the title length'
   const browser = await chromium.launch({ executablePath, headless: true });
   try {
     const cases = [
-      // `visible` counts the Add shortcut tile, which always ends the row.
+      // Every saved shortcut and Add remain visible at narrow widths.
       { name: 'wide-dark-tide', width: 1440, visible: 9 },
       { name: 'wide-light-mint', width: 1280, visible: 9, appearance: { theme: 'mint', colorMode: 'light' } },
-      { name: 'medium-custom', width: 900, visible: 6, appearance: { theme: '#d0543c', colorMode: 'light' } },
-      { name: 'small-custom-dark', width: 640, visible: 4, appearance: { theme: '#d0543c', colorMode: 'dark' } },
-      { name: 'mobile-dark', width: 390, visible: 3 },
+      { name: 'medium-custom', width: 900, visible: 9, appearance: { theme: '#d0543c', colorMode: 'light' } },
+      { name: 'small-custom-dark', width: 640, visible: 9, appearance: { theme: '#d0543c', colorMode: 'dark' } },
+      { name: 'mobile-dark', width: 390, visible: 9 },
     ];
     for (const item of cases) {
       await withNewTab(browser, base, item, async (page) => {
         const sites = await siteGeometry(page);
         assertSiteRow(sites, item.visible, item.name, item.width);
         assert.ok(sites.some((s) => s.truncated), `${item.name}: long titles are truncated`);
-        assert.ok(sites.some((s) => s.text === 'X' && !s.truncated) || item.visible <= 6, `${item.name}: short titles are whole`);
+        assert.ok(sites.some((s) => s.text === 'X' && !s.truncated), `${item.name}: short titles are whole`);
+        if (item.width <= 920) {
+          await page.locator('.site:not(.site-add) .site-link').last().focus();
+          const last = await page.locator('.site:not(.site-add)').last().boundingBox();
+          const add = await page.locator('.site-add').boundingBox();
+          assert.ok(last.x >= 0 && last.x + last.width <= item.width, `${item.name}: final shortcut stays inside the window`);
+          assert.ok(add.x >= 0 && add.x + add.width <= item.width, `${item.name}: Add stays inside the window`);
+          await page.locator('#sites').evaluate((node) => { node.scrollLeft = 0; });
+          await page.locator('#today').click();
+        }
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${item.name}: no page overflow`);
         await page.screenshot({ path: `${evidence}/newtab-sites-${item.name}.png`, clip: { x: 0, y: 0, width: item.width, height: 360 } });
       });

@@ -1,0 +1,36 @@
+[
+  { "id": "activity", "title": "Activity settings", "file": "mint-light-settings-assistant.png", "notes": [
+    [87, 8, 60, 18, "Controls come first; longer explanations move into disclosures."],
+    [85, 62, 52, 43, "Save, deletion and unavailable actions have distinct treatments."],
+    [80, 80, 43, 48, "Optional details stay close to the controls without filling the page."]
+  ] },
+  { "id": "passwords", "title": "Passwords", "file": "mint-light-settings-passwords.png", "notes": [
+    [88, 6, 80, 20, "Password actions use the same grouped rows and buttons as other settings."],
+    [87, 70, 44, 43, "Passkey details and import instructions stay available in disclosures."]
+  ] },
+  { "id": "translation", "title": "Translation settings", "file": "mint-light-settings-languages.png", "notes": [
+    [85, 6, 45, 10, "The category name now describes its purpose."],
+    [85, 60, 41, 38, "A clear save button replaces the text-only action."],
+    [55, 75, 44, 46, "Setup and privacy details are kept together below the controls."]
+  ] },
+  { "id": "narrow", "title": "Narrow settings", "file": "settings-redesign-layout-narrow.png", "notes": [
+    [82, 24, 60, 8, "A category picker keeps every destination available without a large header grid."],
+    [80, 65, 35, 23, "The selected settings start much closer to the top."]
+  ] },
+  { "id": "assistant", "title": "Assistant footer", "file": "sidebar-welcome.png", "notes": [
+    [80, 60, 92, 97, "Reasoning and speed move into one Model options control."],
+    [18, 65, 50, 83, "Source status stays visible beside the page chip."]
+  ] },
+  { "id": "empty", "title": "New-tab errors", "file": "newtab-error.png", "notes": [
+    [85, 75, 78, 59, "The error card fits its content instead of filling the remaining window."],
+    [85, 20, 50, 53, "Error and recovery action stay together."]
+  ] },
+  { "id": "translation-window", "title": "Translation window", "file": "translation-controls-fixture.png", "notes": [
+    [85, 8, 50, 31, "Larger labels and grouped language controls match the app’s visual rhythm."],
+    [85, 80, 48, 56, "Detailed sharing information is available without crowding the main actions."]
+  ] },
+  { "id": "setup", "title": "Setup on a narrow screen", "file": "onboarding-6-organato-optout-failed-narrow.png", "notes": [
+    [82, 13, 52, 20, "The illustration stays visible at a smaller size on narrow screens."],
+    [80, 85, 50, 73, "Failure wording is shorter and uses the shared error treatment."]
+  ] }
+]

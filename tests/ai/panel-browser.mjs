@@ -52,6 +52,7 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.textContent), 'GPT-6.1 Sol✓');
   await page.keyboard.press('ArrowDown');
   assert.equal(await page.evaluate(() => document.activeElement.textContent), 'GPT-6 Luna');
+  await page.screenshot({ path: `${evidence}/sidebar-model-menu.png` });
   await page.keyboard.press('Escape');
   assert.equal(await page.locator('#model-menu').isVisible(), false);
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
@@ -80,13 +81,27 @@ try {
 
   await page.getByRole('button', { name: 'Edit your personal context' }).click();
   await page.getByLabel('Your name', { exact: true }).fill('Ethan');
+  await page.screenshot({ path: `${evidence}/sidebar-profile-dialog.png` });
+  await page.setViewportSize({ width: 320, height: 640 });
+  assert.equal(await page.locator('#profile-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true);
+  await page.screenshot({ path: `${evidence}/sidebar-profile-dialog-narrow.png` });
+  await page.setViewportSize({ width: 400, height: 850 });
   await page.getByLabel('What should Breezer know?').fill('I build thoughtful software. Keep explanations clear and concise.');
   await page.getByRole('button', { name: 'Save context' }).click();
   assert.equal(await page.locator('#profile-dialog').isVisible(), false);
   assert.equal(await page.evaluate(() => window.testStorage.local.breezerProfile.context), 'I build thoughtful software. Keep explanations clear and concise.');
 
+  await page.getByRole('button', { name: 'Model options', exact: true }).click();
   await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
   await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
+  await page.screenshot({ path: `${evidence}/sidebar-model-options.png` });
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const optionsBounds = await page.locator('#inference-options').boundingBox();
+  assert.ok(optionsBounds.x >= 0 && optionsBounds.x + optionsBounds.width <= 320 && optionsBounds.y >= 0 && optionsBounds.y + optionsBounds.height <= 640);
+  await page.screenshot({ path: `${evidence}/sidebar-model-options-narrow.png` });
+  await page.setViewportSize({ width: 400, height: 850 });
+  await page.getByRole('button', { name: 'Model options', exact: true }).click();
   assert.match(await page.locator('#notice-text').innerText(), /more of your Codex allowance/);
   await page.locator('#dismiss-notice').click();
   await page.locator('#model-button').click();
@@ -115,6 +130,7 @@ try {
   });
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
+  await page.getByRole('button', { name: 'Model options', exact: true }).click();
   assert.equal(await page.locator('#speed-setting').isVisible(), false);
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
   await page.locator('#reasoning-select').selectOption('low');
@@ -141,10 +157,12 @@ try {
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
+  await page.getByRole('button', { name: 'Model options', exact: true }).click();
   assert.equal(await page.locator('#speed-setting').isVisible(), true);
   assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
   await page.locator('#reasoning-select').selectOption('xhigh');
   await page.screenshot({ path: `${evidence}/sidebar-settings.png` });
+  await page.getByRole('button', { name: 'Model options', exact: true }).click();
 
   await page.getByRole('button', { name: 'Summarize this page' }).click();
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
@@ -349,12 +367,15 @@ try {
   assert.equal(await page.locator('#model-label').innerText(), 'Choose a connected model');
   await page.getByLabel('Message Breezer').fill('Hello');
   await page.getByLabel('Message Breezer').press('Enter');
-  assert.match(await page.locator('#notice-text').innerText(), /Sign in to Codex or Claude to send/);
+  assert.equal(await page.locator('#notice').isVisible(), false);
+  assert.match(await page.locator('#welcome-status-text').innerText(), /Sign in to Codex or Claude/);
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Hello');
   assert.equal(await page.locator('#model-menu').isVisible(), true);
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 320, height: 640 });
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+  const signInGap = await page.evaluate(() => document.querySelector('#welcome-status').getBoundingClientRect().top - document.querySelector('#welcome h1').getBoundingClientRect().bottom);
+  assert.ok(signInGap >= 16, `Signed-out heading and recovery card must not overlap: ${signInGap}px`);
   await page.screenshot({ path: `${evidence}/sidebar-signed-out-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);

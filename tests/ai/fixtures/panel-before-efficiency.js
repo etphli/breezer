@@ -1,0 +1,662 @@
+import { ResearchSources, maskSecrets } from './research-sources.js';
+import { renderMessage, createMessageStream } from './render-message.js';
+import { latestModels } from './model-catalog.js';
+import { startPanelTheme } from './panel-theme.js';
+
+const $ = (id) => document.getElementById(id);
+const state = {
+  profile: { name: '', context: '' },
+  providers: [],
+  discoveryPending: true,
+  selection: null,
+  preferences: {},
+  messages: [],
+  includeContext: true,
+  control: false,
+  controlTabId: null,
+  running: null,
+  page: null,
+  pageKnown: false,
+  port: null,
+  sessionKey: 'breezer-conversation',
+  windowId: null,
+};
+const research = new ResearchSources({ api: chrome, root: document,
+  onChange: () => { if (research.size) setControl(false); updateControls(); },
+  onRevoke: reason => { if (state.running) stop(); notify(reason); },
+});
+const messageNodes = new Map();
+let scheduledRender = false;
+
+function notify(text) {
+  $('notice-text').textContent = text;
+  $('notice').hidden = !text;
+}
+
+function post(message) {
+  try {
+    if (!state.port) throw new Error('The assistant disconnected. Reopen it with ⌘ K to reconnect.');
+    state.port.postMessage(message);
+    return true;
+  } catch (error) {
+    notify(error.message);
+    finish(`Could not reach the assistant. ${error.message}`);
+    return false;
+  }
+}
+
+function selectedModel() {
+  const provider = state.providers.find((item) => item.id === state.selection?.provider);
+  const model = provider?.models?.find((item) => item.id === state.selection?.model);
+  return provider?.available && provider?.authenticated && model ? { provider, model } : null;
+}
+
+function selectedSettings(selected = selectedModel()) {
+  if (!selected) return { reasoning: '', speed: 'standard' };
+  const { provider, model } = selected;
+  const saved = state.preferences[`${provider.id}:${model.id}`];
+  const levels = model.reasoningEfforts || [];
+  const fallback = levels.includes('high') ? 'high' : levels.includes(model.defaultReasoningEffort) ? model.defaultReasoningEffort : '';
+  return {
+    reasoning: saved?.reasoning === '' || levels.includes(saved?.reasoning) ? saved.reasoning : fallback,
+    speed: model.speeds?.includes('fast') && saved?.speed === 'fast' ? 'fast' : 'standard',
+  };
+}
+
+function renderSettings(selected, running) {
+  const settings = selectedSettings(selected);
+  const levels = selected?.model.reasoningEfforts || [];
+  const reasoning = $('reasoning-select');
+  reasoning.replaceChildren(new Option('Default', ''));
+  for (const level of levels) {
+    const label = ({ xhigh: 'Extra high' })[level] || level.charAt(0).toUpperCase() + level.slice(1);
+    reasoning.add(new Option(label, level));
+  }
+  reasoning.value = settings.reasoning;
+  reasoning.disabled = running || !levels.length;
+  reasoning.parentElement.title = levels.length ? 'Reasoning effort' : 'This model does not report adjustable reasoning effort';
+  const codex = selected?.provider.id === 'codex';
+  $('speed-setting').hidden = !codex;
+  const speed = $('speed-select');
+  speed.replaceChildren(new Option('Standard', 'standard'));
+  const fast = new Option('Fast', 'fast');
+  fast.title = 'Higher usage; account eligibility is checked when you send';
+  fast.disabled = !selected?.model.speeds?.includes('fast');
+  speed.add(fast);
+  speed.value = settings.speed;
+  speed.disabled = running || !codex;
+  $('speed-setting').title = fast.disabled ? 'Fast is not available for this model and CLI' : 'Fast uses more of your Codex allowance. Account eligibility is checked when you send.';
+}
+
+function saveSettings() {
+  const selected = selectedModel();
+  if (!selected || state.running) return;
+  state.preferences[`${selected.provider.id}:${selected.model.id}`] = {
+    reasoning: $('reasoning-select').value,
+    ...(selected.provider.id === 'codex' ? { speed: $('speed-select').value } : {}),
+  };
+  chrome.storage.local.set({ breezerModelPreferences: state.preferences }).catch(() => notify('Your model preferences could not be saved.'));
+  updateControls();
+}
+
+function updateControls() {
+  const running = Boolean(state.running);
+  $('send').disabled = !running && (!selectedModel() || !$('prompt').value.trim());
+  $('send').dataset.running = String(running);
+  $('send').setAttribute('aria-label', running ? 'Stop response' : 'Send message');
+  $('send').title = running ? 'Stop response' : 'Send message';
+  $('send-arrow').toggleAttribute('hidden', running);
+  $('send-stop').hidden = !running;
+  research.setBusy(running);
+  $('control-toggle').disabled = running || !state.page || research.size > 0;
+  $('context-toggle').hidden = research.size > 0;
+  $('context-toggle').disabled = running || !state.page || research.size > 0;
+  $('control-toggle').setAttribute('aria-pressed', String(state.control));
+  $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
+  $('context-check').hidden = !state.includeContext;
+  const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
+  $('context-hint').dataset.state = share;
+  $('context-hint').textContent = research.size ? `${research.size} selected tabs · text only · no control` : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('control-toggle').title = state.page
+    ? 'Let Breezer click, type, scroll, and navigate in this tab until you turn this off'
+    : 'Browser control works only on ordinary web pages';
+  $('prompt').placeholder = research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
+  const selected = selectedModel();
+  renderWelcomeStatus(selected);
+  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
+  $('provider-dot').classList.toggle('connected', Boolean(selected));
+  $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
+  $('model-button').disabled = running;
+  const summarize = document.querySelector('[data-prompt^="Summarize"]');
+  if (summarize) {
+    summarize.dataset.prompt = research.size ? 'Summarize these selected pages and cite the sources.' : 'Summarize this page. What should I take away from it?';
+    summarize.querySelector('span').textContent = research.size ? 'Summarize selected sources' : 'Summarize this page';
+  }
+  renderSettings(selected, running);
+}
+
+// The empty state names whatever is stopping the next message, with one way forward.
+function renderWelcomeStatus(selected) {
+  let text = '';
+  let action = '';
+  if (!selected && !state.discoveryPending) {
+    const connected = state.providers.some((item) => item.available && item.authenticated);
+    text = connected ? 'Choose a model to start.' : 'Sign in to Codex or Claude to start. Run codex login or claude auth login in Terminal, then refresh.';
+    action = connected ? 'Choose a model' : 'Refresh accounts';
+  } else if (state.pageKnown && !state.page) {
+    text = 'Open a web page to summarize it or get help with it. You can still ask anything below.';
+  }
+  $('welcome-status').hidden = !text;
+  $('welcome-status-text').textContent = text;
+  $('welcome-action').hidden = !action;
+  $('welcome-action').textContent = action;
+  document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
+}
+
+function refreshModels() {
+  state.discoveryPending = true;
+  updateControls();
+  post({ type: 'init', windowId: state.windowId });
+}
+
+function providerLabel(id) {
+  return id === 'codex' ? 'Codex' : id === 'claude' ? 'Claude' : id;
+}
+
+function renderModels() {
+  $('model-options').replaceChildren();
+  if (!state.providers.length) {
+    const note = document.createElement('p');
+    note.className = 'provider-error';
+    note.textContent = 'Checking your local Codex and Claude accounts…';
+    $('model-options').append(note);
+  }
+  for (const provider of state.providers) {
+    const group = document.createElement('div');
+    group.className = 'provider-group';
+    const heading = document.createElement('div');
+    heading.className = 'provider-heading';
+    const name = document.createElement('span');
+    name.textContent = providerLabel(provider.id);
+    const status = document.createElement('span');
+    status.className = 'provider-state';
+    status.textContent = !provider.available ? 'Unavailable' : !provider.authenticated ? 'Sign in required' : 'Connected';
+    heading.append(name, status);
+    group.append(heading);
+    for (const model of provider.models || []) {
+      const button = document.createElement('button');
+      button.className = 'model-option';
+      const isSelected = state.selection?.provider === provider.id && state.selection?.model === model.id;
+      button.classList.toggle('selected', isSelected);
+      button.disabled = Boolean(state.running) || !provider.available || !provider.authenticated;
+      button.setAttribute('aria-pressed', String(isSelected));
+      const label = document.createElement('span');
+      label.textContent = model.label || model.id;
+      button.append(label);
+      if (isSelected) {
+        const check = document.createElement('span');
+        check.textContent = '✓';
+        check.setAttribute('aria-hidden', 'true');
+        button.append(check);
+      }
+      button.addEventListener('click', () => {
+        state.selection = { provider: provider.id, model: model.id };
+        chrome.storage.local.set({ breezerModel: state.selection }).catch(() => {});
+        renderModels();
+        updateControls();
+        setModelMenu(false);
+        $('prompt').focus();
+      });
+      group.append(button);
+    }
+    if (provider.error || !provider.authenticated) {
+      const error = document.createElement('p');
+      error.className = 'provider-error';
+      error.textContent = provider.error || `Sign in with ${provider.id === 'codex' ? 'codex login' : 'claude auth login'} in Terminal, then refresh.`;
+      group.append(error);
+    }
+    $('model-options').append(group);
+  }
+}
+
+function acceptProviders(providers) {
+  state.discoveryPending = false;
+  state.providers = Array.isArray(providers)
+    ? providers.map((provider) => ({ ...provider, models: latestModels(provider.models) }))
+    : [];
+  if (!selectedModel()) {
+    const codex = state.providers.find((item) => item.id === 'codex' && item.available && item.authenticated);
+    const provider = codex || state.providers.find((item) => item.available && item.authenticated && item.models?.length);
+    const preferred = provider?.id === 'codex' && provider.models?.find((item) => item.id === 'gpt-6.1-sol');
+    const fallback = provider?.models?.find((item) => item.id === provider.defaultModel) || provider?.models?.[0];
+    state.selection = provider && (preferred || fallback) ? { provider: provider.id, model: (preferred || fallback).id } : null;
+  }
+  renderModels();
+  updateControls();
+}
+
+function setModelMenu(open, focus = false) {
+  $('model-menu').hidden = !open;
+  $('model-button').setAttribute('aria-expanded', String(open));
+  if (open) renderModels();
+  if (open && focus) {
+    const options = [...$('model-options').querySelectorAll('.model-option:not(:disabled)')];
+    (options.find((item) => item.classList.contains('selected')) || options[0] || $('refresh-models')).focus();
+  }
+}
+
+function setPage(page) {
+  state.pageKnown = true;
+  state.page = page?.url && /^https?:\/\//i.test(page.url) ? page : null;
+  if (!state.page) {
+    state.includeContext = false;
+    setControl(false);
+  } else if (state.control && page.tabId !== state.controlTabId) {
+    setControl(false);
+    notify('Browser control turned off because the active tab changed. Turn it on again to let Breezer act in this tab.');
+  }
+  let label = 'No web page in this tab';
+  if (state.page) {
+    try { label = page.title || new URL(page.url).hostname; } catch { label = page.title || 'Current page'; }
+  }
+  $('context-title').textContent = label;
+  $('context-toggle').title = state.page ? `${page.url}\nInclude this page and a screenshot with your message` : 'Include the current page and a screenshot with your message';
+  updateControls();
+}
+
+// Consent belongs to one tab. It lasts across replies until the user turns it off,
+// stops a reply, switches tabs, starts a new conversation, or control fails.
+function setControl(on) {
+  if (on && research.size) return;
+  state.control = on && Boolean(state.page);
+  state.controlTabId = state.control ? state.page.tabId : null;
+  if (state.control) state.includeContext = true;
+}
+
+function applyProfile() {
+  $('greeting-name').textContent = state.profile.name.trim() || 'there';
+  $('open-profile').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
+}
+
+function appendMessage(message) {
+  const article = document.createElement('article');
+  article.className = `message ${message.role}`;
+  article.setAttribute('aria-label', message.role === 'user' ? 'You' : 'Breezer');
+  const body = document.createElement('div');
+  body.className = 'message-body';
+  if (message.role === 'assistant') {
+    const heading = document.createElement('div');
+    heading.className = 'assistant-heading';
+    const logo = document.createElement('img');
+    logo.src = 'icon128.png';
+    logo.alt = '';
+    const label = document.createElement('span');
+    label.textContent = 'Breezer';
+    heading.append(logo, label);
+    article.append(heading);
+    if (message.text) renderMessage(body, message.text);
+    else {
+      const thinking = document.createElement('div');
+      thinking.className = 'thinking';
+      thinking.setAttribute('aria-label', 'Thinking');
+      for (let i = 0; i < 3; i++) thinking.append(document.createElement('span'));
+      body.append(thinking);
+    }
+  } else body.textContent = message.text;
+  article.append(body);
+  if (message.contextTitle) {
+    const meta = document.createElement('div');
+    meta.className = 'message-meta';
+    meta.textContent = message.contextTitle;
+    article.append(meta);
+  }
+  $('messages').append(article);
+  messageNodes.set(message.id, body);
+  $('welcome').hidden = true;
+  return body;
+}
+
+function saveConversation() {
+  const messages = state.messages.filter((item) => item.text).slice(-60);
+  return chrome.storage.session.set({ [state.sessionKey]: messages }).catch(() => {});
+}
+
+function scrollToBottom() {
+  $('conversation').scrollTop = $('conversation').scrollHeight;
+}
+
+function renderDelta() {
+  if (scheduledRender) return;
+  scheduledRender = true;
+  requestAnimationFrame(() => {
+    scheduledRender = false;
+    const message = state.messages.find((item) => item.id === state.running?.assistantId);
+    const body = message && messageNodes.get(message.id);
+    if (!body) return;
+    const scroller = $('conversation');
+    const atBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 100;
+    const run = state.running;
+    run.renderer ||= createMessageStream(body);
+    run.renderer.append(message.text.slice(run.renderedLength || 0));
+    run.renderedLength = message.text.length;
+    if (atBottom) scrollToBottom();
+  });
+}
+
+// A failed or empty reply can be reused, but only by putting it back in the composer.
+// Nothing is resent, and browser control stays off until the user turns it on again.
+function offerRetry(run) {
+  const body = run && messageNodes.get(run.assistantId);
+  const original = run && state.messages.find((item) => item.id === run.id);
+  if (!body || !original || body.parentElement.querySelector('.retry-button')) return;
+  const article = body.parentElement;
+  article.classList.add('failed');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'retry-button';
+  button.textContent = 'Edit and resend';
+  button.addEventListener('click', () => {
+    if (state.running) return;
+    const prompt = $('prompt');
+    if (prompt.value.trim() && prompt.value.trim() !== original.text) {
+      notify('Your draft is still in the message box. Send or clear it first, then choose Edit and resend.');
+      prompt.focus();
+      return;
+    }
+    prompt.value = original.text;
+    resizePrompt();
+    prompt.focus();
+    prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+    if (run.control && !state.control) notify('Browser control is off. Turn it on again before sending if Breezer should act in this tab.');
+  });
+  article.append(button);
+  button.scrollIntoView({ block: 'nearest' });
+}
+
+function finish(label, keepControl = false) {
+  if (state.running) {
+    state.running.renderer?.dispose();
+    state.running.renderer = null;
+    const message = state.messages.find((item) => item.id === state.running.assistantId);
+    if (message && !message.text) {
+      message.text = label || 'Response stopped.';
+      renderMessage(messageNodes.get(message.id), message.text);
+    } else if (message) renderMessage(messageNodes.get(message.id), message.text);
+  }
+  state.running = null;
+  if (!keepControl) setControl(false);
+  $('activity').hidden = true;
+  updateControls();
+  saveConversation();
+  // The stop button turns into a disabled send button; keep keyboard focus in the composer.
+  if (document.activeElement === $('send') || document.activeElement === $('activity-stop') || document.activeElement === document.body) $('prompt').focus();
+}
+
+function stop() {
+  if (!state.running) return;
+  const run = state.running;
+  const replied = Boolean(state.messages.find((item) => item.id === run.assistantId)?.text);
+  post({ type: 'cancel', id: run.id });
+  finish('Stopped.');
+  if (!replied) offerRetry(run);
+}
+
+// The reason is shown in the reply itself, so it is only announced, not repeated in the notice bar.
+function fail(reason, label) {
+  const run = state.running;
+  notify('');
+  $('announcer').textContent = label;
+  finish(label);
+  offerRetry(run);
+}
+
+function revealPanel() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelector('.panel').animate(
+    [{ opacity: 0, transform: 'translateX(6px)' }, { opacity: 1, transform: 'translateX(0)' }],
+    { duration: 120, easing: 'ease-out' },
+  );
+}
+
+async function send() {
+  if (state.running) return stop();
+  const text = $('prompt').value.trim();
+  const selected = selectedModel();
+  if (text && !selected) {
+    const connected = state.providers.some((item) => item.available && item.authenticated);
+    notify(state.discoveryPending ? 'Still checking your Codex and Claude accounts. Send again in a moment.'
+      : connected ? 'Choose a connected model to send this message.' : 'Sign in to Codex or Claude to send this message. Your text is still here.');
+    if (!state.discoveryPending) setModelMenu(true, true);
+    return;
+  }
+  if (!text) return;
+  const settings = selectedSettings(selected);
+  setModelMenu(false);
+  notify('');
+  $('announcer').textContent = '';
+  const id = crypto.randomUUID();
+  const assistantId = `${id}-reply`;
+  const history = state.messages.filter((item) => item.text).slice(-30).map(({ role, text: content }) => ({ role, content }));
+  const userMessage = { id, role: 'user', text, contextTitle: research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '' };
+  const assistantMessage = { id: assistantId, role: 'assistant', text: '' };
+  state.messages.push(userMessage, assistantMessage);
+  appendMessage(userMessage);
+  appendMessage(assistantMessage);
+  state.running = { id, assistantId, control: state.control };
+  $('prompt').value = '';
+  resizePrompt();
+  $('activity').hidden = false;
+  $('activity-label').textContent = state.control ? 'Getting ready to help' : 'Thinking';
+  updateControls();
+  scrollToBottom();
+  let sources;
+  if (research.size) {
+    // Start before awaiting anything so native sees the user's send gesture.
+    post({ type: 'research-begin', id, sources: [...research.selected.values()].map(tab => ({ tabId: tab.tabId, documentId: tab.documentId, expectedUrl: tab.url })) });
+    const capture = research.capture();
+    try {
+      sources = await capture;
+      if (state.running?.id !== id) return;
+      const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
+      userMessage.contextTitle = summary;
+      const meta = messageNodes.get(id)?.parentElement.querySelector('.message-meta');
+      if (meta) meta.textContent = summary;
+      if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');
+    } catch (error) {
+      if (state.running?.id === id) fail(error.message, `Could not read selected sources. ${error.message}`);
+      return;
+    }
+  } else if (state.includeContext || state.control) {
+    try {
+      const allowed = await chrome.breezerPrivate.authorizeCurrentPage();
+      if (!allowed) throw new Error('Page access is only available on ordinary HTTP or HTTPS web pages.');
+      if (state.running?.id !== id) return;
+    } catch (error) {
+      if (state.running?.id !== id) return;
+      fail(error.message, `Could not access this page. ${error.message}`);
+      return;
+    }
+  }
+  const sent = post({
+    type: 'chat', id, provider: selected.provider.id, model: selected.model.id,
+    ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
+    ...(selected.provider.id === 'codex' ? { speed: settings.speed } : {}),
+    message: text, history, profile: state.profile,
+    includeContext: !sources && state.includeContext, control: !sources && state.control,
+    ...(sources ? { researchSources: sources } : {}),
+  });
+  if (!sent) offerRetry({ id, assistantId, control: false });
+}
+
+function receive(message) {
+  if (message.type === 'research-invalidated') { research.invalidate(message.tabId, message.reason); return; }
+  if (message.type === 'status') return acceptProviders(message.providers);
+  if (message.type === 'context') return setPage(message.context);
+  if (message.id && message.id !== state.running?.id) return;
+  if (message.type === 'error') {
+    state.discoveryPending = false;
+    const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
+    if (!state.running) return notify(reason);
+    fail(reason, `Could not finish this response. ${reason}`);
+  } else if (message.type === 'delta' && state.running) {
+    const reply = state.messages.find((item) => item.id === state.running.assistantId);
+    reply.text += message.text || '';
+    renderDelta();
+  } else if (message.type === 'complete') finish(undefined, !message.cancelled);
+  else if (message.type === 'activity' && state.running) {
+    $('activity').hidden = !message.active;
+    $('activity-label').textContent = message.label || 'Working in this tab';
+  }
+}
+
+function resizePrompt() {
+  $('prompt').style.height = 'auto';
+  $('prompt').style.height = `${Math.min(160, Math.max(53, $('prompt').scrollHeight))}px`;
+  updateControls();
+}
+
+$('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
+$('prompt').addEventListener('input', resizePrompt);
+$('prompt').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+    event.preventDefault();
+    if (!state.running) send();
+  }
+});
+$('activity-stop').addEventListener('click', stop);
+$('close-panel').addEventListener('click', async () => {
+  stop();
+  try { await chrome.sidePanel.close({ windowId: state.windowId }); }
+  catch (error) { notify(error.message); }
+});
+$('dismiss-notice').addEventListener('click', () => notify(''));
+$('context-toggle').addEventListener('click', () => {
+  state.includeContext = !state.includeContext;
+  if (!state.includeContext) setControl(false);
+  if (state.includeContext) post({ type: 'context' });
+  updateControls();
+});
+$('control-toggle').addEventListener('click', () => {
+  setControl(!state.control);
+  notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
+  updateControls();
+});
+document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => {
+  $('prompt').value = button.dataset.prompt;
+  if (button.dataset.control && state.page) {
+    setControl(true);
+    notify('Browser control is on for this tab. Describe the task, then send.');
+  }
+  resizePrompt();
+  $('prompt').focus();
+}));
+$('new-chat').addEventListener('click', () => {
+  stop();
+  research.clear();
+  state.messages = [];
+  messageNodes.clear();
+  $('messages').replaceChildren();
+  $('welcome').hidden = false;
+  setControl(false);
+  notify('');
+  updateControls();
+  saveConversation();
+  post({ type: 'context' });
+  $('prompt').focus();
+});
+$('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
+$('model-menu').addEventListener('keydown', (event) => {
+  if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')];
+  const index = options.indexOf(document.activeElement);
+  if (index < 0) return;
+  event.preventDefault();
+  options[(index + (event.key === 'ArrowDown' ? 1 : options.length - 1)) % options.length].focus();
+});
+$('model-menu').addEventListener('focusout', (event) => {
+  if (event.relatedTarget && !$('model-menu').contains(event.relatedTarget) && event.relatedTarget !== $('model-button')) setModelMenu(false);
+});
+$('welcome-action').addEventListener('click', () => {
+  if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);
+  else refreshModels();
+});
+$('reasoning-select').addEventListener('change', saveSettings);
+$('speed-select').addEventListener('change', () => {
+  saveSettings();
+  notify($('speed-select').value === 'fast' ? 'Fast uses more of your Codex allowance. Availability depends on your account.' : '');
+});
+$('refresh-models').addEventListener('click', refreshModels);
+document.addEventListener('click', (event) => {
+  if (!$('model-menu').contains(event.target) && !$('model-button').contains(event.target)) setModelMenu(false);
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    if (!$('model-menu').hidden) { setModelMenu(false); $('model-button').focus(); }
+    else if (state.running) stop();
+  }
+});
+document.addEventListener('visibilitychange', () => {
+  if (state.port) post({ type: 'visibility', visible: !document.hidden });
+  if (document.hidden) { stop(); research.clear(); }
+  else if (state.port) { revealPanel(); post({ type: 'context' }); }
+});
+$('open-profile').addEventListener('click', () => {
+  $('profile-name').value = state.profile.name;
+  $('profile-context').value = state.profile.context;
+  $('profile-dialog').showModal();
+});
+$('close-profile').addEventListener('click', () => $('profile-dialog').close());
+$('profile-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  state.profile = { name: $('profile-name').value.trim().slice(0, 80), context: $('profile-context').value.trim().slice(0, 6000) };
+  try {
+    await chrome.storage.local.set({ breezerProfile: state.profile });
+    applyProfile();
+    $('profile-dialog').close();
+  } catch { notify('Your context could not be saved. Please try again.'); }
+});
+
+// Setup or another panel may save the profile while this panel is open.
+chrome.storage.onChanged?.addListener((changes, area) => {
+  const profile = area === 'local' ? changes.breezerProfile?.newValue : null;
+  if (profile && typeof profile.name === 'string' && typeof profile.context === 'string') { state.profile = profile; applyProfile(); }
+});
+
+async function initialize() {
+  try {
+    const [saved, currentWindow] = await Promise.all([
+      chrome.storage.local.get(['breezerProfile', 'breezerModel', 'breezerModelPreferences']),
+      chrome.windows.getCurrent(),
+    ]);
+    if (saved.breezerProfile && typeof saved.breezerProfile.name === 'string' && typeof saved.breezerProfile.context === 'string') state.profile = saved.breezerProfile;
+    state.selection = saved.breezerModel || null;
+    if (saved.breezerModelPreferences && typeof saved.breezerModelPreferences === 'object' && !Array.isArray(saved.breezerModelPreferences)) state.preferences = saved.breezerModelPreferences;
+    state.windowId = currentWindow.id;
+    state.sessionKey = `breezer-conversation-${currentWindow.id}`;
+    const session = await chrome.storage.session.get(state.sessionKey);
+    if (Array.isArray(session[state.sessionKey])) {
+      state.messages = session[state.sessionKey].filter((item) => ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-60);
+      state.messages.forEach(appendMessage);
+    }
+    applyProfile();
+    state.port = chrome.runtime.connect({ name: 'breezer-panel' });
+    state.port.onMessage.addListener(receive);
+    state.port.onDisconnect.addListener(() => {
+      state.port = null;
+      notify('The assistant disconnected. Reopen it with ⌘ K to reconnect.');
+      finish();
+    });
+    post({ type: 'init', windowId: state.windowId });
+    post({ type: 'visibility', visible: !document.hidden });
+    post({ type: 'context' });
+    updateControls();
+    scrollToBottom();
+    revealPanel();
+    $('prompt').focus();
+  } catch (error) {
+    notify(`Could not open the assistant: ${error.message}`);
+  }
+}
+
+void startPanelTheme();
+initialize();

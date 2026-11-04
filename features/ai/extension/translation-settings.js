@@ -13,7 +13,7 @@ export async function mountTranslationSettings({ container, api }) {
   for (const [id, value] of Object.entries(PROVIDERS)) provider.append(el('option', value.name, { value: id }));
   const key = el('input', '', { id: 'translation-key', type: 'password', autocomplete: 'off', placeholder: 'Leave blank to keep saved key' });
   const clear = el('input', '', { id: 'translation-clear-key', type: 'checkbox' });
-  const save = el('button', 'Save translation settings', { type: 'button', class: 'text-button' });
+  const save = el('button', 'Save translation settings', { type: 'button', class: 'button primary' });
   const status = el('p', '', { class: 'field-note', role: 'status' });
   const group = el('div', '', { class: 'setting-group' });
   const row = (text, id, control, help) => {
@@ -22,17 +22,20 @@ export async function mountTranslationSettings({ container, api }) {
     if (help) label.append(el('small', help));
     line.append(label, control); group.append(line);
   };
-  row('Translation provider', 'translation-provider', provider);
+  row('Translation provider', 'translation-provider', provider, 'Local needs localhost:5000. Hosted uses LibreTranslate.com.');
   row('Provider API key', 'translation-key', key, 'Stored on this device. Leave blank to keep it.');
   row('Remove saved API key', 'translation-clear-key', clear);
   const guide = el('p', '', { class: 'section-note' });
   guide.append(el('a', 'Translation setup and supported content', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
+  const details = el('details', '', { class: 'setting-details' });
+  details.append(el('summary', 'Setup and privacy'),
+    el('p', 'Right-click a page and choose Translate page. Choose languages, translate and restore the original in the translation window. A keyboard shortcut can be set in Browser settings.'),
+    el('p', 'Local mode needs your LibreTranslate server at http://localhost:5000. Hosted mode requires your own LibreTranslate.com API key and sends page text there. Breezer does not provide a paid account or use your AI account.'),
+    el('p', 'Each translation needs your confirmation. Visible page text, including private text you can read, goes to the chosen server. Form fields, editors, code and frames are excluded. No page URL, cookies or browser credentials are included. Your provider can see your IP address. A local server may have its own connections or logging.'), guide);
+  const actions = el('div', '', { class: 'setting-actions' }); actions.append(save);
   section.append(el('h2', 'Page translation', { id: 'translation-heading' }),
-    el('p', 'Right-click a page and choose Translate page, or set a Translate page shortcut at chrome://extensions/shortcuts. Choose languages, translate and restore the original in the translation window.', { class: 'section-note' }),
-    el('p', 'Local mode needs your own LibreTranslate server at http://localhost:5000. Hosted mode sends page text to LibreTranslate.com and requires your own API key. Breezer does not provide a paid account or use your AI account.', { class: 'section-note' }),
-    group,
-    el('p', 'Nothing is translated automatically. Each translation needs your confirmation. Visible page text, including private text you can read, goes to the chosen server. Form fields, editors, code and frames are excluded. No page URL, cookies or browser credentials are included. Your provider can see your IP address. A local server may have its own network connections or logging.', { class: 'section-note' }),
-    guide, save, status);
+    el('p', 'Translate from a page’s right-click menu. Nothing is translated automatically.', { class: 'section-note' }),
+    group, actions, status, details);
   container.append(section);
   let prefs;
   try {

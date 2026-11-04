@@ -7,21 +7,9 @@ import { createHash } from 'node:crypto';
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
 const baselineSHA = 'ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb';
 const hash = text => createHash('sha256').update(text).digest('hex');
-// Inline inverse patch keeps the entire original controller pinned without a build fixture.
-function originalSource(current) {
-  if (hash(current) === baselineSHA) return current;
-  return current
-    .replace(/function recentMessages\(limit\) \{[\s\S]*?\n\}\n\n/, '')
-    .replace('recentMessages(60)', 'state.messages.filter((item) => item.text).slice(-60)')
-    .replace('recentMessages(30)', 'state.messages.filter((item) => item.text).slice(-30)')
-    .replace('const message = state.running?.message;', 'const message = state.messages.find((item) => item.id === state.running?.assistantId);')
-    .replace(/    \/\/ Resolve once[^\n]*\n    message: state.messages.find\(\(item\) => item.id === assistantId\),\n/, '')
-    .replace('state.running = {\n    id, assistantId, control: state.control,\n  };', 'state.running = { id, assistantId, control: state.control };')
-    .replace('    state.running.message = null;\n', '')
-    .replace('const reply = state.running.message;', 'const reply = state.messages.find((item) => item.id === state.running.assistantId);');
-}
-const baseline = originalSource(source);
-assert.equal(hash(baseline), baselineSHA, 'negative control must reconstruct the exact reviewed original');
+// The reviewed original is independent of unrelated UI changes in the current controller.
+const baseline = fs.readFileSync(new URL('./fixtures/panel-before-efficiency.js', import.meta.url), 'utf8');
+assert.equal(hash(baseline), baselineSHA, 'negative control must match the exact reviewed original');
 
 function harness(code, initial = [], ids = []) {
   const frames = [], posts = [], writes = [], events = [], renders = [], streams = [], elements = new Map();

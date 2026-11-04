@@ -6,21 +6,24 @@ import { syncModelValues } from './workspace-sync-model.js';
 export function mountSyncSettings({ container, api }) {
   let disposed = false, opening = false, repairing = false, recoveryRevision = 0, lastState;
   const section = document.createElement('section'); section.className = 'settings-section';
-  const title = document.createElement('h2'); title.textContent = 'Sync';
+  const title = document.createElement('h2'); title.textContent = 'Devices and data';
   const group = document.createElement('div'); group.className = 'setting-group';
   const row = document.createElement('div'); row.className = 'setting-row';
   row.dataset.searchTerms = 'encrypted spaces folders pins favorites passwords credentials provider recovery key disconnect';
   const label = document.createElement('div'); label.className = 'setting-label';
   const heading = document.createElement('span'); heading.textContent = 'Encrypted sync';
-  const description = document.createElement('small'); description.textContent = 'Choose a provider, connect a vault, manage recovery and disconnect in native Breezer settings. Browser-managed passwords stay in the native password manager.';
+  const description = document.createElement('small'); description.textContent = 'Sync saved spaces, favorites and passwords across your devices.';
   label.append(heading, description);
   const button = document.createElement('button'); button.type = 'button'; button.className = 'button'; button.textContent = 'Set up or manage sync';
   const available = typeof api.breezerPrivate?.readWorkspaceSync === 'function';
   button.disabled = !available;
+  if (!available) { heading.textContent = 'Sync unavailable'; description.textContent = 'This build does not include native sync setup.'; }
   row.append(label, button); group.append(row);
-  const state = document.createElement('p'); state.setAttribute('role', 'status');
-  const note = document.createElement('p'); note.className = 'settings-note';
-  note.textContent = 'Live tabs, windows, AI conversations and AI memory stay local. Platform passkeys are managed by Touch ID or Apple Passwords.';
+  const state = document.createElement('p'); state.setAttribute('role', 'status'); state.className = 'field-note';
+  const note = document.createElement('details'); note.className = 'setting-details';
+  const scopeTitle = document.createElement('summary'); scopeTitle.textContent = 'What syncs';
+  const scope = document.createElement('p'); scope.textContent = 'Live tabs, windows, AI conversations and AI memory stay local. Platform passkeys are managed by Touch ID or Apple Passwords. Provider, vault, password selection and recovery are managed in browser settings.';
+  note.append(scopeTitle, scope);
   const review = document.createElement('details'); review.hidden = true;
   const summary = document.createElement('summary'); summary.textContent = 'Resolve workspace limits';
   const explanation = document.createElement('p'); explanation.textContent = 'Concurrent edits can exceed this profile\'s space or favorite limit. Removing a synced space keeps its saved pins in the first remaining space. Moving a favorite keeps it as a saved pin. These choices sync to your other profiles.';
@@ -61,7 +64,7 @@ export function mountSyncSettings({ container, api }) {
   const render = value => {
     if (disposed) return;
     lastState = value;
-    state.textContent = !available ? 'This build does not include native sync setup.'
+    state.textContent = !available ? ''
       : ['error', 'appearanceBlocked'].includes(value?.phase) ? value.message
         : value?.nativeError ? value.nativeMessage
         : ['disabled', 'workspaceOff'].includes(value?.phase) ? 'Saved workspace sync is off. Check native setup for password sync and provider status.'

@@ -40,7 +40,7 @@ function installFixture({ colorMode, theme }) {
         port.reply = (message) => port.onMessage.list.forEach((fn) => fn(structuredClone(message)));
         fx.ports[name] = port;
         // Context settings answer immediately; Organato and updates are driven by the test.
-        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, sites: [] } }), 0);
+        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 } }), 0);
         return port;
       },
     },
@@ -79,7 +79,8 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(category ? `${url}/${category}` : url);
-    await page.getByRole('heading', { name: category ? 'Settings' : 'Bring your Chrome data to Breezer', exact: true }).waitFor();
+    if (category) await page.locator('#settings-title').waitFor();
+    else await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer', exact: true }).waitFor();
     // Initial helper replies: Organato not connected, no update available.
     await page.evaluate(() => {
       const org = window.fx.ports['breezer-organato-settings'];
@@ -94,8 +95,8 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     // ---------------------------------------------------- light, first run
     const { page, context } = await open();
     await page.screenshot({ path: join(evidence, 'settings-onboarding-light.png') });
+    assert.equal(await page.locator('#organato-disconnect').isDisabled(), true, 'Disconnect is unavailable until connected');
     // Subtle buttons must not inherit the sidebar's hover-only .quiet opacity.
-    for (const id of ['organato-disconnect']) assert.equal(await page.locator(`#${id}`).evaluate((node) => getComputedStyle(node).opacity), '1');
     assert.equal(await page.getByRole('button', { name: 'Hide getting started' }).evaluate((node) => getComputedStyle(node).opacity), '1');
     // Native import destinations, keyboard only.
     await page.getByRole('button', { name: 'Import bookmarks and history' }).first().focus();
@@ -142,6 +143,10 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.getByRole('link', { name: 'General' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: {} }); });
     await page.getByRole('button', { name: 'Check for updates' }).click();
+    await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: false, error: 'Update helper unavailable. Try again.' }); });
+    assert.match(await page.locator('#update-status').innerText(), /unavailable/);
+    await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-unavailable-light.png') });
+    await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: { available: true, version: '1.1.1' } }); });
     assert.equal(await page.getByRole('button', { name: 'Update and restart' }).isVisible(), true);
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-light.png') });
@@ -151,9 +156,10 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.locator('[data-onboarding]').waitFor({ state: 'hidden' });
     assert.equal(await page.evaluate(() => document.activeElement.id), 'settings-title');
     await page.reload();
-    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('#settings-title').waitFor();
     await page.waitForTimeout(100);
     assert.equal(await page.locator('[data-onboarding]').isHidden(), true, 'stays hidden after reload');
+    await page.screenshot({ path: join(evidence, 'settings-general-setup-dismissed.png') });
     await page.getByRole('link', { name: 'Browser settings' }).click();
     assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).count(), 1, 'browser import remains in More browser settings');
     await context.close();
@@ -183,6 +189,11 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await narrow.page.locator('#organato-settings').scrollIntoViewIfNeeded();
     assert.equal(await noOverflow(narrow.page), true);
     await narrow.page.locator('#organato-settings').screenshot({ path: join(evidence, 'settings-organato-narrow-busy.png') });
+    await narrow.page.locator('#settings-category-select').selectOption('general');
+    await narrow.page.getByRole('button', { name: 'Check for updates' }).click();
+    await narrow.page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: false, error: 'Update helper unavailable. Try again.' }); });
+    assert.match(await narrow.page.locator('#update-status').innerText(), /unavailable/);
+    await narrow.page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-unavailable-narrow.png') });
     await narrow.context.close();
 
     assert.deepEqual(errors, []);

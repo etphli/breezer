@@ -10,13 +10,26 @@ export async function mountUsageSettings({ api, container }) {
   const section = el('section', '', { class: 'settings-section', 'aria-labelledby': 'usage-heading' });
   const row = el('div', '', { class: 'setting-row' });
   const label = el('label', 'Share basic usage statistics', { class: 'setting-label', for: 'usage-enabled' });
-  label.append(el('small', 'Help measure active users and time spent in Breezer. Enabled by default. No browsing history, URLs, page contents, passwords, or AI conversations are sent.'));
+  label.append(el('small', 'Active-use counts only. No browsing history, URLs, page contents, passwords or AI chats. On by default.'));
   row.append(label, el('input', '', { id: 'usage-enabled', class: 'toggle', type: 'checkbox', disabled: '' }));
   const policy = el('p', 'GitHub separately counts installer downloads. ', { class: 'section-note' });
   policy.append(el('a', 'Read the privacy policy', { href: 'https://breezer-browser.vercel.app/privacy-policy', target: '_blank', rel: 'noreferrer' }));
-  section.append(el('h2', 'Privacy and usage', { id: 'usage-heading' }), row,
-    el('p', 'A random identifier changes each month. Time counts only while a regular Breezer window is focused and your computer is active. Turning this off stops future reporting and clears the local counter. Reports already received expire within 63 days.', { class: 'section-note' }),
-    policy, el('p', '', { class: 'field-note', role: 'status', id: 'usage-status' }));
+  const group = el('div', '', { class: 'setting-group' });
+  const browserRow = el('div', '', { class: 'setting-row' });
+  const browserLabel = el('div', '', { class: 'setting-label' });
+  browserLabel.append(el('span', 'Browsing privacy'), el('small', 'Cookies, site permissions and browsing data.'));
+  const browser = el('button', 'Privacy and security', { type: 'button', class: 'button' });
+  browser.disabled = typeof api.tabs?.create !== 'function';
+  browser.addEventListener('click', async () => {
+    try { await api.tabs.create({ url: 'chrome://settings/privacy' }); }
+    catch { status.textContent = 'Could not open privacy settings. Try again.'; }
+  });
+  browserRow.append(browserLabel, browser); group.append(browserRow, row);
+  const details = el('details', '', { class: 'setting-details' });
+  details.append(el('summary', 'About usage statistics'),
+    el('p', 'A random identifier changes each month. Time counts only while a regular Breezer window is focused and your computer is active. Turning this off stops future reporting and clears the local counter. Reports already received expire within 63 days.'), policy);
+  section.append(el('h2', 'Privacy', { id: 'usage-heading' }), group, details,
+    el('p', '', { class: 'field-note', role: 'status', id: 'usage-status' }));
   container.append(section);
   const control = container.querySelector('#usage-enabled');
   const status = container.querySelector('#usage-status');
