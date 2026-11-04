@@ -21,7 +21,7 @@
     <main id="conversation" class="conversation" tabindex="-1" aria-label="Conversation">
       <section id="welcome" class="welcome">
         <div class="welcome-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M12 25c0-8 7-14 16-14M12 25c0 8 6 13 13 13 8 0 13-6 13-13 0-6-4-10-10-10-5 0-9 4-9 9 0 4 3 7 7 7"/></svg></div>
-        <h1>What are we working on,<br><span id="greeting-name">there</span>?</h1>
+        <h1>What are we working on<span id="greeting-name"></span>?</h1>
         <p class="welcome-note">A question, a closer look, or a little help getting something done.</p>
         <div id="welcome-status" class="welcome-status" role="status" hidden><p id="welcome-status-text"></p><button type="button" id="welcome-action" class="welcome-action" hidden></button></div>
         <div class="suggestions">
@@ -43,13 +43,13 @@
       <div class="context-row">
         <button type="button" id="context-toggle" class="context-chip" aria-pressed="true" aria-describedby="context-hint" title="Include the current page and a screenshot with your message">
           <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
-          <span id="context-title">Current page</span><span id="context-check" aria-hidden="true">✓</span>
+          <span id="context-title">Current page</span><span id="context-action" class="context-action">Include</span><span id="context-check" aria-hidden="true">✓</span>
         </button>
         <span id="context-hint" class="context-hint" data-state="shared">Page + screenshot</span>
       </div>
       <form id="composer" class="composer">
         <label for="prompt" class="sr-only">Message Breezer</label>
-        <textarea id="prompt" rows="2" maxlength="24000" placeholder="Ask about this page…" autocomplete="off" spellcheck="true" aria-describedby="prompt-keys" aria-keyshortcuts="Enter"></textarea>
+        <textarea id="prompt" rows="1" maxlength="24000" placeholder="Ask about this page…" autocomplete="off" spellcheck="true" aria-describedby="prompt-keys" aria-keyshortcuts="Enter"></textarea>
         <span id="prompt-keys" class="sr-only">Enter sends. Shift+Enter adds a new line. Escape stops a reply.</span>
         <div class="composer-tools">
           <button type="button" id="control-toggle" class="control-toggle" aria-pressed="false" aria-describedby="context-hint" title="Let Breezer click, type, scroll, and navigate in this tab until you turn this off"><svg viewBox="0 0 24 24"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Browser control</span><span class="switch" aria-hidden="true"></span></button>
@@ -59,12 +59,12 @@
       <div class="bottom-row">
         <button type="button" id="model-button" class="model-button" aria-controls="model-menu" aria-haspopup="dialog" aria-expanded="false"><span id="provider-dot" class="provider-dot"></span><span id="model-label">Connecting your accounts</span><svg viewBox="0 0 16 16"><path d="m4 6 4 4 4-4"/></svg></button>
         <label class="setting-select" title="Reasoning effort">
-          <span class="sr-only">Reasoning effort</span>
+          <span>Reasoning</span>
           <select id="reasoning-select" aria-label="Reasoning effort" disabled><option value="">Default</option></select>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
         </label>
         <label id="speed-setting" class="setting-select" title="Codex speed" hidden>
-          <span class="sr-only">Codex speed</span>
+          <span>Speed</span>
           <select id="speed-select" aria-label="Codex speed" disabled><option value="standard">Standard</option></select>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
         </label>

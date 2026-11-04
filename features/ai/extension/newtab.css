@@ -22,10 +22,15 @@
   --serif: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --column: min(1040px, calc(100vw - 48px));
-  --line: color-mix(in srgb, var(--ink) 10%, transparent);
-  --hover: color-mix(in srgb, var(--ink) 6%, transparent);
-  /* The sheet is a shade off the card in dark mode so it reads as lifted. */
-  --sheet: var(--card);
+  --line: color-mix(in srgb, var(--ink) 9%, transparent);
+  --hover: color-mix(in srgb, var(--ink) 5%, transparent);
+  /* Mixed from the tone so the sky carries a hint of colour, as in workspace.css. */
+  --neutral: #f5f5f4;
+  --neutral-raised: #fff;
+  --canvas: color-mix(in oklab, var(--air) 38%, var(--neutral));
+  --raised: color-mix(in oklab, var(--card) 40%, var(--neutral-raised));
+  /* The sheet is a shade off the raised surface in dark mode so it reads as lifted. */
+  --sheet: var(--raised);
   color-scheme: light;
   font-family: var(--sans);
   font-size: 15px;
@@ -37,7 +42,9 @@
 :root[data-scheme="dark"] {
   --focus: #79a6ff;
   --danger: #ff8a80;
-  --sheet: color-mix(in srgb, var(--card) 70%, var(--air));
+  --neutral: #1b1c1f;
+  --neutral-raised: #2a2b2f;
+  --sheet: color-mix(in oklab, var(--raised) 68%, var(--canvas));
   color-scheme: dark;
 }
 
@@ -52,9 +59,7 @@ body {
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  background:
-    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--air) 70%, var(--card)) 0%, transparent 70%),
-    var(--air);
+  background: var(--canvas);
 }
 
 a { color: inherit; }
@@ -85,11 +90,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   width: var(--column);
   margin: 0 auto;
   /* Puts the row of sites at about a third of the way down the window. */
-  padding: max(56px, calc(33vh - 132px)) 0 clamp(36px, 7vh, 72px);
+  padding: clamp(48px, 10vh, 96px) 0 clamp(28px, 4vh, 40px);
 }
 
 .today {
-  margin: 0 0 28px;
+  margin: 0 0 22px;
   font-family: var(--serif);
   font-size: clamp(30px, 4.2vw, 44px);
   font-weight: 400;
@@ -103,7 +108,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .sites {
   list-style: none;
   /* Pulls the first icon's edge in line with the date above. */
-  margin: 0 0 0 -22px;
+  margin: 0 0 0 -26px;
   padding: 0;
   display: flex;
   gap: 4px;
@@ -121,32 +126,30 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   padding: 10px 6px 8px;
-  border-radius: 16px;
+  border-radius: 14px;
   text-decoration: none;
 }
 .site-link:hover { background: var(--hover); }
-.site-link:hover .site-icon { transform: translateY(-2px); }
 
 .site-icon {
   position: relative;
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
-  border-radius: 20px;
-  background: var(--card);
-  box-shadow: 0 0 0 1px var(--line), 0 6px 18px -10px color-mix(in srgb, var(--ink) 45%, transparent);
-  transition: transform 160ms ease;
+  border-radius: 14px;
+  background: var(--raised);
+  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px rgb(0 0 0 / 0.07);
 }
-.site-icon img { position: absolute; width: 28px; height: 28px; opacity: 0; }
+.site-icon img { position: absolute; width: 26px; height: 26px; opacity: 0; }
 .site-icon.has-icon img { opacity: 1; }
 .site-icon.has-icon .site-monogram { visibility: hidden; }
 
 .site-monogram {
   font-family: var(--serif);
-  font-size: 24px;
+  font-size: 22px;
   color: var(--accent);
 }
 
@@ -155,11 +158,12 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 12.5px;
   color: var(--muted);
 }
+.site-add .site-name { max-width: none; overflow: visible; white-space: normal; text-align: center; }
 
-.placeholder .site-icon { margin: 10px auto 9px; box-shadow: none; background: color-mix(in srgb, var(--card) 45%, transparent); }
+.placeholder .site-icon { margin: 10px auto 8px; box-shadow: none; background: var(--hover); }
 .placeholder .site-name { display: block; width: 56px; height: 10px; margin: 0 auto; border-radius: 5px; background: var(--hover); }
 
 .sites-empty { margin: 0; padding-top: 12px; color: var(--muted); }
@@ -170,24 +174,24 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   flex: 1;
   width: min(1120px, 100vw);
   margin: 0 auto;
-  padding: 34px max(24px, calc((min(1120px, 100vw) - var(--column)) / 2)) 64px;
-  border-radius: 28px 28px 0 0;
+  padding: 28px max(24px, calc((min(1120px, 100vw) - var(--column)) / 2)) 64px;
+  border-radius: 16px 16px 0 0;
   background: var(--sheet);
-  box-shadow: 0 0 0 1px var(--line), 0 -18px 40px -32px color-mix(in srgb, var(--ink) 50%, transparent);
+  box-shadow: 0 0 0 0.5px var(--line), 0 -1px 3px rgb(0 0 0 / 0.04);
 }
 
 .organato-head {
   display: flex;
   align-items: baseline;
   gap: 14px;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
 }
 
 .organato-title {
   flex: 1;
   margin: 0;
   font-family: var(--serif);
-  font-size: 26px;
+  font-size: 23px;
   font-weight: 400;
   line-height: 1.2;
 }
@@ -196,15 +200,16 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 30px;
-  padding: 0 12px 0 10px;
+  height: 28px;
+  padding: 0 10px 0 8px;
   border: 0;
-  border-radius: 15px;
-  background: var(--hover);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
   font-size: 13px;
 }
 .refresh svg { width: 14px; height: 14px; }
-.refresh:hover { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.refresh:hover { background: var(--hover); color: var(--ink); }
 .refresh:disabled { color: var(--muted); }
 .refresh[aria-busy="true"] svg { animation: spin 900ms linear infinite; }
 
@@ -220,7 +225,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .action-link {
   display: inline-block;
   padding: 7px 14px;
-  border-radius: 16px;
+  border-radius: 8px;
   background: var(--accent);
   color: var(--card);
   font-size: 14px;
@@ -241,19 +246,19 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 .lane-title {
   margin: 0 0 14px;
-  padding-bottom: 10px;
+  padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 .lane-count { margin-left: 4px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 15px; }
 
 .item {
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
 }
 
@@ -266,14 +271,14 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 }
 .stub-day {
   font-family: var(--serif);
-  font-size: 30px;
+  font-size: 26px;
   line-height: 1;
   font-variant-numeric: lining-nums tabular-nums;
 }
-.stub-week { margin-top: 3px; font-size: 12px; line-height: 1; }
+.stub-week { margin-top: 2px; font-size: 11.5px; line-height: 1.1; }
 .item[data-urgency="soon"] .stub { color: var(--accent); }
 .item[data-urgency="today"] .stub { color: var(--accent); }
-.item[data-urgency="today"] .stub-day { font-weight: 700; }
+.item[data-urgency="today"] .stub-day { font-weight: 600; }
 .item[data-urgency="overdue"] .stub { color: var(--danger); }
 .item[data-urgency="none"] .stub::before {
   content: "";
@@ -303,7 +308,7 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 .item[data-urgency="overdue"] .item-when { color: var(--danger); }
 
 .item-empty, .item-more { font-size: 14px; color: var(--muted); }
-.item-more { padding-left: 58px; }
+.item-more { padding-left: 52px; }
 
 /* The one entrance: the lanes settle in when Organato's answer arrives. */
 .organato[data-state="ready"] .lanes { animation: settle 280ms ease-out; }
@@ -315,10 +320,10 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 }
 
 @media (max-width: 560px) {
-  .sites { margin-left: -16px; }
+  .sites { margin-left: -18px; }
   .site { flex-basis: 84px; }
-  .site-icon { width: 52px; height: 52px; border-radius: 17px; }
-  .organato-title { font-size: 23px; }
+  .site-icon { width: 48px; height: 48px; border-radius: 13px; }
+  .organato-title { font-size: 21px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -334,34 +339,34 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 :root[data-scheme="dark"][data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: #2c3038; --ink: #f1f3f6; --muted: #bcc3ce; --accent: color-mix(in srgb, var(--custom-seed) 40%, white); }
 
 .site { position: relative; }
-.site-remove { position: absolute; top: -5px; right: 0; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--card); cursor: pointer; opacity: 0; font: inherit; }
+.site-remove { position: absolute; top: -5px; right: 0; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--raised); cursor: pointer; opacity: 0; font: inherit; }
 .site:hover .site-remove, .site:focus-within .site-remove { opacity: 1; }
 .site-remove:focus-visible, .shortcut-feedback button:focus-visible, .shortcut-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .shortcut-feedback { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; min-height: 30px; margin-top: 10px; font-size: 12px; color: var(--muted); }
 .shortcut-feedback button { border: 0; padding: 4px 7px; color: var(--accent); background: transparent; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
-.shortcut-menu { position: fixed; z-index: 100; padding: 5px; border: 1px solid var(--line); border-radius: 9px; color: var(--ink); background: var(--card); box-shadow: 0 5px 25px #0002; }
+.shortcut-menu { position: fixed; z-index: 100; padding: 5px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--raised); box-shadow: 0 5px 25px #0002; }
 .shortcut-menu button { display: block; padding: 10px 14px; border: 0; border-radius: 5px; color: inherit; background: transparent; font: inherit; cursor: pointer; }
-.shortcut-menu button:hover { background: var(--air-deep); }
+.shortcut-menu button:hover { background: var(--hover); }
 @media (hover: none) { .site-remove { opacity: 1; } }
 
 .sites { padding-block: 7px; }
 
 .site-add-button { width: 100%; border: 0; background: transparent; cursor: pointer; anchor-name: --shortcut-add; }
-.site-add .site-icon { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); font-size: 30px; font-weight: 300; }
+.site-add .site-icon { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); font-size: 26px; font-weight: 300; }
 .site-add-button:hover .site-icon { color: var(--accent); background: var(--hover); }
-.shortcut-add { position-anchor: --shortcut-add; inset: auto; top: anchor(bottom); left: anchor(left); position-try-fallbacks: flip-inline, flip-block; margin: 6px 0; width: min(340px, calc(100vw - 32px)); padding: 14px; border: 1px solid var(--line); border-radius: 18px; color: var(--ink); background: var(--card); box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--ink) 55%, transparent); }
+.shortcut-add { position-anchor: --shortcut-add; inset: auto; top: anchor(bottom); left: anchor(left); position-try-fallbacks: flip-inline, flip-block; margin: 6px 0; width: min(340px, calc(100vw - 32px)); padding: 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--raised); box-shadow: 0 1px 2px rgb(0 0 0 / 0.1), 0 10px 24px -10px rgb(0 0 0 / 0.28); }
 .shortcut-add h2 { margin: 0 0 10px; font: 400 18px var(--serif); }
-.shortcut-add input { width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--air) 60%, var(--card)); color: var(--ink); font: inherit; font-size: 14px; }
+.shortcut-add input { width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--canvas); color: var(--ink); font: inherit; font-size: 14px; }
 .shortcut-add input[aria-invalid="true"] { border-color: var(--danger); }
 #shortcut-add-error { margin: 6px 2px 0; font-size: 12px; color: var(--danger); }
 .shortcut-add-group { margin: 14px 2px 6px; font-size: 12px; color: var(--muted); }
 #shortcut-add-tabs { list-style: none; margin: 0; padding: 0; max-height: 240px; overflow-y: auto; }
-.shortcut-add-tab { display: flex; flex-direction: column; padding: 7px 8px; border-radius: 10px; cursor: pointer; }
+.shortcut-add-tab { display: flex; flex-direction: column; padding: 7px 8px; border-radius: 8px; cursor: pointer; }
 .shortcut-add-tab span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .shortcut-add-tab-host, .shortcut-add-empty { font-size: 12px; color: var(--muted); }
 .shortcut-add-tab:hover, .shortcut-add-tab[aria-selected="true"] { background: var(--hover); }
 .shortcut-add-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
-.shortcut-add-actions button { border: 0; padding: 6px 14px; border-radius: 16px; background: transparent; cursor: pointer; }
+.shortcut-add-actions button { border: 0; padding: 6px 14px; border-radius: 8px; background: transparent; cursor: pointer; }
 .shortcut-add-actions [type=submit] { background: var(--accent); color: var(--card); }
 :root[data-scheme="dark"] .shortcut-add-actions [type=submit] { color: var(--air); }
 .shortcut-add-actions button:disabled { opacity: .45; cursor: default; }

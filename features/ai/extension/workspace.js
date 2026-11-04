@@ -689,12 +689,14 @@ function draw() {
     create: () => {
       const dot = el('button', 'space-dot', { type: 'button', role: 'tab' });
       dot.append(el('span', 'dot', { 'aria-hidden': 'true' }));
+      dot.append(el('span', 'space-label', { 'aria-hidden': 'true' }));
       return dot;
     },
     update: (dot) => {
       const selected = space.id === model.space.id;
       dot.dataset.tone = space.tone;
       dot.setAttribute('aria-selected', String(selected));
+      dot.querySelector('.space-label').textContent = space.name;
       dot.tabIndex = selected ? 0 : -1;
       dot.setAttribute('aria-label', `${space.name}, ${space.tabCount} ${space.tabCount === 1 ? 'tab' : 'tabs'}`);
       dot.title = index < 4 ? `${space.name} (⌃${index + 1})` : space.name;

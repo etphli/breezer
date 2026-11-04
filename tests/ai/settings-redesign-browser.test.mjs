@@ -5,6 +5,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { installFixture } from './settings-browser-fixture.mjs';
 
 // Drives the redesigned Settings page (category navigation, search and the Other tab)
 // in a headless browser against fake chrome.* APIs. Native hosting is out of scope.
@@ -15,50 +16,6 @@ let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
-function installFixture({ colorMode, theme }) {
-  const load = (key, fallback) => JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
-  const fx = { local: load('fx-local', {}), appearance: load('fx-appearance', null), calls: [], ports: {}, listeners: [] };
-  fx.appearance ??= { layout: 'sidebar', sidebarMode: 'expanded', theme, colorMode, showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true };
-  window.fx = fx;
-  const save = () => { localStorage.setItem('fx-local', JSON.stringify(fx.local)); localStorage.setItem('fx-appearance', JSON.stringify(fx.appearance)); };
-  const area = (data, name) => ({
-    async get(keys) { const list = keys == null ? Object.keys(data) : [keys].flat(); return structuredClone(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))); },
-    async set(values) {
-      const changes = {};
-      for (const [key, value] of Object.entries(values)) { changes[key] = { oldValue: data[key], newValue: structuredClone(value) }; data[key] = structuredClone(value); }
-      save();
-      setTimeout(() => fx.listeners.forEach((fn) => fn(changes, name)), 0);
-    },
-  });
-  const event = () => { const list = []; return { list, addListener: (fn) => list.push(fn), removeListener() {} }; };
-  window.chrome = {
-    runtime: {
-      getURL: (path) => `${location.origin}/${path}`,
-      getManifest: () => ({ version: '1.1.0' }),
-      onMessage: event(),
-      connect({ name }) {
-        const port = { name, sent: [], onMessage: event(), onDisconnect: event(), postMessage(message) { this.sent.push(message); }, disconnect() {} };
-        port.reply = (message) => port.onMessage.list.forEach((fn) => fn(structuredClone(message)));
-        fx.ports[name] = port;
-        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, sites: [] } }), 0);
-        if (name === 'breezer-organato-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { connected: false, dashboardEnabled: true, enabled: true, allowAI: true } }), 0);
-        if (name === 'breezer-updates') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { available: false, notice: 'Breezer is up to date.' } }), 0);
-        return port;
-      },
-    },
-    storage: { local: area(fx.local, 'local'), session: area({}, 'session'), onChanged: { addListener: (fn) => fx.listeners.push(fn) } },
-    tabs: {
-      async query() { return [{ index: 0, windowId: 1 }]; },
-      async getCurrent() { return { id: 42, index: 0, windowId: 1 }; },
-      async create(props) { fx.calls.push(['tabs.create', props]); return props; },
-      async update(id, props) { fx.calls.push(['tabs.update', id, props]); return { id, ...props }; },
-    },
-    breezerPrivate: {
-      async getAppearance() { return structuredClone(fx.appearance); },
-      async setAppearance(patch) { fx.calls.push(['setAppearance', patch]); Object.assign(fx.appearance, patch); save(); return structuredClone(fx.appearance); },
-    },
-  };
-}
 
 async function startServer() {
   const server = createServer(async (request, response) => {

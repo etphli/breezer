@@ -114,6 +114,7 @@ function updateControls() {
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
   $('context-check').hidden = !state.includeContext;
+  $('context-action').textContent = state.includeContext ? 'Included' : 'Include';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
   $('context-hint').textContent = research.size ? `${research.size} selected tabs · text only · no control` : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
@@ -274,7 +275,8 @@ function setControl(on) {
 }
 
 function applyProfile() {
-  $('greeting-name').textContent = state.profile.name.trim() || 'there';
+  const name = state.profile.name.trim();
+  $('greeting-name').textContent = name ? `, ${name}` : '';
   $('open-profile').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
 }
 
@@ -525,7 +527,7 @@ function receive(message) {
 
 function resizePrompt() {
   $('prompt').style.height = 'auto';
-  $('prompt').style.height = `${Math.min(160, Math.max(53, $('prompt').scrollHeight))}px`;
+  $('prompt').style.height = `${Math.min(160, Math.max(24, $('prompt').scrollHeight))}px`;
   updateControls();
 }
 

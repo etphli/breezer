@@ -1,0 +1,132 @@
+{
+  "version": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+  "viewport": {
+    "width": 1200,
+    "height": 900
+  },
+  "captures": [
+    {
+      "scheme": "light",
+      "route": "appearance",
+      "file": "light-appearance.png"
+    },
+    {
+      "scheme": "light",
+      "route": "onStartup",
+      "file": "light-onStartup.png"
+    },
+    {
+      "scheme": "light",
+      "route": "people",
+      "file": "light-people.png"
+    },
+    {
+      "scheme": "light",
+      "route": "privacy",
+      "file": "light-privacy.png"
+    },
+    {
+      "scheme": "light",
+      "route": "languages",
+      "file": "light-languages.png"
+    },
+    {
+      "scheme": "light",
+      "route": "downloads",
+      "file": "light-downloads.png"
+    },
+    {
+      "scheme": "light",
+      "route": "accessibility",
+      "file": "light-accessibility.png"
+    },
+    {
+      "scheme": "light",
+      "route": "system",
+      "file": "light-system.png"
+    },
+    {
+      "scheme": "light",
+      "route": "performance",
+      "file": "light-performance.png"
+    },
+    {
+      "scheme": "light",
+      "route": "search",
+      "file": "light-search.png"
+    },
+    {
+      "scheme": "light",
+      "route": "defaultBrowser",
+      "file": "light-defaultBrowser.png"
+    },
+    {
+      "scheme": "light",
+      "route": "newtab",
+      "file": "light-newtab.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "appearance",
+      "file": "dark-appearance.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "onStartup",
+      "file": "dark-onStartup.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "people",
+      "file": "dark-people.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "privacy",
+      "file": "dark-privacy.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "languages",
+      "file": "dark-languages.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "downloads",
+      "file": "dark-downloads.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "accessibility",
+      "file": "dark-accessibility.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "system",
+      "file": "dark-system.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "performance",
+      "file": "dark-performance.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "search",
+      "file": "dark-search.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "defaultBrowser",
+      "file": "dark-defaultBrowser.png"
+    },
+    {
+      "scheme": "dark",
+      "route": "newtab",
+      "file": "dark-newtab.png"
+    }
+  ],
+  "notes": [
+    "Isolated headless Chrome, no personal profile. Native tab strip and toolbar excluded."
+  ]
+}
