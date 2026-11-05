@@ -37,12 +37,16 @@ test('settings categories, search, Other and narrow layout work in a real browse
   const base = `http://127.0.0.1:${server.address().port}/workspace.html`;
   const browser = await chromium.launch({ executablePath, headless: true });
   const errors = [];
-  const open = async ({ hash = '#/settings', colorMode = 'light', theme = 'mint', width = 1200, height = 860, reducedMotion = 'no-preference', initialLocal = {} } = {}) => {
+  const open = async ({ hash = '#/settings', colorMode = 'light', theme = 'mint', width = 1200, height = 860, reducedMotion = 'no-preference', initialLocal = {}, delayTranslation = false } = {}) => {
     const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, colorScheme: colorMode, reducedMotion });
     await context.addInitScript(installFixture, { colorMode, theme, initialLocal });
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(`${message.text()} ${message.location().url}`); });
+    if (delayTranslation) await page.route('**/translation-settings.js', async route => {
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await route.continue();
+    });
     await page.goto(`${base}${hash}`);
     await page.locator('#settings-title').waitFor();
     await page.locator('#theme-swatches [role="radio"]').first().waitFor({ state: 'attached' });
@@ -51,6 +55,11 @@ test('settings categories, search, Other and narrow layout work in a real browse
   const current = (page) => page.locator('.nav-item[aria-current="page"]').innerText();
   const visiblePages = (page) => page.locator('.settings-page:not([hidden])').evaluateAll((nodes) => nodes.map((node) => node.dataset.page));
   try {
+    const loading = await open({ delayTranslation: true });
+    await loading.locator('#settings-search').fill('translation provider');
+    await loading.locator('#settings-results .result-title').filter({ hasText: /^Translation provider$/ }).waitFor();
+    assert.equal(await loading.locator('.nav-item[data-category="languages"]').isVisible(), true);
+    await loading.context().close();
     // ---------------------------------------------------------- categories
     const page = await open();
     await page.waitForTimeout(700); // let the import card finish its entrance
@@ -68,6 +77,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await page.screenshot({ path: join(evidence, 'settings-sync-unavailable-fixture.png') });
     await page.getByRole('button', { name: 'Open update settings', exact: true }).click();
     await page.waitForFunction(() => location.hash === '#/settings/general');
+    await page.getByRole('button', { name: 'Check for updates', exact: true }).waitFor({ state: 'visible' });
     assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isVisible(), true);
     // Feature modules from FEATURE_MOUNTS add their category once rendered.
     await page.locator('.nav-item[data-category="languages"]').waitFor();

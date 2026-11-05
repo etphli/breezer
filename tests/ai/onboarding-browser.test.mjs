@@ -124,6 +124,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.equal(await page.title(), 'Welcome to Breezer');
     assert.equal(await heading(), 'Welcome to Breezer');
     assert.equal(await next.innerText(), 'Get started');
+    assert.equal(await page.locator('#wl-stage-count').innerText(), 'Step 1 of 8');
     assert.equal(await page.locator('#wl-back').isVisible(), false);
     assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-h-welcome');
     await pause(2200);
@@ -215,6 +216,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     for (let at = 0; at < 5; at += 1) {
       titles.push(await heading());
       assert.equal(await page.locator('#wl-tour-count').innerText(), `Tip ${at + 1} of 5`);
+      assert.equal(await page.locator('#wl-progress-group').isHidden(), true, 'the tour keeps one visible progress count');
       await pause(2600);
       if (at === 0 || at === 3) await shot(page, `7-tour-${at + 1}`);
       if (at === 1) {

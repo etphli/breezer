@@ -1104,10 +1104,10 @@ dialog .privacy-note {
 .panel:has(#context-toggle[hidden]) .control-toggle { display:none; }
 .source-details { margin-top:8px; text-align:left; }
 .source-details summary { cursor:pointer; font-weight:500; }
-.source-details summary, .research-sharing summary { list-style:none; display:flex; align-items:center; gap:8px; }
-.source-details summary::-webkit-details-marker, .research-sharing summary::-webkit-details-marker { display:none; }
-.source-details summary::before, .research-sharing summary::before { content:""; width:6px; height:6px; flex:none; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(-45deg); }
-.source-details[open] summary::before, .research-sharing[open] summary::before { transform:translateY(-2px) rotate(45deg); }
+.source-details summary, .research-sharing summary, .error-details summary { list-style:none; display:flex; align-items:center; gap:8px; }
+.source-details summary::-webkit-details-marker, .research-sharing summary::-webkit-details-marker, .error-details summary::-webkit-details-marker { display:none; }
+.source-details summary::before, .research-sharing summary::before, .error-details summary::before { content:""; width:6px; height:6px; flex:none; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(-45deg); }
+.source-details[open] summary::before, .research-sharing[open] summary::before, .error-details[open] summary::before { transform:translateY(-2px) rotate(45deg); }
 .source-details ul { list-style:none; padding:0; margin:8px 0 0; display:grid; gap:6px; }
 .source-details li { padding:8px 10px; border:1px solid var(--hairline); border-radius:8px; }
 .source-details .source-title { display:block; color:var(--ink); font-weight:500; overflow-wrap:anywhere; }

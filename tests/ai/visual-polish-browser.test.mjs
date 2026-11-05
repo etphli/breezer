@@ -386,7 +386,7 @@ const siteGeometry = (page) => page.evaluate(() => [...document.querySelectorAll
   return {
     left: slot.left, right: slot.right, width: slot.width, top: Math.round(slot.top),
     cx: icon.left + icon.width / 2, labelLeft: label.left, labelRight: label.right,
-    truncated: name.scrollWidth > name.clientWidth, title: site.querySelector('.site-link').title, text: name.textContent, add: site.classList.contains('site-add'),
+    truncated: name.scrollWidth > name.clientWidth || name.scrollHeight > name.clientHeight, title: site.querySelector('.site-link').title, text: name.textContent, add: site.classList.contains('site-add'),
   };
 }));
 

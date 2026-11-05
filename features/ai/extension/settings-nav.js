@@ -158,6 +158,7 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
     for (const { link, available } of categories.values()) link.closest('li').hidden = !available();
     for (const option of categorySelect.options) if (categories.has(option.value)) option.hidden = !categories.get(option.value).available();
     if (current && !categories.get(current)?.available()) show(DEFAULT_CATEGORY);
+    if (searching()) render();
   }
 
   function show(category, { scrollTop = true } = {}) {
@@ -289,6 +290,9 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
       if (description) text.append(node('span', 'result-description', description));
       item.append(text);
       if (meta) item.append(node('span', 'result-meta', meta));
+      const cue = node('span', 'result-action');
+      cue.setAttribute('aria-hidden', 'true');
+      item.append(cue);
       item.addEventListener('pointerdown', (event) => event.preventDefault()); // keep focus in the field
       item.addEventListener('click', () => activate(entry));
       options.push(item);

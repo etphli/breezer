@@ -141,7 +141,10 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   assert.equal(await ui.locator('#restore').isDisabled(), true, 'nothing can be restored before translation');
   await captureState('before-sharing');
   await ui.locator('#source').selectOption('es'); await ui.locator('#target').selectOption('en');
-  await ui.locator('#dynamic').check(); await ui.locator('#consent').check();
+  assert.equal(await ui.getByRole('switch', { name: 'Translate new text while this window is open' }).isChecked(), false);
+  await ui.getByRole('switch', { name: 'Translate new text while this window is open' }).check();
+  assert.equal(await ui.getByRole('checkbox', { name: /Share visible page text/ }).isChecked(), false, 'automatic translation does not grant sharing consent');
+  await ui.locator('#consent').check();
   assert.equal(await status.textContent(), 'Ready to translate.', 'sharing confirmation updates readiness');
   assert.equal(await ui.locator('#setup-help').isVisible(), false, 'connected setup instructions step aside');
   assert.equal(await ui.locator('#languages').textContent(), 'Reload languages');

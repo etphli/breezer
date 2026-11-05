@@ -404,6 +404,8 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     }
     $('wl-back').hidden = index === 0;
     progress.hidden = step === 'tour';
+    $('wl-progress-group').hidden = step === 'tour';
+    $('wl-stage-count').textContent = `Step ${index + 1} of ${STEPS.length}`;
     updateNavigation();
     $('wl-skip').hidden = step === 'done' || step === 'organato';
     if (focus) (step === 'you' ? nameInput : section.querySelector('h1')).focus({ preventScroll: true });

@@ -195,7 +195,7 @@ function siteTile(api, site) {
   const link = el('a', 'site-link', { href: site.url, title: `${site.title}\n${site.url}` });
   const icon = el('span', 'site-icon', { 'aria-hidden': 'true' });
   const monogram = el('span', 'site-monogram');
-  monogram.textContent = [...site.title][0]?.toUpperCase() || '?';
+  monogram.textContent = [...site.title.replace(/[^\p{L}\p{N}]/gu, '')].slice(0, 2).join('').toUpperCase() || '?';
   icon.append(monogram);
   const src = faviconUrl(api, site.url);
   if (src) {
@@ -301,6 +301,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   const state = organatoState(organato);
   const error = /\b401\b/.test(organato?.error || '') ? 'The API key was rejected. Review it in Settings.' : organato?.error;
   section.dataset.state = state;
+  section.dataset.stale = String(state === 'ready' && Boolean(organato.error || problem));
   section.removeAttribute('aria-busy');
   action.replaceChildren();
   action.hidden = true;
@@ -332,7 +333,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   }
 
   // Ready. A refresh error with older items still on hand keeps them visible.
-  if (organato.error) status.textContent = `Showing the last update. Organato did not refresh: ${error}`;
+  if (organato.error) status.textContent = `Showing the last update. ${error}`;
   else if (problem) status.textContent = `Showing the last update. ${problem}`;
   else status.hidden = true;
   for (const list of LISTS) {
@@ -364,6 +365,7 @@ export function showOrganato(root, on) {
 function renderLoading(root) {
   const section = root.getElementById('organato');
   section.dataset.state = 'loading';
+  section.dataset.stale = 'false';
   section.setAttribute('aria-busy', 'true');
   root.getElementById('organato-lists').hidden = true;
   root.getElementById('organato-action').hidden = true;

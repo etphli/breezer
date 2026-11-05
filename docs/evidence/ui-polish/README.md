@@ -299,3 +299,18 @@ provider-failure summaries with exact details disclosed, and secondary setup
 import emphasis. The final candidate 16 pack refreshes every source-matching
 state. Nineteen annotated comparisons were shown before the next council.
 The threshold remains unmet; all work stays local and PR #17 is unpushed.
+
+Round 16 Sol 1 returned 8.9. Sol 2 is still pending and Opus returned no score
+after its quota failure. This is an incomplete round, with no inferred scores.
+Candidate 17 work strengthens stale-agenda feedback, clarifies search actions,
+keeps navigation slots stable while settings load, and refreshes active search
+results after a module arrives. Required translation consent is distinct from
+optional automatic translation. Unavailable sharing and restart actions are
+omitted, shortcut captions allow two lines, setup shows its stage count, and
+expanded secondary release notes use the space below the illustration.
+
+The complete Node suite passed 547 checks, zero failures and two skips. A later
+correction to the delayed-search refresh call passed its original reproduction;
+the settings browser check also covers that case. Native and full matrix
+verification for this candidate remain pending. Work is local and unreviewed;
+PR #17 remains unpushed and the requested threshold is unmet.

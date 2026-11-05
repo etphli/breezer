@@ -360,6 +360,8 @@ try {
   assert.match(await page.locator('#welcome-status').innerText(), /Open a web page/);
   assert.equal(await page.getByRole('button', { name: 'Summarize this page' }).isDisabled(), true);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-dark-no-page.png` });
+  assert.equal(await page.locator('#context-toggle').isHidden(), true, 'unavailable pages have no Include affordance');
+  assert.equal(await page.locator('#control-toggle').isVisible(), false, 'browser control is unavailable on a non-web page');
   // Reduced motion: the thinking indicator does not animate.
   await page.getByLabel('Message Breezer').fill('Plain question');
   await page.getByLabel('Message Breezer').press('Enter');

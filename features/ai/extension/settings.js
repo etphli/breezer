@@ -102,8 +102,12 @@ async function mountFeatures(api) {
   await Promise.all(FEATURE_MOUNTS.map(async ({ container, load }) => {
     const node = $(container);
     if (!node) return;
+    const loading = el('p', 'section-note', { role: 'status' });
+    loading.textContent = 'Loading settings…';
+    node.replaceChildren(loading);
     try {
       const handle = await (await load())({ container: node, api });
+      loading.remove();
       if (typeof handle?.dispose === 'function') addEventListener('pagehide', () => handle.dispose(), { once: true });
     } catch (failure) {
       // One feature failing to load must not take the rest of Settings with it.
@@ -116,6 +120,7 @@ async function mountFeatures(api) {
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
+  const featuresReady = mountFeatures(api);
   void mountUsageSettings({ api, container: $('usage-settings') });
   groupSection($('usage-settings'));
   const passwords = mountPasswords({ container: $('password-settings'), api });
@@ -133,7 +138,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
   }
   nav = mountSettingsNav({ api });
-  void mountFeatures(api).then(() => nav.refreshAvailability());
+  void featuresReady.then(() => nav.refreshAvailability());
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
 
@@ -478,7 +483,7 @@ export function mountUpdates(api) {
     status.dataset.state = '';
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
-    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; status.textContent = 'The update check did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
+    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; install.hidden = true; status.textContent = 'The update check did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
     try { connect().postMessage({ type, id: pending }); }
     catch {
       const connection = port; port = null;

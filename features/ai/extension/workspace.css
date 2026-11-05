@@ -784,6 +784,8 @@ body.route-settings {
 .result-title { font-weight: 500; }
 .result-description { color: var(--muted); font-size: 12px; line-height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .result-meta { flex: none; color: var(--muted); font-size: 12px; }
+.result { cursor: pointer; }
+.result-action { flex: none; width: 6px; height: 6px; margin-inline: 2px 4px; border-top: 1.5px solid var(--muted); border-right: 1.5px solid var(--muted); transform: rotate(45deg); }
 .results-empty { padding: 8px 0 4px; }
 .results-empty-title { margin: 0; font-size: 15px; line-height: 22px; font-weight: 600; }
 .results-empty-note { margin: 4px 0 0; color: var(--muted); }

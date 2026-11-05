@@ -148,15 +148,20 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 .site-monogram {
   font-family: var(--serif);
-  font-size: 22px;
+  font-size: 18px;
   color: var(--accent);
 }
 
 .site-name {
   max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 16px;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
   font-size: 12.5px;
   color: var(--muted);
 }
@@ -227,6 +232,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .organato[data-state="error"] .organato-status,
 .organato[data-state="unavailable"] .organato-status { max-width: none; color: var(--danger); padding: 10px 12px; border: 1px solid var(--danger-border); border-radius: 8px; background: var(--danger-surface); }
 .organato[data-state="ready"] .organato-status { margin-bottom: 22px; font-size: 13px; }
+.organato[data-stale="true"] .organato-status { max-width: none; padding: 12px 14px; border-left: 3px solid var(--accent); background: var(--hover); border-radius: 4px; color: var(--ink); font-size: 14px; font-weight: 500; }
 
 .organato-action { margin: 14px 0 0; }
 
@@ -320,7 +326,7 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* The one entrance: the lanes settle in when Organato's answer arrives. */
 .organato[data-state="ready"] .lanes { animation: settle 180ms ease-out; }
-@keyframes settle { from { opacity: 0; transform: translateY(4px); } }
+@keyframes settle { from { transform: translateY(2px); } }
 
 @media (max-width: 860px) {
   .lanes { grid-template-columns: minmax(0, 1fr); gap: 30px; }

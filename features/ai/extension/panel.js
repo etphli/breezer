@@ -113,7 +113,7 @@ function updateControls() {
   $('send-stop').hidden = !running;
   research.setBusy(running);
   $('control-toggle').disabled = running || !state.page || research.size > 0;
-  $('context-toggle').hidden = research.size > 0;
+  $('context-toggle').hidden = research.size > 0 || !state.page;
   $('context-toggle').disabled = running || !state.page || research.size > 0;
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));

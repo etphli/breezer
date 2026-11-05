@@ -240,6 +240,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.waitForSelector('html[data-loaded="true"]');
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
       assert.match(await page.textContent('#organato-status'), /Showing the last update.*timed out/);
+      assert.equal(await page.getAttribute('#organato', 'data-stale'), 'true', 'stale items carry an explicit notice state');
       assert.deepEqual(await page.$$eval('[data-list="upcoming"] .item-when', (nodes) => nodes.map((node) => node.textContent)), ['In 2 days, Oct 31, 10:00 AM', 'In 9 days, Nov 7, 10:00 AM']);
       assert.equal(await page.textContent('[data-list="todos"] .item-empty'), 'Nothing on your to-do list.');
       await page.screenshot({ path: `${evidence}/newtab-stale-same-title.png` });
