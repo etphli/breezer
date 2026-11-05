@@ -177,14 +177,14 @@
               <h2 id="layout-heading">Tabs and sidebar</h2>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="vertical horizontal tab strip position">
-                  <div class="setting-label"><span id="layout-label">Tabs</span><small>Vertical tabs use the left sidebar by default.</small></div>
+                  <div class="setting-label"><span id="layout-label">Tabs</span></div>
                   <div class="segmented" role="radiogroup" aria-labelledby="layout-label" data-field="layout">
                     <button role="radio" data-value="sidebar">Sidebar</button>
                     <button role="radio" data-value="top">Top</button>
                   </div>
                 </div>
                 <div class="setting-row" data-search-terms="collapse compact icons auto hide expand hover">
-                  <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Auto-hide reveals tabs at the sidebar edge. This also controls auto-expand on hover.</small></div>
+                  <div class="setting-label"><span id="sidebar-mode-label">Sidebar behavior</span><small>Compact shows icons. Auto-hide reveals tabs on hover.</small></div>
                   <div class="segmented" role="radiogroup" aria-labelledby="sidebar-mode-label" data-field="sidebarMode">
                     <button role="radio" data-value="expanded">Expanded</button>
                     <button role="radio" data-value="compact">Compact</button>
@@ -192,14 +192,14 @@
                   </div>
                 </div>
                 <div class="setting-row" data-search-terms="sidebar size wide narrow">
-                  <div class="setting-label"><label for="sidebar-width">Sidebar width</label><small>Space for tab titles in the expanded sidebar.</small></div>
+                  <div class="setting-label"><label for="sidebar-width">Sidebar width</label><small>Applies to the expanded sidebar.</small></div>
                   <span class="range-control">
                     <input id="sidebar-width" type="range" min="200" max="360" step="4" value="240" data-field="sidebarWidth">
                     <output id="sidebar-width-value" for="sidebar-width">240 px</output>
                   </span>
                 </div>
                 <div class="setting-row" data-search-terms="bookmark bar favorites toolbar show hide">
-                  <div class="setting-label"><span id="bookmarks-label">Bookmarks bar</span><small>Choose when your bookmarks appear.</small></div>
+                  <div class="setting-label"><span id="bookmarks-label">Bookmarks bar</span></div>
                   <div class="segmented" role="radiogroup" aria-labelledby="bookmarks-label" data-field="bookmarkBarMode">
                     <button type="button" role="radio" aria-checked="true" data-value="newTab" tabindex="0">New tabs only</button>
                     <button type="button" role="radio" aria-checked="false" data-value="always" tabindex="-1">Always</button>
@@ -213,15 +213,15 @@
               <h2 id="address-heading">Address bar</h2>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="omnibox center">
-                  <div class="setting-label"><span id="centered-address-bar-label">Centered address bar</span><small>Keep the address field centered in the top bar.</small></div>
+                  <div class="setting-label"><span id="centered-address-bar-label">Centered address bar</span></div>
                   <button id="centered-address-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="centered-address-bar-label" data-field="centeredAddressBar"><span aria-hidden="true"></span></button>
                 </div>
                 <div class="setting-row" data-search-terms="short url domain only">
-                  <div class="setting-label"><span id="minimal-url-label">Minimal URL in the address bar</span><small>Show a shorter address when you are not editing it.</small></div>
+                  <div class="setting-label"><span id="minimal-url-label">Minimal URL in the address bar</span><small>Show the full address while editing.</small></div>
                   <button id="minimal-url" class="switch" role="switch" aria-checked="true" aria-labelledby="minimal-url-label" data-field="minimalUrl"><span aria-hidden="true"></span></button>
                 </div>
                 <div class="setting-row" data-search-terms="progress bar loading indicator">
-                  <div class="setting-label"><span id="show-load-progress-label">Show loading progress in the address bar</span><small>Display page loading progress behind the address.</small></div>
+                  <div class="setting-label"><span id="show-load-progress-label">Show loading progress in the address bar</span></div>
                   <button id="show-load-progress" class="switch" role="switch" aria-checked="true" aria-labelledby="show-load-progress-label" data-field="showLoadProgress"><span aria-hidden="true"></span></button>
                 </div>
               </div>
@@ -231,15 +231,15 @@
               <h2 id="frameless-heading">Frameless window</h2>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="zen hide toolbar">
-                  <div class="setting-label"><span id="frameless-label">Frameless mode</span><small>Hide unpinned browser UI until you hover the window edge.</small></div>
+                  <div class="setting-label"><span id="frameless-label">Frameless mode</span><small>Hover at the window edge to reveal unpinned bars.</small></div>
                   <button id="frameless" class="switch" role="switch" aria-checked="true" aria-labelledby="frameless-label" data-field="frameless"><span aria-hidden="true"></span></button>
                 </div>
                 <div class="setting-row" data-search-terms="pin sidebar visible">
-                  <div class="setting-label"><span id="always-show-sidebar-label">Always show the sidebar</span><small>Keep the sidebar visible in frameless mode.</small></div>
+                  <div class="setting-label"><span id="always-show-sidebar-label">Always show the sidebar</span></div>
                   <button id="always-show-sidebar" class="switch" role="switch" aria-checked="false" aria-labelledby="always-show-sidebar-label" data-field="alwaysShowSidebar"><span aria-hidden="true"></span></button>
                 </div>
                 <div class="setting-row" data-search-terms="pin toolbar top bar visible">
-                  <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span><small>Keep the top bar visible in frameless mode.</small></div>
+                  <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span></div>
                   <button id="always-show-top-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="always-show-top-bar-label" data-field="alwaysShowTopBar"><span aria-hidden="true"></span></button>
                 </div>
               </div>

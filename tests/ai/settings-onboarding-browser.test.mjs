@@ -100,6 +100,22 @@ test('settings onboarding, Organato and updates render and respond in a real bro
   };
   const noOverflow = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
   try {
+    for (const colorMode of ['light', 'dark']) for (const width of [900, 390]) {
+      const { page, context } = await open({ colorMode, width });
+      const details = page.locator('.onboarding-details');
+      assert.equal(await details.locator('p').last().isVisible(), false);
+      await details.locator('summary').click();
+      assert.match(await details.innerText(), /Passkeys are not included/);
+      assert.equal(await noOverflow(page), true);
+      await page.mouse.move(4, 4);
+      await page.evaluate(() => document.activeElement.blur());
+      await page.screenshot({ path: join(evidence, `settings-onboarding-expanded-${colorMode}${width < 800 ? '-narrow' : ''}.png`) });
+      await details.locator('summary').focus();
+      await page.keyboard.press('Space');
+      assert.equal(await details.locator('p').last().isVisible(), false);
+      assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).isVisible(), true);
+      await context.close();
+    }
     // ---------------------------------------------------- light, first run
     const { page, context } = await open();
     await page.screenshot({ path: join(evidence, 'settings-onboarding-light.png') });

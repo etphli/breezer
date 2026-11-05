@@ -1,9 +1,13 @@
 {
-  "startedAt": "2026-11-05T06:35:50.587Z",
-  "app": "/Users/likht.ethan/Applications/Breezer.app",
-  "appVersion": "1.2.0",
-  "sourceHead": "094bdf0a07b9dcab56cfee8b9a948bc74090dfd3",
-  "nativeRuntimeReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
+  "startedAt": "2026-11-05T11:14:41.531Z",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app",
+  "appVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
+  "shellMetadataVersion": "1.2.0",
+  "sourceHead": "89e499175ad9296f4f9b024d2818f54997260f77",
+  "nativeRuntimeReportedCommit": null,
+  "shellResourceReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
+  "uiBuildProvenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild.",
+  "compiledUiUnits": 9,
   "nativeInputs": [
     {
       "path": "features/ai/native-ui/sidebar.patch",
@@ -63,48 +67,48 @@
     },
     {
       "path": "script/apply_breezer_workspace.py",
-      "sha256": "d7adbda10683608f2fcbf01a62e7deacd511672fecedb4e620a375656393e0e4"
+      "sha256": "2a279f15c6527315f1846c087baf6a3b242120eee6b2c9315aa715b9df4eb635"
     },
     {
       "path": "script/breezer_sidebar_frame.py",
-      "sha256": "99305e5af919beef8426e054549bee377d7aac5356bec80455f40bc295761640"
+      "sha256": "999e392f41babee34e349caecb516e805a8d6145196619df5d205ea93559fc17"
     }
   ],
-  "installedPins": [
+  "capturedAppPins": [
     {
-      "path": "/Users/likht.ethan/Applications/Breezer.app/Contents/MacOS/Breezer",
-      "sha256": "43e6d77440449f9bd849c771550c02c1a14969d872ef90df8e12a5daeb5067ea"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/MacOS/Breezer",
+      "sha256": "8801fcdbfd282f9ea54254a9555501bb6dea6983e3e373cc35f660d2067b3d0f"
     },
     {
-      "path": "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
-      "sha256": "82b14111103d5e9203e4a88c00d1adb294041f05439a05e61f691ef86ce3d3f0"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
+      "sha256": "66016ddf8da3ed733bd03e3bace76e198b8e1f6ae0758d0e5bd8fea85c956c4b"
     },
     {
-      "path": "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
       "sha256": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
     }
   ],
   "method": "ScreenCaptureKit current-process window",
-  "profile": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-ui-native-owned-orn6Lz/profile",
+  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-44NPkx/profile",
   "fixtureOnly": true,
   "captures": [
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85825
+        "windowId": 89339
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native-reduced/native-motion-start.png",
-      "pid": 58966,
+      "path": "/tmp/breezer-ui-polish/round-14-native-reduced/native-motion-start.png",
+      "pid": 95431,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "eac05851de5462aa62250afc2a5b7070416a1d8a74c51e4589585aeb38a06d46",
+      "sha256": "443d2229ad8a0b6d2c744c15fdd54d40c8472958856c52e4d7c5abd1c03bb420",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -132,7 +136,7 @@
           ],
           [
             228,
-            244,
+            245,
             237
           ]
         ],
@@ -142,228 +146,216 @@
           190
         ]
       },
-      "stableCaptures": 2
+      "stableCaptures": 3
     }
   ],
-  "previousAttempts": [
-    {
-      "startedAt": "2026-11-05T06:35:04.403Z",
-      "finishedAt": "2026-11-05T06:35:07.040Z",
-      "status": "failed",
-      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\nfalse !== true\n\n    at file:///Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/tests/ai/native-ui-capture.mjs:100:29",
-      "ownedProcesses": [
-        {
-          "type": "browser",
-          "id": 58504,
-          "cpuTime": 1.190831
-        },
-        {
-          "type": "renderer",
-          "id": 58531,
-          "cpuTime": 0
-        },
-        {
-          "type": "renderer",
-          "id": 58530,
-          "cpuTime": 0
-        },
-        {
-          "type": "renderer",
-          "id": 58528,
-          "cpuTime": 0.122235
-        },
-        {
-          "type": "renderer",
-          "id": 58527,
-          "cpuTime": 0.192255
-        },
-        {
-          "type": "renderer",
-          "id": 58526,
-          "cpuTime": 0.133751
-        },
-        {
-          "type": "renderer",
-          "id": 58522,
-          "cpuTime": 0.146171
-        },
-        {
-          "type": "renderer",
-          "id": 58523,
-          "cpuTime": 0.102653
-        },
-        {
-          "type": "GPU",
-          "id": 58512,
-          "cpuTime": 0.446038
-        },
-        {
-          "type": "network.mojom.NetworkService",
-          "id": 58513,
-          "cpuTime": 0.105985
-        },
-        {
-          "type": "storage.mojom.StorageService",
-          "id": 58520,
-          "cpuTime": 0.057268
-        }
-      ],
-      "cleanup": {
-        "liveRecordedProcesses": [],
-        "fixturePortClosed": true,
-        "profileRemoved": true
-      }
-    }
-  ],
+  "previousAttempts": [],
   "reducedMotionForced": true,
   "motionOnly": true,
   "reducedMotionMethod": "Chromium native animation switch plus renderer CSS preference. System accessibility settings are unchanged.",
-  "provenance": "Actual installed native runtime with unchanged native workspace/frame inputs. Its packaged web UI is older; these captures verify native chrome, not the current candidate web UI. The resource commit stamp is not a reproducible binary attestation.",
+  "provenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild. Current 50-file UI payload is checked through the actual extension origin. Shell metadata is inherited; its commit stamp does not describe this private framework. No full product/release rebuild is claimed.",
+  "installedPins": {
+    "/Users/likht.ethan/Applications/Breezer.app/Contents/MacOS/Breezer": "43e6d77440449f9bd849c771550c02c1a14969d872ef90df8e12a5daeb5067ea",
+    "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework": "82b14111103d5e9203e4a88c00d1adb294041f05439a05e61f691ef86ce3d3f0",
+    "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
+  },
+  "loadedUiSourceHashes": {
+    "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "context-settings.js": "264b3b46bd83333a6cfb673575414f8fba46437bc31d1127693d57d2ec54587d",
+    "efficiency.html": "9e5faff6e758436acff4862c8e327becc9a1f07c61fd7a4139173f4962620c54",
+    "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+    "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "newtab.css": "f00730c7ab340e486c2209a4c6f54d331ba6afce650e708a72ff1058ca0d222a",
+    "newtab.html": "d746dc573025d58df1d1d857c3b4ca4880918feb6e03c7d5765a262a36b9f0bc",
+    "newtab.js": "73506d2b240e3c99e2c379bd62067cde91fbf0001a1873fc63ce07c8d6db6a7c",
+    "onboarding.css": "6c56061135d0db972ba88693a5115e6424c2c39192b6504fdadb612a13e19718",
+    "onboarding.js": "2c39feea57db94d5559ff6d060fd23c4522327d9b55d340730f0a44c1eb2349b",
+    "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "panel.css": "5d12947f42578c405c8e45ef34f458e84332407cbfdacc7ed815e1a4d69eb6ab",
+    "panel.html": "6610309ac4e730b304ea84c44e0fc0a2c03a1a467753d5097893f4fa2fe1d58d",
+    "panel.js": "18f6cd04927345cb0b4ba508116737c0bf3f20830f9788644927ee66a2a70604",
+    "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+    "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+    "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "research-sources.js": "f044e4517683b58615df5cf0f158de7dc002838a92b4baf4b492d10546cb9933",
+    "settings-nav.js": "59760c81bbbdeeebbbfd5fef6c00bbbefa356c84631bbd7420c581a983484fac",
+    "settings-onboarding.js": "09688c7b24bdc17c4494c0a1a9343dcd69cde6fa9c54435bf6731656beba4066",
+    "settings.js": "6a31ab4212d993fc0be797af4643dc92ee2067d56b0b70c613d5aefb5d1ada61",
+    "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "sync-settings.js": "17178927c6c8a4c29d5e8c78ebd1c620a0415ba647bec8fdaca19abb1335e63c",
+    "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
+    "translation.css": "d6a7ff9c19ef243ef456ccd6b10beda65da4a0698cd9f91c625c75229c35c1e4",
+    "translation.html": "4007a518ef06fd2e7338086c54d3e5943fc528152f16f5c455382eb6da54620d",
+    "translation.js": "54e3622c1321f39126676c14087ed88326ea069b419003d7c2c9773c016a2d5c",
+    "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+    "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "whats-new.css": "f202c7a7f49eab29db27ba90dd5e08818d6e30a205029234517f48974da66817",
+    "whats-new.html": "cb7ebebfde2f1a29941af1d6ea4d72ba922e7ea22f3fa765e2f2f0ebb86bca34",
+    "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+    "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "workspace.css": "a551574238132a838fb494bd69a23f323e32cca6f1d11522dfef56c0d4de0519",
+    "workspace.html": "b9c5795f7af27bc1135b6431c4d3c24464940af640f8e601b812c2bc56b85af8",
+    "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
+  },
   "pagePrefersReducedMotion": true,
   "ownedProcesses": [
     {
       "type": "browser",
-      "id": 58966,
-      "cpuTime": 1.189063
+      "id": 95431,
+      "cpuTime": 2.523147
     },
     {
       "type": "renderer",
-      "id": 58993,
-      "cpuTime": 0
+      "id": 95470,
+      "cpuTime": 0.132397
     },
     {
       "type": "renderer",
-      "id": 58992,
-      "cpuTime": 0
+      "id": 95469,
+      "cpuTime": 0.190962
     },
     {
       "type": "renderer",
-      "id": 58990,
-      "cpuTime": 0.125524
+      "id": 95468,
+      "cpuTime": 0.248509
     },
     {
       "type": "renderer",
-      "id": 58989,
-      "cpuTime": 0.131647
+      "id": 95466,
+      "cpuTime": 0.262336
     },
     {
       "type": "renderer",
-      "id": 58988,
-      "cpuTime": 0.215632
+      "id": 95445,
+      "cpuTime": 0.49036
     },
     {
       "type": "renderer",
-      "id": 58984,
-      "cpuTime": 0.139589
+      "id": 95467,
+      "cpuTime": 4.837324
     },
     {
       "type": "renderer",
-      "id": 58985,
-      "cpuTime": 0.100195
+      "id": 95441,
+      "cpuTime": 0.199802
     },
     {
       "type": "GPU",
-      "id": 58974,
-      "cpuTime": 0.41146
+      "id": 95436,
+      "cpuTime": 0.704568
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 58975,
-      "cpuTime": 0.105239
+      "id": 95437,
+      "cpuTime": 0.1455
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 58982,
-      "cpuTime": 0.058447
+      "id": 95438,
+      "cpuTime": 0.064844
     }
   ],
-  "browserPid": 58966,
+  "browserPid": 95431,
   "recording": {
     "start": {
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "ok": true,
-      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-ui-native-owned-orn6Lz/native-tabs-toolbar-motion.mp4",
-      "pid": 58966,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-44NPkx/native-tabs-toolbar-motion.mp4",
+      "pid": 95431,
       "recordingStarted": true,
       "screenCaptureAccessGranted": false
     },
     "actions": [
       {
         "name": "Select Field notes tab",
-        "at": "2026-11-05T06:35:54.180Z"
+        "at": "2026-11-05T11:14:49.447Z"
       },
       {
         "name": "Select Today tab",
-        "at": "2026-11-05T06:35:54.707Z"
+        "at": "2026-11-05T11:14:49.968Z"
       },
       {
         "name": "Close Reading list tab",
-        "at": "2026-11-05T06:35:55.221Z"
+        "at": "2026-11-05T11:14:50.487Z"
       },
       {
         "name": "Enable centered, minimal address",
-        "at": "2026-11-05T06:35:55.738Z"
+        "at": "2026-11-05T11:14:50.999Z"
       }
     ],
     "finish": {
-      "blockedNativeHostLaunches": 1,
-      "bytes": 71863,
+      "blockedNativeHostLaunches": 2,
+      "bytes": 64294,
       "durationSeconds": 2,
       "ok": true,
-      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-ui-native-owned-orn6Lz/native-tabs-toolbar-motion.mp4",
-      "pid": 58966,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-44NPkx/native-tabs-toolbar-motion.mp4",
+      "pid": 95431,
       "recordingFinished": true,
       "screenCaptureAccessGranted": false
     },
-    "path": "/tmp/breezer-ui-polish/round-12-native-reduced/native-tabs-toolbar-motion.mp4",
-    "sha256": "16e36c5cb418dcc81e054c0a94886fc24698c49ecb7708bcea9144721cbffd3e"
+    "path": "/tmp/breezer-ui-polish/round-14-native-reduced/native-tabs-toolbar-motion.mp4",
+    "sha256": "a3175b2a7896682012ca67f7f5401d37e94c6e322fb29f0fbbbc7a6871d183af"
   },
   "status": "passed",
   "finalOwnedProcesses": [
     {
       "type": "browser",
-      "id": 58966,
-      "cpuTime": 2.055692
+      "id": 95431,
+      "cpuTime": 3.194868
     },
     {
       "type": "renderer",
-      "id": 58993,
-      "cpuTime": 1.009741
+      "id": 95470,
+      "cpuTime": 0.133051
     },
     {
       "type": "renderer",
-      "id": 58992,
-      "cpuTime": 0.127335
+      "id": 95468,
+      "cpuTime": 0.252388
     },
     {
       "type": "renderer",
-      "id": 58989,
-      "cpuTime": 0.143742
+      "id": 95466,
+      "cpuTime": 0.560828
     },
     {
       "type": "renderer",
-      "id": 58988,
-      "cpuTime": 0.254329
+      "id": 95445,
+      "cpuTime": 0.555946
     },
     {
       "type": "renderer",
-      "id": 58984,
-      "cpuTime": 0.211073
+      "id": 95467,
+      "cpuTime": 5.224409
     },
     {
       "type": "GPU",
-      "id": 58974,
-      "cpuTime": 0.614366
+      "id": 95436,
+      "cpuTime": 0.871256
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 58975,
-      "cpuTime": 0.113439
+      "id": 95437,
+      "cpuTime": 0.157686
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 58982,
-      "cpuTime": 0.059984
+      "id": 95438,
+      "cpuTime": 0.065953
     }
   ],
   "cleanup": {
@@ -371,6 +363,8 @@
     "fixturePortClosed": true,
     "profileRemoved": true
   },
+  "capturedAppPinsUnchanged": true,
   "installedPinsUnchanged": true,
-  "finishedAt": "2026-11-05T06:35:57.285Z"
+  "finishedAt": "2026-11-05T11:14:53.035Z",
+  "sourceTreeState": "Captured from uncommitted candidate UI files. Per-file nativeInputs and loadedUiSourceHashes identify the exact sources; sourceHead is the repository HEAD at capture, not an assertion of a clean tree."
 }

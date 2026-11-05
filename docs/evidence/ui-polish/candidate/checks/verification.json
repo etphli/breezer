@@ -1,11 +1,11 @@
 {
-  "round": 13,
+  "round": 14,
   "suiteTests": 547,
   "uniquePassingChecks": 545,
   "unresolvedFailures": 0,
   "skipped": 2,
-  "method": "One uninterrupted complete Node suite, then both assistant/research walkthroughs",
-  "fullLog": "/tmp/breezer-ui-round13-full-final.log",
+  "method": "One uninterrupted complete Node suite, then assistant/research walkthroughs, focused import-help verification and private native current-UI capture.",
+  "fullLog": "/tmp/breezer-ui-round14-full-final.log",
   "matrixCaptures": 490,
   "sourceFiles": 50,
   "translationCaptures": 38,
@@ -13,31 +13,19 @@
   "translation320Modes": 2,
   "customMotionSequences": 12,
   "reducedMotionAssertions": 6,
-  "nativeWindowCapturesReused": 39,
-  "nativeContinuousRecordingsReused": 2,
-  "nativeInputsUnchanged": true,
-  "beforeAfterPairs": 13,
-  "narrowReleasePageHeight": {
-    "before": 7516,
-    "after": 6731
-  },
-  "archivedUnindexedStaging": [
-    {
-      "from": "/tmp/breezer-ui-polish/round-13-workflows/whats-new-desktop-tile-08.png",
-      "to": "/tmp/breezer-ui-polish/round-13-unindexed-staging/whats-new-desktop-tile-08.png",
-      "sha256": "042f57ed00f8b5c0c3b2e8f5088f89062716476b2861fada80e3246e426ba712"
-    },
-    {
-      "from": "/tmp/breezer-ui-polish/round-13-workflows/whats-new-narrow-tile-10.png",
-      "to": "/tmp/breezer-ui-polish/round-13-unindexed-staging/whats-new-narrow-tile-10.png",
-      "sha256": "cd330ee50ea419047ad361bde063411151be74dc4334f69fbaae98d132566bae"
-    }
-  ],
+  "freshNativeWindowCaptures": 39,
+  "freshNativeContinuousRecordings": 2,
+  "privateCompiledUiUnits": 9,
+  "nativeLoadedSourceFiles": 50,
+  "nativeProfileIconMinimumContrast": 8.838213838897685,
+  "beforeAfterPairs": 11,
+  "archivedUnindexedStaging": [],
   "reviewStatus": "not yet reviewed",
   "limitations": [
-    "Native evidence is the existing compiled 1.2.0 runtime with matching unchanged native inputs, not a newly compiled candidate.",
-    "Motion samples do not measure smoothness, frame pacing or input latency.",
-    "Native physical hit testing, menus, restoration, auto-hide interaction, translation native geometry/bridge and provider execution remain unverified."
+    "Not a full product/release rebuild.",
+    "Shell version and resource commit metadata are inherited and do not identify the newly linked private framework.",
+    "Physical input, menus, restoration, physical auto-hide and translation native bridge/geometry remain unverified.",
+    "Decoded frames do not establish frame pacing, input latency or smoothness."
   ],
   "skips": [
     "Live LibreTranslate needs explicit opt-in and a server",

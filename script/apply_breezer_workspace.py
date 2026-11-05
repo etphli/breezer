@@ -27,6 +27,29 @@ REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
 LAYOUT_CONTROLLER = "chrome/browser/ui/helium/helium_layout_state_controller.cc"
 VERTICAL_CONTROLLER = "chrome/browser/ui/tabs/vertical_tab_strip_state_controller_impl.cc"
 WINDOW_FEATURES = "chrome/browser/ui/browser_window/internal/browser_window_features.cc"
+AVATAR_STATE = "chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc"
+
+
+def _avatar_replacements():
+    before = (
+        'std::pair<ui::ImageModel, AvatarIconType> StateProvider::GetAvatarIcon(\n'
+        '    int icon_size,\n'
+        '    SkColor /*icon_color*/,\n'
+        '    const ui::ColorProvider& color_provider) const {\n'
+        '  auto [image, icon_type] =\n'
+        '      GetProfileAvatarImage(profile(), color_provider, icon_size);\n'
+    )
+    after = before.replace('SkColor /*icon_color*/', 'SkColor icon_color') + (
+        '  // The toolbar placeholder uses the same contrast-safe foreground as\n'
+        '  // neighboring controls. Profile photos and special states keep their art.\n'
+        '  if (icon_type == AvatarIconType::kPlaceholder) {\n'
+        '    image = profiles::GetPlaceholderAvatarIconWithColors(\n'
+        '        icon_color, icon_color, icon_size,\n'
+        '        profiles::PlaceholderAvatarIconParams{.has_padding = false,\n'
+        '                                              .has_background = false});\n'
+        '  }\n'
+    )
+    return [(before, after)]
 
 
 def _region_replacements():
@@ -715,6 +738,7 @@ def replacements():
             ),
         ],
         "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
+        AVATAR_STATE: _avatar_replacements(),
         **_peek_replacements(),
     })
 

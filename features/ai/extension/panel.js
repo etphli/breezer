@@ -613,7 +613,7 @@ $('control-toggle').addEventListener('click', () => {
 });
 function positionControlTip() {
   const trigger = $('control-toggle').getBoundingClientRect();
-  const footer = document.querySelector('.compose-area').getBoundingClientRect();
+  const footer = document.querySelector('.context-row').getBoundingClientRect();
   const tip = $('control-tip');
   const center = trigger.left + trigger.width / 2 - footer.left;
   const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));

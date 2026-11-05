@@ -952,14 +952,15 @@ body.route-settings {
 .onboarding h2 { margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.012em; }
 .onboarding-head .button { margin: -4px -10px 0 0; }
 .onboarding-intro { margin: 6px 0 20px; color: var(--muted); line-height: 19px; max-width: 60ch; }
-.onboarding-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.onboarding-path { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding-right: 20px; }
-.onboarding-path + .onboarding-path { padding: 0 0 0 20px; border-left: 1px solid var(--line); }
-.onboarding-path h3 { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; }
-.onboarding-path p { flex: 1; margin: 0 0 8px; color: var(--muted); line-height: 19px; }
+.onboarding-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.onboarding-path { display: flex; flex-direction: column; align-items: flex-start; }
+.onboarding-path > .button { width: 100%; }
+.onboarding-details { margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.onboarding-details h3 { margin: 16px 0 4px; color: var(--ink); font-size: 12px; font-weight: 600; }
+.onboarding-details p { margin: 8px 0; }
 .onboarding .field-error { margin-top: 14px; }
 .onboarding .field-error code { overflow-wrap: anywhere; }
-.onboarding > .field-note { max-width: none; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--set-rule); }
+.onboarding-details > .field-note { max-width: none; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--set-rule); }
 
 input[type="range"] { width: 220px; accent-color: var(--accent); }
 
@@ -1123,8 +1124,6 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .space-item { flex-wrap: wrap; }
   .onboarding { padding: 18px 18px 14px; }
   .onboarding-paths { grid-template-columns: 1fr; }
-  .onboarding-path { padding-right: 0; }
-  .onboarding-path + .onboarding-path { margin-top: 16px; padding: 16px 0 0; border-left: 0; border-top: 1px solid var(--line); }
   .key-row, .update-row { flex-wrap: wrap; }
   .key-row .text-input { flex-basis: 100%; }
   .result-meta { display: none; }

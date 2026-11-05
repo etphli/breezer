@@ -1,9 +1,13 @@
 {
-  "startedAt": "2026-11-05T06:34:14.989Z",
-  "app": "/Users/likht.ethan/Applications/Breezer.app",
-  "appVersion": "1.2.0",
-  "sourceHead": "094bdf0a07b9dcab56cfee8b9a948bc74090dfd3",
-  "nativeRuntimeReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
+  "startedAt": "2026-11-05T11:13:49.402Z",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app",
+  "appVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
+  "shellMetadataVersion": "1.2.0",
+  "sourceHead": "89e499175ad9296f4f9b024d2818f54997260f77",
+  "nativeRuntimeReportedCommit": null,
+  "shellResourceReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
+  "uiBuildProvenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild.",
+  "compiledUiUnits": 9,
   "nativeInputs": [
     {
       "path": "features/ai/native-ui/sidebar.patch",
@@ -63,48 +67,48 @@
     },
     {
       "path": "script/apply_breezer_workspace.py",
-      "sha256": "d7adbda10683608f2fcbf01a62e7deacd511672fecedb4e620a375656393e0e4"
+      "sha256": "2a279f15c6527315f1846c087baf6a3b242120eee6b2c9315aa715b9df4eb635"
     },
     {
       "path": "script/breezer_sidebar_frame.py",
-      "sha256": "99305e5af919beef8426e054549bee377d7aac5356bec80455f40bc295761640"
+      "sha256": "999e392f41babee34e349caecb516e805a8d6145196619df5d205ea93559fc17"
     }
   ],
-  "installedPins": [
+  "capturedAppPins": [
     {
-      "path": "/Users/likht.ethan/Applications/Breezer.app/Contents/MacOS/Breezer",
-      "sha256": "43e6d77440449f9bd849c771550c02c1a14969d872ef90df8e12a5daeb5067ea"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/MacOS/Breezer",
+      "sha256": "8801fcdbfd282f9ea54254a9555501bb6dea6983e3e373cc35f660d2067b3d0f"
     },
     {
-      "path": "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
-      "sha256": "82b14111103d5e9203e4a88c00d1adb294041f05439a05e61f691ef86ce3d3f0"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
+      "sha256": "66016ddf8da3ed733bd03e3bace76e198b8e1f6ae0758d0e5bd8fea85c956c4b"
     },
     {
-      "path": "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
       "sha256": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
     }
   ],
   "method": "ScreenCaptureKit current-process window",
-  "profile": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-ui-native-owned-bKGMbz/profile",
+  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-3di4Bd/profile",
   "fixtureOnly": true,
   "captures": [
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-mint-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-mint-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "589645a0318a39b33eeea0d998bd9246e0c47cb51a352247c10e2beece3679cf",
+      "sha256": "5039f631dbfbb65b11785e86bc9d346d62c2ad10275b765ef50df5ab774dc98e",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -146,21 +150,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-mint-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-mint-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "11a65ab6cd9071cd7e8ade63a136267066de832bf67b17f311198e05db73cd86",
+      "sha256": "663e87fbe6ab6e91dd11efe963ed10660ee17652a8121f7c04e9dab3739c8329",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -202,21 +206,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-mint-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-mint-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "ce193d05a0f15232b0a43184370c3ef8661ab5235c7a9ebf0f28dcbaec5e89f6",
+      "sha256": "18919a3fd561366578bb524b4225c6c0a1a386adc2be77f029f9234933257902",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -258,21 +262,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-mint-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-mint-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "19627d6bd5b2ddb23a2b6b366c8cf216d42d5d4483316f4c51fa2251a1b8ca58",
+      "sha256": "596d3cbcd65b7ee0eed7bb55c54c00e76cfde594595d793ebb1acf2df572e9b9",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -314,21 +318,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-tide-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-tide-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "b7d167f017f8ee5febd20e9df02ef056e60d69f889bf68776f18f159a9205e9d",
+      "sha256": "6d31bcb803ab589d6e30b7cecce4cc72bda01fdacabfc816c8fb0c342656916b",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -370,21 +374,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-tide-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-tide-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "5e67284b79434929bfc9b65ea7d9d48ed2dcacfbf027e9d2fa788d6a147532a3",
+      "sha256": "4971ae6251aa6ce9ca45670102a306fc1ad62f77437367608c01d6d9f6d06fdc",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -417,8 +421,8 @@
           ]
         ],
         "top": [
-          246,
-          249,
+          247,
+          248,
           255
         ]
       },
@@ -426,21 +430,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-tide-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-tide-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "6347b8438f37d2437ce2482dd9cb7275ba1efc03315fb3b0d7cbb64dcfac3ee5",
+      "sha256": "38f602af1084e3d77b51df4727eae1c28e8a8dcce9e29222d842a4cede886707",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -473,8 +477,8 @@
           ]
         ],
         "top": [
-          176,
-          191,
+          175,
+          192,
           210
         ]
       },
@@ -482,21 +486,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-tide-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-tide-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "60755aa9e9954a3e0004a53ffc4aa1dabe1862396370f31649f690bcd380a224",
+      "sha256": "34ad5ac00102b96ef9bbcbda07970951d4513c6eea8a5244d2bba28f779d1592",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -538,21 +542,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-dusk-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-dusk-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "adef5b83458e2ca845a22eb72507e9c6d0751321ccd1e4a1c1a266e6c3ef25b5",
+      "sha256": "06f3737253bd95b8f39055530067e38819db177a64f497901cbcb82e27bd42d8",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -594,21 +598,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-dusk-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-dusk-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "e1b335e37b151a1237142a00e0386dbc898e2c1bea36541c58ea090bb17df746",
+      "sha256": "1a1faa9a9f9c04d766867d634f021aae9766f9a670646280ddd2ede20c52e1ba",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -650,21 +654,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-dusk-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-dusk-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "a846616446b961eb2bfa80bfd59b59c055c8cfa46fa1f7d87c9fda92e788b746",
+      "sha256": "5e7740d10d991dedc66fed66728e9c75c45e701ed3e03d80e4b4e5f2f8bf3a3e",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -706,21 +710,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-dusk-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-dusk-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "7c44234e9b813076da2b8eea6019af8c0be1d642f3bdef3653d27f80217af99f",
+      "sha256": "6b05f67ebb38634a507d38178458e52afbfc246279d3fccb0484fd401a7f300c",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -762,21 +766,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-rose-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-rose-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "86bf35e1207bad909e59142cfaf477bef5cdbb2c42151e87593ece809d4ed631",
+      "sha256": "c6bf588b383c6939035cdb09c4bf632924ddb98da2f3e60ed6f54a01c8223f18",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -818,21 +822,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-rose-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-rose-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "3e966ff43be5482b885922ef503518579df13686be7ee25f7ea1fc8485d6888a",
+      "sha256": "9b141965a63b1d5c7be1ed48c19555f0150bebe733f374dc04c34361163de4e8",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -874,21 +878,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-rose-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-rose-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "0de4a7e1cccc4144ee9d32d44ced40448204c165be9d988e51972cb661f0cedd",
+      "sha256": "730bdf7edb9260cbab9b56b0ddbcfd6b0d7242a744e417251c04afcb5cd1765f",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -930,21 +934,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-rose-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-rose-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "43d4b361dbd2226dd63ac1bcc690e014bf5234a933640e611c97289fd4d4c3c8",
+      "sha256": "924932cacc75005d5749e312dd6fad895bb8586b0c687a9dcde9fc4655a54995",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -977,30 +981,30 @@
           ]
         ],
         "top": [
-          46,
+          47,
           25,
-          32
+          31
         ]
       },
       "stableCaptures": 2
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-pollen-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-pollen-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "35a1b994e47e8460e2c3f3c76a85380783e3bd20795d2791fe11081a747f96f6",
+      "sha256": "bc5a11c81cdbec8a928b7ff6a72c20d9e09b1864738ce9d4f554822dcfce22d4",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1042,21 +1046,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-pollen-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-pollen-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "a3516ea2711ac76f32f752f65ebd533c677e1571c0cf61e7fcf42568b4cca24d",
+      "sha256": "adc129f6e05002910fd11b607972815f48fcd5ce290c6e722debc1da23858317",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1098,21 +1102,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-pollen-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-pollen-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "7c76eb322eeefe70c1ec040c534105c07b158197359f499d3b179e7b68afea21",
+      "sha256": "4b0a12b21d6d41af9fc4673c9d1d6f7dd283a8e268d01a092c684162c519912f",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1154,21 +1158,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-pollen-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-pollen-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "ad1ee736a0549e7b621d25240991b394829ee835eab7daa34183c05e5320ca09",
+      "sha256": "8c8a3538987163bd70e6d84d00b7d54d3c47cbc4bbe6d3dabc10c3af74622803",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1210,21 +1214,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-graphite-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-graphite-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "f0d350a67cc86838cf70b1ffac84fce05fa44d1fa3752511b6b6ade995bfd9ae",
+      "sha256": "2cf49e2a45196b2f3b11c961558833adb90e78c578811f2e95d393b5fb1b7999",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1258,29 +1262,29 @@
         ],
         "top": [
           96,
-          113,
-          121
+          112,
+          122
         ]
       },
       "stableCaptures": 2
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-graphite-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-graphite-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "8d7ef9860670c7c5ab07eb23f7dec1ee1dec649f5701361cb3aa39e5d9df4a63",
+      "sha256": "b7c3c6d90bb1f807947e9a54388ffaa86d164ca4818d25c1a08c9f66891511c8",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1322,21 +1326,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-graphite-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-graphite-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "bb307d7fd58038e625c13a5b041f3f5269b7e3fa2ab2a4f2121aaa740a876a18",
+      "sha256": "2b219e8b36f94178426cf27e2b0339de13be9620e0233eb429e4d19b2e05c95a",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1378,21 +1382,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-graphite-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-graphite-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "7820b141ed84655703cabf80ec876993d7e4dc79e21023ce74965269c0570dd9",
+      "sha256": "1e5d191f77555448f9c483ec1808da791aff4e60dd7efa92a27cda001e517ef3",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1434,21 +1438,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-custom-light-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-custom-light-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "056963f05e6062423eab5ae5ef363e820f3707c6501b09ed8c7aa6d2899c7ff8",
+      "sha256": "d27a08f34332668690d90ae54564ef3cc3640f1bfeeee2429087a2e7d1a8f575",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1490,21 +1494,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-custom-light-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-custom-light-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "9df4a751cc2aaaedc0673242c2eefcf7137a2f3d529f13e8b4c4deb8ea3c4ec2",
+      "sha256": "ba81a05975b4e9ef08eb98566562971d90efb07f23cb0e488aba5cca2d838e29",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1546,21 +1550,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-custom-dark-desktop.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-custom-dark-desktop.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "bddfe176b0c609b1f8950b0e60b6f553c8bf562ae0c5369f5b8d7cd6e6b84459",
+      "sha256": "ec2c58da774307590a324bac40fecb3d68012d9559b692af1108be9f6ab54e57",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1593,8 +1597,8 @@
           ]
         ],
         "top": [
-          179,
-          191,
+          180,
+          190,
           211
         ]
       },
@@ -1602,21 +1606,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 540,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-custom-dark-narrow.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-custom-dark-narrow.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "6239b223ca629c34f64f6cd9c90b532facfb838a6307a2e9bde839e7c37ace82",
+      "sha256": "00ee62dd9e9e90ed9db96a99e67c0c675aeee0ea5910c9a9a095d7ffde6e51a7",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1658,21 +1662,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/toolbar-centered-minimal.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/toolbar-centered-minimal.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3a0ad311da3138d3c22980958fce6e57e7e51b7e34468fd54791e7c815c7167a",
+      "sha256": "115f2efe737c6d27b1adfe508da2a416a51efbc899ddfa990cd9fe46cdb81bf9",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1714,21 +1718,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/toolbar-full-address.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/toolbar-full-address.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3797cfb43980b96b8c40f7536ea634d265fcc557eab6b6d6cead3b7b0c02902d",
+      "sha256": "5039f631dbfbb65b11785e86bc9d346d62c2ad10275b765ef50df5ab774dc98e",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1770,21 +1774,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85788
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/toolbar-frameless-pinned.png",
-      "pid": 48161,
+      "path": "/tmp/breezer-ui-polish/round-14-native/toolbar-frameless-pinned.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3797cfb43980b96b8c40f7536ea634d265fcc557eab6b6d6cead3b7b0c02902d",
+      "sha256": "5039f631dbfbb65b11785e86bc9d346d62c2ad10275b765ef50df5ab774dc98e",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1826,21 +1830,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/toolbar-frameless-auto.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/toolbar-frameless-auto.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "ed3da2a6d6b29e4f0464384311012c72053d6ec3fd4692b62c5a9869cb42ce50",
+      "sha256": "5039f631dbfbb65b11785e86bc9d346d62c2ad10275b765ef50df5ab774dc98e",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": false,
@@ -1873,30 +1877,30 @@
           ]
         ],
         "top": [
-          227,
-          244,
-          237
+          94,
+          114,
+          108
         ]
       },
       "stableCaptures": 2
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/toolbar-bookmarks.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/toolbar-bookmarks.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "8949afd2c715ed163b64958228f912c442dd4d77717f3675946364f24a836296",
+      "sha256": "bbe8368c865acea355496cdf513583295eb37bffe168c046f75e9256a14033a0",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": false,
@@ -1934,25 +1938,25 @@
           108
         ]
       },
-      "stableCaptures": 4
+      "stableCaptures": 3
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-system-mode.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/top-system-mode.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "b23109bcf7fc0f6d928524605e333be37cdb5a4fbb70d11fb84c8700c03ee908",
+      "sha256": "18919a3fd561366578bb524b4225c6c0a1a386adc2be77f029f9234933257902",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": false,
@@ -1994,21 +1998,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/sidebar-frame-expanded.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/sidebar-frame-expanded.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "ddb824f7ba1b167e17c6d186b1041ab56138aea8aa63ff0de2a358fdd11d1aa8",
+      "sha256": "cc7e26fd0e055948f921a675db3c6f905f7aac53de30129fe04641b5f5d38ded",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2046,25 +2050,25 @@
           52
         ]
       },
-      "stableCaptures": 2
+      "stableCaptures": 3
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/sidebar-frame-compact.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/sidebar-frame-compact.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "892bd0d0a21a34e9a1248e1c8d90df40cc32a946257ed77f20757e84bdd21c3a",
+      "sha256": "6c191d24043bf69696dfa5940a863aebd49a2605c535d24517e210427fc79b3d",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2106,21 +2110,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/sidebar-frame-autoHide.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/sidebar-frame-autoHide.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "69d98adfdb4c11b25e51b1611240e66656b398cd4188a31f3a469d921f7b740e",
+      "sha256": "59a3f4843448ae397d5ccb0b1864b32a6ebef9fd876de3ddd0c2545911dbb054",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2162,21 +2166,21 @@
     },
     {
       "api": "ScreenCaptureKit current-process window",
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "geometry": {
         "height": 780,
         "scale": 2,
-        "title": "Today · Breezer fixture",
+        "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 85799
+        "windowId": 89323
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-12-native/native-motion-start.png",
-      "pid": 58021,
+      "path": "/tmp/breezer-ui-polish/round-14-native/native-motion-start.png",
+      "pid": 95093,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "b23109bcf7fc0f6d928524605e333be37cdb5a4fbb70d11fb84c8700c03ee908",
+      "sha256": "18919a3fd561366578bb524b4225c6c0a1a386adc2be77f029f9234933257902",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2217,219 +2221,213 @@
       "stableCaptures": 2
     }
   ],
-  "previousAttempts": [
-    {
-      "startedAt": "2026-11-05T06:32:06.059Z",
-      "finishedAt": "2026-11-05T06:32:30.400Z",
-      "status": "failed",
-      "error": "AssertionError [ERR_ASSERTION]: Native frame is distinct from fixture-only content\n    at capture (file:///Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/tests/ai/native-ui-capture.mjs:130:14)\n    at async file:///Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/tests/ai/native-ui-capture.mjs:154:6",
-      "ownedProcesses": [
-        {
-          "type": "browser",
-          "id": 48161,
-          "cpuTime": 4.74244
-        },
-        {
-          "type": "renderer",
-          "id": 48209,
-          "cpuTime": 1.119141
-        },
-        {
-          "type": "renderer",
-          "id": 48208,
-          "cpuTime": 0.099844
-        },
-        {
-          "type": "renderer",
-          "id": 48206,
-          "cpuTime": 0.293511
-        },
-        {
-          "type": "renderer",
-          "id": 48204,
-          "cpuTime": 0.202188
-        },
-        {
-          "type": "renderer",
-          "id": 48203,
-          "cpuTime": 0.285922
-        },
-        {
-          "type": "renderer",
-          "id": 48179,
-          "cpuTime": 2.142642
-        },
-        {
-          "type": "GPU",
-          "id": 48169,
-          "cpuTime": 1.445896
-        },
-        {
-          "type": "network.mojom.NetworkService",
-          "id": 48170,
-          "cpuTime": 0.135757
-        },
-        {
-          "type": "storage.mojom.StorageService",
-          "id": 48177,
-          "cpuTime": 0.063711
-        }
-      ],
-      "cleanup": {
-        "liveRecordedProcesses": [],
-        "fixturePortClosed": true,
-        "profileRemoved": true
-      }
-    }
-  ],
+  "previousAttempts": [],
   "reducedMotionForced": false,
   "motionOnly": false,
-  "provenance": "Actual installed native runtime with unchanged native workspace/frame inputs. Its packaged web UI is older; these captures verify native chrome, not the current candidate web UI. The resource commit stamp is not a reproducible binary attestation.",
+  "reducedMotionMethod": "Renderer CSS no-preference; native runtime uses the current system preference.",
+  "provenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild. Current 50-file UI payload is checked through the actual extension origin. Shell metadata is inherited; its commit stamp does not describe this private framework. No full product/release rebuild is claimed.",
+  "installedPins": {
+    "/Users/likht.ethan/Applications/Breezer.app/Contents/MacOS/Breezer": "43e6d77440449f9bd849c771550c02c1a14969d872ef90df8e12a5daeb5067ea",
+    "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework": "82b14111103d5e9203e4a88c00d1adb294041f05439a05e61f691ef86ce3d3f0",
+    "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
+  },
+  "loadedUiSourceHashes": {
+    "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "context-settings.js": "264b3b46bd83333a6cfb673575414f8fba46437bc31d1127693d57d2ec54587d",
+    "efficiency.html": "9e5faff6e758436acff4862c8e327becc9a1f07c61fd7a4139173f4962620c54",
+    "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+    "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "newtab.css": "f00730c7ab340e486c2209a4c6f54d331ba6afce650e708a72ff1058ca0d222a",
+    "newtab.html": "d746dc573025d58df1d1d857c3b4ca4880918feb6e03c7d5765a262a36b9f0bc",
+    "newtab.js": "73506d2b240e3c99e2c379bd62067cde91fbf0001a1873fc63ce07c8d6db6a7c",
+    "onboarding.css": "6c56061135d0db972ba88693a5115e6424c2c39192b6504fdadb612a13e19718",
+    "onboarding.js": "2c39feea57db94d5559ff6d060fd23c4522327d9b55d340730f0a44c1eb2349b",
+    "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "panel.css": "5d12947f42578c405c8e45ef34f458e84332407cbfdacc7ed815e1a4d69eb6ab",
+    "panel.html": "6610309ac4e730b304ea84c44e0fc0a2c03a1a467753d5097893f4fa2fe1d58d",
+    "panel.js": "18f6cd04927345cb0b4ba508116737c0bf3f20830f9788644927ee66a2a70604",
+    "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+    "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+    "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "research-sources.js": "f044e4517683b58615df5cf0f158de7dc002838a92b4baf4b492d10546cb9933",
+    "settings-nav.js": "59760c81bbbdeeebbbfd5fef6c00bbbefa356c84631bbd7420c581a983484fac",
+    "settings-onboarding.js": "09688c7b24bdc17c4494c0a1a9343dcd69cde6fa9c54435bf6731656beba4066",
+    "settings.js": "6a31ab4212d993fc0be797af4643dc92ee2067d56b0b70c613d5aefb5d1ada61",
+    "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "sync-settings.js": "17178927c6c8a4c29d5e8c78ebd1c620a0415ba647bec8fdaca19abb1335e63c",
+    "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
+    "translation.css": "d6a7ff9c19ef243ef456ccd6b10beda65da4a0698cd9f91c625c75229c35c1e4",
+    "translation.html": "4007a518ef06fd2e7338086c54d3e5943fc528152f16f5c455382eb6da54620d",
+    "translation.js": "54e3622c1321f39126676c14087ed88326ea069b419003d7c2c9773c016a2d5c",
+    "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+    "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "whats-new.css": "f202c7a7f49eab29db27ba90dd5e08818d6e30a205029234517f48974da66817",
+    "whats-new.html": "cb7ebebfde2f1a29941af1d6ea4d72ba922e7ea22f3fa765e2f2f0ebb86bca34",
+    "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
+    "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "workspace.css": "a551574238132a838fb494bd69a23f323e32cca6f1d11522dfef56c0d4de0519",
+    "workspace.html": "b9c5795f7af27bc1135b6431c4d3c24464940af640f8e601b812c2bc56b85af8",
+    "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
+  },
   "pagePrefersReducedMotion": false,
   "ownedProcesses": [
     {
       "type": "browser",
-      "id": 58021,
-      "cpuTime": 1.222344
+      "id": 95093,
+      "cpuTime": 3.087978
     },
     {
       "type": "renderer",
-      "id": 58071,
-      "cpuTime": 0.077712
+      "id": 95151,
+      "cpuTime": 0.105397
     },
     {
       "type": "renderer",
-      "id": 58070,
-      "cpuTime": 0.128872
+      "id": 95138,
+      "cpuTime": 0.230368
     },
     {
       "type": "renderer",
-      "id": 58069,
-      "cpuTime": 0.132566
+      "id": 95137,
+      "cpuTime": 0.219305
     },
     {
       "type": "renderer",
-      "id": 58068,
-      "cpuTime": 0.21124
+      "id": 95134,
+      "cpuTime": 0.291739
     },
     {
       "type": "renderer",
-      "id": 58064,
-      "cpuTime": 0.252781
+      "id": 95106,
+      "cpuTime": 0.497607
     },
     {
       "type": "renderer",
-      "id": 58061,
-      "cpuTime": 0.139876
+      "id": 95135,
+      "cpuTime": 4.694163
     },
     {
       "type": "renderer",
-      "id": 58062,
-      "cpuTime": 0.099526
+      "id": 95103,
+      "cpuTime": 0.228458
     },
     {
       "type": "GPU",
-      "id": 58049,
-      "cpuTime": 0.515099
+      "id": 95098,
+      "cpuTime": 1.246926
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 58050,
-      "cpuTime": 0.106689
+      "id": 95099,
+      "cpuTime": 0.147573
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 58057,
-      "cpuTime": 0.060174
+      "id": 95100,
+      "cpuTime": 0.070959
     }
   ],
-  "browserPid": 58021,
+  "browserPid": 95093,
   "recording": {
     "start": {
-      "blockedNativeHostLaunches": 1,
+      "blockedNativeHostLaunches": 2,
       "ok": true,
-      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-ui-native-owned-bKGMbz/native-tabs-toolbar-motion.mp4",
-      "pid": 58021,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-3di4Bd/native-tabs-toolbar-motion.mp4",
+      "pid": 95093,
       "recordingStarted": true,
       "screenCaptureAccessGranted": false
     },
     "actions": [
       {
         "name": "Select Field notes tab",
-        "at": "2026-11-05T06:34:24.283Z"
+        "at": "2026-11-05T11:14:24.384Z"
       },
       {
         "name": "Select Today tab",
-        "at": "2026-11-05T06:34:24.813Z"
+        "at": "2026-11-05T11:14:24.920Z"
       },
       {
         "name": "Close Reading list tab",
-        "at": "2026-11-05T06:34:25.326Z"
+        "at": "2026-11-05T11:14:25.454Z"
       },
       {
         "name": "Enable centered, minimal address",
-        "at": "2026-11-05T06:34:25.844Z"
+        "at": "2026-11-05T11:14:25.978Z"
       }
     ],
     "finish": {
-      "blockedNativeHostLaunches": 1,
-      "bytes": 72098,
+      "blockedNativeHostLaunches": 2,
+      "bytes": 72113,
       "durationSeconds": 2,
       "ok": true,
-      "path": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-ui-native-owned-bKGMbz/native-tabs-toolbar-motion.mp4",
-      "pid": 58021,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-3di4Bd/native-tabs-toolbar-motion.mp4",
+      "pid": 95093,
       "recordingFinished": true,
       "screenCaptureAccessGranted": false
     },
-    "path": "/tmp/breezer-ui-polish/round-12-native/native-tabs-toolbar-motion.mp4",
-    "sha256": "c7c8e85ec3f0436b46c4ad5ae0ded9bcf825813fa462d3c93093be17fac79467"
+    "path": "/tmp/breezer-ui-polish/round-14-native/native-tabs-toolbar-motion.mp4",
+    "sha256": "1b9cc5ed48c7c41b27682c26bf53e0b28fff77b98f9eb71d55fffe1b25bb441c"
   },
   "status": "passed",
   "finalOwnedProcesses": [
     {
       "type": "browser",
-      "id": 58021,
-      "cpuTime": 3.115961
+      "id": 95093,
+      "cpuTime": 8.955016
     },
     {
       "type": "renderer",
-      "id": 58089,
-      "cpuTime": 0.089991
+      "id": 95285,
+      "cpuTime": 0.095585
     },
     {
       "type": "renderer",
-      "id": 58073,
-      "cpuTime": 1.146766
+      "id": 95137,
+      "cpuTime": 0.448974
     },
     {
       "type": "renderer",
-      "id": 58069,
-      "cpuTime": 0.155312
+      "id": 95134,
+      "cpuTime": 5.631463
     },
     {
       "type": "renderer",
-      "id": 58068,
-      "cpuTime": 0.331345
+      "id": 95106,
+      "cpuTime": 0.879755
     },
     {
       "type": "renderer",
-      "id": 58061,
-      "cpuTime": 0.912634
+      "id": 95135,
+      "cpuTime": 5.02978
     },
     {
       "type": "GPU",
-      "id": 58049,
-      "cpuTime": 1.045866
+      "id": 95098,
+      "cpuTime": 2.963943
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 58050,
-      "cpuTime": 0.124026
+      "id": 95099,
+      "cpuTime": 0.1968
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 58057,
-      "cpuTime": 0.063135
+      "id": 95100,
+      "cpuTime": 0.073305
     }
   ],
   "cleanup": {
@@ -2437,6 +2435,8 @@
     "fixturePortClosed": true,
     "profileRemoved": true
   },
+  "capturedAppPinsUnchanged": true,
   "installedPinsUnchanged": true,
-  "finishedAt": "2026-11-05T06:34:27.523Z"
+  "finishedAt": "2026-11-05T11:14:27.938Z",
+  "sourceTreeState": "Captured from uncommitted candidate UI files. Per-file nativeInputs and loadedUiSourceHashes identify the exact sources; sourceHead is the repository HEAD at capture, not an assertion of a clean tree."
 }

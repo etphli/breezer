@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: settings onboarding, Organato and updates render and respond in a real browser
+ok 1 - settings onboarding, Organato and updates render and respond in a real browser
+  ---
+  duration_ms: 11747.944166
+  ...
+# Subtest: first run shows the card only after the saved choice is read
+ok 2 - first run shows the card only after the saved choice is read
+  ---
+  duration_ms: 26.755375
+  ...
+# Subtest: a dismissed card stays hidden on later visits
+ok 3 - a dismissed card stays hidden on later visits
+  ---
+  duration_ms: 14.719125
+  ...
+# Subtest: Hide persists the choice, hides the card and moves focus to the page heading
+ok 4 - Hide persists the choice, hides the card and moves focus to the page heading
+  ---
+  duration_ms: 57.235083
+  ...
+# Subtest: a failed save keeps the card and explains how to retry
+ok 5 - a failed save keeps the card and explains how to retry
+  ---
+  duration_ms: 26.152833
+  ...
+# Subtest: dismissing in another settings tab hides this card too
+ok 6 - dismissing in another settings tab hides this card too
+  ---
+  duration_ms: 10.118084
+  ...
+# Subtest: bookmarks and history opens the native import dialog without claiming success
+ok 7 - bookmarks and history opens the native import dialog without claiming success
+  ---
+  duration_ms: 19.092167
+  ...
+# Subtest: a blocked tab shows the fixed fallback address and no status
+ok 8 - a blocked tab shows the fixed fallback address and no status
+  ---
+  duration_ms: 18.309292
+  ...
+# Subtest: password steps open the existing CSV guide and never a password route directly
+ok 9 - password steps open the existing CSV guide and never a password route directly
+  ---
+  duration_ms: 20.245666
+  ...
+# Subtest: without the tabs API the import action is disabled and explained
+ok 10 - without the tabs API the import action is disabled and explained
+  ---
+  duration_ms: 9.251875
+  ...
+# Subtest: dispose stops late updates and removes the card
+ok 11 - dispose stops late updates and removes the card
+  ---
+  duration_ms: 9.598708
+  ...
+# Subtest: the module only reuses fixed password routes and stores a single flag
+ok 12 - the module only reuses fixed password routes and stores a single flag
+  ---
+  duration_ms: 0.392375
+  ...
+# Subtest: settings categories, search, Other and narrow layout work in a real browser
+ok 13 - settings categories, search, Other and narrow layout work in a real browser
+  ---
+  duration_ms: 14437.059958
+  ...
+# Subtest: What's new page renders, closes its tab and opens Settings
+ok 14 - What's new page renders, closes its tab and opens Settings
+  ---
+  duration_ms: 42611.0835
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 42991.237417
+PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.
+Screenshots: /tmp/breezer-ui-polish/round-14-focused

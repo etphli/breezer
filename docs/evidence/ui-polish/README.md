@@ -4,8 +4,8 @@ The screenshot set renders Breezer's shipped workspace, settings, new-tab and
 assistant documents in Google Chrome using deterministic extension API fixtures.
 It exercises the real HTML, CSS and JavaScript. The pages contain sample browsing
 and school data. This does not verify native browser window geometry or a newly
-compiled Breezer application. A separate native capture pass now records the
-existing compiled runtime with a disposable profile. The installed app and
+compiled Breezer application. A separate native capture pass records a private current-UI verification build
+using a retained Chromium core and a disposable profile. The installed app and
 personal profile are unchanged.
 
 ## Reproduce
@@ -101,6 +101,7 @@ are retained in the adjacent Markdown files.
 | Breezer, candidate 10 interrupted cohort | 8.5 | 8.5 | 8.7, later resume |
 | Breezer, candidate 11 complete council | 8.5 | 8.4 | 8.8 |
 | Breezer, candidate 12 interrupted cohort | 8.5 | 8.5 | No score: five-hour quota |
+| Breezer, candidate 13, two Sol Fast by request | 8.5 | 8.5 | Excluded by user |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -211,3 +212,36 @@ all six reduced-motion assertions. The 39 native window captures and two native
 recordings are reused after verifying every file hash and unchanged native
 inputs. GPT-6.1 Sol wrote this refinement. It has no council score yet; the 9.5
 threshold remains unmet. All work remains local and PR #17 remains unpushed.
+
+Candidate 13 completed the user-requested two-Sol Fast exception at 8.5 each.
+Both used high reasoning and priority service, received identical neutral briefs
+and were satisfied overall. Actual starts were 2.395 seconds apart and overlapped
+for 909.146 seconds. They inspected 352 and 351 images. One identified low-contrast
+Mint/Pollen light profile icons; the other identified clipped sidebar controls at
+the resting native auto-hide edge. These findings concern the compiled 1.2.0
+native evidence. The normal two-Sol/one-Opus lineup resumes after this exception.
+No score meets the 9.5 threshold, and PR #17 remains unpushed.
+
+Candidate 14 moves browser control beside its page source, anchors the tooltip,
+simplifies the composer, and keeps import actions visible with detailed guidance
+in a disclosure. Layout helpers are shorter and expanded release summaries retain
+their text measure. The native placeholder profile uses the toolbar foreground;
+the resting auto-hide edge no longer exposes sliced sidebar controls. Eleven
+annotated before/after pairs were shown before commissioning the next council.
+
+The complete suite passed 545 checks with zero failures and two skips, plus both
+UI walkthroughs. All 490 matrix captures match the fifty current UI sources;
+all 38 translation captures and six reduced-motion assertions pass. Fresh native
+evidence has 39 windows and two continuous recordings from a private verification
+build using retained Chromium 156 core inputs, nine newly compiled UI/resource
+units and the current fifty-file UI payload. All loaded resources were hashed
+through the running extension. This is not a full product/release rebuild.
+Native stroke/background samples exceed 8.8:1 across all fourteen modes/palettes.
+Installed app pins remain unchanged and every owned capture process exited.
+
+Candidate 14 is awaiting the restored two-Sol/one-Opus simultaneous council.
+The neutral brief asks for a short concrete reason beside every category below
+10, with plain descriptions rather than filenames in the returned report.
+Exact references remain in private coverage ledgers. No stopping threshold or
+past scores are supplied. The user's 9.5-per-reviewer goal remains unmet.
+All work remains local and PR #17 is unpushed.

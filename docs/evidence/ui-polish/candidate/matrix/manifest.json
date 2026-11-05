@@ -64,7 +64,7 @@
       "file": "mint-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -399,7 +399,7 @@
       "file": "tide-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -734,7 +734,7 @@
       "file": "dusk-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -1069,7 +1069,7 @@
       "file": "rose-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -1404,7 +1404,7 @@
       "file": "pollen-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -1739,7 +1739,7 @@
       "file": "graphite-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -2074,7 +2074,7 @@
       "file": "custom-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -2409,7 +2409,7 @@
       "file": "mint-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -2744,7 +2744,7 @@
       "file": "tide-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -3079,7 +3079,7 @@
       "file": "dusk-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -3414,7 +3414,7 @@
       "file": "rose-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -3749,7 +3749,7 @@
       "file": "pollen-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -4084,7 +4084,7 @@
       "file": "graphite-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -4419,7 +4419,7 @@
       "file": "custom-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 1011
+        "height": 955
       }
     },
     {
@@ -4737,9 +4737,9 @@
     "onboarding.js": "2c39feea57db94d5559ff6d060fd23c4522327d9b55d340730f0a44c1eb2349b",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "cfb2db280d3149d08db99746fa981e6eff2758a570d9337c67f283d1985df7fe",
-    "panel.html": "bc04e5e28c6592ae57804011a7ef0fb673ce872a7389e7016905f52bd538c55f",
-    "panel.js": "c42e1752ecb0e822ff2dce32ff89059f3c8d11fa9f539a5959f7ca42a81ccd83",
+    "panel.css": "5d12947f42578c405c8e45ef34f458e84332407cbfdacc7ed815e1a4d69eb6ab",
+    "panel.html": "6610309ac4e730b304ea84c44e0fc0a2c03a1a467753d5097893f4fa2fe1d58d",
+    "panel.js": "18f6cd04927345cb0b4ba508116737c0bf3f20830f9788644927ee66a2a70604",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -4747,7 +4747,7 @@
     "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
     "research-sources.js": "f044e4517683b58615df5cf0f158de7dc002838a92b4baf4b492d10546cb9933",
     "settings-nav.js": "59760c81bbbdeeebbbfd5fef6c00bbbefa356c84631bbd7420c581a983484fac",
-    "settings-onboarding.js": "7e5dc0aa8258662cb1105a922dd766a87e6145c304ce861d054a2137751381d0",
+    "settings-onboarding.js": "09688c7b24bdc17c4494c0a1a9343dcd69cde6fa9c54435bf6731656beba4066",
     "settings.js": "6a31ab4212d993fc0be797af4643dc92ee2067d56b0b70c613d5aefb5d1ada61",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
@@ -4762,14 +4762,14 @@
     "translation.js": "54e3622c1321f39126676c14087ed88326ea069b419003d7c2c9773c016a2d5c",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "8a8dd99269e2cd02b44e7d635702a9aa5c6a94bd9442ac8556f5e93d43c327e5",
+    "whats-new.css": "f202c7a7f49eab29db27ba90dd5e08818d6e30a205029234517f48974da66817",
     "whats-new.html": "cb7ebebfde2f1a29941af1d6ea4d72ba922e7ea22f3fa765e2f2f0ebb86bca34",
     "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
-    "workspace.css": "81b3ad4ec86c11bbe581425e904f1d928fb2b6c0b0eb94cc21cb4e4b63b95c06",
-    "workspace.html": "fb4122a281d81c88c960959f59dcc0903f002cb1fc6a7db7ba877fcec345a988",
+    "workspace.css": "a551574238132a838fb494bd69a23f323e32cca6f1d11522dfef56c0d4de0519",
+    "workspace.html": "b9c5795f7af27bc1135b6431c4d3c24464940af640f8e601b812c2bc56b85af8",
     "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
   }
 }

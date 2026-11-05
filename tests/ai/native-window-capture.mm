@@ -40,6 +40,14 @@ static NativeRecordingDelegate* recordingDelegate;
 // process; no installed executable or global setting is changed.
 static bool IsPrivateHost(const char* path, char* const argv[]) {
   if (!getenv("BREEZER_UI_NATIVE_CAPTURE_DIR")) return false;
+  if (const char* app = getenv("BREEZER_UI_NATIVE_SPAWN_ROOT")) {
+    // A verification build may contain older host lookup code. Permit only
+    // its own browser helpers, plus the fixed spawn self-test executable.
+    if (!path || (strcmp(path, "/usr/bin/true") != 0 &&
+                  (strncmp(path, app, strlen(app)) != 0 ||
+                   path[strlen(app)] != '/'))) return true;
+    if (strstr(path, "/breezer_ai/")) return true;
+  }
   if (path && strstr(path, "/breezer_ai/host/launch.sh")) return true;
   for (unsigned i = 0; argv && argv[i] && i < 64; ++i) if (strstr(argv[i], "/breezer_ai/host/launch.sh")) return true;
   return false;
