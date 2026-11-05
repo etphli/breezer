@@ -68,4 +68,3 @@ Coverage comprised **351 unique displayed PNGs**, recorded in a fresh private le
 Motion judgments use **decoded recording frames, not continuous playback**. They establish sampled appearance and transition structure—not smoothness, frame pacing, or input latency. Web-frame origins are visible-edge references, not input or animation onset.
 
 Fixtures establish rendered appearance, not provider execution. Native menus, physical hit testing, restoration, physical auto-hide, translation native geometry/bridge execution, and broader OS integration remain unverified. The older native sidebar document and fictional page body were excluded; the efficiency article’s fixed-light presentation was treated as intentional.
-

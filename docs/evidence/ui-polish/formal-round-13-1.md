@@ -72,4 +72,3 @@ There are **no blocking observed design defects**. The native edge cleanup above
 Motion assessment used decoded frames, not continuous playback. Custom frame times begin at the first visible UI edges, not input time or animation onset; neither motion set establishes latency, frame pacing or smoothness. The reduced native run uses Chromium switches/preferences, not a changed macOS accessibility setting.
 
 Physical hit testing, native menus, restoration, physical auto-hide, translation native geometry/bridge and provider execution remain unverified. The very tall `whats-new-results-narrow.png` was too small for reliable full-text reading; I used its focused table capture, narrow viewport tiles and expanded desktop details instead.
-
