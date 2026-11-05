@@ -94,7 +94,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   width: var(--column);
   margin: 0 auto;
   /* Puts the row of sites at about a third of the way down the window. */
-  padding: clamp(48px, 10vh, 96px) 0 clamp(28px, 4vh, 40px);
+  padding: clamp(40px, 7vh, 72px) 0 clamp(20px, 3vh, 28px);
 }
 
 .today {
@@ -162,8 +162,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 }
 .site-add .site-name { max-width: none; overflow: visible; white-space: nowrap; text-align: center; font-size: 12px; }
 .sites:has(> .site-add:only-child) { margin-left: 0; }
-.site-add:only-child { min-height: 0; }
-.site-add:only-child .site-link { align-items: flex-start; padding-left: 0; }
+.site-add:only-child { width: max-content; flex: 0 0 auto; min-height: 0; }
+.site-add:only-child .site-link { align-items: center; padding-inline: 0; }
 
 .placeholder .site-icon { margin: 10px auto 8px; box-shadow: none; background: var(--hover); }
 .placeholder .site-name { display: block; width: 56px; height: 10px; margin: 0 auto; border-radius: 5px; background: var(--hover); }
@@ -186,6 +186,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   padding-bottom: 28px;
   border-radius: 16px;
 }
+.sheet:has(.organato[data-state="loading"]) { flex: 1; min-height: 360px; border-radius: 16px 16px 0 0; }
 
 .organato-head {
   display: flex;
@@ -309,7 +310,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 }
 a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 
-.item-meta { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13px; color: var(--muted); }
+.item-meta { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 14px; color: var(--muted); }
 /* Exams share the Upcoming list, so a quiet word marks them instead of a heading. */
 .item-kind { font-weight: 600; color: var(--ink); }
 .item[data-urgency="overdue"] .item-when { color: var(--danger); }
@@ -340,14 +341,15 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
   .action-link { border: 1px solid ButtonText; }
 }
 
-:root[data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 18%, white); --air-deep: color-mix(in srgb, var(--custom-seed) 30%, white); --card: #fff; --ink: #17202a; --muted: #46515e; --accent: color-mix(in srgb, var(--custom-seed) 45%, #17202a); }
-:root[data-scheme="dark"][data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: #2c3038; --ink: #f1f3f6; --muted: #bcc3ce; --accent: color-mix(in srgb, var(--custom-seed) 40%, white); }
+:root[data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 18%, white); --air-deep: color-mix(in srgb, var(--custom-seed) 30%, white); --card: #fff; --ink: #17202a; --muted: #46515e; --accent: oklch(from var(--custom-seed) min(l, .48) min(c, .18) h); }
+:root[data-scheme="dark"][data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: color-mix(in srgb, var(--custom-seed) 14%, #272b33); --ink: #f1f3f6; --muted: #bcc3ce; --accent: oklch(from var(--custom-seed) max(l, .78) min(c, .15) h); }
 
 .site { position: relative; }
 .site-remove { position: absolute; top: -5px; right: 0; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--raised); cursor: pointer; opacity: 0; font: inherit; }
 .site:hover .site-remove, .site:focus-within .site-remove { opacity: 1; }
 .site-remove:focus-visible, .shortcut-feedback button:focus-visible, .shortcut-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .shortcut-feedback { display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 10px; min-height: 30px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.shortcut-feedback:has(#shortcut-status:empty):not(:has(button:not([hidden]))) { min-height: 0; margin-top: 0; }
 .shortcut-feedback button { border: 0; padding: 4px 7px; color: var(--accent); background: transparent; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .shortcut-menu { position: fixed; z-index: 100; padding: 5px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--raised); box-shadow: 0 5px 25px #0002; }
 .shortcut-menu button { display: block; padding: 10px 14px; border: 0; border-radius: 5px; color: inherit; background: transparent; font: inherit; cursor: pointer; }
@@ -385,7 +387,8 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
   .site { min-height: 72px; }
   .site-icon { width: 40px; height: 40px; border-radius: 11px; }
   .site-link { gap: 4px; padding-block: 6px 4px; }
-  .today { margin-bottom: 16px; }
+  .today { margin-bottom: 16px; text-align: center; }
+  .sites > .site-add:only-child { grid-column: 1 / -1; justify-self: center; }
   .sky { padding-top: clamp(32px, 6vh, 48px); padding-bottom: 8px; }
   .shortcut-feedback { min-height: 24px; margin-top: 4px; }
 }

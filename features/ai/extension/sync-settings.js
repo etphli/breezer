@@ -17,7 +17,7 @@ export function mountSyncSettings({ container, api }) {
   const button = document.createElement('button'); button.type = 'button'; button.className = 'button'; button.textContent = 'Set up or manage sync';
   const available = typeof api.breezerPrivate?.readWorkspaceSync === 'function';
   button.disabled = !available;
-  if (!available) { heading.textContent = 'Sync unavailable'; description.textContent = 'This build does not include native sync setup.'; }
+  if (!available) { heading.textContent = 'Sync unavailable'; description.textContent = 'Sync is not available in this version. Saved data stays on this device. Check General for updates.'; }
   row.append(label, button); group.append(row);
   const state = document.createElement('p'); state.setAttribute('role', 'status'); state.className = 'field-note';
   const note = document.createElement('details'); note.className = 'setting-details';
@@ -67,9 +67,9 @@ export function mountSyncSettings({ container, api }) {
     state.textContent = !available ? ''
       : ['error', 'appearanceBlocked'].includes(value?.phase) ? value.message
         : value?.nativeError ? value.nativeMessage
-        : ['disabled', 'workspaceOff'].includes(value?.phase) ? 'Saved workspace sync is off. Check native setup for password sync and provider status.'
-          : value?.phase === 'reconciled' ? 'Workspace metadata is reconciled locally and queued for native sync. Open native setup for authenticated vault contact and initial download status.'
-            : 'Sync is optional. Open native setup to see this profile\'s connection state.';
+        : ['disabled', 'workspaceOff'].includes(value?.phase) ? 'Saved workspace sync is off. Open Sync settings to review password sync and your connection.'
+          : value?.phase === 'reconciled' ? 'Saved workspace changes are queued. Open Sync settings to check the connection and download status.'
+            : 'Sync is optional. Open Sync settings to review this profile\'s connection.';
     void renderRecovery(value);
   };
   render();
@@ -80,7 +80,7 @@ export function mountSyncSettings({ container, api }) {
     if (!available || disposed || opening) return;
     opening = true; button.disabled = true;
     try { await api.tabs.create({ url: 'chrome://breezer-sync/' }); }
-    catch { if (!disposed) state.textContent = 'Could not open native sync setup. Try again.'; }
+    catch { if (!disposed) state.textContent = 'Could not open Sync settings. Try again.'; }
     finally { opening = false; if (!disposed) button.disabled = false; }
   });
   return { dispose() { disposed = true; api.storage.onChanged?.removeListener?.(changed); } };

@@ -356,6 +356,8 @@ bool CheckAppearanceWritable(Profile* profile,
   if (changes_theme &&
       (theme_service->UsingPolicyTheme() ||
        !IsUserModifiable(prefs, prefs::kUserColor) ||
+       !IsUserModifiable(prefs, prefs::kBrowserColorVariant) ||
+       !IsUserModifiable(prefs, prefs::kGrayscaleThemeEnabled) ||
        !IsUserModifiable(prefs, breezer_workspace::prefs::kTheme))) {
     *error = "The browser theme is managed by your organization.";
     return false;
@@ -422,10 +424,14 @@ void ApplyAppearance(Profile* profile,
   if (patch.contains("theme")) {
     prefs->SetString(breezer_workspace::prefs::kTheme, appearance.theme);
     // An explicit Breezer theme choice replaces the current browser theme.
-    ThemeServiceFactory::GetForProfile(profile)
-        ->SetUserColorAndBrowserColorVariant(
-            *ThemeColor(appearance.theme),
-            ui::mojom::BrowserColorVariant::kTonalSpot);
+    ThemeService* const theme_service = ThemeServiceFactory::GetForProfile(profile);
+    if (appearance.theme == "graphite") {
+      theme_service->SetIsGrayscale(true);
+    } else {
+      theme_service->SetUserColorAndBrowserColorVariant(
+          *ThemeColor(appearance.theme),
+          ui::mojom::BrowserColorVariant::kTonalSpot);
+    }
   }
   if (patch.contains("colorMode")) {
     ThemeServiceFactory::GetForProfile(profile)->SetBrowserColorScheme(

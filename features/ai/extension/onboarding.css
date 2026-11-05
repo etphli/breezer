@@ -27,13 +27,13 @@ body.route-welcome { overflow: auto; background: var(--air); }
   display: grid;
   grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
   gap: 64px;
-  align-items: center;
+  align-items: start;
   padding: 32px 0;
 }
 
 /* ---------------------------------------------------------------- copy */
 
-.wl-copy { min-height: 440px; display: grid; align-content: center; }
+.wl-copy { min-height: 440px; display: grid; align-content: start; padding-top: 24px; }
 .wl-step { grid-area: 1 / 1; }
 .wl-step h1 {
   margin: 0 0 12px;

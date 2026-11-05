@@ -35,6 +35,7 @@
          results.json. Bar widths are each median over the largest in its comparison.
          The efficiency article is its own page, efficiency.html, linked from here. -->
 
+    <nav class="page-index" aria-label="On this page"><a href="#features-title">Highlights</a><a href="#results-title">Measurements</a><a href="#verification-title">Known limits</a></nav>
     <section class="features" aria-labelledby="features-title">
       <h2 id="features-title" class="visually-hidden">New in this release</h2>
 
@@ -680,7 +681,7 @@
         <h3 id="pending-sync-title">Encrypted sync</h3>
         <p class="pending-summary">Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
         <details class="feature-details">
-          <summary>Details</summary>
+          <summary>Sync verification</summary>
           <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
         </details>
       </div>
@@ -692,7 +693,7 @@
         <h3 id="pending-docs-title">Google Docs editing</h3>
         <p class="pending-summary">Typing, editing and saved changes still need real-document checks with both AI providers.</p>
         <details class="feature-details">
-          <summary>Details</summary>
+          <summary>Docs verification</summary>
           <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
         </details>
       </div>
@@ -704,7 +705,7 @@
         <h3 id="pending-passwords-title">Enter on Microsoft sign-in</h3>
         <p class="pending-summary">Enter on Microsoft's password step remains unconfirmed.</p>
         <details class="feature-details">
-          <summary>Details</summary>
+          <summary>Microsoft sign-in verification</summary>
           <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
         <p>A narrow Enter fallback is included for explicit username/current-password forms. Native password-picker, IME, validation and site checks remain pending.</p>
         </details>
@@ -717,7 +718,7 @@
         <h3 id="pending-title">Touch ID passkeys</h3>
         <p class="pending-summary">Touch ID passkeys are unavailable without Apple-approved signing entitlements. Saving and filling passwords are separate.</p>
         <details class="feature-details">
-          <summary>Details</summary>
+          <summary>Passkey availability</summary>
           <p>Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements that Breezer does not have yet. This is separate from saving and filling passwords.</p>
         </details>
       </div>

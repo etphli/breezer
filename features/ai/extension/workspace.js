@@ -452,7 +452,7 @@ function updateFavicon(holder, tab, url, title) {
   const src = faviconFor(tab, url);
   const fallback = () => {
     const page = urlOf(tab) || url || '';
-    holder.textContent = /^chrome:\/\/newtab/.test(page) || !page ? '' : (hostLabel(page)[0] || title[0] || '·').toUpperCase();
+    holder.textContent = /^chrome:\/\/newtab/.test(page) || !page ? '' : Array.from(hostLabel(page) || title || '·').slice(0, 2).join('').toUpperCase();
     holder.classList.toggle('blank', !holder.textContent);
   };
   if (!src || holder.dataset.failedIcon === src) {

@@ -24,7 +24,7 @@ test('loads nothing remote', () => {
   }
   assert.deepEqual([...css.matchAll(/url\(([^)]*)\)/g)].map((m) => m[1]), ['#breeze-ink']);
   assert.deepEqual([...html.matchAll(/\b(?:src|href)="([^"]+)"/g)].map((m) => m[1]).sort(),
-    ['#results-table', 'efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings', 'workspace.html#/settings', 'workspace.html#/welcome']);
+    ['#features-title', '#results-table', '#results-title', '#verification-title', 'efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings', 'workspace.html#/settings', 'workspace.html#/welcome']);
 });
 
 test('is CSP-safe and never injects HTML', () => {

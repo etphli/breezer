@@ -441,7 +441,7 @@ export function mountUpdates(api) {
     clearTimeout(timer); clearInterval(poll); poll = null; pending = null;
     available = false; installing = false;
     check.disabled = false; check.hidden = false; install.disabled = true; install.hidden = true;
-    if (needsCheck) { status.textContent = 'Update helper disconnected. Check for updates again.'; status.dataset.state = 'error'; }
+    if (needsCheck) { status.textContent = 'The update check disconnected. Choose Check for updates to retry.'; status.dataset.state = 'error'; }
   };
   const connect = () => {
     if (port) return port;
@@ -451,7 +451,7 @@ export function mountUpdates(api) {
       if (closed || port !== connection || message.id !== pending) return;
       clearTimeout(timer); pending = null;
       check.disabled = false;
-      if (!message.ok) { check.hidden = false; status.textContent = String(message.error).replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
+      if (!message.ok) { check.hidden = false; status.textContent = String(message.error).replace(/Update helper unavailable\.?/i, 'The update check is unavailable.').replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
       const value = message.value;
       status.dataset.state = value.phase === 'failed' ? 'error' : '';
       status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
@@ -478,7 +478,7 @@ export function mountUpdates(api) {
     status.dataset.state = '';
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
-    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; status.textContent = 'Update helper did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
+    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; status.textContent = 'The update check did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
     try { connect().postMessage({ type, id: pending }); }
     catch {
       const connection = port; port = null;
@@ -541,7 +541,7 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
     catch {
       const connection = port; port = null;
       try { connection?.disconnect(); } catch {}
-      finish('Organato helper is unavailable. Try again.', true);
+      finish('Breezer could not connect to Organato. Try again.', true);
     }
   };
   for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));

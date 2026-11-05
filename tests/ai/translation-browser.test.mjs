@@ -211,11 +211,16 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   fail = true;
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('rate limit'));
   assert.match(await status.textContent(), /Wait before retrying/);
+  assert.equal(await ui.locator('#translate').isDisabled(), true);
+  assert.match(await ui.locator('#translate').textContent(), /Retry in \d+s/);
+  const rateLimitRequests = requests.length;
+  await ui.locator('#translate').evaluate(button => button.click());
+  assert.equal(requests.length, rateLimitRequests, 'disabled retry sends no request');
   await captureState('error');
   if (process.env.BREEZER_AI_EVIDENCE) await writeFile(join(evidence, 'translation-capture-geometry.json'), JSON.stringify(captureGeometry, null, 2));
   fail = false; delay = 800;
   const incoming = new Promise(resolve => { onRequest = resolve; });
-  await ui.locator('#translate').click(); await incoming;
+  await ui.locator('#translate').click({ timeout: 40000 }); await incoming;
   await page.evaluate(() => { document.getElementById('article').textContent = 'Updated by the site during translation'; });
   await ui.locator('#cancel').click();
   await ui.waitForFunction(() => document.getElementById('status').textContent.includes('Stopped'));

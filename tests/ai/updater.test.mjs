@@ -114,7 +114,7 @@ test('a lost updater connection invalidates the install action and never replays
     first.disconnect();
     assert.equal(get('update-install').hidden, true, 'a new host has no checked release');
     assert.equal(get('update-check').disabled, false);
-    assert.match(get('update-status').textContent, /Check for updates again/);
+    assert.match(get('update-status').textContent, /Choose Check for updates to retry/);
     assert.equal(ports.length, 1, 'no automatic replay of the install request');
     userClick(get('update-check'));
     assert.equal(ports.length, 2);

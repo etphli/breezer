@@ -315,7 +315,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
             await page.setViewportSize({ width: 390, height: 844 });
           }
         }
-        await page.getByRole('link', { name: 'Read the full benchmark results', exact: true }).click();
+        await page.getByRole('link', { name: 'Full benchmark results', exact: true }).click();
         await page.locator('.results-table').first().waitFor();
         assert.equal(await page.locator('.measurement-details').evaluate(node => node.open), true);
         assert.equal(await page.locator('.full-results').evaluate(node => node.open), true);

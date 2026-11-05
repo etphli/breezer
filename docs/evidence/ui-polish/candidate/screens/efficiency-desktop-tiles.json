@@ -1,5 +1,5 @@
 {
-  "height": 3111,
+  "height": 3097,
   "viewport": {
     "width": 1440,
     "height": 900
@@ -23,8 +23,8 @@
     },
     {
       "file": "efficiency-desktop-tile-04.png",
-      "scrollY": 2211,
-      "mastheadBottom": -1767.09375
+      "scrollY": 2197,
+      "mastheadBottom": -1753.09375
     }
   ]
 }

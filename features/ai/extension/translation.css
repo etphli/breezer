@@ -5,7 +5,7 @@ header { margin-bottom: 24px; }
 h1 { font-size: 24px; line-height: 30px; font-weight: 650; margin: 0 0 6px; letter-spacing: -.5px; }
 p { margin: 14px 0; }
 .page-name { color: var(--muted); overflow-wrap: anywhere; margin: 0; }
-.note { color: var(--muted); font-size: 13px; line-height: 20px; }
+.note { color: var(--muted); font-size: 14px; line-height: 21px; }
 .translation-form { background: var(--raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 #provider { margin: 0 0 16px; }
 .languages { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px 20px 12px; }
@@ -22,8 +22,8 @@ button:disabled { opacity: .5; cursor: default; }
 .check input { flex: none; width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
 .consent-choice { margin: 0; font-weight: 500; }
 .consent-note { display: block; margin-top: 4px; font-weight: 400; }
-.automatic-choice { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.automatic-choice { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .actions button { min-height: 40px; }
 .actions .primary { flex: 1; }
 .primary { background: var(--accent); color: #fff; border-color: transparent; font-weight: 600; }
@@ -32,19 +32,17 @@ button:disabled { opacity: .5; cursor: default; }
 :root[data-scheme="dark"] .primary:not(:disabled) { background: var(--accent); }
 .primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 76%, var(--ink)); }
 :root[data-scheme="dark"] .primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
-:root .primary:disabled { background: var(--raised); color: var(--ink); border-color: var(--line); }
-:root .primary[data-recovery="true"]:not(:disabled) { background: var(--raised); color: var(--ink); border-color: var(--accent); }
-:root .primary[data-recovery="true"]:hover:not(:disabled) { background: var(--hover); }
-#status { min-height: 20px; margin: 12px 0 20px; overflow-wrap: anywhere; font-size: 13px; }
+:root .primary:disabled { background: var(--raised); color: var(--muted); border-color: var(--line); opacity: 1; }
+#status { min-height: 21px; margin: 16px 0 0; overflow-wrap: anywhere; font-size: 14px; }
 #status[data-state="error"] { padding: 10px 12px; border: 1px solid var(--danger-border); border-radius: 8px; background: var(--danger-surface); color: var(--danger); }
-.sharing-details { margin: 16px 0 0 26px; color: var(--muted); font-size: 13px; }
+.sharing-details { margin: 16px 0 0 26px; color: var(--muted); font-size: 14px; }
 .sharing-details summary { display: flex; align-items: center; gap: 9px; list-style: none; cursor: pointer; border-radius: 4px; }
 .sharing-details summary::-webkit-details-marker { display: none; }
 .sharing-details summary::before { content: ""; width: 6px; height: 6px; flex: none; margin: 0 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
-.sharing-details[open] summary::before { transform: rotate(45deg); }
+.sharing-details[open] summary::before { transform: translateY(-2px) rotate(45deg); }
 @media (max-width: 420px) { main { padding: 24px 20px; } .languages { gap: 12px; padding: 16px 16px 12px; } .language-tools { padding: 0 16px 12px; } .sharing-group, .automatic-choice { padding: 16px; } }
 @media (max-width: 360px) { .languages { grid-template-columns: 1fr; gap: 16px; } }
-.settings-link { color: var(--muted); padding: 0; border: 0; background: none; text-decoration: underline; }
+.settings-link { margin-top: 20px; color: var(--muted); padding: 0; border: 0; background: none; text-decoration: underline; }
 #languages.reload { min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; }
 #languages.reload:hover:not(:disabled) { color: var(--ink); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }

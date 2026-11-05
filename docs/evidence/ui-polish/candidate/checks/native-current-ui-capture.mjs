@@ -29,7 +29,7 @@ async function until(label, read, timeout = 15000) {
 const resume = process.env.BREEZER_NATIVE_RESUME === '1';
 const previous = resume ? JSON.parse(await readFile(join(output, 'manifest.json'), 'utf8')) : null;
 if (!resume) await mkdir(output); // Refuse to overwrite an earlier evidence pack.
-const scratch = await mkdtemp(join(repo, 'build/ui-native-verification/capture-owned-'));
+const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round15/capture-owned-'));
 const profile = join(scratch, 'profile');
 await mkdir(join(profile, 'Default'), { recursive: true });
 await writeFile(join(profile, 'Default/Preferences'), JSON.stringify({
@@ -41,7 +41,7 @@ const resources = join(app, 'Contents/Frameworks/Breezer Framework.framework/Res
 const identity = JSON.parse(await readFile(join(resources, 'breezer_ai/host/build-identity.json'), 'utf8'));
 assert.match(identity.commit, /^[0-9a-f]{40}$/);
 const inputNames = git('ls-files', 'features/workspace/native', 'features/ai/native-ui', 'script/apply_breezer_workspace.py', 'script/breezer_sidebar_frame.py', 'script/apply_breezer_ai_ui.py').split('\n').filter(Boolean);
-const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round14-native-build-sdk27.2/runtime-receipt.json', 'utf8'));
+const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round15-native-build/runtime-receipt.json', 'utf8'));
 assert.equal(app, runtimeReceipt.stagedApp);
 assert.equal(sha(await readFile(runtimeReceipt.output)), runtimeReceipt.signedFrameworkSha256, 'Private UI framework changed');
 const buildReceipt = JSON.parse(await readFile(runtimeReceipt.sourceReceipt, 'utf8'));
@@ -170,8 +170,8 @@ try {
     }
     throw new Error(`${name}: full native window did not settle with matching fixture pixels`);
   }
-  const common = { layout: 'top', frameless: false, centeredAddressBar: false, minimalUrl: false, bookmarkBarMode: 'hidden', showLoadProgress: true };
-  if (!motionOnly) for (const theme of ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#2c79c7']) for (const colorMode of ['light', 'dark']) {
+  const common = { theme: 'mint', colorMode: 'light', layout: 'top', frameless: false, centeredAddressBar: false, minimalUrl: false, bookmarkBarMode: 'hidden', showLoadProgress: true };
+  if (!motionOnly) for (const theme of ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#3979bd']) for (const colorMode of ['light', 'dark']) {
     const label = theme.startsWith('#') ? 'custom' : theme;
     for (const [size, width] of [['desktop', 1100], ['narrow', 540]]) await capture(`top-${label}-${colorMode}-${size}`, { ...common, theme, colorMode }, width);
   }

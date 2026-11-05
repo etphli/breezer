@@ -214,12 +214,12 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     const titles = [];
     for (let at = 0; at < 5; at += 1) {
       titles.push(await heading());
-      assert.equal(await page.locator('#wl-tour-count').innerText(), `Tour · ${at + 1} of 5`);
+      assert.equal(await page.locator('#wl-tour-count').innerText(), `Tip ${at + 1} of 5`);
       await pause(2600);
       if (at === 0 || at === 3) await shot(page, `7-tour-${at + 1}`);
       if (at === 1) {
         await page.locator('#wl-back').click();
-        assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tour · 1 of 5');
+        assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tip 1 of 5');
         await next.click();
       }
       await next.click();
@@ -245,7 +245,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       const { context, page } = await open({ reducedMotion: 'reduce', layout: 'top' });
       for (let at = 0; at < 6; at += 1) await page.locator('#wl-next').click();
       assert.equal(await page.locator('#wl-h-tour').innerText(), 'Your tabs stay across the top');
-      assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tour · 1 of 3');
+      assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tip 1 of 3');
       assert.equal(await page.locator('.wl-step:not([hidden])').evaluate((node) => getComputedStyle(node).animationName), 'none');
       assert.equal(await page.locator('#wl-skip').innerText(), 'Skip tour');
       await page.locator('#wl-skip').click();
@@ -335,7 +335,10 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       const { context, page } = await open({ reducedMotion: 'reduce', organato: { enabled: false, connected: true }, local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
       await page.locator('#wl-organato-status', { hasText: 'Organato is turned off' }).waitFor();
       assert.equal(await page.locator('#wl-organato-off').isVisible(), false);
+      assert.equal(await page.locator('#wl-skip').isVisible(), false);
+      await page.locator('#wl-next').click();
       await page.locator('#wl-skip').click();
+      await page.locator('#wl-next').click();
       await page.waitForFunction(() => fx.updated.length === 1);
       assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type }) => type)), ['view']);
       assert.equal(await page.evaluate(() => fx.organato.enabled), false);

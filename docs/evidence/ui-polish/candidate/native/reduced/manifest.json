@@ -1,12 +1,13 @@
 {
-  "startedAt": "2026-11-05T11:14:41.531Z",
-  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app",
+  "startedAt": "2026-11-05T13:09:56.058Z",
+  "sourceTreeState": "Per-file nativeInputs and loadedUiSourceHashes identify the exact captured sources. sourceHead records repository HEAD, which may precede uncommitted candidate files.",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/Breezer.app",
   "appVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
   "shellMetadataVersion": "1.2.0",
-  "sourceHead": "89e499175ad9296f4f9b024d2818f54997260f77",
+  "sourceHead": "2ec6804544cf33f375ad84ba3937d165aebd00ba",
   "nativeRuntimeReportedCommit": null,
   "shellResourceReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
-  "uiBuildProvenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild.",
+  "uiBuildProvenance": "Private UI verification build using the retained Chromium 156 core, current frame/workspace/avatar UI, a newly compiled current appearance bridge and current 50-file web UI payload. Eight unchanged current UI objects are reused. Not a full product/release rebuild.",
   "compiledUiUnits": 9,
   "nativeInputs": [
     {
@@ -19,7 +20,7 @@
     },
     {
       "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
-      "sha256": "6939c92cc59887708166f10cc035f7b06d9af53ca294a7ae76a6d2767d50b79d"
+      "sha256": "08375eda4d5255c6d3f9a896b6217d021a5c360adba5c62466c8b2d9b5aae4bc"
     },
     {
       "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.h",
@@ -76,20 +77,20 @@
   ],
   "capturedAppPins": [
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/MacOS/Breezer",
-      "sha256": "8801fcdbfd282f9ea54254a9555501bb6dea6983e3e373cc35f660d2067b3d0f"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/Breezer.app/Contents/MacOS/Breezer",
+      "sha256": "09d48a6060651a4f0a3259e6b95e0905c94687077c3a6f2e865fdf8270fdc02b"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
-      "sha256": "66016ddf8da3ed733bd03e3bace76e198b8e1f6ae0758d0e5bd8fea85c956c4b"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
+      "sha256": "4ab9c19afe57101632e384cc546e11446172c4888e1394ba792b2c2b8b2d8a1c"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
       "sha256": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
     }
   ],
   "method": "ScreenCaptureKit current-process window",
-  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-44NPkx/profile",
+  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/capture-owned-uzxcOq/profile",
   "fixtureOnly": true,
   "captures": [
     {
@@ -100,21 +101,21 @@
         "scale": 2,
         "title": "Today \u00b7 Breezer fixture",
         "width": 1100,
-        "windowId": 89339
+        "windowId": 92166
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-14-native-reduced/native-motion-start.png",
-      "pid": 95431,
+      "path": "/tmp/breezer-ui-polish/round-15-native-reduced/native-motion-start.png",
+      "pid": 17323,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "443d2229ad8a0b6d2c744c15fdd54d40c8472958856c52e4d7c5abd1c03bb420",
+      "sha256": "bfe33b85dfa4dec4af26d6b609b7ab5df0c6f62e6ae7393e541f39ab28647c14",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
         "bookmarkBarMode": "hidden",
         "centeredAddressBar": false,
-        "colorMode": "system",
+        "colorMode": "light",
         "frameless": false,
         "layout": "top",
         "minimalUrl": false,
@@ -135,25 +136,25 @@
             237
           ],
           [
-            228,
-            245,
+            229,
+            244,
             237
           ]
         ],
         "top": [
-          190,
-          190,
-          190
+          94,
+          114,
+          108
         ]
       },
-      "stableCaptures": 3
+      "stableCaptures": 2
     }
   ],
   "previousAttempts": [],
   "reducedMotionForced": true,
   "motionOnly": true,
   "reducedMotionMethod": "Chromium native animation switch plus renderer CSS preference. System accessibility settings are unchanged.",
-  "provenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild. Current 50-file UI payload is checked through the actual extension origin. Shell metadata is inherited; its commit stamp does not describe this private framework. No full product/release rebuild is claimed.",
+  "provenance": "Private UI verification build using the retained Chromium 156 core, current frame/workspace/avatar UI, a newly compiled current appearance bridge and current 50-file web UI payload. Eight unchanged current UI objects are reused. Not a full product/release rebuild. Current 50-file UI payload is checked through the actual extension origin. Shell metadata is inherited; its commit stamp does not describe this private framework. No full product/release rebuild is claimed.",
   "installedPins": {
     "/Users/likht.ethan/Applications/Breezer.app/Contents/MacOS/Breezer": "43e6d77440449f9bd849c771550c02c1a14969d872ef90df8e12a5daeb5067ea",
     "/Users/likht.ethan/Applications/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework": "82b14111103d5e9203e4a88c00d1adb294041f05439a05e61f691ef86ce3d3f0",
@@ -165,20 +166,20 @@
     "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
     "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
     "context-settings.js": "264b3b46bd83333a6cfb673575414f8fba46437bc31d1127693d57d2ec54587d",
-    "efficiency.html": "9e5faff6e758436acff4862c8e327becc9a1f07c61fd7a4139173f4962620c54",
+    "efficiency.html": "365b2c2a8325013be431f81e6767d52aa6d28e9d1cbbba93a17e344ecbf3c5b0",
     "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
     "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
     "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
-    "newtab.css": "f00730c7ab340e486c2209a4c6f54d331ba6afce650e708a72ff1058ca0d222a",
+    "newtab.css": "1e18415672dcfe4dba76d35c3d984e11c31a1ebe139385e5aed6aa62307125d8",
     "newtab.html": "d746dc573025d58df1d1d857c3b4ca4880918feb6e03c7d5765a262a36b9f0bc",
     "newtab.js": "73506d2b240e3c99e2c379bd62067cde91fbf0001a1873fc63ce07c8d6db6a7c",
-    "onboarding.css": "6c56061135d0db972ba88693a5115e6424c2c39192b6504fdadb612a13e19718",
-    "onboarding.js": "2c39feea57db94d5559ff6d060fd23c4522327d9b55d340730f0a44c1eb2349b",
+    "onboarding.css": "7064a090a883338e4fe3c198c7192de2f6efd1c1422bb9775ee60ae47bbce7ee",
+    "onboarding.js": "63858d0d813e2336fa238c7d3180fbe6f271950340225aa5b1d8f2266dc048f1",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "5d12947f42578c405c8e45ef34f458e84332407cbfdacc7ed815e1a4d69eb6ab",
-    "panel.html": "6610309ac4e730b304ea84c44e0fc0a2c03a1a467753d5097893f4fa2fe1d58d",
-    "panel.js": "18f6cd04927345cb0b4ba508116737c0bf3f20830f9788644927ee66a2a70604",
+    "panel.css": "ec5add29eceaf11a3e988290038ac180114ffb03e5402f4eaf358a1558cba4d5",
+    "panel.html": "a4e0d172efb4c9122347e2a0a841f47697f6b1d0a022faeb2ccf40e71def98e1",
+    "panel.js": "9ef67568991e784bd21d336550f47c026edef69ade7634b41189617f5a49d96c",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -187,175 +188,175 @@
     "research-sources.js": "f044e4517683b58615df5cf0f158de7dc002838a92b4baf4b492d10546cb9933",
     "settings-nav.js": "59760c81bbbdeeebbbfd5fef6c00bbbefa356c84631bbd7420c581a983484fac",
     "settings-onboarding.js": "09688c7b24bdc17c4494c0a1a9343dcd69cde6fa9c54435bf6731656beba4066",
-    "settings.js": "6a31ab4212d993fc0be797af4643dc92ee2067d56b0b70c613d5aefb5d1ada61",
+    "settings.js": "a39e89c735817a25f18f75ebceb2c8cfe4707363a41c7ed716be79f367b6f4b6",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
-    "sync-settings.js": "17178927c6c8a4c29d5e8c78ebd1c620a0415ba647bec8fdaca19abb1335e63c",
+    "sync-settings.js": "39e65194b86fc2c2f8c6623bafd3eecef517763a3974419c67b0b6d427acd5e9",
     "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
-    "translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
+    "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
-    "translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
+    "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
     "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
-    "translation.css": "d6a7ff9c19ef243ef456ccd6b10beda65da4a0698cd9f91c625c75229c35c1e4",
-    "translation.html": "4007a518ef06fd2e7338086c54d3e5943fc528152f16f5c455382eb6da54620d",
-    "translation.js": "54e3622c1321f39126676c14087ed88326ea069b419003d7c2c9773c016a2d5c",
+    "translation.css": "25b99cd4719715a898ee76cd51da1740f3004a5215f8abcc48260e4cdd049254",
+    "translation.html": "a68dad2bf1d08f25999e135c3cf0213b94681a5087ba3a85a8af5454a8e18781",
+    "translation.js": "594d875ac82a80d69289ff49500155060da759baf6e779bd68e279cd1ccda4d5",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "f202c7a7f49eab29db27ba90dd5e08818d6e30a205029234517f48974da66817",
-    "whats-new.html": "cb7ebebfde2f1a29941af1d6ea4d72ba922e7ea22f3fa765e2f2f0ebb86bca34",
+    "whats-new.css": "81b02fa393c99c6aa79841a1900fd841023be8a9c5141e75aceda04900f318ea",
+    "whats-new.html": "21088f0d1283c9e0bf7fcda643b95fe09cd58be9772bb5dced7f93dfea543c19",
     "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
-    "workspace.css": "a551574238132a838fb494bd69a23f323e32cca6f1d11522dfef56c0d4de0519",
-    "workspace.html": "b9c5795f7af27bc1135b6431c4d3c24464940af640f8e601b812c2bc56b85af8",
-    "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
+    "workspace.css": "dae01ab7a2c5724ab2ae3aca3e33dde67ca4f3b90010f0d5ef16bfa8e2b93de8",
+    "workspace.html": "5218dd6fcf0e19546d35e324207560a537a710f328b6e4eb51b38166be733528",
+    "workspace.js": "c638d04771337e02d70ee42682c3795d10b7118b9a0ca184e8289f45a440104c"
   },
   "pagePrefersReducedMotion": true,
   "ownedProcesses": [
     {
       "type": "browser",
-      "id": 95431,
-      "cpuTime": 2.523147
+      "id": 17323,
+      "cpuTime": 2.487782
     },
     {
       "type": "renderer",
-      "id": 95470,
-      "cpuTime": 0.132397
+      "id": 17362,
+      "cpuTime": 0.103853
     },
     {
       "type": "renderer",
-      "id": 95469,
-      "cpuTime": 0.190962
+      "id": 17361,
+      "cpuTime": 0.194633
     },
     {
       "type": "renderer",
-      "id": 95468,
-      "cpuTime": 0.248509
+      "id": 17360,
+      "cpuTime": 0.292837
     },
     {
       "type": "renderer",
-      "id": 95466,
-      "cpuTime": 0.262336
+      "id": 17357,
+      "cpuTime": 0.459609
     },
     {
       "type": "renderer",
-      "id": 95445,
-      "cpuTime": 0.49036
+      "id": 17353,
+      "cpuTime": 0.226868
     },
     {
       "type": "renderer",
-      "id": 95467,
-      "cpuTime": 4.837324
+      "id": 17359,
+      "cpuTime": 0.191372
     },
     {
       "type": "renderer",
-      "id": 95441,
-      "cpuTime": 0.199802
+      "id": 17354,
+      "cpuTime": 0.166322
     },
     {
       "type": "GPU",
-      "id": 95436,
-      "cpuTime": 0.704568
+      "id": 17349,
+      "cpuTime": 0.698907
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 95437,
-      "cpuTime": 0.1455
+      "id": 17350,
+      "cpuTime": 0.139989
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 95438,
-      "cpuTime": 0.064844
+      "id": 17351,
+      "cpuTime": 0.067082
     }
   ],
-  "browserPid": 95431,
+  "browserPid": 17323,
   "recording": {
     "start": {
       "blockedNativeHostLaunches": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-44NPkx/native-tabs-toolbar-motion.mp4",
-      "pid": 95431,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/capture-owned-uzxcOq/native-tabs-toolbar-motion.mp4",
+      "pid": 17323,
       "recordingStarted": true,
       "screenCaptureAccessGranted": false
     },
     "actions": [
       {
         "name": "Select Field notes tab",
-        "at": "2026-11-05T11:14:49.447Z"
+        "at": "2026-11-05T13:10:00.810Z"
       },
       {
         "name": "Select Today tab",
-        "at": "2026-11-05T11:14:49.968Z"
+        "at": "2026-11-05T13:10:01.328Z"
       },
       {
         "name": "Close Reading list tab",
-        "at": "2026-11-05T11:14:50.487Z"
+        "at": "2026-11-05T13:10:01.844Z"
       },
       {
         "name": "Enable centered, minimal address",
-        "at": "2026-11-05T11:14:50.999Z"
+        "at": "2026-11-05T13:10:02.354Z"
       }
     ],
     "finish": {
       "blockedNativeHostLaunches": 2,
-      "bytes": 64294,
+      "bytes": 72246,
       "durationSeconds": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification/capture-owned-44NPkx/native-tabs-toolbar-motion.mp4",
-      "pid": 95431,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round15/capture-owned-uzxcOq/native-tabs-toolbar-motion.mp4",
+      "pid": 17323,
       "recordingFinished": true,
       "screenCaptureAccessGranted": false
     },
-    "path": "/tmp/breezer-ui-polish/round-14-native-reduced/native-tabs-toolbar-motion.mp4",
-    "sha256": "a3175b2a7896682012ca67f7f5401d37e94c6e322fb29f0fbbbc7a6871d183af"
+    "path": "/tmp/breezer-ui-polish/round-15-native-reduced/native-tabs-toolbar-motion.mp4",
+    "sha256": "88e9d0ca920327cc48c000fc0a78f6e7edf7429a330d499445054e90810c2794"
   },
   "status": "passed",
   "finalOwnedProcesses": [
     {
       "type": "browser",
-      "id": 95431,
-      "cpuTime": 3.194868
+      "id": 17323,
+      "cpuTime": 3.584125
     },
     {
       "type": "renderer",
-      "id": 95470,
-      "cpuTime": 0.133051
+      "id": 17362,
+      "cpuTime": 0.105779
     },
     {
       "type": "renderer",
-      "id": 95468,
-      "cpuTime": 0.252388
+      "id": 17360,
+      "cpuTime": 4.671166
     },
     {
       "type": "renderer",
-      "id": 95466,
-      "cpuTime": 0.560828
+      "id": 17357,
+      "cpuTime": 0.519545
     },
     {
       "type": "renderer",
-      "id": 95445,
-      "cpuTime": 0.555946
+      "id": 17353,
+      "cpuTime": 0.484222
     },
     {
       "type": "renderer",
-      "id": 95467,
-      "cpuTime": 5.224409
+      "id": 17359,
+      "cpuTime": 0.254065
     },
     {
       "type": "GPU",
-      "id": 95436,
-      "cpuTime": 0.871256
+      "id": 17349,
+      "cpuTime": 0.871963
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 95437,
-      "cpuTime": 0.157686
+      "id": 17350,
+      "cpuTime": 0.149965
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 95438,
-      "cpuTime": 0.065953
+      "id": 17351,
+      "cpuTime": 0.0682
     }
   ],
   "cleanup": {
@@ -365,6 +366,11 @@
   },
   "capturedAppPinsUnchanged": true,
   "installedPinsUnchanged": true,
-  "finishedAt": "2026-11-05T11:14:53.035Z",
-  "sourceTreeState": "Captured from uncommitted candidate UI files. Per-file nativeInputs and loadedUiSourceHashes identify the exact sources; sourceHead is the repository HEAD at capture, not an assertion of a clean tree."
+  "finishedAt": "2026-11-05T13:10:04.358Z",
+  "captureHelper": {
+    "path": "/tmp/breezer-ui-round15-native-window-diagnostic.mm",
+    "sha256": "4a23847e17ab97901fef27cc85573e0c0f95f6a3506727a9655c0e78340595f3",
+    "differenceFromRepoHelper": "Adds an SCStreamDelegate that records a stream-stop NSError. Capture configuration and current-process filtering are unchanged.",
+    "scope": "Successful instrumented repeat; intermittent macOS stop failure root cause remains unknown."
+  }
 }

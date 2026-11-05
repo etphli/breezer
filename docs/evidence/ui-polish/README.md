@@ -102,6 +102,7 @@ are retained in the adjacent Markdown files.
 | Breezer, candidate 11 complete council | 8.5 | 8.4 | 8.8 |
 | Breezer, candidate 12 interrupted cohort | 8.5 | 8.5 | No score: five-hour quota |
 | Breezer, candidate 13, two Sol Fast by request | 8.5 | 8.5 | Excluded by user |
+| Breezer, candidate 14 complete council | 8.8 | 8.9 | 8.5 |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -239,9 +240,29 @@ through the running extension. This is not a full product/release rebuild.
 Native stroke/background samples exceed 8.8:1 across all fourteen modes/palettes.
 Installed app pins remain unchanged and every owned capture process exited.
 
-Candidate 14 is awaiting the restored two-Sol/one-Opus simultaneous council.
+Candidate 14 used the restored two-Sol/one-Opus simultaneous council.
 The neutral brief asks for a short concrete reason beside every category below
 10, with plain descriptions rather than filenames in the returned report.
 Exact references remain in private coverage ledgers. No stopping threshold or
 past scores are supplied. The user's 9.5-per-reviewer goal remains unmet.
 All work remains local and PR #17 is unpushed.
+
+Candidate 14 completed at 8.8, 8.9 and 8.5. Actual starts were 0.399s apart, with all three overlapping for 668.895s. This is the fifth complete simultaneous three-model council. The two Sol reviewers were satisfied overall; Opus requested alignment and theme refinements before full sign-off. All returned a concrete reason beside each category below 10. These scores remain below the requested threshold. Candidate 15 work is local and PR #17 remains unpushed.
+
+Candidate 15 increases supporting-text readability, separates account connection
+from model choices, consolidates working status and repeated reply branding, and
+separates memory save/erase actions. Translation recovery honors provider retry
+deadlines with a countdown. Narrow related fields align, space actions remain
+attached, setup has one tour counter, new-tab loading reserves space, and the
+release/reference pages have clearer navigation and reading measures. Compact
+icons share an axis and fallback identities use two letters. Graphite native
+chrome is grayscale; custom accents retain hue with measured text contrast.
+
+The full suite passes 547 checks, zero failures and two skips, followed by both
+walkthroughs. The refreshed 490-state matrix matches all fifty UI files. There
+are 38 stable translation captures, twelve motion sequences, and 39 fresh native
+windows with two continuous recordings. The private native build reuses eight
+unchanged current UI units and freshly compiles the appearance bridge. It is not
+a full product/release rebuild. Twenty-two annotated before/after pairs precede
+the next review. All work remains local; PR #17 is unpushed and the requested
+9.5 score from each reviewer remains unmet.

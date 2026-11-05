@@ -138,7 +138,25 @@ try {
   assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
   assert.equal(await page.locator('#speed-select option[value="fast"]').evaluate(option => option.disabled), true);
   await page.locator('#model-button').click();
-  assert.match(await page.locator('#model-menu').innerText(), /Sign in required/);
+  assert.match(await page.locator('#model-menu').innerText(), /Connect Claude/);
+  assert.doesNotMatch(await page.locator('#model-menu').innerText(), /claude auth login/);
+  await page.getByRole('button', { name: 'Connect Claude', exact: true }).click();
+  assert.equal(await page.locator('#account-dialog').isVisible(), true);
+  assert.equal(await page.locator('#account-instructions code').textContent(), 'claude auth login');
+  for (const scheme of ['light', 'dark']) {
+    await page.emulateMedia({ colorScheme: scheme });
+    for (const width of [400, 320]) {
+      await page.setViewportSize({ width, height: width === 320 ? 640 : 850 });
+      const file = `sidebar-account-dialog-${scheme}${width === 320 ? '-narrow' : ''}.png`;
+      captureChecks.push({ file, ...await captureStablePanel(page, `${evidence}/${file}`, { surfaceSelector: '#account-dialog' }) });
+      assert.equal(await page.locator('#account-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true);
+    }
+  }
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.setViewportSize({ width: 400, height: 850 });
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#account-dialog').isVisible(), false);
+  await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
   assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
@@ -243,7 +261,7 @@ try {
   assert.equal(controlChat.control, true);
   assert.equal(controlChat.history.length, 6);
   await page.evaluate((id) => window.emit({ type: 'activity', id, active: true, label: 'Scrolling this page' }), controlChat.id);
-  assert.equal(await page.locator('#activity-label').innerText(), 'Scrolling this page');
+  assert.equal(await page.locator('#activity-label').innerText(), 'Browser control · Scrolling this page');
   assert.equal(await page.locator('#send-arrow').isVisible(), false);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-working.png` });
   await page.getByRole('button', { name: 'Stop response', exact: true }).click();
@@ -421,7 +439,8 @@ try {
   await loading.addInitScript(installPanelFixture, { contextDelay: 30_000 });
   await loading.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
   await loading.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
-  assert.equal(await loading.locator('.context-row').isHidden(), true, 'unresolved page context shows no contradictory sharing labels');
+  assert.equal(await loading.locator('#context-toggle').isHidden(), true, 'unresolved page context has no sharing control');
+  assert.equal(await loading.locator('#context-hint').innerText(), 'Loading current page…');
   await loading.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-page-loading-narrow.png` });
   await loading.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
   assert.equal(await loading.locator('.context-row').isVisible(), true);

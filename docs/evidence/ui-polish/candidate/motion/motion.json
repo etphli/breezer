@@ -107,7 +107,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 40,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -148,7 +148,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 80,
+    "videoFrameOriginMs": 40,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -349,7 +349,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 53.57177593740782,
+        "duration": 53.686270385307296,
         "easing": "ease",
         "endDelay": 0,
         "fill": "backwards",
@@ -360,7 +360,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 111.79801502328964,
+        "duration": 111.89541174553175,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
         "fill": "backwards",
@@ -438,7 +438,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 920,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -564,7 +564,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 40,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -593,7 +593,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -651,7 +651,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -738,7 +738,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

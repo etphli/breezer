@@ -173,28 +173,28 @@
       "colorMode": "light",
       "width": 1200,
       "file": "translation-custom-light.png",
-      "actionContrast": 10.322098785994983
+      "actionContrast": 7.545233709709647
     },
     {
       "theme": "#3979bd",
       "colorMode": "light",
       "width": 390,
       "file": "translation-custom-light-narrow.png",
-      "actionContrast": 10.322098785994983
+      "actionContrast": 7.545233709709647
     },
     {
       "theme": "#3979bd",
       "colorMode": "dark",
       "width": 1200,
       "file": "translation-custom-dark.png",
-      "actionContrast": 9.73731672896065
+      "actionContrast": 8.262910477416515
     },
     {
       "theme": "#3979bd",
       "colorMode": "dark",
       "width": 390,
       "file": "translation-custom-dark-narrow.png",
-      "actionContrast": 9.73731672896065
+      "actionContrast": 8.262910477416515
     }
   ],
   "note": "Real disposable MV3 translation session with a fixture appearance bridge. Native window geometry and native bridge execution remain unverified."

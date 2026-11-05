@@ -325,7 +325,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     const slides = tourSlides(appearance.layout);
     slide = Math.min(slide, slides.length - 1);
     const current = slides[slide];
-    $('wl-tour-count').textContent = `Tour · ${slide + 1} of ${slides.length}`;
+    $('wl-tour-count').textContent = `Tip ${slide + 1} of ${slides.length}`;
     $('wl-h-tour').textContent = current.title;
     $('wl-tour-body').textContent = current.body;
     $('wl-tour-keys').replaceChildren(...current.keys.map(([keys, label]) => {
@@ -403,8 +403,9 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       else item.removeAttribute('aria-current');
     }
     $('wl-back').hidden = index === 0;
+    progress.hidden = step === 'tour';
     updateNavigation();
-    $('wl-skip').hidden = step === 'done';
+    $('wl-skip').hidden = step === 'done' || step === 'organato';
     if (focus) (step === 'you' ? nameInput : section.querySelector('h1')).focus({ preventScroll: true });
     if (!setup.completed && setup.step !== step) {
       setup = { ...setup, step };

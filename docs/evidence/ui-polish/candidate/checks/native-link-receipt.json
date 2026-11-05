@@ -1,22 +1,15 @@
 {
   "exitCode": 0,
-  "compiledUiUnits": 9,
-  "sourceReceipt": "/tmp/breezer-ui-round14-native-build-sdk27.2/compile-receipt.json",
-  "resourceReceipt": "/tmp/breezer-ui-round14-native-build-sdk27.2/resource-receipt.json",
-  "cachePinsUnchanged": {
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/ui/libui.a": "02ecfad17851f89413e7f5fe717f368662b5dab0841c864f0da3cf7ac91c56a9",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/ui/views/profiles/avatar_toolbar_button_impl/avatar_toolbar_button_state_manager.o": "ad48c7e8bb944a010c74532d3185cff034f87974d902193a484f156843b2e782",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/ui/ui/vertical_tab_strip_region_view.o": "c44e7833f314e8af287213a5afed66f3c282dbf688bd05e8b510bf3e65c35651",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/ui/views/frame/browser_view_tabbed_layout_impl/browser_view_tabbed_layout_impl.o": "dd8565ec70d5b3440c884026f6332cc925ff982f3cab57bd4e0c733ebf7064fa",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/ui/ui/browser_view.o": "2ef2a25fb0551844cb2db7036df32e17b38021b1e474f571b4b2b7c5efe91ba1",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/components/breezer_ai/breezer_ai/breezer_ai_resources_map.o": "c1dc9ba43cbef1209c079369d685dd4249d92c28c8afd1ddd44ca4ea5c2eaec7",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/extensions/extensions/chrome_component_extension_resource_manager.o": "ec669b4b05645abd04711daea92d8b79a6ee2126f2ba2770155630561a049ed2",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/ui/ui/breezer_workspace_view.o": "aedd02b02532768ff771d5d4017f47987d2fbf99187bd788cb667ca1a6029fe5",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/browser/extensions/api/breezer_private/breezer_private/breezer_private_api.o": "75fc09f65349f332e13e584e7f23c6e8d57cab0e388748b1f9ed3c0d8949a6f3",
-    "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/out/Default/obj/chrome/common/extensions/api/libgenerated_api_json_strings.a": "48fb27cd2e503f6796f8cf996cc25559d16fd0fd713eb0cc5fbfc6157f5b1373"
-  },
-  "output": "/tmp/breezer-ui-round14-native-build-sdk27.2/Breezer Framework",
-  "provenance": "UI verification build: retained Chromium 156 core, current frame/workspace/avatar UI units, current appearance bridge/schema and current 50-file UI payload. Not a full product/release rebuild.",
-  "sha256": "83e213ce87192a8c96ab949c5d4c6a50d63e25cb777c65371d593c4452c64c41",
-  "bytes": 598118240
+  "newlyCompiledUnits": 1,
+  "unchangedCurrentUiUnitsReused": 8,
+  "sourcePath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+  "sourceSha256": "08375eda4d5255c6d3f9a896b6217d021a5c360adba5c62466c8b2d9b5aae4bc",
+  "privateSourcePath": "/tmp/breezer-ui-round15-native-build/sources/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+  "objectPath": "/tmp/breezer-ui-round15-native-build/breezer_private_api.o",
+  "objectSha256": "3fd134931c63b3c68cd67bd8e4b40cd4c229ee2afd71400f44a680e0f83d4b16",
+  "output": "/tmp/breezer-ui-round15-native-build/Breezer Framework",
+  "cacheObjectUnchanged": "75fc09f65349f332e13e584e7f23c6e8d57cab0e388748b1f9ed3c0d8949a6f3",
+  "baseBuildReceipt": "/tmp/breezer-ui-round14-native-build-sdk27.2/runtime-receipt.json",
+  "scope": "Private native appearance verification using the retained Chromium 156 core and previous current UI objects. No installation or full release-build attestation.",
+  "sha256": "31cc896d998744159a51f6532b488486730c5902757edd52285b8affdab5da44"
 }

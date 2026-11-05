@@ -8,20 +8,22 @@ const port = api.runtime.connect({ name: 'breezer-translation-ui' });
 // MV3 ports alone do not retain a worker. Keep restore/new-text controls alive
 // only for the lifetime of this visible translation window, with no network I/O.
 const heartbeat = setInterval(() => { try { port.postMessage({ type: 'ping' }); } catch {} }, 20000);
-addEventListener('pagehide', () => { clearInterval(heartbeat); port.disconnect(); }, { once: true });
-let prefs, ready = false, running = false, connected = true, languages = [], translatedTotal = 0;
+addEventListener('pagehide', () => { clearInterval(heartbeat); clearInterval(retryTicker); port.disconnect(); }, { once: true });
+let prefs, ready = false, running = false, connected = true, languages = [], translatedTotal = 0, retryAt = 0, retryTicker, recovery = false;
 const status = (message, state = '') => {
   $('status').textContent = message;
   $('status').dataset.state = state;
   $('translate').dataset.recovery = String(state === 'error');
 };
 function controls() {
-  $('translate').disabled = !connected || !ready || running || !$('consent').checked || !$('target').value || $('source').value === $('target').value;
+  const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
+  $('translate').disabled = !connected || !ready || running || remaining > 0 || !$('consent').checked || !$('target').value || $('source').value === $('target').value;
+  $('translate').textContent = remaining ? `Retry in ${remaining}s` : recovery ? 'Retry translation' : 'Translate page';
   $('cancel').disabled = !running;
   $('cancel').hidden = !running;
   $('restore').disabled = !connected || translatedTotal === 0;
   $('restore').hidden = translatedTotal === 0;
-  $('languages').disabled = !connected || !prefs || running;
+  $('languages').disabled = !connected || !prefs || running || remaining > 0;
   $('source').disabled = $('target').disabled = !ready || running;
   $('dynamic').disabled = $('consent').disabled = running;
   $('languages').textContent = ready ? 'Reload languages' : 'Connect and load languages';
@@ -29,11 +31,11 @@ function controls() {
   $('setup-help').hidden = ready;
 }
 function readinessStatus() {
-  if (!connected || !ready || running) return;
+  if (!connected || !ready || running || Date.now() < retryAt) return;
   const target = $('target').value;
   status(!target || $('source').value === target ? 'Choose different source and target languages.'
     : $('consent').checked ? 'Ready to translate.' : 'Confirm sharing to translate this page.', 'ready');
-  $('translate').textContent = 'Translate page';
+  recovery = false;
 }
 const option = (value, text) => { const node = document.createElement('option'); node.value = value; node.textContent = text; return node; };
 function targets() {
@@ -63,12 +65,23 @@ port.onMessage.addListener(message => {
     if (Number.isInteger(message.total)) translatedTotal = message.total;
     running = message.state === 'loading' || (message.state === 'done' && prefs?.dynamic);
     if (message.state === 'navigation' || message.unavailable) { connected = false; ready = false; }
-    $('translate').textContent = message.state === 'error' || message.state === 'cancelled' ? 'Retry translation' : 'Translate page';
+    recovery = message.state === 'error' || message.state === 'cancelled';
+    if (Number.isFinite(message.retryAt) && message.retryAt > Date.now()) {
+      retryAt = Math.max(retryAt, message.retryAt);
+      clearInterval(retryTicker);
+      retryTicker = setInterval(() => {
+        if (Date.now() >= retryAt) {
+          clearInterval(retryTicker);
+          status('Rate limit reached. You can retry now.', 'error');
+        }
+        controls();
+      }, 1000);
+    }
     status(`${message.message}${message.skipped ? ` ${message.skipped} text sections exceed the safety limit and were left unchanged.` : ''}`, message.state);
   }
   controls();
 });
-port.onDisconnect.addListener(() => { clearInterval(heartbeat); connected = false; running = false; status('Translation window disconnected. Reopen Translate page to retry.', 'error'); controls(); });
+port.onDisconnect.addListener(() => { clearInterval(heartbeat); clearInterval(retryTicker); connected = false; running = false; status('Translation window disconnected. Reopen Translate page to retry.', 'error'); controls(); });
 $('languages').addEventListener('click', async () => {
   try {
     const granted = await api.permissions.request({ origins: [PROVIDERS[prefs.provider].origin] });

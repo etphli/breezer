@@ -10,5 +10,29 @@
     "stableCaptures": 2,
     "surfacePaintChecked": true,
     "scale": "css"
+  },
+  {
+    "file": "sidebar-account-dialog-light.png",
+    "stableCaptures": 2,
+    "surfacePaintChecked": true,
+    "scale": "css"
+  },
+  {
+    "file": "sidebar-account-dialog-light-narrow.png",
+    "stableCaptures": 2,
+    "surfacePaintChecked": true,
+    "scale": "css"
+  },
+  {
+    "file": "sidebar-account-dialog-dark.png",
+    "stableCaptures": 2,
+    "surfacePaintChecked": true,
+    "scale": "css"
+  },
+  {
+    "file": "sidebar-account-dialog-dark-narrow.png",
+    "stableCaptures": 2,
+    "surfacePaintChecked": true,
+    "scale": "css"
   }
 ]

@@ -63,7 +63,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     // its native bridge. Discovery must explain that limitation without success.
     await page.locator('.nav-item[data-category="sync"]').waitFor();
     await page.getByRole('link', { name: 'Sync', exact: true }).click();
-    await page.getByText('This build does not include native sync setup.', { exact: true }).waitFor();
+    await page.getByText('Sync is not available in this version. Saved data stays on this device. Check General for updates.', { exact: true }).waitFor();
     assert.equal(await page.getByRole('button', { name: 'Set up or manage sync', exact: true }).isDisabled(), true);
     await page.screenshot({ path: join(evidence, 'settings-sync-unavailable-fixture.png') });
     await page.getByRole('link', { name: 'General', exact: true }).click();
@@ -157,6 +157,9 @@ test('settings categories, search, Other and narrow layout work in a real browse
       await savedKeyPage.locator('#translation-provider').waitFor();
       assert.equal(await savedKeyPage.locator('#translation-clear-key').isVisible(), true, 'saved credentials expose their removal choice');
       assert.equal(await savedKeyPage.locator('#translation-key').inputValue(), '', 'saved credentials are never displayed');
+      const providerBounds = await savedKeyPage.locator('#translation-provider').boundingBox();
+      const keyBounds = await savedKeyPage.locator('#translation-key').boundingBox();
+      assert.ok(Math.abs(providerBounds.x - keyBounds.x) < 1 && Math.abs(providerBounds.width - keyBounds.width) < 1, 'related translation controls share both narrow edges');
       await savedKeyPage.locator('.setting-row:has(#translation-clear-key) .setting-label').click();
       assert.equal(await savedKeyPage.evaluate(key => window.fx.local[key].apiKey, TRANSLATION_KEY), 'fixture-provider-key', 'the row heading does not activate destructive removal');
       await savedKeyPage.screenshot({ path: join(evidence, `settings-translation-saved-key-${colorMode}-narrow.png`), animations: 'disabled' });
@@ -193,7 +196,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await page.locator('.settings-page:not([hidden])').count(), 1);
 
     // ---------------------------------------------------------- Other
-    await page.getByRole('button', { name: 'All settings' }).click();
+    await page.getByRole('button', { name: 'All browser settings' }).click();
     await page.waitForFunction(() => window.fx.calls.some(([name, id, props]) => name === 'tabs.update' && id === 42 && props.url === 'chrome://settings/'));
     assert.equal(await page.locator('#native-settings-error').isHidden(), true);
 

@@ -121,7 +121,7 @@ function updateControls() {
   $('context-action').textContent = state.includeContext ? 'Included' : 'Include';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
-  $('context-hint').textContent = research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('context-hint').textContent = !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
   $('research-label').textContent = research.size ? `${research.size} ${research.size === 1 ? 'source' : 'sources'}` : 'Sources';
   $('research-open').dataset.active = String(research.size > 0);
   $('control-tip').textContent = state.page ? 'Click, type, scroll, and navigate in this tab.' : 'Available on ordinary web pages.';
@@ -196,7 +196,7 @@ function renderModels() {
     status.textContent = !provider.available ? 'Unavailable' : !provider.authenticated ? 'Sign in required' : 'Connected';
     heading.append(name, status);
     group.append(heading);
-    for (const model of provider.models || []) {
+    for (const model of provider.available && provider.authenticated ? provider.models || [] : []) {
       const button = document.createElement('button');
       button.className = 'model-option';
       const isSelected = state.selection?.provider === provider.id && state.selection?.model === model.id;
@@ -225,14 +225,25 @@ function renderModels() {
     if (provider.error || !provider.authenticated) {
       const error = document.createElement('p');
       error.className = 'provider-error';
-      const explanation = provider.error || `Sign in with ${provider.id === 'codex' ? 'codex login' : 'claude auth login'} in Terminal, then refresh.`;
-      const signIn = /\b(codex login|claude auth login)\b/.exec(explanation);
-      if (signIn) {
-        const command = document.createElement('code');
-        command.textContent = signIn[0];
-        error.append(explanation.slice(0, signIn.index), command, explanation.slice(signIn.index + signIn[0].length));
-      } else error.textContent = explanation;
+      error.textContent = provider.available && provider.authenticated ? provider.error
+        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is not available on this Mac.`;
       group.append(error);
+      if (!provider.available || !provider.authenticated) {
+        const connect = document.createElement('button');
+        connect.type = 'button';
+        connect.className = 'account-connect';
+        connect.textContent = `Connect ${providerLabel(provider.id)}`;
+        connect.addEventListener('click', () => {
+          setModelMenu(false);
+          $('account-title').textContent = `Connect ${providerLabel(provider.id)}`;
+          $('account-instructions').replaceChildren(...[...$('welcome-account-steps').children]
+            .filter(node => node.tagName !== 'SUMMARY' && (!node.dataset.provider || node.dataset.provider === provider.id))
+            .map(node => node.cloneNode(true)));
+          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed on this Mac, then run the sign-in command and refresh.`;
+          $('account-dialog').showModal();
+        });
+        group.replaceChildren(connect);
+      }
     }
     $('model-options').append(group);
   }
@@ -309,6 +320,7 @@ function appendMessage(message) {
   if (message.role === 'assistant') {
     const heading = document.createElement('div');
     heading.className = 'assistant-heading';
+    if ($('messages').querySelector('.message.assistant')) heading.classList.add('sr-only');
     const logo = document.createElement('img');
     logo.src = 'icon128.png';
     logo.alt = '';
@@ -432,6 +444,11 @@ function offerRetry(run, failed = true) {
   button.scrollIntoView({ block: 'nearest' });
 }
 
+function activityLabel(label) {
+  const sharing = state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? 'Page + screenshot' : '';
+  $('activity-label').textContent = sharing ? `${sharing} · ${label}` : label;
+}
+
 function finish(label, keepControl = false) {
   if (state.running) {
     state.running.renderer?.dispose();
@@ -510,7 +527,7 @@ async function send() {
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
-  $('activity-label').textContent = state.control ? 'Getting ready to help' : 'Thinking';
+  activityLabel(state.control ? 'Getting ready to help' : 'Thinking');
   updateControls();
   scrollToBottom();
   let sources;
@@ -575,7 +592,7 @@ function receive(message) {
   }
   else if (message.type === 'activity' && state.running) {
     $('activity').hidden = !message.active;
-    $('activity-label').textContent = message.label || 'Working in this tab';
+    activityLabel(message.label || 'Working in this tab');
   }
 }
 
@@ -675,6 +692,9 @@ $('welcome-action').addEventListener('click', () => {
   else refreshModels();
 });
 $('welcome-account-steps').addEventListener('toggle', () => renderWelcomeStatus(selectedModel()));
+$('close-account').addEventListener('click', () => $('account-dialog').close());
+$('account-dialog').addEventListener('close', () => $('model-button').focus());
+$('refresh-accounts').addEventListener('click', () => { $('account-dialog').close(); refreshModels(); });
 $('reasoning-select').addEventListener('change', saveSettings);
 $('speed-select').addEventListener('change', () => {
   saveSettings();

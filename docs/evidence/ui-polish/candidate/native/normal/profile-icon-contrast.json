@@ -2,6 +2,272 @@
   "method": "Dominant solid stroke pixel in the active native placeholder profile icon versus adjacent toolbar background, from actual own-window PNGs. Visual asset check, not a comprehensive accessibility audit.",
   "results": [
     {
+      "round": 15,
+      "theme": "mint",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-mint-light-narrow.png",
+      "bg": [
+        245,
+        251,
+        247
+      ],
+      "foreground": [
+        51,
+        75,
+        69
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 8.967001018098802
+    },
+    {
+      "round": 15,
+      "theme": "mint",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-mint-dark-narrow.png",
+      "bg": [
+        10,
+        36,
+        31
+      ],
+      "foreground": [
+        177,
+        204,
+        196
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.574527699223086
+    },
+    {
+      "round": 15,
+      "theme": "tide",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-tide-light-narrow.png",
+      "bg": [
+        247,
+        249,
+        255
+      ],
+      "foreground": [
+        57,
+        72,
+        87
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 8.911653245343894
+    },
+    {
+      "round": 15,
+      "theme": "tide",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-tide-dark-narrow.png",
+      "bg": [
+        17,
+        33,
+        46
+      ],
+      "foreground": [
+        184,
+        200,
+        218
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.61266491080361
+    },
+    {
+      "round": 15,
+      "theme": "dusk",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-dusk-light-narrow.png",
+      "bg": [
+        253,
+        247,
+        255
+      ],
+      "foreground": [
+        73,
+        68,
+        89
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 8.838213838897685
+    },
+    {
+      "round": 15,
+      "theme": "dusk",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-dusk-dark-narrow.png",
+      "bg": [
+        33,
+        29,
+        47
+      ],
+      "foreground": [
+        202,
+        195,
+        220
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.638083113907598
+    },
+    {
+      "round": 15,
+      "theme": "rose",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-rose-light-narrow.png",
+      "bg": [
+        255,
+        248,
+        248
+      ],
+      "foreground": [
+        91,
+        63,
+        71
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 8.91679638056214
+    },
+    {
+      "round": 15,
+      "theme": "rose",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-rose-dark-narrow.png",
+      "bg": [
+        47,
+        25,
+        32
+      ],
+      "foreground": [
+        227,
+        189,
+        198
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.650909707380121
+    },
+    {
+      "round": 15,
+      "theme": "pollen",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-pollen-light-narrow.png",
+      "bg": [
+        252,
+        250,
+        237
+      ],
+      "foreground": [
+        71,
+        73,
+        47
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 8.857809804666509
+    },
+    {
+      "round": 15,
+      "theme": "pollen",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-pollen-dark-narrow.png",
+      "bg": [
+        31,
+        33,
+        11
+      ],
+      "foreground": [
+        197,
+        201,
+        167
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.594235034321002
+    },
+    {
+      "round": 15,
+      "theme": "graphite",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-graphite-light-narrow.png",
+      "bg": [
+        255,
+        255,
+        255
+      ],
+      "foreground": [
+        70,
+        71,
+        71
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.32214683752696
+    },
+    {
+      "round": 15,
+      "theme": "graphite",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-graphite-dark-narrow.png",
+      "bg": [
+        30,
+        32,
+        32
+      ],
+      "foreground": [
+        198,
+        198,
+        198
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.58490743722513
+    },
+    {
+      "round": 15,
+      "theme": "custom",
+      "mode": "light",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-custom-light-narrow.png",
+      "bg": [
+        248,
+        249,
+        255
+      ],
+      "foreground": [
+        59,
+        72,
+        88
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 8.86740479083442
+    },
+    {
+      "round": 15,
+      "theme": "custom",
+      "mode": "dark",
+      "path": "/tmp/breezer-ui-polish/round-15-native/top-custom-dark-narrow.png",
+      "bg": [
+        21,
+        32,
+        47
+      ],
+      "foreground": [
+        187,
+        199,
+        219
+      ],
+      "solidPixels": 317,
+      "imageWidth": 1080,
+      "ratio": 9.616928120567861
+    },
+    {
       "round": 14,
       "theme": "mint",
       "mode": "light",
@@ -22,139 +288,6 @@
     },
     {
       "round": 14,
-      "theme": "mint",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-mint-dark-narrow.png",
-      "bg": [
-        10,
-        36,
-        31
-      ],
-      "foreground": [
-        177,
-        204,
-        196
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.574527699223086
-    },
-    {
-      "round": 14,
-      "theme": "tide",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-tide-light-narrow.png",
-      "bg": [
-        247,
-        249,
-        255
-      ],
-      "foreground": [
-        57,
-        72,
-        87
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 8.911653245343894
-    },
-    {
-      "round": 14,
-      "theme": "tide",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-tide-dark-narrow.png",
-      "bg": [
-        17,
-        33,
-        46
-      ],
-      "foreground": [
-        184,
-        200,
-        218
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.61266491080361
-    },
-    {
-      "round": 14,
-      "theme": "dusk",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-dusk-light-narrow.png",
-      "bg": [
-        253,
-        247,
-        255
-      ],
-      "foreground": [
-        73,
-        68,
-        89
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 8.838213838897685
-    },
-    {
-      "round": 14,
-      "theme": "dusk",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-dusk-dark-narrow.png",
-      "bg": [
-        33,
-        29,
-        47
-      ],
-      "foreground": [
-        202,
-        195,
-        220
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.638083113907598
-    },
-    {
-      "round": 14,
-      "theme": "rose",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-rose-light-narrow.png",
-      "bg": [
-        255,
-        248,
-        248
-      ],
-      "foreground": [
-        91,
-        63,
-        71
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 8.91679638056214
-    },
-    {
-      "round": 14,
-      "theme": "rose",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-rose-dark-narrow.png",
-      "bg": [
-        47,
-        25,
-        32
-      ],
-      "foreground": [
-        227,
-        189,
-        198
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.650909707380121
-    },
-    {
-      "round": 14,
       "theme": "pollen",
       "mode": "light",
       "path": "/tmp/breezer-ui-polish/round-14-native/top-pollen-light-narrow.png",
@@ -171,139 +304,6 @@
       "solidPixels": 317,
       "imageWidth": 1080,
       "ratio": 8.857809804666509
-    },
-    {
-      "round": 14,
-      "theme": "pollen",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-pollen-dark-narrow.png",
-      "bg": [
-        31,
-        33,
-        11
-      ],
-      "foreground": [
-        197,
-        201,
-        167
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.594235034321002
-    },
-    {
-      "round": 14,
-      "theme": "graphite",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-graphite-light-narrow.png",
-      "bg": [
-        246,
-        250,
-        254
-      ],
-      "foreground": [
-        54,
-        73,
-        85
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 8.935092440860466
-    },
-    {
-      "round": 14,
-      "theme": "graphite",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-graphite-dark-narrow.png",
-      "bg": [
-        14,
-        33,
-        44
-      ],
-      "foreground": [
-        181,
-        201,
-        216
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.673997693945575
-    },
-    {
-      "round": 14,
-      "theme": "custom",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-custom-light-narrow.png",
-      "bg": [
-        248,
-        249,
-        255
-      ],
-      "foreground": [
-        60,
-        71,
-        89
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 8.931374146084718
-    },
-    {
-      "round": 14,
-      "theme": "custom",
-      "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-14-native/top-custom-dark-narrow.png",
-      "bg": [
-        21,
-        32,
-        47
-      ],
-      "foreground": [
-        188,
-        199,
-        219
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 9.636711923812326
-    },
-    {
-      "round": 12,
-      "theme": "mint",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-mint-light-narrow.png",
-      "bg": [
-        245,
-        251,
-        247
-      ],
-      "foreground": [
-        69,
-        172,
-        102
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 2.7259303417430356
-    },
-    {
-      "round": 12,
-      "theme": "pollen",
-      "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-12-native/top-pollen-light-narrow.png",
-      "bg": [
-        252,
-        250,
-        237
-      ],
-      "foreground": [
-        201,
-        178,
-        33
-      ],
-      "solidPixels": 317,
-      "imageWidth": 1080,
-      "ratio": 2.029267515431371
     }
   ]
 }

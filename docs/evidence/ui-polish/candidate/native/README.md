@@ -16,9 +16,10 @@ profiles were removed. Header sheets are indexes; original PNGs are full windows
 A small title-bar badge appears only while recording.
 
 These fresh captures use a private UI verification build. The retained Chromium
-156.0.8078.47 core reports Breezer 0.20.1.1. Nine translation units were freshly
-compiled, covering current frame/workspace/avatar UI, the appearance bridge and
-schema, and the current 50-file UI resource mapping. Matching retained core data
+156.0.8078.47 core reports Breezer 0.20.1.1. Nine verified current UI/resource units cover the frame/workspace/avatar UI,
+appearance bridge/schema and resource mapping. Eight unchanged units were reused
+from the preceding private UI build; the current appearance bridge was freshly
+compiled. All fifty web resources were repacked and signed for this capture. Matching retained core data
 and V8 snapshot accompany that core. Every current UI resource was fetched and
 hashed through the actual component-extension origin before capture. Settings
 patches round-trip through the real native API for each recorded state.
@@ -32,7 +33,9 @@ excluded from the design assessment.
 
 Native placeholder profile icons now use the toolbar foreground. Actual solid
 stroke samples versus adjacent background exceed 8.8:1 across all fourteen
-palette/mode states. The collapsed auto-hide edge is clean. This is a visual
+palette/mode states. Graphite uses a grayscale frame, and the collapsed auto-hide edge is clean.
+The sixteen supplied normal/reduced samples retain the native plus button as it
+moves after tab close; the close-up sheet makes those positions inspectable. This is a visual
 asset check, not a comprehensive accessibility audit.
 
 Physical mouse hit testing, menus, restoration, physical auto-hide, translation
@@ -41,3 +44,8 @@ samples establish neither smoothness nor input latency or frame pacing. Provider
 execution is outside these loopback captures. Capture and private-build receipts
 are retained alongside the frozen evidence; no verification library ships in the
 product.
+
+Two reduced-motion recording attempts stopped early in macOS. Their failure
+manifests and cleanup reports are retained separately. The final repeat adds a
+stream-error diagnostic delegate and passes recording/decoded-frame checks; the
+intermittent recorder failure's cause is unresolved. No product fix is claimed.

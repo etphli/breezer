@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOW, SITES, CONNECTED, at, installFixture } from './newtab-browser-fixture.mjs';
+import { captureStablePanel } from './ui-evidence-capture.mjs';
 
 // Drives the shipped newtab.html in a real browser against a chrome.* fixture
 // that answers the 'breezer-newtab' port. Sites and items below are test data.
@@ -76,11 +77,12 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.textContent('#today'), 'Thursday, October 29');
       assert.deepEqual(await page.evaluate(() => window.fx.requests.map(({ name, type, refresh }) => ({ name, type, refresh }))), [{ name: 'breezer-newtab', type: 'view', refresh: false }]);
 
-      // One row, at about the upper third.
+      // One row below the date, with room for useful content underneath.
       const tops = await page.$$eval('.site:not(.site-add)', (items) => items.map((item) => Math.round(item.getBoundingClientRect().top)));
       assert.equal(tops.length, 8);
       assert.equal(new Set(tops).size, 1);
-      assert.ok(tops[0] > 900 * 0.18 && tops[0] < 900 * 0.4, `sites row at ${tops[0]}px`);
+      const date = await page.locator('#today').boundingBox();
+      assert.ok(tops[0] >= date.y + date.height + 12 && tops[0] < 900 * .3, `sites row at ${tops[0]}px`);
       assert.equal(await page.getAttribute('.site-link', 'href'), 'https://mail.example.com/');
 
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
@@ -309,11 +311,14 @@ test('add shortcuts by URL and open tab, persist across reload and keep Add visi
   await page.getByRole('combobox').press('Escape');
   assert.equal(await page.locator('#shortcut-add').evaluate(x=>x.matches(':popover-open')), false);
   await page.setViewportSize({width:1440,height:900});
-  await page.screenshot({path:`${evidence}/newtab-custom-shortcuts.png`});
+  const checks = [{ file: 'newtab-custom-shortcuts.png', ...await captureStablePanel(page, `${evidence}/newtab-custom-shortcuts.png`) }];
   await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
   await page.getByRole('combobox').fill('project');
   await page.getByRole('option', {name: /Open project/}).waitFor();
-  await page.screenshot({path:`${evidence}/newtab-add-popover.png`});
+  checks.push({ file: 'newtab-add-popover.png', ...await captureStablePanel(page, `${evidence}/newtab-add-popover.png`, { surfaceSelector: '#shortcut-add' }) });
+  assert.equal(await page.locator('.settings-link').count(), 1);
+  assert.equal(await page.locator('main.sheet').count(), 1);
+  await writeFile(`${evidence}/newtab-capture-geometry.json`, JSON.stringify({ settingsLinks: 1, agendaSheets: 1, captures: checks }, null, 2));
  }); } finally { try { await browser?.close(); } finally { await new Promise(done => server.close(done)); } }
 });
 

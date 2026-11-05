@@ -4,28 +4,33 @@
     {
       "path": "chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc",
       "originalSha256": "ce036b7ea46b9edc8bcf7854a2f796318a9dbf01e99e9fe71ca4e1dc2173762f",
-      "privateSha256": "47f11ee79769153397bb9eed8c3c73cbf1ade7b50a45c72e65655cb6aa8e2c1e"
+      "privateSha256": "47f11ee79769153397bb9eed8c3c73cbf1ade7b50a45c72e65655cb6aa8e2c1e",
+      "privatePath": "/tmp/breezer-ui-round14-native-build-sdk27.2/sources/chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc"
     },
     {
       "path": "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc",
       "originalSha256": "ae3785df901c1ccbc58010b399c57622017812288dd3042a31b8b27689996ed0",
-      "privateSha256": "e18ea9e207b2760abc45ad06f753e1fb0a32086dca7d3bfe0f19554717bd5b32"
+      "privateSha256": "e18ea9e207b2760abc45ad06f753e1fb0a32086dca7d3bfe0f19554717bd5b32",
+      "privatePath": "/tmp/breezer-ui-round14-native-build-sdk27.2/sources/chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
     },
     {
       "path": "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.h",
       "originalSha256": "7d630396edd7089cdc0d4f5e4eee78ab15aef4ea0a1fb9241c4ef4e8447e24c7",
-      "privateSha256": "7d630396edd7089cdc0d4f5e4eee78ab15aef4ea0a1fb9241c4ef4e8447e24c7"
+      "privateSha256": "7d630396edd7089cdc0d4f5e4eee78ab15aef4ea0a1fb9241c4ef4e8447e24c7",
+      "privatePath": "/tmp/breezer-ui-round14-native-build-sdk27.2/sources/chrome/browser/ui/views/frame/vertical_tab_strip_region_view.h"
     },
     {
       "path": "chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc",
       "originalSha256": "377903e1b1671622a2768831128b76242a53348928df69d74fcef945adaf3e3a",
-      "privateSha256": "377903e1b1671622a2768831128b76242a53348928df69d74fcef945adaf3e3a"
+      "privateSha256": "377903e1b1671622a2768831128b76242a53348928df69d74fcef945adaf3e3a",
+      "privatePath": "/tmp/breezer-ui-round14-native-build-sdk27.2/sources/chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc"
     },
     {
       "path": "chrome/browser/ui/views/frame/browser_view.cc",
       "originalSha256": "86238868b17e8dbc3cd699ab3e6eb86d2a54d456bf23b4e81e0f223f997b2cc4",
       "privateSha256": "86238868b17e8dbc3cd699ab3e6eb86d2a54d456bf23b4e81e0f223f997b2cc4",
-      "unchangedSourceRebuiltForHeaderConsistency": true
+      "unchangedSourceRebuiltForHeaderConsistency": true,
+      "privatePath": "/tmp/breezer-ui-round14-native-build-sdk27.2/sources/chrome/browser/ui/views/frame/browser_view.cc"
     },
     {
       "path": "gen/components/breezer_ai/resources/grit/breezer_ai_resources_map.cc",
@@ -64,9 +69,9 @@
     {
       "path": "chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
       "originalPath": "/Users/likht.ethan/.t3/projects/breezer/build/helium-macos/build/src/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
-      "privatePath": "/tmp/breezer-ui-round14-native-build-sdk27.2/sources/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+      "privatePath": "/tmp/breezer-ui-round15-native-build/sources/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
       "originalSha256": "a0975a95f3a9c9c5c79e4c1a5b361f1d9433a77bf9ada6cb6325ed19c8149741",
-      "privateSha256": "6939c92cc59887708166f10cc035f7b06d9af53ca294a7ae76a6d2767d50b79d",
+      "privateSha256": "08375eda4d5255c6d3f9a896b6217d021a5c360adba5c62466c8b2d9b5aae4bc",
       "repoSourcePath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
       "repoSourceMatches": true
     },
@@ -153,9 +158,9 @@
     {
       "source": "chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
       "cacheTarget": "obj/chrome/browser/extensions/api/breezer_private/breezer_private/breezer_private_api.o",
-      "output": "/tmp/breezer-ui-round14-native-build-sdk27.2/breezer_private_api.o",
+      "output": "/tmp/breezer-ui-round15-native-build/breezer_private_api.o",
       "exitCode": 0,
-      "sha256": "38837a3fe58f52fe8f5b59ffe14d99eb6a0027ef3f2101737d35ed34b219083a"
+      "sha256": "3fd134931c63b3c68cd67bd8e4b40cd4c229ee2afd71400f44a680e0f83d4b16"
     },
     {
       "source": "/tmp/breezer-ui-round14-native-build-sdk27.2/bridge-generated/generated_schemas.cc",
