@@ -1,5 +1,5 @@
 {
-  "height": 4156,
+  "height": 4168,
   "viewport": {
     "width": 390,
     "height": 844
@@ -33,8 +33,8 @@
     },
     {
       "file": "efficiency-narrow-tile-06.png",
-      "scrollY": 3312,
-      "mastheadBottom": -3003.140625
+      "scrollY": 3324,
+      "mastheadBottom": -3015.140625
     }
   ]
 }

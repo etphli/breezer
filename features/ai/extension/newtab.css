@@ -320,7 +320,7 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* The one entrance: the lanes settle in when Organato's answer arrives. */
 .organato[data-state="ready"] .lanes { animation: settle 180ms ease-out; }
-@keyframes settle { from { transform: translateY(4px); } }
+@keyframes settle { from { opacity: 0; transform: translateY(4px); } }
 
 @media (max-width: 860px) {
   .lanes { grid-template-columns: minmax(0, 1fr); gap: 30px; }
@@ -396,9 +396,4 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 /* ------------------------------------------------------------ Organato off */
 
-/* With Organato off there is no sheet: the date and sites sit a little above
-   the middle of an otherwise empty sky. */
-:root[data-organato="off"] .sky {
-  margin-block: auto;
-  padding-block: 48px max(48px, 12vh);
-}
+/* The date keeps its position when the optional agenda is turned off. */

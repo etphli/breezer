@@ -1,0 +1,195 @@
+{
+  "source" : "\/tmp\/breezer-ui-polish\/round-16-native-reduced\/native-tabs-toolbar-motion.mp4",
+  "frames" : [
+    {
+      "presentationTimeMs" : 0,
+      "file" : "native-dense-000.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 40,
+      "file" : "native-dense-001.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 130,
+      "file" : "native-dense-002.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 163.33333333333334,
+      "file" : "native-dense-003.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 196.66666666666666,
+      "file" : "native-dense-004.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 233.33333333333334,
+      "file" : "native-dense-005.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 266.66666666666669,
+      "file" : "native-dense-006.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 300,
+      "file" : "native-dense-007.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 335,
+      "file" : "native-dense-008.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 368.33333333333337,
+      "file" : "native-dense-009.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 401.66666666666669,
+      "file" : "native-dense-010.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 435,
+      "file" : "native-dense-011.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 468.33333333333331,
+      "file" : "native-dense-012.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 503.33333333333331,
+      "file" : "native-dense-013.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 536.66666666666663,
+      "file" : "native-dense-014.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 570,
+      "file" : "native-dense-015.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 603.33333333333337,
+      "file" : "native-dense-016.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 638.33333333333326,
+      "file" : "native-dense-017.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 671.66666666666663,
+      "file" : "native-dense-018.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 706.66666666666663,
+      "file" : "native-dense-019.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 740,
+      "file" : "native-dense-020.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 773.33333333333337,
+      "file" : "native-dense-021.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 806.66666666666663,
+      "file" : "native-dense-022.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 840,
+      "file" : "native-dense-023.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 873.33333333333326,
+      "file" : "native-dense-024.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 908.33333333333337,
+      "file" : "native-dense-025.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 943.33333333333337,
+      "file" : "native-dense-026.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 976.66666666666663,
+      "file" : "native-dense-027.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1011.6666666666667,
+      "file" : "native-dense-028.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1046.6666666666667,
+      "file" : "native-dense-029.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1080,
+      "file" : "native-dense-030.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1115,
+      "file" : "native-dense-031.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1150,
+      "file" : "native-dense-032.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1401.6666666666665,
+      "file" : "native-dense-033.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1440,
+      "file" : "native-dense-034.png",
+      "durationMs" : null
+    },
+    {
+      "presentationTimeMs" : 1918.3333333333333,
+      "file" : "native-dense-035.png",
+      "durationMs" : null
+    }
+  ],
+  "method" : "Every decoded AVAssetReader sample with its actual presentation timestamp. Native header pixels only; no synthetic in-between frames. This does not establish input latency or application frame pacing.",
+  "sourceHeight" : 1560,
+  "sourceWidth" : 2200,
+  "assetDurationMs" : 2438.3333333333335,
+  "crop" : [
+    0,
+    0,
+    2200,
+    160
+  ]
+}

@@ -157,10 +157,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px var(--shade-near);
 }
 .tile:focus-visible { outline-offset: 2px; }
-.tile .favicon { width: 20px; height: 20px; font-size: 12px; border-radius: 6px; }
+.tile .favicon { width: 20px; height: 20px; font-size: 12px; border-radius: 0; background: none; }
 .tile .favicon img { width: 20px; height: 20px; }
-/* Asleep favourites stay recognisable: only slightly softened. */
-.tile:not(.live) .favicon { opacity: 0.8; }
+/* The tile surface carries the sleeping state; its site identity stays clear. */
+.tile:not(.live) .favicon { opacity: 1; }
 /* The temporary drop target must not move tab rows beneath a held pointer. */
 .favorites.empty {
   position: absolute;
@@ -304,6 +304,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .row-action svg, .row-sound svg { width: 14px; height: 14px; }
 .row-action:hover, .row-sound:hover { background: var(--hover); color: var(--ink); }
 .row-action { opacity: 0; }
+.sidebar:not([data-close="always"]) .row:not(:hover):not(.active):not(:focus-visible) > .row-action { width: 0; margin-left: -8px; overflow: hidden; pointer-events: none; }
 .row:hover .row-action,
 .row.active .row-action,
 .sidebar[data-close="always"] .row-action,
@@ -668,12 +669,14 @@ body.route-settings {
 .context-actions { display: flex; flex-direction: column; align-items: stretch; gap: 16px; margin-top: 14px; }
 .context-actions > .setting-actions { margin: 0; }
 .context-actions > .setting-actions + .setting-actions { padding-top: 14px; border-top: 1px solid var(--set-rule); }
+.context-save { padding: 12px 16px; border-top: 1px solid var(--set-rule); margin: 0; }
+#collapse[aria-pressed="true"] { background: var(--hover); color: var(--accent); }
 @media (max-width: 560px) {
   .settings-head { min-height: 72px; }
   .crumbs h1 { font-size: 18px; line-height: 24px; }
   .settings-head .setup-link { font-size: 12px; padding-inline: 8px; }
   .context-actions { flex-direction: column; align-items: stretch; }
-  .context-actions > .setting-actions:first-child > .button { width: 100%; }
+  .context-save > .button { width: 100%; }
   .setting-row:has(> select, > input[type="password"], > input[type="text"]) { flex-direction: column; align-items: stretch; }
   .setting-row > select { width: 100%; max-width: none; }
 }
@@ -949,7 +952,7 @@ body.route-settings {
 /* First-run card: how to bring data over from Chrome. */
 .onboarding {
   margin: 0 0 36px;
-  padding: 20px 22px 16px;
+  padding: 20px 16px 16px;
   border: 1px solid var(--set-edge);
   border-radius: 11px;
   background: var(--set-group);
@@ -1134,7 +1137,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .space-item .space-name-input { grid-column: 2 / -1; margin-left: 0; padding-inline: 0; }
   .space-item .tone-select { grid-column: 2; grid-row: 2; }
   .space-item .space-actions { grid-column: 3; grid-row: 2; }
-  .onboarding { padding: 18px 18px 14px; }
+  .onboarding { padding: 18px 14px 14px; }
   .onboarding-paths { grid-template-columns: 1fr; }
   .key-row, .update-row { flex-wrap: wrap; }
   .key-row .text-input { flex-basis: 100%; }
@@ -1164,7 +1167,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   resize: vertical;
 }
 :root[data-scheme="dark"] .settings :is(.text-input, textarea, select) {
-  background: color-mix(in oklab, var(--raised) 78%, #000);
+  background-color: color-mix(in oklab, var(--raised) 78%, #000);
   border-color: color-mix(in srgb, var(--ink) 24%, transparent);
 }
 .context-settings table { width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 12px; }

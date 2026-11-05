@@ -2,10 +2,10 @@
   "method": "Dominant solid stroke pixel in the active native placeholder profile icon versus adjacent toolbar background, from actual own-window PNGs. Visual asset check, not a comprehensive accessibility audit.",
   "results": [
     {
-      "round": 15,
+      "round": 16,
       "theme": "mint",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-mint-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-mint-light-narrow.png",
       "bg": [
         245,
         251,
@@ -21,10 +21,10 @@
       "ratio": 8.967001018098802
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "mint",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-mint-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-mint-dark-narrow.png",
       "bg": [
         10,
         36,
@@ -40,10 +40,10 @@
       "ratio": 9.574527699223086
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "tide",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-tide-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-tide-light-narrow.png",
       "bg": [
         247,
         249,
@@ -59,10 +59,10 @@
       "ratio": 8.911653245343894
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "tide",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-tide-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-tide-dark-narrow.png",
       "bg": [
         17,
         33,
@@ -78,10 +78,10 @@
       "ratio": 9.61266491080361
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "dusk",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-dusk-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-dusk-light-narrow.png",
       "bg": [
         253,
         247,
@@ -97,10 +97,10 @@
       "ratio": 8.838213838897685
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "dusk",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-dusk-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-dusk-dark-narrow.png",
       "bg": [
         33,
         29,
@@ -116,10 +116,10 @@
       "ratio": 9.638083113907598
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "rose",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-rose-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-rose-light-narrow.png",
       "bg": [
         255,
         248,
@@ -135,10 +135,10 @@
       "ratio": 8.91679638056214
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "rose",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-rose-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-rose-dark-narrow.png",
       "bg": [
         47,
         25,
@@ -154,10 +154,10 @@
       "ratio": 9.650909707380121
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "pollen",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-pollen-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-pollen-light-narrow.png",
       "bg": [
         252,
         250,
@@ -173,10 +173,10 @@
       "ratio": 8.857809804666509
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "pollen",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-pollen-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-pollen-dark-narrow.png",
       "bg": [
         31,
         33,
@@ -192,10 +192,10 @@
       "ratio": 9.594235034321002
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "graphite",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-graphite-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-graphite-light-narrow.png",
       "bg": [
         255,
         255,
@@ -211,10 +211,10 @@
       "ratio": 9.32214683752696
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "graphite",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-graphite-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-graphite-dark-narrow.png",
       "bg": [
         30,
         32,
@@ -230,10 +230,10 @@
       "ratio": 9.58490743722513
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "custom",
       "mode": "light",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-custom-light-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-custom-light-narrow.png",
       "bg": [
         248,
         249,
@@ -249,10 +249,10 @@
       "ratio": 8.86740479083442
     },
     {
-      "round": 15,
+      "round": 16,
       "theme": "custom",
       "mode": "dark",
-      "path": "/tmp/breezer-ui-polish/round-15-native/top-custom-dark-narrow.png",
+      "path": "/tmp/breezer-ui-polish/round-16-native/top-custom-dark-narrow.png",
       "bg": [
         21,
         32,

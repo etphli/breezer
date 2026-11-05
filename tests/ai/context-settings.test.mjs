@@ -103,10 +103,14 @@ test('settings flow keeps local and provider consent separate and renders provid
   const consent = all().find(node => node.dataset.contextControl === 'consent');
   const sites = all().find(node => node.tagName === 'textarea');
   assert.equal(local.checked, false); assert.equal(consent.checked, false);
+  assert.equal(button('Save choices').disabled, true, 'unchanged choices need no save');
   assert.equal(calls.some(call => call.type === 'summarize'), false);
   local.checked = true; sites.value = 'docs.example.org';
+  await local.fire('change'); await sites.fire('input');
+  assert.equal(button('Save choices').disabled, false, 'changed memory choices can be saved');
   await button('Save choices').fire('click');
   assert.equal(state.enabled, true); assert.equal(state.providerConsent, false);
+  assert.equal(button('Save choices').disabled, true, 'saving clears the pending change');
   consent.checked = true; await consent.fire('change');
   assert.equal(state.providerConsent, true);
   await button('Summarize with GPT-6 Luna').fire('click');

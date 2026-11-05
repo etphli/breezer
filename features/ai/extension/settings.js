@@ -501,6 +501,7 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
   const busy = value => {
     for (const id of controls) $(id).disabled = value;
     $('organato-disconnect').disabled = value || !connected;
+    $('organato-disconnect').hidden = !connected;
   };
   const finish = (text, error = false) => {
     clearTimeout(timer); pending = null; busy(false);

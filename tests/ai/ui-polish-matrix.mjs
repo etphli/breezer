@@ -16,7 +16,7 @@ const root = resolve('features/ai/extension');
 const output = resolve(process.argv[2] || '/tmp/breezer-ui-matrix');
 const themes = ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#3979bd'];
 const categories = ['general', 'appearance', 'layout', 'spaces', 'passwords', 'sync', 'privacy', 'assistant', 'newtab', 'languages', 'browser'];
-const manifest = { themes, categories, captures: [], notes: [
+const manifest = { themes, categories, captures: [], controlChecks: [], notes: [
   'Shipped UI with deterministic extension APIs. No installed app or personal data.',
   'Desktop settings use a tall enough real viewport to show every row. Narrow captures use fullPage.',
   'Compact sidebar uses a 72px viewport. Auto-hide captures its expanded document, not native reveal behavior.',
@@ -70,9 +70,18 @@ try {
       await settings.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
       const height = await settings.locator('.settings-column').evaluate(node => Math.ceil(node.scrollHeight + 64));
       await settings.setViewportSize({ width: 1200, height: Math.max(900, height) });
+      const select = category === 'spaces' ? '.tone-select select' : category === 'languages' ? '#translation-provider' : null;
+      const checkSelectArrow = async () => {
+        if (!select) return;
+        const backgroundImage = await settings.locator(select).first().evaluate(node => getComputedStyle(node).backgroundImage);
+        assert.notEqual(backgroundImage, 'none', `${name}/${category}: custom select retains its arrow`);
+        manifest.controlChecks.push({ name, category, viewport: settings.viewportSize(), selectArrow: true });
+      };
+      await checkSelectArrow();
       await shot(settings, `settings-${category}`);
       await settings.setViewportSize({ width: 390, height: 844 });
       assert.equal(await settings.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${name}/${category} narrow overflow`);
+      await checkSelectArrow();
       await shot(settings, `settings-${category}-narrow`);
     }
     await settings.evaluate(() => { location.hash = '#/settings/assistant'; });

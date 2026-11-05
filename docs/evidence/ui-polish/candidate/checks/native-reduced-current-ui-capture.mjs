@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
-import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +29,7 @@ async function until(label, read, timeout = 15000) {
 const resume = process.env.BREEZER_NATIVE_RESUME === '1';
 const previous = resume ? JSON.parse(await readFile(join(output, 'manifest.json'), 'utf8')) : null;
 if (!resume) await mkdir(output); // Refuse to overwrite an earlier evidence pack.
-const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round15/capture-owned-'));
+const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round16/capture-owned-'));
 const profile = join(scratch, 'profile');
 await mkdir(join(profile, 'Default'), { recursive: true });
 await writeFile(join(profile, 'Default/Preferences'), JSON.stringify({
@@ -41,7 +41,7 @@ const resources = join(app, 'Contents/Frameworks/Breezer Framework.framework/Res
 const identity = JSON.parse(await readFile(join(resources, 'breezer_ai/host/build-identity.json'), 'utf8'));
 assert.match(identity.commit, /^[0-9a-f]{40}$/);
 const inputNames = git('ls-files', 'features/workspace/native', 'features/ai/native-ui', 'script/apply_breezer_workspace.py', 'script/breezer_sidebar_frame.py', 'script/apply_breezer_ai_ui.py').split('\n').filter(Boolean);
-const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round15-native-build/runtime-receipt.json', 'utf8'));
+const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round16-native-build/runtime-receipt.json', 'utf8'));
 assert.equal(app, runtimeReceipt.stagedApp);
 assert.equal(sha(await readFile(runtimeReceipt.output)), runtimeReceipt.signedFrameworkSha256, 'Private UI framework changed');
 const buildReceipt = JSON.parse(await readFile(runtimeReceipt.sourceReceipt, 'utf8'));
@@ -170,7 +170,7 @@ try {
     }
     throw new Error(`${name}: full native window did not settle with matching fixture pixels`);
   }
-  const common = { theme: 'mint', colorMode: 'light', layout: 'top', frameless: false, centeredAddressBar: false, minimalUrl: false, bookmarkBarMode: 'hidden', showLoadProgress: true };
+  const common = { theme: 'mint', colorMode: 'light', sidebarFontSize: 15, layout: 'top', frameless: false, centeredAddressBar: false, minimalUrl: false, bookmarkBarMode: 'hidden', showLoadProgress: true };
   if (!motionOnly) for (const theme of ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#3979bd']) for (const colorMode of ['light', 'dark']) {
     const label = theme.startsWith('#') ? 'custom' : theme;
     for (const [size, width] of [['desktop', 1100], ['narrow', 540]]) await capture(`top-${label}-${colorMode}-${size}`, { ...common, theme, colorMode }, width);
@@ -187,6 +187,9 @@ try {
   // sidebar document uses the verified current candidate's 50-file resource payload.
   if (!motionOnly) for (const sidebarMode of ['expanded', 'compact', 'autoHide']) await capture(`sidebar-frame-${sidebarMode}`, {
     ...common, layout: 'sidebar', sidebarMode, frameless: true, alwaysShowSidebar: true, alwaysShowTopBar: true,
+  });
+  for (const [name, sidebarFontSize] of [['small-type', 12], ['large-type', 20]]) if (!motionOnly) await capture('sidebar-frame-compact-' + name, {
+    ...common, layout: 'sidebar', sidebarMode: 'compact', sidebarFontSize, frameless: true, alwaysShowSidebar: true, alwaysShowTopBar: true,
   });
   await capture('native-motion-start', { ...common, frameless: false });
   report.recording = { start: await request('native-tabs-toolbar-motion', 'record-start'), actions: [] };
@@ -213,7 +216,16 @@ try {
   const liveOwned = (report.finalOwnedProcesses || report.ownedProcesses || []).filter(p => spawnSync('/bin/kill', ['-0', String(p.id)]).status === 0);
   report.cleanup = { liveRecordedProcesses: liveOwned.map(p => p.id), fixturePortClosed: !server.listening };
   if (liveOwned.length) { report.status = 'failed'; report.cleanup.error = 'Owned browser processes remain; profile preserved for diagnosis'; process.exitCode = 1; }
-  else { await rm(scratch, { recursive: true, force: true }); report.cleanup.profileRemoved = true; }
+  else {
+    if (report.status !== 'passed') {
+      report.failureArtifacts = [];
+      for (const name of (await readdir(scratch)).filter(name => name.endsWith('.mp4') || name === 'stream-error.json')) {
+        const path = join(output, 'failed-' + name); await rename(join(scratch, name), path);
+        const bytes = await readFile(path); report.failureArtifacts.push({ path, bytes: bytes.length, sha256: sha(bytes) });
+      }
+    }
+    await rm(scratch, { recursive: true, force: true }); report.cleanup.profileRemoved = true;
+  }
   report.capturedAppPinsUnchanged = (await Promise.all(installedBefore.map(async pin => sha(await readFile(pin.path)) === pin.sha256))).every(Boolean);
   report.installedPinsUnchanged = (await Promise.all(Object.entries(runtimeReceipt.installedPinsUnchanged).map(async ([path, expected]) => sha(await readFile(path)) === expected))).every(Boolean);
   if (!report.installedPinsUnchanged) { report.status = 'failed'; process.exitCode = 1; }

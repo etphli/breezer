@@ -952,6 +952,10 @@ dialog {
 dialog::backdrop {
   background: rgb(0 0 0 / .22);
 }
+dialog[open] { animation: panel-dialog-in 120ms ease-out; }
+dialog[open]::backdrop { animation: panel-backdrop-in 120ms ease-out; }
+@keyframes panel-dialog-in { from { opacity: .75; transform: translateY(2px); } }
+@keyframes panel-backdrop-in { from { background: transparent; } }
 
 .dialog-heading {
   display: flex;
@@ -1066,7 +1070,7 @@ dialog .privacy-note {
 }
 
 @media(prefers-reduced-motion:reduce) {
-  *,*:before,*:after {
+  *,*:before,*:after,::backdrop {
     animation: none!important;
     transition: none!important;
     scroll-behavior: auto!important;

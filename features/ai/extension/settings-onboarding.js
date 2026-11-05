@@ -96,10 +96,10 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   }, { signal: events.signal });
   if (!passwords) passwordSteps.hidden = true;
   path('Passwords',
-    'Export a password file from Chrome, then import it in Breezer’s password manager. The steps are in Passwords below. Passkeys are not included.',
+    'Export a password file from Chrome, then import it in Breezer’s password manager. Choose Show password steps for the guide. Passkeys are not included.',
     passwordSteps);
 
-  const footnote = node('p', 'After you hide this, both imports stay available in Passwords and Browser settings.', 'field-note');
+  const footnote = node('p', 'After you hide this, both imports stay available in Passwords and Browser tools.', 'field-note');
   details.append(footnote);
   section.append(head, intro, paths, status, error, details);
 

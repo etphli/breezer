@@ -201,7 +201,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.waitForTimeout(100);
     assert.equal(await page.locator('[data-onboarding]').isHidden(), true, 'stays hidden after reload');
     await page.screenshot({ path: join(evidence, 'settings-general-setup-dismissed.png') });
-    await page.getByRole('link', { name: 'Browser settings' }).click();
+    await page.getByRole('link', { name: 'Browser tools' }).click();
     assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).count(), 1, 'browser import remains in Browser settings');
     await context.close();
 

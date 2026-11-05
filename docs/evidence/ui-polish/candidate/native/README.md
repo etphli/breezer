@@ -6,8 +6,8 @@ private app's browser helpers, blocks native host launches and uses a mock
 keychain. No installed executable, real profile, account integration, system
 setting or permission was changed.
 
-`normal/` has 38 native windows: seven palettes, both modes and 1100px/540px
-widths, six toolbar options, three sidebar allocations and a motion start state.
+`normal/` has 40 native windows: seven palettes, both modes and 1100px/540px
+widths, six toolbar options, three sidebar allocations, a motion start state, and both compact-sidebar font-size endpoints.
 `reduced/` adds one start window and an equivalent continuous recording using
 Chromium's native reduced-motion switch and renderer preference. Both folders
 retain the MP4, eight decoded samples, contact sheets, geometry, action timestamps
@@ -17,9 +17,8 @@ A small title-bar badge appears only while recording.
 
 These fresh captures use a private UI verification build. The retained Chromium
 156.0.8078.47 core reports Breezer 0.20.1.1. Nine verified current UI/resource units cover the frame/workspace/avatar UI,
-appearance bridge/schema and resource mapping. Eight unchanged units were reused
-from the preceding private UI build; the current appearance bridge was freshly
-compiled. All fifty web resources were repacked and signed for this capture. Matching retained core data
+appearance bridge/schema and resource mapping. All nine unchanged current UI units were reused from the preceding private UI
+build. No new native translation unit was required for this refinement. All fifty web resources were repacked and signed for this capture. Matching retained core data
 and V8 snapshot accompany that core. Every current UI resource was fetched and
 hashed through the actual component-extension origin before capture. Settings
 patches round-trip through the real native API for each recorded state.
@@ -45,7 +44,13 @@ execution is outside these loopback captures. Capture and private-build receipts
 are retained alongside the frozen evidence; no verification library ships in the
 product.
 
-Two reduced-motion recording attempts stopped early in macOS. Their failure
-manifests and cleanup reports are retained separately. The final repeat adds a
-stream-error diagnostic delegate and passes recording/decoded-frame checks; the
-intermittent recorder failure's cause is unresolved. No product fix is claimed.
+Earlier candidate captures encountered intermittent macOS stream-stop errors;
+their failure manifests are retained separately. Both recordings in this pack
+passed with the diagnostic stream delegate. That earlier recorder failure's cause
+remains unresolved; no product fix is claimed.
+
+The `dense/` folders contain every encoded frame's native header, decoded with
+AVAssetReader and actual presentation timestamps: 42 normal and 36 reduced.
+Unknown sample durations are recorded as null. The source MP4s remain unchanged.
+Recorders may omit unchanged images, so timestamp gaps are not app frame pacing.
+The two dense contact sheets index the original pixel strips.

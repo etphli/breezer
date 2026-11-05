@@ -56,7 +56,7 @@ export function createContextClient(api = globalThis.chrome) {
 // Uses the existing settings typography and controls. No browsing starts on mount.
 export function mountContextSettings({ container, api = globalThis.chrome, client = createContextClient(api) }) {
   const doc = container.ownerDocument, events = new AbortController();
-  let disposed = false, revision = 0, summarizing = false;
+  let disposed = false, revision = 0, summarizing = false, savedChoices = '';
   const el = (tag, text = '', className = '') => {
     const node = doc.createElement(tag); node.textContent = text;
     if (className) node.className = className;
@@ -70,9 +70,9 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   );
   const localGroup = el('div', '', 'setting-group');
   const localActions = el('div', '', 'context-actions');
-  const saveActions = el('div', '', 'setting-actions');
+  const saveActions = el('div', '', 'setting-actions context-save');
   const maintenanceActions = el('div', '', 'setting-actions');
-  localActions.append(saveActions, maintenanceActions);
+  localActions.append(maintenanceActions);
   const summarySection = el('section', '', 'settings-section context-settings');
   const summaryGroup = el('div', '', 'setting-group context-summary');
   summarySection.append(el('h2', 'Activity summary'),
@@ -115,10 +115,15 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     try { await work(); }
     catch (failure) { if (!disposed) { error.textContent = failure instanceof TypeError ? 'Activity settings could not load. Reopen Settings to try again.' : failure.message; error.hidden = false; } }
   };
-  button('Save choices', () => run(async () => {
+  const save = button('Save choices', () => run(async () => {
     await client.request('configure', { enabled: enabled.checked, sites: sites.value.split(/[\n,]+/).map(value => value.trim()).filter(Boolean) });
     await refresh();
   }), saveActions, 'button primary');
+  localGroup.append(saveActions);
+  const choices = () => JSON.stringify([enabled.checked, sites.value.split(/[\n,]+/).map(value => value.trim()).filter(Boolean)]);
+  const updateSave = () => { sites.disabled = !enabled.checked; save.disabled = choices() === savedChoices; };
+  enabled.addEventListener('change', updateSave, { signal: events.signal });
+  sites.addEventListener('input', updateSave, { signal: events.signal });
   const disable = button('Disable and erase', () => run(async () => { output.textContent = ''; await client.request('configure', { enabled: false }); await refresh(); }), maintenanceActions, 'button danger');
   const clear = button('Clear activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }), maintenanceActions, 'button danger');
   const empty = el('p', 'No activity recorded.', 'empty-state');
@@ -150,6 +155,8 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     enabled.checked = state.enabled; consent.checked = state.providerConsent;
     consent.disabled = !state.enabled;
     sites.value = state.sites.join('\n');
+    savedChoices = choices();
+    updateSave();
     disable.disabled = !state.enabled && !state.habits.length;
     clear.disabled = !state.habits.length;
     summarize.disabled = summarizing || !state.enabled || !state.providerConsent;

@@ -391,7 +391,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
       await control.click();
       await settings.waitForFunction(({ id, value }) => document.getElementById(id).getAttribute('aria-checked') === String(value), { id, value: initial });
     }
-    await go(settings, 'Browser settings');
+    await go(settings, 'Browser tools');
     await settings.getByRole('button', { name: 'Privacy and security', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/privacy'));
     await settings.getByRole('button', { name: 'All browser settings', exact: true }).click();

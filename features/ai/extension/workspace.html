@@ -32,9 +32,9 @@
     </div>
 
     <footer class="dock">
-      <button id="collapse" class="icon-button" aria-label="Hide sidebar" title="Hide sidebar" hidden><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="2.2"/><path d="M6.2 3v10"/></svg></button>
+      <button id="collapse" class="icon-button" aria-label="Keep sidebar visible" title="Keep sidebar visible" hidden><svg viewBox="0 0 16 16"><path d="M5 2h6M6 2v4L4 9v1h8V9L10 6V2"/><path d="M8 10v4"/></svg></button>
       <div id="spaces" class="space-dots" role="tablist" aria-label="Spaces"></div>
-      <button id="add-space" class="icon-button" aria-label="New space" title="New space"><svg viewBox="0 0 16 16"><path d="M8 3.5v9M3.5 8h9"/></svg></button>
+      <button id="add-space" class="icon-button" aria-label="New space" title="New space"><svg viewBox="0 0 16 16"><rect x="2" y="4" width="10" height="9" rx="2"/><path d="M5 2h7a2 2 0 0 1 2 2v6M7 6.5v4M5 8.5h4"/></svg></button>
       <button id="open-updates" class="icon-button" aria-label="What’s new in Breezer" title="What’s new in Breezer"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 4.5v.5"/></svg></button>
       <button id="open-settings" class="icon-button" aria-label="Settings" title="Settings"><svg viewBox="0 0 16 16"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></button>
     </footer>
@@ -73,7 +73,7 @@
         <h2 id="nav-group-browser" class="nav-group">Browser</h2>
         <ul class="nav-list" aria-labelledby="nav-group-browser">
           <li><a class="nav-item" href="#/settings/languages" data-category="languages"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.3 3.4 2.3 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.7 5.9 5.7 8s.7 3.9 2.3 5.5"/></svg><span>Translation</span></a></li>
-          <li><a class="nav-item" href="#/settings/browser" data-category="browser"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Browser settings</span></a></li>
+          <li><a class="nav-item" href="#/settings/browser" data-category="browser"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Browser tools</span></a></li>
           <li><button id="open-native-settings" class="nav-item" type="button" aria-describedby="native-settings-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 8 8"/><path d="M11.5 9.5v2.5a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h2.5"/></svg><span>All browser settings</span></button></li>
         </ul>
         <p id="native-settings-hint" class="nav-hint sr-only">Open all browser settings. Use Back to return.</p>
@@ -308,7 +308,7 @@
             <div id="translation-settings" data-search-terms="translate translation page language original libretranslate privacy"></div>
           </section>
 
-          <section class="settings-page" data-page="browser" aria-label="Browser settings" hidden>
+          <section class="settings-page" data-page="browser" aria-label="Browser tools" hidden>
             <section class="settings-section" aria-labelledby="browser-heading">
               <h2 id="browser-heading">Browsing</h2>
               <p class="section-note">Opens in a new tab.</p>

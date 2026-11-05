@@ -1,15 +1,8 @@
 {
-  "exitCode": 0,
-  "newlyCompiledUnits": 1,
-  "unchangedCurrentUiUnitsReused": 8,
-  "sourcePath": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
-  "sourceSha256": "08375eda4d5255c6d3f9a896b6217d021a5c360adba5c62466c8b2d9b5aae4bc",
-  "privateSourcePath": "/tmp/breezer-ui-round15-native-build/sources/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
-  "objectPath": "/tmp/breezer-ui-round15-native-build/breezer_private_api.o",
-  "objectSha256": "3fd134931c63b3c68cd67bd8e4b40cd4c229ee2afd71400f44a680e0f83d4b16",
-  "output": "/tmp/breezer-ui-round15-native-build/Breezer Framework",
-  "cacheObjectUnchanged": "75fc09f65349f332e13e584e7f23c6e8d57cab0e388748b1f9ed3c0d8949a6f3",
-  "baseBuildReceipt": "/tmp/breezer-ui-round14-native-build-sdk27.2/runtime-receipt.json",
-  "scope": "Private native appearance verification using the retained Chromium 156 core and previous current UI objects. No installation or full release-build attestation.",
-  "sha256": "31cc896d998744159a51f6532b488486730c5902757edd52285b8affdab5da44"
+  "newlyCompiledUnits": 0,
+  "unchangedCurrentUiUnitsReused": 9,
+  "baseBuildReceipt": "/tmp/breezer-ui-round15-native-build/build-receipt.json",
+  "scope": "Native inputs and mapping are unchanged. Current web UI resources repacked in an APFS COW clone.",
+  "priorPrivateAppPinsUnchanged": true,
+  "installedPinsUnchanged": true
 }

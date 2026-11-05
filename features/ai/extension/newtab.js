@@ -363,7 +363,7 @@ export function showOrganato(root, on) {
 
 function renderLoading(root) {
   const section = root.getElementById('organato');
-  delete section.dataset.state;
+  section.dataset.state = 'loading';
   section.setAttribute('aria-busy', 'true');
   root.getElementById('organato-lists').hidden = true;
   root.getElementById('organato-action').hidden = true;
@@ -439,6 +439,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   const paint = () => {
     const at = now();
     refreshButton.disabled = pending || off || organatoState(view?.organato) === 'setup';
+    refreshButton.hidden = refreshButton.disabled;
     renderToday(root, at);
     if (view) {
       renderSites(api, root, view.topSites);
@@ -456,6 +457,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     if (pending) { again = true; return; }
     pending = true;
     refreshButton.disabled = true;
+    refreshButton.hidden = true;
     refreshButton.setAttribute('aria-busy', 'true');
     try {
       const [result] = await Promise.all([requestView(api, { refresh }), shortcuts.load()]);

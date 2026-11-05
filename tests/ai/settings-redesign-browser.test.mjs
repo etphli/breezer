@@ -157,6 +157,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
       await savedKeyPage.locator('#translation-provider').waitFor();
       assert.equal(await savedKeyPage.locator('#translation-clear-key').isVisible(), true, 'saved credentials expose their removal choice');
       assert.equal(await savedKeyPage.locator('#translation-key').inputValue(), '', 'saved credentials are never displayed');
+      assert.notEqual(await savedKeyPage.locator('#translation-provider').evaluate(node => getComputedStyle(node).backgroundImage), 'none', 'provider select keeps its arrow in both color modes');
       const providerBounds = await savedKeyPage.locator('#translation-provider').boundingBox();
       const keyBounds = await savedKeyPage.locator('#translation-key').boundingBox();
       assert.ok(Math.abs(providerBounds.x - keyBounds.x) < 1 && Math.abs(providerBounds.width - keyBounds.width) < 1, 'related translation controls share both narrow edges');
@@ -206,7 +207,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await dark.screenshot({ path: join(evidence, 'settings-redesign-general-dark.png') });
     await dark.getByRole('link', { name: 'Layout' }).click();
     await dark.screenshot({ path: join(evidence, 'settings-redesign-layout-dark.png') });
-    for (const [name, file] of [['Passwords', 'passwords'], ['Translation', 'languages'], ['Browser settings', 'browser'], ['Spaces', 'spaces'], ['Assistant', 'assistant'], ['Layout', 'layout']]) {
+    for (const [name, file] of [['Passwords', 'passwords'], ['Translation', 'languages'], ['Browser tools', 'browser'], ['Spaces', 'spaces'], ['Assistant', 'assistant'], ['Layout', 'layout']]) {
       await dark.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
       await dark.screenshot({ path: join(evidence, `settings-redesign-${file}-dark.png`) });
     }

@@ -165,6 +165,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), 'workspace.html#/settings');
       assert.equal(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle), 'solid');
+      const focusGap = await page.evaluate(() => document.querySelector('.page-index').getBoundingClientRect().top - document.activeElement.getBoundingClientRect().bottom);
+      assert.ok(focusGap >= 12, 'masthead focus outline and shadow clear the following section index');
       await page.screenshot({ path: `${evidence}/whats-new-keyboard-focus.png` });
 
       await page.click('.masthead [data-action="continue"]');
@@ -292,6 +294,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
         await page.evaluate(() => document.fonts.ready);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${name} reference article stays contained`);
         assert.ok(await contrast(page, '.benchmark-story-body p') >= 4.5, `${name} reference article contrast`);
+        const footerGap = await page.locator('.benchmark-story-footer').evaluate(footer => { const [first, second] = [...footer.querySelectorAll('a')].map(node => node.getBoundingClientRect()); return second.top > first.top + 4 ? second.top - first.bottom : second.left - first.right; });
+        assert.ok(footerGap >= 12, `${name} footer actions have separate targets`);
         await page.screenshot({ path: `${evidence}/efficiency-${name}.png` });
         if (name !== 'dark') {
           await captureLongPage(page, `efficiency-${name}`);

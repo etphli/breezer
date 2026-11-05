@@ -169,6 +169,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   }
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('Watching'));
   assert.equal(await ui.locator('#cancel').isEnabled(), true, 'watching can be stopped without restoring');
+  assert.equal(await ui.locator('#translate').isHidden(), true, 'running translation keeps its available Stop action instead of a disabled start button');
   assert.match(await page.locator('#article').textContent(), /^English:/);
   assert.equal(await page.locator('#hello').textContent(), ' English: Hola English: mundo. ');
   assert.equal(await page.locator('#injection img').count(), 0); assert.match(await page.locator('#injection').textContent(), /<img/);

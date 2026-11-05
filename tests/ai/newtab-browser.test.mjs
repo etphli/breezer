@@ -365,8 +365,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 6);
       const state = await organatoGone(page);
       assert.deepEqual({ hidden: state.hidden, text: state.text, refreshVisible: state.refreshVisible, flag: state.flag, overflow: state.overflow }, { hidden: true, text: false, refreshVisible: false, flag: 'off', overflow: false });
-      // The date and sites sit a little above the middle, not up top over a blank gap.
-      assert.ok(state.skyCentre > state.height * 0.35 && state.skyCentre < state.height * 0.5, `sky centre ${state.skyCentre}`);
+      assert.ok(state.skyCentre < state.height * 0.35, 'the date keeps its top anchor with the agenda off');
       assert.equal(await page.locator('.item, .item-empty, #organato-action a').count(), 0);
       assert.equal(await page.getByRole('heading', { name: /Organato/ }).count(), 0);
       assert.equal(await page.getByRole('status').filter({ hasText: /Organato/ }).count(), 0);
@@ -427,6 +426,9 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await other.waitForSelector('html[data-loaded="true"]');
       for (const tab of [page, other]) assert.equal(await tab.getAttribute('#organato', 'data-state'), 'ready');
 
+      const dateAnchor = await other.locator('#today').boundingBox();
+      const readySheet = await other.locator('.sheet').boundingBox();
+      await other.screenshot({ path: `${evidence}/newtab-state-ready.png` });
       // A slow refresh is on its way when Organato is turned off.
       await page.evaluate(() => { window.fx.delay = 600; });
       await page.click('#refresh');
@@ -436,6 +438,9 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.waitForTimeout(200);
       assert.equal((await organatoGone(page)).hidden, true, 'the late "on" answer does not bring it back');
       assert.equal((await organatoGone(other)).hidden, true);
+      const offAnchor = await other.locator('#today').boundingBox();
+      assert.ok(Math.abs(dateAnchor.x - offAnchor.x) < 1 && Math.abs(dateAnchor.y - offAnchor.y) < 1, 'the date stays anchored across the live off switch');
+      await other.screenshot({ path: `${evidence}/newtab-state-off.png` });
 
       // Back on: the loading sheet shows, a fresh request goes out and the lanes return.
       const before = await other.evaluate(() => window.fx.requests.length);
@@ -444,6 +449,11 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.evaluate(() => window.chrome.storage.local.set({ 'organato.switches.v1': { enabled: true, dashboardEnabled: true } }));
       await other.waitForFunction(() => !document.querySelector('.sheet').hidden && document.getElementById('organato').getAttribute('aria-busy') === 'true');
       assert.match(await other.textContent('#organato-status'), /Loading/);
+      assert.equal(await other.getAttribute('#organato', 'data-state'), 'loading');
+      const loadingSheet = await other.locator('.sheet').boundingBox();
+      const loadingAnchor = await other.locator('#today').boundingBox();
+      assert.ok(Math.abs(dateAnchor.x - loadingAnchor.x) < 1 && Math.abs(dateAnchor.y - loadingAnchor.y) < 1, 'the date stays anchored while reloading');
+      assert.ok(Math.abs(readySheet.y - loadingSheet.y) < 1 && Math.abs(readySheet.height - loadingSheet.height) < 1, 'loading reserves the full desktop agenda footprint');
       await other.screenshot({ path: `${evidence}/newtab-organato-reenabled-loading.png` });
       for (const tab of [page, other]) await tab.waitForFunction(() => document.getElementById('organato').dataset.state === 'ready');
       assert.equal(await other.evaluate(() => window.fx.requests.length), before + 1);

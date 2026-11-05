@@ -266,3 +266,26 @@ unchanged current UI units and freshly compiles the appearance bridge. It is not
 a full product/release rebuild. Twenty-two annotated before/after pairs precede
 the next review. All work remains local; PR #17 is unpushed and the requested
 9.5 score from each reviewer remains unmet.
+
+Round 15 Opus returned 8.7, satisfied with the direction but requesting further
+refinement. Its report covers 25 categories and explains each shortfall. Its
+actual run lasted from 13:16:14.373Z to 13:27:26.162Z on 5 November 2026. The two
+Sol results remain pending; there is no complete round-15 result or inferred
+score. No new review has been launched.
+
+Candidate 16 restores dark select arrows, clears masthead focus and shadow,
+separates footer actions, corrects import guidance and aligns its padding. Memory
+Save belongs to its fields and is enabled only for pending changes. Translation
+prioritizes Stop while running. New-tab loading now declares its state, so its
+reserved space applies; the date keeps one anchor when Organato is toggled. Pin
+and New space icons are distinct, favorite identities use one frame, and inactive
+titles use the space of hidden close controls. Browser tools has a distinct label.
+
+The complete suite passed 547 checks, zero failures and two skips, plus both
+walkthroughs. The 490 captures match all fifty UI files; 56 select-arrow checks,
+72 compact layout combinations and all six reduced-motion assertions pass.
+Fresh native evidence includes 41 windows and two recordings, with all 78 encoded
+header frames decoded separately. Nine unchanged native units were reused with
+the current fifty-file UI payload. Physical-input and temporal limits remain
+explicit. Fourteen annotated before/after pairs are prepared before the next
+review. The installed app and profile are unchanged; PR #17 remains unpushed.

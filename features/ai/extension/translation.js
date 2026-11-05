@@ -19,8 +19,10 @@ function controls() {
   const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
   $('translate').disabled = !connected || !ready || running || remaining > 0 || !$('consent').checked || !$('target').value || $('source').value === $('target').value;
   $('translate').textContent = remaining ? `Retry in ${remaining}s` : recovery ? 'Retry translation' : 'Translate page';
+  $('translate').hidden = running;
   $('cancel').disabled = !running;
   $('cancel').hidden = !running;
+  $('cancel').classList.toggle('primary', running);
   $('restore').disabled = !connected || translatedTotal === 0;
   $('restore').hidden = translatedTotal === 0;
   $('languages').disabled = !connected || !prefs || running || remaining > 0;

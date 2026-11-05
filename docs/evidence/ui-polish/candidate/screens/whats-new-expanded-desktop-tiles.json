@@ -1,5 +1,5 @@
 {
-  "height": 10806,
+  "height": 10826,
   "viewport": {
     "width": 1440,
     "height": 900
@@ -73,8 +73,8 @@
     },
     {
       "file": "whats-new-expanded-desktop-tile-14.png",
-      "scrollY": 9906,
-      "mastheadBottom": -9116.71875
+      "scrollY": 9926,
+      "mastheadBottom": -9136.71875
     }
   ]
 }
