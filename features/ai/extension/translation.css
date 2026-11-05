@@ -50,7 +50,7 @@ button:disabled { opacity: .5; cursor: default; }
 .sharing-details summary::before { content: ""; width: 6px; height: 6px; flex: none; margin: 0 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 .sharing-details[open] summary::before { transform: translateY(-2px) rotate(45deg); }
 @media (max-width: 420px) { main { padding: 24px 20px; } .languages { gap: 12px; padding: 16px 16px 12px; } .language-tools { padding: 0 16px 12px; } .sharing-group, .automatic-choice { padding: 16px; } }
-@media (max-width: 360px) { .languages { gap: 8px; } .languages select { padding-right: 24px; } }
+@media (max-width: 360px) { .languages { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 8px; } .languages select { padding-right: 24px; } }
 @media (max-width: 319px) { .languages { grid-template-columns: 1fr; gap: 16px; } }
 .settings-link { margin-top: 20px; color: var(--muted); padding: 0; border: 0; background: none; text-decoration: underline; }
 #languages.reload { min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; }

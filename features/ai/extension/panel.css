@@ -303,7 +303,6 @@ h1 {
 .welcome-status p {
   margin: 0;
 }
-.welcome-status code { font-size: .92em; padding: 2px 4px; border-radius: 4px; background: var(--tint); white-space: nowrap; }
 
 .welcome-action {
   margin-top: 10px;
@@ -1138,7 +1137,7 @@ dialog .privacy-note {
 .account-options[open] > p { margin: 10px 0; color: var(--muted); }
 .account-options > div { display: grid; grid-template-columns: 42px minmax(0, 1fr) 62px; align-items: center; gap: 6px 8px; margin-top: 12px; }
 .account-options > div > span { font-size: 12px; color: var(--muted); }
-.account-options code { min-width: 0; font: 13px ui-monospace, "SFMono-Regular", Menlo, monospace; user-select: text; white-space: pre-wrap; overflow-wrap: anywhere; }
+.account-options code { min-width: 0; min-height: 32px; padding: 6px 8px; border-radius: 4px; background: var(--tint); font: 13px/20px ui-monospace, "SFMono-Regular", Menlo, monospace; user-select: text; white-space: pre-wrap; overflow-wrap: anywhere; }
 @media (max-width: 360px) {
   .account-options > div { grid-template-columns: minmax(0, 1fr) 62px; }
   .account-options > div > span { grid-column: 1 / -1; }

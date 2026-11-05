@@ -1,0 +1,469 @@
+{
+  "scope": "Native tab/toolbar detail crops. Original full-window PNGs and manifests remain available. Fictional page body excluded from design review.",
+  "items": [
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-mint-light-desktop.png",
+      "sha256": "8787af30e11f8e6aad596ef61212ca67ad602ddfb7165d4e9fa3432b5feca0b3",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-mint-light-desktop.png",
+      "sourceSha256": "59cc3575bc967df30e0d3ec1581910321fc6ef9faf493b8a012de85f856b8574",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-mint-light-narrow.png",
+      "sha256": "8b108c2b2b3d8450025dbc6795ac2dfb6383516e87e16d375fa5e26cb44602fc",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-mint-light-narrow.png",
+      "sourceSha256": "7de272051f2332e878f31cb1b2c6524b076e4389999b03663df298a7efd348a3",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-mint-dark-desktop.png",
+      "sha256": "0125a71ddb9267c5bf281f3dd81ef2e4e1a27a639cf0d2c1ed570f9ebfcab370",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-mint-dark-desktop.png",
+      "sourceSha256": "e997e6582a85f4c79eced825b1e850c18307948bf4ef151c1bcfe7cd30ae2e8f",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-mint-dark-narrow.png",
+      "sha256": "3752ecbb108a4194431044fdfa7b22718596e3de40be1eea8d37bd3fe587b940",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-mint-dark-narrow.png",
+      "sourceSha256": "5778689301eceee38ab243ad22c84390aff3ebd0c3f304c2df210126dd37bb30",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-tide-light-desktop.png",
+      "sha256": "a1742d83317cd30c267a320617946884161342c53ea7ee96d9a3bab05d0aca10",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-tide-light-desktop.png",
+      "sourceSha256": "a3016c5ea704de4a7023980b1fe13ba1d0602130020cf79e2f7bbee33357c9d9",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-tide-light-narrow.png",
+      "sha256": "40b7c2d7e7c86ea86de738d5db8d7589690bea8ff69822136e2ba317d63341b9",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-tide-light-narrow.png",
+      "sourceSha256": "c350215a439fa9cd0b99a1cffc5302f5411b98af0ee99fc35f8e7f9d78433356",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-tide-dark-desktop.png",
+      "sha256": "b969bab56b0adcd1580e59181fd3c112cc678f6ee7618e0cf31b63a67d9dd4ee",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-tide-dark-desktop.png",
+      "sourceSha256": "a1cbf9531dd21f8bca51962b1f6e2ace9224d2d484859e59f5726787d88c3bf9",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-tide-dark-narrow.png",
+      "sha256": "5a11b9a0cf0997ce87d36b9d47d7e0e66e5237bb6dd89f481301cf436a40cc32",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-tide-dark-narrow.png",
+      "sourceSha256": "7c54c8a003dd2f69d2ca06e6ce862edca25d9b24f39c350992e1770dce1209a1",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-dusk-light-desktop.png",
+      "sha256": "9ee572a18b3e66a2206b44bddf9ad3c51ca0863cacadbd9bedfa4bb9ccfa39ca",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-dusk-light-desktop.png",
+      "sourceSha256": "14281c4bea9d66ce96b088cbff9a9c97c04df95709e36fb9660741babc0db94d",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-dusk-light-narrow.png",
+      "sha256": "69e4df2bacfab6f40db986924231c9dd0cff7a07c7fa14e4bca99ba7eaa24e17",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-dusk-light-narrow.png",
+      "sourceSha256": "00a699623bd64a10efa3e3d57902898b1f9faaa0570c37d7c88c44b5f2e5c724",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-dusk-dark-desktop.png",
+      "sha256": "89fb32f15140d47aaa640f6181ace3f14d95e26be19e8fbf81dad592ca50e7c8",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-dusk-dark-desktop.png",
+      "sourceSha256": "444390e7142e87ac97ae730ad34b5962c2093792bb3da268154ffcdaeb6139ec",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-dusk-dark-narrow.png",
+      "sha256": "12fdaae6e6953975561f3fdac87daca3d9f766bfdd38767a740f49a27ac7d80d",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-dusk-dark-narrow.png",
+      "sourceSha256": "0274260903555775fc67213cf6dc224e0c927ca324b40ec814c802e97d278cf9",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-rose-light-desktop.png",
+      "sha256": "4cd4ee4dc2831ef27e471fab4e08df91a3061cc1cb6478f7bdcf0048e24753bf",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-rose-light-desktop.png",
+      "sourceSha256": "e368b1542f3859da9d7bc856a04b986b1ed6edc765c53771e85e9e423b00d717",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-rose-light-narrow.png",
+      "sha256": "bc0d96036e108bf12698f9409b4224a0aa947b51f80996afb6b2e3394835e61c",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-rose-light-narrow.png",
+      "sourceSha256": "5a86c7db90c114ceef0a08aa8ebf3f8a753f0c5014e352cdb8daae9afe0d7231",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-rose-dark-desktop.png",
+      "sha256": "48cb9390b9025a633c165aea0d321fd90b0d1f35ea524cc530e68dbf0993ea23",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-rose-dark-desktop.png",
+      "sourceSha256": "8e90d76b62daceb0ee862fd48b1e138d70263ac9464c3ce9915b15ef2dd9d1ee",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-rose-dark-narrow.png",
+      "sha256": "4ad26e3fc0c94ab180fe71f2f84acaaaabed774b920c80973e26c2d02172debe",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-rose-dark-narrow.png",
+      "sourceSha256": "9848c62df33a289b60546821976a960b80321a78f2d8f12649e748c801d1459b",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-pollen-light-desktop.png",
+      "sha256": "ff593e6b8406fb67df59def01c53f09e2c7066d1133aee3aaa2e1d619debff68",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-pollen-light-desktop.png",
+      "sourceSha256": "4d330aee17eb6a4a2f6a752eeb166eed14da9ae2e9457149e532459c6e3637cf",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-pollen-light-narrow.png",
+      "sha256": "ed87d8c880049eb4a97ad32054eee2cde36579841c1e991edfbeaa54807d03e4",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-pollen-light-narrow.png",
+      "sourceSha256": "f4c9a136412cfdb778c7ed11ababfc1adb7694497bd95794921abd725a122d3d",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-pollen-dark-desktop.png",
+      "sha256": "a18bb6201f197ccd2e3212727b0f1a0b92c76668a434d88b6207a76a84be16de",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-pollen-dark-desktop.png",
+      "sourceSha256": "ce7fe218a4ff220645f135a2ed0e10796c518b069d8126624d2aa40394267415",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-pollen-dark-narrow.png",
+      "sha256": "cf97f7961e090120984932688d4c1c687d7f4a55cdb264ce381d3ccf3a5544e3",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-pollen-dark-narrow.png",
+      "sourceSha256": "adee9d0993e14f05c2d02f1fce0eb666c17bb51e22e8b1a12d7d4791ce7358ff",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-graphite-light-desktop.png",
+      "sha256": "f9f694a0c099f824cce93161bdd7fe376a74e8a86a2cc3e92539b4d8ef2454b3",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-graphite-light-desktop.png",
+      "sourceSha256": "5bee80f9012687820980b6833de9ec6baa4c5f4c185754084c95265f7dfad865",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-graphite-light-narrow.png",
+      "sha256": "bc35516095e8312c7f5bf6d8595afb0b0bafc595f45202991de38981469f5b74",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-graphite-light-narrow.png",
+      "sourceSha256": "a8432417a749dfe3c9e0dfe5333f8d5c4b67e8f6c7eb7e8926e4d9178d3a7ca8",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-graphite-dark-desktop.png",
+      "sha256": "acb043ae349668e45dcfc3a91359909ea10ba262d55ed301a9674910596750a0",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-graphite-dark-desktop.png",
+      "sourceSha256": "410c4cf96bed0da1d7dcbe93ec6cf0861ac63a350a3ff2959154f65bf1725895",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-graphite-dark-narrow.png",
+      "sha256": "bf0b0c71971bfc373e2b4a7c0230c488e8e441f7290c57f101bd1f3bf750ffc4",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-graphite-dark-narrow.png",
+      "sourceSha256": "9177dfa97379cd3a4e15a0a1d7298df36e2ce490b2547a98abf1ababdcbd157e",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-custom-light-desktop.png",
+      "sha256": "3df65109d553e03d44632ca34ff012ebe2faac7c83d4e0b41218b65804c44368",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-custom-light-desktop.png",
+      "sourceSha256": "b765df3449b6315075b479ea346b45a835e27d8fbe07b68d174f5a92f759958a",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-custom-light-narrow.png",
+      "sha256": "9991b9c44ef86eb79f6b20dc9b3c456904c22a858e7cade0a6cdc6914560463c",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-custom-light-narrow.png",
+      "sourceSha256": "532db5860d9967c09aa53383b7945bc90cd9d100020c5bb014b981a27f3f3820",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-custom-dark-desktop.png",
+      "sha256": "68f02e9ab12dfc1ec8b7fc4e201d5a489806f852f4b399f7ef66fc219d431746",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-custom-dark-desktop.png",
+      "sourceSha256": "a5192344ea0852908090446cdf93c42f9b457ca77b720a34ade06b4026381fb1",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-custom-dark-narrow.png",
+      "sha256": "0a21e353e39b912ea81958887d23ce68ed6758a839bc5f48973a94325e060e7f",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-custom-dark-narrow.png",
+      "sourceSha256": "6272f4447449234240ac322727a5ab12e0e9179b8580fd087d2af6477977c358",
+      "sourceWidth": 1080,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        1080,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    },
+    {
+      "path": "/tmp/breezer-ui-polish/round-20-native-headers/top-system-mode.png",
+      "sha256": "82a8305e6df77f6ca41f1cf6ad59a77deeeef720489606553de8fc536aec72e5",
+      "source": "/tmp/breezer-ui-polish/round-19-final-native/top-system-mode.png",
+      "sourceSha256": "7853d19ecb64269188e8e8f8b39432bd2260ba90db0614e1494a5da4fdd3f0b0",
+      "sourceWidth": 2200,
+      "sourceHeight": 1560,
+      "rect": [
+        0,
+        0,
+        2200,
+        360
+      ],
+      "decodedPixelsMatch": true,
+      "method": "Original image decoded in Chromium, cropped at the top 180 CSS pixels without resizing. PNG roundtrip decoded RGBA matches the source crop."
+    }
+  ]
+}

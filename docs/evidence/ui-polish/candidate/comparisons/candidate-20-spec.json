@@ -1,0 +1,69 @@
+[
+  {
+    "beforeRoot": "round-20-focused",
+    "afterRoot": "round-20-focused",
+    "id": "startup",
+    "title": "Assistant startup",
+    "file": "after-startup-light-320.png",
+    "beforeFile": "before-startup-light-320.png",
+    "notes": [
+      [
+        76,
+        83,
+        33,
+        95.5,
+        "The complete loading message fits at 320px."
+      ]
+    ]
+  },
+  {
+    "beforeRoot": "round-20-focused",
+    "afterRoot": "round-20-focused",
+    "id": "instructions",
+    "title": "Sign-in commands",
+    "file": "after-instructions-light-320.png",
+    "beforeFile": "before-instructions-light-320.png",
+    "notes": [
+      [
+        79,
+        53,
+        40,
+        46,
+        "Commands and Copy buttons have consistent spacing and height."
+      ]
+    ]
+  },
+  {
+    "beforeRoot": "round-20-focused",
+    "afterRoot": "round-20-focused",
+    "id": "account-dialog",
+    "title": "Account dialog",
+    "file": "after-dialog-light-320.png",
+    "beforeFile": "before-dialog-light-320.png",
+    "notes": [
+      [
+        78,
+        61,
+        40,
+        51,
+        "The dialog uses the same readable command treatment."
+      ]
+    ]
+  },
+  {
+    "id": "translation",
+    "title": "Language selection at 320px",
+    "file": "translation-before-sharing-light-320.png",
+    "beforeRoot": "round-19-final-workflows",
+    "afterRoot": "round-20-final-workflows",
+    "notes": [
+      [
+        70,
+        30,
+        35,
+        20.3,
+        "Auto-detect has more room before the dropdown arrow."
+      ]
+    ]
+  }
+]

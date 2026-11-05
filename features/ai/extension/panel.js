@@ -132,9 +132,9 @@ function updateControls() {
   if (!selected && !state.discoveryPending) $('prompt').placeholder = 'Draft a message…';
   renderWelcomeStatus(selected);
   document.querySelector('.panel').dataset.accountState = selected ? 'ready' : state.discoveryPending ? 'connecting' : 'signed-out';
-  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Accounts';
+  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Loading models…' : 'Accounts';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
-  $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
+  $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : state.discoveryPending ? 'Checking connected accounts' : 'Choose a model';
   $('model-button').disabled = running;
   $('inference-options').hidden = !selected;
   if (running) setModelMenu(false);

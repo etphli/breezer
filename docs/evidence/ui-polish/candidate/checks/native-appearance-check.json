@@ -19,5 +19,8 @@
       "sha256": "89ec847683471950effc67648566e5bd7350290fa22056e4d14c0ad4389cbc72"
     }
   ],
-  "installedAppAndProfileUnchanged": true
+  "installedAppAndProfileUnchanged": true,
+  "reusedFromRound": 19,
+  "currentNativeInputsVerified": 16,
+  "currentRenderedResourceInputsVerified": 32
 }

@@ -107,6 +107,7 @@ are retained in the adjacent Markdown files.
 | Breezer, candidate 16 interrupted cohort | 8.9 | 9.0 | 8.3, later resume |
 | Breezer, candidate 17 complete council | 9.0 | 9.0 | 8.9 |
 | Breezer, candidate 18 complete council | 9.0 | 9.0 | 9.2 |
+| Breezer, candidate 19 interrupted cohort | no score | no score | no score |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -378,3 +379,30 @@ separately. Sixteen actual annotated before/after pairs were shown before review
 The frozen pack contains 1,195 evidence files. GPT-6.1 Sol wrote these changes;
 no council has scored candidate 19. Native physical interaction and frame pacing
 remain unverified; this is not a release rebuild. PR #17 remains unpushed.
+
+Round 19 returned no scores. Both Sol reviews failed during remote compaction
+with connection errors; Opus reached its account quota. Actual starts were
+18.084 seconds apart and all three runs overlapped for 198.729 seconds. These
+are technical failures, not design ratings. No replacement model was used.
+
+Candidate 20 fits the assistant startup message at 320px, shares one command-chip
+treatment between account instructions and dialogs, and gives Auto-detect more
+room before its arrow. All four focused light/dark and width cases pass. The full
+suite passed 547 checks, zero failures and two skips, followed by both walkthroughs.
+All 490 matrix captures match fifty source files; 38 translation states fit, and
+all twelve motion sequences pass their checks, including six reduced-motion cases.
+Seventy-two compact layouts, six dialog-motion cases and 22 custom-color contrast
+cases also pass. Four actual annotated before/after pairs were shown.
+
+Fresh native capture failed before producing an image; the Mac subsequently
+reported its screen locked. The current private runtime served all fifty matching
+assets and cleaned up its process, profile and port. The 42 native windows and
+two recordings from candidate 19 are retained with explicit reuse provenance.
+All sixteen native inputs and all 32 resources referenced by the captured sidebar
+document are unchanged. The four modified standalone assistant/translation files
+were not rendered in those native surfaces. Twenty-nine pixel-checked header
+crops make the original windows easier to inspect without redundant full-window
+reads. No new native image or recording is claimed. The frozen pack contains
+1,225 evidence files. Physical interaction, OS integration and frame pacing remain
+unverified; this is not a release rebuild. GPT-6.1 Sol wrote the changes. PR #17
+remains unpushed, and candidate 20 has not been scored.

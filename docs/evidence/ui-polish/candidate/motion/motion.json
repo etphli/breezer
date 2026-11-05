@@ -107,7 +107,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 120,
+    "videoFrameOriginMs": 40,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -148,7 +148,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 160,
+    "videoFrameOriginMs": 520,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -177,7 +177,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 400,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -294,6 +294,72 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
+        "duration": 440.9709894831945,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 295.03447078209024,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 440.9709894831945,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 440.9709894831945,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 440.9709894831945,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 320,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
         "duration": 320,
         "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
         "endDelay": 0,
@@ -394,7 +460,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 480,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -490,7 +556,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -531,7 +597,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 840,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -560,7 +626,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 280,
+    "videoFrameOriginMs": 240,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -589,7 +655,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 1320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -618,7 +684,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 400,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -647,7 +713,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -676,7 +742,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 200,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -705,7 +771,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 1320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

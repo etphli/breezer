@@ -1,11 +1,11 @@
 {
-  "round": 19,
+  "round": 20,
   "suiteTests": 549,
   "uniquePassingChecks": 547,
-  "unresolvedFailures": 0,
+  "unresolvedProductCheckFailures": 0,
   "skipped": 2,
-  "method": "One uninterrupted complete Node suite, then assistant/research walkthroughs, focused narrow-field geometry and private native current-UI capture.",
-  "fullLog": "/tmp/breezer-ui-round19-full-final-2.log",
+  "method": "One uninterrupted complete Node suite, assistant/research walkthroughs and focused geometry. Native views are reused with all relevant inputs verified; a fresh current-runtime attempt served current assets but produced no image.",
+  "fullLog": "/tmp/breezer-ui-round20-full-final.log",
   "matrixCaptures": 490,
   "sourceFiles": 50,
   "newlyCompiledNativeUnits": 0,
@@ -15,12 +15,14 @@
   "translation320Modes": 2,
   "customMotionSequences": 12,
   "reducedMotionAssertions": 6,
-  "freshNativeWindowCaptures": 42,
-  "freshNativeContinuousRecordings": 2,
+  "freshNativeWindowCaptures": 0,
+  "freshNativeContinuousRecordings": 0,
+  "reusedNativeWindowCaptures": 42,
+  "reusedNativeContinuousRecordings": 2,
   "privateCompiledUiUnits": 9,
   "nativeLoadedSourceFiles": 50,
   "nativeProfileIconMinimumContrast": 8.838213838897685,
-  "beforeAfterPairs": 16,
+  "beforeAfterPairs": 4,
   "accountConnectionDialogs": 4,
   "selectArrowChecks": 56,
   "compactLayoutCases": 72,
@@ -33,6 +35,7 @@
   "customColorContrastCases": 22,
   "archivedUnindexedStaging": [],
   "reviewStatus": "not yet reviewed",
+  "nativeFreshCaptureStatus": "Failed before first image; Mac screen reported locked at subsequent check. Current private runtime served all 50 verified assets and cleaned up. Reused native views have matching relevant inputs.",
   "captureFailureNote": "Prior native recorder failures are preserved separately. This pack uses the diagnostic stream delegate and retains failed media before disposable-profile cleanup.",
   "limitations": [
     "Not a full product/release rebuild.",
@@ -47,117 +50,117 @@
   "nativeActivationRaceProof": {
     "samples": [
       {
-        "time": 3.9000000953674316,
+        "time": 6,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 19.5,
+        "time": 23.100000143051147,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 37.90000009536743,
+        "time": 39.80000019073486,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 54.60000014305115,
+        "time": 54.5,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 71.20000004768372,
+        "time": 73.10000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 87.79999995231628,
+        "time": 88.5,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 103.79999995231628,
+        "time": 106.5,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 121.29999995231628,
+        "time": 123.20000004768372,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 137.90000009536743,
+        "time": 139.80000019073486,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 154.60000014305115,
+        "time": 155.10000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 171.20000004768372,
+        "time": 173.20000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 186.90000009536743,
+        "time": 188.70000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 204.60000014305115,
+        "time": 206.5,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 221.29999995231628,
+        "time": 223.20000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 238,
+        "time": 239.80000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 253.10000014305115,
+        "time": 254.40000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 270.5,
+        "time": 271.30000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 288.10000014305115,
+        "time": 289.80000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 304.7000000476837,
+        "time": 306.5,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 321.40000009536743,
+        "time": 323.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 336.2000000476837,
+        "time": 339.80000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 354.7000000476837,
+        "time": 354.5,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 371.2999999523163,
+        "time": 373.2000000476837,
         "space": "Personal",
         "selected": 1
       }
@@ -186,15 +189,18 @@
         "sha256": "89ec847683471950effc67648566e5bd7350290fa22056e4d14c0ad4389cbc72"
       }
     ],
-    "installedAppAndProfileUnchanged": true
+    "installedAppAndProfileUnchanged": true,
+    "reusedFromRound": 19,
+    "currentNativeInputsVerified": 16,
+    "currentRenderedResourceInputsVerified": 32
   },
-  "nativeFixtureCorrection": "The initial direct-bridge capture omitted the standard Settings appearance.rev broadcast. That diagnostic pack is retained separately; this pack includes the broadcast and visibly distinct font endpoints.",
+  "nativeFixtureCorrection": "The reused native pack includes the Settings appearance.rev broadcast and distinct font endpoints. Its recorded input files match the current native views.",
   "wholePanelOpacity": {
-    "method": "Computed opacity sampled on animation frames during normal-mode startup in both schemes. A deterministic fixture delays its initial provider reply by 600ms to expose the connecting state. This is a functional opacity check, not a latency measurement.",
+    "method": "Computed opacity sampled on animation frames during normal startup in both schemes. Fixture provider reply delayed 600ms only to expose connecting state, not to measure latency.",
     "current": {
       "light": [
         {
-          "time": 63.700000047683716,
+          "time": 74.20000004768372,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -205,7 +211,7 @@
           "model": "1"
         },
         {
-          "time": 79.5,
+          "time": 88.40000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -216,7 +222,7 @@
           "model": "1"
         },
         {
-          "time": 97.29999995231628,
+          "time": 106.29999995231628,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -227,7 +233,7 @@
           "model": "1"
         },
         {
-          "time": 114.10000014305115,
+          "time": 122.79999995231628,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -238,7 +244,7 @@
           "model": "1"
         },
         {
-          "time": 130.60000014305115,
+          "time": 139.59999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -249,7 +255,7 @@
           "model": "1"
         },
         {
-          "time": 147.29999995231628,
+          "time": 155.59999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -260,7 +266,7 @@
           "model": "1"
         },
         {
-          "time": 164,
+          "time": 170.90000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -271,7 +277,7 @@
           "model": "1"
         },
         {
-          "time": 180.60000014305115,
+          "time": 189.70000004768372,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -282,7 +288,7 @@
           "model": "1"
         },
         {
-          "time": 197.40000009536743,
+          "time": 206.20000004768372,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -293,7 +299,7 @@
           "model": "1"
         },
         {
-          "time": 213.90000009536743,
+          "time": 222.79999995231628,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -304,7 +310,7 @@
           "model": "1"
         },
         {
-          "time": 230.79999995231628,
+          "time": 237.90000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -315,7 +321,7 @@
           "model": "1"
         },
         {
-          "time": 247.29999995231628,
+          "time": 256.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -326,7 +332,7 @@
           "model": "1"
         },
         {
-          "time": 264,
+          "time": 272.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -337,7 +343,7 @@
           "model": "1"
         },
         {
-          "time": 280.7000000476837,
+          "time": 289.5,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -348,7 +354,7 @@
           "model": "1"
         },
         {
-          "time": 297.5,
+          "time": 306.09999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -359,7 +365,7 @@
           "model": "1"
         },
         {
-          "time": 314.2000000476837,
+          "time": 322.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -370,7 +376,7 @@
           "model": "1"
         },
         {
-          "time": 330.90000009536743,
+          "time": 337.7000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -381,7 +387,7 @@
           "model": "1"
         },
         {
-          "time": 347.5,
+          "time": 356.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -392,7 +398,7 @@
           "model": "1"
         },
         {
-          "time": 364.10000014305115,
+          "time": 372.90000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -403,7 +409,7 @@
           "model": "1"
         },
         {
-          "time": 380.2999999523163,
+          "time": 389.59999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -414,7 +420,7 @@
           "model": "1"
         },
         {
-          "time": 397.40000009536743,
+          "time": 406.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -425,7 +431,7 @@
           "model": "1"
         },
         {
-          "time": 414.2000000476837,
+          "time": 422.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -436,7 +442,7 @@
           "model": "1"
         },
         {
-          "time": 430.5,
+          "time": 439.59999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -447,7 +453,7 @@
           "model": "1"
         },
         {
-          "time": 445.7000000476837,
+          "time": 456.2999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -458,7 +464,7 @@
           "model": "1"
         },
         {
-          "time": 462.7000000476837,
+          "time": 471.2999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -469,7 +475,7 @@
           "model": "1"
         },
         {
-          "time": 480.90000009536743,
+          "time": 489.5,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -480,7 +486,7 @@
           "model": "1"
         },
         {
-          "time": 497,
+          "time": 506.40000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -491,7 +497,7 @@
           "model": "1"
         },
         {
-          "time": 512.4000000953674,
+          "time": 523,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -502,7 +508,7 @@
           "model": "1"
         },
         {
-          "time": 530.9000000953674,
+          "time": 539.5,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -513,7 +519,7 @@
           "model": "1"
         },
         {
-          "time": 545.9000000953674,
+          "time": 556.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -524,7 +530,7 @@
           "model": "1"
         },
         {
-          "time": 562.4000000953674,
+          "time": 573,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -535,7 +541,7 @@
           "model": "1"
         },
         {
-          "time": 580.9000000953674,
+          "time": 589.5,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -546,7 +552,7 @@
           "model": "1"
         },
         {
-          "time": 597.7000000476837,
+          "time": 606.5999999046326,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -557,7 +563,7 @@
           "model": "1"
         },
         {
-          "time": 614.2000000476837,
+          "time": 622.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -568,7 +574,7 @@
           "model": "1"
         },
         {
-          "time": 630.9000000953674,
+          "time": 639.4000000953674,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -579,7 +585,7 @@
           "model": "1"
         },
         {
-          "time": 647.5,
+          "time": 656.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -590,7 +596,7 @@
           "model": "1"
         },
         {
-          "time": 664.1000001430511,
+          "time": 672.5,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -601,7 +607,7 @@
           "model": "1"
         },
         {
-          "time": 680.7999999523163,
+          "time": 689.5,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -612,7 +618,7 @@
           "model": "1"
         },
         {
-          "time": 697.4000000953674,
+          "time": 706.2999999523163,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -623,7 +629,7 @@
           "model": "1"
         },
         {
-          "time": 714.2000000476837,
+          "time": 722.7999999523163,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -634,7 +640,7 @@
           "model": "1"
         },
         {
-          "time": 730.7999999523163,
+          "time": 739.7999999523163,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -645,7 +651,7 @@
           "model": "1"
         },
         {
-          "time": 746.1000001430511,
+          "time": 754.9000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -656,7 +662,7 @@
           "model": "1"
         },
         {
-          "time": 764.1000001430511,
+          "time": 772.9000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -667,7 +673,7 @@
           "model": "1"
         },
         {
-          "time": 780.7999999523163,
+          "time": 789.5,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -678,7 +684,7 @@
           "model": "1"
         },
         {
-          "time": 797,
+          "time": 804.4000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -689,7 +695,7 @@
           "model": "1"
         },
         {
-          "time": 812.2999999523163,
+          "time": 822.9000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -700,7 +706,7 @@
           "model": "1"
         },
         {
-          "time": 830.9000000953674,
+          "time": 839.9000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -711,7 +717,7 @@
           "model": "1"
         },
         {
-          "time": 847.7000000476837,
+          "time": 856.2000000476837,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -722,7 +728,7 @@
           "model": "1"
         },
         {
-          "time": 864.2999999523163,
+          "time": 871.5999999046326,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -733,7 +739,7 @@
           "model": "1"
         },
         {
-          "time": 881,
+          "time": 889.5,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -744,7 +750,29 @@
           "model": "1"
         },
         {
-          "time": 897.2000000476837,
+          "time": 906.2000000476837,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 922.7999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 939.5,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -757,7 +785,7 @@
       ],
       "dark": [
         {
-          "time": 85,
+          "time": 63.5,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -768,7 +796,7 @@
           "model": "1"
         },
         {
-          "time": 100.10000014305115,
+          "time": 76.79999995231628,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -779,7 +807,7 @@
           "model": "1"
         },
         {
-          "time": 115.80000019073486,
+          "time": 92,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -790,7 +818,7 @@
           "model": "1"
         },
         {
-          "time": 132.60000014305115,
+          "time": 110.09999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -801,7 +829,7 @@
           "model": "1"
         },
         {
-          "time": 148.90000009536743,
+          "time": 126.70000004768372,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -812,7 +840,7 @@
           "model": "1"
         },
         {
-          "time": 166.60000014305115,
+          "time": 141.20000004768372,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -823,7 +851,7 @@
           "model": "1"
         },
         {
-          "time": 182.20000004768372,
+          "time": 158.59999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -834,7 +862,7 @@
           "model": "1"
         },
         {
-          "time": 200.80000019073486,
+          "time": 176.40000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -845,7 +873,7 @@
           "model": "1"
         },
         {
-          "time": 217.60000014305115,
+          "time": 193.09999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -856,7 +884,7 @@
           "model": "1"
         },
         {
-          "time": 234.20000004768372,
+          "time": 209.90000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -867,7 +895,7 @@
           "model": "1"
         },
         {
-          "time": 250.80000019073486,
+          "time": 226.29999995231628,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -878,7 +906,7 @@
           "model": "1"
         },
         {
-          "time": 267.60000014305115,
+          "time": 243,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -889,7 +917,7 @@
           "model": "1"
         },
         {
-          "time": 284.2000000476837,
+          "time": 258,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -900,7 +928,7 @@
           "model": "1"
         },
         {
-          "time": 300.80000019073486,
+          "time": 274.40000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -911,7 +939,7 @@
           "model": "1"
         },
         {
-          "time": 317.7000000476837,
+          "time": 291.7000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -922,7 +950,7 @@
           "model": "1"
         },
         {
-          "time": 334.40000009536743,
+          "time": 307.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -933,7 +961,7 @@
           "model": "1"
         },
         {
-          "time": 349.5,
+          "time": 324.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -944,7 +972,7 @@
           "model": "1"
         },
         {
-          "time": 367.7000000476837,
+          "time": 341.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -955,7 +983,7 @@
           "model": "1"
         },
         {
-          "time": 383.10000014305115,
+          "time": 359.09999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -966,7 +994,7 @@
           "model": "1"
         },
         {
-          "time": 401,
+          "time": 375.09999990463257,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -977,7 +1005,7 @@
           "model": "1"
         },
         {
-          "time": 417.30000019073486,
+          "time": 392.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -988,7 +1016,7 @@
           "model": "1"
         },
         {
-          "time": 432.7000000476837,
+          "time": 409.2999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -999,7 +1027,7 @@
           "model": "1"
         },
         {
-          "time": 450.90000009536743,
+          "time": 425.90000009536743,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1010,7 +1038,7 @@
           "model": "1"
         },
         {
-          "time": 467.60000014305115,
+          "time": 441.2999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1021,7 +1049,7 @@
           "model": "1"
         },
         {
-          "time": 484.30000019073486,
+          "time": 459.2999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1032,7 +1060,7 @@
           "model": "1"
         },
         {
-          "time": 500.40000009536743,
+          "time": 474.2000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1043,7 +1071,7 @@
           "model": "1"
         },
         {
-          "time": 516.1000001430511,
+          "time": 491,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1054,7 +1082,7 @@
           "model": "1"
         },
         {
-          "time": 534.4000000953674,
+          "time": 508.7999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1065,7 +1093,7 @@
           "model": "1"
         },
         {
-          "time": 551,
+          "time": 526,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1076,7 +1104,7 @@
           "model": "1"
         },
         {
-          "time": 567.7000000476837,
+          "time": 542.5999999046326,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1087,7 +1115,7 @@
           "model": "1"
         },
         {
-          "time": 584.4000000953674,
+          "time": 558,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1098,7 +1126,7 @@
           "model": "1"
         },
         {
-          "time": 601,
+          "time": 575.5999999046326,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1109,7 +1137,7 @@
           "model": "1"
         },
         {
-          "time": 618,
+          "time": 592.7000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1120,7 +1148,7 @@
           "model": "1"
         },
         {
-          "time": 634.3000001907349,
+          "time": 609,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1131,7 +1159,7 @@
           "model": "1"
         },
         {
-          "time": 651,
+          "time": 626,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1142,7 +1170,7 @@
           "model": "1"
         },
         {
-          "time": 667.6000001430511,
+          "time": 641.7000000476837,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1153,7 +1181,7 @@
           "model": "1"
         },
         {
-          "time": 684.3000001907349,
+          "time": 657.2999999523163,
           "state": "connecting",
           "root": "1",
           "body": "1",
@@ -1164,7 +1192,7 @@
           "model": "1"
         },
         {
-          "time": 701,
+          "time": 675.9000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1175,7 +1203,7 @@
           "model": "1"
         },
         {
-          "time": 716.4000000953674,
+          "time": 690.7000000476837,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1186,7 +1214,7 @@
           "model": "1"
         },
         {
-          "time": 733.9000000953674,
+          "time": 707.7999999523163,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1197,7 +1225,7 @@
           "model": "1"
         },
         {
-          "time": 751,
+          "time": 724.9000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1208,7 +1236,7 @@
           "model": "1"
         },
         {
-          "time": 767.6000001430511,
+          "time": 741.5,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1219,7 +1247,7 @@
           "model": "1"
         },
         {
-          "time": 784.2000000476837,
+          "time": 759.4000000953674,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1230,7 +1258,7 @@
           "model": "1"
         },
         {
-          "time": 801,
+          "time": 776,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1241,7 +1269,7 @@
           "model": "1"
         },
         {
-          "time": 816.6000001430511,
+          "time": 791.2000000476837,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1252,7 +1280,7 @@
           "model": "1"
         },
         {
-          "time": 834.5,
+          "time": 807.5999999046326,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1263,7 +1291,7 @@
           "model": "1"
         },
         {
-          "time": 851,
+          "time": 824.5,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1274,7 +1302,7 @@
           "model": "1"
         },
         {
-          "time": 867.7000000476837,
+          "time": 842.7000000476837,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1285,7 +1313,7 @@
           "model": "1"
         },
         {
-          "time": 884.4000000953674,
+          "time": 859.2999999523163,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1296,7 +1324,7 @@
           "model": "1"
         },
         {
-          "time": 901,
+          "time": 874.7000000476837,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1307,7 +1335,18 @@
           "model": "1"
         },
         {
-          "time": 915.9000000953674,
+          "time": 890.7999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 908.7999999523163,
           "state": "ready",
           "root": "1",
           "body": "1",
@@ -1326,5 +1365,349 @@
       "conversation",
       "composer"
     ]
-  }
+  },
+  "nativeReuse": {
+    "candidateRound": 20,
+    "capturedRound": 19,
+    "scope": "Reuse of native tabs, toolbar and workspace-window captures only. No product input rendered in those native views changed. Current assistant and translation web views are newly captured separately.",
+    "nativeInputs": [
+      {
+        "path": "features/ai/native-ui/sidebar.patch",
+        "sha256": "114aaead2cbcf04028dad3d144575f6762d2447bc1e9c9ed3bd24cfc0a0aabf4"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/BUILD.gn",
+        "sha256": "22b1ed9487c4410d0a61b938414ba7c03064ac5ee128c8661e3c36fc7d9c6be3"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+        "sha256": "08375eda4d5255c6d3f9a896b6217d021a5c360adba5c62466c8b2d9b5aae4bc"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.h",
+        "sha256": "0766a16f80936831b332165f095eae78573acd152edcbc8bb7bc3154e1aec3ba"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h",
+        "sha256": "b065a29cff92c5980e86bb037fb77aa1519d5b0b31642d5b0dd185d6d1640efb"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/workspace_sync_api.cc",
+        "sha256": "a278785364fa904271f3923f55071590ef30d79785414a1f594803994b527ec6"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/ui/helium/breezer_workspace_prefs.h",
+        "sha256": "e9c54f58f281395fef004d25ba5b8332ebddc529afb5b9e6896481d8f335e422"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/BUILD.gn",
+        "sha256": "5b39b93ab3413b9c85d0569f8ecfa469135be3f209df854b98738b8e8b3a77ad"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.cc",
+        "sha256": "4cbf8c741c40b4e63d475b89b6f309f9c24a45500c746bb7fc248371fcab6309"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.h",
+        "sha256": "622e738a7e56d976f59162569878ec2f97f90c93d4939e03bffa7afa51440c79"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.cc",
+        "sha256": "cd7899e086166a97f4c7d528a665d180d2543ae54c901e1cbcbecdab07af2c62"
+      },
+      {
+        "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.h",
+        "sha256": "7ee35eb7194873c1ee69a89cded3c49a3d2fb3bc10a09b84900686d00f230b3b"
+      },
+      {
+        "path": "features/workspace/native/chrome/common/extensions/api/breezer_private.idl",
+        "sha256": "56c0c2caddb728f19216fbe2abbe5749f8e7cb9cdae3392fb925d7ad36507d97"
+      },
+      {
+        "path": "script/apply_breezer_ai_ui.py",
+        "sha256": "46e6a197bd55c808d83277ac192722d30170f9e44f96fdc9447bd36cfdd4dbc0"
+      },
+      {
+        "path": "script/apply_breezer_workspace.py",
+        "sha256": "2a279f15c6527315f1846c087baf6a3b242120eee6b2c9315aa715b9df4eb635"
+      },
+      {
+        "path": "script/breezer_sidebar_frame.py",
+        "sha256": "999e392f41babee34e349caecb516e805a8d6145196619df5d205ea93559fc17"
+      }
+    ],
+    "unchangedWebInputs": {
+      "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "context-settings.js": "17969f2835e982c3be91f848c2d87019cf7f2a62610ce3fa6f175bf3937d2680",
+      "efficiency.html": "748ccd7559080172098fb07ea5cfd12f16923f3d43f27b045bba8a5e899675a8",
+      "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+      "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+      "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+      "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+      "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+      "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+      "onboarding.css": "793bf0c48f33d3600a682e925149cc3daa8416d60aad6063c6bd7ad70286c4cc",
+      "onboarding.js": "057ce114acfc5b4045322ec437c8ef4e3054f068f93e89159fa2c49b6016494a",
+      "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+      "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+      "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "research-sources.js": "b5df7a33ba95cdfb578516f5f63eeef28204a59f46b7dce15b7925ccef69b7b5",
+      "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+      "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+      "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+      "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+      "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
+      "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+      "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+      "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
+      "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
+      "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+      "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "whats-new.css": "de2c91c7eee5723a3a292f0db1828729ac95e580baac270a8d1f167ce47b9032",
+      "whats-new.html": "36a9a2762a0b7bc0791507014cdf8de3675ccf183dd4e797051afc63266695da",
+      "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+      "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "workspace.css": "371ceafdadc42abf88dfb6b7319487a73357e60a39d92c25dac84c9c3fb1352c",
+      "workspace.html": "bcbe13b731c99e0d722713a70ca98ed7e0aef1dc622578b81d371ab058ddc2be",
+      "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
+    },
+    "changedUnrenderedResources": [
+      "panel.css",
+      "panel.html",
+      "panel.js",
+      "translation.css"
+    ],
+    "capturedUiSourceHashes": {
+      "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "context-settings.js": "17969f2835e982c3be91f848c2d87019cf7f2a62610ce3fa6f175bf3937d2680",
+      "efficiency.html": "748ccd7559080172098fb07ea5cfd12f16923f3d43f27b045bba8a5e899675a8",
+      "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+      "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+      "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+      "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+      "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+      "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+      "onboarding.css": "793bf0c48f33d3600a682e925149cc3daa8416d60aad6063c6bd7ad70286c4cc",
+      "onboarding.js": "057ce114acfc5b4045322ec437c8ef4e3054f068f93e89159fa2c49b6016494a",
+      "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "panel.css": "89949160be5ab643f7a1494354317c08760254209929eb5dc6fcaeae11f6a103",
+      "panel.html": "629e5bd1f9079a6184af58be11273d350ab8a90662202f981c8d01e3b62c3b0b",
+      "panel.js": "34adcbe2fee3d0061677feb20bfc0941c0b451d80ae528d176da4345ceb19d41",
+      "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+      "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+      "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "research-sources.js": "b5df7a33ba95cdfb578516f5f63eeef28204a59f46b7dce15b7925ccef69b7b5",
+      "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+      "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+      "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+      "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+      "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
+      "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+      "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+      "translation.css": "4c02f21c8bd0bf7fb2c0c9a53a1fc33a364717f0d964e852778de5c96ad5c957",
+      "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
+      "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
+      "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+      "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "whats-new.css": "de2c91c7eee5723a3a292f0db1828729ac95e580baac270a8d1f167ce47b9032",
+      "whats-new.html": "36a9a2762a0b7bc0791507014cdf8de3675ccf183dd4e797051afc63266695da",
+      "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+      "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "workspace.css": "371ceafdadc42abf88dfb6b7319487a73357e60a39d92c25dac84c9c3fb1352c",
+      "workspace.html": "bcbe13b731c99e0d722713a70ca98ed7e0aef1dc622578b81d371ab058ddc2be",
+      "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
+    },
+    "candidateUiSourceHashes": {
+      "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "context-settings.js": "17969f2835e982c3be91f848c2d87019cf7f2a62610ce3fa6f175bf3937d2680",
+      "efficiency.html": "748ccd7559080172098fb07ea5cfd12f16923f3d43f27b045bba8a5e899675a8",
+      "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+      "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+      "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+      "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+      "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+      "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+      "onboarding.css": "793bf0c48f33d3600a682e925149cc3daa8416d60aad6063c6bd7ad70286c4cc",
+      "onboarding.js": "057ce114acfc5b4045322ec437c8ef4e3054f068f93e89159fa2c49b6016494a",
+      "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "panel.css": "d3e7eb0ce6b11f4b25d3c45955f7fb4c7552b5d6b37f2fd3df1de0aefd73ef9b",
+      "panel.html": "aa6cdd84d7b737baae75c0954739ef5e7ee3bdbaf2da11da2f700b0a643a837c",
+      "panel.js": "4e1140499f6da490c5a7017105733f9e2d818befd325b30f76a11b6fc18ec505",
+      "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+      "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+      "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "research-sources.js": "b5df7a33ba95cdfb578516f5f63eeef28204a59f46b7dce15b7925ccef69b7b5",
+      "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+      "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+      "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+      "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+      "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
+      "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+      "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+      "translation.css": "c419f42907f1c3d5e1e6050f05b6dcc0b4af18f91e4ed0ab0d9686c813f0d929",
+      "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
+      "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
+      "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+      "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "whats-new.css": "de2c91c7eee5723a3a292f0db1828729ac95e580baac270a8d1f167ce47b9032",
+      "whats-new.html": "36a9a2762a0b7bc0791507014cdf8de3675ccf183dd4e797051afc63266695da",
+      "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+      "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "workspace.css": "371ceafdadc42abf88dfb6b7319487a73357e60a39d92c25dac84c9c3fb1352c",
+      "workspace.html": "bcbe13b731c99e0d722713a70ca98ed7e0aef1dc622578b81d371ab058ddc2be",
+      "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
+    },
+    "normalRoot": "/tmp/breezer-ui-polish/round-19-final-native",
+    "reducedRoot": "/tmp/breezer-ui-polish/round-19-final-native-reduced",
+    "nativeWindows": 42,
+    "recordings": 2,
+    "nativeInputsMatch": true,
+    "renderedResourcesMatch": true,
+    "sourceEntryPoint": "workspace.html -> workspace.css + workspace.js; native appearance bridge and schema unchanged",
+    "freshAttemptFailure": "/tmp/breezer-ui-polish/round-20-native-capture-failure",
+    "screenLockedAtCheck": [
+      {
+        "CGSSessionScreenIsLocked": true,
+        "CGSSessionScreenLockedTime": 1793910545
+      }
+    ],
+    "verifiedAtUtc": "2026-11-05T21:44:22.167801+00:00",
+    "limitations": [
+      "No new native window capture succeeded for candidate20.",
+      "The captured bundle contains the earlier four standalone assistant/translation assets, which are outside the captured native surfaces.",
+      "Physical interaction, menus, restoration, physical auto-hide, translation native geometry/bridge and continuous pacing remain unverified."
+    ],
+    "renderedResourceClosure": {
+      "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "context-settings.js": "17969f2835e982c3be91f848c2d87019cf7f2a62610ce3fa6f175bf3937d2680",
+      "efficiency.html": "748ccd7559080172098fb07ea5cfd12f16923f3d43f27b045bba8a5e899675a8",
+      "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+      "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+      "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+      "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+      "onboarding.css": "793bf0c48f33d3600a682e925149cc3daa8416d60aad6063c6bd7ad70286c4cc",
+      "onboarding.js": "057ce114acfc5b4045322ec437c8ef4e3054f068f93e89159fa2c49b6016494a",
+      "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+      "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+      "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+      "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+      "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+      "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+      "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+      "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+      "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+      "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "whats-new.css": "de2c91c7eee5723a3a292f0db1828729ac95e580baac270a8d1f167ce47b9032",
+      "whats-new.html": "36a9a2762a0b7bc0791507014cdf8de3675ccf183dd4e797051afc63266695da",
+      "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+      "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "workspace.css": "371ceafdadc42abf88dfb6b7319487a73357e60a39d92c25dac84c9c3fb1352c",
+      "workspace.html": "bcbe13b731c99e0d722713a70ca98ed7e0aef1dc622578b81d371ab058ddc2be",
+      "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
+    },
+    "resourceClosureMethod": "Conservative traversal of every quoted local asset reference from workspace.html, including literal imports, dynamic imports, linked styles and image sources. All references are unchanged from the captured native bundle.",
+    "preparedCurrentAppLoadedSourceHashesVerified": true,
+    "currentRuntimeLoadedUiSourceHashes": {
+      "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "context-settings.js": "17969f2835e982c3be91f848c2d87019cf7f2a62610ce3fa6f175bf3937d2680",
+      "efficiency.html": "748ccd7559080172098fb07ea5cfd12f16923f3d43f27b045bba8a5e899675a8",
+      "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+      "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+      "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+      "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+      "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+      "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+      "onboarding.css": "793bf0c48f33d3600a682e925149cc3daa8416d60aad6063c6bd7ad70286c4cc",
+      "onboarding.js": "057ce114acfc5b4045322ec437c8ef4e3054f068f93e89159fa2c49b6016494a",
+      "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "panel.css": "d3e7eb0ce6b11f4b25d3c45955f7fb4c7552b5d6b37f2fd3df1de0aefd73ef9b",
+      "panel.html": "aa6cdd84d7b737baae75c0954739ef5e7ee3bdbaf2da11da2f700b0a643a837c",
+      "panel.js": "4e1140499f6da490c5a7017105733f9e2d818befd325b30f76a11b6fc18ec505",
+      "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+      "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+      "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "research-sources.js": "b5df7a33ba95cdfb578516f5f63eeef28204a59f46b7dce15b7925ccef69b7b5",
+      "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+      "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+      "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+      "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+      "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
+      "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+      "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+      "translation.css": "c419f42907f1c3d5e1e6050f05b6dcc0b4af18f91e4ed0ab0d9686c813f0d929",
+      "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
+      "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
+      "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+      "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "whats-new.css": "de2c91c7eee5723a3a292f0db1828729ac95e580baac270a8d1f167ce47b9032",
+      "whats-new.html": "36a9a2762a0b7bc0791507014cdf8de3675ccf183dd4e797051afc63266695da",
+      "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+      "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "workspace.css": "371ceafdadc42abf88dfb6b7319487a73357e60a39d92c25dac84c9c3fb1352c",
+      "workspace.html": "bcbe13b731c99e0d722713a70ca98ed7e0aef1dc622578b81d371ab058ddc2be",
+      "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
+    },
+    "currentNativeAttemptCleanup": {
+      "liveRecordedProcesses": [],
+      "fixturePortClosed": true,
+      "profileRemoved": true
+    }
+  },
+  "nativeHeaderDetails": 29,
+  "freshNativeImages": 0
 }
