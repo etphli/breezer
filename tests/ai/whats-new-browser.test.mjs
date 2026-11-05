@@ -143,10 +143,10 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       // Illustrations are hidden from assistive tech and not focusable.
       assert.equal(await page.$$eval('.plate', (plates) => plates.every((plate) => plate.getAttribute('aria-hidden') === 'true')), true);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-      // Main illustrations alternate; secondary fixes keep their diagrams in disclosures.
+      // Primary illustrations alternate; secondary notes keep a compact text column.
       assert.deepEqual(await page.$$eval('.feature', (rows) => rows.map((row) => {
-        const plate = row.querySelector('.plate').getBoundingClientRect(), copy = row.querySelector('.feature-copy').getBoundingClientRect();
-        return !plate.width ? 'compact' : plate.left < copy.left ? 'left' : 'right';
+        const plate = row.querySelector('.plate')?.getBoundingClientRect(), copy = row.querySelector('.feature-copy').getBoundingClientRect();
+        return !plate ? 'compact' : plate.left < copy.left ? 'left' : 'right';
       })), ['left', 'right', 'left', 'compact', 'compact', 'compact', 'left', 'right', 'left', 'right']);
       // Every drawing renders inside its plate.
       assert.equal(await page.$$eval('.plate .art', (arts) => arts.every((art) => {
@@ -180,9 +180,20 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.locator('.measurement-details > summary').click();
       await page.locator('.results-more > summary').click();
       const explanations = await page.locator('.feature-details > summary').all();
-      for (const summary of explanations) await summary.click();
+      for (const summary of explanations) {
+        const position = () => summary.evaluate(node => {
+          const row = node.closest('.feature');
+          return row?.classList.contains('feature-secondary') ? {
+            headingWidth: row.querySelector('h3').getBoundingClientRect().width,
+            summaryTop: node.getBoundingClientRect().top + scrollY,
+          } : null;
+        });
+        const before = await position();
+        await summary.click();
+        if (before) assert.deepEqual(await position(), before, 'technical notes open without rewrapping their heading or moving the disclosure');
+      }
       assert.equal(await page.locator('.feature-details[open]').count(), explanations.length);
-      assert.equal(await page.locator('.feature-secondary > .plate').evaluateAll(plates => plates.every(plate => plate.getBoundingClientRect().width > 200)), true, 'secondary diagrams appear with their explanations');
+      assert.equal(await page.locator('.feature-secondary > .plate').count(), 0, 'technical notes do not add a second illustration hierarchy');
       await captureLongPage(page, 'whats-new-expanded-desktop');
       await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-expanded.png`, animations: 'disabled' });
     });
@@ -257,8 +268,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
 
     await withPage(browser, base, { viewport: { width: 390, height: 844 } }, async (page) => {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true);
-      const stacked = await page.$$eval('.feature', (rows) => rows.map((row) => row.querySelector('.feature-copy').getBoundingClientRect().top > row.querySelector('.plate').getBoundingClientRect().bottom));
-      assert.deepEqual(stacked, [true, true, true, true, true, true, true, true, true, true], 'every feature stacks plate above text');
+      const stacked = await page.$$eval('.feature:not(.feature-secondary)', (rows) => rows.map((row) => row.querySelector('.feature-copy').getBoundingClientRect().top > row.querySelector('.plate').getBoundingClientRect().bottom));
+      assert.deepEqual(stacked, [true, true, true, true, true, true, true], 'every primary feature stacks plate above text');
       assert.equal(await page.$$eval('.plate, .pending, .feature-copy .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
       // Every comparison remains visible in the narrow card layout.
       await page.locator('.measurement-details > summary').click();

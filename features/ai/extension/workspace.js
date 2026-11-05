@@ -552,6 +552,7 @@ function updateRow(row, { title, tab, url, active, asleep, actionLabel, actionIc
   row.classList.toggle('asleep', Boolean(asleep));
   row.classList.toggle('loading', tab?.status === 'loading');
   row.classList.toggle('discarded', Boolean(tab?.discarded));
+  row.title = title;
   row.setAttribute('aria-selected', String(Boolean(selected)));
   row.setAttribute('aria-label', [title, asleep ? 'asleep' : '', tab?.audible ? 'playing audio' : ''].filter(Boolean).join(', '));
   const audible = Boolean(tab && (tab.audible || tab.mutedInfo?.muted));

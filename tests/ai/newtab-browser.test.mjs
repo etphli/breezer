@@ -189,6 +189,10 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       const lanes = await page.$$eval('.lane', (nodes) => nodes.map((node) => node.getBoundingClientRect().top));
       assert.ok(lanes[1] > lanes[0], 'lanes stack on narrow windows');
       await page.screenshot({ path: `${evidence}/newtab-narrow.png`, fullPage: true });
+      await page.getByRole('link', { name: 'To-dos', exact: true }).click();
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'lane-todos');
+      assert.ok((await page.locator('#lane-todos').boundingBox()).y >= 0, 'To-dos jump brings its heading into view');
+      await page.evaluate(() => { history.replaceState(null, '', location.pathname); scrollTo(0, 0); });
       const lastSite = page.locator('.site:not(.site-add) a').last();
       await lastSite.focus();
       const lastBox = await lastSite.boundingBox();

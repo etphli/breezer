@@ -234,11 +234,16 @@ test('makes no claim the measurements do not support', () => {
   assert.doesNotMatch(resultsText, /new in 1\.2[^.]*(?:new tab|relaunch)|1\.2 (?:makes|made) new tabs/i);
 });
 
-test('illustrates each feature with decorative inline SVG only', () => {
+test('illustrates primary features and keeps technical notes compact', () => {
   const features = [...html.matchAll(/<article class="feature[^"]*" aria-labelledby="([^"]+)">([\s\S]*?)<\/article>/g)];
   assert.deepEqual(features.map((m) => m[1]), ['f-setup', 'f-shortcuts', 'f-tasks', 'f-sidebar', 'f-helpers', 'f-storage', 'f-passkeys', 'f-research', 'f-translation', 'f-settings']);
   for (const [, id, body] of features) {
-    assert.match(body, /<figure class="plate plate-art" aria-hidden="true">\s*<svg class="art" viewBox="[\d ]+" focusable="false">/, id);
+    if (['f-sidebar', 'f-helpers', 'f-storage'].includes(id)) {
+      assert.doesNotMatch(body, /<figure/, id);
+      assert.match(body, /<details class="feature-details">/, id);
+    } else {
+      assert.match(body, /<figure class="plate plate-art" aria-hidden="true">\s*<svg class="art" viewBox="[\d ]+" focusable="false">/, id);
+    }
     assert.match(body, new RegExp(`<h3 id="${id}">[^<]+</h3>`));
   }
   // Heading IDs are unique across the page.

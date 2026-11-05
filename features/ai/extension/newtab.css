@@ -89,6 +89,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   border: 1px solid var(--line);
   font-size: 13px;
 }
+.settings-link { text-decoration: none; }
 .settings-link svg { width: 17px; height: 17px; }
 .settings-link:hover { color: var(--ink); background: var(--hover); }
 
@@ -169,6 +170,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   font-size: 12.5px;
   color: var(--muted);
 }
+.site-name.hostname { display: block; white-space: nowrap; text-overflow: ellipsis; }
 .site-add .site-name { max-width: none; overflow: visible; white-space: nowrap; text-align: center; font-size: 12px; }
 .sites:has(> .site-add:only-child) { margin-left: 0; }
 .site-add:only-child { width: max-content; flex: 0 0 auto; min-height: 0; }
@@ -277,6 +279,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   font-size: 13px;
   font-weight: 600;
 }
+.lane-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.lane-heading .lane-title { margin: 0; padding: 0; border: 0; }
+.todos-jump { display: none; color: var(--accent); font-size: 13px; text-underline-offset: 3px; }
+#lane-todos { scroll-margin-top: 16px; }
+#lane-todos:focus { outline: none; }
 .lane-count { margin-left: 4px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .items { list-style: none; margin: 0; padding: 0; display: grid; gap: 15px; }
@@ -343,7 +350,9 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 
 @media (max-width: 860px) {
   .lanes { grid-template-columns: minmax(0, 1fr); gap: 30px; }
-  .lane-title { margin-bottom: 12px; }
+  .lane-title, .lane-heading { margin-bottom: 12px; }
+  .lane-heading .lane-title { margin-bottom: 0; }
+  .lanes:has([data-list="todos"] .item) .todos-jump { display: inline; }
 }
 
 @media (max-width: 560px) {
@@ -367,8 +376,9 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 .site-remove { position: absolute; top: -5px; right: 0; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--raised); cursor: pointer; opacity: 0; font: inherit; }
 .site:hover .site-remove, .site:focus-within .site-remove { opacity: 1; }
 .site-remove:focus-visible, .shortcut-feedback button:focus-visible, .shortcut-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-.shortcut-feedback { display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 10px; min-height: 30px; margin-top: 10px; font-size: 12px; color: var(--muted); }
-.shortcut-feedback:has(#shortcut-status:empty):not(:has(button:not([hidden]))) { min-height: 0; margin-top: 0; }
+.shortcut-feedback { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 36px; margin-top: 4px; font-size: 12px; color: var(--muted); }
+#shortcut-status { min-width: 0; }
+.sky { padding-bottom: 0; }
 .shortcut-feedback button { border: 0; padding: 4px 7px; color: var(--accent); background: transparent; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .shortcut-menu { position: fixed; z-index: 100; padding: 5px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--raised); box-shadow: 0 5px 25px #0002; }
 .shortcut-menu button { display: block; padding: 10px 14px; border: 0; border-radius: 5px; color: inherit; background: transparent; font: inherit; cursor: pointer; }
@@ -409,7 +419,7 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
   .today { margin-bottom: 16px; text-align: center; }
   .sites > .site-add:only-child { grid-column: 1 / -1; justify-self: center; }
   .sky { padding-top: clamp(32px, 6vh, 48px); padding-bottom: 8px; }
-  .shortcut-feedback { min-height: 24px; margin-top: 4px; }
+  .sky { padding-bottom: 0; }
 }
 #refresh:disabled { opacity: .5; cursor: default; }
 

@@ -35,6 +35,7 @@
 }
 
 * { box-sizing: border-box; }
+a { color: var(--accent); text-underline-offset: 3px; }
 [hidden] { display: none !important; }
 
 body {
@@ -861,14 +862,15 @@ body {
   .story-table tbody th { width: 38%; }
 }
 @media (max-width: 560px) {
-  .story-table:not(.story-code-table) thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .story-table:not(.story-code-table) thead { display: block; position: sticky; top: 0; z-index: 1; background: var(--paper); }
+  .story-table:not(.story-code-table) thead tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .story-table:not(.story-code-table) thead th { display: flex; align-items: end; padding: 10px 0; text-align: left; font-size: .875rem; line-height: 1.4; }
+  .story-table:not(.story-code-table) thead th:first-child { display: none; }
   .story-table:not(.story-code-table) tbody { display: block; }
   .story-table:not(.story-code-table) tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; padding: 16px 0; border-bottom: 1px solid var(--plate-edge); }
   .story-table:not(.story-code-table) tbody th, .story-table:not(.story-code-table) tbody td { display: block; width: auto; padding: 0; border: 0; text-align: left; }
   .story-table:not(.story-code-table) tbody th { grid-column: 1 / -1; font-weight: 600; }
-  .story-table:not(.story-code-table) td::before { content: attr(data-label); display: block; min-height: 2.8em; margin-bottom: 4px; color: var(--muted); font-size: .8125rem; white-space: normal; line-height: 1.4; }
 }
-@media (max-width: 360px) { .story-table:not(.story-code-table) td::before { min-height: 34px; } }
 .benchmark-story-footer { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 0 40px; }
 .patch-copy > .patch-limit { padding: 0; margin-top: 18px; background: none; box-shadow: none; font-size: .875rem; line-height: 1.6; }
 .patch-lead > .plate { max-width: 340px; justify-self: center; padding: 8px; background: none; box-shadow: none; }
@@ -876,8 +878,6 @@ body {
 
 .benchmark-story-note code { overflow-wrap: anywhere; }
 
-.feature:has(> .feature-details[open]) .feature-copy > .feature-limit,
-.pending:has(.feature-details[open]) .pending-summary { display: none; }
 .patch-details { margin-top: 12px; }
 .patch-details > .notes { max-width: 76ch; margin-top: 18px; }
 .pending .feature-details { margin-top: 12px; padding-top: 10px; }
@@ -888,24 +888,11 @@ body {
 .page-index a:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 html { scroll-padding-top: 64px; }
 @media (max-width: 360px) { html { scroll-padding-top: 96px; } }
-.feature.feature-secondary { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 16px; }
-.feature.feature-secondary > .feature-copy { grid-area: 1 / 1 / auto / -1; max-width: 64ch; }
-.feature.feature-secondary > .plate { grid-area: 2 / 1; }
-.feature.feature-secondary > .feature-details { grid-area: 2 / 2; margin-top: 0; padding-top: 0; border-top: 0; }
-.feature.feature-secondary:not(:has(> .feature-details[open])) > .plate { display: none; }
-.feature.feature-secondary:not(:has(> .feature-details[open])) > .feature-details { grid-column: 1 / -1; }
-@media (min-width: 721px) {
-  .feature.feature-secondary:has(> .feature-details[open]) { grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); }
-  .feature.feature-secondary:has(> .feature-details[open]) > .plate { grid-area: 1 / 1; }
-  .feature.feature-secondary:has(> .feature-details[open]) > .feature-copy { grid-area: 1 / 2; }
-  .feature.feature-secondary:has(> .feature-details[open]) > .feature-details { grid-area: 2 / 1 / auto / -1; padding-top: 14px; border-top: 1px solid var(--plate-edge); }
-}
-.feature-details > p { max-width: 64ch; }
-@media (max-width: 720px) {
-  .feature.feature-secondary { grid-template-columns: 1fr; }
-  .feature.feature-secondary > .feature-details { grid-area: 3 / 1; }
-  .feature.feature-secondary:not(:has(> .feature-details[open])) > .feature-details { grid-row: 2; }
-}
+/* Secondary engineering notes keep one reading column in both states. */
+.feature.feature-secondary { display: block; }
+.feature.feature-secondary > .feature-copy, .feature.feature-secondary > .feature-details { max-width: 64ch; }
+.feature.feature-secondary > .feature-details { margin-top: 16px; padding-top: 0; border-top: 0; }
+.feature-details p { max-width: 64ch; }
 .features + .results { margin-top: 48px; }
 .results + .patch-notes { margin-top: 32px; padding-top: 12px; border-top: 0; }
 .verification-group { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--plate-edge); }

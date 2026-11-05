@@ -47,11 +47,11 @@
 
       <div id="organato-lists" class="lanes" hidden>
         <section class="lane lane-upcoming" aria-labelledby="lane-upcoming">
-          <h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3>
+          <div class="lane-heading"><h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3><a class="todos-jump" href="#lane-todos">To-dos</a></div>
           <ol class="items" data-list="upcoming"></ol>
         </section>
         <section class="lane lane-todos" aria-labelledby="lane-todos">
-          <h3 id="lane-todos" class="lane-title">To-dos <span class="lane-count" data-count="todos"></span></h3>
+          <h3 id="lane-todos" class="lane-title" tabindex="-1">To-dos <span class="lane-count" data-count="todos"></span></h3>
           <ol class="items" data-list="todos"></ol>
         </section>
       </div>

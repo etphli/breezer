@@ -148,7 +148,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 80,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -177,7 +177,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 80,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -294,29 +294,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 320,
-        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 320,
-        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 140,
+        "duration": 200,
         "easing": "ease",
         "endDelay": 0,
         "fill": "backwards",
@@ -327,7 +305,62 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 160,
+        "duration": 135.03629438386204,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 200,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 200,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 320,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 86.43496422468398,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 134.42765666160346,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
         "fill": "backwards",
@@ -405,7 +438,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 840,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -484,17 +517,6 @@
         "fill": "none",
         "iterationStart": 0,
         "iterations": 1
-      },
-      {
-        "name": "panel-backdrop-in",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 120,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "none",
-        "iterationStart": 0,
-        "iterations": 1
       }
     ],
     "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
@@ -512,7 +534,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 40,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -553,7 +575,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 840,
+    "videoFrameOriginMs": 880,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -611,7 +633,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 960,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -640,7 +662,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 280,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -669,7 +691,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 880,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -698,7 +720,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 1000,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -727,7 +749,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 920,
+    "videoFrameOriginMs": 960,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

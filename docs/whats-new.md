@@ -22,7 +22,7 @@ chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/whats-new.html
 
 Use [templates/whats-new-release.md](templates/whats-new-release.md) for the authoring template and checklist. The live HTML and CSS are the canonical visual template, so copy their structure rather than maintaining another full stylesheet.
 
-Keep each feature's heading and short introduction in `.feature-copy`, beside its illustration. Put optional `.feature-details` directly inside the `.feature` article, after the introduction and illustration. The disclosure spans both columns so expanded explanations have a readable line length without leaving a tall empty illustration column.
+Keep each primary feature's heading and short introduction in `.feature-copy`, beside its illustration. Use a single-column `.feature-secondary` for supporting technical notes; keep their heading, introduction and disclosure stable when expanded. Put optional `.feature-details` directly inside the `.feature` article, after the introduction and illustration. The disclosure spans both columns so expanded explanations have a readable line length without leaving a tall empty illustration column.
 
 For a new `1.x.0` edition, replace the previous edition's feature and patch content with the new release's illustrated feature rows. Keep the shell, version hooks, actions, accessibility and known-limitations section. Historical editions remain in Git tags and published release evidence. The stable URL stays the same; a new edition does not require another browser route.
 
@@ -36,7 +36,7 @@ Each patch has a `.patch-lead` row for its main illustration and related notes, 
 
 A patch may add a second `.patch-pair` and end with a `.patch-limit` block that states what keeps its normal behavior or what the change cannot promise.
 
-The 1.2.0 draft has ten illustrated rows. Its first six cover the setup guide, custom shortcuts, Organato task links, sidebar snapshot ordering, idle helpers and storage cleanup. Additional rows come from accepted merged features:
+The 1.2.0 draft has seven illustrated primary rows and three compact technical notes. Its first six entries cover the setup guide, custom shortcuts, Organato task links, sidebar snapshot ordering, idle helpers and storage cleanup. Additional rows come from accepted merged features:
 
 - PR #7 adds limited native passkey-management guidance and retains the Apple signing limitation. It does not announce Touch ID, Apple Passwords or complete platform enrollment.
 - PR #8 adds research across at most six explicitly selected, text-only page sources, separate from browser control. Citation quality depends on the model. Text exclusions are heuristic, not universal secret detection.

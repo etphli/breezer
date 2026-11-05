@@ -8,27 +8,33 @@ body.route-welcome { overflow: auto; background: var(--air); }
 .welcome {
   --ease-out: cubic-bezier(.2, .8, .2, 1);
   --ease-spring: cubic-bezier(.3, 1.35, .45, 1);
-  min-height: 100dvh;
+  height: 100dvh;
   max-width: 1180px;
   margin: 0 auto;
   padding: 28px 44px 32px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   /* Slide-in steps start off to the side; never let that scroll the page. */
   overflow-x: clip;
   transition: background-color 240ms ease, color 240ms ease;
 }
 
+#wl-skip { padding-right: 0; }
 .wl-top { display: flex; align-items: center; justify-content: space-between; }
 .wl-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }
 .wl-brand img { border-radius: 8px; }
 
 .wl-stage {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   display: grid;
   grid-template-columns: minmax(0, 460px) minmax(0, 1fr);
   gap: 64px;
   align-items: start;
-  padding: 32px 0;
+  padding: 32px 4px;
+  margin-inline: -4px;
 }
 
 /* ---------------------------------------------------------------- copy */
@@ -404,7 +410,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
 
 @media (max-width: 900px) {
   .welcome { padding: 20px 22px 24px; }
-  .wl-stage { grid-template-columns: 1fr; gap: 28px; padding: 20px 0; }
+  .wl-stage { grid-template-columns: 1fr; gap: 28px; padding: 20px 4px; }
   .mini { order: -1; max-width: 560px; width: 100%; justify-self: center; }
   .wl-copy { min-height: 0; }
   .wl-step h1 { font-size: 30px; line-height: 36px; }
@@ -412,7 +418,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
 @media (max-width: 560px) {
   .mini { width: 200px; max-width: 70%; max-height: none; }
   .mini-frame { width: 220%; height: 220%; scale: .454545; transform-origin: top left; }
-  .wl-stage { gap: 16px; padding: 12px 0; align-content: start; align-items: start; }
+  .wl-stage { gap: 16px; padding: 12px 4px; align-content: start; align-items: start; }
   .wl-choices, .wl-swatches { grid-template-columns: 1fr 1fr; }
   .wl-nav { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
   .wl-nav .wl-progress { justify-self: center; gap: 3px; }

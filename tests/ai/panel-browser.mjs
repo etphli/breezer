@@ -122,6 +122,13 @@ try {
   await openModelOptions();
   await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
   await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
+  assert.equal(await page.locator('#model-options').isVisible(), false, 'tuning has its own view');
+  assert.equal(await page.locator('#inference-model').innerText(), 'GPT-6.1 Sol');
+  assert.equal(await page.locator('.menu-note').isVisible(), false, 'Fast guidance replaces the generic allowance note');
+  assert.equal(await page.locator('.suggestions').isVisible(), false, 'no clipped starter text behind the menu');
+  await page.getByText('Back to models', { exact: true }).click();
+  assert.equal(await page.locator('#model-options').getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).isVisible(), true);
+  await openModelOptions();
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));

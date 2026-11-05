@@ -207,6 +207,7 @@ function siteTile(api, site) {
   }
   const name = el('span', 'site-name');
   name.textContent = site.title;
+  if (site.title.toLowerCase().replace(/^www\./, '') === new URL(site.url).hostname.replace(/^www\./, '')) name.classList.add('hostname');
   link.append(icon, name);
   const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
   remove.textContent = '×';

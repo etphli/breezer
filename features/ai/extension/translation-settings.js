@@ -30,7 +30,7 @@ export async function mountTranslationSettings({ container, api }) {
   provider.setAttribute('aria-describedby', providerHint.id);
   row('Provider API key', 'translation-key', key, 'Stored on this device. Switching providers clears the key field.');
   row('Saved API key', 'translation-clear-key', clear, 'Remove the key from this device.');
-  const guide = el('p', '', { class: 'section-note' });
+  const guide = el('p', '', { class: 'section-note setting-reference' });
   guide.append(el('a', 'LibreTranslate setup guide', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
   const details = el('details', '', { class: 'setting-details' });
   details.append(el('summary', 'Sharing and privacy'),

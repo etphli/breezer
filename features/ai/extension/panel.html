@@ -26,10 +26,10 @@
           <p id="welcome-status-text"></p>
           <details id="welcome-account-steps" class="account-options" hidden>
             <summary>Sign-in instructions</summary>
-            <p>Copy the command for one account.</p>
+            <p>Copy a sign-in command.</p>
             <div data-provider="codex"><span>Codex</span><code>codex login</code><button type="button" data-copy-command aria-label="Copy Codex sign-in command">Copy</button></div>
             <div data-provider="claude"><span>Claude</span><code>claude auth login</code><button type="button" data-copy-command aria-label="Copy Claude sign-in command">Copy</button></div>
-            <p>Run it in Terminal, then return and refresh.</p>
+            <p>Run it in Terminal, then refresh.</p>
           </details>
           <button type="button" id="welcome-action" class="welcome-action" hidden></button>
         </div>
@@ -53,7 +53,7 @@
           <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
           <span id="context-title">Current page</span><span id="context-action" class="context-action">Include</span><span id="context-check" aria-hidden="true">✓</span>
         </button>
-        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span></button>
+        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Control</span><span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span></button>
         <span id="context-hint" class="context-hint" data-state="shared">Page + screenshot</span>
       </div>
       <form id="composer" class="composer">
@@ -72,8 +72,9 @@
         <div class="menu-heading"><span>Your models</span><button type="button" id="refresh-models" class="text-button">Refresh</button></div>
         <div id="model-options"></div>
         <details id="inference-options" class="model-preferences">
-          <summary>Model options</summary>
+          <summary><span class="model-options-label">Model options</span><span class="model-back-label">Back to models</span></summary>
           <div class="model-settings">
+            <h3 id="inference-model" class="inference-model"></h3>
             <label class="setting-select" title="Reasoning effort">
               <span>Reasoning</span>
               <select id="reasoning-select" aria-label="Reasoning effort" disabled><option value="">Default</option></select>

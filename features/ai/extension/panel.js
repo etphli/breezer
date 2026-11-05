@@ -65,6 +65,7 @@ function selectedSettings(selected = selectedModel()) {
 }
 
 function renderSettings(selected, running) {
+  $('inference-model').textContent = selected ? selected.model.label || selected.model.id : '';
   const settings = selectedSettings(selected);
   const levels = selected?.model.reasoningEfforts || [];
   const reasoning = $('reasoning-select');
@@ -268,7 +269,10 @@ function acceptProviders(providers) {
 function setModelMenu(open, focus = false) {
   $('model-menu').hidden = !open;
   $('model-button').setAttribute('aria-expanded', String(open));
-  if (open) renderModels();
+  if (open) {
+    $('inference-options').open = false;
+    renderModels();
+  }
   if (open && focus) {
     const options = [...$('model-options').querySelectorAll('.model-option:not(:disabled)')];
     (options.find((item) => item.classList.contains('selected')) || options[0] || $('refresh-models')).focus();
@@ -364,7 +368,8 @@ function linkResearchCitations(body, sources) {
     for (const match of node.textContent.matchAll(/\[S(\d+)\]/g)) {
       const source = sources.find(source => source.sourceId === `S${match[1]}`);
       if (!source || !/^https?:\/\//.test(source.url)) continue;
-      parts.push(document.createTextNode(node.textContent.slice(start, match.index)));
+      const between = node.textContent.slice(start, match.index);
+      parts.push(document.createTextNode(parts.length && !between.trim() ? ', ' : between));
       const link = document.createElement('a');
       link.textContent = `Source ${match[1]}`; link.href = source.url;
       link.title = source.title || link.textContent;
@@ -709,7 +714,7 @@ $('new-chat').addEventListener('click', () => {
 $('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
 $('model-menu').addEventListener('keydown', (event) => {
   if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
-  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')];
+  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')].filter(button => button.checkVisibility());
   const index = options.indexOf(document.activeElement);
   if (index < 0) return;
   event.preventDefault();
@@ -752,7 +757,7 @@ document.addEventListener('click', async event => {
       feedback.setAttribute('role', 'status');
       button.parentElement.append(feedback);
     }
-    feedback.textContent = 'Command selected. Use your keyboard to copy it.';
+    feedback.textContent = 'Use your keyboard to copy.';
   }
 });
 $('close-account').addEventListener('click', () => $('account-dialog').close());

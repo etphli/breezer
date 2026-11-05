@@ -715,6 +715,9 @@ body.route-settings {
 .setting-group > * + * { border-top: 1px solid var(--set-rule); }
 .setting-field { display: block; padding: 14px 16px; font-weight: 500; }
 .setting-field .field-note { display: block; font-weight: 400; }
+.setting-actions > .field-note { margin: 0; }
+.setting-reference { margin-top: 16px; }
+.settings-section:has(> #space-list) > .section-note { margin-bottom: 20px; }
 .setting-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
 .setting-group .setting-actions { margin: 0; padding: 14px 16px; }
 .setting-group.panel .setting-actions { padding: 12px 0 0; }
@@ -1027,10 +1030,10 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   min-width: 0;
   height: 30px;
   padding: 0 8px;
-  margin-left: -8px;
-  border: 0;
+  margin-left: 0;
+  border: 1px solid var(--set-edge, var(--line));
   border-radius: 7px;
-  background: transparent;
+  background: var(--set-control, var(--air));
   font-weight: 500;
 }
 .space-name-input:hover { background: var(--hover); }

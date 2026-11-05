@@ -1,10 +1,10 @@
 {
-  "startedAt": "2026-11-05T16:54:23.853Z",
+  "startedAt": "2026-11-05T18:32:46.698Z",
   "sourceTreeState": "Per-file nativeInputs and loadedUiSourceHashes identify the exact captured sources. sourceHead records repository HEAD, which may precede uncommitted candidate files.",
-  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/Breezer.app",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/Breezer.app",
   "appVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
   "shellMetadataVersion": "1.2.0",
-  "sourceHead": "f380ec56680c171a57189ab244bfbf70d3871701",
+  "sourceHead": "5ef2c9ad6b11f2c6ccb02f1fd67f30686c37298b",
   "nativeRuntimeReportedCommit": null,
   "shellResourceReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
   "uiBuildProvenance": "Private UI verification build: retained Chromium 156 core, nine unchanged verified current native UI/resource units reused, and fifty current web UI resources repacked and signed. Not a full release rebuild or reproducible binary attestation.",
@@ -77,20 +77,20 @@
   ],
   "capturedAppPins": [
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/Breezer.app/Contents/MacOS/Breezer",
-      "sha256": "9be95a6d688905f6d29e260161e933801d6707517e8e312c7a59cd498fde511d"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/Breezer.app/Contents/MacOS/Breezer",
+      "sha256": "303cb697d481cdd7ce612cf5ec55d2584b128cfdcbe8c23675684b47416fa87f"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
-      "sha256": "7311eea09d1b47a78dd5a870cc019533483f737daf0fb4fcc978890863142769"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
+      "sha256": "cde8b7366b68fba347d98472c19f530ebb361efc04f931a1ddc1fb0b48ebe53d"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
       "sha256": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
     }
   ],
   "method": "ScreenCaptureKit current-process window",
-  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/capture-owned-cDhbyN/profile",
+  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/capture-owned-jkMYWm/profile",
   "fixtureOnly": true,
   "captures": [
     {
@@ -101,15 +101,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 102164
+        "windowId": 104172
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-start.png",
-      "pid": 53077,
+      "path": "/tmp/breezer-ui-polish/round-18-final-native-reduced/native-motion-start.png",
+      "pid": 55595,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "ef116ebf2060470db3c555b92e7e3777c4c77a9281a912988e9ae207b3cf80a4",
+      "sha256": "d7510d464b2af7f1d5a7e804ff8a1eda1ceac10b4427c7a15b239f2d76d35c71",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -136,7 +136,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -150,66 +150,7 @@
       "stableCaptures": 2
     }
   ],
-  "previousAttempts": [
-    {
-      "startedAt": "2026-11-05T16:53:15.017Z",
-      "finishedAt": "2026-11-05T16:53:23.569Z",
-      "status": "failed",
-      "error": "AssertionError [ERR_ASSERTION]: {\"blockedNativeHostLaunches\":2,\"details\":{\"code\":-3821,\"domain\":\"com.apple.ScreenCaptureKit.SCStreamErrorDomain\",\"message\":\"Stream was stopped by the system\",\"userInfo\":\"{\\n    NSLocalizedDescription = \\\"Stream was stopped by the system\\\";\\n}\",\"windowNumber\":102164},\"error\":\"Stream was stopped by the system\",\"ok\":false,\"pid\":53077,\"screenCaptureAccessGranted\":false,\"streamStopped\":true}\n\nfalse !== true\n\n    at request (file:///private/tmp/breezer-ui-round17final-native-capture.mjs:131:57)\n    at async file:///private/tmp/breezer-ui-round17final-native-capture.mjs:202:29",
-      "ownedProcesses": [
-        {
-          "type": "browser",
-          "id": 53077,
-          "cpuTime": 3.156807
-        },
-        {
-          "type": "renderer",
-          "id": 53116,
-          "cpuTime": 0.099617
-        },
-        {
-          "type": "renderer",
-          "id": 53114,
-          "cpuTime": 4.324881
-        },
-        {
-          "type": "renderer",
-          "id": 53110,
-          "cpuTime": 0.523924
-        },
-        {
-          "type": "renderer",
-          "id": 53086,
-          "cpuTime": 0.511165
-        },
-        {
-          "type": "renderer",
-          "id": 53113,
-          "cpuTime": 0.236868
-        },
-        {
-          "type": "GPU",
-          "id": 53082,
-          "cpuTime": 0.840153
-        },
-        {
-          "type": "network.mojom.NetworkService",
-          "id": 53083,
-          "cpuTime": 0.149342
-        },
-        {
-          "type": "storage.mojom.StorageService",
-          "id": 53084,
-          "cpuTime": 0.071799
-        }
-      ],
-      "cleanup": {
-        "liveRecordedProcesses": [],
-        "fixturePortClosed": true,
-        "profileRemoved": true
-      }
-    }
-  ],
+  "previousAttempts": [],
   "reducedMotionForced": true,
   "motionOnly": true,
   "reducedMotionMethod": "Chromium native animation switch plus renderer CSS preference. System accessibility settings are unchanged.",
@@ -229,16 +170,16 @@
     "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
     "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
     "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
-    "newtab.css": "b4c24fb8ab63d29f550ff98e10eb63dcd636952a5bfad6376e4c3455f3bc4fd9",
-    "newtab.html": "a2976038172be7ddac59a8e446d64166dd39e656f385855ebca50ec45a81164b",
-    "newtab.js": "f9848756245c4ebbc431f26840720a6ce2206002c1589d6152ffc236613e8ec0",
-    "onboarding.css": "bbfcc035acc6d205141164d4350eb123b5c8fc01813a7a39b5287c5534be9911",
-    "onboarding.js": "39de8c051adbf62bf0514b5ef34c3611f5c1b8d1f7603cf7498584decd2598aa",
+    "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+    "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+    "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+    "onboarding.css": "7f87e8ed5d6c85d74ae570ecba1a8813c5db81a9b964aca099c569c4c71782df",
+    "onboarding.js": "e6c4ea72a94a3b826d7a6f5e78b16c68edcb873d712df48ff7f942060ddbe5e4",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "4d4c90388ee4bfb4a4e834358a283a3b989a90711634e0a9b258ed8e52f94590",
-    "panel.html": "7a8f3ec1d69d1817f4a1c6ad160c4c84b47aaf5b7490180210cc26bd86906662",
-    "panel.js": "28ecc023cc04aa3df5e717332edf6061d5d492011d3d4cc118c90add5d7f2159",
+    "panel.css": "c1520978fc9015c73c6eb739c9dd3a22268c4b50090a5fcad9965b3668d6a041",
+    "panel.html": "74ac066487a5aec4b1f6bb89e9a0a1034f1ee01b7e6cfb9fa83b13d7fad0d689",
+    "panel.js": "de4f9834dea5b97634c8eca7481ffe06f106d60bb118a879876bdaabe70ea954",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -255,167 +196,167 @@
     "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
     "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
-    "translation-settings.js": "f7701079332789fc196ae0fa570a2ea0c31341d3e5a05152236d9448793e7d28",
-    "translation.css": "08f81500d216275c7ea5a3d2b136bbaee37f3869717411232b3171746d30be9c",
+    "translation-settings.js": "075baa36bf181b351ccc1d6e9805cbc944620b6c6506c07470e2f43c722545b6",
+    "translation.css": "4d1df80140ca16b67268ae97c72bc7466a86a8ddca3f7ff811a10f5cc4448c97",
     "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
     "translation.js": "228ae759ee27648ec9d74f6f49d94b437123ff62aa7b34186879d2990768d72e",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "1bd1e0b00da3ccd9efb7236db0b3262f6933b04c6b286339b91c1c54272ec3fe",
-    "whats-new.html": "21088f0d1283c9e0bf7fcda643b95fe09cd58be9772bb5dced7f93dfea543c19",
+    "whats-new.css": "a620eb63e00216b12719dda5cc3df7d4bd931f464361518d3608bfb11dd00360",
+    "whats-new.html": "dbb71280761124636fb8db7db48fddae795b309d7c3ae1131c48ea14a5ccdd32",
     "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
-    "workspace.css": "3a3ddc13aabf8f1ccfc7d3d7421780bbbf8f848307942299132cf09501a5d2f2",
+    "workspace.css": "6aceaf00172f3258c3d63549dc00ec84dedfd716b1d9e8ee0ba514183f2de126",
     "workspace.html": "d8809a65963c4b097c7c7a0ca7ea3a724e255c3893a5c73b95e4c16c6fc30ca0",
-    "workspace.js": "1aad4616e3643a200fbaedc7bab5d920d4c50f699b1d49e9ce41245ae0de9357"
+    "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
   },
   "pagePrefersReducedMotion": true,
   "ownedProcesses": [
     {
       "type": "browser",
-      "id": 53459,
-      "cpuTime": 2.275289
+      "id": 55595,
+      "cpuTime": 3.40372
     },
     {
       "type": "renderer",
-      "id": 53498,
-      "cpuTime": 0.094472
+      "id": 55708,
+      "cpuTime": 0.093543
     },
     {
       "type": "renderer",
-      "id": 53497,
-      "cpuTime": 0.189562
+      "id": 55664,
+      "cpuTime": 0.208459
     },
     {
       "type": "renderer",
-      "id": 53496,
-      "cpuTime": 0.272639
+      "id": 55663,
+      "cpuTime": 0.231326
     },
     {
       "type": "renderer",
-      "id": 53472,
-      "cpuTime": 0.446694
+      "id": 55661,
+      "cpuTime": 0.307273
     },
     {
       "type": "renderer",
-      "id": 53468,
-      "cpuTime": 0.248216
+      "id": 55658,
+      "cpuTime": 0.573104
     },
     {
       "type": "renderer",
-      "id": 53495,
-      "cpuTime": 0.216238
+      "id": 55662,
+      "cpuTime": 4.746659
     },
     {
       "type": "renderer",
-      "id": 53469,
-      "cpuTime": 0.154753
+      "id": 55644,
+      "cpuTime": 0.332053
     },
     {
       "type": "GPU",
-      "id": 53464,
-      "cpuTime": 0.706021
+      "id": 55636,
+      "cpuTime": 0.898905
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 53465,
-      "cpuTime": 0.138031
+      "id": 55637,
+      "cpuTime": 0.193341
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 53466,
-      "cpuTime": 0.069159
+      "id": 55641,
+      "cpuTime": 0.097095
     }
   ],
-  "browserPid": 53459,
+  "browserPid": 55595,
   "recording": {
     "start": {
       "blockedNativeHostLaunches": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/capture-owned-cDhbyN/native-tabs-toolbar-motion.mp4",
-      "pid": 53459,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/capture-owned-jkMYWm/native-tabs-toolbar-motion.mp4",
+      "pid": 55595,
       "recordingStarted": true,
       "screenCaptureAccessGranted": false
     },
     "actions": [
       {
         "name": "Select Field notes tab",
-        "at": "2026-11-05T16:54:27.256Z"
+        "at": "2026-11-05T18:32:57.482Z"
       },
       {
         "name": "Select Today tab",
-        "at": "2026-11-05T16:54:27.774Z"
+        "at": "2026-11-05T18:32:58.009Z"
       },
       {
         "name": "Close Reading list tab",
-        "at": "2026-11-05T16:54:28.292Z"
+        "at": "2026-11-05T18:32:58.534Z"
       },
       {
         "name": "Enable centered, minimal address",
-        "at": "2026-11-05T16:54:28.803Z"
+        "at": "2026-11-05T18:32:59.080Z"
       }
     ],
     "finish": {
       "blockedNativeHostLaunches": 2,
-      "bytes": 71874,
+      "bytes": 78053,
       "durationSeconds": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round17final/capture-owned-cDhbyN/native-tabs-toolbar-motion.mp4",
-      "pid": 53459,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round18final/capture-owned-jkMYWm/native-tabs-toolbar-motion.mp4",
+      "pid": 55595,
       "recordingFinished": true,
       "screenCaptureAccessGranted": false
     },
-    "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-tabs-toolbar-motion.mp4",
-    "sha256": "7ef930dc16e051dd74ba34c5d7db1b6825ae7904a7937004a903b8d8025014d4"
+    "path": "/tmp/breezer-ui-polish/round-18-final-native-reduced/native-tabs-toolbar-motion.mp4",
+    "sha256": "0e2042c85a4865dc544b1b4ac3f92cc32261cf10d890fe09e41e4787d785526a"
   },
   "status": "passed",
   "finalOwnedProcesses": [
     {
       "type": "browser",
-      "id": 53459,
-      "cpuTime": 3.103352
+      "id": 55595,
+      "cpuTime": 4.16615
     },
     {
       "type": "renderer",
-      "id": 53498,
-      "cpuTime": 0.09588
+      "id": 55708,
+      "cpuTime": 0.12449
     },
     {
       "type": "renderer",
-      "id": 53496,
-      "cpuTime": 3.772776
+      "id": 55663,
+      "cpuTime": 0.274443
     },
     {
       "type": "renderer",
-      "id": 53472,
-      "cpuTime": 0.507018
+      "id": 55661,
+      "cpuTime": 0.569507
     },
     {
       "type": "renderer",
-      "id": 53468,
-      "cpuTime": 0.299845
+      "id": 55658,
+      "cpuTime": 0.658995
     },
     {
       "type": "renderer",
-      "id": 53495,
-      "cpuTime": 0.276077
+      "id": 55662,
+      "cpuTime": 5.005105
     },
     {
       "type": "GPU",
-      "id": 53464,
-      "cpuTime": 0.816169
+      "id": 55636,
+      "cpuTime": 1.115496
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 53465,
-      "cpuTime": 0.145732
+      "id": 55637,
+      "cpuTime": 0.207995
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 53466,
-      "cpuTime": 0.069913
+      "id": 55641,
+      "cpuTime": 0.098055
     }
   ],
   "cleanup": {
@@ -425,5 +366,5 @@
   },
   "capturedAppPinsUnchanged": true,
   "installedPinsUnchanged": true,
-  "finishedAt": "2026-11-05T16:54:32.135Z"
+  "finishedAt": "2026-11-05T18:33:01.510Z"
 }

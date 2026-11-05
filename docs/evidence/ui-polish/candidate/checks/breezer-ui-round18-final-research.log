@@ -1,0 +1,2 @@
+PASS: shipped picker keyboard selection, max-six limit, loading state, chips/removal/clear, precise sharing hint, two origins, no active-page grant/screenshot/control, truncation, partial failure, cancellation/late-result rejection, navigation revocation, real fixed-script extraction/redaction. Native API transport and paid providers remain unverified.
+Screenshots: /tmp/breezer-ui-polish/round-18-final-research/research-{selected-tabs,picker,partial-failure}.png

@@ -26,7 +26,7 @@ Use with [the code map and page contract](../whats-new.md). Edit `features/ai/ex
 </article>
 ```
 
-Keep optional technical disclosures directly inside `.feature`, after `.feature-copy`, so expanded text can use the full row. Omit the disclosure when the description is sufficient.
+Keep optional technical disclosures directly inside `.feature`, after `.feature-copy`, so expanded text can use the full row. Omit the disclosure when the description is sufficient. Supporting technical notes may use `.feature.feature-secondary` without an illustration. Keep their heading, introduction and disclosure in one stable column. Opening a disclosure must not rewrap the introduction or move its control.
 
 ## Patch in the same `1.x` edition
 

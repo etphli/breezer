@@ -1,11 +1,11 @@
 {
-  "round": 17,
+  "round": 18,
   "suiteTests": 549,
   "uniquePassingChecks": 547,
   "unresolvedFailures": 0,
   "skipped": 2,
   "method": "One uninterrupted complete Node suite, then assistant/research walkthroughs, focused narrow-field geometry and private native current-UI capture.",
-  "fullLog": "/tmp/breezer-ui-round17-full-final-4.log",
+  "fullLog": "/tmp/breezer-ui-round18-full-final-2.log",
   "matrixCaptures": 490,
   "sourceFiles": 50,
   "newlyCompiledNativeUnits": 0,
@@ -20,13 +20,13 @@
   "privateCompiledUiUnits": 9,
   "nativeLoadedSourceFiles": 50,
   "nativeProfileIconMinimumContrast": 8.838213838897685,
-  "beforeAfterPairs": 20,
+  "beforeAfterPairs": 14,
   "accountConnectionDialogs": 4,
   "selectArrowChecks": 56,
   "compactLayoutCases": 72,
   "completeEncodedNativeFrameCounts": [
-    45,
-    37
+    41,
+    71
   ],
   "dialogMotionModeCases": 6,
   "nativePlusVisibleSamples": 16,
@@ -47,117 +47,117 @@
   "nativeActivationRaceProof": {
     "samples": [
       {
-        "time": 0.7999999523162842,
+        "time": 10,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 15.799999952316284,
+        "time": 27.700000047683716,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 34.19999980926514,
+        "time": 44.30000019073486,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 48.799999952316284,
+        "time": 59.10000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 67.59999990463257,
+        "time": 77.70000004768372,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 84.09999990463257,
+        "time": 94.30000019073486,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 100.19999980926514,
+        "time": 110.30000019073486,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 117.5,
+        "time": 127.70000004768372,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 134.09999990463257,
+        "time": 142.5,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 149.29999995231628,
+        "time": 159.40000009536743,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 167.5,
+        "time": 177.80000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 183.19999980926514,
+        "time": 193.70000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 199.59999990463257,
+        "time": 210.90000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 217.59999990463257,
+        "time": 226.20000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 234.09999990463257,
+        "time": 244.40000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 250.79999995231628,
+        "time": 260.40000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 265.7999999523163,
+        "time": 277.80000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 283.39999985694885,
+        "time": 292.60000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 300.89999985694885,
+        "time": 310.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 317.5,
+        "time": 326.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 334.2999999523163,
+        "time": 343.90000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 350.89999985694885,
+        "time": 359.80000019073486,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 366.39999985694885,
+        "time": 377.7000000476837,
         "space": "Personal",
         "selected": 1
       }

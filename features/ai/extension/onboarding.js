@@ -390,6 +390,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
 
   function render(direction = 0, { focus = true } = {}) {
     const step = STEPS[index];
+    root.querySelector('.wl-stage').scrollTop = 0;
     for (const section of root.querySelectorAll('.wl-step')) section.hidden = section.dataset.step !== step;
     const section = root.querySelector(`.wl-step[data-step="${step}"]`);
     if (direction) replay(section, direction > 0 ? 'wl-enter-next' : 'wl-enter-prev');

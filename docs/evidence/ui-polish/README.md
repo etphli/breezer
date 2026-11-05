@@ -103,6 +103,9 @@ are retained in the adjacent Markdown files.
 | Breezer, candidate 12 interrupted cohort | 8.5 | 8.5 | No score: five-hour quota |
 | Breezer, candidate 13, two Sol Fast by request | 8.5 | 8.5 | Excluded by user |
 | Breezer, candidate 14 complete council | 8.8 | 8.9 | 8.5 |
+| Breezer, candidate 15 complete council | 8.8 | 8.8 | 8.7 |
+| Breezer, candidate 16 interrupted cohort | 8.9 | 9.0 | 8.3, later resume |
+| Breezer, candidate 17 complete council | 9.0 | 9.0 | 8.9 |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -322,3 +325,23 @@ unchanged current native units and all 50 current web resources. All 45 normal a
 One system-stopped recording is retained separately; its successful retry is used.
 Twenty annotated comparisons show the changes. Physical interaction and frame
 pacing remain unverified; this is not a release rebuild. PR #17 stays unpushed.
+
+Round 17 returned 9.0, 9.0 and 8.9. Actual starts were 1.145 seconds apart, with
+all three running together for 630.632 seconds. The reviewers were satisfied with
+the direction, but the target remains unmet. Their shared findings concern model
+menu density, awkward shortcut labels, detached guidance and long explanations.
+The full reports are retained in `formal-round-17-1.md` through `-3.md`.
+
+Candidate 18 keeps technical notes compact, separates model selection from tuning,
+labels browser control, and provides a narrow-screen jump to To-dos. Shortcut
+feedback and expanded notes keep their neighboring content stable. Setup navigation
+stays visible in short windows, account commands keep their Copy width, and editable
+space names have the same field treatment in both modes. Narrow reference tables
+share comparator headings instead of repeating them in every row. The complete suite passed
+547 checks with zero failures and two skips, followed by both UI walkthroughs.
+All 490 matrix captures match the fifty current source files. The 38 translation
+captures fit, and all six reduced-motion checks pass. Forty-one native windows
+and two recordings retain every encoded sample, 41 normal and 71 reduced.
+Fourteen actual annotated comparisons were shown before review. The frozen pack
+contains 1,220 evidence files. GPT-6.1 Sol wrote these changes; no reviewer has
+scored candidate 18. Physical interaction and frame pacing remain unverified.

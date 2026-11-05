@@ -25,11 +25,13 @@ button:disabled { opacity: .5; cursor: default; }
 @media (forced-colors: active) { .check input { appearance: auto; } .check input::before { content: none; } }
 .consent-choice { margin: 0; font-weight: 500; }
 .consent-note { display: block; margin-top: 4px; font-weight: 400; }
-.automatic-choice { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+.automatic-choice { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--ink); font-size: 14px; }
 .automatic-choice { flex-direction: row-reverse; justify-content: space-between; align-items: center; gap: 18px; }
 #dynamic { width: 32px; height: 18px; margin: 0; padding: 1.5px; display: block; border-radius: 10px; }
 #dynamic::before { content: ""; display: block; width: 12px; height: 12px; margin: 0; border: 0; border-radius: 50%; background: var(--muted); transform: none; }
-#dynamic:checked::before { background: var(--raised); transform: translateX(14px); }
+#dynamic:checked { background: var(--accent); border-color: var(--accent); }
+#dynamic:checked::before { background: var(--air); transform: translateX(14px); }
+:root[data-scheme="dark"] .languages select { border-color: color-mix(in srgb, var(--ink) 36%, var(--raised)); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .actions button { min-height: 40px; }
 .actions .primary { flex: 1; }
