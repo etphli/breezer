@@ -58,6 +58,8 @@ try {
     await page.locator('#control-tip').waitFor({ state: 'visible' });
     const tip = await page.locator('#control-tip').boundingBox();
     assert.ok(tip.x >= 0 && tip.x + tip.width <= width && tip.y >= 0, 'Control explanation stays in the panel');
+    const composer = await page.locator('.compose-area').boundingBox();
+    assert.ok(tip.y + tip.height <= composer.y, 'Control explanation leaves the composer and sharing status uncovered');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
     await page.mouse.move(1, 1);
   }

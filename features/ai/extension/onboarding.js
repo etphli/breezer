@@ -244,6 +244,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       button.textContent = organatoConnected ? 'Update connection' : 'Connect';
       button.classList.toggle('primary', !organatoConnected);
       off.hidden = !organatoEnabled;
+      updateNavigation();
     };
     const connect = () => {
       if (port) return port;
@@ -374,6 +375,14 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     element.classList.add(className);
   }
 
+  function updateNavigation() {
+    const step = STEPS[index];
+    const lastTip = slide === tourSlides(appearance.layout).length - 1;
+    $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Not now'
+      : step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
+    $('wl-skip').textContent = step === 'tour' ? 'Skip tour' : 'Skip setup';
+  }
+
   function render(direction = 0, { focus = true } = {}) {
     const step = STEPS[index];
     for (const section of root.querySelectorAll('.wl-step')) section.hidden = section.dataset.step !== step;
@@ -389,8 +398,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       else item.removeAttribute('aria-current');
     }
     $('wl-back').hidden = index === 0;
-    const slides = tourSlides(appearance.layout);
-    $('wl-next').textContent = step === 'tour' && slide < slides.length - 1 ? 'Next' : NEXT_LABELS[step] ?? 'Continue';
+    updateNavigation();
     $('wl-skip').hidden = step === 'done';
     if (focus) (step === 'you' ? nameInput : section.querySelector('h1')).focus({ preventScroll: true });
     if (!setup.completed && setup.step !== step) {
@@ -441,7 +449,10 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
 
   $('wl-next').addEventListener('click', () => void next());
   $('wl-back').addEventListener('click', back);
-  $('wl-skip').addEventListener('click', () => void finish({ skipped: true }));
+  $('wl-skip').addEventListener('click', () => {
+    if (STEPS[index] === 'tour') { index = STEPS.indexOf('done'); render(1); }
+    else void finish({ skipped: true });
+  });
 
   renderAppearance();
   root.hidden = false;

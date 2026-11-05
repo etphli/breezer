@@ -193,12 +193,14 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     // Organato: optional; a key goes to the background helper, never into storage.
     assert.equal(await heading(), 'Connect Organato?');
+    assert.equal(await next.innerText(), 'Not now');
     await pause(700);
     await page.getByRole('button', { name: 'Connect' }).click();
     assert.match(await page.locator('#wl-organato-status').innerText(), /Paste your API key/);
     await page.locator('#wl-organato-key').pressSequentially('org_demo_key', { delay: videoDir ? 70 : 0 });
     await page.keyboard.press('Enter');
     await page.locator('#wl-organato-status', { hasText: 'Organato is connected' }).waitFor();
+    assert.equal(await next.innerText(), 'Continue');
     const sent = await page.evaluate(() => fx.ports['breezer-organato-settings'].sent);
     assert.deepEqual(sent.map((message) => message.type), ['view', 'configure']);
     assert.deepEqual(sent[1].settings, { key: 'org_demo_key' });
@@ -238,17 +240,22 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.deepEqual(await page.evaluate(() => fx.local['settings.onboarding.v1']), { dismissed: true });
     await context.close();
 
-    // Top tabs get the top-tab tour; Skip records a skip and leaves the import card alone.
+    // Skipping the tour keeps the completed setup choices and opens their summary.
     {
       const { context, page } = await open({ reducedMotion: 'reduce', layout: 'top' });
       for (let at = 0; at < 6; at += 1) await page.locator('#wl-next').click();
       assert.equal(await page.locator('#wl-h-tour').innerText(), 'Your tabs stay across the top');
       assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tour · 1 of 3');
       assert.equal(await page.locator('.wl-step:not([hidden])').evaluate((node) => getComputedStyle(node).animationName), 'none');
+      assert.equal(await page.locator('#wl-skip').innerText(), 'Skip tour');
       await page.locator('#wl-skip').click();
+      assert.equal(await page.locator('.wl-step[data-step="done"]').isVisible(), true);
+      assert.equal(await page.evaluate(() => fx.updated.length), 0);
+      await shot(page, '8-skip-tour');
+      await page.locator('#wl-next').click();
       await page.waitForFunction(() => fx.updated.length === 1);
-      assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'done', completed: true, skipped: true });
-      assert.equal(await page.evaluate(() => fx.local['settings.onboarding.v1']), undefined);
+      assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'done', completed: true, skipped: false });
+      assert.deepEqual(await page.evaluate(() => fx.local['settings.onboarding.v1']), { dismissed: true });
       await context.close();
     }
 

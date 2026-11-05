@@ -1149,6 +1149,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 }
 .context-settings table { width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 12px; }
 .context-settings caption { text-align: start; margin-bottom: 8px; font-weight: 600; }
+.context-settings.settings-section { margin-bottom: 24px; }
 .context-settings th, .context-settings td { text-align: start; padding: 8px 4px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .context-settings td:first-child { max-width: 32ch; }
 .context-settings th { font-weight: 500; }

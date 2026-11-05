@@ -1,0 +1,64 @@
+[
+  {
+    "file": "research-picker.png",
+    "headings": 1,
+    "dialog": {
+      "x": 16,
+      "y": 128,
+      "width": 368,
+      "height": 594,
+      "top": 128,
+      "right": 384,
+      "bottom": 722,
+      "left": 16
+    },
+    "button": {
+      "x": 303.625,
+      "y": 148,
+      "width": 60.375,
+      "height": 28,
+      "top": 148,
+      "right": 364,
+      "bottom": 176,
+      "left": 303.625
+    },
+    "buttonColor": "rgb(35, 134, 107)",
+    "viewport": {
+      "width": 400,
+      "height": 850
+    },
+    "stableCaptures": 2,
+    "donePaintMatches": true
+  },
+  {
+    "file": "research-picker-narrow.png",
+    "headings": 1,
+    "dialog": {
+      "x": 16,
+      "y": 55.25,
+      "width": 288,
+      "height": 529.5,
+      "top": 55.25,
+      "right": 304,
+      "bottom": 584.75,
+      "left": 16
+    },
+    "button": {
+      "x": 223.625,
+      "y": 75.25,
+      "width": 60.375,
+      "height": 28,
+      "top": 75.25,
+      "right": 284,
+      "bottom": 103.25,
+      "left": 223.625
+    },
+    "buttonColor": "rgb(35, 134, 107)",
+    "viewport": {
+      "width": 320,
+      "height": 640
+    },
+    "stableCaptures": 2,
+    "donePaintMatches": true
+  }
+]

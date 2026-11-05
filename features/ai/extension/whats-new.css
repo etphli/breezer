@@ -202,7 +202,7 @@ body {
 
 .features {
   display: grid;
-  gap: clamp(32px, 4vw, 44px);
+  gap: clamp(28px, 3.5vw, 40px);
   margin-top: clamp(48px, 6vw, 72px);
 }
 
@@ -220,8 +220,8 @@ body {
 .feature > .feature-details .notes { margin-top: 18px; }
 .feature > .feature-details .notes li { max-width: 58ch; }
 .feature > .feature-details .notes li + li { border-top: 0; padding-top: 0; }
-.feature .art .lift { filter: drop-shadow(0 2px 4px rgb(92 70 30 / .12)); }
-.feature .art .lift-strong { filter: drop-shadow(0 4px 6px rgb(20 30 30 / .18)); }
+.feature .art .lift { filter: drop-shadow(0 1px 2px rgb(92 70 30 / .07)); }
+.feature .art .lift-strong { filter: drop-shadow(0 2px 4px rgb(20 30 30 / .1)); }
 
 .feature-copy h3 {
   margin: 0 0 10px;
@@ -454,8 +454,8 @@ body {
 .art .fade-2 { opacity: 0.65; }
 /* 1.1.3 menus: a tight, darker contact shadow rather than a pale halo. */
 .art .menu-shadow { filter: drop-shadow(0 1px 1px rgb(20 30 30 / 0.22)) drop-shadow(0 4px 6px rgb(20 30 30 / 0.2)); }
-.art .lift { filter: drop-shadow(0 6px 10px rgb(92 70 30 / 0.16)); }
-.art .lift-strong { filter: drop-shadow(0 14px 18px rgb(20 30 30 / 0.35)); }
+.art .lift { filter: drop-shadow(0 2px 4px rgb(92 70 30 / .08)); }
+.art .lift-strong { filter: drop-shadow(0 4px 6px rgb(20 30 30 / .14)); }
 .art .on-accent { fill: #fbf7ee; }
 .art .on-toast { fill: var(--mint); }
 .art .quiet { fill: var(--muted); font-weight: 500; }
@@ -863,8 +863,9 @@ body {
   .story-table:not(.story-code-table) tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; padding: 16px 0; border-bottom: 1px solid var(--plate-edge); }
   .story-table:not(.story-code-table) tbody th, .story-table:not(.story-code-table) tbody td { display: block; width: auto; padding: 0; border: 0; text-align: left; }
   .story-table:not(.story-code-table) tbody th { grid-column: 1 / -1; font-weight: 600; }
-  .story-table:not(.story-code-table) td::before { content: attr(data-label); display: block; min-height: 34px; margin-bottom: 4px; color: var(--muted); font-size: .75rem; white-space: normal; line-height: 1.4; }
+  .story-table:not(.story-code-table) td::before { content: attr(data-label); display: block; margin-bottom: 4px; color: var(--muted); font-size: .75rem; white-space: normal; line-height: 1.4; }
 }
+@media (max-width: 360px) { .story-table:not(.story-code-table) td::before { min-height: 34px; } }
 .benchmark-story-footer { padding: 0 0 40px; }
 .patch-copy > .patch-limit { padding: 0; margin-top: 18px; background: none; box-shadow: none; font-size: .875rem; line-height: 1.6; }
 .patch-lead > .plate { max-width: 340px; justify-self: center; padding: 8px; background: none; box-shadow: none; }

@@ -159,8 +159,8 @@ test('leads with selected measured wins, each naming its comparator and workload
   assert.deepEqual(headings, [
     'Measured against Chrome and the previous Breezer',
     'New in this build',
-    'First local page after opening tabs: 63.5% less time than the previous Breezer',
-    'Saved-tab records: restoring 1,000 took 2.90 ms instead of 189.96 ms',
+    'First local page after tab exercises',
+    'Restoring saved-tab records',
     'Still ahead of Chrome, as before',
     'New tab: 50.3% less time than Chrome',
     'Relaunch: 19.5% less time than Chrome',
@@ -168,7 +168,7 @@ test('leads with selected measured wins, each naming its comparator and workload
   const more = highlights.slice(highlights.indexOf('<details class="results-more">'));
   assert.match(more, /^<details class="results-more">\s*<summary>More browser measurements<\/summary>/);
   assert.doesNotMatch(more, /<details[^>]*\sopen/);
-  assert.ok(highlights.indexOf('Saved-tab records:') < highlights.indexOf('<details class="results-more">'));
+  assert.ok(highlights.indexOf('Restoring saved-tab records') < highlights.indexOf('<details class="results-more">'));
   assert.ok(more.includes('Still ahead of Chrome, as before'));
   // Leads over Chrome are attributed to the earlier Breezer, not to 1.2.
   assert.match(hero, /previous Breezer measured 99\.2\s?ms, so this lead isn’t new in 1\.2/);

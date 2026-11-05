@@ -375,9 +375,9 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 560px) {
   .sites { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sites { row-gap: 4px; }
-  .site { min-height: 80px; }
+  .site { min-height: 72px; }
   .site-icon { width: 40px; height: 40px; border-radius: 11px; }
-  .site-link { gap: 5px; padding-block: 8px 6px; }
+  .site-link { gap: 4px; padding-block: 6px 4px; }
   .today { margin-bottom: 16px; }
   .sky { padding-top: clamp(32px, 6vh, 48px); padding-bottom: 8px; }
   .shortcut-feedback { min-height: 24px; margin-top: 4px; }

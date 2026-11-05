@@ -646,7 +646,6 @@ h1 {
 }
 
 .control-toggle {
-  position: relative;
   justify-content: center;
   width: 30px;
   height: 30px;
@@ -669,7 +668,7 @@ h1 {
   background: var(--tint);
   color: var(--accent-ink);
 }
-.control-tip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 6; width: 210px; padding: 8px 10px; border-radius: 7px; background: var(--ink); color: var(--canvas); font-size: 12px; line-height: 1.4; font-weight: 400; text-align: left; white-space: normal; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 100ms ease, visibility 0s; }
+.control-tip { position: absolute; bottom: calc(100% + 8px); left: 8px; z-index: 6; width: 210px; max-width: calc(100% - 16px); padding: 8px 10px; border-radius: 7px; background: var(--ink); color: var(--canvas); font-size: 12px; line-height: 1.4; font-weight: 400; text-align: left; white-space: normal; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 100ms ease, visibility 0s; }
 .control-toggle:not([data-tip-dismissed]):is(:hover, :focus-visible) .control-tip { opacity: 1; visibility: visible; transition-delay: 300ms; }
 .control-toggle:not([data-tip-dismissed]):focus-visible .control-tip { transition-delay: 0s; }
 

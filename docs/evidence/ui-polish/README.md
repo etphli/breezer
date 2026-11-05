@@ -94,6 +94,7 @@ are retained in the adjacent Markdown files.
 | Breezer, round 7 attempt | 8.5 | 8.3 | No score: API rate limit |
 | Breezer, round 8 attempt | 8.4 | 8.5 | No score: account limit |
 | Breezer, candidate 9 complete council | 8.6 | 8.7 | 8.8 |
+| Breezer, candidate 10 attempt | 8.5 | 8.5 | No score: account limit |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -122,4 +123,8 @@ Attempt 8 did not achieve concurrent execution: wait-mode delegation calls were 
 
 Candidate 9 completed the requested concurrent method. Its three runs started at 23:33:00.990, 23:33:01.281 and 23:33:01.348 UTC on 4 November 2026, a spread of 358ms, and all three overlapped for more than eight minutes. All reviewers were satisfied with the observed UI, with scores of 8.6, 8.7 and 8.8. These remain below the user's requested 9.5 threshold. There have been three complete council passes; the candidate numbers retain the intervening incomplete attempts.
 
-Candidate 10 refines translation consent and recovery, selected custom colors, assistant focus and startup state, setup action hierarchy and motion, and editorial reading rhythm. Sixteen annotated before/after pairs are retained in `candidate/comparisons/candidate-10-*.png`. The fresh complete run passed 544 checks with zero failures and two explicit skips, followed by the assistant and research walkthroughs. All 490 matrix captures match the current 50-file UI source fingerprint. All 36 translation captures passed stable-image and geometry guards, and all six reduced-motion assertions passed. The next independent council is pending; no score or completion is claimed.
+Candidate 10 refines translation consent and recovery, selected custom colors, assistant focus and startup state, setup action hierarchy and motion, and editorial reading rhythm. Sixteen annotated before/after pairs are retained in `candidate/comparisons/candidate-10-*.png`. The fresh complete run passed 544 checks with zero failures and two explicit skips, followed by the assistant and research walkthroughs. All 490 matrix captures match the current 50-file UI source fingerprint. All 36 translation captures passed stable-image and geometry guards, and all six reduced-motion assertions passed. The two Sol reviews returned 8.5 each; Opus reached its five-hour account limit and returned no score. This candidate is an incomplete council attempt and remains below the requested threshold. Both Sol reviewers found the narrow research-picker image corrupted; it cannot establish that state’s usability.
+
+Candidate 10 starts were 421ms apart, with all three overlapping for 430.7 seconds before the Opus limit. There are still three complete council passes. The next candidate must resolve the narrow picker evidence before review.
+
+Candidate 11 adds a picker capture guard that rejects the recorded corrupt image, places the control tooltip above the composer, clarifies optional Organato and tour actions, tightens narrow layouts and reduces illustration weight. Ten annotated before/after pairs are in `candidate/comparisons/candidate-11-*.png`. The full suite again passed 544 checks with zero failures and two skips, followed by both UI walkthroughs. All 490 matrix captures match the current source. Four fresh offline native-source checks passed, alongside twelve motion sequences and all six reduced-motion assertions. Native runtime remains unverified. The next requested three-model cohort is deferred until the reported Opus reset; no score or completion is claimed.
