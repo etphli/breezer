@@ -183,7 +183,7 @@ test('leads with selected measured wins, each naming its comparator and workload
   assert.match(hero, /selected results for specific workloads, not overall browser speed/);
   // Bars are proportional to the median on a zero-based scale.
   const widths = [...resultsHtml.matchAll(/<rect width="([\d.]+)%"/g)].map((m) => Number(m[1]));
-  assert.deepEqual(widths, [36.55, 100, 1.53, 100, 5.66, 100, 49.73, 49.9, 100, 80.48, 79.1, 100]);
+  assert.deepEqual(widths, [36.55, 100, 7.31, 1.53, 100, 5.66, 100, 49.73, 49.9, 100, 80.48, 79.1, 100]);
   // Losing metrics are not in the hero, and the full results are named up front.
   assert.doesNotMatch(hero, /RSS|footprint|2,756|48\.9|blank tab/i);
   assert.match(hero, /See the full results , including slower and unavailable measurements/);

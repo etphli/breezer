@@ -611,6 +611,17 @@ $('control-toggle').addEventListener('click', () => {
   notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
 });
+function positionControlTip() {
+  const trigger = $('control-toggle').getBoundingClientRect();
+  const footer = document.querySelector('.compose-area').getBoundingClientRect();
+  const tip = $('control-tip');
+  const center = trigger.left + trigger.width / 2 - footer.left;
+  const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));
+  tip.style.left = `${left}px`;
+  tip.style.setProperty('--tip-pointer', `${center - left}px`);
+}
+for (const type of ['pointerenter', 'focus']) $('control-toggle').addEventListener(type, positionControlTip);
+addEventListener('resize', positionControlTip);
 const resetControlTip = () => {
   if (!$('control-toggle').matches(':hover, :focus-visible')) delete $('control-toggle').dataset.tipDismissed;
 };

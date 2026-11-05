@@ -120,6 +120,7 @@
             </section>
             <section id="update-settings" class="settings-section" aria-labelledby="update-heading" data-search-terms="update upgrade version release restart github">
               <h2 id="update-heading">Breezer updates</h2>
+              <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
               <div class="setting-group">
                 <div class="setting-row update-row">
                   <div class="setting-label"><small>Checks stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</small></div>
@@ -129,7 +130,6 @@
                   </div>
                 </div>
               </div>
-              <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
             </section>
           </section>
 
@@ -448,9 +448,10 @@
             </div>
             <p id="wl-organato-note" class="field-note">Get a key from <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>. Saved in macOS Keychain.</p>
           </div>
-          <p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p>
+          <div id="wl-organato-connect-status"><p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p></div>
           <div class="wl-optout">
             <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
+            <div id="wl-organato-off-status"></div>
             <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Change this later in Settings.</p>
           </div>
         </section>

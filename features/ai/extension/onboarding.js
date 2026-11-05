@@ -222,6 +222,9 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     let port = null, pending = null, pendingType = null, done = null, sequence = 0, timer;
     const status = $('wl-organato-status');
     const off = $('wl-organato-off');
+    const placeStatus = kind => {
+      $(kind === 'off' ? 'wl-organato-off-status' : 'wl-organato-connect-status').append(status);
+    };
     const busy = (value) => {
       for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
       root.classList.toggle('wl-connecting', value);
@@ -274,6 +277,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     // A change replaces a pending read; nothing replaces a pending change.
     const request = (type, settings, { kind = type, then = null } = {}) => {
       if ((pending && pendingType !== 'view') || typeof api.runtime?.connect !== 'function') return false;
+      placeStatus(kind);
       clearTimeout(timer);
       pending = String(++sequence);
       pendingType = kind;
@@ -297,6 +301,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       } });
     });
     $('wl-organato-connect').addEventListener('click', () => {
+      placeStatus('connect');
       const key = $('wl-organato-key').value.trim();
       if (!key) { status.textContent = 'Paste your API key first, or choose Continue to skip.'; $('wl-organato-key').focus(); return; }
       $('wl-organato-key').value = '';
@@ -378,7 +383,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   function updateNavigation() {
     const step = STEPS[index];
     const lastTip = slide === tourSlides(appearance.layout).length - 1;
-    $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Not now'
+    $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Connect later'
       : step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
     $('wl-skip').textContent = step === 'tour' ? 'Skip tour' : 'Skip setup';
   }

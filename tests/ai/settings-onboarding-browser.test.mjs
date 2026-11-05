@@ -160,12 +160,21 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: { available: true, version: '1.1.1' } }); });
     assert.equal(await page.getByRole('button', { name: 'Update and restart' }).isVisible(), true);
+    assert.equal(await page.getByRole('button', { name: 'Check for updates' }).isHidden(), true, 'Available update has one primary action');
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-light.png') });
     const updateViewport = page.viewportSize();
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(await page.locator('#update-settings').evaluate(node => node.scrollWidth <= node.clientWidth), true);
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-narrow.png') });
     await page.setViewportSize(updateViewport);
+    await page.clock.install();
+    await page.getByRole('button', { name: 'Update and restart', exact: true }).click();
+    await page.clock.fastForward(65_000);
+    assert.match(await page.locator('#update-status').innerText(), /Choose Check for updates/);
+    assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isVisible(), true);
+    assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isEnabled(), true);
+    await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-timeout-light.png') });
+    await page.clock.resume();
 
     // ---------------------------------------------------- dismiss persists
     await page.getByRole('button', { name: 'Hide getting started' }).click();

@@ -1,0 +1,205 @@
+[
+  {
+    "id": "translate-light",
+    "title": "Translation: one coherent form",
+    "file": "translation-mint-light-narrow.png",
+    "notes": [
+      [
+        85,
+        14,
+        48,
+        26,
+        "Language choices stay together."
+      ],
+      [
+        85,
+        68,
+        45,
+        42,
+        "Provider, permission and privacy form one consent group."
+      ],
+      [
+        85,
+        78,
+        50,
+        60,
+        "One clear primary action; Stop and Restore appear when useful."
+      ]
+    ]
+  },
+  {
+    "id": "translate-dark",
+    "title": "Translation in dark mode",
+    "file": "translation-mint-dark-narrow.png",
+    "notes": [
+      [
+        85,
+        16,
+        50,
+        40,
+        "The same consent hierarchy works in dark mode."
+      ]
+    ]
+  },
+  {
+    "id": "working",
+    "title": "Assistant working state",
+    "file": "sidebar-working.png",
+    "notes": [
+      [
+        85,
+        70,
+        24,
+        81,
+        "A quiet activity line replaces the wide tinted status strip."
+      ],
+      [
+        85,
+        95,
+        50,
+        86,
+        "Sharing stays explicit while the redundant Included marker steps aside."
+      ]
+    ]
+  },
+  {
+    "id": "models",
+    "title": "Models before advanced options",
+    "file": "sidebar-model-options-narrow.png",
+    "notes": [
+      [
+        85,
+        13,
+        35,
+        43,
+        "Choose a model before adjusting its options."
+      ],
+      [
+        85,
+        48,
+        50,
+        72,
+        "Reasoning and speed remain grouped below the model list."
+      ]
+    ]
+  },
+  {
+    "id": "tooltip",
+    "title": "Tooltip follows its trigger",
+    "file": "sidebar-control-tooltip-narrow.png",
+    "notes": [
+      [
+        85,
+        62,
+        53,
+        75,
+        "The pointer identifies browser control while the explanation stays above the composer."
+      ]
+    ]
+  },
+  {
+    "id": "profile",
+    "title": "Reliable narrow profile evidence",
+    "file": "sidebar-profile-dialog-narrow.png",
+    "notes": [
+      [
+        85,
+        15,
+        50,
+        80,
+        "The complete Save action is visible. This repairs capture evidence; profile-dialog styling is unchanged."
+      ]
+    ]
+  },
+  {
+    "id": "tide-options",
+    "title": "Reliable Tide dark model evidence",
+    "file": "tide-dark-assistant-options-narrow.png",
+    "notes": [
+      [
+        85,
+        13,
+        53,
+        83,
+        "The entire menu is captured cleanly, with checked surface paint and matching consecutive frames."
+      ]
+    ]
+  },
+  {
+    "id": "update",
+    "title": "Update action hierarchy",
+    "file": "settings-update-available-narrow.png",
+    "notes": [
+      [
+        85,
+        17,
+        36,
+        27,
+        "Availability leads the controls."
+      ],
+      [
+        85,
+        48,
+        36,
+        78,
+        "Update and restart is the single available-update action."
+      ]
+    ]
+  },
+  {
+    "id": "key",
+    "title": "Explicit saved-key removal",
+    "file": "settings-translation-saved-key-light-narrow.png",
+    "notes": [
+      [
+        85,
+        54,
+        28,
+        69,
+        "A red Remove saved key button performs the named action directly."
+      ]
+    ]
+  },
+  {
+    "id": "optout",
+    "title": "Errors stay with the failed action",
+    "file": "onboarding-6-organato-optout-failed-narrow.png",
+    "notes": [
+      [
+        85,
+        30,
+        50,
+        70,
+        "Organato opt-out failures appear beside the opt-out action."
+      ]
+    ]
+  },
+  {
+    "id": "source-limit",
+    "title": "A visible research limit",
+    "file": "research-picker.png",
+    "notes": [
+      [
+        85,
+        17,
+        50,
+        81,
+        "Unselected tabs become visibly disabled when six sources are selected; selected tabs remain removable."
+      ]
+    ]
+  },
+  {
+    "id": "later",
+    "title": "Clearer optional setup navigation",
+    "file": "mint-light-onboarding-narrow.png",
+    "notes": [
+      [
+        85,
+        58,
+        80,
+        95,
+        "Connect later states what the secondary route does."
+      ]
+    ]
+  }
+]

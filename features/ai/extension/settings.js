@@ -440,7 +440,7 @@ export function mountUpdates(api) {
     const needsCheck = pending !== null || available || installing;
     clearTimeout(timer); clearInterval(poll); poll = null; pending = null;
     available = false; installing = false;
-    check.disabled = false; install.disabled = true; install.hidden = true;
+    check.disabled = false; check.hidden = false; install.disabled = true; install.hidden = true;
     if (needsCheck) { status.textContent = 'Update helper disconnected. Check for updates again.'; status.dataset.state = 'error'; }
   };
   const connect = () => {
@@ -451,11 +451,12 @@ export function mountUpdates(api) {
       if (closed || port !== connection || message.id !== pending) return;
       clearTimeout(timer); pending = null;
       check.disabled = false;
-      if (!message.ok) { status.textContent = String(message.error).replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
+      if (!message.ok) { check.hidden = false; status.textContent = String(message.error).replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
       const value = message.value;
       status.dataset.state = value.phase === 'failed' ? 'error' : '';
       status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
       if (value.available !== undefined) { available = value.available === true; install.hidden = !available; }
+      check.hidden = available && value.phase !== 'failed';
       install.disabled = !available;
       if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
       if (value.installing) {
@@ -477,7 +478,7 @@ export function mountUpdates(api) {
     status.dataset.state = '';
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
-    timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
+    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; status.textContent = 'Update helper did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
     try { connect().postMessage({ type, id: pending }); }
     catch {
       const connection = port; port = null;

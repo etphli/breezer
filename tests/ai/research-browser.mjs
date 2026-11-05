@@ -178,9 +178,13 @@ try {
   await page.locator('#research-open').click();
   await checkboxes.nth(0).check(); await checkboxes.nth(1).check();
   for (let index = 3; index < 7; index++) await checkboxes.nth(index).check();
-  await checkboxes.nth(7).click();
+  assert.equal(await checkboxes.nth(7).isDisabled(), true, 'Unselected sources are visibly disabled at the limit');
+  await checkboxes.nth(0).uncheck();
+  assert.equal(await checkboxes.nth(7).isEnabled(), true, 'Removing a source makes another choice available');
+  await checkboxes.nth(0).check();
+  assert.equal(await checkboxes.nth(7).isDisabled(), true);
   assert.equal(await checkboxes.nth(7).isChecked(), false);
-  assert.match(await page.locator('#research-limit').innerText(), /6 selected/);
+  assert.match(await page.locator('#research-limit').innerText(), /6 of 6 selected/);
   assert.equal(await page.locator('#research-chips button').count(), 6);
   await capturePicker(page, 'research-picker.png');
   await page.setViewportSize({ width: 320, height: 640 });

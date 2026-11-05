@@ -156,13 +156,14 @@ test('settings categories, search, Other and narrow layout work in a real browse
       await savedKeyPage.locator('#translation-provider').waitFor();
       assert.equal(await savedKeyPage.locator('#translation-clear-key').isVisible(), true, 'saved credentials expose their removal choice');
       assert.equal(await savedKeyPage.locator('#translation-key').inputValue(), '', 'saved credentials are never displayed');
+      await savedKeyPage.locator('.setting-row:has(#translation-clear-key) .setting-label').click();
+      assert.equal(await savedKeyPage.evaluate(key => window.fx.local[key].apiKey, TRANSLATION_KEY), 'fixture-provider-key', 'the row heading does not activate destructive removal');
       await savedKeyPage.screenshot({ path: join(evidence, `settings-translation-saved-key-${colorMode}-narrow.png`), animations: 'disabled' });
       await savedKeyPage.locator('#translation-provider').selectOption('local');
       assert.equal(await savedKeyPage.locator('#translation-clear-key').isHidden(), true, 'removal applies only to the saved provider');
       await savedKeyPage.locator('#translation-provider').selectOption('hosted');
-      await savedKeyPage.locator('#translation-clear-key').check();
-      await savedKeyPage.getByRole('button', { name: 'Save translation settings', exact: true }).click();
-      await savedKeyPage.getByText('Saved. Reopen the translation window to use these settings.', { exact: true }).waitFor();
+      await savedKeyPage.locator('#translation-clear-key').click();
+      await savedKeyPage.getByText('Saved API key removed.', { exact: true }).waitFor();
       assert.equal(await savedKeyPage.locator('#translation-clear-key').isHidden(), true);
       assert.equal(await savedKeyPage.evaluate(key => window.fx.local[key].apiKey, TRANSLATION_KEY), '');
       await savedKeyPage.context().close();

@@ -19,7 +19,7 @@ if (command === 'capture' && args.length === 1) {
     }
   }
   for (const tests of [
-    ['--test', '--test-concurrency=2', ...testFiles],
+    ['--test', '--test-concurrency=1', ...testFiles],
     ['tests/ai/panel-browser.mjs'],
     ['tests/ai/research-browser.mjs'],
   ]) execFileSync(process.execPath, tests, { cwd: root, env, stdio: 'inherit' });

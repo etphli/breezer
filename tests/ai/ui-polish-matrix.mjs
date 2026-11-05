@@ -10,6 +10,7 @@ import { installFixture as settingsFixture } from './settings-browser-fixture.mj
 import { installFixture as workspaceFixture, seed } from './workspace-browser-fixture.mjs';
 import { installFixture as newtabFixture, CONNECTED, NOW } from './newtab-browser-fixture.mjs';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
+import { captureStablePanel } from './ui-evidence-capture.mjs';
 
 const root = resolve('features/ai/extension');
 const output = resolve(process.argv[2] || '/tmp/breezer-ui-matrix');
@@ -52,8 +53,10 @@ try {
       const file = `${name}-${id}.png`;
       await page.mouse.move(page.viewportSize().width - 2, 2);
       await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
-      await page.screenshot({ path: resolve(output, file), fullPage: id.endsWith('-narrow'), animations: 'disabled' });
-      const entry = { name, id, file, viewport: page.viewportSize() };
+      let captureChecks;
+      if (id.startsWith('assistant')) captureChecks = await captureStablePanel(page, resolve(output, file), id.startsWith('assistant-options') ? { surfaceSelector: '#model-menu' } : {});
+      else await page.screenshot({ path: resolve(output, file), fullPage: id.endsWith('-narrow'), animations: 'disabled' });
+      const entry = { name, id, file, viewport: page.viewportSize(), ...(captureChecks ? { captureChecks } : {}) };
       captures.push(entry); manifest.captures.push(entry);
     };
     const settings = await context.newPage();

@@ -216,7 +216,7 @@ body {
 .feature > .plate { grid-column: 1; grid-row: 1; background: none; box-shadow: none; padding: 8px; overflow: visible; }
 .feature > .feature-copy { grid-column: 2; grid-row: 1; }
 .feature > .feature-details { grid-column: 1 / -1; grid-row: 2; margin: 0; padding-top: 10px; }
-.feature > .feature-details > p { max-width: 58ch; margin: 18px 0 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.65; }
+.feature > .feature-details > p { max-width: 52ch; margin: 16px 0 0; color: var(--muted); font-size: 1.0625rem; line-height: 1.65; }
 .feature > .feature-details .notes { margin-top: 18px; }
 .feature > .feature-details .notes li { max-width: 58ch; }
 .feature > .feature-details .notes li + li { border-top: 0; padding-top: 0; }
@@ -605,7 +605,7 @@ body {
   align-items: center;
   gap: clamp(24px, 4vw, 48px);
 }
-.reading-wide .reading-chart { align-self: center; }
+.reading-wide .reading-chart { align-self: start; }
 .readings:has(> .reading-wide) { grid-template-columns: 1fr; }
 
 .bars {
@@ -829,7 +829,7 @@ body {
 /* Separate efficiency article, reached from the update log. */
 .efficiency-page .title { font-size: clamp(32px, 5vw, 64px); }
 .benchmark-story { padding: 40px 0; }
-.benchmark-story-title { font-family: var(--serif); font-size: clamp(26px, 4vw, 38px); line-height: 1.15; margin: 0 0 16px; }
+.benchmark-story-title { font-family: var(--serif); font-size: clamp(26px, 4vw, 38px); font-weight: 400; line-height: 1.15; margin: 0 0 16px; }
 .benchmark-story-kicker { color: var(--muted); max-width: 70ch; }
 .benchmark-story-body { max-width: 70ch; line-height: 1.7; }
 .benchmark-story-body > p { max-width: 58ch; }
@@ -875,7 +875,7 @@ body {
 
 .feature:has(> .feature-details[open]) .feature-copy > .feature-limit,
 .pending:has(.feature-details[open]) .pending-summary { display: none; }
-.patch-details { margin-top: 24px; }
+.patch-details { margin-top: 12px; }
 .patch-details > .notes { max-width: 76ch; margin-top: 18px; }
 .pending .feature-details { margin-top: 12px; padding-top: 10px; }
 

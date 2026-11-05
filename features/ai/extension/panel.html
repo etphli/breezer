@@ -39,11 +39,11 @@
       <div id="messages" class="messages" role="log" aria-label="Messages" aria-live="polite" aria-relevant="additions"></div>
     </main>
 
-    <div id="activity" class="activity" role="status" hidden><span class="activity-dot" aria-hidden="true"></span><span id="activity-label">Thinking</span></div>
     <div id="announcer" class="sr-only" role="status"></div>
     <div id="notice" class="notice" role="status" hidden><span id="notice-text"></span><button type="button" id="dismiss-notice" aria-label="Dismiss message">×</button></div>
 
     <footer class="compose-area">
+      <div id="activity" class="activity" role="status" hidden><span class="activity-dot" aria-hidden="true"></span><span id="activity-label">Thinking</span></div>
       <div id="research-chips" class="research-chips" aria-label="Selected research sources"></div>
       <div class="context-row">
         <button type="button" id="context-toggle" class="context-chip" aria-pressed="true" aria-describedby="context-hint" title="Include the current page and a screenshot with your message">
@@ -67,6 +67,7 @@
       </form>
       <section id="model-menu" class="model-menu" role="dialog" aria-label="Choose a model" hidden>
         <div class="menu-heading"><span>Your models</span><button type="button" id="refresh-models" class="text-button">Refresh</button></div>
+        <div id="model-options"></div>
         <details id="inference-options" class="model-preferences">
           <summary>Model options</summary>
           <div class="model-settings">
@@ -83,7 +84,6 @@
             <p id="speed-note" class="option-note" hidden>Fast uses more Codex allowance. Availability depends on your account.</p>
           </div>
         </details>
-        <div id="model-options"></div>
         <p class="menu-note">Uses your signed-in Codex or Claude account.</p>
       </section>
     </footer>

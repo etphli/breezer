@@ -1,0 +1,14 @@
+[
+  {
+    "file": "sidebar-profile-dialog-narrow.png",
+    "stableCaptures": 3,
+    "surfacePaintChecked": true,
+    "scale": "css"
+  },
+  {
+    "file": "sidebar-model-options-narrow.png",
+    "stableCaptures": 2,
+    "surfacePaintChecked": true,
+    "scale": "css"
+  }
+]

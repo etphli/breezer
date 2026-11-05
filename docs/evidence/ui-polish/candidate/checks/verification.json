@@ -1,0 +1,67 @@
+{
+  "round": 12,
+  "suiteTests": 547,
+  "uniquePassingChecks": 545,
+  "skipped": 2,
+  "unresolvedFailures": 0,
+  "method": "Complete test-file coverage across resumed batches, not one uninterrupted run",
+  "batches": [
+    {
+      "log": "final-full",
+      "passing": 337,
+      "completedThrough": "tests/ai/settings.test.mjs",
+      "interrupted": true
+    },
+    {
+      "log": "final-remaining",
+      "tests": 136,
+      "passing": 134,
+      "skipped": 2
+    },
+    {
+      "log": "final-root-tests",
+      "tests": 73,
+      "passing": 73
+    },
+    {
+      "log": "update-timeout-green",
+      "tests": 19,
+      "passing": 19,
+      "newUniqueTests": 1
+    }
+  ],
+  "skips": [
+    "Live LibreTranslate requires opt-in and a server",
+    "Local benchmark report absent"
+  ],
+  "panelWalkthrough": true,
+  "researchWalkthrough": true,
+  "settingsTimeoutBrowser": true,
+  "savedKeyExplicitActivationBrowser": true,
+  "matrixCaptures": 490,
+  "sourceFiles": 50,
+  "sourceHashesMatch": true,
+  "translationCaptures": 36,
+  "customMotionSequences": 12,
+  "reducedMotionAssertions": 6,
+  "offlineNativeSourceChecks": 4,
+  "nativeWindowCaptures": 39,
+  "nativeContinuousRecordings": 2,
+  "nativeToolFinalSmoke": "passed",
+  "beforeAfterPairs": 12,
+  "noNewCouncil": true,
+  "thresholdReached": false,
+  "retainedFailures": [
+    "/tmp/breezer-ui-round12-full-attempt1-enospc.log",
+    "/tmp/breezer-ui-round12-core-attempt1-error.json",
+    "/tmp/breezer-ui-round12-full.log",
+    "/tmp/breezer-ui-round12-update-timeout-red.log",
+    "/tmp/breezer-ui-round12-key-label-red.log",
+    "/tmp/breezer-ui-round12-key-label-red-confirmed.log"
+  ],
+  "limitations": [
+    "The first failed matrix raw log was overwritten during log rotation; the explicit error note retains only observed ENOSPC and is not reconstructed output.",
+    "Actual installed native runtime with unchanged native workspace/frame inputs. Its packaged web UI is older; these captures verify native chrome, not the current candidate web UI. The resource commit stamp is not a reproducible binary attestation.",
+    "Native physical hit testing, menus, restoration, translation native geometry/bridge and provider execution remain unverified. Continuous recordings are not a frame-pacing or input-latency measurement."
+  ]
+}

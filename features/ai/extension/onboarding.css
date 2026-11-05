@@ -413,8 +413,10 @@ body.route-welcome { overflow: auto; background: var(--air); }
   .mini-frame { width: 220%; height: 220%; scale: .454545; transform-origin: top left; }
   .wl-stage { gap: 16px; padding: 12px 0; align-content: start; align-items: start; }
   .wl-choices, .wl-swatches { grid-template-columns: 1fr 1fr; }
-  .wl-progress li { width: 10px; }
-  .wl-progress li[aria-current="step"] { width: 24px; }
+  .wl-nav { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
+  .wl-nav .wl-progress { justify-self: center; gap: 3px; }
+  .wl-progress li { width: 6px; }
+  .wl-progress li[aria-current="step"] { width: 18px; }
   .wl-next { min-width: 0; }
   .wl-row { flex-wrap: wrap; }
 }

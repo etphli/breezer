@@ -290,6 +290,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -299,6 +304,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -308,6 +318,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -317,6 +332,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -605,6 +625,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -614,6 +639,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -623,6 +653,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -632,6 +667,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -920,6 +960,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -929,6 +974,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -938,6 +988,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -947,6 +1002,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -1235,6 +1295,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -1244,6 +1309,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -1253,6 +1323,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -1262,6 +1337,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -1550,6 +1630,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -1559,6 +1644,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -1568,6 +1658,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -1577,6 +1672,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -1865,6 +1965,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -1874,6 +1979,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -1883,6 +1993,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -1892,6 +2007,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -2180,6 +2300,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -2189,6 +2314,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -2198,6 +2328,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -2207,6 +2342,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -2495,6 +2635,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -2504,6 +2649,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -2513,6 +2663,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -2522,6 +2677,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -2810,6 +2970,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -2819,6 +2984,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -2828,6 +2998,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -2837,6 +3012,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -3125,6 +3305,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -3134,6 +3319,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -3143,6 +3333,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -3152,6 +3347,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -3440,6 +3640,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -3449,6 +3654,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -3458,6 +3668,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -3467,6 +3682,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -3755,6 +3975,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -3764,6 +3989,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -3773,6 +4003,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -3782,6 +4017,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -4070,6 +4310,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -4079,6 +4324,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -4088,6 +4338,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -4097,6 +4352,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -4385,6 +4645,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -4394,6 +4659,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": false,
+        "scale": "css"
       }
     },
     {
@@ -4403,6 +4673,11 @@
       "viewport": {
         "width": 400,
         "height": 850
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -4412,6 +4687,11 @@
       "viewport": {
         "width": 320,
         "height": 640
+      },
+      "captureChecks": {
+        "stableCaptures": 2,
+        "surfacePaintChecked": true,
+        "scale": "css"
       }
     },
     {
@@ -4453,22 +4733,22 @@
     "newtab.css": "f00730c7ab340e486c2209a4c6f54d331ba6afce650e708a72ff1058ca0d222a",
     "newtab.html": "d746dc573025d58df1d1d857c3b4ca4880918feb6e03c7d5765a262a36b9f0bc",
     "newtab.js": "73506d2b240e3c99e2c379bd62067cde91fbf0001a1873fc63ce07c8d6db6a7c",
-    "onboarding.css": "96a77a9b7c454353da056134f932546d3093dc9bd57cac0dcd1e8939c5e2546c",
-    "onboarding.js": "de2369875a4bad67e7625faa3f5405baad48594b18b642d107c1a9e2f2167fd4",
+    "onboarding.css": "732dd349e3326e5fa30bd25e7fa4ec500aeaf16705af8bb0501937a48eb58b4a",
+    "onboarding.js": "2c39feea57db94d5559ff6d060fd23c4522327d9b55d340730f0a44c1eb2349b",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "3a307d743b7fdcb88ff0dcb0a6e1a6dba618c3571f8ac49f2081b0cc8a303ab4",
-    "panel.html": "8fd6b8b3054095c39a96a177fe4149a8be8d0424d0f7efd577bf85fea6775d81",
-    "panel.js": "948877f151c2de54a581937c23d097612c56a7a7c0a3f5b87e79b06517fd04a1",
+    "panel.css": "9e2bbb898951239b9b5a9bca7a0665d6e06893b24ed5b91cfffe1bd8c2abd38a",
+    "panel.html": "5840f3945ab6949579b06573c2d6146740bafaa57b405ffb422775a6d3ed6e64",
+    "panel.js": "c6d12640e620f43aeb9a534039f073b439c177970a4369400b4c67b2a83fb55b",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
     "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
     "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
-    "research-sources.js": "a9c65544f953cb35b8a678d76dfe113abe3efe137e1920ae5b57397eae2c092b",
+    "research-sources.js": "f044e4517683b58615df5cf0f158de7dc002838a92b4baf4b492d10546cb9933",
     "settings-nav.js": "e7c3c04ee4153901bc04fa81be21939efb954a4acdfafa4deb866efa0f813374",
     "settings-onboarding.js": "7e5dc0aa8258662cb1105a922dd766a87e6145c304ce861d054a2137751381d0",
-    "settings.js": "b591e2775eac18b723a0123766f2ba689f433b9cd21ed27723a00e940d5c6d2f",
+    "settings.js": "6a31ab4212d993fc0be797af4643dc92ee2067d56b0b70c613d5aefb5d1ada61",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
     "sync-settings.js": "17178927c6c8a4c29d5e8c78ebd1c620a0415ba647bec8fdaca19abb1335e63c",
@@ -4476,20 +4756,20 @@
     "translation-background.js": "a4d1686efc17ceb03dccb8dadd1ee01c5d8237788f6e715a52ae7688d9d8f1f9",
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
     "translation-provider.js": "b43873ac2e00462cdca113101b0303adbdfcb0e243e41ad47397464a56ea436c",
-    "translation-settings.js": "3e38d53b6286438df52b1a07632396ead49429a6c528fb6c72aeae84ab68d362",
-    "translation.css": "0098a9da40bb3dde4cf861e50f1f5aa1282b57b3551289c8d5273f8372d6718c",
-    "translation.html": "b83e19cc1cb8c33b7c77436441da04c431ff07a6792269c16b16543b44e93220",
-    "translation.js": "e474fcf5cc0de8390d32a1c8e32c08503371bcf8466b1d331254885cfe94e953",
+    "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
+    "translation.css": "024afde60aaa1a3f226a69e8e5881759b5ac6541a5d5df27315014f11f3789df",
+    "translation.html": "57eaf28b982d2162a35ab3985b72ccb09ad400827efc120005b0e20fb231c2cc",
+    "translation.js": "70234da57ae069603c1f6904969705fe695001b3d712a5090ead19b32c42b5d1",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "4fb4567fbe57482df83fbdcd1b8e357ad8619d65798da8b44bf178935e9d2bc3",
-    "whats-new.html": "c213f4780b72c1265c42ff38d2a369aeb71ab2c5a8bda0c8a95d49619e585748",
+    "whats-new.css": "0d6d1805b913174bc1ba82381f00d24a1858a4c821764ab697f468e2bded078c",
+    "whats-new.html": "07858aba65b020e399e0931be8937b234482be8fc18155df53d85c67af81c12d",
     "whats-new.js": "2d751ea7a02679be7f1b6c27af5a68823e2b4c5f4dbf5f61460a7aab80c15c25",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
     "workspace.css": "a660f9ec4738ed73ead0b97621345fdae77753d1aab9831adfae85134a05a176",
-    "workspace.html": "591bca1c6e7e061bf8db384ca028981b732e6e796e1855647ea77f5b699723d9",
+    "workspace.html": "d63fee3e887640e2ecc38cc97ae96f85ade86e37f6ad7de2da2a73cde3b99167",
     "workspace.js": "aab3775894b5a2ea82005a2b6ba09edf782ce036392ac70f8074dac4811a5f31"
   }
 }

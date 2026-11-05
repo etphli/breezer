@@ -18,7 +18,9 @@ const status = (message, state = '') => {
 function controls() {
   $('translate').disabled = !connected || !ready || running || !$('consent').checked || !$('target').value || $('source').value === $('target').value;
   $('cancel').disabled = !running;
+  $('cancel').hidden = !running;
   $('restore').disabled = !connected || translatedTotal === 0;
+  $('restore').hidden = translatedTotal === 0;
   $('languages').disabled = !connected || !prefs || running;
   $('source').disabled = $('target').disabled = !ready || running;
   $('dynamic').disabled = $('consent').disabled = running;
@@ -43,8 +45,10 @@ function targets() {
 }
 port.onMessage.addListener(message => {
   if (message.type === 'init') {
-    prefs = message.prefs; $('page').textContent = message.origin;
-    $('provider').textContent = `Provider: ${message.provider}. ${prefs.provider === 'local' ? 'Text goes to localhost:5000 on this device.' : 'Text leaves this device and goes to LibreTranslate.com.'}`;
+    prefs = message.prefs;
+    try { $('page').textContent = new URL(message.origin).host; } catch { $('page').textContent = message.origin; }
+    $('page').title = message.origin;
+    $('provider').textContent = prefs.provider === 'local' ? 'Local LibreTranslate receives text at localhost:5000 on this device.' : 'LibreTranslate.com receives text outside this device.';
     $('dynamic').checked = prefs.dynamic;
   }
   if (message.type === 'languages') {

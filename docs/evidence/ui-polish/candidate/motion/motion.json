@@ -148,7 +148,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 440,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -294,51 +294,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 444.8887662562379,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 444.8887662562379,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 444.8887662562379,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 444.8887662562379,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 140,
+        "duration": 200,
         "easing": "ease",
         "endDelay": 0,
         "fill": "backwards",
@@ -349,7 +305,62 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 160,
+        "duration": 320,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 200,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 200,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 320,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 53.50215648638164,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 111.73870562782265,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
         "fill": "backwards",
@@ -427,7 +438,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 440,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -512,7 +523,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 400,
+    "videoFrameOriginMs": 520,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -525,7 +536,19 @@
   {
     "area": "control",
     "reducedMotion": "no-preference",
-    "animations": [],
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 300,
+        "direction": "normal",
+        "duration": 100,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
     "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
     "videoFrameTimesMs": [
       0,
@@ -541,7 +564,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 880,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -570,7 +593,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -599,7 +622,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 40,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -686,7 +709,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 440,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -715,7 +738,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

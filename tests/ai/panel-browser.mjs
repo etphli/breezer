@@ -1,15 +1,17 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
+import { captureStablePanel } from './ui-evidence-capture.mjs';
 
 // This exercises the shipped UI in a real browser, with a deterministic extension
 // API fixture. Native Chromium integration and paid model inference are separate.
 const { chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright');
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../features/ai/extension');
 const evidence = process.env.BREEZER_AI_EVIDENCE || '/tmp/breezer-ai-evidence';
+const captureChecks = [];
 await mkdir(evidence, { recursive: true });
 const server = createServer(async (request, response) => {
   try {
@@ -60,6 +62,9 @@ try {
     assert.ok(tip.x >= 0 && tip.x + tip.width <= width && tip.y >= 0, 'Control explanation stays in the panel');
     const composer = await page.locator('.compose-area').boundingBox();
     assert.ok(tip.y + tip.height <= composer.y, 'Control explanation leaves the composer and sharing status uncovered');
+    const trigger = await page.locator('#control-toggle').boundingBox();
+    const pointer = await page.locator('#control-tip').evaluate(node => parseFloat(node.style.getPropertyValue('--tip-pointer')));
+    assert.ok(Math.abs(tip.x + pointer - trigger.x - trigger.width / 2) < 1, 'Tooltip pointer follows the browser-control trigger');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
     await page.mouse.move(1, 1);
   }
@@ -106,7 +111,7 @@ try {
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-profile-dialog.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   assert.equal(await page.locator('#profile-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true);
-  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-profile-dialog-narrow.png` });
+  captureChecks.push({ file: 'sidebar-profile-dialog-narrow.png', ...await captureStablePanel(page, `${evidence}/sidebar-profile-dialog-narrow.png`, { surfaceSelector: '#profile-dialog', corruptFixture: resolve('tests/ai/fixtures/panel-dialog-corrupt.png') }) });
   await page.setViewportSize({ width: 400, height: 850 });
   await page.getByLabel('What should Breezer know?').fill('I build thoughtful software. Keep explanations clear and concise.');
   await page.getByRole('button', { name: 'Save context' }).click();
@@ -121,7 +126,7 @@ try {
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   const optionsBounds = await page.locator('#inference-options').boundingBox();
   assert.ok(optionsBounds.x >= 0 && optionsBounds.x + optionsBounds.width <= 320 && optionsBounds.y >= 0 && optionsBounds.y + optionsBounds.height <= 640);
-  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options-narrow.png` });
+  captureChecks.push({ file: 'sidebar-model-options-narrow.png', ...await captureStablePanel(page, `${evidence}/sidebar-model-options-narrow.png`, { surfaceSelector: '#model-menu' }) });
   await page.setViewportSize({ width: 400, height: 850 });
   assert.match(await page.locator('#speed-note').innerText(), /more Codex allowance/);
   assert.equal(await page.locator('#notice').isVisible(), false, 'Speed guidance stays beside its setting');
@@ -407,6 +412,7 @@ try {
   await page.getByRole('button', { name: 'Refresh accounts' }).click();
   assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'init').length), sentInits + 1);
   assert.deepEqual(errors, []);
+  await writeFile(`${evidence}/panel-capture-geometry.json`, JSON.stringify(captureChecks, null, 2));
   const loading = await browser.newPage({ viewport: { width: 320, height: 640 } });
   await loading.addInitScript(installPanelFixture, { contextDelay: 30_000 });
   await loading.goto(`http://127.0.0.1:${server.address().port}/panel.html`);

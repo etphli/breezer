@@ -12,13 +12,14 @@ export async function mountTranslationSettings({ container, api }) {
   const provider = el('select', '', { id: 'translation-provider' });
   for (const [id, value] of Object.entries(PROVIDERS)) provider.append(el('option', value.name, { value: id }));
   const key = el('input', '', { id: 'translation-key', type: 'password', autocomplete: 'off', placeholder: 'Leave blank to keep saved key' });
-  const clear = el('input', '', { id: 'translation-clear-key', type: 'checkbox' });
+  const clear = el('button', 'Remove saved key', { id: 'translation-clear-key', type: 'button', class: 'button danger' });
   const save = el('button', 'Save translation settings', { type: 'button', class: 'button primary' });
   const status = el('p', '', { class: 'field-note', role: 'status' });
   const group = el('div', '', { class: 'setting-group' });
   const row = (text, id, control, help) => {
     const line = el('div', '', { class: 'setting-row' });
-    const label = el('label', text, { class: 'setting-label', for: id });
+    const isAction = control.tagName === 'BUTTON';
+    const label = el(isAction ? 'div' : 'label', text, { class: 'setting-label', ...(isAction ? {} : { for: id }) });
     const hint = help ? el('small', help) : null;
     if (hint) label.append(hint);
     line.append(label, control); group.append(line);
@@ -28,7 +29,7 @@ export async function mountTranslationSettings({ container, api }) {
   providerHint.id = 'translation-provider-help';
   provider.setAttribute('aria-describedby', providerHint.id);
   row('Provider API key', 'translation-key', key, 'Stored on this device. Switching providers clears the key field.');
-  row('Remove saved API key', 'translation-clear-key', clear);
+  row('Saved API key', 'translation-clear-key', clear, 'Remove the key from this device.');
   const guide = el('p', '', { class: 'section-note' });
   guide.append(el('a', 'LibreTranslate setup guide', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
   const details = el('details', '', { class: 'setting-details' });
@@ -56,22 +57,32 @@ export async function mountTranslationSettings({ container, api }) {
   updateProviderHelp();
   const events = new AbortController();
   provider.addEventListener('change', () => {
-    key.value = ''; clear.checked = false;
+    key.value = '';
     updateProviderHelp();
     if (prefs) status.textContent = provider.value !== prefs.provider ? 'Save to use this provider.'
       : prefs.apiKey ? 'An API key is saved on this device.' : 'No API key saved.';
   }, { signal: events.signal });
+  clear.addEventListener('click', async () => {
+    clear.disabled = save.disabled = true;
+    try {
+      const next = { ...prefs, apiKey: '' };
+      await api.storage.local.set({ [TRANSLATION_KEY]: next }); prefs = next;
+      updateProviderHelp();
+      status.textContent = 'Saved API key removed.';
+    } catch { status.textContent = 'Could not remove the saved key. Try again.'; }
+    finally { clear.disabled = save.disabled = false; }
+  }, { signal: events.signal });
   save.addEventListener('click', async () => {
-    save.disabled = true;
+    clear.disabled = save.disabled = true;
     try {
       // A provider change never carries a credential to another server.
-      const next = { ...prefs, provider: provider.value, apiKey: clear.checked ? '' : (key.value || (prefs.provider === provider.value ? prefs.apiKey : '')) };
+      const next = { ...prefs, provider: provider.value, apiKey: key.value || (prefs.provider === provider.value ? prefs.apiKey : '') };
       await api.storage.local.set({ [TRANSLATION_KEY]: next }); prefs = next;
-      key.value = ''; clear.checked = false;
+      key.value = '';
       updateProviderHelp();
       status.textContent = 'Saved. Reopen the translation window to use these settings.';
     } catch { status.textContent = 'Could not save translation settings. Try again.'; }
-    finally { save.disabled = false; }
+    finally { clear.disabled = save.disabled = false; }
   }, { signal: events.signal });
   return { dispose() { events.abort(); key.value = ''; section.remove(); } };
 }

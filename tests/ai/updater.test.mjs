@@ -122,6 +122,23 @@ test('a lost updater connection invalidates the install action and never replays
   } finally { mounted.dispose(); }
 });
 
+test('an unanswered install restores the visible check action after timeout', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { ports, mounted, userClick, get } = await updateSettingsFixture();
+  try {
+    const port = ports[0];
+    port.onMessage.emit({ id: port.sent[0].id, ok: true, value: { available: true, version: '1.2.0' } });
+    assert.equal(get('update-check').hidden, true);
+    userClick(get('update-install'));
+    t.mock.timers.tick(65_000);
+    assert.match(get('update-status').textContent, /Choose Check for updates/);
+    assert.equal(get('update-check').hidden, false, 'the named recovery action is visible');
+    assert.equal(get('update-check').disabled, false);
+    userClick(get('update-check'));
+    assert.equal(port.sent.at(-1).type, 'update-check');
+  } finally { mounted.dispose(); }
+});
+
 test('handoff reuses the existing runtime and waits for the worker to acknowledge startup', async () => {
   const { startUpdateWorker } = await import('../../features/ai/host/updater.mjs');
   const { readdir, stat } = await import('node:fs/promises');

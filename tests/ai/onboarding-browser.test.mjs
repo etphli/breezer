@@ -193,9 +193,9 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     // Organato: optional; a key goes to the background helper, never into storage.
     assert.equal(await heading(), 'Connect Organato?');
-    assert.equal(await next.innerText(), 'Not now');
+    assert.equal(await next.innerText(), 'Connect later');
     await pause(700);
-    await page.getByRole('button', { name: 'Connect' }).click();
+    await page.getByRole('button', { name: 'Connect', exact: true }).click();
     assert.match(await page.locator('#wl-organato-status').innerText(), /Paste your API key/);
     await page.locator('#wl-organato-key').pressSequentially('org_demo_key', { delay: videoDir ? 70 : 0 });
     await page.keyboard.press('Enter');
@@ -307,6 +307,13 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       assert.equal(await page.locator('#wl-next').isDisabled(), false);
       assert.equal(await page.evaluate(() => fx.organato.enabled), true);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+      for (const width of [320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        const footer = await page.evaluate(() => Object.fromEntries(['wl-back', 'wl-progress', 'wl-next'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
+        assert.ok(footer['wl-back'].right + 8 <= footer['wl-progress'].left, 'Back leaves room for progress');
+        assert.ok(footer['wl-progress'].right + 8 <= footer['wl-next'].left, 'Progress leaves room for Connect later');
+      }
+      assert.equal(await page.locator('#wl-organato-status').evaluate(node => node.parentElement.id), 'wl-organato-off-status', 'Failure is adjacent to the opt-out action');
       await shot(page, '6-organato-optout-failed-narrow');
       // Retry succeeds.
       await page.evaluate(() => { fx.configure = 'ok'; });

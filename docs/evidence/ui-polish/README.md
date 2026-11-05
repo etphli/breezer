@@ -4,7 +4,9 @@ The screenshot set renders Breezer's shipped workspace, settings, new-tab and
 assistant documents in Google Chrome using deterministic extension API fixtures.
 It exercises the real HTML, CSS and JavaScript. The pages contain sample browsing
 and school data. This does not verify native browser window geometry or a newly
-compiled Breezer application. The installed app and personal profile are unchanged.
+compiled Breezer application. A separate native capture pass now records the
+existing compiled runtime with a disposable profile. The installed app and
+personal profile are unchanged.
 
 ## Reproduce
 
@@ -74,8 +76,10 @@ of twelve normal/reduced-motion sequences. The detector requires visible edges a
 only screenshots taken after a locator settles. They establish neither input latency nor native
 frame pacing. Use `node tests/ai/ui-polish-motion.mjs DIRECTORY --decode-only` to regenerate sheets from the same recordings. The release page uses overlapping viewport tiles and a scroll-position index instead of a very tall HiDPI full-page image. The capture asserts a single masthead and includes both default and expanded technical disclosures.
 
-Native macOS motion, top tabs,
-toolbar geometry and menus remain explicitly unverified, as requested.
+Earlier rounds had no native window evidence. Candidate 12 adds native top-tab,
+toolbar and continuous motion captures through the current-process
+ScreenCaptureKit API. Menus, physical auto-hide and broader macOS integration
+remain outside that evidence. See [the native capture scope](candidate/native/README.md).
 
 Chrome and Safari each received a separate overall review by all three council
 members. Chrome's review included real WebUI captures; Safari's used six official
@@ -95,6 +99,7 @@ are retained in the adjacent Markdown files.
 | Breezer, round 8 attempt | 8.4 | 8.5 | No score: account limit |
 | Breezer, candidate 9 complete council | 8.6 | 8.7 | 8.8 |
 | Breezer, candidate 10 interrupted cohort | 8.5 | 8.5 | 8.7, later resume |
+| Breezer, candidate 11 complete council | 8.5 | 8.4 | 8.8 |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -103,7 +108,7 @@ overall design judgments, not direct browser comparisons or usability benchmarks
 
 The 22-category rubric covers hierarchy, typography, alignment, spacing, rhythm/density, consistency,
 craft/polish, color across modes, contrast, navigation, sidebar, settings/controls, assistant,
-new tab, responsive layouts, custom UI motion, empty/error states, keyboard/focus appearance, onboarding, What's New, the linked efficiency article and the translation window. Native top tabs and toolbar remain unverified.
+new tab, responsive layouts, custom UI motion, empty/error states, keyboard/focus appearance, onboarding, What's New, the linked efficiency article and the translation window. Native top tabs and toolbar were unverified in rounds 1–11; the next review can inspect the new native evidence separately.
 
 Historical release-page captures can be reproduced without changing the worktree:
 
@@ -134,3 +139,46 @@ The automatic Opus continuation completed candidate 10 at 04:32 UTC on 5 Novembe
 Before its first council, candidate 11 was revised using that late feedback. Settings headers now follow the content grid at intermediate widths; narrow fields and toggles share their row insets. Error alerts span the available column, and update failures preserve the controls’ description. The passkey illustration matches the availability action. New-tab errors use recovery wording, an aligned empty shortcut and a nearby hint; feedback follows the content edge. The efficiency article uses the same Previous Breezer label as the release page. The resting shortcut image now excludes the test’s deliberate focus; a separate keyboard-focus image retains that evidence. Nine additional annotated comparisons are in `candidate/comparisons/candidate-11-revised-*.png`.
 
 The revised candidate again passed 544 Node checks, with zero failures and two explicit skips, both browser walkthroughs, all 490 source-matching matrix captures, all 36 guarded translation captures, twelve motion sequences and all six reduced-motion assertions. Four fresh offline native-source integration checks passed. These source checks do not verify native appearance or runtime. GPT-6.1 Sol wrote this revision; the council supplied read-only design feedback. All work remains local; no PR update or installation has been performed.
+
+Candidate 11’s three reviews completed at 8.5, 8.4 and 8.8. Starts were 729ms apart, overlapping for 522.675 seconds. All were satisfied with the observed design, with two narrow capture gaps preventing full evidence sign-off. These scores remain below 9.5. There are now four complete simultaneous council passes. Main-agent refinement continues locally; no further council is commissioned.
+
+Candidate 12 groups translation languages and consent into one form, puts model
+choices before advanced options, quiets the assistant activity line and anchors
+the browser-control tooltip. Source choices become visibly disabled at the
+six-tab limit. Update availability leads its action, saved-key removal is an
+explicit destructive action, and Organato failures stay beside the action that
+failed. Narrow setup navigation fits at 320px and uses “Connect later”. The
+Organato illustration is retained. Twelve annotated comparisons are in
+`candidate/comparisons/candidate-12-*.png`.
+
+The complete test-file coverage passed across resumed batches: 337 successful
+checks before a parent-turn interruption, 134 passing and two skipped in the
+remaining batch, and 73 root checks. A subsequently reproduced update-timeout
+recovery defect was fixed and all 19 updater/lifetime checks passed, including
+one new regression. This is 545 distinct passing checks, zero unresolved failures
+and two explicit skips. The affected settings browser walkthrough also passed.
+The saved-key walkthrough also reproduced and corrected unintended removal when
+clicking its row heading; removal now requires the explicitly named button.
+The interrupted output and exact resume boundary are retained in the verification
+record, rather than represented as a single uninterrupted run.
+
+The final 490 captures match all 50 current UI source hashes. All 36 translation
+captures passed their geometry and paint guards. The two faulty narrow assistant
+captures now require stable consecutive CSS-pixel images and matching surface
+paint; the recorded corrupt profile image is a negative control. Twelve fresh
+custom-UI motion sequences passed all six reduced-motion assertions. Four offline
+native-source checks also passed.
+
+Native capture works without Computer Use or a screen-recording grant. A
+capture-only library runs inside an isolated Breezer process and uses
+ScreenCaptureKit’s current-process window API. The pack contains 38 normal native
+window captures, one reduced-motion start capture and two continuous MP4s,
+including all seven palettes in light/dark at 1100px and 540px native widths.
+The runtime is the installed 1.2.0 app, with matching unchanged native workspace
+inputs and upstream source tree. Its older packaged web UI is excluded from the
+candidate web-UI assessment. Installed binary/framework hashes match before and
+after; owned processes exited and temporary profiles were removed.
+
+GPT-6.1 Sol wrote candidate 12 and its capture tools. No new council has reviewed
+it, and no 9.5 score or completion is claimed. All changes remain local. PR #17
+has not been pushed or updated.

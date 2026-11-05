@@ -1,0 +1,2 @@
+PASS: full-height sidebar frame replacements merge into the workspace overlay, apply to the pinned Chromium/Helium fixture (20 upstream targets), re-apply idempotently, and compose with the assistant UI patch in either order.
+Native compilation and real window behavior still require the full macOS browser build.

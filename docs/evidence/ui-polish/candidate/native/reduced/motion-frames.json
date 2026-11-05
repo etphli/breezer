@@ -1,0 +1,72 @@
+{
+  "width": 2200,
+  "height": 1560,
+  "duration": 2.435,
+  "frames": [
+    {
+      "ms": 0,
+      "pixel": [
+        231,
+        243,
+        240
+      ]
+    },
+    {
+      "ms": 100,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    },
+    {
+      "ms": 300,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    },
+    {
+      "ms": 600,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    },
+    {
+      "ms": 900,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    },
+    {
+      "ms": 1200,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    },
+    {
+      "ms": 1500,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    },
+    {
+      "ms": 1800,
+      "pixel": [
+        231,
+        243,
+        238
+      ]
+    }
+  ],
+  "note": "Times are video timestamps. They are not input latency or animation onset. Continuous recordings are retained; these are decoded samples."
+}

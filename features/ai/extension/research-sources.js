@@ -39,7 +39,10 @@ export class ResearchSources {
     this.root.querySelector('#research-limit').textContent = `${this.size} of ${MAX_RESEARCH_SOURCES} selected`;
     this.root.querySelector('#research-open').disabled = this.busy;
     this.root.querySelector('#research-clear').hidden = !this.size;
-    for (const input of this.root.querySelectorAll('#research-options input[data-tab-id]')) input.checked = this.selected.has(Number(input.dataset.tabId));
+    for (const input of this.root.querySelectorAll('#research-options input[data-tab-id]')) {
+      input.checked = this.selected.has(Number(input.dataset.tabId));
+      input.disabled = input.dataset.loading === 'true' || (!input.checked && this.size >= MAX_RESEARCH_SOURCES);
+    }
     const chips = this.root.querySelector('#research-chips'); chips.replaceChildren();
     [...this.selected.values()].forEach((tab, index) => {
       const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'research-chip';
@@ -63,6 +66,7 @@ export class ResearchSources {
       for (const tab of tabs) {
         const label = document.createElement('label'); label.className = 'research-option';
         const input = document.createElement('input'); input.type = 'checkbox'; input.dataset.tabId = String(tab.tabId); input.checked = this.selected.has(tab.tabId); input.disabled = tab.loading;
+        input.dataset.loading = String(Boolean(tab.loading));
         const text = document.createElement('span');
         const title = document.createElement('strong'); title.textContent = maskSecrets(tab.title || new URL(tab.url).hostname);
         const url = document.createElement('small'); url.textContent = `${sourceURL(tab.url)}${tab.loading ? ' · Loading, try again when ready' : ''}`;
@@ -73,6 +77,7 @@ export class ResearchSources {
           this.revision++; this.render(); this.onChange();
         });
       }
+      this.render();
     } catch (error) { list.textContent = error.message; }
   }
   // Invoke all native reads in the send gesture's stack. No await before these
