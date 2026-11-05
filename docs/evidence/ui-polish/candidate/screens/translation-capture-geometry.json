@@ -31,6 +31,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 4.628812522984764,
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
@@ -71,6 +72,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 4.628812522984764,
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
@@ -111,6 +113,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 4.628812522984764,
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
@@ -151,6 +154,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 5.479567331233594,
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
@@ -191,6 +195,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 5.479567331233594,
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
@@ -231,6 +236,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 5.479567331233594,
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
@@ -271,6 +277,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 14.041352201335863,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -311,6 +318,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 14.041352201335863,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -351,6 +359,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.59266445924548,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -391,6 +400,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.59266445924548,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -431,6 +441,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 15.711677607182903,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -471,6 +482,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 15.711677607182903,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -511,6 +523,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.3904166633504,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -551,6 +564,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.3904166633504,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -591,6 +605,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.003956622692392,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -631,6 +646,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.003956622692392,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -671,6 +687,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.513216433820771,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -711,6 +728,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.513216433820771,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -751,6 +769,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.106608570794613,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -791,6 +810,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.106608570794613,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -831,6 +851,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.406225023892413,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -871,6 +892,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.406225023892413,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -911,6 +933,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 14.764463946351093,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -951,6 +974,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 14.764463946351093,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -991,6 +1015,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.897681771356012,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1031,6 +1056,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.897681771356012,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1071,6 +1097,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.160549528786415,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1111,6 +1138,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.160549528786415,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1151,6 +1179,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.559989346776108,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1191,6 +1220,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.559989346776108,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1231,6 +1261,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.45162216413095,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1271,6 +1302,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 16.45162216413095,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1311,6 +1343,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 12.092979087362092,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1351,6 +1384,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 12.092979087362092,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1391,6 +1425,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 14.041352201335863,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1431,6 +1466,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 14.041352201335863,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1471,6 +1507,7 @@
       "height": 900,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.59266445924548,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,
@@ -1511,6 +1548,7 @@
       "height": 844,
       "dpr": 1
     },
+    "consentBoundaryContrast": 10.59266445924548,
     "sourceFit": {
       "label": "Spanish",
       "textWidth": 53.9833984375,

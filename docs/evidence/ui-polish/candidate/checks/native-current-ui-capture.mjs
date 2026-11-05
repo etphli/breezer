@@ -29,7 +29,7 @@ async function until(label, read, timeout = 15000) {
 const resume = process.env.BREEZER_NATIVE_RESUME === '1';
 const previous = resume ? JSON.parse(await readFile(join(output, 'manifest.json'), 'utf8')) : null;
 if (!resume) await mkdir(output); // Refuse to overwrite an earlier evidence pack.
-const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round16/capture-owned-'));
+const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round16final/capture-owned-'));
 const profile = join(scratch, 'profile');
 await mkdir(join(profile, 'Default'), { recursive: true });
 await writeFile(join(profile, 'Default/Preferences'), JSON.stringify({
@@ -41,7 +41,7 @@ const resources = join(app, 'Contents/Frameworks/Breezer Framework.framework/Res
 const identity = JSON.parse(await readFile(join(resources, 'breezer_ai/host/build-identity.json'), 'utf8'));
 assert.match(identity.commit, /^[0-9a-f]{40}$/);
 const inputNames = git('ls-files', 'features/workspace/native', 'features/ai/native-ui', 'script/apply_breezer_workspace.py', 'script/breezer_sidebar_frame.py', 'script/apply_breezer_ai_ui.py').split('\n').filter(Boolean);
-const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round16-native-build/runtime-receipt.json', 'utf8'));
+const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round16final-native-build/runtime-receipt.json', 'utf8'));
 assert.equal(app, runtimeReceipt.stagedApp);
 assert.equal(sha(await readFile(runtimeReceipt.output)), runtimeReceipt.signedFrameworkSha256, 'Private UI framework changed');
 const buildReceipt = JSON.parse(await readFile(runtimeReceipt.sourceReceipt, 'utf8'));

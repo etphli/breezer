@@ -50,7 +50,7 @@ passed with the diagnostic stream delegate. That earlier recorder failure's caus
 remains unresolved; no product fix is claimed.
 
 The `dense/` folders contain every encoded frame's native header, decoded with
-AVAssetReader and actual presentation timestamps: 42 normal and 36 reduced.
+AVAssetReader and actual presentation timestamps: 72 normal and 72 reduced.
 Unknown sample durations are recorded as null. The source MP4s remain unchanged.
 Recorders may omit unchanged images, so timestamp gaps are not app frame pacing.
 The two dense contact sheets index the original pixel strips.

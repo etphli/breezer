@@ -42,6 +42,7 @@ try {
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
   await page.addInitScript(installPanelFixture);
+  await page.addInitScript(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedCommand = text; } } }));
   await page.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   assert.equal(await page.title(), 'Breezer assistant');
@@ -142,6 +143,9 @@ try {
   assert.doesNotMatch(await page.locator('#model-menu').innerText(), /claude auth login/);
   await page.getByRole('button', { name: 'Connect Claude', exact: true }).click();
   assert.equal(await page.locator('#account-dialog').isVisible(), true);
+  await page.locator('#account-dialog').getByRole('button', { name: 'Copy Claude sign-in command' }).click();
+  await page.waitForFunction(() => window.copiedCommand === 'claude auth login');
+  assert.equal(await page.locator('#account-dialog [data-copy-command]').innerText(), 'Copied');
   assert.equal(await page.locator('#account-instructions code').textContent(), 'claude auth login');
   for (const scheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: scheme });
@@ -305,10 +309,15 @@ try {
   const failedChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
   assert.equal(failedChat.model, 'gpt-6.1-terra');
   await page.evaluate(id => window.emit({ type: 'error', id, error: 'CLI test rejection' }), failedChat.id);
-  assert.match(await page.locator('.assistant .message-body').last().innerText(), /CLI test rejection/);
+  assert.match(await page.locator('.assistant .message-body').last().innerText(), /The assistant could not complete this response/);
+  assert.equal(await page.getByText('CLI test rejection', { exact: true }).isVisible(), false, 'technical provider detail is initially disclosed');
+  await page.locator('.error-details summary').last().click();
+  assert.equal(await page.getByText('CLI test rejection', { exact: true }).isVisible(), true, 'exact provider detail remains available');
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-error-details-narrow.png` });
+  await page.locator('.error-details summary').last().click();
   assert.equal(await page.locator('.message.failed').count(), 1);
   assert.equal(await page.locator('#notice').isVisible(), false, 'The failure is shown once, in the reply');
-  assert.match(await page.locator('#announcer').textContent(), /CLI test rejection/);
+  assert.match(await page.locator('#announcer').textContent(), /The assistant could not complete this response/);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-error-narrow.png` });
   await page.getByRole('button', { name: 'Edit and resend' }).click();
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Exercise the error path');
@@ -429,6 +438,13 @@ try {
   await page.getByRole('button', { name: 'Set up an account', exact: true }).click();
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), true, 'sign-in instructions remain available');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-instructions-narrow.png` });
+  await page.getByRole('button', { name: 'Copy Codex sign-in command' }).click();
+  await page.waitForFunction(() => window.copiedCommand === 'codex login');
+  await page.evaluate(() => { navigator.clipboard.writeText = async () => { throw new Error('Clipboard unavailable'); }; });
+  await page.getByRole('button', { name: 'Copy Claude sign-in command' }).click();
+  await page.waitForFunction(() => window.getSelection().toString() === 'claude auth login');
+  assert.match(await page.locator('.copy-feedback').innerText(), /keyboard to copy/);
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-command-copy-fallback-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
   await page.getByRole('button', { name: 'Refresh accounts' }).click();

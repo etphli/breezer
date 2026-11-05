@@ -63,10 +63,12 @@ test('settings categories, search, Other and narrow layout work in a real browse
     // its native bridge. Discovery must explain that limitation without success.
     await page.locator('.nav-item[data-category="sync"]').waitFor();
     await page.getByRole('link', { name: 'Sync', exact: true }).click();
-    await page.getByText('Sync is not available in this version. Saved data stays on this device. Check General for updates.', { exact: true }).waitFor();
-    assert.equal(await page.getByRole('button', { name: 'Set up or manage sync', exact: true }).isDisabled(), true);
+    await page.getByText('Sync is not available in this version. Saved data stays on this device.', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('button', { name: 'Open update settings', exact: true }).isEnabled(), true);
     await page.screenshot({ path: join(evidence, 'settings-sync-unavailable-fixture.png') });
-    await page.getByRole('link', { name: 'General', exact: true }).click();
+    await page.getByRole('button', { name: 'Open update settings', exact: true }).click();
+    await page.waitForFunction(() => location.hash === '#/settings/general');
+    assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isVisible(), true);
     // Feature modules from FEATURE_MOUNTS add their category once rendered.
     await page.locator('.nav-item[data-category="languages"]').waitFor();
     assert.equal(await page.locator('.nav-item[data-category="assistant"]').isVisible(), true, 'context settings mounted');

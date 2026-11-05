@@ -19,7 +19,10 @@ button { cursor: pointer; }
 button:hover:not(:disabled) { background: var(--hover); }
 button:disabled { opacity: .5; cursor: default; }
 .check { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; }
-.check input { flex: none; width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
+.check input { appearance: none; flex: none; width: 16px; height: 16px; margin: 3px 0 0; border: 1.5px solid color-mix(in srgb, var(--ink) 65%, var(--raised)); border-radius: 3px; background: var(--raised); display: grid; place-content: center; }
+.check input:checked { background: var(--ink); border-color: var(--ink); }
+.check input:checked::before { content: ""; width: 7px; height: 4px; margin-top: -2px; border-left: 2px solid var(--raised); border-bottom: 2px solid var(--raised); transform: rotate(-45deg); }
+@media (forced-colors: active) { .check input { appearance: auto; } .check input::before { content: none; } }
 .consent-choice { margin: 0; font-weight: 500; }
 .consent-note { display: block; margin-top: 4px; font-weight: 400; }
 .automatic-choice { margin: 0; padding: 16px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }

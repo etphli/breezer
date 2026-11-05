@@ -11,7 +11,8 @@ const hash = text => createHash('sha256').update(text).digest('hex');
 const baseline = fs.readFileSync(new URL('./fixtures/panel-before-efficiency.js', import.meta.url), 'utf8');
 assert.equal(hash(baseline), baselineSHA, 'negative control must match the exact reviewed original');
 // Compare controller behavior with the current terminal copy; measurements keep the original below.
-const baselineForBehavior = baseline.replace('finish(undefined, !message.cancelled);', "finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);");
+const baselineForBehavior = baseline.replace('finish(undefined, !message.cancelled);', "finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);")
+  .replace('fail(reason, `Could not finish this response. ${reason}`);', "fail(reason, 'The assistant could not complete this response.');");
 
 function harness(code, initial = [], ids = []) {
   const frames = [], posts = [], writes = [], events = [], renders = [], streams = [], elements = new Map();

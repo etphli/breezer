@@ -1,10 +1,10 @@
 {
-  "startedAt": "2026-11-05T14:19:25.458Z",
+  "startedAt": "2026-11-05T14:57:14.680Z",
   "sourceTreeState": "Per-file nativeInputs and loadedUiSourceHashes identify the exact captured sources. sourceHead records repository HEAD, which may precede uncommitted candidate files.",
-  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app",
   "appVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
   "shellMetadataVersion": "1.2.0",
-  "sourceHead": "b9c0b466f36dfbd22a1b8b12d760cca70d427c7f",
+  "sourceHead": "447443e5d9642c230cf18c9a797b9785aa3e7348",
   "nativeRuntimeReportedCommit": null,
   "shellResourceReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
   "uiBuildProvenance": "Private UI verification build: retained Chromium 156 core, nine unchanged verified current native UI/resource units reused, and fifty current web UI resources repacked and signed. Not a full release rebuild or reproducible binary attestation.",
@@ -77,20 +77,20 @@
   ],
   "capturedAppPins": [
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/MacOS/Breezer",
-      "sha256": "d8f063e258111a89d5d5fa3c26587d4d3ce90e3811d71d0a87648fb3c8d04be6"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/MacOS/Breezer",
+      "sha256": "50a01cfc18fa5a0a9f22b537e301d8145868cd16f0ce0e1bbdb9b3446ffa47b6"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
-      "sha256": "ad4d75f8f2a1dfdf2c5962220687aa613fc14a24c3503135112cb3f395c56c40"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
+      "sha256": "a3351a26c2220e382ceaf2e2394add24e7eb5b827678175fd0a5d96e5c63ea7a"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
       "sha256": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
     }
   ],
   "method": "ScreenCaptureKit current-process window",
-  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/capture-owned-5RwAuK/profile",
+  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/capture-owned-TeAwTh/profile",
   "fixtureOnly": true,
   "captures": [
     {
@@ -101,15 +101,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-mint-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-mint-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "a6782da86b431b7592557b9842864a9864c68daf72b377a3add8463b982500da",
+      "sha256": "df829a30ed4e1c05dfe4ce4966460d8607f1e1f04a6349b08493bfecf0ca9567",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -136,7 +136,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -157,15 +157,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-mint-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-mint-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "90d4dec693fa01ad1ffd7eb81dd7792ebdb5b16158cf025c2dfbaeefe33bb937",
+      "sha256": "6540c9bc02e4f4cb22ad1e276f402dd8a8c13f124d7064e7842c0c9b420638b4",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -192,7 +192,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -213,15 +213,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-mint-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-mint-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "1f006c6779e1e22965bbe761a56d7e9e9a32da59d1b81285f36653793e594f79",
+      "sha256": "c7a8750a30f20779c45b8e800c245263b0157c5547b4b88f83fb38e5e0973531",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -248,13 +248,13 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
-          169,
+          170,
           196,
           188
         ]
@@ -269,15 +269,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-mint-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-mint-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "2e47282c0e174ebabd65ca7e1464f70989eb2e6c9454dcaceb6b23b0f01656e1",
+      "sha256": "514b55f99b956ed111e13b6920a960e575648334455159628f89481821b45fbf",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -304,14 +304,14 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
           10,
-          36,
+          37,
           31
         ]
       },
@@ -325,15 +325,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-tide-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-tide-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "f9f24476e749ec9de5b86328caf7d3ca0a62127cdd4a56fd97363e057b9d481e",
+      "sha256": "56d36dd7c2e43dda403fe55d5d58c042c616ed81623545e2e914c4f7f03563cb",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -360,18 +360,18 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
           99,
-          112,
+          111,
           124
         ]
       },
-      "stableCaptures": 2
+      "stableCaptures": 4
     },
     {
       "api": "ScreenCaptureKit current-process window",
@@ -381,15 +381,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-tide-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-tide-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "7ac0b457f2c63d51fa84ac667da201867b4409c267950819f3c2a79b66a13df8",
+      "sha256": "774811043a89009c093c7e2374089b4877071a2e7ea0107fc14c9862b4664421",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -416,7 +416,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -437,15 +437,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-tide-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-tide-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "6e33b4783690fc4fd991b539dc58b03ef2fa5816e0e11c5b1621f301ebeea5ea",
+      "sha256": "663b21fa8e8f672d923f9a41ae3eda25b25d386601843551f8f27caa1e0267c8",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -472,7 +472,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -493,15 +493,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-tide-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-tide-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "00e2ab01453a5b11b0a1b0f9b96c23cdc32f440b69f42c1137601d3adeb31581",
+      "sha256": "7d0a5f1ac176d16947cab07afe9b10ae01841313a1a0dcae311e30196df3c2ca",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -528,7 +528,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -549,15 +549,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-dusk-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-dusk-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "d14e5042da74b73ca3df577d4fbf9eb7c80dfd94b5578f2d3b58afdafd1f83a2",
+      "sha256": "9b9c8f84d2d6c2c7a1bdb8a5588e8502b9399315cf2d114f87a4d80930c3eb36",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -584,7 +584,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -605,15 +605,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-dusk-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-dusk-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "b21ae8cdcf078c9f0294c80ff0660c988c0044c2b872be94955056304fb85b61",
+      "sha256": "7d377e189c619f209b1aaac7b984deacbaf8e1642c1e26e9794b535a185f395a",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -640,7 +640,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -661,15 +661,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-dusk-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-dusk-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "d232c1152e1c0ac08901473610bb4528a494a68b42ed28a5902a89dc8ef42b54",
+      "sha256": "0c243085cea1fe40224a3633679d92f0968824335087a2306b4b17575e908ebc",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -696,7 +696,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -717,15 +717,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-dusk-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-dusk-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "8c4a9f56126ce423d6baa5bb191f60b4b55f675b8d6ac487812cf23fd3438fc0",
+      "sha256": "0c3d0cda7d7abed2c731329f33648acce0f1a971390c6ab3cb5ca98dc806e39d",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -752,7 +752,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -773,15 +773,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-rose-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-rose-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "31e8b3a6c7290d76d82fc2762bfbcd59d7216d93b13e59705040b527b247f606",
+      "sha256": "f26d34028cb06d85f869e22f5ad03e99702997a1712369ceffe6fc64aa258dab",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -808,14 +808,14 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
           127,
-          105,
+          104,
           110
         ]
       },
@@ -829,15 +829,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-rose-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-rose-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "2c295b10bdd1775a7092a87e9b0620841a957ec5536c60b6fcf86a2bc2fefa54",
+      "sha256": "e507b4cc3392254fb8f644358cffff595bc001e413b668311f5d721ba3616fec",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -864,7 +864,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -885,15 +885,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-rose-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-rose-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "2c7e6654c3db83356d2a36cf8f6ba560208dce0bdf06b36a7a089b2ddfba4b86",
+      "sha256": "230047bf355848ef681d49dee2aa0d53ddf83fbc6386c577d4a835453e276ede",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -920,7 +920,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -941,15 +941,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-rose-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-rose-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "8d348192f0d2d5036be644048e0fbb2d926549a28347e56e29920a84f19707eb",
+      "sha256": "1ea3d7f34f88ed414a3654a182e210e1bc4db6df929db7ff6af789b01968c933",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -976,7 +976,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -997,15 +997,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-pollen-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-pollen-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "b8ed0710ec9fb7eabd50078bf65ebcec534c7daee38653fd9b70507185aad502",
+      "sha256": "bf56739502ca8d48ce718f650be55db6bb6ba178f922f58a0dc2de263eb92cfd",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1032,7 +1032,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1053,15 +1053,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-pollen-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-pollen-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "1cf80b4da62f971f420e915b562c46e7dfeaa19181606a958aff6e6c4d67fd79",
+      "sha256": "43b2e8fc683291649404986bd4ce0154b64a49da5da045191069d5565fd196a7",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1088,14 +1088,14 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
           252,
-          251,
+          250,
           237
         ]
       },
@@ -1109,15 +1109,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-pollen-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-pollen-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "73997470486f57136d58ba7f3ea95f0041ef821c8d072e1e2c2568e4a97937a2",
+      "sha256": "60461dc0c99e73e7ee0b3ad53ce558b378facf25cba9c075300d69d2b355b096",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1144,13 +1144,13 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
-          192,
+          191,
           193,
           160
         ]
@@ -1165,15 +1165,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-pollen-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-pollen-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "8b18075370580590eeb19358031eae299a0fe5447e02e93c4b2f96aaf7e050bf",
+      "sha256": "8f5d45efd88e1f8624aaa6a4f9c929e9d802e6a34f3ccd0e96e213d405a8a047",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1200,7 +1200,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1221,15 +1221,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-graphite-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-graphite-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "636d1a7061977aaf2e73310c9b9333c7d8661501efc8ad0917b302fa2ae5eccb",
+      "sha256": "f35055c95974f6c00a2719b58561aedeca73329b57d312b2ee04718526c5c85c",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1256,7 +1256,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1277,15 +1277,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-graphite-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-graphite-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "6b01f849685d075fc245c0a91a1a0b6065bb3ee4d41e84cef2b927bb11075fb1",
+      "sha256": "8cd1016749972c6157dcc4b59530ff0223f1bd4833aeda06996a1d2e3515a04c",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1312,7 +1312,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1333,15 +1333,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-graphite-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-graphite-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "a314336eb2ea0672493301370262189a09f39ee353186be3cb9c65456b431742",
+      "sha256": "ef7da7e27a6bf8a2aff4307bbbad3251db0dae53f7d8c7ffd0a3526aeac172e0",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1368,7 +1368,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1389,15 +1389,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-graphite-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-graphite-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "130061b2cf5fccfae47fbc8b876a28b628f2230e802eddb8c2d69e80d576bb61",
+      "sha256": "5d24eb4d73b493541c88db00f02a72dcc324c909c16c954e77a54d8b5a0b59fe",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1424,13 +1424,13 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
-          30,
+          31,
           32,
           32
         ]
@@ -1445,15 +1445,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-custom-light-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-custom-light-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "e06f4a79abca29841c719d773a8b53924a967babb3f6b4c2471a4a75ae215296",
+      "sha256": "9d6b9e0e08ea064da72555db54425082150f4ed01115a45fcc070e906ea48d28",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1480,13 +1480,13 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
-          101,
+          102,
           111,
           125
         ]
@@ -1501,15 +1501,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-custom-light-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-custom-light-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "b9af5eb94bd0318168da7670c0801459b6436226b85d65bd89f6219c954ebdd2",
+      "sha256": "51f1a658ff4bd29fa44707075183015eace60e7f5ee2825549362b2c28652fa0",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1536,14 +1536,14 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
           248,
-          250,
+          249,
           255
         ]
       },
@@ -1557,15 +1557,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-custom-dark-desktop.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-custom-dark-desktop.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "fe8ce4d3d4cf8b8ef48f998a4cb73260a0cffe0e2a8a961017e1d1c811d3938e",
+      "sha256": "71573fec881cda9a163d711e1f8f8edd4c798347388aa74d7716d5c9cf1d30ab",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1592,7 +1592,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1600,7 +1600,7 @@
         "top": [
           179,
           191,
-          212
+          211
         ]
       },
       "stableCaptures": 2
@@ -1613,15 +1613,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 540,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-custom-dark-narrow.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-custom-dark-narrow.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 1080,
       "screenCaptureAccessGranted": false,
-      "sha256": "583cd279e7aa146448071a35c1e04843edc4d2f64175230ebd54e5c4c35dc8b6",
+      "sha256": "0b38cd2269b8091aeebf34d43173e70ff80d45f164c75f977810d93e9930aaa7",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1648,7 +1648,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1669,15 +1669,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/toolbar-centered-minimal.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/toolbar-centered-minimal.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "e70d9260347c31fe49b285c2ef0579588b18836b6b2f820b22dc0e1752af8f99",
+      "sha256": "c26fec93aca3a0680d829355ac8e93b540a07513f5f56f8d54e155fad445b5f1",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1704,7 +1704,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1725,15 +1725,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/toolbar-full-address.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/toolbar-full-address.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3b07993b6a88e41f01e48a79cde31026010818e0c5e7409db11ff6f09c3ac8e9",
+      "sha256": "a128ed023cd562fb84f95bd35deb1361df5a94af505e3100c1da2ec8bb20b9bd",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1760,7 +1760,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1781,15 +1781,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/toolbar-frameless-pinned.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/toolbar-frameless-pinned.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3b07993b6a88e41f01e48a79cde31026010818e0c5e7409db11ff6f09c3ac8e9",
+      "sha256": "a128ed023cd562fb84f95bd35deb1361df5a94af505e3100c1da2ec8bb20b9bd",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -1816,7 +1816,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1837,15 +1837,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/toolbar-frameless-auto.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/toolbar-frameless-auto.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3b07993b6a88e41f01e48a79cde31026010818e0c5e7409db11ff6f09c3ac8e9",
+      "sha256": "a128ed023cd562fb84f95bd35deb1361df5a94af505e3100c1da2ec8bb20b9bd",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": false,
@@ -1872,7 +1872,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1893,15 +1893,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/toolbar-bookmarks.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/toolbar-bookmarks.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "540bdb2990c77cf88951bf784d3cb2d9e9f97fc90822b1a566f8acb0b82fcd3d",
+      "sha256": "b853823b05b9785c8605f412f3eed0779729f14e849ae48f75da051a4783032f",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": false,
@@ -1928,7 +1928,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -1939,7 +1939,7 @@
           108
         ]
       },
-      "stableCaptures": 3
+      "stableCaptures": 2
     },
     {
       "api": "ScreenCaptureKit current-process window",
@@ -1949,15 +1949,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/top-system-mode.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/top-system-mode.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "6973c0bb458033e91a3a02252cec1f7b893814dc17fbe4f4fe7a2d4c633ab11e",
+      "sha256": "1d31f583266a3eaa5dfd28187a55071617ec738f8946ae4ec3003d72b63bdb12",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": false,
@@ -1984,13 +1984,13 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
         ],
         "top": [
-          169,
+          170,
           196,
           188
         ]
@@ -2005,15 +2005,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/sidebar-frame-expanded.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/sidebar-frame-expanded.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "ff45f2992f99d3ca29664d7ac7f09cb5d25fdb03fb9525bd748eeb6e76fd6832",
+      "sha256": "197af12ec2d1ca261f81f69027fcdd97e3a1b37111d0a7318fa271f1f4040f6b",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2040,7 +2040,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -2048,7 +2048,7 @@
         "top": [
           219,
           237,
-          232
+          231
         ]
       },
       "stableCaptures": 3
@@ -2061,15 +2061,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/sidebar-frame-compact.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/sidebar-frame-compact.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "dad907db9d6e0f2ab83a5f9d3f397b6f500be6afed0e8967dc6eeccd42cce3eb",
+      "sha256": "3cb95de6a4e68f449ca35f0ca095ac5104e8334950622ea40499a8a227dbe1f0",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2096,7 +2096,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -2104,7 +2104,7 @@
         "top": [
           219,
           237,
-          232
+          231
         ]
       },
       "stableCaptures": 3
@@ -2117,15 +2117,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/sidebar-frame-autoHide.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/sidebar-frame-autoHide.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "33d87a2cdec90e59eb958654663923c409eb8185e39e5112cf48adc8952a1dfc",
+      "sha256": "5fa789174f1337914d078bd53a2f2e058371a4f18628b79bea3db6295fecf598",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2152,7 +2152,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -2160,7 +2160,7 @@
         "top": [
           219,
           237,
-          232
+          231
         ]
       },
       "stableCaptures": 2
@@ -2173,15 +2173,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/sidebar-frame-compact-small-type.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/sidebar-frame-compact-small-type.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "dad907db9d6e0f2ab83a5f9d3f397b6f500be6afed0e8967dc6eeccd42cce3eb",
+      "sha256": "3cb95de6a4e68f449ca35f0ca095ac5104e8334950622ea40499a8a227dbe1f0",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2208,7 +2208,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -2216,7 +2216,7 @@
         "top": [
           219,
           237,
-          232
+          231
         ]
       },
       "stableCaptures": 2
@@ -2229,15 +2229,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/sidebar-frame-compact-large-type.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/sidebar-frame-compact-large-type.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "dad907db9d6e0f2ab83a5f9d3f397b6f500be6afed0e8967dc6eeccd42cce3eb",
+      "sha256": "3cb95de6a4e68f449ca35f0ca095ac5104e8334950622ea40499a8a227dbe1f0",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2264,7 +2264,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -2272,7 +2272,7 @@
         "top": [
           219,
           237,
-          232
+          231
         ]
       },
       "stableCaptures": 2
@@ -2285,15 +2285,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94894
+        "windowId": 96201
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native/native-motion-start.png",
-      "pid": 91513,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-start.png",
+      "pid": 28883,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "3b07993b6a88e41f01e48a79cde31026010818e0c5e7409db11ff6f09c3ac8e9",
+      "sha256": "a128ed023cd562fb84f95bd35deb1361df5a94af505e3100c1da2ec8bb20b9bd",
       "appearance": {
         "alwaysShowSidebar": true,
         "alwaysShowTopBar": true,
@@ -2320,7 +2320,7 @@
             237
           ],
           [
-            229,
+            228,
             244,
             237
           ]
@@ -2361,9 +2361,9 @@
     "onboarding.js": "63858d0d813e2336fa238c7d3180fbe6f271950340225aa5b1d8f2266dc048f1",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "ccad156006abb96296661869f5039c19981ed511ed8b1aeb411cd8b43115b208",
-    "panel.html": "a4e0d172efb4c9122347e2a0a841f47697f6b1d0a022faeb2ccf40e71def98e1",
-    "panel.js": "9ef67568991e784bd21d336550f47c026edef69ade7634b41189617f5a49d96c",
+    "panel.css": "a9d4109d783ec1a128f7bb000719fcec0f5f8b176bae6066ace259a7972bc7da",
+    "panel.html": "e9878e0a486c18367a3d1dd3fcad7f81b62cf27f120c6c4fcd92c049cd3aa1cc",
+    "panel.js": "2465e3258898c84fdeee426a89d644553fb673bb014f8938ce1ace95fc9aac25",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -2375,13 +2375,13 @@
     "settings.js": "478d0c91c39b5fccad71876ce908a43d7b4258e48605e14b3f3b3759cec3e078",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
-    "sync-settings.js": "39e65194b86fc2c2f8c6623bafd3eecef517763a3974419c67b0b6d427acd5e9",
+    "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
     "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
     "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
     "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
     "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
-    "translation.css": "b0ef0034dbf2a147378be3a2680dce2db9d8b9d64075a297c0cca7c478f98288",
+    "translation.css": "daff591f5e27e98a8ddb6170cb227e6e590b442a764e8086ed3437d0fb5a73e4",
     "translation.html": "a68dad2bf1d08f25999e135c3cf0213b94681a5087ba3a85a8af5454a8e18781",
     "translation.js": "7eecfff9555c30ab4e07b28bbbeea9ec03ece8a139762bc75db4e19b7641a3f7",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
@@ -2393,154 +2393,154 @@
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
     "workspace.css": "cdabcc43d8822019d7828b3eeafcdfe017032c9d7105c34167edcea7c4956536",
-    "workspace.html": "6070b9181cbba6114d5651249035ef57182ba472b93fb1bfb5f2020af7343ba5",
+    "workspace.html": "9f7782654a9b3b09fcc223f0502ad34a2b8ab8e602197f0f5c64f95f98d20f2d",
     "workspace.js": "c638d04771337e02d70ee42682c3795d10b7118b9a0ca184e8289f45a440104c"
   },
   "pagePrefersReducedMotion": false,
   "ownedProcesses": [
     {
       "type": "browser",
-      "id": 91513,
-      "cpuTime": 2.387922
+      "id": 28883,
+      "cpuTime": 2.275324
     },
     {
       "type": "renderer",
-      "id": 91591,
-      "cpuTime": 0.099959
+      "id": 29300,
+      "cpuTime": 0.12019
     },
     {
       "type": "renderer",
-      "id": 91590,
-      "cpuTime": 0.185694
+      "id": 29299,
+      "cpuTime": 0.415604
     },
     {
       "type": "renderer",
-      "id": 91589,
-      "cpuTime": 0.301927
+      "id": 29298,
+      "cpuTime": 0.17451
     },
     {
       "type": "renderer",
-      "id": 91582,
-      "cpuTime": 0.520834
+      "id": 29283,
+      "cpuTime": 0.202408
     },
     {
       "type": "renderer",
-      "id": 91577,
-      "cpuTime": 0.228034
+      "id": 29275,
+      "cpuTime": 0.496834
     },
     {
       "type": "renderer",
-      "id": 91588,
-      "cpuTime": 0.19786
+      "id": 29270,
+      "cpuTime": 0.261115
     },
     {
       "type": "renderer",
-      "id": 91578,
-      "cpuTime": 0.184182
+      "id": 29271,
+      "cpuTime": 0.194483
     },
     {
       "type": "GPU",
-      "id": 91562,
-      "cpuTime": 0.851576
+      "id": 29265,
+      "cpuTime": 0.728356
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 91563,
-      "cpuTime": 0.141222
+      "id": 29266,
+      "cpuTime": 0.155565
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 91574,
-      "cpuTime": 0.064992
+      "id": 29267,
+      "cpuTime": 0.079789
     }
   ],
-  "browserPid": 91513,
+  "browserPid": 28883,
   "recording": {
     "start": {
       "blockedNativeHostLaunches": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/capture-owned-5RwAuK/native-tabs-toolbar-motion.mp4",
-      "pid": 91513,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/capture-owned-TeAwTh/native-tabs-toolbar-motion.mp4",
+      "pid": 28883,
       "recordingStarted": true,
       "screenCaptureAccessGranted": false
     },
     "actions": [
       {
         "name": "Select Field notes tab",
-        "at": "2026-11-05T14:20:04.474Z"
+        "at": "2026-11-05T14:57:55.839Z"
       },
       {
         "name": "Select Today tab",
-        "at": "2026-11-05T14:20:05.020Z"
+        "at": "2026-11-05T14:57:56.390Z"
       },
       {
         "name": "Close Reading list tab",
-        "at": "2026-11-05T14:20:05.541Z"
+        "at": "2026-11-05T14:57:56.907Z"
       },
       {
         "name": "Enable centered, minimal address",
-        "at": "2026-11-05T14:20:06.078Z"
+        "at": "2026-11-05T14:57:57.436Z"
       }
     ],
     "finish": {
       "blockedNativeHostLaunches": 2,
-      "bytes": 74374,
+      "bytes": 77534,
       "durationSeconds": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/capture-owned-5RwAuK/native-tabs-toolbar-motion.mp4",
-      "pid": 91513,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/capture-owned-TeAwTh/native-tabs-toolbar-motion.mp4",
+      "pid": 28883,
       "recordingFinished": true,
       "screenCaptureAccessGranted": false
     },
-    "path": "/tmp/breezer-ui-polish/round-16-native/native-tabs-toolbar-motion.mp4",
-    "sha256": "34f6abc227422cb5156efdb90a1bb53611e461b4ea46b589fcfcd5f6c5298e33"
+    "path": "/tmp/breezer-ui-polish/round-16-final-native/native-tabs-toolbar-motion.mp4",
+    "sha256": "37847ee2cb424e7ad6ae45ceeba8fdf1c0466b8955fb1b8eed4adb4b106121e8"
   },
   "status": "passed",
   "finalOwnedProcesses": [
     {
       "type": "browser",
-      "id": 91513,
-      "cpuTime": 9.218796
+      "id": 28883,
+      "cpuTime": 8.881979
     },
     {
       "type": "renderer",
-      "id": 91714,
-      "cpuTime": 0.120572
+      "id": 29570,
+      "cpuTime": 0.248607
     },
     {
       "type": "renderer",
-      "id": 91589,
-      "cpuTime": 4.942496
+      "id": 29299,
+      "cpuTime": 5.257578
     },
     {
       "type": "renderer",
-      "id": 91582,
-      "cpuTime": 0.909387
+      "id": 29283,
+      "cpuTime": 0.421901
     },
     {
       "type": "renderer",
-      "id": 91577,
-      "cpuTime": 5.573291
+      "id": 29275,
+      "cpuTime": 0.959432
     },
     {
       "type": "renderer",
-      "id": 91588,
-      "cpuTime": 0.430516
+      "id": 29270,
+      "cpuTime": 6.293067
     },
     {
       "type": "GPU",
-      "id": 91562,
-      "cpuTime": 2.776439
+      "id": 29265,
+      "cpuTime": 2.691766
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 91563,
-      "cpuTime": 0.198435
+      "id": 29266,
+      "cpuTime": 0.217089
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 91574,
-      "cpuTime": 0.067526
+      "id": 29267,
+      "cpuTime": 0.083024
     }
   ],
   "cleanup": {
@@ -2550,5 +2550,5 @@
   },
   "capturedAppPinsUnchanged": true,
   "installedPinsUnchanged": true,
-  "finishedAt": "2026-11-05T14:20:08.155Z"
+  "finishedAt": "2026-11-05T14:57:59.956Z"
 }

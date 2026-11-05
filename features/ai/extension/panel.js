@@ -484,6 +484,17 @@ function fail(reason, label) {
   notify('');
   $('announcer').textContent = label;
   finish(label);
+  const body = run && messageNodes.get(run.assistantId);
+  if (body && reason && !label.includes(reason)) {
+    const details = document.createElement('details');
+    details.className = 'error-details';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Error details';
+    const text = document.createElement('p');
+    text.textContent = reason;
+    details.append(summary, text);
+    body.parentElement.append(details);
+  }
   offerRetry(run);
 }
 
@@ -579,7 +590,7 @@ function receive(message) {
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
     if (!state.running) return notify(reason);
-    fail(reason, `Could not finish this response. ${reason}`);
+    fail(reason, 'The assistant could not complete this response.');
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
     reply.text += message.text || '';
@@ -692,6 +703,33 @@ $('welcome-action').addEventListener('click', () => {
   else refreshModels();
 });
 $('welcome-account-steps').addEventListener('toggle', () => renderWelcomeStatus(selectedModel()));
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-copy-command]');
+  if (!button) return;
+  const command = button.parentElement.querySelector('code');
+  try {
+    await navigator.clipboard.writeText(command.textContent);
+    button.textContent = 'Copied';
+    const feedback = button.parentElement.querySelector('.copy-feedback');
+    if (feedback) feedback.remove();
+    $('announcer').textContent = 'Sign-in command copied.';
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(command);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    button.textContent = 'Copy';
+    let feedback = button.parentElement.querySelector('.copy-feedback');
+    if (!feedback) {
+      feedback = document.createElement('small');
+      feedback.className = 'copy-feedback';
+      feedback.setAttribute('role', 'status');
+      button.parentElement.append(feedback);
+    }
+    feedback.textContent = 'Command selected. Use your keyboard to copy it.';
+  }
+});
 $('close-account').addEventListener('click', () => $('account-dialog').close());
 $('account-dialog').addEventListener('close', () => $('model-button').focus());
 $('refresh-accounts').addEventListener('click', () => { $('account-dialog').close(); refreshModels(); });

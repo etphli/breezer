@@ -225,7 +225,84 @@
       ]
     ],
     "beforeRoot": "round-16-comparison-crops/before",
-    "afterRoot": "round-16-comparison-crops/after",
+    "afterRoot": "round-16-final-comparison-crops/after",
     "maxWidth": "150px"
+  },
+  {
+    "id": "command-copy",
+    "title": "Account sign-in commands",
+    "file": "sidebar-signed-out-instructions-narrow.png",
+    "beforeRoot": "round-16-workflows",
+    "notes": [
+      [
+        79,
+        37,
+        83,
+        51,
+        "Copy the exact command without selecting technical text."
+      ]
+    ]
+  },
+  {
+    "id": "consent-edge",
+    "title": "Dark translation consent",
+    "file": "translation-before-sharing-dark-narrow.png",
+    "beforeRoot": "round-16-workflows",
+    "notes": [
+      [
+        72,
+        32,
+        11,
+        39,
+        "Unchecked controls retain a clear boundary against the dark card."
+      ]
+    ]
+  },
+  {
+    "id": "sync-recovery",
+    "title": "Unavailable sync",
+    "file": "settings-sync-unavailable-fixture.png",
+    "beforeRoot": "round-16-workflows",
+    "notes": [
+      [
+        91,
+        31,
+        81.2,
+        19.4,
+        "The next step is an available action that opens update settings."
+      ]
+    ]
+  },
+  {
+    "id": "provider-error",
+    "title": "Assistant recovery",
+    "file": "sidebar-error-narrow.png",
+    "beforeRoot": "round-16-workflows",
+    "notes": [
+      [
+        76,
+        31,
+        43,
+        25,
+        "A plain summary leads; exact technical detail stays behind Error details."
+      ]
+    ],
+    "extraAfter": "sidebar-error-details-narrow.png",
+    "extraCaption": "Exact provider details remain available"
+  },
+  {
+    "id": "import-hierarchy",
+    "title": "Setup import step",
+    "file": "onboarding-5-import.png",
+    "beforeRoot": "round-16-workflows",
+    "notes": [
+      [
+        36,
+        40,
+        14.5,
+        49,
+        "Import is secondary to continuing through setup."
+      ]
+    ]
   }
 ]

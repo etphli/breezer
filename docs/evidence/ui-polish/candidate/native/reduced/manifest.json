@@ -1,10 +1,10 @@
 {
-  "startedAt": "2026-11-05T14:20:11.977Z",
+  "startedAt": "2026-11-05T14:58:04.989Z",
   "sourceTreeState": "Per-file nativeInputs and loadedUiSourceHashes identify the exact captured sources. sourceHead records repository HEAD, which may precede uncommitted candidate files.",
-  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app",
+  "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app",
   "appVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
   "shellMetadataVersion": "1.2.0",
-  "sourceHead": "b9c0b466f36dfbd22a1b8b12d760cca70d427c7f",
+  "sourceHead": "447443e5d9642c230cf18c9a797b9785aa3e7348",
   "nativeRuntimeReportedCommit": null,
   "shellResourceReportedCommit": "6bbe560a9bdb4fa0f91b5aad7ed975ee4f862fb5",
   "uiBuildProvenance": "Private UI verification build: retained Chromium 156 core, nine unchanged verified current native UI/resource units reused, and fifty current web UI resources repacked and signed. Not a full release rebuild or reproducible binary attestation.",
@@ -77,20 +77,20 @@
   ],
   "capturedAppPins": [
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/MacOS/Breezer",
-      "sha256": "d8f063e258111a89d5d5fa3c26587d4d3ce90e3811d71d0a87648fb3c8d04be6"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/MacOS/Breezer",
+      "sha256": "50a01cfc18fa5a0a9f22b537e301d8145868cd16f0ce0e1bbdb9b3446ffa47b6"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
-      "sha256": "ad4d75f8f2a1dfdf2c5962220687aa613fc14a24c3503135112cb3f395c56c40"
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Breezer Framework",
+      "sha256": "a3351a26c2220e382ceaf2e2394add24e7eb5b827678175fd0a5d96e5c63ea7a"
     },
     {
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Resources/breezer_ai/host/build-identity.json",
       "sha256": "9d07095cdaa0409fbf5ee47fa7026b2904a1f4cbde2a9ab7ef424cfbaeb3465d"
     }
   ],
   "method": "ScreenCaptureKit current-process window",
-  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/capture-owned-bf3FRz/profile",
+  "profile": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/capture-owned-t8ITTl/profile",
   "fixtureOnly": true,
   "captures": [
     {
@@ -101,15 +101,15 @@
         "scale": 2,
         "title": "Today · Breezer fixture",
         "width": 1100,
-        "windowId": 94910
+        "windowId": 96247
       },
       "ok": true,
-      "path": "/tmp/breezer-ui-polish/round-16-native-reduced/native-motion-start.png",
-      "pid": 91816,
+      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-start.png",
+      "pid": 29796,
       "pixelHeight": 1560,
       "pixelWidth": 2200,
       "screenCaptureAccessGranted": false,
-      "sha256": "a8f6eac6d946f81779d8ad2bc77f71a1e7c48ec34100378be49336602b223897",
+      "sha256": "13d99b2820211704414a2d33e6c30f69475a31e37667008819f53aa24db1c9e1",
       "appearance": {
         "alwaysShowSidebar": false,
         "alwaysShowTopBar": true,
@@ -177,9 +177,9 @@
     "onboarding.js": "63858d0d813e2336fa238c7d3180fbe6f271950340225aa5b1d8f2266dc048f1",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "ccad156006abb96296661869f5039c19981ed511ed8b1aeb411cd8b43115b208",
-    "panel.html": "a4e0d172efb4c9122347e2a0a841f47697f6b1d0a022faeb2ccf40e71def98e1",
-    "panel.js": "9ef67568991e784bd21d336550f47c026edef69ade7634b41189617f5a49d96c",
+    "panel.css": "a9d4109d783ec1a128f7bb000719fcec0f5f8b176bae6066ace259a7972bc7da",
+    "panel.html": "e9878e0a486c18367a3d1dd3fcad7f81b62cf27f120c6c4fcd92c049cd3aa1cc",
+    "panel.js": "2465e3258898c84fdeee426a89d644553fb673bb014f8938ce1ace95fc9aac25",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -191,13 +191,13 @@
     "settings.js": "478d0c91c39b5fccad71876ce908a43d7b4258e48605e14b3f3b3759cec3e078",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
-    "sync-settings.js": "39e65194b86fc2c2f8c6623bafd3eecef517763a3974419c67b0b6d427acd5e9",
+    "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
     "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
     "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
     "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
     "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
-    "translation.css": "b0ef0034dbf2a147378be3a2680dce2db9d8b9d64075a297c0cca7c478f98288",
+    "translation.css": "daff591f5e27e98a8ddb6170cb227e6e590b442a764e8086ed3437d0fb5a73e4",
     "translation.html": "a68dad2bf1d08f25999e135c3cf0213b94681a5087ba3a85a8af5454a8e18781",
     "translation.js": "7eecfff9555c30ab4e07b28bbbeea9ec03ece8a139762bc75db4e19b7641a3f7",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
@@ -209,154 +209,154 @@
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
     "workspace.css": "cdabcc43d8822019d7828b3eeafcdfe017032c9d7105c34167edcea7c4956536",
-    "workspace.html": "6070b9181cbba6114d5651249035ef57182ba472b93fb1bfb5f2020af7343ba5",
+    "workspace.html": "9f7782654a9b3b09fcc223f0502ad34a2b8ab8e602197f0f5c64f95f98d20f2d",
     "workspace.js": "c638d04771337e02d70ee42682c3795d10b7118b9a0ca184e8289f45a440104c"
   },
   "pagePrefersReducedMotion": true,
   "ownedProcesses": [
     {
       "type": "browser",
-      "id": 91816,
-      "cpuTime": 2.413737
+      "id": 29796,
+      "cpuTime": 2.442348
     },
     {
       "type": "renderer",
-      "id": 91902,
-      "cpuTime": 0.097746
+      "id": 29845,
+      "cpuTime": 0.10494
     },
     {
       "type": "renderer",
-      "id": 91901,
-      "cpuTime": 0.19213
+      "id": 29844,
+      "cpuTime": 0.202792
     },
     {
       "type": "renderer",
-      "id": 91900,
-      "cpuTime": 0.38795
+      "id": 29843,
+      "cpuTime": 0.296368
     },
     {
       "type": "renderer",
-      "id": 91897,
-      "cpuTime": 0.427423
+      "id": 29838,
+      "cpuTime": 0.499551
     },
     {
       "type": "renderer",
-      "id": 91893,
-      "cpuTime": 0.20637
+      "id": 29814,
+      "cpuTime": 0.282612
     },
     {
       "type": "renderer",
-      "id": 91899,
-      "cpuTime": 0.186363
+      "id": 29842,
+      "cpuTime": 0.206278
     },
     {
       "type": "renderer",
-      "id": 91894,
-      "cpuTime": 0.153511
+      "id": 29815,
+      "cpuTime": 0.215454
     },
     {
       "type": "GPU",
-      "id": 91848,
-      "cpuTime": 0.698558
+      "id": 29802,
+      "cpuTime": 0.753065
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 91850,
-      "cpuTime": 0.140985
+      "id": 29803,
+      "cpuTime": 0.16927
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 91867,
-      "cpuTime": 0.083684
+      "id": 29805,
+      "cpuTime": 0.073235
     }
   ],
-  "browserPid": 91816,
+  "browserPid": 29796,
   "recording": {
     "start": {
       "blockedNativeHostLaunches": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/capture-owned-bf3FRz/native-tabs-toolbar-motion.mp4",
-      "pid": 91816,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/capture-owned-t8ITTl/native-tabs-toolbar-motion.mp4",
+      "pid": 29796,
       "recordingStarted": true,
       "screenCaptureAccessGranted": false
     },
     "actions": [
       {
         "name": "Select Field notes tab",
-        "at": "2026-11-05T14:20:16.453Z"
+        "at": "2026-11-05T14:58:10.085Z"
       },
       {
         "name": "Select Today tab",
-        "at": "2026-11-05T14:20:16.972Z"
+        "at": "2026-11-05T14:58:10.612Z"
       },
       {
         "name": "Close Reading list tab",
-        "at": "2026-11-05T14:20:17.488Z"
+        "at": "2026-11-05T14:58:11.131Z"
       },
       {
         "name": "Enable centered, minimal address",
-        "at": "2026-11-05T14:20:17.998Z"
+        "at": "2026-11-05T14:58:11.691Z"
       }
     ],
     "finish": {
       "blockedNativeHostLaunches": 2,
-      "bytes": 67010,
+      "bytes": 116820,
       "durationSeconds": 2,
       "ok": true,
-      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/capture-owned-bf3FRz/native-tabs-toolbar-motion.mp4",
-      "pid": 91816,
+      "path": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/capture-owned-t8ITTl/native-tabs-toolbar-motion.mp4",
+      "pid": 29796,
       "recordingFinished": true,
       "screenCaptureAccessGranted": false
     },
-    "path": "/tmp/breezer-ui-polish/round-16-native-reduced/native-tabs-toolbar-motion.mp4",
-    "sha256": "b41c3f69ef564da48ce1b60ae79f76a8a0d68054fb101fe6e1e6b65f6e737b97"
+    "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-tabs-toolbar-motion.mp4",
+    "sha256": "ea7b7a0024b05925d8181bf41a76ec57dfb1140800f69160f1f42c30097399d3"
   },
   "status": "passed",
   "finalOwnedProcesses": [
     {
       "type": "browser",
-      "id": 91816,
-      "cpuTime": 3.305063
+      "id": 29796,
+      "cpuTime": 3.712133
     },
     {
       "type": "renderer",
-      "id": 91902,
-      "cpuTime": 0.098545
+      "id": 29845,
+      "cpuTime": 0.122598
     },
     {
       "type": "renderer",
-      "id": 91900,
-      "cpuTime": 4.819624
+      "id": 29843,
+      "cpuTime": 5.26206
     },
     {
       "type": "renderer",
-      "id": 91897,
-      "cpuTime": 0.487285
+      "id": 29838,
+      "cpuTime": 0.568867
     },
     {
       "type": "renderer",
-      "id": 91893,
-      "cpuTime": 0.445988
+      "id": 29814,
+      "cpuTime": 0.576274
     },
     {
       "type": "renderer",
-      "id": 91899,
-      "cpuTime": 0.226461
+      "id": 29842,
+      "cpuTime": 0.258396
     },
     {
       "type": "GPU",
-      "id": 91848,
-      "cpuTime": 0.862997
+      "id": 29802,
+      "cpuTime": 0.985293
     },
     {
       "type": "network.mojom.NetworkService",
-      "id": 91850,
-      "cpuTime": 0.150871
+      "id": 29803,
+      "cpuTime": 0.184605
     },
     {
       "type": "storage.mojom.StorageService",
-      "id": 91867,
-      "cpuTime": 0.084691
+      "id": 29805,
+      "cpuTime": 0.075243
     }
   ],
   "cleanup": {
@@ -366,5 +366,5 @@
   },
   "capturedAppPinsUnchanged": true,
   "installedPinsUnchanged": true,
-  "finishedAt": "2026-11-05T14:20:20.006Z"
+  "finishedAt": "2026-11-05T14:58:14.404Z"
 }

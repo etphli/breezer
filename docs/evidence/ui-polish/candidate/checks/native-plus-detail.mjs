@@ -1,6 +1,6 @@
 import {chromium} from '/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/tests/ai/node_modules/playwright/index.mjs';
 import {readFile,writeFile} from 'node:fs/promises';
-const folder='/tmp/breezer-ui-polish/round-16-native';const report=JSON.parse(await readFile(folder+'/native-plus-samples.json','utf8'));
+const folder='/tmp/breezer-ui-polish/round-16-final-native';const report=JSON.parse(await readFile(folder+'/native-plus-samples.json','utf8'));
 const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
 try{const page=await browser.newPage({viewport:{width:960,height:900},deviceScaleFactor:1});const tiles=[];
 for(const item of report.results){const png=(await readFile(item.path)).toString('base64');const crop=await page.evaluate(async({png,center})=>{const image=new Image();image.src='data:image/png;base64,'+png;await image.decode();const canvas=document.createElement('canvas');canvas.width=128;canvas.height=64;canvas.getContext('2d').drawImage(image,center.x-64,0,128,64,0,0,128,64);return canvas.toDataURL('image/png');},{png,center:item.center});tiles.push(`<figure><figcaption>${item.mode} · ${item.ms} ms<br>center x=${item.center.x}, y=${item.center.y}</figcaption><img src="${crop}" alt="Actual native plus button sample"></figure>`);}

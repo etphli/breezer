@@ -64,6 +64,19 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
       headings: [...document.querySelectorAll('h1')].map(node => ({ text: node.textContent, rect: node.getBoundingClientRect().toJSON() })),
       main: document.querySelector('main').getBoundingClientRect().toJSON(),
       viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+      consentBoundaryContrast: (() => {
+        const input = document.getElementById('consent'), style = getComputedStyle(input);
+        const context = document.createElement('canvas').getContext('2d');
+        const luminance = color => {
+          context.fillStyle = color; context.fillRect(0, 0, 1, 1);
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).reduce((sum, value, i) => {
+            const channel = value / 255;
+            return sum + (channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4) * [.2126, .7152, .0722][i];
+          }, 0);
+        };
+        const edge = luminance(style.borderTopColor), surface = luminance(getComputedStyle(input.closest('.sharing-group')).backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(document.querySelector('.translation-form')).backgroundColor : getComputedStyle(input.closest('.sharing-group')).backgroundColor);
+        return (Math.max(edge, surface) + .05) / (Math.min(edge, surface) + .05);
+      })(),
       sourceFit: (() => {
         const select = document.querySelector('#source'), style = getComputedStyle(select);
         const canvas = document.createElement('canvas'), context = canvas.getContext('2d'); context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
@@ -72,6 +85,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
       })(),
     }));
     assert.equal(geometry.headings.length, 1, `${file} has one heading`);
+    assert.ok(geometry.consentBoundaryContrast >= 3, `${file}: consent boundary has at least 3:1 contrast`);
     assert.ok(geometry.sourceFit.textWidth <= geometry.sourceFit.availableWidth, `${file}: selected source label fits before the chevron`);
     await ui.mouse.move(geometry.viewport.width - 2, 2);
     let previous;

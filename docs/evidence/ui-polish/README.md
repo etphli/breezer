@@ -289,3 +289,13 @@ header frames decoded separately. Nine unchanged native units were reused with
 the current fifty-file UI payload. Physical-input and temporal limits remain
 explicit. Fourteen annotated before/after pairs are prepared before the next
 review. The installed app and profile are unchanged; PR #17 remains unpushed.
+
+Round 15 is complete at 8.8, 8.8 and 8.7. Actual starts were 0.721 seconds
+apart and all three overlapped for 671.068 seconds. Both Sol reports confirm
+focus clearance and footer spacing as concrete finishing issues; those were
+already corrected in candidate 16. Their remaining accepted feedback adds
+command copying, stronger dark consent boundaries, direct sync recovery, plain
+provider-failure summaries with exact details disclosed, and secondary setup
+import emphasis. The final candidate 16 pack refreshes every source-matching
+state. Nineteen annotated comparisons were shown before the next council.
+The threshold remains unmet; all work stays local and PR #17 is unpushed.

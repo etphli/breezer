@@ -102,7 +102,9 @@ function panelHarness() {
   function start(id) {
     const message = { id: id + '-reply', role: 'assistant', text: '' };
     api.state.messages.push(message);
-    api.messageNodes.set(message.id, f.root());
+    const body = f.root();
+    const article = f.root(); article.append(body); body.parentElement = article;
+    api.messageNodes.set(message.id, body);
     api.state.running = { id, assistantId: message.id, message };
     return message;
   }

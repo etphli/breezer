@@ -1,0 +1,4 @@
+Decoded 72 actual native frames
+Decoded 72 actual native frames
+{"root":"/tmp/breezer-ui-polish/round-16-final-native","decodedFrames":72,"first":0,"last":2448.333333333333,"completeEncodedFrameSequence":true}
+{"root":"/tmp/breezer-ui-polish/round-16-final-native-reduced","decodedFrames":72,"first":0,"last":2505,"completeEncodedFrameSequence":true}

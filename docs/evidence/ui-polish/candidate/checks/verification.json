@@ -5,7 +5,7 @@
   "unresolvedFailures": 0,
   "skipped": 2,
   "method": "One uninterrupted complete Node suite, then assistant/research walkthroughs, focused narrow-field geometry and private native current-UI capture.",
-  "fullLog": "/tmp/breezer-ui-round16-full-final.log",
+  "fullLog": "/tmp/breezer-ui-round16final-full-final.log",
   "matrixCaptures": 490,
   "sourceFiles": 50,
   "newlyCompiledNativeUnits": 0,
@@ -20,13 +20,13 @@
   "privateCompiledUiUnits": 9,
   "nativeLoadedSourceFiles": 50,
   "nativeProfileIconMinimumContrast": 8.838213838897685,
-  "beforeAfterPairs": 14,
+  "beforeAfterPairs": 19,
   "accountConnectionDialogs": 4,
   "selectArrowChecks": 56,
   "compactLayoutCases": 72,
   "completeEncodedNativeFrameCounts": [
-    42,
-    36
+    72,
+    72
   ],
   "dialogMotionModeCases": 6,
   "nativePlusVisibleSamples": 16,

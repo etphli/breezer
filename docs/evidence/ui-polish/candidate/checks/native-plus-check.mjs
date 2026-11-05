@@ -1,7 +1,7 @@
 import {chromium} from '/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/tests/ai/node_modules/playwright/index.mjs';
 import {readFile,writeFile} from 'node:fs/promises';
-const base='/tmp/breezer-ui-polish',output=base+'/round-16-native';const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
-try{const page=await browser.newPage();const images=[];for(const mode of ['normal','reduced'])for(const ms of [0,100,300,600,900,1200,1500,1800]){const path=base+`/round-16-native${mode==='reduced'?'-reduced':''}/native-motion-${ms}.png`;images.push({mode,ms,path,png:(await readFile(path)).toString('base64')});}
+const base='/tmp/breezer-ui-polish',output=base+'/round-16-final-native';const browser=await chromium.launch({headless:true,executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
+try{const page=await browser.newPage();const images=[];for(const mode of ['normal','reduced'])for(const ms of [0,100,300,600,900,1200,1500,1800]){const path=base+`/round-16-final-native${mode==='reduced'?'-reduced':''}/native-motion-${ms}.png`;images.push({mode,ms,path,png:(await readFile(path)).toString('base64')});}
 const results=await page.evaluate(async images=>{
  const c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});
  const load=async png=>{const image=new Image();image.src='data:image/png;base64,'+png;await image.decode();c.width=image.width;c.height=image.height;ctx.drawImage(image,0,0);};

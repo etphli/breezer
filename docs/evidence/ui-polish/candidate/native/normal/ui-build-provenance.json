@@ -2,7 +2,7 @@
   "scope": "Private UI verification build: retained Chromium 156 core, nine unchanged verified current native UI/resource units reused, and fifty current web UI resources repacked and signed. Not a full release rebuild or reproducible binary attestation.",
   "runtimeVersion": "Breezer 0.20.1.1 (Chromium 156.0.8078.47)",
   "shellMetadataVersion": "1.2.0",
-  "frameworkSha256": "ad4d75f8f2a1dfdf2c5962220687aa613fc14a24c3503135112cb3f395c56c40",
+  "frameworkSha256": "a3351a26c2220e382ceaf2e2394add24e7eb5b827678175fd0a5d96e5c63ea7a",
   "compiledUiUnits": [
     {
       "source": "chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc",
@@ -73,7 +73,7 @@
   "candidate15Build": {
     "newlyCompiledUnits": 0,
     "unchangedCurrentUiUnitsReused": 9,
-    "baseBuildReceipt": "/tmp/breezer-ui-round15-native-build/build-receipt.json",
+    "baseBuildReceipt": "/tmp/breezer-ui-round16-native-build/build-receipt.json",
     "scope": "Native inputs and mapping are unchanged. Current web UI resources repacked in an APFS COW clone.",
     "priorPrivateAppPinsUnchanged": true,
     "installedPinsUnchanged": true
@@ -181,7 +181,7 @@
       "schemaSourceSha256": "56c0c2caddb728f19216fbe2abbe5749f8e7cb9cdae3392fb925d7ad36507d97"
     }
   ],
-  "resourcePayloadSha256": "b94f327664a78995fd702610a4f5c101af3d1d33246f0cb660298e25d4658fb6",
+  "resourcePayloadSha256": "baf07a2fc5a0befaaf6ea18d608c5282dad7287258f8171c5a5cdaf8fab04ad8",
   "currentUiSourceHashes": {
     "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
     "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
@@ -199,9 +199,9 @@
     "onboarding.js": "63858d0d813e2336fa238c7d3180fbe6f271950340225aa5b1d8f2266dc048f1",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "ccad156006abb96296661869f5039c19981ed511ed8b1aeb411cd8b43115b208",
-    "panel.html": "a4e0d172efb4c9122347e2a0a841f47697f6b1d0a022faeb2ccf40e71def98e1",
-    "panel.js": "9ef67568991e784bd21d336550f47c026edef69ade7634b41189617f5a49d96c",
+    "panel.css": "a9d4109d783ec1a128f7bb000719fcec0f5f8b176bae6066ace259a7972bc7da",
+    "panel.html": "e9878e0a486c18367a3d1dd3fcad7f81b62cf27f120c6c4fcd92c049cd3aa1cc",
+    "panel.js": "2465e3258898c84fdeee426a89d644553fb673bb014f8938ce1ace95fc9aac25",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -213,13 +213,13 @@
     "settings.js": "478d0c91c39b5fccad71876ce908a43d7b4258e48605e14b3f3b3759cec3e078",
     "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
     "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
-    "sync-settings.js": "39e65194b86fc2c2f8c6623bafd3eecef517763a3974419c67b0b6d427acd5e9",
+    "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
     "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
     "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
     "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
     "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
     "translation-settings.js": "0be3f803a019fca8faca5f1fda785ab1b7844ac5af4eab2136474f30bd2a3fb8",
-    "translation.css": "b0ef0034dbf2a147378be3a2680dce2db9d8b9d64075a297c0cca7c478f98288",
+    "translation.css": "daff591f5e27e98a8ddb6170cb227e6e590b442a764e8086ed3437d0fb5a73e4",
     "translation.html": "a68dad2bf1d08f25999e135c3cf0213b94681a5087ba3a85a8af5454a8e18781",
     "translation.js": "7eecfff9555c30ab4e07b28bbbeea9ec03ece8a139762bc75db4e19b7641a3f7",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
@@ -231,7 +231,7 @@
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
     "workspace.css": "cdabcc43d8822019d7828b3eeafcdfe017032c9d7105c34167edcea7c4956536",
-    "workspace.html": "6070b9181cbba6114d5651249035ef57182ba472b93fb1bfb5f2020af7343ba5",
+    "workspace.html": "9f7782654a9b3b09fcc223f0502ad34a2b8ab8e602197f0f5c64f95f98d20f2d",
     "workspace.js": "c638d04771337e02d70ee42682c3795d10b7118b9a0ca184e8289f45a440104c"
   },
   "installedPinsUnchanged": {

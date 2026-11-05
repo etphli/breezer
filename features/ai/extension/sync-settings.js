@@ -16,8 +16,7 @@ export function mountSyncSettings({ container, api }) {
   label.append(heading, description);
   const button = document.createElement('button'); button.type = 'button'; button.className = 'button'; button.textContent = 'Set up or manage sync';
   const available = typeof api.breezerPrivate?.readWorkspaceSync === 'function';
-  button.disabled = !available;
-  if (!available) { heading.textContent = 'Sync unavailable'; description.textContent = 'Sync is not available in this version. Saved data stays on this device. Check General for updates.'; }
+  if (!available) { heading.textContent = 'Sync unavailable'; description.textContent = 'Sync is not available in this version. Saved data stays on this device.'; button.textContent = 'Open update settings'; }
   row.append(label, button); group.append(row);
   const state = document.createElement('p'); state.setAttribute('role', 'status'); state.className = 'field-note';
   const note = document.createElement('details'); note.className = 'setting-details';
@@ -77,7 +76,8 @@ export function mountSyncSettings({ container, api }) {
   const changed = (changes, area) => { if (area === 'local' && changes[SYNC_STATE_KEY]) render(changes[SYNC_STATE_KEY].newValue); };
   api.storage.onChanged?.addListener(changed);
   button.addEventListener('click', async () => {
-    if (!available || disposed || opening) return;
+    if (disposed || opening) return;
+    if (!available) { location.hash = '#/settings/general'; return; }
     opening = true; button.disabled = true;
     try { await api.tabs.create({ url: 'chrome://breezer-sync/' }); }
     catch { if (!disposed) state.textContent = 'Could not open Sync settings. Try again.'; }

@@ -1125,9 +1125,15 @@ dialog .privacy-note {
 .account-options > summary::before { content: ""; width: 6px; height: 6px; flex: none; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 .account-options[open] > summary::before { transform: translateY(-2px) rotate(45deg); }
 .account-options[open] > p { margin: 10px 0; color: var(--muted); }
-.account-options > div { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 8px; }
+.account-options > div { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-top: 8px; }
 .account-options > div > span { font-size: 12px; color: var(--muted); }
-.account-options code { font: 12px ui-monospace, "SFMono-Regular", Menlo, monospace; user-select: text; }
+.account-options code { font: 12px ui-monospace, "SFMono-Regular", Menlo, monospace; user-select: text; overflow-wrap: anywhere; }
+.account-options [data-copy-command] { min-height: 30px; padding: 4px 6px; border: 1px solid var(--hairline); border-radius: 5px; color: var(--accent-ink); font-size: 12px; }
+.account-options [data-copy-command]:hover { background: var(--hover); }
+.copy-feedback { grid-column: 2 / -1; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.error-details { margin-top: 10px; color: var(--muted); font-size: 13px; }
+.error-details summary { cursor: pointer; }
+.error-details p { margin: 8px 0 0; overflow-wrap: anywhere; }
 .provider-error code { font-size: 12px; user-select: text; }
 
 @media (max-width: 420px) {
