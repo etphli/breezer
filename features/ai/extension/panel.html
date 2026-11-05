@@ -24,10 +24,12 @@
         <h1>What are we working on<span id="greeting-name"></span>?</h1>
         <div id="welcome-status" class="welcome-status" role="status" hidden>
           <p id="welcome-status-text"></p>
-          <div id="welcome-account-steps" class="account-options" hidden>
+          <details id="welcome-account-steps" class="account-options" hidden>
+            <summary>Sign-in instructions</summary>
+            <p>In Terminal, run the command for one account. Then return here and refresh.</p>
             <div><span>Codex</span><code>codex login</code></div>
             <div><span>Claude</span><code>claude auth login</code></div>
-          </div>
+          </details>
           <button type="button" id="welcome-action" class="welcome-action" hidden></button>
         </div>
         <div class="suggestions">

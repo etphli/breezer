@@ -64,8 +64,15 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
       headings: [...document.querySelectorAll('h1')].map(node => ({ text: node.textContent, rect: node.getBoundingClientRect().toJSON() })),
       main: document.querySelector('main').getBoundingClientRect().toJSON(),
       viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+      sourceFit: (() => {
+        const select = document.querySelector('#source'), style = getComputedStyle(select);
+        const canvas = document.createElement('canvas'), context = canvas.getContext('2d'); context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        const label = select.selectedOptions[0]?.textContent || '';
+        return { label, textWidth: context.measureText(label).width, availableWidth: select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) };
+      })(),
     }));
     assert.equal(geometry.headings.length, 1, `${file} has one heading`);
+    assert.ok(geometry.sourceFit.textWidth <= geometry.sourceFit.availableWidth, `${file}: selected source label fits before the chevron`);
     await ui.mouse.move(geometry.viewport.width - 2, 2);
     let previous;
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -105,9 +112,9 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     if (!process.env.BREEZER_AI_EVIDENCE) return;
     for (const colorMode of ['light', 'dark']) {
       await setAppearance({ theme: 'mint', colorMode });
-      for (const width of [1200, 390]) {
+      for (const width of state === 'before-sharing' ? [1200, 390, 320] : [1200, 390]) {
         await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
-        await capture(`translation-${state}-${colorMode}${width === 390 ? '-narrow' : ''}.png`);
+        await capture(`translation-${state}-${colorMode}${width === 390 ? '-narrow' : width === 320 ? '-320' : ''}.png`);
       }
     }
   };

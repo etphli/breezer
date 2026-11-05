@@ -132,7 +132,8 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await page.locator('#settings-results [role="option"]').first().waitFor();
     assert.equal(await page.locator('#settings-search').getAttribute('aria-expanded'), 'true');
     assert.deepEqual(await visiblePages(page), [], 'results replace the page');
-    assert.equal(await page.locator('#settings-results [aria-selected="true"] .result-title').innerText(), 'Appearance');
+    assert.equal(await page.locator('#settings-results [aria-selected="true"] .result-title').innerText(), 'Color mode');
+    assert.equal(await page.locator('#settings-results [aria-selected="true"] .result-meta').innerText(), 'Light');
     assert.equal(await page.locator('#settings-crumb').innerText(), 'Search');
     await page.screenshot({ path: join(evidence, 'settings-redesign-search-light.png') });
     await page.keyboard.press('Enter');

@@ -53,7 +53,7 @@ port.onMessage.addListener(message => {
   }
   if (message.type === 'languages') {
     languages = message.languages;
-    $('source').replaceChildren(option('auto', 'Detect language'), ...languages.map(l => option(l.code, l.name)));
+    $('source').replaceChildren(option('auto', 'Auto-detect'), ...languages.map(l => option(l.code, l.name)));
     $('source').value = languages.some(l => l.code === prefs.source) ? prefs.source : 'auto';
     targets();
     if ([...$('target').options].some(o => o.value === prefs.target)) $('target').value = prefs.target;

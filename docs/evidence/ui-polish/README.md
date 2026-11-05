@@ -100,15 +100,16 @@ are retained in the adjacent Markdown files.
 | Breezer, candidate 9 complete council | 8.6 | 8.7 | 8.8 |
 | Breezer, candidate 10 interrupted cohort | 8.5 | 8.5 | 8.7, later resume |
 | Breezer, candidate 11 complete council | 8.5 | 8.4 | 8.8 |
+| Breezer, candidate 12 interrupted cohort | 8.5 | 8.5 | No score: five-hour quota |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
 Baseline scores use the evidence scope described above. They are independent
 overall design judgments, not direct browser comparisons or usability benchmarks.
 
-The 22-category rubric covers hierarchy, typography, alignment, spacing, rhythm/density, consistency,
+The 22-category web-UI rubric covers hierarchy, typography, alignment, spacing, rhythm/density, consistency,
 craft/polish, color across modes, contrast, navigation, sidebar, settings/controls, assistant,
-new tab, responsive layouts, custom UI motion, empty/error states, keyboard/focus appearance, onboarding, What's New, the linked efficiency article and the translation window. Native top tabs and toolbar were unverified in rounds 1–11; the next review can inspect the new native evidence separately.
+new tab, responsive layouts, custom UI motion, empty/error states, keyboard/focus appearance, onboarding, What's New, the linked efficiency article and the translation window. Native top tabs and toolbar were unverified in rounds 1–11. From round 12, three additional scored categories cover native top tabs, toolbar/window controls and observed native motion, with the compiled-runtime provenance stated.
 
 Historical release-page captures can be reproduced without changing the worktree:
 
@@ -120,7 +121,7 @@ The fixture reads that commit’s resources directly from Git. The linked effici
 
 The translation window has 28 additional appearance captures (seven palettes, light/dark, desktop/narrow), plus eight before-sharing and error states. These use a real disposable MV3 translation session with a fixture appearance bridge. The enabled primary action is measured at at least 5.21:1 text contrast across the matrix; native window geometry and bridge execution remain unverified.
 
-Translation captures also assert one DOM page heading, require two identical consecutive viewport PNGs, and check the empty area below the content for stray painted text. `translation-capture-geometry.json` records those checks for all 36 images. An earlier frozen capture had a duplicate painted heading without a duplicate DOM heading; its renderer/compositor cause remains unestablished. The current capture guard rejects that artifact.
+Translation captures also assert one DOM page heading, require two identical consecutive viewport PNGs, and check the empty area below the content for stray painted text. From candidate 13, `translation-capture-geometry.json` records those checks and selected-label text width for all 38 images, including both 320px modes. An earlier frozen capture had a duplicate painted heading without a duplicate DOM heading; its renderer/compositor cause remains unestablished. The current capture guard rejects that artifact.
 
 Static assistant and research captures disable animation during capture, so they show settled text and controls. The separate recordings preserve normal and reduced-motion behavior.
 
@@ -182,3 +183,31 @@ after; owned processes exited and temporary profiles were removed.
 GPT-6.1 Sol wrote candidate 12 and its capture tools. No new council has reviewed
 it, and no 9.5 score or completion is claimed. All changes remain local. PR #17
 has not been pushed or updated.
+
+Candidate 12 returned 8.5 from both Sol reviewers. Both were satisfied overall,
+with one necessary fit correction: the narrow From selector clipped the end of
+“Detect language”. Native top tabs, toolbar/window controls and sampled native
+motion were scored directly with the compiled-runtime provenance stated. Opus
+exhausted its five-hour quota before completing the review and returned no score.
+The three calls were issued together; actual provider starts were 11.234 seconds
+apart and all three overlapped for 466.195 seconds. This remains an incomplete
+council attempt, so there are still four complete simultaneous passes.
+
+Candidate 13 fixes the clipped translation label and stacks language controls at
+320px. Settings search names the setting and current choice. Activity memory has
+shorter copy and aligned summary rows while retaining explicit provider consent.
+Signed-out setup discloses technical instructions behind a clear first action.
+Update status spacing, Organato error grouping and methodology reading measure
+are refined. Secondary release diagrams open with their technical disclosures;
+the default narrow release page is 785px shorter. Chrome's chart key is consistent
+across comparisons, without changing any measurements. Thirteen annotated pairs
+are retained in `candidate/comparisons/candidate-13-*.png`.
+
+One uninterrupted suite passed 545 checks with zero failures and two explicit
+skips, followed by both browser walkthroughs. All 490 matrix captures match the
+50 current UI source hashes. All 38 translation captures pass stable-frame,
+heading, paint and selected-label fit guards. Twelve fresh motion sequences pass
+all six reduced-motion assertions. The 39 native window captures and two native
+recordings are reused after verifying every file hash and unchanged native
+inputs. GPT-6.1 Sol wrote this refinement. It has no council score yet; the 9.5
+threshold remains unmet. All work remains local and PR #17 remains unpushed.

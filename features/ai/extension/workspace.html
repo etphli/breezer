@@ -147,7 +147,7 @@
                   </span>
                 </div>
                 <div class="setting-row" data-search-terms="dark mode light mode system color scheme night">
-                  <div class="setting-label"><span id="mode-label">Appearance</span><small>System follows your Mac.</small></div>
+                  <div class="setting-label"><span id="mode-label">Color mode</span><small>Light, dark, or your Mac’s appearance.</small></div>
                   <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-field="colorMode">
                     <button role="radio" data-value="system">System</button>
                     <button role="radio" data-value="light">Light</button>
@@ -283,7 +283,7 @@
                   <input id="dashboard-enabled" class="toggle" type="checkbox" checked>
                 </div>
                 <div class="setting-row" data-search-terms="exams assignments to-dos deadlines">
-                  <label class="setting-label" for="organato-enabled">Organato on the dashboard<small>Show upcoming exams, assignments, and to-dos.</small></label>
+                  <label class="setting-label" for="organato-enabled">Organato on the dashboard<small>Show upcoming exams, assignments, and <span class="keep-word">to-dos</span>.</small></label>
                   <input id="organato-enabled" class="toggle" type="checkbox" checked>
                 </div>
                 <div class="setting-row" data-search-terms="ai assistant organato tools">
@@ -451,8 +451,8 @@
           <div id="wl-organato-connect-status"><p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p></div>
           <div class="wl-optout">
             <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
-            <div id="wl-organato-off-status"></div>
             <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Change this later in Settings.</p>
+            <div id="wl-organato-off-status"></div>
           </div>
         </section>
 

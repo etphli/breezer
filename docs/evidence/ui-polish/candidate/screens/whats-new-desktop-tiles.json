@@ -1,5 +1,5 @@
 {
-  "height": 5782,
+  "height": 5359,
   "viewport": {
     "width": 1440,
     "height": 900
@@ -38,13 +38,8 @@
     },
     {
       "file": "whats-new-desktop-tile-07.png",
-      "scrollY": 4800,
-      "mastheadBottom": -4010.71875
-    },
-    {
-      "file": "whats-new-desktop-tile-08.png",
-      "scrollY": 4882,
-      "mastheadBottom": -4092.71875
+      "scrollY": 4459,
+      "mastheadBottom": -3669.71875
     }
   ]
 }

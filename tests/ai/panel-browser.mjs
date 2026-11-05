@@ -390,12 +390,12 @@ try {
   });
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
-  assert.match(await page.locator('#welcome-status').innerText(), /Sign in to one account in Terminal/);
+  assert.match(await page.locator('#welcome-status').innerText(), /Sign in to Codex or Claude/);
   assert.equal(await page.locator('#model-label').innerText(), 'Accounts');
   await page.getByLabel('Message Breezer').fill('Hello');
   await page.getByLabel('Message Breezer').press('Enter');
   assert.equal(await page.locator('#notice').isVisible(), false);
-  assert.match(await page.locator('#welcome-status-text').innerText(), /Sign in to one account in Terminal/);
+  assert.match(await page.locator('#welcome-status-text').innerText(), /Sign in to Codex or Claude/);
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Hello');
   assert.equal(await page.locator('#model-menu').isVisible(), true);
   await page.keyboard.press('Escape');
@@ -407,6 +407,10 @@ try {
   const composerWidth = await page.locator('#composer').evaluate(node => node.getBoundingClientRect().width);
   assert.ok(accountWidth < composerWidth * .65, 'Accounts keeps a content-width focus target');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-narrow.png` });
+  assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), false, 'commands are secondary to the sign-in explanation');
+  await page.getByRole('button', { name: 'Set up an account', exact: true }).click();
+  assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), true, 'sign-in instructions remain available');
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-instructions-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
   await page.getByRole('button', { name: 'Refresh accounts' }).click();

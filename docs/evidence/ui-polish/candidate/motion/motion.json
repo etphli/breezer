@@ -107,7 +107,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 40,
+    "videoFrameOriginMs": 80,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -349,7 +349,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 53.50215648638164,
+        "duration": 53.45719752484348,
         "easing": "ease",
         "endDelay": 0,
         "fill": "backwards",
@@ -360,7 +360,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 111.73870562782265,
+        "duration": 111.70039743765412,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
         "fill": "backwards",
@@ -523,7 +523,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 520,
+    "videoFrameOriginMs": 40,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -564,7 +564,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 880,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -622,7 +622,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 40,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -651,7 +651,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -680,7 +680,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -738,7 +738,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

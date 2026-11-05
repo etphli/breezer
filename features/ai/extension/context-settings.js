@@ -63,10 +63,10 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     return node;
   };
   const section = el('section', '', 'settings-section context-settings');
-  section.setAttribute('aria-label', 'Context and habits');
+  section.setAttribute('aria-label', 'Activity memory');
   const note = text => el('p', text, 'section-note');
-  section.append(el('h2', 'Context and habits'),
-    note('Optional activity memory for the sites you choose. Stored on this device for seven days.'),
+  section.append(el('h2', 'Activity memory'),
+    note('Remember visits to selected sites on this device for seven days.'),
   );
   const localGroup = el('div', '', 'setting-group');
   const localActions = el('div', '', 'context-actions');
@@ -74,19 +74,19 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   const maintenanceActions = el('div', '', 'setting-actions');
   localActions.append(saveActions, maintenanceActions);
   const summarySection = el('section', '', 'settings-section context-settings');
-  const summaryGroup = el('div', '', 'setting-group panel');
+  const summaryGroup = el('div', '', 'setting-group context-summary');
   summarySection.append(el('h2', 'Activity summary'),
-    note('Summarize sends the site names and counts below to OpenAI through your Codex account. Nothing is added to ordinary chats.'), summaryGroup);
+    note('OpenAI receives these site names and counts through Codex only when you choose Summarize.'), summaryGroup);
   const check = (text, key, parent = localGroup) => {
     const label = el('label', '', 'setting-row');
     const input = el('input', '', 'toggle'); input.type = 'checkbox'; input.checked = false; input.dataset.contextControl = key;
     label.append(el('span', text, 'setting-label'), input); parent.append(label);
     return input;
   };
-  const enabled = check('Remember activity on the sites I choose', 'enabled');
+  const enabled = check('Remember selected sites', 'enabled');
   const sitesLabel = el('label', 'Sites', 'setting-field');
-  const sites = el('textarea'); sites.rows = 3; sites.placeholder = 'docs.example.org'; sites.spellcheck = false;
-  sitesLabel.append(sites, el('small', 'One hostname per line, up to 20. Subdomains are separate.', 'field-note'));
+  const sites = el('textarea'); sites.rows = 2; sites.placeholder = 'docs.example.org'; sites.spellcheck = false;
+  sitesLabel.append(sites, el('small', 'One site per line, up to 20. Subdomains count separately.', 'field-note'));
   localGroup.append(sitesLabel);
   const details = el('details', '', 'setting-details');
   details.append(el('summary', 'What is remembered'),
@@ -123,7 +123,7 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   const clear = button('Clear activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }), maintenanceActions, 'button danger');
   const empty = el('p', 'No activity recorded.', 'empty-state');
   summaryGroup.append(table, empty, suggestions);
-  const consent = check('Allow OpenAI summaries when I click Summarize', 'consent', summaryGroup);
+  const consent = check('Allow OpenAI summaries', 'consent', summaryGroup);
   consent.addEventListener('change', () => run(async () => { output.textContent = ''; await client.request('consent', { consent: consent.checked }); await refresh(); }), { signal: events.signal });
   const summaryActions = el('div', '', 'setting-actions');
   summaryGroup.append(summaryActions);
@@ -137,7 +137,7 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   }), summaryActions, 'button primary');
   const stop = button('Stop summary', () => run(async () => { output.textContent = ''; await client.request('cancel'); }), summaryActions); stop.hidden = true;
   const summaryDetails = el('details', '', 'setting-details');
-  summaryDetails.append(el('summary', 'Summary limits and privacy'), note('At least three samples are needed. One request per hour when activity changes. GPT-6 Luna uses your Codex plan allowance. If Luna is unavailable, local suggestions remain. Clearing local activity cannot recall data already sent to OpenAI.'));
+  summaryDetails.append(el('summary', 'Summary limits and privacy'), note('At least three samples are needed. One request per hour when activity changes. GPT-6 Luna uses your Codex plan allowance. Nothing is added to ordinary chats. If Luna is unavailable, local suggestions remain. Clearing local activity cannot recall data already sent to OpenAI.'));
   summaryGroup.append(output);
   summarySection.append(summaryDetails);
   section.append(status, error);

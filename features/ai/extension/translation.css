@@ -13,7 +13,7 @@ p { margin: 14px 0; }
 .sharing-group { padding: 20px; border-top: 1px solid var(--line); }
 .languages label { position: relative; display: grid; gap: 8px; font-weight: 600; }
 .languages label::after { content: ""; position: absolute; right: 14px; bottom: 18px; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); pointer-events: none; }
-.languages select { width: 100%; min-width: 0; appearance: none; padding-right: 32px; }
+.languages select { width: 100%; min-width: 0; appearance: none; padding-left: 10px; padding-right: 28px; text-overflow: ellipsis; }
 button, select { color: var(--ink); border: 1px solid var(--line); background: var(--raised); border-radius: 7px; padding: 8px 12px; font: inherit; }
 button { cursor: pointer; }
 button:hover:not(:disabled) { background: var(--hover); }
@@ -43,6 +43,7 @@ button:disabled { opacity: .5; cursor: default; }
 .sharing-details summary::before { content: ""; width: 6px; height: 6px; flex: none; margin: 0 3px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 .sharing-details[open] summary::before { transform: rotate(45deg); }
 @media (max-width: 420px) { main { padding: 24px 20px; } .languages { gap: 12px; padding: 16px 16px 12px; } .language-tools { padding: 0 16px 12px; } .sharing-group, .automatic-choice { padding: 16px; } }
+@media (max-width: 360px) { .languages { grid-template-columns: 1fr; gap: 16px; } }
 .settings-link { color: var(--muted); padding: 0; border: 0; background: none; text-decoration: underline; }
 #languages.reload { min-height: 32px; padding: 4px 0; border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; }
 #languages.reload:hover:not(:disabled) { color: var(--ink); }

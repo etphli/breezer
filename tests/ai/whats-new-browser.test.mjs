@@ -143,15 +143,16 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       // Illustrations are hidden from assistive tech and not focusable.
       assert.equal(await page.$$eval('.plate', (plates) => plates.every((plate) => plate.getAttribute('aria-hidden') === 'true')), true);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-      // Rows after the lead alternate: even rows put their drawing on the right.
+      // Main illustrations alternate; secondary fixes keep their diagrams in disclosures.
       assert.deepEqual(await page.$$eval('.feature', (rows) => rows.map((row) => {
-        const [plate, copy] = [row.querySelector('.plate'), row.querySelector('.feature-copy')].map((node) => node.getBoundingClientRect().left);
-        return plate < copy ? 'left' : 'right';
-      })), ['left', 'right', 'left', 'right', 'left', 'right', 'left', 'right', 'left', 'right']);
+        const plate = row.querySelector('.plate').getBoundingClientRect(), copy = row.querySelector('.feature-copy').getBoundingClientRect();
+        return !plate.width ? 'compact' : plate.left < copy.left ? 'left' : 'right';
+      })), ['left', 'right', 'left', 'compact', 'compact', 'compact', 'left', 'right', 'left', 'right']);
       // Every drawing renders inside its plate.
       assert.equal(await page.$$eval('.plate .art', (arts) => arts.every((art) => {
         const box = art.getBoundingClientRect();
         const plate = art.parentElement.getBoundingClientRect();
+        if (!box.width) return Boolean(art.closest('.feature-secondary')) && !art.closest('.feature').querySelector('.feature-details').open;
         return box.width > 200 && box.height > 120 && box.right <= plate.right + 0.5 && box.bottom <= plate.bottom + 0.5;
       })), true);
       await page.screenshot({ path: `${evidence}/whats-new-desktop.png` });
@@ -179,6 +180,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       const explanations = await page.locator('.feature-details > summary').all();
       for (const summary of explanations) await summary.click();
       assert.equal(await page.locator('.feature-details[open]').count(), explanations.length);
+      assert.equal(await page.locator('.feature-secondary > .plate').evaluateAll(plates => plates.every(plate => plate.getBoundingClientRect().width > 200)), true, 'secondary diagrams appear with their explanations');
       await captureLongPage(page, 'whats-new-expanded-desktop');
       await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-expanded.png`, animations: 'disabled' });
     });

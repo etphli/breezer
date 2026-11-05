@@ -152,8 +152,8 @@ function renderWelcomeStatus(selected) {
   if (!selected && !state.discoveryPending) {
     const connected = state.providers.some((item) => item.available && item.authenticated);
     showAccounts = !connected;
-    text = connected ? 'Choose a model to start.' : 'Sign in to one account in Terminal, then refresh.';
-    action = connected ? 'Choose a model' : 'Refresh accounts';
+    text = connected ? 'Choose a model to start.' : 'Sign in to Codex or Claude to start.';
+    action = connected ? 'Choose a model' : $('welcome-account-steps').open ? 'Refresh accounts' : 'Set up an account';
   } else if (state.pageKnown && !state.page) {
     text = 'Open a web page to summarize it or get help with it. You can still ask anything below.';
   }
@@ -667,8 +667,14 @@ $('model-menu').addEventListener('focusout', (event) => {
 });
 $('welcome-action').addEventListener('click', () => {
   if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);
+  else if (!$('welcome-account-steps').open) {
+    $('welcome-account-steps').open = true;
+    $('welcome-account-steps').querySelector('summary').focus();
+    renderWelcomeStatus(selectedModel());
+  }
   else refreshModels();
 });
+$('welcome-account-steps').addEventListener('toggle', () => renderWelcomeStatus(selectedModel()));
 $('reasoning-select').addEventListener('change', saveSettings);
 $('speed-select').addEventListener('change', () => {
   saveSettings();

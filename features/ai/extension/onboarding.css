@@ -421,7 +421,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
   .wl-row { flex-wrap: wrap; }
 }
 #wl-organato-status[data-state="success"] { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--accent); }
-.welcome .status-line[data-state="error"] { background: var(--card); }
+.welcome .status-line[data-state="error"] { background: var(--danger-surface); }
 
 @media (forced-colors: active) {
   .wl-choice[aria-checked="true"], .wl-swatch[aria-checked="true"] { outline: 3px solid Highlight; }

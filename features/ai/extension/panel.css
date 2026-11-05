@@ -1109,9 +1109,14 @@ dialog .privacy-note {
 .source-details li[data-state="unavailable"] small { color:var(--danger); }
 
 .account-options { margin: 14px 0; }
+.account-options > summary { display: flex; align-items: center; gap: 8px; list-style: none; cursor: pointer; font-weight: 500; }
+.account-options > summary::-webkit-details-marker { display: none; }
+.account-options > summary::before { content: ""; width: 6px; height: 6px; flex: none; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
+.account-options[open] > summary::before { transform: rotate(45deg); }
+.account-options[open] > p { margin: 10px 0; color: var(--muted); }
 .account-options > div { display: grid; grid-template-columns: 48px minmax(0, 1fr); align-items: center; gap: 10px; margin-top: 8px; }
 .account-options > div > span { font-size: 12px; color: var(--muted); }
-.account-options code { font-size: 12px; user-select: text; }
+.account-options code { font: 12px ui-monospace, "SFMono-Regular", Menlo, monospace; user-select: text; }
 .provider-error code { font-size: 12px; user-select: text; }
 
 @media (max-width: 420px) {

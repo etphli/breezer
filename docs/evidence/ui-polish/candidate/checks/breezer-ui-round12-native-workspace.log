@@ -1,2 +1,0 @@
-PASS: native workspace overlay applies to the pinned Chromium/Helium source fixture (20 upstream targets), checks idempotently, converges after interruption, rejects anchor drift without partial writes, and exposes the bounded appearance, collapse, activeTab, and Peek source APIs with the favourite-tab Peek hooks in place.
-Native compilation and real window/extension-host behavior still require the full macOS browser build.

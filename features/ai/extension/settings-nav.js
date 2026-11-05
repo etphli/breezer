@@ -103,7 +103,7 @@ export function collectEntries(root, categories) {
       if (hiddenIn(row, page)) continue;
       const label = row.querySelector('.setting-label, label');
       if (!label) continue;
-      add({ kind: 'setting', title: ownText(label), description: clean(label.querySelector('small')?.textContent), terms: terms(row), target: row });
+      add({ kind: 'setting', title: ownText(label), description: clean(label.querySelector('small')?.textContent), currentValue: clean(row.querySelector('.segmented [aria-checked="true"]')?.textContent), terms: terms(row), target: row });
     }
     // Actions and disclosures that are not inside a row, such as the password manager links.
     for (const item of page.querySelectorAll('button.text-button, summary, [data-search-item]')) {
@@ -309,8 +309,8 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
       wrap.setAttribute('aria-labelledby', id);
       wrap.append(head(group.label, id));
       for (const entry of group.entries) {
-        const description = entry.kind === 'category' ? `Show all ${entry.title} settings` : entry.description;
-        wrap.append(option(entry, entry.title, description, entry.kind === 'native' ? 'Opens in a new tab' : ''));
+        const title = entry.kind === 'category' ? `All ${entry.title} settings` : entry.title;
+        wrap.append(option(entry, title, entry.description, entry.kind === 'native' ? 'Opens in a new tab' : entry.currentValue));
       }
       fragment.push(wrap);
     });
@@ -319,7 +319,7 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
     fallback.setAttribute('role', 'group');
     fallback.setAttribute('aria-labelledby', 'settings-results-native');
     fallback.append(head('All browser settings', 'settings-results-native'),
-      option({ kind: 'native-search', query }, `Search browser settings for “${query}”`, 'Search all browser settings in a new tab.', 'Opens in a new tab'));
+      option({ kind: 'native-search', query }, `Search browser settings for “${query}”`, '', 'Opens in a new tab'));
     fragment.push(fallback);
     results.replaceChildren(...fragment);
     status.textContent = found.length
