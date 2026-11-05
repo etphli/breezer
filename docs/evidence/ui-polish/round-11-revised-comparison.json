@@ -1,0 +1,156 @@
+[
+  {
+    "id": "header",
+    "title": "Settings content grid",
+    "file": "settings-password-guide-light.png",
+    "notes": [
+      [
+        84,
+        12,
+        28,
+        4,
+        "The header follows the content edge at intermediate window widths."
+      ]
+    ]
+  },
+  {
+    "id": "passkeys",
+    "title": "Passkey action wording",
+    "file": "whats-new-passkeys-desktop.png",
+    "notes": [
+      [
+        85,
+        80,
+        12,
+        56,
+        "The illustration uses the same availability action as Settings."
+      ],
+      [
+        85,
+        15,
+        71,
+        37,
+        "The description states what the action opens."
+      ]
+    ]
+  },
+  {
+    "id": "newtab-error",
+    "title": "New-tab recovery layout",
+    "file": "newtab-error.png",
+    "notes": [
+      [
+        85,
+        24,
+        14,
+        32,
+        "The empty shortcut and its hint share the date\u2019s edge."
+      ],
+      [
+        85,
+        66,
+        53,
+        53,
+        "The readable error spans the content column and gives a recovery step."
+      ]
+    ]
+  },
+  {
+    "id": "feedback",
+    "title": "Shortcut feedback alignment",
+    "file": "newtab-custom-shortcuts.png",
+    "notes": [
+      [
+        85,
+        34,
+        19,
+        33,
+        "Shortcut feedback starts at the same content edge."
+      ]
+    ]
+  },
+  {
+    "id": "organato-error",
+    "title": "Settings error width",
+    "file": "settings-organato-error-light.png",
+    "notes": [
+      [
+        85,
+        72,
+        62,
+        89,
+        "The error uses the full available column."
+      ]
+    ]
+  },
+  {
+    "id": "update-error",
+    "title": "Update recovery hierarchy",
+    "file": "settings-update-unavailable-light.png",
+    "notes": [
+      [
+        85,
+        25,
+        45,
+        85,
+        "The error sits below the controls without replacing their description."
+      ]
+    ]
+  },
+  {
+    "id": "assistant-settings",
+    "title": "Narrow control alignment",
+    "file": "mint-light-settings-assistant-enabled-narrow.png",
+    "notes": [
+      [
+        85,
+        40,
+        8,
+        33,
+        "Field labels share the grouped-row inset."
+      ],
+      [
+        85,
+        68,
+        87,
+        80,
+        "The activity toggles share a right edge."
+      ],
+      [
+        85,
+        16,
+        93,
+        7,
+        "Category navigation uses the shared chevron style."
+      ]
+    ]
+  },
+  {
+    "id": "comparison-label",
+    "title": "Consistent measurement names",
+    "file": "efficiency-browser-table-desktop.png",
+    "notes": [
+      [
+        85,
+        30,
+        58,
+        13,
+        "Both reference pages call the baseline Previous Breezer."
+      ]
+    ]
+  },
+  {
+    "id": "resting-capture",
+    "title": "Resting and keyboard evidence",
+    "file": "newtab-organato-off-light.png",
+    "notes": [
+      [
+        85,
+        31,
+        16,
+        47,
+        "The resting capture no longer includes the test\u2019s deliberate keyboard focus. A separate focus capture retains that state."
+      ]
+    ]
+  }
+]

@@ -299,6 +299,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   const action = root.getElementById('organato-action');
   const lanes = root.getElementById('organato-lists');
   const state = organatoState(organato);
+  const error = /\b401\b/.test(organato?.error || '') ? 'The API key was rejected. Review it in Settings.' : organato?.error;
   section.dataset.state = state;
   section.removeAttribute('aria-busy');
   action.replaceChildren();
@@ -324,14 +325,14 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     return;
   }
   if (state === 'error') {
-    status.textContent = `Organato did not load: ${organato.error}`;
+    status.textContent = `Organato did not load: ${error}`;
     action.append(settingsLink('Review Organato in Settings'));
     action.hidden = false;
     return;
   }
 
   // Ready. A refresh error with older items still on hand keeps them visible.
-  if (organato.error) status.textContent = `Showing the last update. Organato did not refresh: ${organato.error}`;
+  if (organato.error) status.textContent = `Showing the last update. Organato did not refresh: ${error}`;
   else if (problem) status.textContent = `Showing the last update. ${problem}`;
   else status.hidden = true;
   for (const list of LISTS) {

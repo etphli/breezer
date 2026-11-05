@@ -94,7 +94,7 @@ are retained in the adjacent Markdown files.
 | Breezer, round 7 attempt | 8.5 | 8.3 | No score: API rate limit |
 | Breezer, round 8 attempt | 8.4 | 8.5 | No score: account limit |
 | Breezer, candidate 9 complete council | 8.6 | 8.7 | 8.8 |
-| Breezer, candidate 10 attempt | 8.5 | 8.5 | No score: account limit |
+| Breezer, candidate 10 interrupted cohort | 8.5 | 8.5 | 8.7, later resume |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -128,3 +128,9 @@ Candidate 10 refines translation consent and recovery, selected custom colors, a
 Candidate 10 starts were 421ms apart, with all three overlapping for 430.7 seconds before the Opus limit. There are still three complete council passes. The next candidate must resolve the narrow picker evidence before review.
 
 Candidate 11 adds a picker capture guard that rejects the recorded corrupt image, places the control tooltip above the composer, clarifies optional Organato and tour actions, tightens narrow layouts and reduces illustration weight. Ten annotated before/after pairs are in `candidate/comparisons/candidate-11-*.png`. The full suite again passed 544 checks with zero failures and two skips, followed by both UI walkthroughs. All 490 matrix captures match the current source. Four fresh offline native-source checks passed, alongside twelve motion sequences and all six reduced-motion assertions. Native runtime remains unverified. The next requested three-model cohort is deferred until the reported Opus reset; no score or completion is claimed.
+
+The automatic Opus continuation completed candidate 10 at 04:32 UTC on 5 November with a score of 8.7. This is a late completed assessment of the unchanged candidate-10 evidence, not a score for candidate 11. Its initial rate-limit failure and resumed review are retained in `formal-round-10-3.md`. The cohort remains marked interrupted. Its newly confirmed findings were resolved before candidate 11’s first simultaneous review.
+
+Before its first council, candidate 11 was revised using that late feedback. Settings headers now follow the content grid at intermediate widths; narrow fields and toggles share their row insets. Error alerts span the available column, and update failures preserve the controls’ description. The passkey illustration matches the availability action. New-tab errors use recovery wording, an aligned empty shortcut and a nearby hint; feedback follows the content edge. The efficiency article uses the same Previous Breezer label as the release page. The resting shortcut image now excludes the test’s deliberate focus; a separate keyboard-focus image retains that evidence. Nine additional annotated comparisons are in `candidate/comparisons/candidate-11-revised-*.png`.
+
+The revised candidate again passed 544 Node checks, with zero failures and two explicit skips, both browser walkthroughs, all 490 source-matching matrix captures, all 36 guarded translation captures, twelve motion sequences and all six reduced-motion assertions. Four fresh offline native-source integration checks passed. These source checks do not verify native appearance or runtime. GPT-6.1 Sol wrote this revision; the council supplied read-only design feedback. All work remains local; no PR update or installation has been performed.

@@ -578,6 +578,8 @@ body.route-settings {
   margin: 0 2px 10px;
 }
 .settings-category-select { display: none; }
+.settings-category-picker { display: none; position: relative; }
+.settings-category-picker::after { content: ""; position: absolute; right: 15px; top: 14px; width: 6px; height: 6px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); pointer-events: none; }
 .settings-search svg { position: absolute; left: 9px; width: 15px; height: 15px; color: var(--muted); pointer-events: none; }
 .settings-search input {
   width: 100%;
@@ -648,7 +650,7 @@ body.route-settings {
   gap: 16px;
   min-height: 80px;
   /* Lines the breadcrumb and link up with the edges of the settings column. */
-  padding: 0 max(20px, calc((100% - 680px) / 2));
+  padding: 0 max(40px, calc((100% - 680px) / 2));
   border-bottom: 1px solid var(--set-rule);
 }
 .crumbs { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
@@ -934,7 +936,6 @@ body.route-settings {
 .key-field > label { display: block; margin-bottom: 8px; font-weight: 500; }
 .key-row { display: flex; align-items: center; gap: 8px; }
 
-.update-row .status-line { margin: 0; color: var(--ink); font-weight: 500; }
 .update-actions { display: flex; flex: none; gap: 8px; }
 
 /* First-run card: how to bring data over from Chrome. */
@@ -1059,7 +1060,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 [data-passwords] details li + li { margin-top: 6px; }
 [data-passwords] a { color: var(--accent); text-underline-offset: 3px; }
 
-.field-error, .status-line[data-state="error"] { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--danger-border); border-radius: 8px; background: var(--danger-surface); color: var(--danger); max-width: 64ch; line-height: 1.5; }
+.field-error, .status-line[data-state="error"] { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--danger-border); border-radius: 8px; background: var(--danger-surface); color: var(--danger); max-width: none; line-height: 1.5; }
 .field-error:empty { display: none; }
 
 .link-list.setting-group > li { position: relative; display: flex; flex-direction: column; gap: 2px; padding-right: 48px; }
@@ -1093,7 +1094,8 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .settings-search { margin: 0 0 8px; }
   .settings-search kbd { display: none; }
   .nav-groups { display: none; }
-  .settings-category-select { display: block; width: 100%; height: 36px; padding: 0 12px; border: 1px solid var(--set-edge); border-radius: 8px; background: var(--set-control); color: var(--ink); font: inherit; }
+  .settings-category-picker { display: block; }
+  .settings-category-select { display: block; appearance: none; width: 100%; height: 36px; padding: 0 34px 0 12px; border: 1px solid var(--set-edge); border-radius: 8px; background: var(--set-control); color: var(--ink); font: inherit; }
   .nav-list { display: contents; }
   .nav-list > li:not([hidden]) { flex: none; }
   .nav-group, .nav-hint { display: none; }
@@ -1113,6 +1115,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .setting-group > .setting-row, .setting-group > .space-item, .setting-group > li, .setting-group > .key-field { padding: 12px 14px; }
   .link-list.setting-group > li { padding-right: 48px; }
   .context-settings .setting-group > .setting-row { flex-wrap: nowrap; }
+  .context-settings .setting-field, .context-settings .setting-group.panel { padding-inline: 14px; }
   .range-control { width: 100%; }
   .range-control input[type="range"] { flex: 1; width: auto; }
   .space-item { flex-wrap: wrap; }

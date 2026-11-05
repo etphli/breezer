@@ -51,7 +51,7 @@
         <input id="settings-search" type="search" role="combobox" aria-label="Search settings" aria-expanded="false" aria-controls="settings-results" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Search">
         <kbd aria-hidden="true">/</kbd>
       </div>
-      <select id="settings-category-select" class="settings-category-select" aria-label="Settings category"></select>
+      <div class="settings-category-picker"><select id="settings-category-select" class="settings-category-select" aria-label="Settings category"></select></div>
       <div id="settings-categories" class="nav-groups">
         <ul class="nav-list" aria-label="Breezer">
           <li><a class="nav-item" href="#/settings/general" data-category="general"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg><span>General</span></a></li>
@@ -122,13 +122,14 @@
               <h2 id="update-heading">Breezer updates</h2>
               <div class="setting-group">
                 <div class="setting-row update-row">
-                  <div class="setting-label"><p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p><small>Checks stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</small></div>
+                  <div class="setting-label"><small>Checks stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</small></div>
                   <div class="update-actions">
                     <button id="update-check" class="button" type="button">Check for updates</button>
                     <button id="update-install" class="button primary" type="button" hidden>Update and restart</button>
                   </div>
                 </div>
               </div>
+              <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
             </section>
           </section>
 

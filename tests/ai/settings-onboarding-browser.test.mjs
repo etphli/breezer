@@ -88,6 +88,14 @@ test('settings onboarding, Organato and updates render and respond in a real bro
       const upd = window.fx.ports['breezer-updates'];
       upd.reply({ id: upd.sent[0].id, ok: true, value: { available: false, notice: 'Breezer 1.1.0 is up to date.' } });
     });
+    if (width >= 800) {
+      const aligned = await page.evaluate(() => {
+        const column = document.querySelector('.settings-column');
+        const style = getComputedStyle(column), rect = column.getBoundingClientRect();
+        return Math.abs(document.querySelector('.crumbs').getBoundingClientRect().left - rect.left - parseFloat(style.paddingLeft)) < 1;
+      });
+      assert.equal(aligned, true, 'Settings header follows the content grid at intermediate widths');
+    }
     return { page, context };
   };
   const noOverflow = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
@@ -128,6 +136,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.locator('#organato-settings').screenshot({ path: join(evidence, 'settings-organato-busy-light.png') });
     await page.evaluate(() => { const org = window.fx.ports['breezer-organato-settings']; org.reply({ id: org.sent.at(-1).id, ok: false, error: 'Organato API key is invalid or expired.' }); });
     assert.equal(await page.locator('#organato-connect').isDisabled(), false);
+    assert.equal(await page.locator('#organato-status').evaluate(node => Math.abs(node.getBoundingClientRect().width - node.parentElement.clientWidth + parseFloat(getComputedStyle(node.parentElement).paddingLeft) + parseFloat(getComputedStyle(node.parentElement).paddingRight)) < 1), true, 'Organato error spans its available column');
     assert.match(await page.locator('#organato-status').innerText(), /invalid or expired/);
     assert.equal(await page.locator('#organato-status').evaluate((node) => getComputedStyle(node, '::before').content), 'none');
     await page.locator('#organato-settings').screenshot({ path: join(evidence, 'settings-organato-error-light.png') });
@@ -146,6 +155,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: false, error: 'Update helper unavailable. Try again.' }); });
     assert.match(await page.locator('#update-status').innerText(), /unavailable/);
     assert.match(await page.locator('#update-status').innerText(), /Choose Check for updates to retry\./);
+    assert.equal(await page.locator('#update-status').evaluate(node => Math.abs(node.getBoundingClientRect().width - node.parentElement.clientWidth) < 1), true, 'Update error spans the settings column');
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-unavailable-light.png') });
     await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: { available: true, version: '1.1.1' } }); });

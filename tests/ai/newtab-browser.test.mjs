@@ -208,6 +208,14 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'error');
       assert.equal(await page.isVisible('#sites-empty'), true);
       assert.match(await page.textContent('#organato-status'), /API key was rejected/);
+      assert.doesNotMatch(await page.textContent('#organato-status'), /401/);
+      const layout = await page.evaluate(() => {
+        const rect = id => document.getElementById(id).getBoundingClientRect();
+        return { alertWidth: rect('organato-status').width, columnWidth: rect('organato').width, addLeft: document.querySelector('.site-add .site-name').getBoundingClientRect().left, dateLeft: rect('today').left, emptyGap: rect('sites-empty').top - document.querySelector('.site-add-button').getBoundingClientRect().bottom };
+      });
+      assert.ok(Math.abs(layout.alertWidth - layout.columnWidth) < 1, 'New-tab error spans the content column');
+      assert.ok(Math.abs(layout.addLeft - layout.dateLeft) < 1, 'Empty shortcut aligns with the date');
+      assert.ok(layout.emptyGap < 48, 'Empty hint stays with its shortcut control');
       await page.screenshot({ path: `${evidence}/newtab-error.png` });
     });
 
@@ -364,7 +372,10 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.closest('.sheet')), null, 'nothing in the hidden sheet takes focus');
       await page.locator('.site-link').first().focus();
-      await page.screenshot({ path: `${evidence}/newtab-organato-off-light.png` });
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-keyboard-focus.png` });
+      await page.evaluate(() => document.activeElement.blur());
+      await page.mouse.move(1, 1);
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-light.png`, animations: 'disabled' });
       // Shortcut controls still work with Organato off.
       await page.getByRole('button', { name: 'Remove Mail shortcut', exact: true }).click();
       await page.getByRole('button', { name: 'Undo', exact: true }).click();

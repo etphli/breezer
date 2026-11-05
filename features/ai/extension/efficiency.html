@@ -17,7 +17,7 @@
     </header>
 <section class="benchmark-story" aria-labelledby="benchmark-story-title">
   <h2 id="benchmark-story-title" class="benchmark-story-title">What changed</h2>
-  <p class="benchmark-story-kicker">Combined 1.2.0 candidate, not yet released. Measured on one M1 Mac against the installed Breezer and Chrome.</p>
+  <p class="benchmark-story-kicker">Combined 1.2.0 candidate, not yet released. Measured on one M1 Mac against the previous Breezer and Chrome.</p>
 
   <div class="benchmark-story-body">
     <p>Most of this work removes repeated effort. It did not make the whole browser faster, and some results got worse.</p>
@@ -41,17 +41,17 @@
     <h3 class="benchmark-story-heading">Browser results</h3>
     <table class="story-table">
       <caption>Selected medians · lower is better</caption>
-      <thead><tr><th scope="col">Measurement</th><th scope="col">Installed Breezer</th><th scope="col">1.2 candidate</th><th scope="col">Chrome</th></tr></thead>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">Previous Breezer</th><th scope="col">1.2 candidate</th><th scope="col">Chrome</th></tr></thead>
       <tbody>
-        <tr><th scope="row">First local page after opening and closing tabs <span class="story-unit">ms</span></th><td data-label="Installed Breezer"><data value="717.402">717.4</data></td><td data-label="1.2 candidate"><data value="262.21">262.2</data></td><td data-label="Chrome"><data value="52.439">52.4</data></td></tr>
-        <tr><th scope="row">New-tab readiness <span class="story-unit">ms</span></th><td data-label="Installed Breezer">99.2</td><td data-label="1.2 candidate"><data value="98.819">98.8</data></td><td data-label="Chrome"><data value="198.716">198.7</data></td></tr>
-        <tr><th scope="row">Reopening the same profile <span class="story-unit">ms</span></th><td data-label="Installed Breezer">846.6</td><td data-label="1.2 candidate"><data value="861.277">861.3</data></td><td data-label="Chrome"><data value="1070.2">1,070.2</data></td></tr>
-        <tr><th scope="row">Typical local navigation <span class="story-unit">ms</span></th><td data-label="Installed Breezer"><data value="33.879">33.9</data></td><td data-label="1.2 candidate"><data value="48.87">48.9</data></td><td data-label="Chrome"><data value="33.059">33.1</data></td></tr>
-        <tr><th scope="row">Process-tree RSS, ten tabs <span class="story-unit">MiB</span></th><td data-label="Installed Breezer"><data value="2560.797">2,560.8</data></td><td data-label="1.2 candidate"><data value="2756.102">2,756.1</data></td><td data-label="Chrome"><data value="2515.102">2,515.1</data></td></tr>
+        <tr><th scope="row">First local page after opening and closing tabs <span class="story-unit">ms</span></th><td data-label="Previous Breezer"><data value="717.402">717.4</data></td><td data-label="1.2 candidate"><data value="262.21">262.2</data></td><td data-label="Chrome"><data value="52.439">52.4</data></td></tr>
+        <tr><th scope="row">New-tab readiness <span class="story-unit">ms</span></th><td data-label="Previous Breezer">99.2</td><td data-label="1.2 candidate"><data value="98.819">98.8</data></td><td data-label="Chrome"><data value="198.716">198.7</data></td></tr>
+        <tr><th scope="row">Reopening the same profile <span class="story-unit">ms</span></th><td data-label="Previous Breezer">846.6</td><td data-label="1.2 candidate"><data value="861.277">861.3</data></td><td data-label="Chrome"><data value="1070.2">1,070.2</data></td></tr>
+        <tr><th scope="row">Typical local navigation <span class="story-unit">ms</span></th><td data-label="Previous Breezer"><data value="33.879">33.9</data></td><td data-label="1.2 candidate"><data value="48.87">48.9</data></td><td data-label="Chrome"><data value="33.059">33.1</data></td></tr>
+        <tr><th scope="row">Process-tree RSS, ten tabs <span class="story-unit">MiB</span></th><td data-label="Previous Breezer"><data value="2560.797">2,560.8</data></td><td data-label="1.2 candidate"><data value="2756.102">2,756.1</data></td><td data-label="Chrome"><data value="2515.102">2,515.1</data></td></tr>
       </tbody>
     </table>
-    <p><strong>The first-load pause is shorter.</strong> Chrome is still faster. New tabs and reopening a profile retain a lead over Chrome that the installed Breezer already had.</p>
-    <p><strong>Navigation and memory regressed.</strong> Typical local navigation is slower, and ten-tab RSS is higher than both comparators. With one tab, RSS matched Chrome but exceeded the installed Breezer.</p>
+    <p><strong>The first-load pause is shorter.</strong> Chrome is still faster. New tabs and reopening a profile retain a lead over Chrome that the previous Breezer already had.</p>
+    <p><strong>Navigation and memory regressed.</strong> Typical local navigation is slower, and ten-tab RSS is higher than both comparators. With one tab, RSS matched Chrome but exceeded the previous Breezer.</p>
     <p>The macOS memory footprint barely moved. CPU readings were too small to measure reliably, so there is no CPU or battery claim.</p>
 
     <h3 class="benchmark-story-heading">Still to do</h3>
