@@ -358,7 +358,7 @@ try {
   assert.equal(await page.locator('#context-hint').innerText(), 'Only web pages can be shared');
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.match(await page.locator('#welcome-status').innerText(), /Open a web page/);
-  assert.equal(await page.getByRole('button', { name: 'Summarize this page' }).isDisabled(), true);
+  assert.equal(await page.locator('.suggestions').isHidden(), true, 'non-web pages omit unavailable page actions');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-dark-no-page.png` });
   assert.equal(await page.locator('#context-toggle').isHidden(), true, 'unavailable pages have no Include affordance');
   assert.equal(await page.locator('#control-toggle').isVisible(), false, 'browser control is unavailable on a non-web page');

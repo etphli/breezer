@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
-  <a class="settings-link" href="workspace.html#/settings" aria-label="Breezer settings" title="Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></a>
+  <a class="settings-link" href="workspace.html#/settings" aria-label="Breezer settings" title="Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg><span>Settings</span></a>
 
   <header class="sky">
     <h1 id="today" class="today">New tab</h1>
@@ -39,6 +39,11 @@
 
       <p id="organato-status" class="organato-status" role="status" aria-live="polite">Loading your exams, assignments and to-dos…</p>
       <p id="organato-action" class="organato-action" hidden></p>
+
+      <div class="lanes agenda-skeleton" aria-hidden="true">
+        <div class="skeleton-lane"><i></i><span></span><span></span><span></span></div>
+        <div class="skeleton-lane"><i></i><span></span><span></span><span></span></div>
+      </div>
 
       <div id="organato-lists" class="lanes" hidden>
         <section class="lane lane-upcoming" aria-labelledby="lane-upcoming">

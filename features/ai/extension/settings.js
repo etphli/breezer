@@ -526,7 +526,7 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
       if (!message.ok) { finish(message.error, true); return; }
       connected = message.value.connected === true;
       for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
-      finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
+      finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show deadlines on your new tab.');
     });
     connection.onDisconnect.addListener(() => {
       void api.runtime.lastError;

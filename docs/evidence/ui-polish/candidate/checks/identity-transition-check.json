@@ -1,0 +1,256 @@
+{
+  "scope": "Controlled source replay with current sibling assets; injected 160ms API delay. Frame selection is functional evidence, not an input-latency benchmark.",
+  "before": {
+    "samples": [
+      {
+        "time": 7.799999952316284,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 24.100000143051147,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 40.799999952316284,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 57.299999952316284,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 74.10000014305115,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 89.10000014305115,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 105.5,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 124.10000014305115,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 140.79999995231628,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 156,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 172.79999995231628,
+        "space": "Personal",
+        "selected": 0
+      },
+      {
+        "time": 189.5,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 206.10000014305115,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 222.60000014305115,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 239.40000009536743,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 256,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 272.60000014305115,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 289.40000009536743,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 306.10000014305115,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 322.7000000476837,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 340.7000000476837,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 357.40000009536743,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 372.2000000476837,
+        "space": "Personal",
+        "selected": 1
+      }
+    ],
+    "unselectedDestinationFrames": 11
+  },
+  "after": {
+    "samples": [
+      {
+        "time": 0.7999999523162842,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 15.799999952316284,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 34.19999980926514,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 48.799999952316284,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 67.59999990463257,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 84.09999990463257,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 100.19999980926514,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 117.5,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 134.09999990463257,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 149.29999995231628,
+        "space": "Work",
+        "selected": 1
+      },
+      {
+        "time": 167.5,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 183.19999980926514,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 199.59999990463257,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 217.59999990463257,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 234.09999990463257,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 250.79999995231628,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 265.7999999523163,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 283.39999985694885,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 300.89999985694885,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 317.5,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 334.2999999523163,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 350.89999985694885,
+        "space": "Personal",
+        "selected": 1
+      },
+      {
+        "time": 366.39999985694885,
+        "space": "Personal",
+        "selected": 1
+      }
+    ],
+    "unselectedDestinationFrames": 0,
+    "newerNativeActivationWins": true
+  },
+  "light": {
+    "matchingIconsLabels": [
+      "PA",
+      "PB"
+    ]
+  },
+  "dark": {
+    "matchingIconsLabels": [
+      "PA",
+      "PB"
+    ]
+  }
+}

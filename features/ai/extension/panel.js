@@ -162,7 +162,7 @@ function renderWelcomeStatus(selected) {
   $('welcome-account-steps').hidden = !showAccounts;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
-  document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending;
+  document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending || state.pageKnown && !state.page && !research.size;
   document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
 
@@ -239,7 +239,7 @@ function renderModels() {
           $('account-instructions').replaceChildren(...[...$('welcome-account-steps').children]
             .filter(node => node.tagName !== 'SUMMARY' && (!node.dataset.provider || node.dataset.provider === provider.id))
             .map(node => node.cloneNode(true)));
-          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed on this Mac, then run the sign-in command and refresh.`;
+          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
           $('account-dialog').showModal();
         });
         group.replaceChildren(connect);
@@ -337,6 +337,7 @@ function appendMessage(message) {
       body.append(thinking);
     }
   } else body.textContent = message.text;
+  linkResearchCitations(body, message.citations);
   article.append(body);
   if (message.contextTitle) {
     const meta = document.createElement('div');
@@ -350,6 +351,28 @@ function appendMessage(message) {
   messageNodes.set(message.id, body);
   $('welcome').hidden = true;
   return body;
+}
+
+function linkResearchCitations(body, sources) {
+  // Decorate completed research replies without changing the shared stream parser.
+  if (!sources?.length) return;
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (!walker.currentNode.parentElement.closest('code, pre, a')) nodes.push(walker.currentNode);
+  for (const node of nodes) {
+    const parts = []; let start = 0;
+    for (const match of node.textContent.matchAll(/\[S(\d+)\]/g)) {
+      const source = sources.find(source => source.sourceId === `S${match[1]}`);
+      if (!source || !/^https?:\/\//.test(source.url)) continue;
+      parts.push(document.createTextNode(node.textContent.slice(start, match.index)));
+      const link = document.createElement('a');
+      link.textContent = `Source ${match[1]}`; link.href = source.url;
+      link.title = source.title || link.textContent;
+      link.target = '_blank'; link.rel = 'noopener noreferrer'; link.className = 'citation';
+      parts.push(link); start = match.index + match[0].length;
+    }
+    if (parts.length) node.replaceWith(...parts, document.createTextNode(node.textContent.slice(start)));
+  }
 }
 
 function renderSourceMetadata(meta, sources) {
@@ -367,7 +390,7 @@ function renderSourceMetadata(meta, sources) {
     row.dataset.state = source.status;
     const title = document.createElement('span');
     title.className = 'source-title';
-    title.textContent = `[${source.sourceId}] ${source.title || 'Source'}`;
+    title.textContent = `${source.sourceId.slice(1)} · ${source.title || 'Source'}`;
     title.title = source.url;
     const status = document.createElement('small');
     status.textContent = source.status === 'available'
@@ -458,6 +481,7 @@ function finish(label, keepControl = false) {
       message.text = label || 'Response stopped.';
       renderMessage(messageNodes.get(message.id), message.text);
     } else if (message) renderMessage(messageNodes.get(message.id), message.text);
+    if (message) linkResearchCitations(messageNodes.get(message.id), message.citations);
     state.running.message = null;
   }
   state.running = null;
@@ -552,6 +576,7 @@ async function send() {
       const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
       userMessage.contextTitle = summary;
       userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
+      assistantMessage.citations = userMessage.sourceMetadata;
       const meta = messageNodes.get(id)?.parentElement.querySelector('.message-meta');
       if (meta) renderSourceMetadata(meta, userMessage.sourceMetadata);
       if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');

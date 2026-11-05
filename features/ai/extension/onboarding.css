@@ -388,9 +388,9 @@ body.route-welcome { overflow: auto; background: var(--air); }
 /* Keep the copy available while the preview enters as one surface. */
 .wl-intro .mini-frame { animation: wl-window 220ms var(--ease-out) both; }
 
-@keyframes wl-in-next { from { opacity: .65; transform: translateX(8px); } }
-@keyframes wl-in-prev { from { opacity: .65; transform: translateX(-8px); } }
-@keyframes wl-rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes wl-in-next { from { transform: translateX(8px); } }
+@keyframes wl-in-prev { from { transform: translateX(-8px); } }
+@keyframes wl-rise { from { transform: translateY(6px); } }
 @keyframes wl-window { from { opacity: 0; transform: translateY(28px) scale(0.96); } }
 @keyframes wl-greet { from { opacity: 0; transform: translateY(8px); } }
 @keyframes wl-tab-wiggle { 40% { transform: translateY(-3px); } }

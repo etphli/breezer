@@ -383,7 +383,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Row enter/leave: only after the first paint, never idle. */
 .row.entering, .folder.entering { animation: row-in 140ms ease-out; }
-@keyframes row-in { from { opacity: 0; transform: translateY(-3px); } }
+@keyframes row-in { from { transform: translateY(-3px); } }
 .leaving { pointer-events: none; overflow: hidden; animation: row-out 130ms ease-in forwards; }
 @keyframes row-out { to { opacity: 0; height: 0; margin-top: -2px; } }
 .tile.leaving { animation: tile-out 130ms ease-in forwards; }
@@ -525,8 +525,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .folder-row { position: relative; }
   .folder-row .chevron { position: absolute; left: calc(50% - var(--favicon) / 2 - 18px); }
   .folder-glyph { margin-right: 0; }
-  .space-head .space-name, .space-head .quiet, .title, .row-action, .row-sound, .section-label, .divider-row .meta-button, .new-tab span, .folder-row .count { display: none; }
+  .space-head .space-name, .space-head .quiet, .title, .row-action, .row-sound, .section-label, .divider-row .meta-button, .divider-row .rule, .new-tab span, .folder-row .count { display: none; }
   .row, .new-tab { justify-content: center; padding: 0; }
+  .row[data-compact-label] { flex-direction: column; gap: 2px; min-height: max(var(--row-h), 42px); padding-block: 4px; }
+  .row[data-compact-label]::after { content: attr(data-compact-label); max-width: 100%; color: var(--ink); font-size: 12px; font-weight: 600; line-height: 14px; text-align: center; }
   .folder-children { padding-left: 0; }
   .dock { flex-direction: column; flex-wrap: nowrap; padding: 6px 0; }
   .space-dots { flex: none; flex-direction: column; overflow: auto; max-height: 120px; }
@@ -692,6 +694,7 @@ body.route-settings {
 /* ---- sections and grouped rows */
 .settings-section { padding: 0; margin: 0 0 36px; border: 0; }
 .settings-section h2 { margin: 0 0 8px; font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: -0.005em; }
+.settings-page[data-page="browser"] .settings-section { margin-bottom: 24px; }
 .section-note { margin: 0 0 12px; color: var(--muted); line-height: 19px; max-width: 72ch; }
 .section-note a, .field-note a { color: var(--accent); text-underline-offset: 3px; }
 
@@ -960,7 +963,7 @@ body.route-settings {
   background: var(--set-group);
 }
 .onboarding:not([hidden]) { animation: onboarding-in 160ms ease-out both; }
-@keyframes onboarding-in { from { opacity: 0; transform: translateY(3px); } }
+@keyframes onboarding-in { from { transform: translateY(3px); } }
 .onboarding-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .onboarding h2 { margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.012em; }
 .onboarding-head .button { margin: -4px -10px 0 0; }
@@ -1168,7 +1171,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   border-radius: 8px;
   resize: vertical;
 }
-:root[data-scheme="dark"] .settings :is(.text-input, textarea, select) {
+:root[data-scheme="dark"] .settings :is(.text-input, textarea, select, input[type="password"], input[type="text"], input[type="url"]) {
   background-color: color-mix(in oklab, var(--raised) 78%, #000);
   border-color: color-mix(in srgb, var(--ink) 24%, transparent);
 }

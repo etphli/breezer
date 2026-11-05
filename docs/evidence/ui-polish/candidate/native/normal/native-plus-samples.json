@@ -4,10 +4,10 @@
     {
       "mode": "normal",
       "ms": 0,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-0.png",
-      "templateStrokePixels": 128,
-      "rmse": 0,
-      "strokeSeparation": 136.91145833333346,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-0.png",
+      "templateStrokePixels": 124,
+      "rmse": 2.7194260015263856,
+      "strokeSeparation": 138.72043010752705,
       "center": {
         "x": 1394,
         "y": 34
@@ -17,10 +17,10 @@
     {
       "mode": "normal",
       "ms": 100,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-100.png",
-      "templateStrokePixels": 128,
-      "rmse": 0.9814247013624854,
-      "strokeSeparation": 137.76041666666669,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-100.png",
+      "templateStrokePixels": 124,
+      "rmse": 2.982984150887233,
+      "strokeSeparation": 139.34946236559142,
       "center": {
         "x": 1394,
         "y": 34
@@ -30,10 +30,10 @@
     {
       "mode": "normal",
       "ms": 300,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-300.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.0612492638395556,
-      "strokeSeparation": 137.98437500000009,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-300.png",
+      "templateStrokePixels": 124,
+      "rmse": 3.06612314023933,
+      "strokeSeparation": 139.58602150537644,
       "center": {
         "x": 1394,
         "y": 34
@@ -43,10 +43,10 @@
     {
       "mode": "normal",
       "ms": 600,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-600.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.0836217564773745,
-      "strokeSeparation": 137.96093750000003,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-600.png",
+      "templateStrokePixels": 124,
+      "rmse": 3.0696430302778377,
+      "strokeSeparation": 139.56182795698928,
       "center": {
         "x": 1394,
         "y": 34
@@ -56,10 +56,10 @@
     {
       "mode": "normal",
       "ms": 900,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-900.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.0846466398478962,
-      "strokeSeparation": 137.96093750000003,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-900.png",
+      "templateStrokePixels": 124,
+      "rmse": 3.070004976470809,
+      "strokeSeparation": 139.56182795698928,
       "center": {
         "x": 1394,
         "y": 34
@@ -69,10 +69,10 @@
     {
       "mode": "normal",
       "ms": 1200,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-1200.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.1666666666666663,
-      "strokeSeparation": 138.22395833333334,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-1200.png",
+      "templateStrokePixels": 124,
+      "rmse": 3.1440198967422393,
+      "strokeSeparation": 139.7956989247312,
       "center": {
         "x": 1394,
         "y": 34
@@ -82,12 +82,12 @@
     {
       "mode": "normal",
       "ms": 1500,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-1500.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.1633584046964103,
-      "strokeSeparation": 138.08593750000003,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-1500.png",
+      "templateStrokePixels": 124,
+      "rmse": 3.1440198967422393,
+      "strokeSeparation": 139.7956989247312,
       "center": {
-        "x": 1274,
+        "x": 1394,
         "y": 34
       },
       "visibleInSample": true
@@ -95,10 +95,10 @@
     {
       "mode": "normal",
       "ms": 1800,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native/native-motion-1800.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.2154960121512355,
-      "strokeSeparation": 138.02604166666666,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native/native-motion-1800.png",
+      "templateStrokePixels": 124,
+      "rmse": 2.974848268773083,
+      "strokeSeparation": 139.01881720430103,
       "center": {
         "x": 992,
         "y": 34
@@ -108,10 +108,10 @@
     {
       "mode": "reduced",
       "ms": 0,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-0.png",
-      "templateStrokePixels": 128,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-0.png",
+      "templateStrokePixels": 124,
       "rmse": 0,
-      "strokeSeparation": 136.91145833333346,
+      "strokeSeparation": 129.8709677419355,
       "center": {
         "x": 1394,
         "y": 34
@@ -121,10 +121,10 @@
     {
       "mode": "reduced",
       "ms": 100,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-100.png",
-      "templateStrokePixels": 128,
-      "rmse": 0.9917717031207882,
-      "strokeSeparation": 137.64583333333337,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-100.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.1202678251204035,
+      "strokeSeparation": 129.93548387096772,
       "center": {
         "x": 1394,
         "y": 34
@@ -134,10 +134,10 @@
     {
       "mode": "reduced",
       "ms": 300,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-300.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.032459307780322,
-      "strokeSeparation": 137.81770833333337,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-300.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.1202678251204035,
+      "strokeSeparation": 129.93548387096772,
       "center": {
         "x": 1394,
         "y": 34
@@ -147,10 +147,10 @@
     {
       "mode": "reduced",
       "ms": 600,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-600.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.1103365355702843,
-      "strokeSeparation": 138.05468750000006,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-600.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.1202678251204035,
+      "strokeSeparation": 129.93548387096772,
       "center": {
         "x": 1394,
         "y": 34
@@ -160,10 +160,10 @@
     {
       "mode": "reduced",
       "ms": 900,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-900.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.1103365355702843,
-      "strokeSeparation": 138.05468750000006,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-900.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.1202678251204035,
+      "strokeSeparation": 129.93548387096772,
       "center": {
         "x": 1394,
         "y": 34
@@ -173,10 +173,10 @@
     {
       "mode": "reduced",
       "ms": 1200,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-1200.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.1086465722773067,
-      "strokeSeparation": 138.05989583333337,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-1200.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.115733440885909,
+      "strokeSeparation": 130.2311827956989,
       "center": {
         "x": 1394,
         "y": 34
@@ -186,12 +186,12 @@
     {
       "mode": "reduced",
       "ms": 1500,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-1500.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.1086465722773067,
-      "strokeSeparation": 138.05989583333337,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-1500.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.1219093348196847,
+      "strokeSeparation": 130.58064516129033,
       "center": {
-        "x": 1394,
+        "x": 992,
         "y": 34
       },
       "visibleInSample": true
@@ -199,10 +199,10 @@
     {
       "mode": "reduced",
       "ms": 1800,
-      "path": "/tmp/breezer-ui-polish/round-16-final-native-reduced/native-motion-1800.png",
-      "templateStrokePixels": 128,
-      "rmse": 1.2892719737209164,
-      "strokeSeparation": 137.5286458333333,
+      "path": "/tmp/breezer-ui-polish/round-17-final-native-reduced/native-motion-1800.png",
+      "templateStrokePixels": 124,
+      "rmse": 1.1219093348196847,
+      "strokeSeparation": 130.58064516129033,
       "center": {
         "x": 992,
         "y": 34

@@ -46,7 +46,7 @@ export class ResearchSources {
     const chips = this.root.querySelector('#research-chips'); chips.replaceChildren();
     [...this.selected.values()].forEach((tab, index) => {
       const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'research-chip';
-      chip.textContent = `[S${index + 1}] ${maskSecrets(tab.title || new URL(tab.url).hostname)}`;
+      chip.textContent = `${index + 1} · ${maskSecrets(tab.title || new URL(tab.url).hostname)}`;
       chip.title = `Remove source: ${sourceURL(tab.url)}`;
       chip.setAttribute('aria-label', `Remove source ${index + 1}: ${maskSecrets(tab.title)}`);
       chip.addEventListener('click', () => { this.selected.delete(tab.tabId); this.revision++; this.render(); this.onChange(); if (this.busy) this.onRevoke('Source removed. Response stopped.'); this.root.querySelector('#research-open').focus(); });

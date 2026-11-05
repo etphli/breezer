@@ -103,7 +103,7 @@ export function applyAppearance(appearance) {
     const label = appearance.alwaysShowSidebar ? 'Auto-hide sidebar' : 'Keep sidebar visible';
     collapse.setAttribute('aria-label', label);
     collapse.setAttribute('aria-pressed', String(appearance.alwaysShowSidebar));
-    collapse.title = label;
+    collapse.title = appearance.alwaysShowSidebar ? 'Let the sidebar hide when you leave it' : 'Keep the sidebar open beside your page';
   }
   const scheme = appearance.colorMode === 'system' ? (darkQuery.matches ? 'dark' : 'light') : appearance.colorMode;
   root.dataset.scheme = scheme;
@@ -366,16 +366,26 @@ function switchSpace(spaceId, { activateTab = true, focusTab = null } = {}) {
   const current = activeTab();
   if (current && spaceOfTab(state.store, state.records, current.id) === state.activeSpaceId) state.lastActive[state.activeSpaceId] = current.id;
   state.activeSpaceId = next;
-  saveWindowState();
-  animateSpace(direction);
-  state.instant = true;
-  draw();
-  state.instant = false;
-  if (!activateTab) return;
-  const visible = visibleTabs(state.model);
+  const reveal = () => {
+    if (state.activeSpaceId !== next) return;
+    saveWindowState();
+    animateSpace(direction);
+    state.instant = true;
+    draw();
+    state.instant = false;
+  };
+  if (!activateTab) { reveal(); return; }
+  const visible = visibleTabs(buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: next }));
   const target = visible.find((tab) => tab.id === focusTab) || visible.find((tab) => tab.id === state.lastActive[next]) || visible.find((tab) => tab.active) || visible[0];
-  if (target) void activate(target.id);
-  else void createTab();
+  const activationVersion = tabEventVersion;
+  const activation = target ? api.tabs.update(target.id, { active: true }).then(tab => {
+    if (tab?.active && tabEventVersion === activationVersion && state.activeSpaceId === next) {
+      ++tabEventVersion;
+      for (const live of state.tabs.values()) live.active = live.id === tab.id;
+      state.lastActive[next] = tab.id;
+    }
+  }).catch(error => showToast(errorText(error))) : createTab();
+  void activation.finally(reveal);
 }
 
 function animateSpace(direction) {
@@ -589,6 +599,23 @@ function drawTree(container, items) {
   reconcile(container, items);
 }
 
+function compactLabels() {
+  const rows = ['pinned', 'today'].flatMap(id => [...$(id).querySelectorAll('.row')])
+    .filter(row => !row.classList.contains('folder-row') && !row.closest('.leaving') && !row.closest('.folder-children[hidden]'));
+  const labels = rows.map(row => {
+    const words = rowPresentation.get(row)[0].match(/[\p{L}\p{N}]+/gu) || ['Tab'];
+    return (words.length > 1 ? words.slice(0, 2).map(word => [...word][0]).join('') : [...words[0]].slice(0, 2).join('')).toUpperCase();
+  });
+  const counts = new Map(), ordinals = new Map();
+  for (const label of labels) counts.set(label, (counts.get(label) || 0) + 1);
+  rows.forEach((row, index) => {
+    const base = labels[index], ordinal = (ordinals.get(base) || 0) + 1;
+    ordinals.set(base, ordinal);
+    const label = counts.get(base) > 1 ? String(ordinal) : base;
+    if (row.dataset.compactLabel !== label) row.dataset.compactLabel = label;
+  });
+}
+
 function draw() {
   if (!state.store) return;
   const model = buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: state.activeSpaceId });
@@ -705,6 +732,7 @@ function draw() {
   $('add-space').hidden = model.spaces.length >= MAX_SPACES;
 
   syncRovingFocus();
+  compactLabels();
   state.drawn = true;
 }
 

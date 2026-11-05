@@ -296,7 +296,7 @@ h1 {
   border: 1px solid var(--hairline);
   border-radius: 10px;
   background: var(--raised);
-  font-size: 12.5px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -616,8 +616,8 @@ h1 {
 }
 
 .composer:focus-within {
-  border-color: color-mix(in srgb,var(--accent) 55%,transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb,var(--accent) 11%,transparent);
+  border-color: var(--accent);
+  box-shadow: none;
 }
 
 .composer textarea {
@@ -725,8 +725,8 @@ h1 {
 .model-preferences[open] > summary::after { transform: rotate(225deg); }
 .model-preferences > summary:hover { background: var(--hover); color: var(--ink); }
 .model-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; padding: 8px 5px 4px; }
-.model-preferences .option-note { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
-.model-preferences .setting-select > span { font-size: 12px; margin-bottom: 4px; }
+.model-preferences .option-note { grid-column: 1 / -1; margin: 0; color: var(--ink); font-size: 14px; line-height: 1.5; }
+.model-preferences .setting-select > span { font-size: 13px; margin-bottom: 4px; }
 .model-preferences .setting-select select { width: 100%; max-width: none; padding: 7px 20px 7px 8px; background: var(--canvas); border: 1px solid var(--hairline); border-radius: 6px; color: var(--ink); font-size: 13px; line-height: 1.4; }
 .model-preferences .setting-select svg { bottom: 11px; right: 8px; }
 
@@ -879,7 +879,7 @@ h1 {
 }
 
 .provider-heading .provider-state {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .model-option {
@@ -920,7 +920,7 @@ h1 {
 }
 
 .menu-note {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
   line-height: 1.5;
   margin: 12px 5px 0;
@@ -954,7 +954,7 @@ dialog::backdrop {
 }
 dialog[open] { animation: panel-dialog-in 120ms ease-out; }
 dialog[open]::backdrop { animation: panel-backdrop-in 120ms ease-out; }
-@keyframes panel-dialog-in { from { opacity: .75; transform: translateY(2px); } }
+@keyframes panel-dialog-in { from { transform: translateY(2px); } }
 @keyframes panel-backdrop-in { from { background: transparent; } }
 
 .dialog-heading {
@@ -1112,7 +1112,7 @@ dialog .privacy-note {
 .source-details li { padding:8px 10px; border:1px solid var(--hairline); border-radius:8px; }
 .source-details .source-title { display:block; color:var(--ink); font-weight:500; overflow-wrap:anywhere; }
 .source-details small { display:block; margin-top:3px; font-size:12px; line-height:1.5; }
-.source-details li[data-state="unavailable"] { border-left:2px solid var(--danger); }
+.source-details li[data-state="unavailable"] { background:var(--danger-surface); }
 .source-details li[data-state="unavailable"] small { color:var(--danger); }
 
 .account-options { margin: 14px 0; }
@@ -1125,12 +1125,12 @@ dialog .privacy-note {
 .account-options > summary::before { content: ""; width: 6px; height: 6px; flex: none; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); }
 .account-options[open] > summary::before { transform: translateY(-2px) rotate(45deg); }
 .account-options[open] > p { margin: 10px 0; color: var(--muted); }
-.account-options > div { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-top: 8px; }
-.account-options > div > span { font-size: 12px; color: var(--muted); }
+.account-options > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 8px; margin-top: 12px; }
+.account-options > div > span { grid-column: 1 / -1; font-size: 12px; color: var(--muted); }
 .account-options code { font: 12px ui-monospace, "SFMono-Regular", Menlo, monospace; user-select: text; overflow-wrap: anywhere; }
-.account-options [data-copy-command] { min-height: 30px; padding: 4px 6px; border: 1px solid var(--hairline); border-radius: 5px; color: var(--accent-ink); font-size: 12px; }
+.account-options [data-copy-command] { min-height: 32px; padding: 4px 6px; border: 1px solid var(--hairline); border-radius: 5px; color: var(--accent-ink); font-size: 12px; }
 .account-options [data-copy-command]:hover { background: var(--hover); }
-.copy-feedback { grid-column: 2 / -1; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.copy-feedback { grid-column: 1 / -1; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .error-details { margin-top: 10px; color: var(--muted); font-size: 13px; }
 .error-details summary { cursor: pointer; }
 .error-details p { margin: 8px 0 0; overflow-wrap: anywhere; }

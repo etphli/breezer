@@ -419,7 +419,7 @@ body {
 .art { display: block; width: 100%; height: auto; overflow: visible; }
 .art text {
   font-family: var(--sans);
-  font-size: 9.5px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: -0.01em;
   fill: var(--ink);

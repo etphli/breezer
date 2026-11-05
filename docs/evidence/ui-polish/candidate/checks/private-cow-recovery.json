@@ -1,0 +1,17 @@
+{
+  "scope": "Lossless same-path APFS COW reconstruction of one owned private verification framework. No installed app, profile, source, compiled object, screenshot or log removed.",
+  "base": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Versions/156.0.8078.47/Breezer Framework",
+  "target": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round16final/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Versions/156.0.8078.47/Breezer Framework",
+  "sha256": "a3351a26c2220e382ceaf2e2394add24e7eb5b827678175fd0a5d96e5c63ea7a",
+  "allBytesPreserved": true,
+  "posixAndExtendedMetadataPreserved": true,
+  "changedChunks": [
+    [
+      592445440,
+      1048576
+    ]
+  ],
+  "freeBytesBefore": 689426432,
+  "freeBytesAfter": 1283641344,
+  "installedPinsUnchanged": true
+}

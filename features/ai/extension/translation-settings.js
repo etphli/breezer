@@ -37,10 +37,11 @@ export async function mountTranslationSettings({ container, api }) {
     el('p', 'Right-click a page and choose Translate page. Choose languages, translate and restore the original in the translation window. A keyboard shortcut can be set in Browser settings.'),
     el('p', 'Local mode needs your LibreTranslate server at http://localhost:5000. Hosted mode requires your own LibreTranslate.com API key and sends page text there. Breezer does not provide a paid account or use your AI account.'),
     el('p', 'Each translation needs your confirmation. Visible page text, including private text you can read, goes to the chosen server. Form fields, editors, code and frames are excluded. No page URL, cookies or browser credentials are included. Your provider can see your IP address. A local server may have its own connections or logging.'));
-  const actions = el('div', '', { class: 'setting-actions' }); actions.append(save);
+  const actions = el('div', '', { class: 'setting-actions context-save' }); actions.append(save, status);
+  group.append(actions);
   section.append(el('h2', 'Page translation', { id: 'translation-heading' }),
     el('p', 'Translate from a page’s right-click menu. Nothing is translated automatically.', { class: 'section-note' }),
-    group, actions, status, guide, details);
+    group, guide, details);
   container.append(section);
   let prefs;
   try {

@@ -52,7 +52,8 @@ port.onMessage.addListener(message => {
     prefs = message.prefs;
     try { $('page').textContent = new URL(message.origin).host; } catch { $('page').textContent = message.origin; }
     $('page').title = message.origin;
-    $('provider').textContent = prefs.provider === 'local' ? 'Local LibreTranslate receives text at localhost:5000 on this device.' : 'LibreTranslate.com receives text outside this device.';
+    $('provider').textContent = prefs.provider === 'local' ? 'Local LibreTranslate receives page text on this device.' : 'LibreTranslate.com receives text outside this device.';
+    $('provider').title = prefs.provider === 'local' ? 'Local server: http://localhost:5000' : 'https://libretranslate.com';
     $('dynamic').checked = prefs.dynamic;
   }
   if (message.type === 'languages') {

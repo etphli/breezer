@@ -26,9 +26,10 @@
           <p id="welcome-status-text"></p>
           <details id="welcome-account-steps" class="account-options" hidden>
             <summary>Sign-in instructions</summary>
-            <p>In Terminal, run the command for one account. Then return here and refresh.</p>
+            <p>Copy the command for one account.</p>
             <div data-provider="codex"><span>Codex</span><code>codex login</code><button type="button" data-copy-command aria-label="Copy Codex sign-in command">Copy</button></div>
             <div data-provider="claude"><span>Claude</span><code>claude auth login</code><button type="button" data-copy-command aria-label="Copy Claude sign-in command">Copy</button></div>
+            <p>Run it in Terminal, then return and refresh.</p>
           </details>
           <button type="button" id="welcome-action" class="welcome-action" hidden></button>
         </div>
@@ -83,10 +84,10 @@
               <select id="speed-select" aria-label="Codex speed" aria-describedby="speed-note" disabled><option value="standard">Standard</option></select>
               <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
             </label>
-            <p id="speed-note" class="option-note" hidden>Fast uses more Codex allowance. Availability depends on your account.</p>
+            <p id="speed-note" class="option-note" hidden>Fast uses more Codex allowance. Your account must support it.</p>
           </div>
         </details>
-        <p class="menu-note">Uses your signed-in Codex or Claude account.</p>
+        <p class="menu-note">Uses your account allowance.</p>
       </section>
     </footer>
   </div>

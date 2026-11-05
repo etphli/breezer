@@ -78,12 +78,16 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   position: fixed;
   top: 14px;
   right: 16px;
-  width: 34px;
+  padding: 0 10px;
   height: 34px;
-  display: grid;
-  place-items: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border-radius: 10px;
-  color: var(--muted);
+  color: var(--ink);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  font-size: 13px;
 }
 .settings-link svg { width: 17px; height: 17px; }
 .settings-link:hover { color: var(--ink); background: var(--hover); }
@@ -192,6 +196,14 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   border-radius: 16px;
 }
 .sheet:has(.organato[data-state="loading"]) { flex: 1; min-height: 360px; border-radius: 16px 16px 0 0; }
+.organato .agenda-skeleton { display: none; }
+.organato[data-state="loading"] .agenda-skeleton { display: grid; margin-top: 24px; }
+.skeleton-lane { display: grid; gap: 14px; align-content: start; }
+.skeleton-lane i, .skeleton-lane span { display: block; border-radius: 5px; background: var(--hover); }
+.skeleton-lane i { width: 32%; height: 14px; margin-bottom: 8px; }
+.skeleton-lane span { height: 48px; background: linear-gradient(var(--hover), var(--hover)) left center / 64% 12px no-repeat; border-bottom: 1px solid var(--line); border-radius: 0; }
+.skeleton-lane span:nth-child(3) { background-size: 82% 12px; }
+.skeleton-lane span:nth-child(4) { background-size: 54% 12px; }
 
 .organato-head {
   display: flex;
@@ -316,7 +328,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 }
 a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 
-.item-meta { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 14px; color: var(--muted); }
+.item-meta { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 14px; color: var(--ink); }
+.item-subject { color: var(--muted); }
 /* Exams share the Upcoming list, so a quiet word marks them instead of a heading. */
 .item-kind { font-weight: 600; color: var(--ink); }
 .item[data-urgency="overdue"] .item-when { color: var(--danger); }

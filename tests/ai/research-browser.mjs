@@ -153,13 +153,16 @@ try {
   assert.equal(sent.researchSources[1].truncated, true);
   assert.equal(await page.evaluate(() => window.activePageReads || 0), 0);
   await page.evaluate(id => { window.emit({ type: 'delta', id, text: 'The sources discuss different tradeoffs [S1] [S2].' }); window.emit({ type: 'complete', id }); }, sent.id);
+  await page.locator('.message.assistant .citation').first().waitFor();
+  assert.deepEqual(await page.locator('.message.assistant .citation').allTextContents(), ['Source 1', 'Source 2']);
+  assert.equal(await page.locator('.message.assistant .citation').first().getAttribute('href'), 'https://one.test/design');
   await page.locator('#prompt').fill('Summarize again.');
   await page.evaluate(() => { window.failSecond = true; window.sent.length = 0; });
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => window.sent.some(message => message.type === 'chat'));
   const partial = await page.evaluate(() => window.sent.find(message => message.type === 'chat'));
   assert.equal(partial.researchSources[1].status, 'unavailable');
-  assert.match(await page.locator('.message-meta').last().innerText(), /S2[\s\S]*closed/);
+  assert.match(await page.locator('.message-meta').last().innerText(), /2 · Comparing browser memory[\s\S]*closed/);
   await page.evaluate(id => window.emit({ type: 'complete', id }), partial.id);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/research-partial-failure.png` });
   await page.getByRole('button', { name: 'Remove source 2:', exact: false }).click();

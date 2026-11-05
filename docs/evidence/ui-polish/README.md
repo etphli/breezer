@@ -300,17 +300,25 @@ import emphasis. The final candidate 16 pack refreshes every source-matching
 state. Nineteen annotated comparisons were shown before the next council.
 The threshold remains unmet; all work stays local and PR #17 is unpushed.
 
-Round 16 Sol 1 returned 8.9. Sol 2 is still pending and Opus returned no score
-after its quota failure. This is an incomplete round, with no inferred scores.
-Candidate 17 work strengthens stale-agenda feedback, clarifies search actions,
-keeps navigation slots stable while settings load, and refreshes active search
-results after a module arrives. Required translation consent is distinct from
-optional automatic translation. Unavailable sharing and restart actions are
-omitted, shortcut captions allow two lines, setup shows its stage count, and
-expanded secondary release notes use the space below the illustration.
+Round 16 returned 8.9, 9.0 and 8.3. All original launches overlapped; Opus
+finished after its quota reset. Its early-image judgments relied partly on notes
+and its article/motion coverage was partial. The requested threshold remains unmet.
 
-The complete Node suite passed 547 checks, zero failures and two skips. A later
-correction to the delayed-search refresh call passed its original reproduction;
-the settings browser check also covers that case. Native and full matrix
-verification for this candidate remain pending. Work is local and unreviewed;
-PR #17 remains unpushed and the requested threshold is unmet.
+Candidate 17 makes sharing consent distinct from optional automation, improves
+secondary text, gives settings search a navigation cue, and keeps categories stable
+while modules arrive. It adds agenda loading placeholders, a visible new-tab Settings
+entry, readable compact-tab identities, linked research citations and clearer
+account command rows. Save/status placement and dark fields follow shared rules.
+A controlled delayed-activation replay confirms destination tabs keep their selection;
+a newer native activation also wins over a late API reply.
+
+The final uninterrupted suite passed 547 checks, zero failures and two skips.
+Both assistant/research walkthroughs passed. The refreshed 490-state matrix matches
+all 50 source hashes; 38 translation captures fit, and all six reduced-motion
+cases have no active animations. Seventy-two compact layouts fit. Forty-one actual
+native windows and two recordings use the private verification build with nine
+unchanged current native units and all 50 current web resources. All 45 normal and
+37 reduced encoded native frames are retained with presentation timestamps.
+One system-stopped recording is retained separately; its successful retry is used.
+Twenty annotated comparisons show the changes. Physical interaction and frame
+pacing remain unverified; this is not a release rebuild. PR #17 stays unpushed.

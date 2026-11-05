@@ -1,8 +1,9 @@
 # Candidate evidence
 
-Current evidence for the sixteenth UI refinement. GPT-6.1 Sol wrote the code and
-verification tools. The completed round-15 council scored 8.8, 8.8 and 8.7. Its accepted finishing
-fixes are included here; this candidate has not yet been reviewed. All changes remain local.
+Current evidence for the seventeenth UI refinement. GPT-6.1 Sol wrote the code
+and verification tools. Round 16 returned 8.9, 9.0 and 8.3; Opus completed after
+its quota reset. This candidate incorporates accepted findings and has not yet
+been reviewed. All changes remain local.
 
 - `screens/` contains current settings, assistant, setup, new-tab, release and
   translation states, including edited memory choices ready to save.
@@ -11,8 +12,8 @@ fixes are included here; this candidate has not yet been reviewed. All changes r
 - `motion/` contains twelve recordings and decoded sheets. All six reduced-motion
   cases have no active animations, including modal backdrops.
 - `native/` contains 41 fresh windows and two continuous recordings, plus every
-  encoded native header frame: 72 normal and 72 reduced-motion frames.
-- `comparisons/candidate-16-*.png` contains nineteen annotated before/after pairs.
+  encoded native header frame: 45 normal and 37 reduced-motion frames.
+- `comparisons/candidate-17-*.png` contains twenty annotated before/after pairs.
 - `checks/verification.json` records the complete suite, focused workflow checks,
   source integrity and the remaining verification limits.
 - `evidence-hashes.json` identifies the included artifacts.

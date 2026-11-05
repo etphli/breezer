@@ -36,7 +36,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
 
   const intro = node('p', 'Copy the bookmarks, history and passwords you choose from Chrome.', 'onboarding-intro');
   const details = node('details', '', 'setting-details onboarding-details');
-  details.append(node('summary', 'Import details'), node('p', 'Chrome and Breezer keep separate profiles. This copies your data once; later changes in Chrome stay in Chrome.'));
+  details.append(node('summary', 'Import details'), node('p', 'Chrome and Breezer keep separate profiles. Future changes in Chrome stay there.'));
 
   const paths = node('div', '', 'onboarding-paths');
   const status = node('p', '', 'status-line');
@@ -81,7 +81,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
     if (!disposed) status.textContent = 'Import dialog opened in a new tab. Choose what to copy there, then check your bookmarks and history.';
   }, { signal: events.signal });
   path('Bookmarks and history',
-    'Opens Breezer’s import dialog. Choose Google Chrome as the source, then select bookmarks, history, or both.',
+    'Choose Google Chrome in the import dialog, then select bookmarks, history, or both.',
     browserImport);
 
   const passwordSteps = node('button', 'Show password steps', 'button');
@@ -96,10 +96,10 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   }, { signal: events.signal });
   if (!passwords) passwordSteps.hidden = true;
   path('Passwords',
-    'Export a password file from Chrome, then import it in Breezer’s password manager. Choose Show password steps for the guide. Passkeys are not included.',
+    'Choose Show password steps to export from Chrome and import into Breezer. Passkeys are not included.',
     passwordSteps);
 
-  const footnote = node('p', 'After you hide this, both imports stay available in Passwords and Browser tools.', 'field-note');
+  const footnote = node('p', 'Imports remain in Passwords and Browser tools.', 'field-note');
   details.append(footnote);
   section.append(head, intro, paths, status, error, details);
 
