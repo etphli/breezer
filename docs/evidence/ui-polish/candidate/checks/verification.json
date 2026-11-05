@@ -1,11 +1,11 @@
 {
-  "round": 18,
+  "round": 19,
   "suiteTests": 549,
   "uniquePassingChecks": 547,
   "unresolvedFailures": 0,
   "skipped": 2,
   "method": "One uninterrupted complete Node suite, then assistant/research walkthroughs, focused narrow-field geometry and private native current-UI capture.",
-  "fullLog": "/tmp/breezer-ui-round18-full-final-2.log",
+  "fullLog": "/tmp/breezer-ui-round19-full-final-2.log",
   "matrixCaptures": 490,
   "sourceFiles": 50,
   "newlyCompiledNativeUnits": 0,
@@ -15,18 +15,18 @@
   "translation320Modes": 2,
   "customMotionSequences": 12,
   "reducedMotionAssertions": 6,
-  "freshNativeWindowCaptures": 41,
+  "freshNativeWindowCaptures": 42,
   "freshNativeContinuousRecordings": 2,
   "privateCompiledUiUnits": 9,
   "nativeLoadedSourceFiles": 50,
   "nativeProfileIconMinimumContrast": 8.838213838897685,
-  "beforeAfterPairs": 14,
+  "beforeAfterPairs": 16,
   "accountConnectionDialogs": 4,
   "selectArrowChecks": 56,
   "compactLayoutCases": 72,
   "completeEncodedNativeFrameCounts": [
-    41,
-    71
+    40,
+    39
   ],
   "dialogMotionModeCases": 6,
   "nativePlusVisibleSamples": 16,
@@ -47,122 +47,1284 @@
   "nativeActivationRaceProof": {
     "samples": [
       {
-        "time": 10,
+        "time": 3.9000000953674316,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 27.700000047683716,
+        "time": 19.5,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 44.30000019073486,
+        "time": 37.90000009536743,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 59.10000014305115,
+        "time": 54.60000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 77.70000004768372,
+        "time": 71.20000004768372,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 94.30000019073486,
+        "time": 87.79999995231628,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 110.30000019073486,
+        "time": 103.79999995231628,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 127.70000004768372,
+        "time": 121.29999995231628,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 142.5,
+        "time": 137.90000009536743,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 159.40000009536743,
+        "time": 154.60000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 177.80000019073486,
+        "time": 171.20000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 193.70000004768372,
+        "time": 186.90000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 210.90000009536743,
+        "time": 204.60000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 226.20000004768372,
+        "time": 221.29999995231628,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 244.40000009536743,
+        "time": 238,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 260.40000009536743,
+        "time": 253.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 277.80000019073486,
+        "time": 270.5,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 292.60000014305115,
+        "time": 288.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 310.10000014305115,
+        "time": 304.7000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 326.10000014305115,
+        "time": 321.40000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 343.90000009536743,
+        "time": 336.2000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 359.80000019073486,
+        "time": 354.7000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 377.7000000476837,
+        "time": 371.2999999523163,
         "space": "Personal",
         "selected": 1
       }
     ],
     "unselectedDestinationFrames": 0,
     "newerNativeActivationWins": true
+  },
+  "nativeAppearance": {
+    "method": "Real native bridge writes followed by Settings appearance.rev notification; retained UI source hashes identify the loaded payload. Two matching consecutive own-window images per state.",
+    "bookmarkStates": [
+      "empty",
+      "populated"
+    ],
+    "bookmarkSeedsMatchAcrossMotionModes": true,
+    "nativeWindows": 42,
+    "fontEndpointPixelsDiffer": true,
+    "fontEndpoints": [
+      {
+        "value": 12,
+        "path": "/tmp/breezer-ui-polish/round-19-final-native/sidebar-frame-compact-small-type.png",
+        "sha256": "be58bf82af3f79544c8fa69546bb677864572377e20400150707ddebc9974e95"
+      },
+      {
+        "value": 20,
+        "path": "/tmp/breezer-ui-polish/round-19-final-native/sidebar-frame-compact-large-type.png",
+        "sha256": "89ec847683471950effc67648566e5bd7350290fa22056e4d14c0ad4389cbc72"
+      }
+    ],
+    "installedAppAndProfileUnchanged": true
+  },
+  "nativeFixtureCorrection": "The initial direct-bridge capture omitted the standard Settings appearance.rev broadcast. That diagnostic pack is retained separately; this pack includes the broadcast and visibly distinct font endpoints.",
+  "wholePanelOpacity": {
+    "method": "Computed opacity sampled on animation frames during normal-mode startup in both schemes. A deterministic fixture delays its initial provider reply by 600ms to expose the connecting state. This is a functional opacity check, not a latency measurement.",
+    "current": {
+      "light": [
+        {
+          "time": 63.700000047683716,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 79.5,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 97.29999995231628,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 114.10000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 130.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 147.29999995231628,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 164,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 180.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 197.40000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 213.90000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 230.79999995231628,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 247.29999995231628,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 264,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 280.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 297.5,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 314.2000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 330.90000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 347.5,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 364.10000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 380.2999999523163,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 397.40000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 414.2000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 430.5,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 445.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 462.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 480.90000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 497,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 512.4000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 530.9000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 545.9000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 562.4000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 580.9000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 597.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 614.2000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 630.9000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 647.5,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 664.1000001430511,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 680.7999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 697.4000000953674,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 714.2000000476837,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 730.7999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 746.1000001430511,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 764.1000001430511,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 780.7999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 797,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 812.2999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 830.9000000953674,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 847.7000000476837,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 864.2999999523163,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 881,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 897.2000000476837,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        }
+      ],
+      "dark": [
+        {
+          "time": 85,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 100.10000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 115.80000019073486,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 132.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 148.90000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 166.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 182.20000004768372,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 200.80000019073486,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 217.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 234.20000004768372,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 250.80000019073486,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 267.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 284.2000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 300.80000019073486,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 317.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 334.40000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 349.5,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 367.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 383.10000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 401,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 417.30000019073486,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 432.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 450.90000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 467.60000014305115,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 484.30000019073486,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 500.40000009536743,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 516.1000001430511,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 534.4000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 551,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 567.7000000476837,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 584.4000000953674,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 601,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 618,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 634.3000001907349,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 651,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 667.6000001430511,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 684.3000001907349,
+          "state": "connecting",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 701,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 716.4000000953674,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 733.9000000953674,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 751,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 767.6000001430511,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 784.2000000476837,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 801,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 816.6000001430511,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 834.5,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 851,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 867.7000000476837,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 884.4000000953674,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 901,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        },
+        {
+          "time": 915.9000000953674,
+          "state": "ready",
+          "root": "1",
+          "body": "1",
+          "panel": "1",
+          "conversation": "1",
+          "composer": "1",
+          "suggestion": "1",
+          "model": "1"
+        }
+      ]
+    },
+    "majorContainers": [
+      "root",
+      "body",
+      "panel",
+      "conversation",
+      "composer"
+    ]
   }
 }

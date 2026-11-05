@@ -3,117 +3,112 @@
   "before": {
     "samples": [
       {
-        "time": 6.799999952316284,
+        "time": 13.900000095367432,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 23.90000009536743,
+        "time": 29.5,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 41.10000014305115,
+        "time": 47.299999952316284,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 57.799999952316284,
+        "time": 62.60000014305115,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 74.5,
+        "time": 80.60000014305115,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 91.20000004768372,
+        "time": 97.40000009536743,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 105.90000009536743,
+        "time": 114.10000014305115,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 124.5,
+        "time": 130.10000014305115,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 141.10000014305115,
+        "time": 147.40000009536743,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 157.79999995231628,
+        "time": 164.20000004768372,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 174.40000009536743,
+        "time": 180.60000014305115,
         "space": "Personal",
         "selected": 0
       },
       {
-        "time": 191,
+        "time": 197,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 207.79999995231628,
+        "time": 212.60000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 223.79999995231628,
+        "time": 230.70000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 241.20000004768372,
+        "time": 247.29999995231628,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 257.7000000476837,
+        "time": 264,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 274.40000009536743,
+        "time": 280.7000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 291.10000014305115,
+        "time": 296.2999999523163,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 307.7999999523163,
+        "time": 314,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 324.40000009536743,
+        "time": 330.60000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 340.60000014305115,
+        "time": 347.2999999523163,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 357.2000000476837,
-        "space": "Personal",
-        "selected": 1
-      },
-      {
-        "time": 374,
+        "time": 364,
         "space": "Personal",
         "selected": 1
       }
@@ -123,117 +118,117 @@
   "after": {
     "samples": [
       {
-        "time": 10,
+        "time": 3.9000000953674316,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 27.700000047683716,
+        "time": 19.5,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 44.30000019073486,
+        "time": 37.90000009536743,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 59.10000014305115,
+        "time": 54.60000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 77.70000004768372,
+        "time": 71.20000004768372,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 94.30000019073486,
+        "time": 87.79999995231628,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 110.30000019073486,
+        "time": 103.79999995231628,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 127.70000004768372,
+        "time": 121.29999995231628,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 142.5,
+        "time": 137.90000009536743,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 159.40000009536743,
+        "time": 154.60000014305115,
         "space": "Work",
         "selected": 1
       },
       {
-        "time": 177.80000019073486,
+        "time": 171.20000004768372,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 193.70000004768372,
+        "time": 186.90000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 210.90000009536743,
+        "time": 204.60000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 226.20000004768372,
+        "time": 221.29999995231628,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 244.40000009536743,
+        "time": 238,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 260.40000009536743,
+        "time": 253.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 277.80000019073486,
+        "time": 270.5,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 292.60000014305115,
+        "time": 288.10000014305115,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 310.10000014305115,
+        "time": 304.7000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 326.10000014305115,
+        "time": 321.40000009536743,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 343.90000009536743,
+        "time": 336.2000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 359.80000019073486,
+        "time": 354.7000000476837,
         "space": "Personal",
         "selected": 1
       },
       {
-        "time": 377.7000000476837,
+        "time": 371.2999999523163,
         "space": "Personal",
         "selected": 1
       }

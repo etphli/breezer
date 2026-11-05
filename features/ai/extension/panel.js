@@ -78,6 +78,7 @@ function renderSettings(selected, running) {
   reasoning.disabled = running || !levels.length;
   reasoning.parentElement.title = levels.length ? 'Reasoning effort' : 'This model does not report adjustable reasoning effort';
   const codex = selected?.provider.id === 'codex';
+  $('model-settings-label').textContent = codex ? 'Reasoning and speed' : 'Reasoning';
   $('speed-setting').hidden = !codex;
   const speed = $('speed-select');
   speed.replaceChildren(new Option('Standard', 'standard'));
@@ -530,7 +531,7 @@ function fail(reason, label) {
 function revealPanel() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.querySelector('.panel').animate(
-    [{ opacity: 0, transform: 'translateX(6px)' }, { opacity: 1, transform: 'translateX(0)' }],
+    [{ transform: 'translateX(2px)' }, { transform: 'translateX(0)' }],
     { duration: 120, easing: 'ease-out' },
   );
 }
@@ -676,6 +677,7 @@ function positionControlTip() {
   const center = trigger.left + trigger.width / 2 - footer.left;
   const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));
   tip.style.left = `${left}px`;
+  tip.style.bottom = `${footer.bottom - trigger.top + 8}px`;
   tip.style.setProperty('--tip-pointer', `${center - left}px`);
 }
 for (const type of ['pointerenter', 'focus']) $('control-toggle').addEventListener(type, positionControlTip);

@@ -41,11 +41,23 @@ try {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.addInitScript(() => {
+    window.panelOpacityFrames = [];
+    const sample = () => {
+      const panel = document.querySelector('.panel');
+      if (panel) window.panelOpacityFrames.push(getComputedStyle(panel).opacity);
+      if (window.panelOpacityFrames.length < 12) requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  });
   await page.addInitScript(installPanelFixture);
   await page.addInitScript(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedCommand = text; } } }));
   await page.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   assert.equal(await page.title(), 'Breezer assistant');
+  await page.waitForFunction(() => window.panelOpacityFrames.length >= 12);
+  assert.equal(await page.evaluate(() => window.panelOpacityFrames.every(opacity => opacity === '1')), true, 'assistant text remains opaque through its entrance');
   assert.match(await page.locator('h1').innerText(), /^What are we working on\?$/);
   assert.equal(await page.locator('#greeting-name').innerText(), '');
   assert.equal(await page.locator('#context-title').innerText(), 'Designing a calmer browser');
@@ -61,9 +73,10 @@ try {
     await page.locator('#control-tip').waitFor({ state: 'visible' });
     const tip = await page.locator('#control-tip').boundingBox();
     assert.ok(tip.x >= 0 && tip.x + tip.width <= width && tip.y >= 0, 'Control explanation stays in the panel');
-    const composer = await page.locator('.compose-area').boundingBox();
-    assert.ok(tip.y + tip.height <= composer.y, 'Control explanation leaves the composer and sharing status uncovered');
+    const writing = await page.locator('#prompt').boundingBox();
+    assert.ok(tip.y + tip.height <= writing.y, 'Control explanation leaves the writing area uncovered');
     const trigger = await page.locator('#control-toggle').boundingBox();
+    assert.ok(Math.abs(trigger.y - tip.y - tip.height - 8) < 1, 'Tooltip is anchored directly above Browser control');
     const pointer = await page.locator('#control-tip').evaluate(node => parseFloat(node.style.getPropertyValue('--tip-pointer')));
     assert.ok(Math.abs(tip.x + pointer - trigger.x - trigger.width / 2) < 1, 'Tooltip pointer follows the browser-control trigger');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });

@@ -265,6 +265,12 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     document.body.replaceChildren(); const container = document.createElement('div'); document.body.append(container);
     await mountTranslationSettings({ container, api: chrome });
   });
+  const saveTranslation = settings.getByRole('button', { name: 'Save translation settings' });
+  assert.equal(await saveTranslation.isDisabled(), true, 'unchanged preferences have no save action');
+  await settings.locator('#translation-key').fill('temporary-key');
+  assert.equal(await saveTranslation.isEnabled(), true);
+  await settings.locator('#translation-key').fill('');
+  assert.equal(await saveTranslation.isDisabled(), true, 'undoing the edit restores the unchanged state');
   await settings.locator('#translation-key').fill('local-draft-secret');
   await settings.locator('#translation-provider').selectOption('hosted');
   assert.equal(await settings.locator('#translation-key').inputValue(), '', 'changing providers clears an unsubmitted key draft');
@@ -278,6 +284,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   const saved = await worker.evaluate(async () => (await chrome.storage.local.get('translation.v1'))['translation.v1']);
   assert.equal(saved.apiKey, '', 'changing provider never forwards its credential');
   assert.equal(saved.source, 'es'); assert.equal(saved.target, 'en');
+  assert.equal(await saveTranslation.isDisabled(), true, 'successful save returns to unchanged state');
   assert.equal(requests.length, count, 'settings and reopening never translate automatically');
   const plain = await context.newPage(); await plain.goto('http://127.0.0.1:' + port + '/plain');
   const plainId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, plain.url());

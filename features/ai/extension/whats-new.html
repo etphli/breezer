@@ -90,9 +90,11 @@
         </div>
         <details class="feature-details">
           <summary>Setup choices</summary>
+          <h4>Profile choices</h4>
           <p>A new profile now opens a short setup guide instead of these notes. Pick the name Breezer AI greets you by, where your tabs sit, a theme color and appearance, then import from Chrome and connect Organato if you use it. A quick tour of the sidebar and the assistant finishes it, and you can skip at any step.</p>
         <p>Already set up? Open the guide whenever you like with the Setup guide button in Settings.</p>
-        <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
+        <h4>Optional services</h4>
+          <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
         </details>
       </article>
 
@@ -221,10 +223,10 @@
         <details class="feature-details">
           <summary>Helper lifecycle</summary>
           <ul class="notes">
-          <li>The background helpers behind Breezer AI, Organato and updates now start when something needs them and close once they've been idle, rather than staying open.</li>
-          <li>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
+          <li><h4>Start on demand</h4>The background helpers behind Breezer AI, Organato and updates now start when something needs them and close once they've been idle, rather than staying open.</li>
+          <li><h4>Shared connection, separate requests</h4>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
           <li>Breezer AI loads its provider code with your first request. Opening Settings or serving Organato requests does not load that code just in case.</li>
-          <li>After Settings has sat quietly for a while, your next action reconnects on its own. What you typed stays in place, and an interrupted change is never resent automatically.</li>
+          <li><h4>Reconnect safely</h4>After Settings has sat quietly for a while, your next action reconnects on its own. What you typed stays in place, and an interrupted change is never resent automatically.</li>
           <li>An update you've checked for stays ready to install. If the connection drops first, Breezer asks you to check again. The checksum, identity, signature and rollback checks are unchanged.</li>
         </ul>
         </details>
@@ -241,9 +243,9 @@
         <details class="feature-details">
           <summary>Startup and cleanup</summary>
           <ul class="notes">
-          <li>Breezer can reuse prepared versions of unchanged built-in ad-block lists. Custom filters, list updates and your blocking settings work as before.</li>
+          <li><h4>Prepared block lists</h4>Breezer can reuse prepared versions of unchanged built-in ad-block lists. Custom filters, list updates and your blocking settings work as before.</li>
           <li>If a prepared list has changed or cannot be used, Breezer processes it normally instead.</li>
-          <li>While Breezer runs, it keeps a private copy of itself so macOS can still check its signature after an update. Copies left by sessions that have ended are now removed.</li>
+          <li><h4>Private app copies</h4>While Breezer runs, it keeps a private copy of itself so macOS can still check its signature after an update. Copies left by sessions that have ended are now removed.</li>
           <li>A copy a running Breezer still holds is never touched, and copies from earlier versions, or whose owner can't be confirmed, are kept.</li>
         </ul>
         </details>
@@ -353,9 +355,11 @@
         </div>
         <details class="feature-details">
           <summary>Translation options</summary>
+          <h4>Provider and sharing</h4>
           <p>Translate page text in place, choose languages and restore the original. Connect your local LibreTranslate server or use your own LibreTranslate.com key, with explicit confirmation before sharing page text.</p>
         <p>Right-click a page and choose Translate page to begin. Translation needs your provider to be running; Breezer does not bundle translation models or use your AI account.</p>
-        <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
+        <h4>Stop and restore</h4>
+          <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
         </details>
       </article>
       <article class="feature" aria-labelledby="f-settings">

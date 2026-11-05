@@ -106,6 +106,7 @@ are retained in the adjacent Markdown files.
 | Breezer, candidate 15 complete council | 8.8 | 8.8 | 8.7 |
 | Breezer, candidate 16 interrupted cohort | 8.9 | 9.0 | 8.3, later resume |
 | Breezer, candidate 17 complete council | 9.0 | 9.0 | 8.9 |
+| Breezer, candidate 18 complete council | 9.0 | 9.0 | 9.2 |
 | Chrome, standalone baseline | 8.0 | 8.0 | 7.7 |
 | Safari, standalone baseline | 8.6 | 8.6 | 8.4 |
 
@@ -345,3 +346,35 @@ and two recordings retain every encoded sample, 41 normal and 71 reduced.
 Fourteen actual annotated comparisons were shown before review. The frozen pack
 contains 1,220 evidence files. GPT-6.1 Sol wrote these changes; no reviewer has
 scored candidate 18. Physical interaction and frame pacing remain unverified.
+
+Candidate 18 completed at 9.0, 9.0 and 9.2. Starts were 0.401 seconds apart and
+all three reviews overlapped for 666.507 seconds. Both Sol reviewers found no
+confirmed blockers; Opus confirmed four local fixes. All three were satisfied
+with the direction. The requested 9.5 from each reviewer remains unmet.
+
+Candidate 19 fits command chips at 320px, anchors the browser-control tooltip,
+contains missing-integration notices, and enables Translation Save only for edits.
+It clarifies the assistant footer, removes its whole-panel opacity entrance, and
+keeps loading controls readable. Compact identities scale with the font choice.
+Inactive memory maintenance actions are hidden, Organato guidance is shorter,
+and the optional tour states its remaining length. Release disclosures have
+subheadings and a current-section indicator. Narrow comparison headers stay
+visible, and Translation keeps both language controls on one row at 320px.
+Its rate-limit countdown remains readable while disabled.
+
+Focused browser checks cover the four reproduced issues, unchanged/edit/undo,
+failed-write retry and provider-key isolation, shared interface refinements,
+normal-mode opacity frames in both modes, and 72 compact layout combinations.
+The complete suite passed 547 checks with zero failures and two skips, followed
+by both assistant/research walkthroughs. All 490 matrix captures match the fifty
+source files; 38 translation states fit and all six reduced-motion checks pass.
+The private verification build supplies 42 native windows and two recordings,
+with all 40 normal and 39 reduced encoded frames retained. Nine unchanged native
+units and all fifty loaded web resources were verified. Both empty and populated
+bookmarks bars were captured in disposable profiles. Font endpoints now include
+the normal Settings notification; a matched previous-build capture supports the
+native text comparison. The earlier capture without that notification is retained
+separately. Sixteen actual annotated before/after pairs were shown before review.
+The frozen pack contains 1,195 evidence files. GPT-6.1 Sol wrote these changes;
+no council has scored candidate 19. Native physical interaction and frame pacing
+remain unverified; this is not a release rebuild. PR #17 remains unpushed.

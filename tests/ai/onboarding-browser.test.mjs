@@ -356,6 +356,13 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       assert.equal(await page.getByRole('radio', { name: /^Top/ }).getAttribute('aria-disabled'), 'true');
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.equal(overflow, 0, 'no horizontal scrolling at 390px');
+      const noticeFits = await page.locator('#wl-bridge-note').evaluate(node => {
+        const text = document.createRange(); text.selectNodeContents(node);
+        return text.getBoundingClientRect().bottom <= node.getBoundingClientRect().bottom;
+      });
+      assert.equal(noticeFits, true, 'integration notice contains every line');
+      const nextBounds = await page.locator('#wl-next').boundingBox();
+      assert.ok(nextBounds.y + nextBounds.height <= 844, 'Continue stays available while setup content scrolls');
       await shot(page, 'narrow-no-bridge');
       await context.close();
     }

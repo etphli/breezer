@@ -19,6 +19,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
   transition: background-color 240ms ease, color 240ms ease;
 }
 
+.welcome:has(#wl-bridge-note:not([hidden])) { grid-template-rows: auto auto minmax(0, 1fr) auto; }
 #wl-skip { padding-right: 0; }
 .wl-top { display: flex; align-items: center; justify-content: space-between; }
 .wl-brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 650; letter-spacing: -0.01em; }

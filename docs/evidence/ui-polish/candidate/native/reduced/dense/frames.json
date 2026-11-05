@@ -1,5 +1,5 @@
 {
-  "source" : "\/tmp\/breezer-ui-polish\/round-18-final-native-reduced\/native-tabs-toolbar-motion.mp4",
+  "source" : "\/tmp\/breezer-ui-polish\/round-19-final-native-reduced\/native-tabs-toolbar-motion.mp4",
   "frames" : [
     {
       "presentationTimeMs" : 0,
@@ -12,147 +12,147 @@
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 93.333333333333343,
+      "presentationTimeMs" : 106.66666666666667,
       "file" : "native-dense-002.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 126.66666666666667,
+      "presentationTimeMs" : 140,
       "file" : "native-dense-003.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 176.66666666666666,
+      "presentationTimeMs" : 173.33333333333334,
       "file" : "native-dense-004.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 218.33333333333331,
+      "presentationTimeMs" : 208.33333333333334,
       "file" : "native-dense-005.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 251.66666666666666,
+      "presentationTimeMs" : 243.33333333333334,
       "file" : "native-dense-006.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 286.66666666666669,
+      "presentationTimeMs" : 280,
       "file" : "native-dense-007.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 320,
+      "presentationTimeMs" : 310,
       "file" : "native-dense-008.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 353.33333333333331,
+      "presentationTimeMs" : 345,
       "file" : "native-dense-009.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 386.66666666666669,
+      "presentationTimeMs" : 380,
       "file" : "native-dense-010.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 421.66666666666669,
+      "presentationTimeMs" : 413.33333333333331,
       "file" : "native-dense-011.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 455,
+      "presentationTimeMs" : 446.66666666666663,
       "file" : "native-dense-012.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 488.33333333333331,
+      "presentationTimeMs" : 481.66666666666669,
       "file" : "native-dense-013.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 523.33333333333337,
+      "presentationTimeMs" : 515,
       "file" : "native-dense-014.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 565,
+      "presentationTimeMs" : 550,
       "file" : "native-dense-015.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 600,
+      "presentationTimeMs" : 583.33333333333337,
       "file" : "native-dense-016.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 633.33333333333326,
+      "presentationTimeMs" : 616.66666666666674,
       "file" : "native-dense-017.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 666.66666666666663,
+      "presentationTimeMs" : 651.66666666666663,
       "file" : "native-dense-018.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 700,
+      "presentationTimeMs" : 686.66666666666663,
       "file" : "native-dense-019.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 743.33333333333326,
+      "presentationTimeMs" : 720,
       "file" : "native-dense-020.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 776.66666666666663,
+      "presentationTimeMs" : 753.33333333333326,
       "file" : "native-dense-021.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 811.66666666666663,
+      "presentationTimeMs" : 788.33333333333337,
       "file" : "native-dense-022.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 845,
+      "presentationTimeMs" : 820,
       "file" : "native-dense-023.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 888.33333333333326,
+      "presentationTimeMs" : 891.66666666666674,
       "file" : "native-dense-024.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 926.66666666666663,
+      "presentationTimeMs" : 925,
       "file" : "native-dense-025.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 961.66666666666663,
+      "presentationTimeMs" : 960,
       "file" : "native-dense-026.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 996.66666666666674,
+      "presentationTimeMs" : 995,
       "file" : "native-dense-027.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1030,
+      "presentationTimeMs" : 1028.3333333333333,
       "file" : "native-dense-028.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1063.3333333333333,
+      "presentationTimeMs" : 1061.6666666666667,
       "file" : "native-dense-029.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1098.3333333333335,
+      "presentationTimeMs" : 1096.6666666666667,
       "file" : "native-dense-030.png",
       "durationMs" : null
     },
@@ -162,205 +162,45 @@
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1165,
+      "presentationTimeMs" : 1391.6666666666665,
       "file" : "native-dense-032.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1201.6666666666667,
+      "presentationTimeMs" : 1426.6666666666667,
       "file" : "native-dense-033.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1235,
+      "presentationTimeMs" : 1676.6666666666667,
       "file" : "native-dense-034.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1280,
+      "presentationTimeMs" : 1711.6666666666667,
       "file" : "native-dense-035.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1315,
+      "presentationTimeMs" : 1911.6666666666665,
       "file" : "native-dense-036.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1361.6666666666665,
+      "presentationTimeMs" : 2376.6666666666665,
       "file" : "native-dense-037.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1396.6666666666667,
+      "presentationTimeMs" : 2411.6666666666665,
       "file" : "native-dense-038.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1430,
-      "file" : "native-dense-039.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1463.3333333333335,
-      "file" : "native-dense-040.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1498.3333333333333,
-      "file" : "native-dense-041.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1531.6666666666667,
-      "file" : "native-dense-042.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1565,
-      "file" : "native-dense-043.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1600,
-      "file" : "native-dense-044.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1635,
-      "file" : "native-dense-045.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1668.3333333333333,
-      "file" : "native-dense-046.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1701.6666666666667,
-      "file" : "native-dense-047.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1735,
-      "file" : "native-dense-048.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1768.3333333333333,
-      "file" : "native-dense-049.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1803.3333333333333,
-      "file" : "native-dense-050.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1836.6666666666667,
-      "file" : "native-dense-051.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1871.6666666666665,
-      "file" : "native-dense-052.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1905,
-      "file" : "native-dense-053.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1940,
-      "file" : "native-dense-054.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 1973.3333333333335,
-      "file" : "native-dense-055.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2006.6666666666667,
-      "file" : "native-dense-056.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2041.6666666666665,
-      "file" : "native-dense-057.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2076.6666666666665,
-      "file" : "native-dense-058.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2110,
-      "file" : "native-dense-059.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2145,
-      "file" : "native-dense-060.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2178.333333333333,
-      "file" : "native-dense-061.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2211.6666666666665,
-      "file" : "native-dense-062.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2245,
-      "file" : "native-dense-063.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2278.3333333333335,
-      "file" : "native-dense-064.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2313.3333333333335,
-      "file" : "native-dense-065.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2348.333333333333,
-      "file" : "native-dense-066.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2380,
-      "file" : "native-dense-067.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2415,
-      "file" : "native-dense-068.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2451.6666666666665,
-      "file" : "native-dense-069.png",
-      "durationMs" : null
-    },
-    {
-      "presentationTimeMs" : 2483.3333333333335,
-      "file" : "native-dense-070.png",
       "durationMs" : null
     }
   ],
   "method" : "Every decoded AVAssetReader sample with its actual presentation timestamp. Native header pixels only; no synthetic in-between frames. This does not establish input latency or application frame pacing.",
   "sourceHeight" : 1560,
   "sourceWidth" : 2200,
-  "assetDurationMs" : 2503.3333333333335,
+  "assetDurationMs" : 2425,
   "crop" : [
     0,
     0,

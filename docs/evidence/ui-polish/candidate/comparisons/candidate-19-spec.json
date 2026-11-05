@@ -1,0 +1,287 @@
+[
+  {
+    "id": "footer",
+    "title": "Assistant sharing and writing",
+    "file": "footer.png",
+    "beforeFile": "before-footer.png",
+    "afterFile": "after-footer.png",
+    "beforeRoot": "round-19-shared-proof",
+    "afterRoot": "round-19-shared-proof",
+    "notes": [
+      [
+        75,
+        59,
+        58,
+        76,
+        "Sharing, writing, and model/source controls have clearer grouping and more readable labels."
+      ]
+    ]
+  },
+  {
+    "id": "startup",
+    "title": "Assistant startup",
+    "file": "connecting-light.png",
+    "beforeFile": "before-connecting-light.png",
+    "afterFile": "after-connecting-light.png",
+    "beforeRoot": "round-19-shared-proof",
+    "afterRoot": "round-19-shared-proof",
+    "notes": [
+      [
+        76,
+        24,
+        43,
+        19,
+        "Text remains opaque through the opening animation."
+      ]
+    ]
+  },
+  {
+    "id": "commands",
+    "title": "Sign-in commands at 320px",
+    "file": "command.png",
+    "beforeFile": "before-command.png",
+    "afterFile": "after-command.png",
+    "beforeRoot": "round-19-final-focused",
+    "afterRoot": "round-19-final-focused",
+    "notes": [
+      [
+        77,
+        43,
+        48,
+        52,
+        "The full sign-in command fits beside Copy."
+      ]
+    ]
+  },
+  {
+    "id": "tooltip",
+    "title": "Browser control tooltip",
+    "file": "tooltip.png",
+    "beforeFile": "before-tooltip.png",
+    "afterFile": "after-tooltip.png",
+    "beforeRoot": "round-19-final-focused",
+    "afterRoot": "round-19-final-focused",
+    "notes": [
+      [
+        72,
+        63,
+        80,
+        77,
+        "The tooltip points directly to Browser control."
+      ]
+    ]
+  },
+  {
+    "id": "fallback-notice",
+    "title": "Setup integration notice",
+    "file": "notice.png",
+    "beforeFile": "before-notice.png",
+    "afterFile": "after-notice.png",
+    "beforeRoot": "round-19-final-focused",
+    "afterRoot": "round-19-final-focused",
+    "notes": [
+      [
+        77,
+        22,
+        60,
+        15,
+        "The notice contains every line; Continue stays visible."
+      ]
+    ]
+  },
+  {
+    "id": "translation-save",
+    "title": "Translation Save state",
+    "file": "translation.png",
+    "beforeFile": "before-translation.png",
+    "afterFile": "after-translation.png",
+    "beforeRoot": "round-19-final-focused",
+    "afterRoot": "round-19-final-focused",
+    "notes": [
+      [
+        77,
+        69,
+        50,
+        77.5,
+        "Save is available only after a setting changes."
+      ]
+    ]
+  },
+  {
+    "id": "memory",
+    "title": "Memory actions",
+    "file": "memory-390.png",
+    "beforeFile": "before-memory-390.png",
+    "afterFile": "after-memory-390.png",
+    "beforeRoot": "round-19-shared-proof",
+    "afterRoot": "round-19-shared-proof",
+    "notes": [
+      [
+        76,
+        70,
+        49,
+        58,
+        "Unavailable memory-clearing actions stay hidden."
+      ]
+    ]
+  },
+  {
+    "id": "organato",
+    "title": "New-tab settings",
+    "file": "organato-settings.png",
+    "beforeFile": "before-organato-settings.png",
+    "afterFile": "after-organato-settings.png",
+    "beforeRoot": "round-19-shared-proof",
+    "afterRoot": "round-19-shared-proof",
+    "notes": [
+      [
+        77,
+        27,
+        48,
+        21,
+        "One connection instruction replaces repeated guidance."
+      ]
+    ]
+  },
+  {
+    "id": "tour",
+    "title": "Optional tour length",
+    "file": "tour-preview.png",
+    "beforeFile": "before-tour-preview.png",
+    "afterFile": "after-tour-preview.png",
+    "beforeRoot": "round-19-shared-proof",
+    "afterRoot": "round-19-shared-proof",
+    "notes": [
+      [
+        77,
+        45,
+        24,
+        32,
+        "Setup states that five optional tips follow."
+      ]
+    ]
+  },
+  {
+    "id": "release-notes",
+    "title": "Expanded release details",
+    "file": "notes.png",
+    "beforeFile": "before-notes.png",
+    "afterFile": "after-notes.png",
+    "beforeRoot": "round-19-shared-proof",
+    "afterRoot": "round-19-shared-proof",
+    "notes": [
+      [
+        78,
+        25,
+        28,
+        38,
+        "Subheadings make technical details easier to scan."
+      ]
+    ]
+  },
+  {
+    "id": "section-index",
+    "title": "Current release-page section",
+    "file": "section-index.png",
+    "beforeFile": "before-section-index.png",
+    "afterFile": "after-section-index.png",
+    "beforeRoot": "round-19-final-detail",
+    "afterRoot": "round-19-final-detail",
+    "notes": [
+      [
+        78,
+        77,
+        49,
+        50,
+        "The index marks the section being read."
+      ]
+    ]
+  },
+  {
+    "id": "model-guidance",
+    "title": "Model settings and allowance",
+    "file": "allowance.png",
+    "beforeFile": "before-allowance.png",
+    "afterFile": "after-allowance.png",
+    "beforeRoot": "round-19-final-detail",
+    "afterRoot": "round-19-final-detail",
+    "notes": [
+      [
+        77,
+        70,
+        43,
+        91,
+        "Reasoning and speed is explicit; the account note stays visible when returning from Fast settings."
+      ]
+    ]
+  },
+  {
+    "id": "table",
+    "title": "Narrow comparison headings",
+    "file": "table.png",
+    "beforeFile": "before-table.png",
+    "afterFile": "after-table.png",
+    "beforeRoot": "round-19-final-detail",
+    "afterRoot": "round-19-final-detail",
+    "notes": [
+      [
+        78,
+        24,
+        55,
+        15,
+        "Column headings share one continuous rule."
+      ]
+    ],
+    "extraAfter": "after-table-scrolled.png",
+    "extraCaption": "The same table after scrolling"
+  },
+  {
+    "id": "translation-layout",
+    "title": "Translation at 320px",
+    "file": "translation-before-sharing-light-320.png",
+    "beforeRoot": "round-18-final-workflows",
+    "afterRoot": "round-19-final-workflows",
+    "notes": [
+      [
+        75,
+        33,
+        51,
+        20,
+        "Language controls share one row at 320px. Sharing details remain visible."
+      ]
+    ]
+  },
+  {
+    "id": "translation-cooldown",
+    "title": "Readable retry countdown",
+    "file": "translation-error-light-narrow.png",
+    "beforeRoot": "round-18-final-workflows",
+    "afterRoot": "round-19-final-workflows",
+    "notes": [
+      [
+        82,
+        82,
+        49,
+        72,
+        "The countdown stays readable while Retry is unavailable."
+      ]
+    ]
+  },
+  {
+    "id": "native-compact-type",
+    "title": "Native compact-tab text at the large font setting",
+    "file": "native-compact-type.png",
+    "beforeRoot": "round-19-final-comparison-crops/before",
+    "afterRoot": "round-19-final-comparison-crops/after",
+    "maxWidth": "160px",
+    "notes": [
+      [
+        83,
+        38,
+        41,
+        55,
+        "Compact labels scale with the text-size preference."
+      ]
+    ]
+  }
+]

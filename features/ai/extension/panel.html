@@ -48,12 +48,12 @@
     <footer class="compose-area">
       <div id="activity" class="activity" role="status" hidden><span class="activity-dot" aria-hidden="true"></span><span id="activity-label">Thinking</span></div>
       <div id="research-chips" class="research-chips" aria-label="Selected research sources"></div>
-      <div class="context-row">
+      <div class="context-row" role="group" aria-label="Page sharing and browser control">
         <button type="button" id="context-toggle" class="context-chip" aria-pressed="true" aria-describedby="context-hint" title="Include the current page and a screenshot with your message">
           <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h4"/></svg>
           <span id="context-title">Current page</span><span id="context-action" class="context-action">Include</span><span id="context-check" aria-hidden="true">✓</span>
         </button>
-        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Control</span><span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span></button>
+        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 10-7 1-3 7Z"/></svg><span>Browser control</span><span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span></button>
         <span id="context-hint" class="context-hint" data-state="shared">Page + screenshot</span>
       </div>
       <form id="composer" class="composer">
@@ -72,7 +72,7 @@
         <div class="menu-heading"><span>Your models</span><button type="button" id="refresh-models" class="text-button">Refresh</button></div>
         <div id="model-options"></div>
         <details id="inference-options" class="model-preferences">
-          <summary><span class="model-options-label">Model options</span><span class="model-back-label">Back to models</span></summary>
+          <summary><span id="model-settings-label" class="model-options-label">Reasoning and speed</span><span class="model-back-label">Back to models</span></summary>
           <div class="model-settings">
             <h3 id="inference-model" class="inference-model"></h3>
             <label class="setting-select" title="Reasoning effort">

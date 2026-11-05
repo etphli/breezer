@@ -528,7 +528,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .space-head .space-name, .space-head .quiet, .title, .row-action, .row-sound, .section-label, .divider-row .meta-button, .divider-row .rule, .new-tab span, .folder-row .count { display: none; }
   .row, .new-tab { justify-content: center; padding: 0; }
   .row[data-compact-label] { flex-direction: column; gap: 2px; min-height: max(var(--row-h), 42px); padding-block: 4px; }
-  .row[data-compact-label]::after { content: attr(data-compact-label); max-width: 100%; color: var(--ink); font-size: 12px; font-weight: 600; line-height: 14px; text-align: center; }
+  .row[data-compact-label]::after { content: attr(data-compact-label); max-width: 100%; color: var(--ink); font-size: clamp(12px, calc(var(--sidebar-font-size) - 2px), 15px); font-weight: 600; line-height: 1.25; text-align: center; }
   .folder-children { padding-left: 0; }
   .dock { flex-direction: column; flex-wrap: nowrap; padding: 6px 0; }
   .space-dots { flex: none; flex-direction: column; overflow: auto; max-height: 120px; }

@@ -159,6 +159,9 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     updateSave();
     disable.disabled = !state.enabled && !state.habits.length;
     clear.disabled = !state.habits.length;
+    disable.hidden = disable.disabled;
+    clear.hidden = clear.disabled;
+    localActions.hidden = disable.hidden && clear.hidden;
     summarize.disabled = summarizing || !state.enabled || !state.providerConsent;
     status.textContent = state.enabled ? 'Local context is on. Provider summaries run only when you request one.' : 'Local context is off. No browsing activity is being remembered.';
     if (clearOutput) output.textContent = '';

@@ -186,7 +186,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
       await savedKeyPage.context().close();
     }
     await page.locator('#settings-search').fill('organato key');
-    await page.locator('#settings-results [role="option"]', { hasText: 'Organato API key' }).click();
+    await page.getByRole('option', { name: 'Organato API key', exact: true }).click();
     assert.equal(await current(page), 'New tab and Organato');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'organato-key');
 

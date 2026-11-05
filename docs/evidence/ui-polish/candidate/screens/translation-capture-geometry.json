@@ -102,10 +102,10 @@
       "x": 0,
       "y": 0,
       "width": 320,
-      "height": 776,
+      "height": 692,
       "top": 0,
       "right": 320,
-      "bottom": 776,
+      "bottom": 692,
       "left": 0
     },
     "viewport": {
@@ -117,7 +117,7 @@
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
-      "availableWidth": 206
+      "availableWidth": 83
     },
     "stableCaptures": 2,
     "clearBelowContent": true
@@ -225,10 +225,10 @@
       "x": 0,
       "y": 0,
       "width": 320,
-      "height": 776,
+      "height": 692,
       "top": 0,
       "right": 320,
-      "bottom": 776,
+      "bottom": 692,
       "left": 0
     },
     "viewport": {
@@ -240,7 +240,7 @@
     "sourceFit": {
       "label": "Auto-detect",
       "textWidth": 81.94696044921875,
-      "availableWidth": 206
+      "availableWidth": 83
     },
     "stableCaptures": 2,
     "clearBelowContent": true

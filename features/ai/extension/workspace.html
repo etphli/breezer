@@ -276,7 +276,7 @@
           <section class="settings-page" data-page="newtab" aria-label="New tab and Organato" hidden>
             <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading" data-search-terms="organato dashboard deadlines assignments homework api key">
               <h2 id="organato-heading" class="sr-only">New tab and Organato</h2>
-              <p class="section-note">Connect Organato to see deadlines and let Breezer AI manage the items you ask it to. Your API key stays in macOS Keychain.</p>
+              <p class="section-note">Your Organato API key stays in macOS Keychain.</p>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="new tab page dashboard home">
                   <label class="setting-label" for="dashboard-enabled">Breezer new-tab dashboard<small>Open new tabs on Breezer’s dashboard instead of a blank page.</small></label>
@@ -297,7 +297,7 @@
                     <button id="organato-connect" class="button primary" type="button">Connect</button>
                     <button id="organato-disconnect" class="button subtle" type="button">Disconnect</button>
                   </div>
-                  <p id="organato-key-note" class="field-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A read-only key can display them.</p>
+                  <p id="organato-key-note" class="field-note">Create a read/write API key in <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a> to add and edit assignments. A <span class="keep-word">read-only</span> key can display them.</p>
                   <p id="organato-status" class="status-line" role="status" aria-live="polite"></p>
                 </div>
               </div>
@@ -443,7 +443,7 @@
 
         <section class="wl-step" data-step="organato" aria-labelledby="wl-h-organato" hidden>
           <h1 id="wl-h-organato" tabindex="-1">Connect Organato?</h1>
-          <p class="wl-lede">See Organato exams, assignments and to-dos on new tabs. Breezer AI can update them when you ask. It’s optional.</p>
+          <p class="wl-lede">See Organato tasks on new tabs. Breezer AI can update them when you ask. <span id="wl-tour-preview"></span></p>
           <div class="key-field wl-key">
             <label for="wl-organato-key">Organato API key</label>
             <div class="key-row">

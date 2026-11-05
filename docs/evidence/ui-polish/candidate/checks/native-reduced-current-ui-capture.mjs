@@ -29,7 +29,7 @@ async function until(label, read, timeout = 15000) {
 const resume = process.env.BREEZER_NATIVE_RESUME === '1';
 const previous = resume ? JSON.parse(await readFile(join(output, 'manifest.json'), 'utf8')) : null;
 if (!resume) await mkdir(output); // Refuse to overwrite an earlier evidence pack.
-const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round18final/capture-owned-'));
+const scratch = await mkdtemp(join(repo, 'build/ui-native-verification-round19final/capture-owned-'));
 const profile = join(scratch, 'profile');
 await mkdir(join(profile, 'Default'), { recursive: true });
 await writeFile(join(profile, 'Default/Preferences'), JSON.stringify({
@@ -41,7 +41,7 @@ const resources = join(app, 'Contents/Frameworks/Breezer Framework.framework/Res
 const identity = JSON.parse(await readFile(join(resources, 'breezer_ai/host/build-identity.json'), 'utf8'));
 assert.match(identity.commit, /^[0-9a-f]{40}$/);
 const inputNames = git('ls-files', 'features/workspace/native', 'features/ai/native-ui', 'script/apply_breezer_workspace.py', 'script/breezer_sidebar_frame.py', 'script/apply_breezer_ai_ui.py').split('\n').filter(Boolean);
-const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round18final-native-build/runtime-receipt.json', 'utf8'));
+const runtimeReceipt = JSON.parse(await readFile('/tmp/breezer-ui-round19final-native-build/runtime-receipt.json', 'utf8'));
 assert.equal(app, runtimeReceipt.stagedApp);
 assert.equal(sha(await readFile(runtimeReceipt.output)), runtimeReceipt.signedFrameworkSha256, 'Private UI framework changed');
 const buildReceipt = JSON.parse(await readFile(runtimeReceipt.sourceReceipt, 'utf8'));
@@ -142,6 +142,9 @@ try {
     if (report.captures.some(item => item.path === join(output, `${name}.png`))) { console.log(`retained ${name}`); return; }
     const appearance = await call('setAppearance', patch);
     for (const [key, value] of Object.entries(patch)) assert.equal(appearance[key], value, `${name}: ${key} round trip`);
+    // Settings broadcasts this revision after saving through the real bridge.
+    await worker.evaluate(async () => chrome.storage.session.set({ 'appearance.rev': Date.now() }));
+    await wait(120);
     await cdp.send('Browser.setWindowBounds', { windowId, bounds: { width, height: 780, windowState: 'normal' } });
     await dismissStartup();
     let previous, result;
@@ -183,6 +186,24 @@ try {
     ['toolbar-bookmarks', { frameless: false, bookmarkBarMode: 'always' }],
     ['top-system-mode', { colorMode: 'system', bookmarkBarMode: 'hidden' }],
   ]) await capture(name, { ...common, theme: 'mint', colorMode: 'light', ...patch });
+  {
+    // Seed the same sample bookmark state in both motion modes.
+    const bookmarks = await context.newPage();
+    try {
+      await bookmarks.goto('chrome://bookmarks/');
+      report.bookmarkFixture = await bookmarks.evaluate(async url => {
+        if (typeof chrome.bookmarks?.create !== 'function') return { available: false, reason: 'Bookmark creation API unavailable in this trusted page.' };
+        const created = [];
+        for (const [title, path] of [['Project notes', '/notes'], ['Reading', '/reading']]) {
+          const item = await chrome.bookmarks.create({ parentId: '1', title, url: url + path });
+          created.push({ id: item.id, parentId: item.parentId, title: item.title, url: item.url });
+        }
+        return { available: true, disposableProfileOnly: true, created };
+      }, base);
+    } catch (error) { report.bookmarkFixture = { available: false, reason: error.message }; }
+    finally { await bookmarks.close(); }
+    if (!motionOnly && report.bookmarkFixture.available) await capture('toolbar-bookmarks-populated', { ...common, bookmarkBarMode: 'always' });
+  }
   // Keep the native sidebar open while testing its frame allocation. The hosted
   // sidebar document uses the verified current candidate's 50-file resource payload.
   if (!motionOnly) for (const sidebarMode of ['expanded', 'compact', 'autoHide']) await capture(`sidebar-frame-${sidebarMode}`, {

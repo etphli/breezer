@@ -1,0 +1,23 @@
+{
+  "method": "Real native bridge writes followed by Settings appearance.rev notification; retained UI source hashes identify the loaded payload. Two matching consecutive own-window images per state.",
+  "bookmarkStates": [
+    "empty",
+    "populated"
+  ],
+  "bookmarkSeedsMatchAcrossMotionModes": true,
+  "nativeWindows": 42,
+  "fontEndpointPixelsDiffer": true,
+  "fontEndpoints": [
+    {
+      "value": 12,
+      "path": "/tmp/breezer-ui-polish/round-19-final-native/sidebar-frame-compact-small-type.png",
+      "sha256": "be58bf82af3f79544c8fa69546bb677864572377e20400150707ddebc9974e95"
+    },
+    {
+      "value": 20,
+      "path": "/tmp/breezer-ui-polish/round-19-final-native/sidebar-frame-compact-large-type.png",
+      "sha256": "89ec847683471950effc67648566e5bd7350290fa22056e4d14c0ad4389cbc72"
+    }
+  ],
+  "installedAppAndProfileUnchanged": true
+}

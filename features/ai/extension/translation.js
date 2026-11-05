@@ -19,6 +19,7 @@ function controls() {
   const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
   $('translate').disabled = !connected || !ready || running || remaining > 0 || !$('consent').checked || !$('target').value || $('source').value === $('target').value;
   $('translate').textContent = remaining ? `Retry in ${remaining}s` : recovery ? 'Retry translation' : 'Translate page';
+  $('translate').dataset.waiting = String(remaining > 0);
   $('translate').hidden = running;
   $('cancel').disabled = !running;
   $('cancel').hidden = !running;

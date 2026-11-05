@@ -383,6 +383,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   function updateNavigation() {
     const step = STEPS[index];
     const lastTip = slide === tourSlides(appearance.layout).length - 1;
+    $('wl-tour-preview').textContent = `Next: ${tourSlides(appearance.layout).length} optional tips.`;
     $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Connect later'
       : step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
     $('wl-skip').textContent = step === 'tour' ? 'Skip tour' : 'Skip setup';

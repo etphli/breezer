@@ -1,5 +1,5 @@
 {
-  "source" : "\/tmp\/breezer-ui-polish\/round-18-final-native\/native-tabs-toolbar-motion.mp4",
+  "source" : "\/tmp\/breezer-ui-polish\/round-19-final-native\/native-tabs-toolbar-motion.mp4",
   "frames" : [
     {
       "presentationTimeMs" : 0,
@@ -7,210 +7,205 @@
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 33.333333333333336,
+      "presentationTimeMs" : 48.333333333333336,
       "file" : "native-dense-001.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 183.33333333333331,
+      "presentationTimeMs" : 128.33333333333331,
       "file" : "native-dense-002.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 216.66666666666669,
+      "presentationTimeMs" : 163.33333333333334,
       "file" : "native-dense-003.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 251.66666666666666,
+      "presentationTimeMs" : 198.33333333333334,
       "file" : "native-dense-004.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 283.33333333333331,
+      "presentationTimeMs" : 230,
       "file" : "native-dense-005.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 316.66666666666663,
+      "presentationTimeMs" : 265,
       "file" : "native-dense-006.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 351.66666666666669,
+      "presentationTimeMs" : 300,
       "file" : "native-dense-007.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 383.33333333333337,
+      "presentationTimeMs" : 335,
       "file" : "native-dense-008.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 420,
+      "presentationTimeMs" : 368.33333333333337,
       "file" : "native-dense-009.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 451.66666666666669,
+      "presentationTimeMs" : 401.66666666666669,
       "file" : "native-dense-010.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 486.66666666666669,
+      "presentationTimeMs" : 436.66666666666663,
       "file" : "native-dense-011.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 520,
+      "presentationTimeMs" : 470,
       "file" : "native-dense-012.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 553.33333333333337,
+      "presentationTimeMs" : 505,
       "file" : "native-dense-013.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 588.33333333333337,
+      "presentationTimeMs" : 540,
       "file" : "native-dense-014.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 620,
+      "presentationTimeMs" : 573.33333333333337,
       "file" : "native-dense-015.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 653.33333333333337,
+      "presentationTimeMs" : 606.66666666666674,
       "file" : "native-dense-016.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 688.33333333333337,
+      "presentationTimeMs" : 640,
       "file" : "native-dense-017.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 720,
+      "presentationTimeMs" : 675,
       "file" : "native-dense-018.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 755,
+      "presentationTimeMs" : 710,
       "file" : "native-dense-019.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 788.33333333333337,
+      "presentationTimeMs" : 743.33333333333326,
       "file" : "native-dense-020.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 823.33333333333337,
+      "presentationTimeMs" : 776.66666666666663,
       "file" : "native-dense-021.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 858.33333333333326,
+      "presentationTimeMs" : 811.66666666666663,
       "file" : "native-dense-022.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 891.66666666666674,
+      "presentationTimeMs" : 846.66666666666663,
       "file" : "native-dense-023.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 926.66666666666663,
+      "presentationTimeMs" : 898.33333333333337,
       "file" : "native-dense-024.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 958.33333333333337,
+      "presentationTimeMs" : 933.33333333333337,
       "file" : "native-dense-025.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 993.33333333333326,
+      "presentationTimeMs" : 966.66666666666663,
       "file" : "native-dense-026.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1026.6666666666665,
+      "presentationTimeMs" : 1003.3333333333334,
       "file" : "native-dense-027.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1061.6666666666667,
+      "presentationTimeMs" : 1036.6666666666665,
       "file" : "native-dense-028.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1095,
+      "presentationTimeMs" : 1068.3333333333333,
       "file" : "native-dense-029.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1130,
+      "presentationTimeMs" : 1105,
       "file" : "native-dense-030.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1161.6666666666665,
+      "presentationTimeMs" : 1138.3333333333335,
       "file" : "native-dense-031.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1416.6666666666667,
+      "presentationTimeMs" : 1433.3333333333333,
       "file" : "native-dense-032.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1450,
+      "presentationTimeMs" : 1468.3333333333333,
       "file" : "native-dense-033.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1485,
+      "presentationTimeMs" : 1503.3333333333335,
       "file" : "native-dense-034.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1520,
+      "presentationTimeMs" : 1535,
       "file" : "native-dense-035.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1551.6666666666667,
+      "presentationTimeMs" : 1570,
       "file" : "native-dense-036.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1585,
+      "presentationTimeMs" : 1605,
       "file" : "native-dense-037.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1620,
+      "presentationTimeMs" : 1638.3333333333335,
       "file" : "native-dense-038.png",
       "durationMs" : null
     },
     {
-      "presentationTimeMs" : 1653.3333333333333,
-      "file" : "native-dense-039.png",
-      "durationMs" : null
-    },
-    {
       "presentationTimeMs" : 1935,
-      "file" : "native-dense-040.png",
+      "file" : "native-dense-039.png",
       "durationMs" : null
     }
   ],
   "method" : "Every decoded AVAssetReader sample with its actual presentation timestamp. Native header pixels only; no synthetic in-between frames. This does not establish input latency or application frame pacing.",
   "sourceHeight" : 1560,
   "sourceWidth" : 2200,
-  "assetDurationMs" : 2455,
+  "assetDurationMs" : 2441.666666666667,
   "crop" : [
     0,
     0,

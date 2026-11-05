@@ -44,6 +44,8 @@ export async function mountTranslationSettings({ container, api }) {
     group, guide, details);
   container.append(section);
   let prefs;
+  let busy = false;
+  save.disabled = true;
   try {
     prefs = translationPreferences((await api.storage.local.get(TRANSLATION_KEY))[TRANSLATION_KEY]);
     provider.value = prefs.provider; status.textContent = prefs.apiKey ? 'An API key is saved on this device.' : 'No API key saved.';
@@ -55,35 +57,53 @@ export async function mountTranslationSettings({ container, api }) {
     key.placeholder = provider.value === prefs?.provider && prefs.apiKey ? 'Leave blank to keep saved key' : 'API key, if required';
     clear.closest('.setting-row').hidden = !prefs?.apiKey || provider.value !== prefs.provider;
   };
+  const pendingPreferences = () => ({
+    ...prefs,
+    provider: provider.value,
+    apiKey: key.value || (prefs?.provider === provider.value ? prefs.apiKey : ''),
+  });
+  const updateControls = () => {
+    const next = pendingPreferences();
+    save.disabled = busy || !prefs || (next.provider === prefs.provider && next.apiKey === prefs.apiKey);
+    clear.disabled = busy || !prefs?.apiKey;
+    provider.disabled = key.disabled = busy || !prefs;
+  };
   updateProviderHelp();
+  updateControls();
   const events = new AbortController();
+  key.addEventListener('input', updateControls, { signal: events.signal });
   provider.addEventListener('change', () => {
     key.value = '';
     updateProviderHelp();
+    updateControls();
     if (prefs) status.textContent = provider.value !== prefs.provider ? 'Save to use this provider.'
       : prefs.apiKey ? 'An API key is saved on this device.' : 'No API key saved.';
   }, { signal: events.signal });
   clear.addEventListener('click', async () => {
-    clear.disabled = save.disabled = true;
+    if (clear.disabled) return;
+    busy = true;
+    updateControls();
     try {
       const next = { ...prefs, apiKey: '' };
       await api.storage.local.set({ [TRANSLATION_KEY]: next }); prefs = next;
       updateProviderHelp();
       status.textContent = 'Saved API key removed.';
     } catch { status.textContent = 'Could not remove the saved key. Try again.'; }
-    finally { clear.disabled = save.disabled = false; }
+    finally { busy = false; updateControls(); }
   }, { signal: events.signal });
   save.addEventListener('click', async () => {
-    clear.disabled = save.disabled = true;
+    if (save.disabled) return;
+    // A provider change never carries a credential to another server.
+    const next = pendingPreferences();
+    busy = true;
+    updateControls();
     try {
-      // A provider change never carries a credential to another server.
-      const next = { ...prefs, provider: provider.value, apiKey: key.value || (prefs.provider === provider.value ? prefs.apiKey : '') };
       await api.storage.local.set({ [TRANSLATION_KEY]: next }); prefs = next;
       key.value = '';
       updateProviderHelp();
       status.textContent = 'Saved. Reopen the translation window to use these settings.';
     } catch { status.textContent = 'Could not save translation settings. Try again.'; }
-    finally { clear.disabled = save.disabled = false; }
+    finally { busy = false; updateControls(); }
   }, { signal: events.signal });
   return { dispose() { events.abort(); key.value = ''; section.remove(); } };
 }
