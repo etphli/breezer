@@ -1,5 +1,5 @@
 {
-  "height": 3084,
+  "height": 3111,
   "viewport": {
     "width": 1440,
     "height": 900
@@ -9,22 +9,22 @@
     {
       "file": "efficiency-desktop-tile-01.png",
       "scrollY": 0,
-      "mastheadBottom": 585
+      "mastheadBottom": 443.90625
     },
     {
       "file": "efficiency-desktop-tile-02.png",
       "scrollY": 800,
-      "mastheadBottom": -215
+      "mastheadBottom": -356.09375
     },
     {
       "file": "efficiency-desktop-tile-03.png",
       "scrollY": 1600,
-      "mastheadBottom": -1015
+      "mastheadBottom": -1156.09375
     },
     {
       "file": "efficiency-desktop-tile-04.png",
-      "scrollY": 2184,
-      "mastheadBottom": -1599
+      "scrollY": 2211,
+      "mastheadBottom": -1767.09375
     }
   ]
 }

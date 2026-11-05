@@ -9,12 +9,16 @@ const port = api.runtime.connect({ name: 'breezer-translation-ui' });
 // only for the lifetime of this visible translation window, with no network I/O.
 const heartbeat = setInterval(() => { try { port.postMessage({ type: 'ping' }); } catch {} }, 20000);
 addEventListener('pagehide', () => { clearInterval(heartbeat); port.disconnect(); }, { once: true });
-let prefs, ready = false, running = false, connected = true, languages = [];
-const status = (message, state = '') => { $('status').textContent = message; $('status').dataset.state = state; };
+let prefs, ready = false, running = false, connected = true, languages = [], translatedTotal = 0;
+const status = (message, state = '') => {
+  $('status').textContent = message;
+  $('status').dataset.state = state;
+  $('translate').dataset.recovery = String(state === 'error');
+};
 function controls() {
   $('translate').disabled = !connected || !ready || running || !$('consent').checked || !$('target').value || $('source').value === $('target').value;
   $('cancel').disabled = !running;
-  $('restore').disabled = !connected;
+  $('restore').disabled = !connected || translatedTotal === 0;
   $('languages').disabled = !connected || !prefs || running;
   $('source').disabled = $('target').disabled = !ready || running;
   $('dynamic').disabled = $('consent').disabled = running;
@@ -52,6 +56,7 @@ port.onMessage.addListener(message => {
     ready = true; readinessStatus();
   }
   if (message.type === 'status') {
+    if (Number.isInteger(message.total)) translatedTotal = message.total;
     running = message.state === 'loading' || (message.state === 'done' && prefs?.dynamic);
     if (message.state === 'navigation' || message.unavailable) { connected = false; ready = false; }
     $('translate').textContent = message.state === 'error' || message.state === 'cancelled' ? 'Retry translation' : 'Translate page';

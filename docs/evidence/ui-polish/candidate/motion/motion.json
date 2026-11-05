@@ -107,7 +107,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 40,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -148,7 +148,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 440,
+    "videoFrameOriginMs": 160,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -349,7 +349,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 86.45144056139763,
+        "duration": 53.45045763984553,
         "easing": "ease",
         "endDelay": 0,
         "fill": "backwards",
@@ -360,7 +360,7 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 134.43701331051523,
+        "duration": 111.6946482675788,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
         "fill": "backwards",
@@ -371,40 +371,7 @@
         "name": "wl-in-next",
         "delay": 0,
         "direction": "normal",
-        "duration": 380,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-rise",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 600,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-rise",
-        "delay": 90,
-        "direction": "normal",
-        "duration": 600,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-rise",
-        "delay": 180,
-        "direction": "normal",
-        "duration": 600,
+        "duration": 180,
         "easing": "linear",
         "endDelay": 0,
         "fill": "both",
@@ -441,124 +408,14 @@
         "easing": "linear",
         "endDelay": 0,
         "fill": "none",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-rise",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 600,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
         "iterationStart": 0,
         "iterations": 1
       },
       {
         "name": "wl-window",
-        "delay": 120,
+        "delay": 0,
         "direction": "normal",
-        "duration": 760,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 420,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 470,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 520,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 570,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 640,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 700,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 760,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-drop",
-        "delay": 820,
-        "direction": "normal",
-        "duration": 520,
-        "easing": "linear",
-        "endDelay": 0,
-        "fill": "both",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "wl-rise",
-        "delay": 520,
-        "direction": "normal",
-        "duration": 620,
+        "duration": 220,
         "easing": "linear",
         "endDelay": 0,
         "fill": "both",
@@ -581,7 +438,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -724,7 +581,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -753,7 +610,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -782,7 +639,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 320,
+    "videoFrameOriginMs": 360,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -840,7 +697,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 360,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

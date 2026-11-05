@@ -396,12 +396,25 @@ try {
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   const signInGap = await page.evaluate(() => document.querySelector('#welcome-status').getBoundingClientRect().top - document.querySelector('#welcome h1').getBoundingClientRect().bottom);
   assert.ok(signInGap >= 16, `Signed-out heading and recovery card must not overlap: ${signInGap}px`);
+  const accountWidth = await page.locator('#model-button').evaluate(node => node.getBoundingClientRect().width);
+  const composerWidth = await page.locator('#composer').evaluate(node => node.getBoundingClientRect().width);
+  assert.ok(accountWidth < composerWidth * .65, 'Accounts keeps a content-width focus target');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
   const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
   await page.getByRole('button', { name: 'Refresh accounts' }).click();
   assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'init').length), sentInits + 1);
   assert.deepEqual(errors, []);
+  const loading = await browser.newPage({ viewport: { width: 320, height: 640 } });
+  await loading.addInitScript(installPanelFixture, { contextDelay: 30_000 });
+  await loading.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
+  await loading.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await loading.locator('.context-row').isHidden(), true, 'unresolved page context shows no contradictory sharing labels');
+  await loading.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-page-loading-narrow.png` });
+  await loading.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
+  assert.equal(await loading.locator('.context-row').isVisible(), true);
+  assert.equal(await loading.locator('#context-hint').innerText(), 'Page + screenshot');
+  await loading.close();
   console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {

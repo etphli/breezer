@@ -101,6 +101,15 @@ async function captureLongPage(page, name) {
   await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 }
 
+async function captureFeatureDetails(page, size) {
+  for (const [name, selector] of [
+    ['patch', '.patch-notes'],
+    ['passkeys', 'article[aria-labelledby="f-passkeys"]'],
+    ['shortcuts', 'article[aria-labelledby="f-shortcuts"]'],
+  ]) await page.locator(selector).screenshot({ path: `${evidence}/whats-new-${name}-${size}.png`, animations: 'disabled' });
+  await page.evaluate(() => scrollTo(0, 0));
+}
+
 // WCAG relative-luminance contrast between an element's text and the paper.
 const contrast = (page, selector) => page.$eval(selector, (node) => {
   // color-mix() computes to color(srgb r g b) with 0-1 channels.
@@ -147,6 +156,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       })), true);
       await page.screenshot({ path: `${evidence}/whats-new-desktop.png` });
       await captureLongPage(page, 'whats-new-desktop');
+      await captureFeatureDetails(page, 'desktop');
 
       // Keyboard: Continue browsing first, then Settings, with a visible ring.
       await page.keyboard.press('Tab');
@@ -154,7 +164,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), 'workspace.html#/settings');
       assert.equal(await page.evaluate(() => getComputedStyle(document.activeElement).outlineStyle), 'solid');
-      await page.screenshot({ path: `${evidence}/whats-new-keyboard-focus.png`, clip: { x: 0, y: 0, width: 1440, height: 760 } });
+      await page.screenshot({ path: `${evidence}/whats-new-keyboard-focus.png` });
 
       await page.click('.masthead [data-action="continue"]');
       await page.waitForFunction(() => window.fx.removed.length === 1);
@@ -262,6 +272,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.evaluate(() => scrollTo(0, 0));
       await page.screenshot({ path: `${evidence}/whats-new-narrow.png` });
       await captureLongPage(page, 'whats-new-narrow');
+      await captureFeatureDetails(page, 'narrow');
       const limits = await page.evaluate(() => {
         const group = document.querySelector('.verification-group');
         const rows = [...document.querySelectorAll('.pending')];
@@ -283,7 +294,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
         if (name !== 'dark') {
           await captureLongPage(page, `efficiency-${name}`);
           await page.locator('.benchmark-story-note').screenshot({ path: `${evidence}/efficiency-method-${name}.png`, animations: 'disabled' });
-          await page.getByRole('heading', { name: 'Saved tabs', exact: true }).evaluate(node => node.scrollIntoView({ block: 'start' }));
+          await page.locator('.story-table:not(.story-code-table)').screenshot({ path: `${evidence}/efficiency-browser-table-${name}.png`, animations: 'disabled' });
+          await page.getByRole('heading', { name: 'Saved tabs', exact: true }).evaluate(node => { node.scrollIntoView({ block: 'start' }); scrollBy(0, -16); });
           const savedTabs = await page.evaluate(() => {
             const headings = [...document.querySelectorAll('.benchmark-story-heading')];
             const range = document.createRange();
@@ -291,8 +303,15 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
             range.setEndBefore(headings.find(node => node.textContent === 'Less idle work'));
             return range.getBoundingClientRect().toJSON();
           });
-          assert.ok(savedTabs.top >= 0 && savedTabs.bottom <= await page.evaluate(() => innerHeight), 'Saved-tab explanation fits its capture');
+          assert.ok(savedTabs.top >= 0 && savedTabs.bottom <= await page.evaluate(() => innerHeight), `${name} saved-tab explanation fits its capture: ${JSON.stringify(savedTabs)}`);
           await page.screenshot({ path: `${evidence}/efficiency-saved-tabs-${name}.png`, clip: savedTabs, animations: 'disabled' });
+          if (name === 'narrow') {
+            await page.setViewportSize({ width: 320, height: 844 });
+            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, '320px reference article stays contained');
+            await page.locator('.story-table:not(.story-code-table)').screenshot({ path: `${evidence}/efficiency-browser-table-320.png`, animations: 'disabled' });
+            await page.locator('.story-code-table').screenshot({ path: `${evidence}/efficiency-code-table-320.png`, animations: 'disabled' });
+            await page.setViewportSize({ width: 390, height: 844 });
+          }
         }
         await page.getByRole('link', { name: 'Read the full benchmark results', exact: true }).click();
         await page.locator('.results-table').first().waitFor();

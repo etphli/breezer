@@ -104,6 +104,7 @@ function saveSettings() {
 function updateControls() {
   const running = Boolean(state.running);
   document.querySelector('.panel').dataset.running = String(running);
+  document.querySelector('.panel').dataset.pageState = state.pageKnown ? 'ready' : 'loading';
   $('send').disabled = !running && (!selectedModel() || !$('prompt').value.trim());
   $('send').dataset.running = String(running);
   $('send').setAttribute('aria-label', running ? 'Stop response' : 'Send message');
@@ -224,7 +225,13 @@ function renderModels() {
     if (provider.error || !provider.authenticated) {
       const error = document.createElement('p');
       error.className = 'provider-error';
-      error.textContent = provider.error || `Sign in with ${provider.id === 'codex' ? 'codex login' : 'claude auth login'} in Terminal, then refresh.`;
+      const explanation = provider.error || `Sign in with ${provider.id === 'codex' ? 'codex login' : 'claude auth login'} in Terminal, then refresh.`;
+      const signIn = /\b(codex login|claude auth login)\b/.exec(explanation);
+      if (signIn) {
+        const command = document.createElement('code');
+        command.textContent = signIn[0];
+        error.append(explanation.slice(0, signIn.index), command, explanation.slice(signIn.index + signIn[0].length));
+      } else error.textContent = explanation;
       group.append(error);
     }
     $('model-options').append(group);
@@ -397,12 +404,12 @@ function renderDelta() {
 
 // A failed or empty reply can be reused, but only by putting it back in the composer.
 // Nothing is resent, and browser control stays off until the user turns it on again.
-function offerRetry(run) {
+function offerRetry(run, failed = true) {
   const body = run && messageNodes.get(run.assistantId);
   const original = run && state.messages.find((item) => item.id === run.id);
   if (!body || !original || body.parentElement.querySelector('.retry-button')) return;
   const article = body.parentElement;
-  article.classList.add('failed');
+  article.classList.toggle('failed', failed);
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'retry-button';
@@ -451,7 +458,7 @@ function stop() {
   const replied = Boolean(state.messages.find((item) => item.id === run.assistantId)?.text);
   post({ type: 'cancel', id: run.id });
   finish('Stopped.');
-  if (!replied) offerRetry(run);
+  if (!replied) offerRetry(run, false);
 }
 
 // The reason is shown in the reply itself, so it is only announced, not repeated in the notice bar.
@@ -563,7 +570,7 @@ function receive(message) {
   } else if (message.type === 'complete') {
     const run = state.running;
     const empty = run && !run.message.text;
-    finish(undefined, !message.cancelled);
+    finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);
     if (empty && !message.cancelled) offerRetry(run);
   }
   else if (message.type === 'activity' && state.running) {

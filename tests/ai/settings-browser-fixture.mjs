@@ -1,7 +1,7 @@
 // Shared deterministic API fixture for Settings walkthroughs and visual coverage.
-export function installFixture({ colorMode, theme }) {
+export function installFixture({ colorMode, theme, initialLocal = {} }) {
   const load = (key, fallback) => JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
-  const fx = { local: load('fx-local', {}), appearance: load('fx-appearance', null), calls: [], ports: {}, listeners: [] };
+  const fx = { local: load('fx-local', initialLocal), appearance: load('fx-appearance', null), calls: [], ports: {}, listeners: [] };
   fx.context = { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 };
   fx.appearance ??= { layout: 'sidebar', sidebarMode: 'expanded', theme, colorMode, showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true };
   window.fx = fx;
@@ -39,7 +39,10 @@ export function installFixture({ colorMode, theme }) {
         return port;
       },
     },
-    storage: { local: area(fx.local, 'local'), session: area({}, 'session'), onChanged: { addListener: (fn) => fx.listeners.push(fn) } },
+    storage: { local: area(fx.local, 'local'), session: area({}, 'session'), onChanged: {
+      addListener: (fn) => fx.listeners.push(fn),
+      removeListener: (fn) => { fx.listeners = fx.listeners.filter(listener => listener !== fn); },
+    } },
     tabs: {
       async query() { return [{ index: 0, windowId: 1 }]; },
       async getCurrent() { return { id: 42, index: 0, windowId: 1 }; },

@@ -10,12 +10,14 @@ const hash = text => createHash('sha256').update(text).digest('hex');
 // The reviewed original is independent of unrelated UI changes in the current controller.
 const baseline = fs.readFileSync(new URL('./fixtures/panel-before-efficiency.js', import.meta.url), 'utf8');
 assert.equal(hash(baseline), baselineSHA, 'negative control must match the exact reviewed original');
+// Compare controller behavior with the current terminal copy; measurements keep the original below.
+const baselineForBehavior = baseline.replace('finish(undefined, !message.cancelled);', "finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);");
 
 function harness(code, initial = [], ids = []) {
   const frames = [], posts = [], writes = [], events = [], renders = [], streams = [], elements = new Map();
   const counts = { reads: 0, findCallbacks: 0, filterCallbacks: 0, resultArrays: 0, resultSlots: 0, frames: 0 };
   const node = () => ({ children: [], style: {}, value: '', hidden: false, scrollTop: 0, scrollHeight: 300, clientHeight: 100,
-    classList: { add() {} }, setAttribute() {}, focus() {}, setSelectionRange() {}, scrollIntoView() {},
+    classList: { add() {}, toggle() {} }, setAttribute() {}, focus() {}, setSelectionRange() {}, scrollIntoView() {},
     append(...children) { for (const child of children) { this.children.push(child); child.parentElement = this; } },
     replaceChildren() { this.children = []; }, querySelector(selector) { return this.children.find(child => '.' + child.className === selector); },
     addEventListener(type, fn) { this[type] = fn; },
@@ -116,7 +118,7 @@ async function scenario(code, ending, collision = false) {
 
 test('source controller preserves history, writes, retry, terminal rendering and stale RAF ordering', async () => {
   for (const ending of ['complete', 'error', 'stop', 'new-chat']) for (const collision of [false, true]) {
-    assert.deepEqual(await scenario(source, ending, collision), await scenario(baseline, ending, collision));
+    assert.deepEqual(await scenario(source, ending, collision), await scenario(baselineForBehavior, ending, collision));
   }
 });
 
@@ -147,7 +149,7 @@ test('actual initialize accepts loaded valid records, including empty text, befo
     await h.start(); h.receive({ type: 'complete', id: h.state.running.id });
     return plain({ posts: h.posts, writes: h.writes.map(write => write.snapshot), messages: h.state.messages });
   }
-  assert.deepEqual(await loaded(source), await loaded(baseline));
+  assert.deepEqual(await loaded(source), await loaded(baselineForBehavior));
 });
 
 test('empty replies, stop retry, pending authorization cancellation and post failure stay equivalent', async () => {
@@ -173,7 +175,7 @@ test('empty replies, stop retry, pending authorization cancellation and post fai
     output.push(plain(h.writes.map(write => write.snapshot)));
     return output;
   }
-  assert.deepEqual(await edges(source), await edges(baseline));
+  assert.deepEqual(await edges(source), await edges(baselineForBehavior));
 });
 
 async function measure(code, size) {

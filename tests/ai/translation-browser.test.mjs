@@ -117,6 +117,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   await ui.waitForFunction(() => document.getElementById('source').options.length > 1);
   assert.equal(requests.length, 0, 'loading languages sends no page text');
   assert.equal(await ui.locator('#translate').isDisabled(), true, 'consent is required');
+  assert.equal(await ui.locator('#restore').isDisabled(), true, 'nothing can be restored before translation');
   await captureState('before-sharing');
   await ui.locator('#source').selectOption('es'); await ui.locator('#target').selectOption('en');
   await ui.locator('#dynamic').check(); await ui.locator('#consent').check();
@@ -184,10 +185,12 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   ui = await context.newPage(); await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
   status = ui.locator('#status');
   await ui.waitForFunction(() => document.getElementById('status').textContent.includes('remains'));
+  assert.equal(await ui.locator('#restore').isEnabled(), true, 'reopened windows can restore existing translated text');
   assert.equal(await ui.locator('#languages').isEnabled(), true);
   assert.equal(await ui.locator('#consent').isChecked(), false, 'sharing confirmation is not persisted');
   assert.equal(requests.length, beforeClose);
   await ui.locator('#restore').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('restored'));
+  assert.equal(await ui.locator('#restore').isDisabled(), true, 'restoring clears the recoverable translation state');
   assert.equal(await page.locator('#article').textContent(), 'La biblioteca abre por la mañana. Puedes leer junto a la ventana y escuchar los pájaros.');
   assert.equal(await page.locator('#hello').textContent(), ' Hola mundo. ');
   assert.equal(await page.locator('#dynamic').textContent(), 'Texto nuevo');

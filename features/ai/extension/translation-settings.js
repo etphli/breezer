@@ -30,9 +30,9 @@ export async function mountTranslationSettings({ container, api }) {
   row('Provider API key', 'translation-key', key, 'Stored on this device. Switching providers clears the key field.');
   row('Remove saved API key', 'translation-clear-key', clear);
   const guide = el('p', '', { class: 'section-note' });
-  guide.append(el('a', 'Translation setup', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
+  guide.append(el('a', 'LibreTranslate setup guide', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
   const details = el('details', '', { class: 'setting-details' });
-  details.append(el('summary', 'Setup and privacy'),
+  details.append(el('summary', 'Sharing and privacy'),
     el('p', 'Right-click a page and choose Translate page. Choose languages, translate and restore the original in the translation window. A keyboard shortcut can be set in Browser settings.'),
     el('p', 'Local mode needs your LibreTranslate server at http://localhost:5000. Hosted mode requires your own LibreTranslate.com API key and sends page text there. Breezer does not provide a paid account or use your AI account.'),
     el('p', 'Each translation needs your confirmation. Visible page text, including private text you can read, goes to the chosen server. Form fields, editors, code and frames are excluded. No page URL, cookies or browser credentials are included. Your provider can see your IP address. A local server may have its own connections or logging.'));
@@ -51,6 +51,7 @@ export async function mountTranslationSettings({ container, api }) {
       ? 'Use your own LibreTranslate.com API key. Page text will be shared with that service.'
       : 'Start LibreTranslate at http://localhost:5000. Add a key if needed.';
     key.placeholder = provider.value === prefs?.provider && prefs.apiKey ? 'Leave blank to keep saved key' : 'API key, if required';
+    clear.closest('.setting-row').hidden = !prefs?.apiKey || provider.value !== prefs.provider;
   };
   updateProviderHelp();
   const events = new AbortController();

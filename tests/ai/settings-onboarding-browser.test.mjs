@@ -145,11 +145,17 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: false, error: 'Update helper unavailable. Try again.' }); });
     assert.match(await page.locator('#update-status').innerText(), /unavailable/);
+    assert.match(await page.locator('#update-status').innerText(), /Choose Check for updates to retry\./);
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-unavailable-light.png') });
     await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: { available: true, version: '1.1.1' } }); });
     assert.equal(await page.getByRole('button', { name: 'Update and restart' }).isVisible(), true);
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-light.png') });
+    const updateViewport = page.viewportSize();
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.equal(await page.locator('#update-settings').evaluate(node => node.scrollWidth <= node.clientWidth), true);
+    await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-narrow.png') });
+    await page.setViewportSize(updateViewport);
 
     // ---------------------------------------------------- dismiss persists
     await page.getByRole('button', { name: 'Hide getting started' }).click();

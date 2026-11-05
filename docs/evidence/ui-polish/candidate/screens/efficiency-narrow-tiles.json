@@ -1,5 +1,5 @@
 {
-  "height": 3867,
+  "height": 4085,
   "viewport": {
     "width": 390,
     "height": 844
@@ -9,32 +9,32 @@
     {
       "file": "efficiency-narrow-tile-01.png",
       "scrollY": 0,
-      "mastheadBottom": 367.65625
+      "mastheadBottom": 308.859375
     },
     {
       "file": "efficiency-narrow-tile-02.png",
       "scrollY": 744,
-      "mastheadBottom": -376.34375
+      "mastheadBottom": -435.140625
     },
     {
       "file": "efficiency-narrow-tile-03.png",
       "scrollY": 1488,
-      "mastheadBottom": -1120.34375
+      "mastheadBottom": -1179.140625
     },
     {
       "file": "efficiency-narrow-tile-04.png",
       "scrollY": 2232,
-      "mastheadBottom": -1864.34375
+      "mastheadBottom": -1923.140625
     },
     {
       "file": "efficiency-narrow-tile-05.png",
       "scrollY": 2976,
-      "mastheadBottom": -2608.34375
+      "mastheadBottom": -2667.140625
     },
     {
       "file": "efficiency-narrow-tile-06.png",
-      "scrollY": 3023,
-      "mastheadBottom": -2655.34375
+      "scrollY": 3241,
+      "mastheadBottom": -2932.140625
     }
   ]
 }

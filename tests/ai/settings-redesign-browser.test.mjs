@@ -6,6 +6,7 @@ import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installFixture } from './settings-browser-fixture.mjs';
+import { TRANSLATION_KEY } from '../../features/ai/extension/translation-provider.js';
 
 // Drives the redesigned Settings page (category navigation, search and the Other tab)
 // in a headless browser against fake chrome.* APIs. Native hosting is out of scope.
@@ -36,9 +37,9 @@ test('settings categories, search, Other and narrow layout work in a real browse
   const base = `http://127.0.0.1:${server.address().port}/workspace.html`;
   const browser = await chromium.launch({ executablePath, headless: true });
   const errors = [];
-  const open = async ({ hash = '#/settings', colorMode = 'light', theme = 'mint', width = 1200, height = 860, reducedMotion = 'no-preference' } = {}) => {
+  const open = async ({ hash = '#/settings', colorMode = 'light', theme = 'mint', width = 1200, height = 860, reducedMotion = 'no-preference', initialLocal = {} } = {}) => {
     const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, colorScheme: colorMode, reducedMotion });
-    await context.addInitScript(installFixture, { colorMode, theme });
+    await context.addInitScript(installFixture, { colorMode, theme, initialLocal });
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(`${message.text()} ${message.location().url}`); });
@@ -148,6 +149,24 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await page.locator('#settings-results [aria-selected="true"]').click();
     assert.equal(await current(page), 'Translation');
     assert.equal(await page.evaluate(() => document.activeElement.closest('#translation-settings') !== null), true);
+    assert.equal(await page.locator('#translation-clear-key').isHidden(), true, 'no removal control without a saved key');
+    for (const colorMode of ['light', 'dark']) {
+      const savedKeyPage = await open({ colorMode, width: 390, height: 844, initialLocal: { [TRANSLATION_KEY]: { provider: 'hosted', apiKey: 'fixture-provider-key' } } });
+      await savedKeyPage.getByRole('combobox', { name: 'Settings category' }).selectOption('languages');
+      await savedKeyPage.locator('#translation-provider').waitFor();
+      assert.equal(await savedKeyPage.locator('#translation-clear-key').isVisible(), true, 'saved credentials expose their removal choice');
+      assert.equal(await savedKeyPage.locator('#translation-key').inputValue(), '', 'saved credentials are never displayed');
+      await savedKeyPage.screenshot({ path: join(evidence, `settings-translation-saved-key-${colorMode}-narrow.png`), animations: 'disabled' });
+      await savedKeyPage.locator('#translation-provider').selectOption('local');
+      assert.equal(await savedKeyPage.locator('#translation-clear-key').isHidden(), true, 'removal applies only to the saved provider');
+      await savedKeyPage.locator('#translation-provider').selectOption('hosted');
+      await savedKeyPage.locator('#translation-clear-key').check();
+      await savedKeyPage.getByRole('button', { name: 'Save translation settings', exact: true }).click();
+      await savedKeyPage.getByText('Saved. Reopen the translation window to use these settings.', { exact: true }).waitFor();
+      assert.equal(await savedKeyPage.locator('#translation-clear-key').isHidden(), true);
+      assert.equal(await savedKeyPage.evaluate(key => window.fx.local[key].apiKey, TRANSLATION_KEY), '');
+      await savedKeyPage.context().close();
+    }
     await page.locator('#settings-search').fill('organato key');
     await page.locator('#settings-results [role="option"]', { hasText: 'Organato API key' }).click();
     assert.equal(await current(page), 'New tab and Organato');

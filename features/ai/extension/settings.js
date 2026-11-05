@@ -451,7 +451,7 @@ export function mountUpdates(api) {
       if (closed || port !== connection || message.id !== pending) return;
       clearTimeout(timer); pending = null;
       check.disabled = false;
-      if (!message.ok) { status.textContent = message.error; status.dataset.state = 'error'; return; }
+      if (!message.ok) { status.textContent = String(message.error).replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
       const value = message.value;
       status.dataset.state = value.phase === 'failed' ? 'error' : '';
       status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
@@ -477,7 +477,7 @@ export function mountUpdates(api) {
     status.dataset.state = '';
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
-    timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Try again.'; status.dataset.state = 'error'; }, 65_000);
+    timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
     try { connect().postMessage({ type, id: pending }); }
     catch {
       const connection = port; port = null;

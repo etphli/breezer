@@ -137,10 +137,10 @@
         <div class="feature-copy">
           <h3 id="f-shortcuts">Shortcuts you choose</h3>
           <p>Add a website or an open tab to your new-tab shortcuts. Command-number also opens saved favorites and pins.</p>
-          <p>Top tabs, private windows and Command+9 keep their usual numbered-tab behavior. A slot without a saved favorite or pin falls back to the ordinary tab shortcut.</p>
         </div>
         <details class="feature-details">
           <summary>Keyboard and saved shortcuts</summary>
+          <p>Top tabs, private windows and Command+9 keep their usual numbered-tab behavior. A slot without a saved favorite or pin falls back to the ordinary tab shortcut.</p>
           <p>On a new tab, the Add tile after your sites takes a web address or one of your open tabs. Arrow keys move through the tabs and Enter adds the one you pick. Your shortcuts are saved in this profile on your Mac, and they use the same Remove, Undo and Restore controls as the suggested sites. On a smaller window, the row makes room for them.</p>
         <p>For sidebar favorites and pins, Command-number shortcuts now open the saved page even when it is asleep. Only the selected page opens, repeated presses reuse it, and favorite slots stay consistent across spaces and restarts.</p>
         </details>
@@ -238,7 +238,7 @@
           <p>Closed tabs stay closed, and newer titles and selections take priority.</p>
         </div>
         <details class="feature-details">
-          <summary>How it works</summary>
+          <summary>Sidebar update details</summary>
           <p>A tab you closed could come back to the sidebar when an older list of tabs arrived late, sometimes with an outdated title or the wrong tab highlighted. The sidebar now ignores lists older than what it already shows.</p>
         <ul class="notes">
           <li>Restoring a large saved session also takes less work. Matching saved tabs and preparing the sidebar no longer repeatedly scan the whole saved workspace.</li>
@@ -286,7 +286,7 @@
           <p class="feature-limit">Update verification and rollback checks stay in place. Interrupted changes are not resent automatically.</p>
         </div>
         <details class="feature-details">
-          <summary>How it works</summary>
+          <summary>Helper lifecycle</summary>
           <ul class="notes">
           <li>The background helpers behind Breezer AI, Organato and updates now start when something needs them and close once they've been idle, rather than staying open.</li>
           <li>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
@@ -339,7 +339,7 @@
           <p class="feature-limit">Running copies, older versions and copies with unknown owners are kept.</p>
         </div>
         <details class="feature-details">
-          <summary>How it works</summary>
+          <summary>Startup and cleanup</summary>
           <ul class="notes">
           <li>Breezer can reuse prepared versions of unchanged built-in ad-block lists. Custom filters, list updates and your blocking settings work as before.</li>
           <li>If a prepared list has changed or cannot be used, Breezer processes it normally instead.</li>
@@ -371,7 +371,7 @@
             <path class="stroke-accent" d="M243 115 h20 M255 115 v6 M262 115 v4"/>
             <rect class="bar" x="196" y="155" width="96" height="4" rx="2"/>
             <rect class="bar" x="196" y="167" width="76" height="4" rx="2"/>
-            <text class="quiet" x="26" y="202">Storage and provider help</text>
+            <text class="quiet" x="26" y="194"><tspan x="26">Storage and</tspan><tspan x="26" dy="14">provider help</tspan></text>
           </svg>
         </figure>
         <div class="feature-copy">
@@ -638,17 +638,25 @@
       <div class="patch-lead">
         <figure class="plate patch-plate" aria-hidden="true">
           <svg class="art" viewBox="0 0 320 232" focusable="false">
-            <rect x="40" y="38" width="240" height="156" rx="18" fill="#f8f4e9" stroke="#526b63"/>
-            <rect x="58" y="58" width="66" height="116" rx="8" fill="#d4e7dc"/>
-            <path d="M72 78h36M72 98h28M72 118h32M72 138h22" fill="none" stroke="#37635a" stroke-width="5" stroke-linecap="round"/>
-            <rect x="140" y="62" width="118" height="38" rx="8" fill="#e6d9c8"/>
-            <rect x="140" y="112" width="118" height="54" rx="8" fill="#c4ddd4"/>
-            <path d="M156 128h76M156 146h48" fill="none" stroke="#37635a" stroke-width="5" stroke-linecap="round"/>
+            <rect class="card lift" x=".5" y=".5" width="319" height="231" rx="14"/>
+            <path class="rule" d="M24 78h272M24 154h272"/>
+            <rect class="mint-soft" x="24" y="24" width="36" height="36" rx="8"/>
+            <rect class="stroke-accent" x="34" y="32" width="18" height="14" rx="3"/>
+            <path class="stroke-accent" d="M30 38v14h18"/>
+            <text class="label" x="76" y="36">Tabs</text>
+            <text class="quiet" x="76" y="55">Keep unchanged rows</text>
+            <rect class="mint-soft" x="24" y="100" width="36" height="36" rx="8"/>
+            <path class="stroke-accent" d="M32 110h20M42 106v4m-7 0c0 8 5 13 13 16m1-16c0 8-5 13-13 16"/>
+            <text class="label" x="76" y="112">Translation</text>
+            <text class="quiet" x="76" y="131">Skip repeated visibility checks</text>
+            <rect class="mint-soft" x="24" y="176" width="36" height="36" rx="8"/>
+            <path class="stroke-accent" d="M33 184h18v14H40l-7 5zM37 189h10M37 193h7"/>
+            <text class="label" x="76" y="188">Replies</text>
+            <text class="quiet" x="76" y="207">Keep completed text</text>
           </svg>
         </figure>
         <div class="patch-copy">
-          <h3>Tabs, translation and replies</h3>
-          <p>Tabs, translation and AI replies skip work that has already been done.</p>
+          <p>Breezer keeps unchanged sidebar rows, avoids rescanning translated text, and preserves completed reply text.</p>
           <p class="patch-limit">These changes reduce repeated work in the checked components. Whole-browser RAM and CPU savings have not yet been measured. Existing translation sharing, browser permissions and update verification remain in place.</p>
         </div>
       </div>
