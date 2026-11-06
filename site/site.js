@@ -232,3 +232,11 @@ for (const link of document.querySelectorAll('[data-download]')) {
     document.querySelector('.install')?.scrollIntoView({ behavior: reduce.matches ? 'auto' : 'smooth', block: 'start' });
   });
 }
+
+// Keep sound from different films from overlapping.
+const films = [...document.querySelectorAll('.film video')];
+for (const film of films) {
+  film.addEventListener('play', () => {
+    for (const other of films) if (other !== film) other.pause();
+  });
+}

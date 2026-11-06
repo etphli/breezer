@@ -18,6 +18,19 @@ numbers use tabular figures. Empty, loading, and failed states contain no
 invented activity. Small screens stack the measurements and retain a data table
 as an accessible alternative to the chart.
 
+## Homepage films
+
+The `#videos` gallery lists all eight finished films from `advertising/`.
+`site/videos/` contains copies of those MP4s so Vercel can serve them within
+its `site/` root, plus 960×540 JPEG posters captured at eight seconds.
+The MP4 copies share Git blobs with the originals. When replacing a render,
+copy it into `site/videos/` and refresh its poster and displayed duration.
+
+Players use native controls, inline playback, and `preload="none"`. They do
+not autoplay or download video data when the page or gallery loads. Starting
+a film pauses the other players. The voiced films contain visible captions
+in the rendered video. The gallery remains usable without JavaScript.
+
 ## Access boundary
 
 The private dashboard is
