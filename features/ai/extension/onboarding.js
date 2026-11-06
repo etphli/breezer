@@ -20,7 +20,7 @@ const TOP_SLIDES = [
   { focus: 'toptabs', title: 'Your tabs stay across the top', body: 'Tabs work the way you’re used to. To get spaces and favorites later, switch to the sidebar in Settings under Layout.', keys: [['⌘ T', 'New tab'], ['⌘ ,', 'Open Settings']] },
 ];
 const AI_SLIDES = [
-  { focus: 'ai', title: 'Meet Breezer AI', body: 'Press ⌘K to open the assistant. Choose Include on the page chip to share that page and ask for a summary or an answer.', keys: [['⌘ K', 'Open or close Breezer AI']] },
+  { focus: 'ai', title: 'Meet Breezer AI', body: 'Press ⌘K to open the assistant. Select Page + screenshot to share this tab, then ask for a summary or an answer.', keys: [['⌘ K', 'Open or close Breezer AI']] },
   { focus: 'control', title: 'Let it help, on your terms', body: 'Turn on Browser control and Breezer AI can click, type and scroll in the current tab until you turn it off. It asks before buying, sending or deleting anything.', keys: [['esc', 'Stop a reply']] },
 ];
 

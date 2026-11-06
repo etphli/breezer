@@ -82,6 +82,22 @@ function harness(code, initial = [], ids = []) {
 const records = n => Array.from({ length: n }, (_, i) => ({ id: `history-${i}`, role: i % 2 ? 'assistant' : 'user', text: i % 7 ? `text ${i}` : '', contextTitle: `page ${i}` }));
 const plain = value => JSON.parse(JSON.stringify(value));
 
+test('known provider failures name the cause without exposing technical details in the reply', async () => {
+  for (const [reason, expected] of [
+    ['HTTP 429 rate_limit_exceeded: private diagnostic', /provider limit.*reset before retrying/],
+    ['401 Unauthorized: private account diagnostic', /could not verify your account/],
+    ['Provider request timed out after 60000ms', /took too long to reply/],
+    ['connect ECONNREFUSED 127.0.0.1:1234', /connection to your provider failed/],
+    ['unrecognized provider diagnostic', /could not complete this response/],
+  ]) {
+    const h = harness(source), run = await h.start();
+    h.receive({ type: 'error', id: run.id, error: reason });
+    const response = h.state.messages.find(message => message.id === run.assistantId).text;
+    assert.match(response, expected);
+    assert.equal(response.includes(reason), false);
+  }
+});
+
 async function scenario(code, ending, collision = false) {
   const initial = records(125);
   if (collision) initial.unshift({ id: 'same-reply', role: 'assistant', text: 'first match' }, { id: 'same', role: 'user', text: 'original collision user' });

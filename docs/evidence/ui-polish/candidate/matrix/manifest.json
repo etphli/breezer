@@ -64,7 +64,7 @@
       "file": "mint-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -399,7 +399,7 @@
       "file": "tide-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -734,7 +734,7 @@
       "file": "dusk-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -1069,7 +1069,7 @@
       "file": "rose-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -1404,7 +1404,7 @@
       "file": "pollen-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -1739,7 +1739,7 @@
       "file": "graphite-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -2074,7 +2074,7 @@
       "file": "custom-light-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -2409,7 +2409,7 @@
       "file": "mint-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -2744,7 +2744,7 @@
       "file": "tide-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -3079,7 +3079,7 @@
       "file": "dusk-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -3414,7 +3414,7 @@
       "file": "rose-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -3749,7 +3749,7 @@
       "file": "pollen-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -4084,7 +4084,7 @@
       "file": "graphite-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -4419,7 +4419,7 @@
       "file": "custom-dark-settings-layout.png",
       "viewport": {
         "width": 1200,
-        "height": 967
+        "height": 975
       }
     },
     {
@@ -5231,21 +5231,21 @@
     "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
     "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
     "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
-    "context-settings.js": "17969f2835e982c3be91f848c2d87019cf7f2a62610ce3fa6f175bf3937d2680",
-    "efficiency.html": "748ccd7559080172098fb07ea5cfd12f16923f3d43f27b045bba8a5e899675a8",
+    "context-settings.js": "e4271e5e1b9add413beeb61beb62ea3f5429107c93baff750e9af4e260524b65",
+    "efficiency.html": "279b7d4fc0479de0e131573c214643cae9b3badbf1b55438355d3446bcb61405",
     "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
     "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
     "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
     "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
     "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
     "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
-    "onboarding.css": "793bf0c48f33d3600a682e925149cc3daa8416d60aad6063c6bd7ad70286c4cc",
-    "onboarding.js": "057ce114acfc5b4045322ec437c8ef4e3054f068f93e89159fa2c49b6016494a",
+    "onboarding.css": "350fbfc3c8888c0e049aee5a1878533e0fa5a66ff2b8d2eeeacf7af7063d3592",
+    "onboarding.js": "25af18251f050b6a48abdb57d5eb0dce0f9d699eda1585ecc57c28827f373f3c",
     "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
     "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
-    "panel.css": "d3e7eb0ce6b11f4b25d3c45955f7fb4c7552b5d6b37f2fd3df1de0aefd73ef9b",
-    "panel.html": "aa6cdd84d7b737baae75c0954739ef5e7ee3bdbaf2da11da2f700b0a643a837c",
-    "panel.js": "4e1140499f6da490c5a7017105733f9e2d818befd325b30f76a11b6fc18ec505",
+    "panel.css": "5dcb312e2a13014763fb0d413f6c2a71728c08915920670aff53cf3404e74801",
+    "panel.html": "28211da36ce2f3d19a2f6acdda60f2da2b1dda655f5fd3ad3cdb64f5614d1337",
+    "panel.js": "90d065a1a0a509c1fec5c51ce84ce3d9d0f548c54b861438e4482097bed4fad2",
     "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
     "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
     "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
@@ -5268,14 +5268,14 @@
     "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
     "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
     "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
-    "whats-new.css": "de2c91c7eee5723a3a292f0db1828729ac95e580baac270a8d1f167ce47b9032",
-    "whats-new.html": "36a9a2762a0b7bc0791507014cdf8de3675ccf183dd4e797051afc63266695da",
+    "whats-new.css": "a10261e3dc72d2094d441b88126a57b8a397b20b9105a18ac623f33dbc017d40",
+    "whats-new.html": "9d0b7618dcaa1425500724904893e5b0a4da9703b825aca77d7e56a098c221cd",
     "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
     "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
     "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
     "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
-    "workspace.css": "371ceafdadc42abf88dfb6b7319487a73357e60a39d92c25dac84c9c3fb1352c",
-    "workspace.html": "bcbe13b731c99e0d722713a70ca98ed7e0aef1dc622578b81d371ab058ddc2be",
-    "workspace.js": "3542486c8ddc8df8efce7e2091ae7aedf9209df773fdac4c7803c96c861a54ad"
+    "workspace.css": "db14f41922c36edcfde00179b543e3a981a01d30d0d48169eb259e7d354c737a",
+    "workspace.html": "649e7f6e08a222e11a942b7ae615e07b9776b65a2568ed03001ddbff457a03a1",
+    "workspace.js": "306767b98a78bc70567a164e4a3daac349e50d8b1eb8882ad2b327bb61599623"
   }
 }

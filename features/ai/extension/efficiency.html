@@ -35,8 +35,10 @@
     <p>This measures JavaScript work on stored records, not 1,000 live tabs or overall browser speed.</p>
 
     <h3 class="benchmark-story-heading">Less idle work</h3>
-    <p>Sidebar rows keep their elements when nothing visible changed, so keyboard focus stays put. Organato’s helper starts on first request, is shared between pages and exits when idle. The updater helper is also released when idle, and AI provider code loads only when needed.</p>
-    <p>Built-in filter lists can load from checked, prepared copies, with the normal compiler as fallback. The build also used Chromium’s Apple Silicon profile-guided optimization (PGO). None of these was measured alone in the browser comparison, so none gets individual credit.</p>
+    <p>Sidebar rows keep their elements when nothing visible changed, so keyboard focus stays put.</p>
+    <p>Organato’s helper starts on first request, is shared between pages and exits when idle. The updater helper is also released when idle, and AI provider code loads only when needed.</p>
+    <p>Built-in filter lists can load from checked, prepared copies, with the normal compiler as fallback. The build also used Chromium’s Apple Silicon profile-guided optimization (PGO).</p>
+    <p>None of these was measured alone in the browser comparison, so none gets individual credit.</p>
 
     <h3 class="benchmark-story-heading">Browser results</h3>
     <table class="story-table">

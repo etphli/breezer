@@ -1,8 +1,0 @@
-{
-  "newlyCompiledUnits": 0,
-  "unchangedCurrentUiUnitsReused": 9,
-  "baseBuildReceipt": "/tmp/breezer-ui-round18final-native-build/build-receipt.json",
-  "scope": "Native inputs and mapping are unchanged. Current web UI resources repacked in an APFS COW clone.",
-  "priorPrivateAppPinsUnchanged": true,
-  "installedPinsUnchanged": true
-}

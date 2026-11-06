@@ -148,7 +148,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 520,
+    "videoFrameOriginMs": 40,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -177,7 +177,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 400,
+    "videoFrameOriginMs": 80,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -239,28 +239,6 @@
         "name": "transition",
         "delay": 0,
         "direction": "normal",
-        "duration": 260,
-        "easing": "ease",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 260,
-        "easing": "ease",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
         "duration": 420,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
         "endDelay": 0,
@@ -285,72 +263,6 @@
         "direction": "normal",
         "duration": 420,
         "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9709894831945,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 295.03447078209024,
-        "easing": "ease",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9709894831945,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9709894831945,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 440.9709894831945,
-        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 320,
-        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
         "endDelay": 0,
         "fill": "backwards",
         "iterationStart": 0,
@@ -460,7 +372,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 480,
+    "videoFrameOriginMs": 280,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -474,17 +386,6 @@
     "area": "assistant",
     "reducedMotion": "no-preference",
     "animations": [
-      {
-        "name": "transition",
-        "delay": 0,
-        "direction": "normal",
-        "duration": 150,
-        "easing": "ease",
-        "endDelay": 0,
-        "fill": "backwards",
-        "iterationStart": 0,
-        "iterations": 1
-      },
       {
         "name": "transition",
         "delay": 0,
@@ -556,7 +457,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 280,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -597,7 +498,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 840,
+    "videoFrameOriginMs": 0,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -655,7 +556,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 1320,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -684,7 +585,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 400,
+    "videoFrameOriginMs": 280,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -713,7 +614,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 0,
+    "videoFrameOriginMs": 280,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -742,7 +643,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 200,
+    "videoFrameOriginMs": 320,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,
@@ -771,7 +672,7 @@
       800,
       1000
     ],
-    "videoFrameOriginMs": 1320,
+    "videoFrameOriginMs": 280,
     "videoFrameOriginMethod": {
       "previewPixels": 64,
       "luminanceVarianceThreshold": 1,

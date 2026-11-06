@@ -1,0 +1,34 @@
+[
+  {
+    "colorMode": "light",
+    "width": 1200,
+    "file": "settings-memory-unsaved-light.png",
+    "pristineSaveDisabled": true,
+    "editedSaveEnabled": true,
+    "savedSaveDisabled": true
+  },
+  {
+    "colorMode": "light",
+    "width": 390,
+    "file": "settings-memory-unsaved-light-narrow.png",
+    "pristineSaveDisabled": true,
+    "editedSaveEnabled": true,
+    "savedSaveDisabled": true
+  },
+  {
+    "colorMode": "dark",
+    "width": 1200,
+    "file": "settings-memory-unsaved-dark.png",
+    "pristineSaveDisabled": true,
+    "editedSaveEnabled": true,
+    "savedSaveDisabled": true
+  },
+  {
+    "colorMode": "dark",
+    "width": 390,
+    "file": "settings-memory-unsaved-dark-narrow.png",
+    "pristineSaveDisabled": true,
+    "editedSaveEnabled": true,
+    "savedSaveDisabled": true
+  }
+]

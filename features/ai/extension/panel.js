@@ -119,8 +119,7 @@ function updateControls() {
   $('context-toggle').disabled = running || !state.page || research.size > 0;
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
-  $('context-check').hidden = !state.includeContext;
-  $('context-action').textContent = state.includeContext ? 'Included' : 'Include';
+  $('sharing-label').textContent = state.control ? 'Page' : 'Page + screenshot';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
   $('context-hint').textContent = !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
@@ -528,6 +527,14 @@ function fail(reason, label) {
   offerRetry(run);
 }
 
+function providerFailureSummary(reason) {
+  if (/rate[ _-]*limit|quota|usage limit|\b429\b/i.test(reason)) return 'Your account has reached a provider limit. Wait for it to reset before retrying.';
+  if (/unauthori[sz]ed|authentication|not signed in|sign[ -]in|\b401\b/i.test(reason)) return 'The provider could not verify your account. Check its sign-in, then try again.';
+  if (/timed? out|timeout|deadline exceeded/i.test(reason)) return 'The provider took too long to reply. Try again.';
+  if (/ECONNREFUSED|ENETUNREACH|network error|connection (?:failed|closed|refused)|fetch failed/i.test(reason)) return 'The connection to your provider failed. Check your connection, then try again.';
+  return 'The assistant could not complete this response.';
+}
+
 function revealPanel() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.querySelector('.panel').animate(
@@ -621,7 +628,7 @@ function receive(message) {
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
     if (!state.running) return notify(reason);
-    fail(reason, 'The assistant could not complete this response.');
+    fail(reason, providerFailureSummary(reason));
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
     reply.text += message.text || '';

@@ -96,7 +96,8 @@ test('settings categories, search, Other and narrow layout work in a real browse
     const consent = page.locator('[data-context-control="consent"]');
     assert.equal(await consent.isChecked(), false, 'local memory never enables provider consent');
     assert.equal(await page.getByRole('button', { name: 'Summarize with GPT-6 Luna', exact: true }).isDisabled(), true);
-    await page.getByRole('button', { name: 'Disable and erase', exact: true }).click();
+    await page.locator('[data-context-control="enabled"]').uncheck();
+    await page.getByRole('button', { name: 'Turn off and erase', exact: true }).click();
     await page.getByRole('heading', { name: 'Activity summary', exact: true }).waitFor({ state: 'hidden' });
     await page.getByRole('link', { name: 'General', exact: true }).click();
 

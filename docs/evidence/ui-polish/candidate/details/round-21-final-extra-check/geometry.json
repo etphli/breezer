@@ -1,0 +1,118 @@
+[
+  {
+    "side": "before",
+    "mode": "light",
+    "kind": "timeout",
+    "summary": "The assistant could not complete this response."
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "kind": "account",
+    "summary": "The assistant could not complete this response."
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "kind": "limit",
+    "summary": "The assistant could not complete this response."
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "kind": "allowance",
+    "font": "13px"
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "kind": "timeout",
+    "summary": "The assistant could not complete this response."
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "kind": "account",
+    "summary": "The assistant could not complete this response."
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "kind": "limit",
+    "summary": "The assistant could not complete this response."
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "kind": "allowance",
+    "font": "13px"
+  },
+  {
+    "side": "before",
+    "kind": "setup-preview",
+    "sample": "Paused at 100ms CSS animation time; not an input-latency measurement",
+    "geometry": {
+      "sideOpacity": "0.339982",
+      "tabsOpacity": "0.660018",
+      "visibleSteps": 1
+    }
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "kind": "timeout",
+    "summary": "The provider took too long to reply. Try again."
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "kind": "account",
+    "summary": "The provider could not verify your account. Check its sign-in, then try again."
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "kind": "limit",
+    "summary": "Your account has reached a provider limit. Wait for it to reset before retrying."
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "kind": "allowance",
+    "font": "14px"
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "kind": "timeout",
+    "summary": "The provider took too long to reply. Try again."
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "kind": "account",
+    "summary": "The provider could not verify your account. Check its sign-in, then try again."
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "kind": "limit",
+    "summary": "Your account has reached a provider limit. Wait for it to reset before retrying."
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "kind": "allowance",
+    "font": "14px"
+  },
+  {
+    "side": "after",
+    "kind": "setup-preview",
+    "sample": "Paused at 100ms CSS animation time; not an input-latency measurement",
+    "geometry": {
+      "sideOpacity": "0",
+      "tabsOpacity": "1",
+      "visibleSteps": 1
+    }
+  }
+]

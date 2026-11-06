@@ -527,8 +527,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .folder-glyph { margin-right: 0; }
   .space-head .space-name, .space-head .quiet, .title, .row-action, .row-sound, .section-label, .divider-row .meta-button, .divider-row .rule, .new-tab span, .folder-row .count { display: none; }
   .row, .new-tab { justify-content: center; padding: 0; }
-  .row[data-compact-label] { flex-direction: column; gap: 2px; min-height: max(var(--row-h), 42px); padding-block: 4px; }
-  .row[data-compact-label]::after { content: attr(data-compact-label); max-width: 100%; color: var(--ink); font-size: clamp(12px, calc(var(--sidebar-font-size) - 2px), 15px); font-weight: 600; line-height: 1.25; text-align: center; }
+  .row[data-compact-label] > .favicon { display: none; }
+  .row[data-compact-label]::after { content: attr(data-compact-label); max-width: 100%; color: var(--ink); font-size: clamp(14px, var(--sidebar-font-size), 16px); font-weight: 600; line-height: 1.25; text-align: center; }
   .folder-children { padding-left: 0; }
   .dock { flex-direction: column; flex-wrap: nowrap; padding: 6px 0; }
   .space-dots { flex: none; flex-direction: column; overflow: auto; max-height: 120px; }
@@ -668,17 +668,17 @@ body.route-settings {
 
 .settings-scroll { flex: 1; min-height: 0; overflow-y: auto; scroll-padding: 24px; }
 .settings-column { max-width: 760px; margin: 0 auto; padding: 24px 40px 96px; }
-.context-actions { display: flex; flex-direction: column; align-items: stretch; gap: 16px; margin-top: 14px; }
-.context-actions > .setting-actions { margin: 0; }
-.context-actions > .setting-actions + .setting-actions { padding-top: 14px; border-top: 1px solid var(--set-rule); }
-.context-save { padding: 12px 16px; border-top: 1px solid var(--set-rule); margin: 0; }
+.context-save { align-items: center; padding: 12px 16px; border-top: 1px solid var(--set-rule); margin: 0; }
+.context-save .field-note { margin: 0; }
+.context-settings .setting-group > .setting-details { padding: 12px 16px; margin: 0; border-top: 1px solid var(--set-rule); }
 #collapse[aria-pressed="true"] { background: var(--hover); color: var(--accent); }
 @media (max-width: 560px) {
   .settings-head { min-height: 72px; }
   .crumbs h1 { font-size: 18px; line-height: 24px; }
   .settings-head .setup-link { font-size: 12px; padding-inline: 8px; }
-  .context-actions { flex-direction: column; align-items: stretch; }
+  .context-save { flex-direction: column; align-items: stretch; }
   .context-save > .button { width: 100%; }
+  .context-settings .setting-group > .setting-details { padding-inline: 14px; }
   .setting-row:has(> select, > input[type="password"], > input[type="text"]) { flex-direction: column; align-items: stretch; }
   .setting-row > select { width: 100%; max-width: none; }
 }
@@ -807,7 +807,7 @@ body.route-settings {
 .setting-row + .setting-row { border-top: 1px solid var(--line); }
 .setting-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .setting-label > :first-child { font-weight: 500; }
-.setting-label small { color: var(--muted); font-size: 13px; line-height: 19px; }
+.setting-label small { color: var(--muted); font-size: 14px; line-height: 21px; }
 .muted-row { opacity: 0.55; }
 
 .segmented {
@@ -931,7 +931,7 @@ body.route-settings {
 .text-input:focus-visible { outline-offset: 0; border-color: transparent; }
 .text-input:disabled { opacity: 0.6; }
 
-.field-note { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 19px; max-width: 64ch; }
+.field-note { margin: 8px 0 0; color: var(--muted); font-size: 14px; line-height: 21px; max-width: 64ch; }
 
 /* Live status text. A spinner appears while the matching request keeps controls disabled. */
 .status-line { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; color: var(--muted); line-height: 19px; max-width: 64ch; }
@@ -1178,7 +1178,7 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   background-color: color-mix(in oklab, var(--raised) 78%, #000);
   border-color: color-mix(in srgb, var(--ink) 24%, transparent);
 }
-.context-settings table { width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 12px; }
+.context-settings table { width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 13px; }
 .context-settings caption { text-align: start; margin-bottom: 8px; font-weight: 600; }
 .context-settings.settings-section { margin-bottom: 24px; }
 .context-settings th, .context-settings td { text-align: start; padding: 8px 4px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }

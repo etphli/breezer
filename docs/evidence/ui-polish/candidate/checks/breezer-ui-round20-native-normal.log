@@ -1,7 +1,0 @@
-AssertionError [ERR_ASSERTION]: {"blockedNativeHostLaunches":2,"error":"Failed to start stream due to audio/video capture failure","ok":false,"pid":23920,"screenCaptureAccessGranted":false}
-
-false !== true
-
-    at request (file:///private/tmp/breezer-ui-round20final-native-capture.mjs:131:57)
-    at async capture (file:///private/tmp/breezer-ui-round20final-native-capture.mjs:153:16)
-    at async file:///private/tmp/breezer-ui-round20final-native-capture.mjs:179:71

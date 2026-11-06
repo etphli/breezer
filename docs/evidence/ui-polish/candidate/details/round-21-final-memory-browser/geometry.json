@@ -1,0 +1,242 @@
+[
+  {
+    "side": "before",
+    "width": 390,
+    "mode": "light",
+    "enabled": false,
+    "geometry": {
+      "height": 400,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 390,
+    "mode": "light",
+    "enabled": true,
+    "geometry": {
+      "height": 444,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [
+        "Save choices",
+        "Disable and erase",
+        "Clear activity"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 390,
+    "mode": "dark",
+    "enabled": false,
+    "geometry": {
+      "height": 400,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 390,
+    "mode": "dark",
+    "enabled": true,
+    "geometry": {
+      "height": 444,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [
+        "Save choices",
+        "Disable and erase",
+        "Clear activity"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 1200,
+    "mode": "light",
+    "enabled": false,
+    "geometry": {
+      "height": 362,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 1200,
+    "mode": "light",
+    "enabled": true,
+    "geometry": {
+      "height": 406,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [
+        "Save choices",
+        "Disable and erase",
+        "Clear activity"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 1200,
+    "mode": "dark",
+    "enabled": false,
+    "geometry": {
+      "height": 362,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "before",
+    "width": 1200,
+    "mode": "dark",
+    "enabled": true,
+    "geometry": {
+      "height": 406,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [
+        "Save choices",
+        "Disable and erase",
+        "Clear activity"
+      ],
+      "detailsInCard": false
+    }
+  },
+  {
+    "side": "after",
+    "width": 390,
+    "mode": "light",
+    "enabled": false,
+    "geometry": {
+      "height": 185,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 390,
+    "mode": "light",
+    "enabled": true,
+    "geometry": {
+      "height": 440,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 390,
+    "mode": "dark",
+    "enabled": false,
+    "geometry": {
+      "height": 185,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 390,
+    "mode": "dark",
+    "enabled": true,
+    "geometry": {
+      "height": 440,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 1200,
+    "mode": "light",
+    "enabled": false,
+    "geometry": {
+      "height": 166,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 1200,
+    "mode": "light",
+    "enabled": true,
+    "geometry": {
+      "height": 371,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 1200,
+    "mode": "dark",
+    "enabled": false,
+    "geometry": {
+      "height": 166,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [],
+      "detailsInCard": true
+    }
+  },
+  {
+    "side": "after",
+    "width": 1200,
+    "mode": "dark",
+    "enabled": true,
+    "geometry": {
+      "height": 371,
+      "scrollWidth": 1200,
+      "viewport": 1200,
+      "saveVisible": [
+        "Save choices"
+      ],
+      "detailsInCard": true
+    }
+  }
+]

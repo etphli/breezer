@@ -479,6 +479,7 @@ function updateFavicon(holder, tab, url, title) {
     if (holder.contains(img) && img.getAttribute('src') === src) {
       holder.dataset.failedIcon = src;
       fallback();
+      render();
     }
   };
   if (img.getAttribute('src') !== src) img.src = src;
@@ -603,18 +604,35 @@ function drawTree(container, items) {
 function compactLabels() {
   const rows = ['pinned', 'today'].flatMap(id => [...$(id).querySelectorAll('.row')])
     .filter(row => !row.classList.contains('folder-row') && !row.closest('.leaving') && !row.closest('.folder-children[hidden]'));
-  const labels = rows.map(row => {
-    const words = rowPresentation.get(row)[0].match(/[\p{L}\p{N}]+/gu) || ['Tab'];
-    return (words.length > 1 ? words.slice(0, 2).map(word => [...word][0]).join('') : [...words[0]].slice(0, 2).join('')).toUpperCase();
-  });
-  const counts = new Map(), ordinals = new Map();
-  for (const label of labels) counts.set(label, (counts.get(label) || 0) + 1);
-  rows.forEach((row, index) => {
-    const base = labels[index], ordinal = (ordinals.get(base) || 0) + 1;
-    ordinals.set(base, ordinal);
-    const label = counts.get(base) > 1 ? String(ordinal) : base;
-    if (row.dataset.compactLabel !== label) row.dataset.compactLabel = label;
-  });
+  const groups = new Map();
+  const labelsByRow = new Map();
+  for (const row of rows) {
+    const [title, source, url] = rowPresentation.get(row);
+    const image = row.querySelector('.favicon img');
+    const identity = image ? (source.startsWith('data:') ? source : new URL(url).hostname) : row.querySelector('.favicon').textContent;
+    const group = groups.get(identity) || [];
+    group.push({ row, words: title.match(/[\p{L}\p{N}]+/gu) || ['Tab'] });
+    groups.set(identity, group);
+  }
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const candidates = group.map(item => item.words.map(word => [...word].slice(0, 2).join('').toUpperCase()));
+    const occurrences = new Map();
+    for (const words of candidates) for (const word of new Set(words)) occurrences.set(word, (occurrences.get(word) || 0) + 1);
+    const labels = candidates.map(words => words.find(word => occurrences.get(word) === 1) || words[0]);
+    const counts = new Map(), ordinals = new Map();
+    for (const label of labels) counts.set(label, (counts.get(label) || 0) + 1);
+    group.forEach(({ row }, index) => {
+      const base = labels[index], ordinal = (ordinals.get(base) || 0) + 1;
+      ordinals.set(base, ordinal);
+      labelsByRow.set(row, counts.get(base) > 1 ? [...base][0] + ordinal : base);
+    });
+  }
+  for (const row of rows) {
+    const label = labelsByRow.get(row);
+    if (label && row.dataset.compactLabel !== label) row.dataset.compactLabel = label;
+    else if (!label && row.dataset.compactLabel) delete row.dataset.compactLabel;
+  }
 }
 
 function draw() {

@@ -1,0 +1,10 @@
+/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round21final/Breezer.app/Contents/Frameworks/Breezer Framework.framework: replacing existing signature
+/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round21final/Breezer.app/Contents/Frameworks/Breezer Framework.framework: internal error in Code Signing subsystem
+Traceback (most recent call last):
+  File "/tmp/breezer-ui-round21final-stage-native.py", line 15, in <module>
+    subprocess.run(['codesign','--force','--sign','-','--timestamp=none',str(framework)],check=True);subprocess.run(['codesign','--force','--sign','-','--preserve-metadata=entitlements,flags','--timestamp=none',str(app)],check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Library/Frameworks/Python.framework/Versions/3.14/lib/python3.14/subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['codesign', '--force', '--sign', '-', '--timestamp=none', '/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/ui-native-verification-round21final/Breezer.app/Contents/Frameworks/Breezer Framework.framework']' returned non-zero exit status 1.

@@ -56,7 +56,7 @@ export function createContextClient(api = globalThis.chrome) {
 // Uses the existing settings typography and controls. No browsing starts on mount.
 export function mountContextSettings({ container, api = globalThis.chrome, client = createContextClient(api) }) {
   const doc = container.ownerDocument, events = new AbortController();
-  let disposed = false, revision = 0, summarizing = false, savedChoices = '';
+  let disposed = false, revision = 0, summarizing = false, saving = false, savedChoices = '', loadedState = null;
   const el = (tag, text = '', className = '') => {
     const node = doc.createElement(tag); node.textContent = text;
     if (className) node.className = className;
@@ -69,18 +69,17 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     note('Remember visits to selected sites on this device for seven days.'),
   );
   const localGroup = el('div', '', 'setting-group');
-  const localActions = el('div', '', 'context-actions');
   const saveActions = el('div', '', 'setting-actions context-save');
-  const maintenanceActions = el('div', '', 'setting-actions');
-  localActions.append(maintenanceActions);
   const summarySection = el('section', '', 'settings-section context-settings');
   const summaryGroup = el('div', '', 'setting-group context-summary');
-  summarySection.append(el('h2', 'Activity summary'),
-    note('OpenAI receives these site names and counts through Codex only when you choose Summarize.'), summaryGroup);
-  const check = (text, key, parent = localGroup) => {
+  summarySection.hidden = true;
+  summarySection.append(el('h2', 'Activity summary'), summaryGroup);
+  const check = (text, key, parent = localGroup, help = '') => {
     const label = el('label', '', 'setting-row');
     const input = el('input', '', 'toggle'); input.type = 'checkbox'; input.checked = false; input.dataset.contextControl = key;
-    label.append(el('span', text, 'setting-label'), input); parent.append(label);
+    const copy = el('span', text, 'setting-label');
+    if (help) { copy.textContent = ''; copy.append(el('span', text), el('small', help)); }
+    label.append(copy, input); parent.append(label);
     return input;
   };
   const enabled = check('Remember selected sites', 'enabled');
@@ -93,8 +92,9 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     note('Only sites you choose and grant page access to. Site names and daily counts are stored for seven calendar days, sampled at most once per site per half hour. No titles, page text, forms, passwords, URL paths or query strings. Private browsing and known sensitive sites are excluded.'),
     note('Older activity is erased next time Breezer checks context. Suggestions are uncertain inferences, not saved preferences.'),
   );
-  section.append(localGroup, localActions, details);
-  const button = (text, action, parent = localActions, className = 'button') => {
+  localGroup.append(details);
+  section.append(localGroup);
+  const button = (text, action, parent, className = 'button') => {
     const node = el('button', text, className); node.type = 'button';
     node.addEventListener('click', action, { signal: events.signal });
     parent.append(node); return node;
@@ -116,19 +116,36 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     catch (failure) { if (!disposed) { error.textContent = failure instanceof TypeError ? 'Activity settings could not load. Reopen Settings to try again.' : failure.message; error.hidden = false; } }
   };
   const save = button('Save choices', () => run(async () => {
-    await client.request('configure', { enabled: enabled.checked, sites: sites.value.split(/[\n,]+/).map(value => value.trim()).filter(Boolean) });
-    await refresh();
+    if (!loadedState || saving || save.disabled) return;
+    saving = true; updateSave();
+    try {
+      await client.request('configure', { enabled: enabled.checked, sites: sites.value.split(/[\n,]+/).map(value => value.trim()).filter(Boolean) });
+      await refresh(true, true);
+    } finally { saving = false; if (!disposed) updateSave(); }
   }), saveActions, 'button primary');
+  saveActions.append(el('span', 'Changes take effect when you save.', 'field-note'));
   localGroup.append(saveActions);
   const choices = () => JSON.stringify([enabled.checked, sites.value.split(/[\n,]+/).map(value => value.trim()).filter(Boolean)]);
-  const updateSave = () => { sites.disabled = !enabled.checked; save.disabled = choices() === savedChoices; };
+  const updateSave = () => {
+    enabled.disabled = !loadedState || saving;
+    sites.disabled = !loadedState || saving || !enabled.checked;
+    sitesLabel.hidden = !enabled.checked;
+    saveActions.hidden = !enabled.checked && !loadedState?.enabled;
+    save.disabled = !loadedState || saving || choices() === savedChoices;
+    const erasing = Boolean(loadedState?.enabled && !enabled.checked);
+    save.textContent = erasing ? 'Turn off and erase' : 'Save choices';
+    save.className = erasing ? 'button danger' : 'button primary';
+    consent.disabled = !loadedState?.enabled || !enabled.checked || saving;
+    summarize.disabled = summarizing || consent.disabled || !loadedState?.providerConsent;
+  };
   enabled.addEventListener('change', updateSave, { signal: events.signal });
   sites.addEventListener('input', updateSave, { signal: events.signal });
-  const disable = button('Disable and erase', () => run(async () => { output.textContent = ''; await client.request('configure', { enabled: false }); await refresh(); }), maintenanceActions, 'button danger');
-  const clear = button('Clear activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }), maintenanceActions, 'button danger');
   const empty = el('p', 'No activity recorded.', 'empty-state');
   summaryGroup.append(table, empty, suggestions);
-  const consent = check('Allow OpenAI summaries', 'consent', summaryGroup);
+  const maintenanceActions = el('div', '', 'setting-actions');
+  const clear = button('Clear activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }), maintenanceActions, 'button danger');
+  summaryGroup.append(maintenanceActions);
+  const consent = check('Allow OpenAI summaries', 'consent', summaryGroup, 'OpenAI receives these site names and counts through Codex only when you choose Summarize.');
   consent.addEventListener('change', () => run(async () => { output.textContent = ''; await client.request('consent', { consent: consent.checked }); await refresh(); }), { signal: events.signal });
   const summaryActions = el('div', '', 'setting-actions');
   summaryGroup.append(summaryActions);
@@ -147,22 +164,19 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   summarySection.append(summaryDetails);
   section.append(status, error);
   container.replaceChildren(section, summarySection);
-  async function refresh(clearOutput = true) {
+  async function refresh(clearOutput = true, replaceChoices = false) {
     const current = ++revision;
     const state = await client.request('view');
     if (disposed || revision !== current) return;
     summarySection.hidden = !state.enabled && !state.habits.length;
-    enabled.checked = state.enabled; consent.checked = state.providerConsent;
-    consent.disabled = !state.enabled;
-    sites.value = state.sites.join('\n');
-    savedChoices = choices();
+    const keepDraft = loadedState && choices() !== savedChoices && !replaceChoices;
+    loadedState = state;
+    consent.checked = state.providerConsent;
+    savedChoices = JSON.stringify([state.enabled, state.sites]);
+    if (!keepDraft) { enabled.checked = state.enabled; sites.value = state.sites.join('\n'); }
     updateSave();
-    disable.disabled = !state.enabled && !state.habits.length;
     clear.disabled = !state.habits.length;
-    disable.hidden = disable.disabled;
-    clear.hidden = clear.disabled;
-    localActions.hidden = disable.hidden && clear.hidden;
-    summarize.disabled = summarizing || !state.enabled || !state.providerConsent;
+    maintenanceActions.hidden = clear.disabled;
     status.textContent = state.enabled ? 'Local context is on. Provider summaries run only when you request one.' : 'Local context is off. No browsing activity is being remembered.';
     if (clearOutput) output.textContent = '';
     body.replaceChildren();
@@ -176,6 +190,7 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
     suggestions.replaceChildren(...state.suggestions.map(text => el('li', text)));
   }
   const unsubscribe = client.onChange(() => { void run(() => refresh()); });
+  updateSave();
   const ready = run(() => refresh());
   return { ready, dispose() { disposed = true; events.abort(); unsubscribe(); client.dispose(); section.remove(); summarySection.remove(); } };
 }

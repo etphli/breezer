@@ -91,10 +91,9 @@
         <details class="feature-details">
           <summary>Setup choices</summary>
           <h4>Profile choices</h4>
-          <p>A new profile now opens a short setup guide instead of these notes. Pick the name Breezer AI greets you by, where your tabs sit, a theme color and appearance, then import from Chrome and connect Organato if you use it. A quick tour of the sidebar and the assistant finishes it, and you can skip at any step.</p>
-        <p>Already set up? Open the guide whenever you like with the Setup guide button in Settings.</p>
+          <p>New profiles open this guide. Choose a name, tab layout and appearance, then import from Chrome. Each step can be skipped.</p>
         <h4>Optional services</h4>
-          <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
+          <p>Connect Organato, defer it, or choose Don't use Organato to keep it off. The final summary confirms your choice. The five-tip tour is optional.</p>
         </details>
       </article>
 
@@ -143,9 +142,11 @@
         </div>
         <details class="feature-details">
           <summary>Keyboard and saved shortcuts</summary>
-          <p>Top tabs, private windows and Command+9 keep their usual numbered-tab behavior. A slot without a saved favorite or pin falls back to the ordinary tab shortcut.</p>
-          <p>On a new tab, the Add tile after your sites takes a web address or one of your open tabs. Arrow keys move through the tabs and Enter adds the one you pick. Your shortcuts are saved in this profile on your Mac, and they use the same Remove, Undo and Restore controls as the suggested sites. On a smaller window, the row makes room for them.</p>
-        <p>For sidebar favorites and pins, Command-number shortcuts now open the saved page even when it is asleep. Only the selected page opens, repeated presses reuse it, and favorite slots stay consistent across spaces and restarts.</p>
+          <h4>Add a site</h4>
+          <p>Choose Add on a new tab, then enter an address or select an open tab. Arrow keys move through the list; Enter adds the selected tab. Shortcuts stay in this profile on your Mac, with Remove, Undo and Restore controls.</p>
+          <h4>Numbered tab shortcuts</h4>
+          <p>Command-number opens one saved favorite or pin, including asleep pages, and reuses it on repeat. Favorite slots persist across spaces and restarts.</p>
+          <p>Top tabs, private windows and Command+9 keep their usual behavior. An empty favorite or pin slot falls back to the ordinary tab shortcut.</p>
         </details>
       </article>
 
@@ -190,9 +191,7 @@
         </div>
         <details class="feature-details">
           <summary>Organato behavior</summary>
-          <p>Assignment titles in the new tab's Upcoming list now link to that task's own page in Organato, so one click takes you to the details.</p>
-        <p>With Organato turned off, new tabs show just the date and your shortcuts, with no empty Organato panel or reserved space. Open new tabs update straight away, and the choice survives reloads and restarts.</p>
-        <p>Those new tabs do not start the Organato helper or request Organato data while it is off. Turning it back on restores the panel and fetches fresh data.</p>
+          <p>Assignments link to their own Organato page. Turning Organato off removes its panel from open new tabs and survives restarts. Those tabs stop starting its helper and requesting its data. Turning it back on restores the panel and fetches fresh data.</p>
         </details>
       </article>
 
@@ -223,10 +222,9 @@
         <details class="feature-details">
           <summary>Helper lifecycle</summary>
           <ul class="notes">
-          <li><h4>Start on demand</h4>The background helpers behind Breezer AI, Organato and updates now start when something needs them and close once they've been idle, rather than staying open.</li>
+          <li><h4>Start on demand</h4>AI provider code loads with your first AI request, not when you open Settings or use Organato.</li>
           <li><h4>Shared connection, separate requests</h4>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
-          <li>Breezer AI loads its provider code with your first request. Opening Settings or serving Organato requests does not load that code just in case.</li>
-          <li><h4>Reconnect safely</h4>After Settings has sat quietly for a while, your next action reconnects on its own. What you typed stays in place, and an interrupted change is never resent automatically.</li>
+          <li><h4>Reconnect safely</h4>Your next action reconnects after an idle period. Drafts stay in place; interrupted changes are never resent automatically.</li>
           <li>An update you've checked for stays ready to install. If the connection drops first, Breezer asks you to check again. The checksum, identity, signature and rollback checks are unchanged.</li>
         </ul>
         </details>
@@ -283,7 +281,7 @@
         </div>
         <details class="feature-details">
           <summary>Password and passkey details</summary>
-          <p>Touch ID and Apple Passwords remain unavailable until Breezer has the required Apple signing entitlements. Saving passwords and importing them from CSV work as before.</p>
+          <p>Website passkeys still need Apple-approved signing entitlements. The local page checks availability; it does not enable Touch ID or Apple Passwords.</p>
           <p>Password suggestions close in Chromium's usual way again as you type. The Microsoft sign-in Enter behavior remains unconfirmed, as noted below.</p>
         </details>
       </article>
@@ -356,8 +354,7 @@
         <details class="feature-details">
           <summary>Translation options</summary>
           <h4>Provider and sharing</h4>
-          <p>Translate page text in place, choose languages and restore the original. Connect your local LibreTranslate server or use your own LibreTranslate.com key, with explicit confirmation before sharing page text.</p>
-        <p>Right-click a page and choose Translate page to begin. Translation needs your provider to be running; Breezer does not bundle translation models or use your AI account.</p>
+          <p>Use a running LibreTranslate server on your Mac, or your own LibreTranslate.com key. Breezer does not bundle translation models or use your AI account. Sharing requires your confirmation and is limited to the chosen page.</p>
         <h4>Stop and restore</h4>
           <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
         </details>
@@ -397,9 +394,7 @@
         </div>
         <details class="feature-details">
           <summary>Navigation and appearance</summary>
-          <p>Settings has a new look. Categories sit in a list on the left, and search takes you straight to the setting you need.</p>
-        <p>Press / to search by name, description or keyword. Search also offers Chromium's own settings. Choose All settings to open the full browser settings page.</p>
-        <p>Back and Forward move between categories. Use the keyboard to move through categories and search results; the layout follows your Breezer theme and light or dark appearance.</p>
+          <p>Search also includes Chromium's settings. Back and Forward move between categories; keyboard navigation works through categories and results. The page follows your Breezer theme and appearance.</p>
         </details>
       </article>
     </section>

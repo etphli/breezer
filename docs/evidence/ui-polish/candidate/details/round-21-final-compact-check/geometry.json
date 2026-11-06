@@ -1,0 +1,4034 @@
+[
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": false,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "light",
+    "matching": true,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": false,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": "AS",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": "AR",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": "M3",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 26,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 40,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 56,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 42,
+        "width": 104,
+        "identityFont": "13px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "before",
+    "mode": "dark",
+    "matching": true,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "1",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "2",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PN",
+        "height": 44,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 26,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 26,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 26,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 40,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 40,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 40,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 56,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 56,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 56,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": false,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 104,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 104,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 104,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 26,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 26,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 26,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 26,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 26,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 26,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 40,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 40,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 40,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 40,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 40,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 40,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 56,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 56,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 56,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 56,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 56,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 56,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 104,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 104,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 104,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "light",
+    "matching": true,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 104,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 104,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 104,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 26,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 26,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 26,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 26,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 40,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 40,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 40,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 40,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 56,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 56,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 56,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 56,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 28,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 28,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 28,
+        "width": 104,
+        "identityFont": "12px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": false,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Arc-style sidebar · Pull request #42",
+        "label": null,
+        "height": 44,
+        "width": 104,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Arc review notes",
+        "label": null,
+        "height": 44,
+        "width": 104,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Mail — 3 unread",
+        "label": null,
+        "height": 44,
+        "width": 104,
+        "identityFont": "20px",
+        "iconVisible": true,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 42,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 26,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 26,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 26,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 42,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 26,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 42,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 26,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 26,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 26,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 26,
+        "clientWidth": 26
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 56,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 40,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 40,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 40,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 56,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 40,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 56,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 40,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 40,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 40,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 40,
+        "clientWidth": 40
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 72,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 56,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 56,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 56,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 72,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 56,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 72,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 56,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 56,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 56,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 56,
+        "clientWidth": 56
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 120,
+    "font": 12,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 28,
+        "width": 104,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 28,
+        "width": 104,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 28,
+        "width": 104,
+        "identityFont": "14px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 120,
+    "font": 15,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 34,
+        "width": 104,
+        "identityFont": "15px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  },
+  {
+    "side": "after",
+    "mode": "dark",
+    "matching": true,
+    "width": 120,
+    "font": 20,
+    "geometry": [
+      {
+        "key": "t:3",
+        "title": "Project metrics",
+        "label": "ME",
+        "height": 44,
+        "width": 104,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:4",
+        "title": "Project milestones",
+        "label": "MI",
+        "height": 44,
+        "width": 104,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      },
+      {
+        "key": "t:5",
+        "title": "Planning notes",
+        "label": "PL",
+        "height": 44,
+        "width": 104,
+        "identityFont": "16px",
+        "iconVisible": false,
+        "scrollWidth": 104,
+        "clientWidth": 104
+      }
+    ]
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "side": "before",
+    "id": "setup",
+    "geometry": {
+      "width": 868,
+      "height": 760.546875,
+      "words": 112
+    }
+  },
+  {
+    "side": "before",
+    "id": "shortcuts",
+    "geometry": {
+      "width": 868,
+      "height": 677.453125,
+      "words": 132
+    }
+  },
+  {
+    "side": "after",
+    "id": "setup",
+    "geometry": {
+      "width": 868,
+      "height": 576.265625,
+      "words": 51
+    }
+  },
+  {
+    "side": "after",
+    "id": "shortcuts",
+    "geometry": {
+      "width": 868,
+      "height": 647.265625,
+      "words": 95
+    }
+  }
+]
