@@ -1,0 +1,93 @@
+[
+  {
+    "id": "release",
+    "title": "Release page at the same scroll position",
+    "file": "whats-new-narrow-tile-02.png",
+    "notes": [
+      [
+        86,
+        12,
+        49,
+        19,
+        "The feature tour appears earlier. Measurements open on request."
+      ],
+      [
+        86,
+        53,
+        44,
+        63,
+        "Short summaries lead. Additional explanations expand below."
+      ]
+    ]
+  },
+  {
+    "id": "headings",
+    "title": "Settings titles",
+    "file": "mint-light-settings-passwords-narrow.png",
+    "notes": [
+      [
+        85,
+        17,
+        51,
+        23,
+        "One page title leads directly into the settings."
+      ]
+    ]
+  },
+  {
+    "id": "speed",
+    "title": "Model options",
+    "file": "sidebar-model-options-narrow.png",
+    "notes": [
+      [
+        86,
+        51,
+        54,
+        86,
+        "Fast-mode usage guidance sits beside Speed."
+      ]
+    ]
+  },
+  {
+    "id": "connected",
+    "title": "Organato connected",
+    "file": "onboarding-6-organato.png",
+    "notes": [
+      [
+        17,
+        87,
+        29,
+        71,
+        "The connected state keeps clear opt-out instructions."
+      ]
+    ]
+  },
+  {
+    "id": "tour",
+    "title": "Tour progress",
+    "file": "onboarding-7-tour-4.png",
+    "notes": [
+      [
+        36,
+        21,
+        12,
+        39,
+        "Tour labels the inner progress count."
+      ]
+    ]
+  },
+  {
+    "id": "loading",
+    "title": "Recorded loading transition",
+    "file": "newtab-no-preference-video-500.png",
+    "notes": [
+      [
+        86,
+        70,
+        34,
+        59,
+        "The entrance movement keeps loaded rows visible. Frames are 500 ms from each recording start."
+      ]
+    ]
+  }
+]

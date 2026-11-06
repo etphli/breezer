@@ -59,6 +59,7 @@ const research = new ResearchSources({ api: chrome, root: document,
   onRevoke: reason => { if (state.running) stop(); notify(reason); },
 });
 const messageNodes = new Map();
+let lastContextTitle = null;
 let scheduledRender = false;
 
 function notify(text) {
@@ -97,6 +98,7 @@ function selectedSettings(selected = selectedModel()) {
 }
 
 function renderSettings(selected, running) {
+  $('inference-model').textContent = selected ? selected.model.label || selected.model.id : '';
   const settings = selectedSettings(selected);
   const levels = selected?.model.reasoningEfforts || [];
   const reasoning = $('reasoning-select');
@@ -109,6 +111,7 @@ function renderSettings(selected, running) {
   reasoning.disabled = running || !levels.length;
   reasoning.parentElement.title = levels.length ? 'Reasoning effort' : 'This model does not report adjustable reasoning effort';
   const codex = selected?.provider.id === 'codex';
+  $('model-settings-label').textContent = codex ? 'Reasoning and speed' : 'Reasoning';
   $('speed-setting').hidden = !codex;
   const speed = $('speed-select');
   speed.replaceChildren(new Option('Standard', 'standard'));
@@ -118,6 +121,7 @@ function renderSettings(selected, running) {
   speed.add(fast);
   speed.value = settings.speed;
   speed.disabled = running || !codex;
+  $('speed-note').hidden = !codex || settings.speed !== 'fast';
   $('speed-setting').title = fast.disabled ? 'Fast is not available for this model and CLI' : 'Fast uses more of your Codex allowance. Account eligibility is checked when you send.';
 }
 
@@ -134,6 +138,8 @@ function saveSettings() {
 
 function updateControls() {
   const running = Boolean(state.running);
+  document.querySelector('.panel').dataset.running = String(running);
+  document.querySelector('.panel').dataset.pageState = state.pageKnown ? 'ready' : 'loading';
   $('send').disabled = !running && (!selectedModel() || (!$('prompt').value.trim() && !state.attachments.length) || state.readingFiles);
   $('send').dataset.running = String(running);
   $('send').setAttribute('aria-label', running ? 'Stop response' : 'Send message');
@@ -145,24 +151,28 @@ function updateControls() {
   document.querySelectorAll('.attachment-remove').forEach(button => { button.disabled = running || state.readingFiles; });
   research.setBusy(running);
   $('control-toggle').disabled = running || !state.page || research.size > 0;
-  $('context-toggle').hidden = research.size > 0;
+  $('context-toggle').hidden = research.size > 0 || !state.page;
   $('context-toggle').disabled = running || !state.page || research.size > 0;
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
-  $('context-check').hidden = !state.includeContext;
+  $('sharing-label').textContent = state.control ? 'Page' : 'Page + screenshot';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
-  $('context-hint').textContent = research.size ? `${research.size} selected tabs · text only · no control` : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
-  $('control-toggle').title = state.page
-    ? 'Let Breezer click, type, scroll, and navigate in this tab until you turn this off'
-    : 'Browser control works only on ordinary web pages';
+  $('context-hint').textContent = !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('research-label').textContent = research.size ? `${research.size} ${research.size === 1 ? 'source' : 'sources'}` : 'Sources';
+  $('research-open').dataset.active = String(research.size > 0);
+  $('control-tip').textContent = state.page ? 'Click, type, scroll, and navigate in this tab.' : 'Available on ordinary web pages.';
   $('prompt').placeholder = research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
   const selected = selectedModel();
+  if (!selected && !state.discoveryPending) $('prompt').placeholder = 'Draft a message…';
   renderWelcomeStatus(selected);
-  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Connecting your accounts' : 'Choose a connected model';
+  document.querySelector('.panel').dataset.accountState = selected ? 'ready' : state.discoveryPending ? 'connecting' : 'signed-out';
+  $('model-label').textContent = selected ? selected.model.label || selected.model.id : state.discoveryPending ? 'Loading models…' : 'Accounts';
   $('provider-dot').classList.toggle('connected', Boolean(selected));
-  $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : 'Choose a model';
+  $('model-button').title = selected ? `${providerLabel(selected.provider.id)} · ${selected.model.label || selected.model.id}` : state.discoveryPending ? 'Checking connected accounts' : 'Choose a model';
   $('model-button').disabled = running;
+  $('inference-options').hidden = !selected;
+  if (running) setModelMenu(false);
   const summarize = document.querySelector('[data-prompt^="Summarize"]');
   if (summarize) {
     summarize.dataset.prompt = research.size ? 'Summarize these selected pages and cite the sources.' : 'Summarize this page. What should I take away from it?';
@@ -175,17 +185,21 @@ function updateControls() {
 function renderWelcomeStatus(selected) {
   let text = '';
   let action = '';
+  let showAccounts = false;
   if (!selected && !state.discoveryPending) {
     const connected = state.providers.some((item) => item.available && item.authenticated);
-    text = connected ? 'Choose a model to start.' : 'Sign in to Codex or Claude to start. Run codex login or claude auth login in Terminal, then refresh.';
-    action = connected ? 'Choose a model' : 'Refresh accounts';
+    showAccounts = !connected;
+    text = connected ? 'Choose a model to start.' : 'Sign in to Codex or Claude to start.';
+    action = connected ? 'Choose a model' : $('welcome-account-steps').open ? 'Refresh accounts' : 'Set up an account';
   } else if (state.pageKnown && !state.page) {
     text = 'Open a web page to summarize it or get help with it. You can still ask anything below.';
   }
   $('welcome-status').hidden = !text;
   $('welcome-status-text').textContent = text;
+  $('welcome-account-steps').hidden = !showAccounts;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
+  document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending || state.pageKnown && !state.page && !research.size;
   document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
 
@@ -219,7 +233,7 @@ function renderModels() {
     status.textContent = !provider.available ? 'Unavailable' : !provider.authenticated ? 'Sign in required' : 'Connected';
     heading.append(name, status);
     group.append(heading);
-    for (const model of provider.models || []) {
+    for (const model of provider.available && provider.authenticated ? provider.models || [] : []) {
       const button = document.createElement('button');
       button.className = 'model-option';
       const isSelected = state.selection?.provider === provider.id && state.selection?.model === model.id;
@@ -248,8 +262,25 @@ function renderModels() {
     if (provider.error || !provider.authenticated) {
       const error = document.createElement('p');
       error.className = 'provider-error';
-      error.textContent = provider.error || `Sign in with ${provider.id === 'codex' ? 'codex login' : 'claude auth login'} in Terminal, then refresh.`;
+      error.textContent = provider.available && provider.authenticated ? provider.error
+        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is not available on this Mac.`;
       group.append(error);
+      if (!provider.available || !provider.authenticated) {
+        const connect = document.createElement('button');
+        connect.type = 'button';
+        connect.className = 'account-connect';
+        connect.textContent = `Connect ${providerLabel(provider.id)}`;
+        connect.addEventListener('click', () => {
+          setModelMenu(false);
+          $('account-title').textContent = `Connect ${providerLabel(provider.id)}`;
+          $('account-instructions').replaceChildren(...[...$('welcome-account-steps').children]
+            .filter(node => node.tagName !== 'SUMMARY' && (!node.dataset.provider || node.dataset.provider === provider.id))
+            .map(node => node.cloneNode(true)));
+          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
+          $('account-dialog').showModal();
+        });
+        group.replaceChildren(connect);
+      }
     }
     $('model-options').append(group);
   }
@@ -274,7 +305,10 @@ function acceptProviders(providers) {
 function setModelMenu(open, focus = false) {
   $('model-menu').hidden = !open;
   $('model-button').setAttribute('aria-expanded', String(open));
-  if (open) renderModels();
+  if (open) {
+    $('inference-options').open = false;
+    renderModels();
+  }
   if (open && focus) {
     const options = [...$('model-options').querySelectorAll('.model-option:not(:disabled)')];
     (options.find((item) => item.classList.contains('selected')) || options[0] || $('refresh-models')).focus();
@@ -310,11 +344,14 @@ function setControl(on) {
 }
 
 function applyProfile() {
-  $('greeting-name').textContent = state.profile.name.trim() || 'there';
+  const name = state.profile.name.trim();
+  $('greeting-name').textContent = name ? `, ${name}` : '';
   $('open-profile').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
 }
 
 function appendMessage(message) {
+  const repeatedContext = message.role === 'user' && message.contextTitle === lastContextTitle && !Array.isArray(message.sourceMetadata);
+  if (message.role === 'user') lastContextTitle = message.contextTitle || '';
   const article = document.createElement('article');
   article.className = `message ${message.role}`;
   article.setAttribute('aria-label', message.role === 'user' ? 'You' : 'Breezer');
@@ -323,6 +360,7 @@ function appendMessage(message) {
   if (message.role === 'assistant') {
     const heading = document.createElement('div');
     heading.className = 'assistant-heading';
+    if ($('messages').querySelector('.message.assistant')) heading.classList.add('sr-only');
     const logo = document.createElement('img');
     logo.src = 'icon128.png';
     logo.alt = '';
@@ -339,6 +377,7 @@ function appendMessage(message) {
       body.append(thinking);
     }
   } else body.textContent = message.text;
+  linkResearchCitations(body, message.citations);
   article.append(body);
   if (message.attachments?.length) {
     const files = document.createElement('div');
@@ -349,13 +388,64 @@ function appendMessage(message) {
   if (message.contextTitle) {
     const meta = document.createElement('div');
     meta.className = 'message-meta context-meta';
+    if (repeatedContext) { meta.classList.add('sr-only'); article.title = `Included context: ${message.contextTitle}`; }
     meta.textContent = message.contextTitle;
+    if (Array.isArray(message.sourceMetadata)) renderSourceMetadata(meta, message.sourceMetadata);
     article.append(meta);
   }
   $('messages').append(article);
   messageNodes.set(message.id, body);
   $('welcome').hidden = true;
   return body;
+}
+
+function linkResearchCitations(body, sources) {
+  // Decorate completed research replies without changing the shared stream parser.
+  if (!sources?.length) return;
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (!walker.currentNode.parentElement.closest('code, pre, a')) nodes.push(walker.currentNode);
+  for (const node of nodes) {
+    const parts = []; let start = 0;
+    for (const match of node.textContent.matchAll(/\[S(\d+)\]/g)) {
+      const source = sources.find(source => source.sourceId === `S${match[1]}`);
+      if (!source || !/^https?:\/\//.test(source.url)) continue;
+      const between = node.textContent.slice(start, match.index);
+      parts.push(document.createTextNode(parts.length && !between.trim() ? ', ' : between));
+      const link = document.createElement('a');
+      link.textContent = `Source ${match[1]}`; link.href = source.url;
+      link.title = source.title || link.textContent;
+      link.target = '_blank'; link.rel = 'noopener noreferrer'; link.className = 'citation';
+      parts.push(link); start = match.index + match[0].length;
+    }
+    if (parts.length) node.replaceWith(...parts, document.createTextNode(node.textContent.slice(start)));
+  }
+}
+
+function renderSourceMetadata(meta, sources) {
+  meta.classList.remove('sr-only');
+  const unavailable = sources.filter(source => source.status !== 'available').length;
+  const details = document.createElement('details');
+  details.className = 'source-details';
+  details.open = unavailable > 0;
+  const summary = document.createElement('summary');
+  summary.textContent = `${sources.length} sources${unavailable ? ` · ${unavailable} unavailable` : ''}`;
+  details.append(summary);
+  const list = document.createElement('ul');
+  for (const source of sources) {
+    const row = document.createElement('li');
+    row.dataset.state = source.status;
+    const title = document.createElement('span');
+    title.className = 'source-title';
+    title.textContent = `${source.sourceId.slice(1)} · ${source.title || 'Source'}`;
+    title.title = source.url;
+    const status = document.createElement('small');
+    status.textContent = source.status === 'available'
+      ? `${source.capturedCharacters} characters${source.truncated ? ' · Truncated' : ''}`
+      : `Unavailable · ${source.error}`;
+    row.append(title, status); list.append(row);
+  }
+  details.append(list); meta.replaceChildren(details);
 }
 
 function recentMessages(limit) {
@@ -410,12 +500,12 @@ function renderDelta() {
 
 // A failed or empty reply can be reused, but only by putting it back in the composer.
 // Nothing is resent, and browser control stays off until the user turns it on again.
-function offerRetry(run) {
+function offerRetry(run, failed = true) {
   const body = run && messageNodes.get(run.assistantId);
   const original = run && state.messages.find((item) => item.id === run.id);
   if (!body || !original || body.parentElement.querySelector('.retry-button')) return;
   const article = body.parentElement;
-  article.classList.add('failed');
+  article.classList.toggle('failed', failed);
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'retry-button';
@@ -442,6 +532,11 @@ function offerRetry(run) {
   button.scrollIntoView({ block: 'nearest' });
 }
 
+function activityLabel(label) {
+  const sharing = state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? 'Page + screenshot' : '';
+  $('activity-label').textContent = sharing ? `${sharing} · ${label}` : label;
+}
+
 function finish(label, keepControl = false) {
   if (state.running) {
     state.running.renderer?.dispose();
@@ -451,6 +546,7 @@ function finish(label, keepControl = false) {
       message.text = label || 'Response stopped.';
       renderMessage(messageNodes.get(message.id), message.text);
     } else if (message) renderMessage(messageNodes.get(message.id), message.text);
+    if (message) linkResearchCitations(messageNodes.get(message.id), message.citations);
     state.running.message = null;
   }
   state.running = null;
@@ -459,7 +555,7 @@ function finish(label, keepControl = false) {
   updateControls();
   saveConversation();
   // The stop button turns into a disabled send button; keep keyboard focus in the composer.
-  if (document.activeElement === $('send') || document.activeElement === $('activity-stop') || document.activeElement === document.body) $('prompt').focus();
+  if (document.activeElement === $('send') || document.activeElement === document.body) $('prompt').focus();
 }
 
 function stop() {
@@ -468,7 +564,7 @@ function stop() {
   const replied = Boolean(state.messages.find((item) => item.id === run.assistantId)?.text);
   post({ type: 'cancel', id: run.id });
   finish('Stopped.');
-  if (!replied) offerRetry(run);
+  if (!replied) offerRetry(run, false);
 }
 
 // The reason is shown in the reply itself, so it is only announced, not repeated in the notice bar.
@@ -477,13 +573,32 @@ function fail(reason, label) {
   notify('');
   $('announcer').textContent = label;
   finish(label);
+  const body = run && messageNodes.get(run.assistantId);
+  if (body && reason && !label.includes(reason)) {
+    const details = document.createElement('details');
+    details.className = 'error-details';
+    const summary = document.createElement('summary');
+    summary.textContent = 'Error details';
+    const text = document.createElement('p');
+    text.textContent = reason;
+    details.append(summary, text);
+    body.parentElement.append(details);
+  }
   offerRetry(run);
+}
+
+function providerFailureSummary(reason) {
+  if (/rate[ _-]*limit|quota|usage limit|\b429\b/i.test(reason)) return 'Your account has reached a provider limit. Wait for it to reset before retrying.';
+  if (/unauthori[sz]ed|authentication|not signed in|sign[ -]in|\b401\b/i.test(reason)) return 'The provider could not verify your account. Check its sign-in, then try again.';
+  if (/timed? out|timeout|deadline exceeded/i.test(reason)) return 'The provider took too long to reply. Try again.';
+  if (/ECONNREFUSED|ENETUNREACH|network error|connection (?:failed|closed|refused)|fetch failed/i.test(reason)) return 'The connection to your provider failed. Check your connection, then try again.';
+  return 'The assistant could not complete this response.';
 }
 
 function revealPanel() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   document.querySelector('.panel').animate(
-    [{ opacity: 0, transform: 'translateX(6px)' }, { opacity: 1, transform: 'translateX(0)' }],
+    [{ transform: 'translateX(2px)' }, { transform: 'translateX(0)' }],
     { duration: 120, easing: 'ease-out' },
   );
 }
@@ -496,7 +611,7 @@ async function send() {
   if (text && !selected) {
     const connected = state.providers.some((item) => item.available && item.authenticated);
     notify(state.discoveryPending ? 'Still checking your Codex and Claude accounts. Send again in a moment.'
-      : connected ? 'Choose a connected model to send this message.' : 'Sign in to Codex or Claude to send this message. Your text is still here.');
+      : connected ? 'Choose a connected model to send this message.' : '');
     if (!state.discoveryPending) setModelMenu(true, true);
     return;
   }
@@ -525,7 +640,7 @@ async function send() {
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
-  $('activity-label').textContent = state.control ? 'Getting ready to help' : 'Thinking';
+  activityLabel(state.control ? 'Getting ready to help' : 'Thinking');
   updateControls();
   scrollToBottom();
   let sources;
@@ -538,8 +653,10 @@ async function send() {
       if (state.running?.id !== id) return;
       const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
       userMessage.contextTitle = summary;
+      userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
+      assistantMessage.citations = userMessage.sourceMetadata;
       const meta = messageNodes.get(id)?.parentElement.querySelector('.context-meta');
-      if (meta) meta.textContent = summary;
+      if (meta) renderSourceMetadata(meta, userMessage.sourceMetadata);
       if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');
     } catch (error) {
       if (state.running?.id === id) fail(error.message, `Could not read selected sources. ${error.message}`);
@@ -576,21 +693,26 @@ function receive(message) {
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
     if (!state.running) return notify(reason);
-    fail(reason, `Could not finish this response. ${reason}`);
+    fail(reason, providerFailureSummary(reason));
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
     reply.text += message.text || '';
     renderDelta();
-  } else if (message.type === 'complete') finish(undefined, !message.cancelled);
+  } else if (message.type === 'complete') {
+    const run = state.running;
+    const empty = run && !run.message.text;
+    finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);
+    if (empty && !message.cancelled) offerRetry(run);
+  }
   else if (message.type === 'activity' && state.running) {
     $('activity').hidden = !message.active;
-    $('activity-label').textContent = message.label || 'Working in this tab';
+    activityLabel(message.label || 'Working in this tab');
   }
 }
 
 function resizePrompt() {
   $('prompt').style.height = 'auto';
-  $('prompt').style.height = `${Math.min(160, Math.max(53, $('prompt').scrollHeight))}px`;
+  $('prompt').style.height = `${Math.min(160, Math.max(24, $('prompt').scrollHeight))}px`;
   updateControls();
 }
 
@@ -663,7 +785,6 @@ $('prompt').addEventListener('keydown', (event) => {
     if (!state.running) send();
   }
 });
-$('activity-stop').addEventListener('click', stop);
 $('close-panel').addEventListener('click', async () => {
   stop();
   try { await chrome.sidePanel.close({ windowId: state.windowId }); }
@@ -677,9 +798,29 @@ $('context-toggle').addEventListener('click', () => {
   updateControls();
 });
 $('control-toggle').addEventListener('click', () => {
+  $('control-toggle').dataset.tipDismissed = 'true';
   setControl(!state.control);
   notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
+});
+function positionControlTip() {
+  const trigger = $('control-toggle').getBoundingClientRect();
+  const footer = document.querySelector('.context-row').getBoundingClientRect();
+  const tip = $('control-tip');
+  const center = trigger.left + trigger.width / 2 - footer.left;
+  const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));
+  tip.style.left = `${left}px`;
+  tip.style.bottom = `${footer.bottom - trigger.top + 8}px`;
+  tip.style.setProperty('--tip-pointer', `${center - left}px`);
+}
+for (const type of ['pointerenter', 'focus']) $('control-toggle').addEventListener(type, positionControlTip);
+addEventListener('resize', positionControlTip);
+const resetControlTip = () => {
+  if (!$('control-toggle').matches(':hover, :focus-visible')) delete $('control-toggle').dataset.tipDismissed;
+};
+for (const type of ['pointerleave', 'blur']) $('control-toggle').addEventListener(type, resetControlTip);
+$('control-toggle').addEventListener('keydown', event => {
+  if (event.key === 'Escape') $('control-toggle').dataset.tipDismissed = 'true';
 });
 document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => {
   $('prompt').value = button.dataset.prompt;
@@ -698,6 +839,7 @@ $('new-chat').addEventListener('click', () => {
   state.attachments = [];
   renderAttachments();
   state.messages = [];
+  lastContextTitle = null;
   messageNodes.clear();
   $('messages').replaceChildren();
   $('welcome').hidden = false;
@@ -711,7 +853,7 @@ $('new-chat').addEventListener('click', () => {
 $('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
 $('model-menu').addEventListener('keydown', (event) => {
   if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
-  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')];
+  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')].filter(button => button.checkVisibility());
   const index = options.indexOf(document.activeElement);
   if (index < 0) return;
   event.preventDefault();
@@ -722,12 +864,48 @@ $('model-menu').addEventListener('focusout', (event) => {
 });
 $('welcome-action').addEventListener('click', () => {
   if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);
+  else if (!$('welcome-account-steps').open) {
+    $('welcome-account-steps').open = true;
+    $('welcome-account-steps').querySelector('summary').focus();
+    renderWelcomeStatus(selectedModel());
+  }
   else refreshModels();
 });
+$('welcome-account-steps').addEventListener('toggle', () => renderWelcomeStatus(selectedModel()));
+document.addEventListener('click', async event => {
+  const button = event.target.closest('[data-copy-command]');
+  if (!button) return;
+  const command = button.parentElement.querySelector('code');
+  try {
+    await navigator.clipboard.writeText(command.textContent);
+    button.textContent = 'Copied';
+    const feedback = button.parentElement.querySelector('.copy-feedback');
+    if (feedback) feedback.remove();
+    $('announcer').textContent = 'Sign-in command copied.';
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(command);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    button.textContent = 'Copy';
+    let feedback = button.parentElement.querySelector('.copy-feedback');
+    if (!feedback) {
+      feedback = document.createElement('small');
+      feedback.className = 'copy-feedback';
+      feedback.setAttribute('role', 'status');
+      button.parentElement.append(feedback);
+    }
+    feedback.textContent = 'Use your keyboard to copy.';
+  }
+});
+$('close-account').addEventListener('click', () => $('account-dialog').close());
+$('account-dialog').addEventListener('close', () => $('model-button').focus());
+$('refresh-accounts').addEventListener('click', () => { $('account-dialog').close(); refreshModels(); });
 $('reasoning-select').addEventListener('change', saveSettings);
 $('speed-select').addEventListener('change', () => {
   saveSettings();
-  notify($('speed-select').value === 'fast' ? 'Fast uses more of your Codex allowance. Availability depends on your account.' : '');
+  $('speed-note').hidden = $('speed-select').value !== 'fast';
 });
 $('refresh-models').addEventListener('click', refreshModels);
 document.addEventListener('click', (event) => {

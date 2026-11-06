@@ -8,12 +8,13 @@
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
-  <a class="settings-link" href="workspace.html#/settings" aria-label="Breezer settings" title="Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></a>
+  <a class="settings-link" href="workspace.html#/settings" aria-label="Breezer settings" title="Settings"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg><span>Settings</span></a>
 
   <header class="sky">
     <h1 id="today" class="today">New tab</h1>
     <nav class="sites-nav" aria-label="Frequently visited sites">
       <ol id="sites" class="sites" aria-busy="true"></ol>
+      <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
       <div class="shortcut-feedback"><span id="shortcut-status" role="status" aria-live="polite"></span><button id="shortcut-undo" type="button" hidden>Undo</button><button id="sites-reset" type="button" hidden>Restore shortcuts</button></div>
       <form id="shortcut-add" class="shortcut-add" popover="auto" role="dialog" aria-labelledby="shortcut-add-title" novalidate>
         <h2 id="shortcut-add-title">Add shortcut</h2>
@@ -26,27 +27,31 @@
           <button type="submit" disabled>Add</button>
         </div>
       </form>
-      <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
     </nav>
   </header>
 
   <main class="sheet">
-    <section id="organato" class="organato" aria-labelledby="organato-title" aria-busy="true">
+    <section id="organato" class="organato" data-state="loading" aria-labelledby="organato-title" aria-busy="true">
       <div class="organato-head">
         <h2 id="organato-title" class="organato-title">Coming up in Organato</h2>
-        <button id="refresh" class="refresh" type="button" title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
+        <button id="refresh" class="refresh" type="button" hidden title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
       </div>
 
       <p id="organato-status" class="organato-status" role="status" aria-live="polite">Loading your exams, assignments and to-dos…</p>
       <p id="organato-action" class="organato-action" hidden></p>
 
+      <div class="lanes agenda-skeleton" aria-hidden="true">
+        <div class="skeleton-lane"><i></i><span></span><span></span><span></span></div>
+        <div class="skeleton-lane"><i></i><span></span><span></span><span></span></div>
+      </div>
+
       <div id="organato-lists" class="lanes" hidden>
         <section class="lane lane-upcoming" aria-labelledby="lane-upcoming">
-          <h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3>
+          <div class="lane-heading"><h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3><a class="todos-jump" href="#lane-todos">To-dos</a></div>
           <ol class="items" data-list="upcoming"></ol>
         </section>
         <section class="lane lane-todos" aria-labelledby="lane-todos">
-          <h3 id="lane-todos" class="lane-title">To-dos <span class="lane-count" data-count="todos"></span></h3>
+          <h3 id="lane-todos" class="lane-title" tabindex="-1">To-dos <span class="lane-count" data-count="todos"></span></h3>
           <ol class="items" data-list="todos"></ol>
         </section>
       </div>

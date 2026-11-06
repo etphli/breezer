@@ -1,3 +1,6 @@
 # Unified patches contain required context prefixes on otherwise empty lines.
 features/ai/native-ui/*.patch whitespace=-blank-at-eol
 features/storage/code-sign-clones/*.patch whitespace=-blank-at-eol
+# Raw TAP diagnostics retain the test runner's blank-line indentation.
+docs/evidence/ui-polish/candidate/checks/*.log whitespace=-blank-at-eol
+docs/evidence/ui-polish/candidate/release-1.2.5/*.log whitespace=-blank-at-eol

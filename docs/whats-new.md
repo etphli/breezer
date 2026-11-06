@@ -12,6 +12,7 @@ chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/whats-new.html
 | --- | --- |
 | `whats-new.html` | Feature copy, patch sections and local illustrations. |
 | `whats-new.css` | Cream palette, layout, artwork, focus, forced colors and reduced motion. |
+| `efficiency.html` | Linked measurement article, comparison tables and methodology. Reuses `whats-new.css`. |
 | `whats-new.js` | Reads `RELEASE_VERSION`, sets the masthead/title with `textContent`, closes this tab on Continue browsing and handles close refusal. |
 | `release-info.js` | Published version and derived minor-page version. For example, `1.1.2` maps to `1.1.0`. |
 | `release-notes.js` | Opens the page once per minor release in a regular window, deduplicates existing tabs and records `breezer.releaseNotesSeen`. Private windows are excluded. A brand-new profile gets the setup guide (`workspace.html#/welcome`) instead and skips the current notes; see [workspace.md](workspace.md#first-run-setup). |
@@ -20,6 +21,8 @@ chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/whats-new.html
 ## Template and release workflow
 
 Use [templates/whats-new-release.md](templates/whats-new-release.md) for the authoring template and checklist. The live HTML and CSS are the canonical visual template, so copy their structure rather than maintaining another full stylesheet.
+
+Keep each primary feature's heading and short introduction in `.feature-copy`, beside its illustration. Use a single-column `.feature-secondary` for supporting technical notes; keep their heading, introduction and disclosure stable when expanded. Put optional `.feature-details` directly inside the `.feature` article, after the introduction and illustration. The disclosure spans both columns so expanded explanations have a readable line length without leaving a tall empty illustration column. Use short `h4` subheadings inside long disclosures. The page index marks the section currently being read without changing keyboard focus.
 
 For a new `1.x.0` edition, replace the previous edition's feature and patch content with the new release's illustrated feature rows. Keep the shell, version hooks, actions, accessibility and known-limitations section. Historical editions remain in Git tags and published release evidence. The stable URL stays the same; a new edition does not require another browser route.
 
@@ -33,12 +36,12 @@ Each patch has a `.patch-lead` row for its main illustration and related notes, 
 
 A patch may add a second `.patch-pair` and end with a `.patch-limit` block that states what keeps its normal behavior or what the change cannot promise.
 
-The 1.2.0 draft has ten illustrated rows. Its first six cover the setup guide, custom shortcuts, Organato task links, sidebar snapshot ordering, idle helpers and storage cleanup. Additional rows come from accepted merged features:
+The 1.2.0 draft has seven illustrated primary rows and three compact technical notes. Its first six entries cover the setup guide, custom shortcuts, Organato task links, sidebar snapshot ordering, idle helpers and storage cleanup. Additional rows come from accepted merged features:
 
 - PR #7 adds limited native passkey-management guidance and retains the Apple signing limitation. It does not announce Touch ID, Apple Passwords or complete platform enrollment.
 - PR #8 adds research across at most six explicitly selected, text-only page sources, separate from browser control. Citation quality depends on the model. Text exclusions are heuristic, not universal secret detection.
 - PR #9 adds page translation with a running local LibreTranslate server or the user's own LibreTranslate.com key, with confirmation before sharing text. It does not claim bundled models, AI-account access or general translation quality.
-- PR #10 adds the settings category list, search and Other destination for full browser settings. Translation mounts under Languages, passwords/passkeys stay under Passwords and Sync stays hidden until its module mounts.
+- PR #10 adds the settings category list, search and All settings destination for full browser settings. Translation mounts under Translation, passwords/passkeys stay under Passwords and Sync stays hidden until its module mounts.
 
 The shortcut row also includes merged PR #11: sidebar favorite/pin number slots open only the selected page lazily, reuse it on repeat and preserve native fallback, top/private and Command+9 behavior. Its native workspace fingerprint changes. Source and isolated-world fixtures do not prove physical macOS key dispatch.
 
@@ -48,15 +51,15 @@ PR #13's narrow native Enter fallback also merged after explicit user instructio
 
 Merged PR #14 adds persistent Organato opt-out to the setup row and fully removes the disabled Organato sheet in the task-links row. Its native acceptance must confirm storage changes reaching real open new tabs and no helper process launch while off. The switch mirror is `organato.switches.v1` with `enabled` and `dashboardEnabled`; it is a fast-path copy of helper settings, not a second source of truth. AI-sidebar Organato behavior stays unchanged.
 
-The merged feature batch is now included in the completed combined PC compilation. Native invocation and feature-specific acceptance remain separate gates, including the Settings command through the hub to Other. Sync PR #6 is merged and its native files compile; encrypted two-profile/password acceptance remains pending, so working sync stays outside shipped claims.
+The merged feature batch is now included in the completed combined PC compilation. Native invocation and feature-specific acceptance remain separate gates, including the Settings command through the hub to All settings. Sync PR #6 is merged and its native files compile; encrypted two-profile/password acceptance remains pending, so working sync stays outside shipped claims.
 
-The fuller performance/lifecycle details and the post-build benchmark workflow are mapped in [the 1.2.0 inventory](release-1.2.0-inventory.md). After final combined-artifact measurements, put the strongest supported findings and a complete results table before the feature rows. Keep workloads, comparators, units, conditions, regressions and unavailable results explicit; do not promote old component measurements or compilation throughput into browser claims.
+The fuller performance/lifecycle details and the post-build benchmark workflow are mapped in [the 1.2.0 inventory](release-1.2.0-inventory.md). After final combined-artifact measurements, retain the strongest supported findings and the complete results table in the measurements disclosure after the feature tour. Keep workloads, comparators, units, conditions, regressions and unavailable results explicit; do not promote old component measurements or compilation throughput into browser claims.
 
 The setup illustration follows the real guide's step sequence and links to `workspace.html#/welcome`. The storage illustration distinguishes active, ended and older sessions. Keep descriptions beside the artwork so their meaning remains available to screen readers. Earlier editions and patch drawings remain in Git history.
 
-Release preparation now sets the extension, native display and packaged app version to 1.2.0 from `release-info.js`. The browser fixture also verifies that edition. The benchmarked private candidate predates that final version stamp and remains labelled with its actual metadata. The managed performance candidate includes the prepared ad-block-list experiment; retain that release note only if the final build enables it and passes its promotion checks. Feature acceptance, signature-copy cleanup and the final versioned release artifact remain separate checks.
+Release preparation now sets the extension, native display and packaged app version to 1.2.5 from `release-info.js`. The page edition remains 1.2.0. The browser fixture verifies the current version, and the 1.2.5 illustrated patch describes the complete interface overhaul in grouped details while preserving the 1.2.1 notes. The benchmarked private candidate predates this version stamp and remains labelled with its actual metadata. The managed performance candidate includes the prepared ad-block-list experiment; retain that release note only if the final build enables it and passes its promotion checks. Feature acceptance, signature-copy cleanup and the final versioned release artifact remain separate checks.
 
-The results section follows the masthead. Its headline charts show selected measured wins with exact comparators; a closed Full results section retains all 11 browser measurements, component results, regressions and unavailable values. `efficiency.html` is a separate, read-only article linked from the update log. It reuses `whats-new.css`; the extension now fills all 50 reserved resource slots. Adding another resource requires revisiting that allocation.
+The feature tour follows the masthead; the results section follows the features and precedes patch notes. A closed measurements section keeps detailed charts and methodology available after the feature tour. Its headline charts show selected measured wins with exact comparators; Full results retains all 11 browser measurements, component results, regressions and unavailable values. `efficiency.html` is a separate, read-only article linked from the update log. It reuses `whats-new.css`; the extension now fills all 50 reserved resource slots. Adding another resource requires revisiting that allocation.
 
 ## Page contract
 
@@ -78,6 +81,6 @@ node --test tests/ai/whats-new.test.mjs tests/ai/release-notes.test.mjs
 BREEZER_AI_EVIDENCE=/tmp/breezer-whats-new node --test tests/ai/whats-new-browser.test.mjs
 ```
 
-The browser fixture uses headless Chrome, synthetic release metadata and a stub for tab-closing APIs. It checks desktop and 390px layouts, contrast, keyboard focus, action fallbacks, reduced motion and malformed metadata. Inspect its full-page screenshots, including every new illustration. Report skips as missing coverage.
+The browser fixture uses headless Chrome, synthetic release metadata and a stub for tab-closing APIs. It checks desktop and 390px layouts, contrast, keyboard focus, action fallbacks, reduced motion and malformed metadata. Inspect its overlapping viewport screenshots and scroll-position indexes, including every new illustration and the expanded technical disclosures. A single very tall HiDPI capture can repeat compositor tiles. Report skips as missing coverage.
 
 These checks do not verify the compiled extension or updater. A release also needs the native build, actual-app checks and artifact verification in [RELEASE_POLICY.md](../RELEASE_POLICY.md). Native acceptance must respect the local-install hold.

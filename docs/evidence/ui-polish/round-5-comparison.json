@@ -1,0 +1,121 @@
+[
+  {
+    "id": "settings",
+    "title": "Settings hierarchy",
+    "file": "settings-redesign-browser-dark.png",
+    "notes": [
+      [
+        85,
+        7,
+        47,
+        5,
+        "The current category is a clear page title."
+      ],
+      [
+        86,
+        43,
+        48,
+        59,
+        "Related browser destinations are grouped by purpose."
+      ]
+    ]
+  },
+  {
+    "id": "assistant",
+    "title": "Assistant while working",
+    "file": "sidebar-working.png",
+    "notes": [
+      [
+        82,
+        39,
+        58,
+        44,
+        "Repeated page titles no longer interrupt each short exchange."
+      ],
+      [
+        83,
+        72,
+        76,
+        91,
+        "One Stop control remains beside the draft. Source and model options stay quiet while working."
+      ]
+    ]
+  },
+  {
+    "id": "accounts",
+    "title": "Account connection",
+    "file": "sidebar-signed-out-narrow.png",
+    "notes": [
+      [
+        84,
+        19,
+        38,
+        43,
+        "Refresh accounts is the primary action."
+      ],
+      [
+        81,
+        72,
+        50,
+        88,
+        "The saved draft has a quieter treatment while signed out."
+      ]
+    ]
+  },
+  {
+    "id": "organato",
+    "title": "Organato setup",
+    "file": "onboarding-6-organato-optout-failed-narrow.png",
+    "notes": [
+      [
+        85,
+        14,
+        51,
+        21,
+        "The full illustration stays, at a smaller size."
+      ],
+      [
+        83,
+        47,
+        53,
+        48,
+        "Shorter explanations keep the connection choices and recovery message clear."
+      ]
+    ]
+  },
+  {
+    "id": "release",
+    "title": "Release details",
+    "file": "whats-new-results.png",
+    "notes": [
+      [
+        87,
+        63,
+        40,
+        80,
+        "Additional browser comparisons open on request."
+      ],
+      [
+        86,
+        95,
+        53,
+        97,
+        "Full measurements, regressions and limits remain available."
+      ]
+    ]
+  },
+  {
+    "id": "actions",
+    "title": "Settings actions",
+    "file": "mint-light-settings-assistant-enabled-narrow.png",
+    "notes": [
+      [
+        85,
+        42,
+        50,
+        54,
+        "Save has its own row. Disable and Clear activity stay together."
+      ]
+    ]
+  }
+]

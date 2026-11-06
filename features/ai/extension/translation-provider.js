@@ -35,7 +35,15 @@ export async function providerRequest(prefs, path, { texts, source, target, sign
     throw new Error(prefs.provider === 'local' ? 'Cannot reach local LibreTranslate at localhost:5000. Start your server, then retry.' : 'LibreTranslate.com could not be reached. Check your connection, then retry.');
   }
   if (!response.ok) {
-    const message = { 400: 'The provider rejected this language pair or API key.', 401: 'The provider requires a valid API key.', 403: 'The provider refused this API key.', 429: 'Translation rate limit reached. Wait before retrying.' }[response.status];
+    if (response.status === 429) {
+      const now = Date.now();
+      const retry = response.headers.get('Retry-After')?.trim() || '';
+      const requested = /^\d+$/.test(retry) ? now + Number(retry) * 1000 : Date.parse(retry);
+      throw Object.assign(new Error('Translation rate limit reached. Wait before retrying.'), {
+        retryAt: Number.isFinite(requested) && requested > now ? Math.min(requested, now + 86400000) : now + 30000,
+      });
+    }
+    const message = { 400: 'The provider rejected this language pair or API key.', 401: 'The provider requires a valid API key.', 403: 'The provider refused this API key.' }[response.status];
     throw new Error(message || `Translation provider failed (HTTP ${response.status}). Retry later.`);
   }
   // Bound responses before parsing; never display provider error bodies or credentials.

@@ -34,131 +34,8 @@
          presentation-data.json; saved-tab records: build/benchmark-1.2.0-components-20261101/
          results.json. Bar widths are each median over the largest in its comparison.
          The efficiency article is its own page, efficiency.html, linked from here. -->
-    <section class="results" aria-labelledby="results-title">
-      <h2 id="results-title">Measured against Chrome and the previous Breezer</h2>
-      <p class="results-lede">We timed a pre-release Breezer 1.2.0 build beside the previous Breezer and Chrome 156. Two measurements improved in this build, and two leads over Chrome carried over from before. <a href="#results-table">See the full results</a>, including slower and unavailable measurements.</p>
 
-      <h3 class="results-group">New in this build</h3>
-      <div class="readings">
-        <article class="reading reading-wide" aria-labelledby="r-first-load">
-          <div class="reading-copy">
-            <h4 id="r-first-load">First local page after opening tabs: 63.5% less time than the previous Breezer</h4>
-            <p>After each launch the test opens and switches tabs, then loads a small local page three times. The first of those loads took 262.2 ms instead of 717.4 ms (medians of 6 launches). Chrome took 52.4 ms on the same workload, so it is still quicker here.</p>
-          </div>
-          <div class="reading-chart">
-            <ul class="bars">
-              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="36.55%" height="100%" rx="4"/></svg> <span class="bar-value">262.2 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">717.4 ms</span></li>
-            </ul>
-          </div>
-        </article>
-        <article class="reading reading-wide" aria-labelledby="r-saved-records">
-          <div class="reading-copy">
-            <h4 id="r-saved-records">Saved-tab records: restoring 1,000 took 2.90 ms instead of 189.96 ms</h4>
-            <p>A separate synthetic test of the sidebar’s workspace code, comparing the previous Breezer code with the 1.2.0 candidate code. Building the sidebar model for the same records took 0.187 ms instead of 3.299 ms. It times this code alone, not 1,000 open tabs or overall browser speed.</p>
-          </div>
-          <div class="reading-chart">
-            <p class="bars-caption">Restore 1,000 records</p>
-            <ul class="bars" aria-label="Restore 1,000 records">
-              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="1.53%" height="100%" rx="4"/></svg> <span class="bar-value">2.90 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">189.96 ms</span></li>
-            </ul>
-            <p class="bars-caption">Build the sidebar model</p>
-            <ul class="bars" aria-label="Build the sidebar model">
-              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="5.66%" height="100%" rx="4"/></svg> <span class="bar-value">0.187 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">3.299 ms</span></li>
-            </ul>
-          </div>
-        </article>
-      </div>
-
-      <h3 class="results-group">Still ahead of Chrome, as before</h3>
-      <div class="readings">
-        <article class="reading" aria-labelledby="r-new-tab">
-          <div class="reading-copy">
-            <h4 id="r-new-tab">New tab: 50.3% less time than Chrome</h4>
-            <p>Breezer’s own new-tab page was ready in 98.8 ms, against 198.7 ms for Chrome’s (medians of 18 tabs). The previous Breezer measured 99.2 ms, so this lead isn’t new in 1.2.</p>
-          </div>
-          <div class="reading-chart">
-            <ul class="bars">
-              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.73%" height="100%" rx="4"/></svg> <span class="bar-value">98.8 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.90%" height="100%" rx="4"/></svg> <span class="bar-value">99.2 ms</span></li>
-              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">198.7 ms</span></li>
-            </ul>
-          </div>
-        </article>
-        <article class="reading" aria-labelledby="r-relaunch">
-          <div class="reading-copy">
-            <h4 id="r-relaunch">Relaunch: 19.5% less time than Chrome</h4>
-            <p>Quitting and reopening a set-up test profile until the page was usable took 861.3 ms, against 1,070.2 ms for Chrome (medians of 6 launches). The previous Breezer measured 846.6 ms, so this lead isn’t new either.</p>
-          </div>
-          <div class="reading-chart">
-            <ul class="bars">
-              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="80.48%" height="100%" rx="4"/></svg> <span class="bar-value">861.3 ms</span></li>
-              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="79.10%" height="100%" rx="4"/></svg> <span class="bar-value">846.6 ms</span></li>
-              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">1,070.2 ms</span></li>
-            </ul>
-          </div>
-        </article>
-      </div>
-      <p class="results-method">Measured on one Apple M1 Mac with 8 GB of memory, 6 rounds per browser. Bars show medians, start at zero and use a separate scale in each comparison. These are selected results for specific workloads, not overall browser speed.</p>
-      <p class="results-article"><a class="button secondary" href="efficiency.html">Read about the efficiency work in 1.2</a></p>
-
-      <details class="full-results">
-        <summary>Full results: all 11 measurements, including slower and unavailable ones</summary>
-        <p>Some results are slower or use more memory than Chrome or the previous Breezer, and two Chrome values couldn’t be measured. Every result is listed here.</p>
-        <div class="table-scroll" role="region" aria-labelledby="results-table" tabindex="0">
-          <table class="results-table">
-            <caption id="results-table">All 11 measurements: medians, with the lowest and highest observation beneath. Lower is better in every row.</caption>
-            <thead><tr><th scope="col">Measurement</th><th scope="col">Breezer 1.2.0 candidate</th><th scope="col">Previous Breezer</th><th scope="col">Chrome 156</th><th scope="col">Result</th></tr></thead>
-            <tbody>
-              <tr class="table-group"><th scope="colgroup" colspan="5">Speed, in milliseconds</th></tr>
-              <tr><th scope="row">Initialized-profile usable startup<span class="measure-note">Launch with a set-up test profile until the page is usable. 6 launches.</span></th><td>742.1 ms<span class="range"><span class="visually-hidden">range </span>712.8–851.2</span></td><td>730.4 ms<span class="range"><span class="visually-hidden">range </span>720.8–762.6</span></td><td>734.9 ms<span class="range"><span class="visually-hidden">range </span>671.0–877.7</span></td><td class="verdict">Within 2% of both</td></tr>
-              <tr><th scope="row">Reused-profile usable startup<span class="measure-note">Quit, then relaunch the same profile until the page is usable. 6 launches.</span></th><td>861.3 ms<span class="range"><span class="visually-hidden">range </span>784.9–990.3</span></td><td>846.6 ms<span class="range"><span class="visually-hidden">range </span>764.0–1,026.2</span></td><td>1,070.2 ms<span class="range"><span class="visually-hidden">range </span>1,010.3–1,754.7</span></td><td class="verdict">19.5% lower than Chrome; similar to previous Breezer</td></tr>
-              <tr><th scope="row">Blank-tab readiness<span class="measure-note">Open an empty tab until it is ready. 18 tabs, 3 per launch.</span></th><td>68.8 ms<span class="range"><span class="visually-hidden">range </span>50.0–228.3</span></td><td>65.0 ms<span class="range"><span class="visually-hidden">range </span>49.4–84.3</span></td><td>66.2 ms<span class="range"><span class="visually-hidden">range </span>41.5–82.8</span></td><td class="verdict">4–6% higher than both</td></tr>
-              <tr><th scope="row">Product new-tab readiness<span class="measure-note">Open the browser’s own new-tab page until it is ready. 18 tabs.</span></th><td>98.8 ms<span class="range"><span class="visually-hidden">range </span>78.1–216.5</span></td><td>99.2 ms<span class="range"><span class="visually-hidden">range </span>81.1–148.9</span></td><td>198.7 ms<span class="range"><span class="visually-hidden">range </span>149.5–249.2</span></td><td class="verdict">50.3% lower than Chrome; same as previous Breezer</td></tr>
-              <tr><th scope="row">Local-page navigation readiness<span class="measure-note">Load the same local test page until it is usable. 18 loads.</span></th><td>48.9 ms<span class="range"><span class="visually-hidden">range </span>31.9–453.0</span></td><td>33.9 ms<span class="range"><span class="visually-hidden">range </span>31.3–792.8</span></td><td>33.1 ms<span class="range"><span class="visually-hidden">range </span>31.1–71.7</span></td><td class="verdict">47.8% higher than Chrome; 44.3% higher than previous Breezer</td></tr>
-              <tr><th scope="row">Local-page loadEventEnd<span class="measure-note">The page’s own load-finished time for those loads. 18 loads.</span></th><td>11.2 ms<span class="range"><span class="visually-hidden">range </span>9.1–416.7</span></td><td>11.5 ms<span class="range"><span class="visually-hidden">range </span>10.4–754.1</span></td><td>6.6 ms<span class="range"><span class="visually-hidden">range </span>5.3–9.8</span></td><td class="verdict">69.7% higher than Chrome; similar to previous Breezer</td></tr>
-              <tr><th scope="row">First local navigation after tab exercises<span class="measure-note">The first of those three loads after each launch’s tab exercises. 6 loads.</span></th><td>262.2 ms<span class="range"><span class="visually-hidden">range </span>154.9–453.0</span></td><td>717.4 ms<span class="range"><span class="visually-hidden">range </span>703.8–792.8</span></td><td>52.4 ms<span class="range"><span class="visually-hidden">range </span>35.5–71.7</span></td><td class="verdict">63.5% lower than previous Breezer; still about 5 times Chrome’s</td></tr>
-            </tbody>
-            <tbody>
-              <tr class="table-group"><th scope="colgroup" colspan="5">Memory, in MiB</th></tr>
-              <tr><th scope="row">One-tab process-tree RSS<span class="measure-note">Resident memory of all browser processes with one tab. 6 launches, 5 samples each.</span></th><td>1,417.6 MiB<span class="range"><span class="visually-hidden">range </span>1,250.9–1,439.4</span></td><td>1,245.5 MiB<span class="range"><span class="visually-hidden">range </span>1,204.0–1,349.8</span></td><td>1,418.3 MiB<span class="range"><span class="visually-hidden">range </span>1,349.5–1,518.0</span></td><td class="verdict">Same as Chrome; 13.8% higher than previous Breezer</td></tr>
-              <tr><th scope="row">Ten-tab process-tree RSS<span class="measure-note">The same with ten tabs open. 6 launches, 5 samples each.</span></th><td>2,756.1 MiB<span class="range"><span class="visually-hidden">range </span>2,658.9–2,837.4</span></td><td>2,560.8 MiB<span class="range"><span class="visually-hidden">range </span>2,524.8–2,652.1</span></td><td>2,515.1 MiB<span class="range"><span class="visually-hidden">range </span>2,426.3–2,568.1</span></td><td class="verdict">9.6% higher than Chrome; 7.6% higher than previous Breezer</td></tr>
-              <tr><th scope="row">One-tab macOS physical footprint<span class="measure-note">Memory macOS charges to the browser’s processes, one tab. 6 launches.</span></th><td>454.8 MiB<span class="range"><span class="visually-hidden">range </span>446.6–484.7</span></td><td>461.3 MiB<span class="range"><span class="visually-hidden">range </span>450.9–472.7</span></td><td class="unavailable">Unavailable</td><td class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
-              <tr><th scope="row">Ten-tab macOS physical footprint<span class="measure-note">The same with ten tabs open. 6 launches.</span></th><td>959.5 MiB<span class="range"><span class="visually-hidden">range </span>946.9–966.1</span></td><td>956.2 MiB<span class="range"><span class="visually-hidden">range </span>952.8–976.4</span></td><td class="unavailable">Unavailable</td><td class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <h3>Saved-tab records code test</h3>
-        <p>This synthetic test runs the sidebar’s workspace code on its own in Node, comparing the previous Breezer code with the 1.2.0 candidate code. It isn’t a measurement of open tabs or the browser.</p>
-        <table class="results-table component-table">
-          <caption>Milliseconds; medians of 6 alternating rounds, 11 repetitions each.</caption>
-          <thead>
-            <tr><td></td><th scope="colgroup" colspan="2">Restore</th><th scope="colgroup" colspan="2">Sidebar model</th></tr>
-            <tr><th scope="col">Records</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th></tr>
-          </thead>
-          <tbody>
-            <tr><th scope="row">10</th><td>0.15</td><td>0.08</td><td>0.007</td><td>0.005</td></tr>
-            <tr><th scope="row">100</th><td>2.53</td><td>0.59</td><td>0.049</td><td>0.028</td></tr>
-            <tr><th scope="row">500</th><td>48.07</td><td>1.72</td><td>0.809</td><td>0.092</td></tr>
-            <tr><th scope="row">1,000</th><td>189.96</td><td>2.90</td><td>3.299</td><td>0.187</td></tr>
-          </tbody>
-        </table>
-        <h3>How this was measured, and what it doesn’t show</h3>
-        <ul class="results-limits">
-          <li>One Apple M1 Mac with 8 GB of memory, macOS 26.7, on AC power with no thermal warning. 6 rounds rotated the launch order: 36 timed launches after 18 untimed setup launches, and all 36 timed launches passed their foreground check.</li>
-          <li>Startups use test profiles that were already set up, then reused. They aren’t cold starts after a reboot, and no caches were flushed.</li>
-          <li>Page loads use the same small local test page in every browser, not real websites over the internet.</li>
-          <li>Process-tree RSS adds up the resident memory of every browser process and can count shared memory more than once. It isn’t the memory Activity Monitor shows. Physical footprint is the memory macOS charges to those processes, including compressed memory.</li>
-          <li>Chrome’s physical footprint is unavailable: 11 of its 60 samples failed process-identity or process-tree checks, and the remaining samples aren’t summarized on their own.</li>
-          <li>CPU use couldn’t be measured: in all 36 sampling windows the CPU time stayed within the counters’ uncertainty. These results make no CPU, energy or battery-life claims.</li>
-          <li>Six rounds give medians and ranges, not statistically significant differences.</li>
-          <li>The candidate is a private ad hoc signed build of the combined 1.2.0 source (snapshot fa19c37); its internal version still reads 0.20.1.1. Its release identity and full feature checks are still pending, so the published release may measure differently.</li>
-        </ul>
-      </details>
-    </section>
-
+    <nav class="page-index" aria-label="On this page"><a href="#features-title">Highlights</a><a href="#patch-125-title">Update 1.2.5</a><a href="#results-title">Measurements</a><a href="#verification-title">Known limits</a></nav>
     <section class="features" aria-labelledby="features-title">
       <h2 id="features-title" class="visually-hidden">New in this release</h2>
 
@@ -207,11 +84,17 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-setup">A setup guide for new profiles</h3>
-          <p>A new profile now opens a short setup guide instead of these notes. Pick the name Breezer AI greets you by, where your tabs sit, a theme color and appearance, then import from Chrome and connect Organato if you use it. A quick tour of the sidebar and the assistant finishes it, and you can skip at any step.</p>
-          <p>Already set up? Open the guide whenever you like with the Setup guide button in Settings.</p>
-          <p>The Organato step has a one-click Don't use Organato button. It saves your choice before moving on, keeps Organato off when you return, and shows Turned off in your setup summary.</p>
+          <p>A short guide helps you choose tabs, appearance, Chrome import and an optional Organato connection.</p>
+          <p class="feature-limit">Skip any step, or reopen the guide in Settings.</p>
           <a class="button secondary" href="workspace.html#/welcome">Open the setup guide</a>
         </div>
+        <details class="feature-details">
+          <summary>Setup choices</summary>
+          <h4>Profile choices</h4>
+          <p>New profiles open this guide. Choose a name, tab layout and appearance, then import from Chrome. Each step can be skipped.</p>
+        <h4>Optional services</h4>
+          <p>Connect Organato, defer it, or choose Don't use Organato to keep it off. The final summary confirms your choice. The five-tip tour is optional.</p>
+        </details>
       </article>
 
       <!-- Shortcuts: the Add tile on the new tab, and its popover offering a
@@ -255,10 +138,16 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-shortcuts">Shortcuts you choose</h3>
-          <p>On a new tab, the Add tile after your sites takes a web address or one of your open tabs. Arrow keys move through the tabs and Enter adds the one you pick. Your shortcuts are saved in this profile on your Mac, and they use the same Remove, Undo and Restore controls as the suggested sites. On a smaller window, the row makes room for them.</p>
-          <p>For sidebar favorites and pins, Command-number shortcuts now open the saved page even when it is asleep. Only the selected page opens, repeated presses reuse it, and favorite slots stay consistent across spaces and restarts.</p>
-          <p>Top tabs, private windows and Command+9 keep their usual numbered-tab behavior. A slot without a saved favorite or pin falls back to the ordinary tab shortcut.</p>
+          <p>Add a website or an open tab to your new-tab shortcuts. Command-number also opens saved favorites and pins.</p>
         </div>
+        <details class="feature-details">
+          <summary>Keyboard and saved shortcuts</summary>
+          <h4>Add a site</h4>
+          <p>Choose Add on a new tab, then enter an address or select an open tab. Arrow keys move through the list; Enter adds the selected tab. Shortcuts stay in this profile on your Mac, with Remove, Undo and Restore controls.</p>
+          <h4>Numbered tab shortcuts</h4>
+          <p>Command-number opens one saved favorite or pin, including asleep pages, and reuses it on repeat. Favorite slots persist across spaces and restarts.</p>
+          <p>Top tabs, private windows and Command+9 keep their usual behavior. An empty favorite or pin slot falls back to the ordinary tab shortcut.</p>
+        </details>
       </article>
 
       <!-- Organato: an Upcoming item linking straight to its own page. -->
@@ -297,152 +186,67 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-tasks">Tasks open where they live</h3>
-          <p>Assignment titles in the new tab's Upcoming list now link to that task's own page in Organato, so one click takes you to the details.</p>
-          <p>With Organato turned off, new tabs show just the date and your shortcuts, with no empty Organato panel or reserved space. Open new tabs update straight away, and the choice survives reloads and restarts.</p>
-          <p>Those new tabs do not start the Organato helper or request Organato data while it is off. Turning it back on restores the panel and fetches fresh data.</p>
+          <p>Open assignments from Upcoming with one click. Turn Organato off for a new tab with only the date and shortcuts.</p>
+          <p class="feature-limit">When off, new tabs make no Organato data requests.</p>
         </div>
+        <details class="feature-details">
+          <summary>Organato behavior</summary>
+          <p>Assignments link to their own Organato page. Turning Organato off removes its panel from open new tabs and survives restarts. Those tabs stop starting its helper and requesting its data. Turning it back on restores the panel and fetches fresh data.</p>
+        </details>
       </article>
 
       <!-- Sidebar: the latest list of tabs is applied; an older one that
            arrives late is ignored, so the closed row stays closed. -->
-      <article class="feature" aria-labelledby="f-sidebar">
-        <figure class="plate plate-art" aria-hidden="true">
-          <svg class="art" viewBox="0 0 320 232" focusable="false">
-            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
-            <rect class="well" x="14" y="14" width="140" height="204" rx="10"/>
-            <circle class="dot" cx="30" cy="35" r="4"/><rect class="bar" x="40" y="33" width="74" height="4" rx="2"/>
-            <rect class="card" x="20" y="48" width="128" height="24" rx="6"/><rect class="accent" x="20" y="53" width="3" height="14" rx="1.5"/>
-            <circle class="s1" cx="30" cy="60" r="4"/><rect class="bar strong" x="40" y="58" width="82" height="4" rx="2"/>
-            <rect class="ghost" x="20.5" y="80.5" width="127" height="23" rx="6"/>
-            <g class="fade-1"><circle class="dot" cx="30" cy="92" r="4"/><rect class="bar strong" x="40" y="90" width="52" height="4" rx="2"/></g>
-            <text class="quiet" x="140" y="95" text-anchor="end">Closed</text>
-            <circle class="dot" cx="30" cy="124" r="4"/><rect class="bar" x="40" y="122" width="64" height="4" rx="2"/>
-            <circle class="dot" cx="30" cy="148" r="4"/><rect class="bar" x="40" y="146" width="88" height="4" rx="2"/>
-            <circle class="dot" cx="30" cy="172" r="4"/><rect class="bar" x="40" y="170" width="56" height="4" rx="2"/>
-
-            <g class="lift">
-              <rect class="card edge" x="186.5" y="28.5" width="117" height="62" rx="9"/>
-            </g>
-            <text class="label" x="198" y="46">Latest tabs</text>
-            <rect class="bar strong" x="198" y="56" width="70" height="4" rx="2"/>
-            <rect class="bar" x="198" y="66" width="82" height="4" rx="2"/>
-            <rect class="bar" x="198" y="76" width="58" height="4" rx="2"/>
-            <path class="stroke-accent" d="M186 60 C 172 60, 170 60, 158 60"/>
-            <path class="stroke-accent" d="M163 55.5 L157.5 60 L163 64.5"/>
-
-            <g class="fade-2">
-              <rect class="paper" x="186.5" y="120.5" width="117" height="72" rx="9"/>
-              <text class="quiet" x="198" y="138">Older, arrived late</text>
-              <rect class="bar" x="198" y="148" width="70" height="4" rx="2"/>
-              <rect class="bar" x="198" y="158" width="52" height="4" rx="2"/>
-              <rect class="bar" x="198" y="168" width="82" height="4" rx="2"/>
-              <rect class="bar" x="198" y="178" width="58" height="4" rx="2"/>
-            </g>
-            <path class="stroke-quiet dash" d="M186 156 C 178 156, 180 128, 176 116"/>
-            <circle class="card" cx="172" cy="106" r="9"/><circle class="stroke-quiet" cx="172" cy="106" r="7"/><path class="stroke-quiet" d="M167 101 l10 10"/>
-            <text class="quiet" x="245" y="212" text-anchor="middle">Ignored</text>
-          </svg>
-        </figure>
+      <article class="feature feature-secondary" aria-labelledby="f-sidebar">
         <div class="feature-copy">
           <h3 id="f-sidebar">No more ghost tabs</h3>
-          <p>A tab you closed could come back to the sidebar when an older list of tabs arrived late, sometimes with an outdated title or the wrong tab highlighted. The sidebar now ignores lists older than what it already shows.</p>
-          <ul class="notes">
-            <li>Restoring a large saved session also takes less work. Matching saved tabs and preparing the sidebar no longer repeatedly scan the whole saved workspace.</li>
-            <li>When one tab changes, the rows that didn't are left as they are. Keyboard focus stays on the existing row instead of being lost to a redraw.</li>
-          </ul>
+          <p>Closed tabs stay closed, and newer titles and selections take priority.</p>
         </div>
+        <details class="feature-details">
+          <summary>Sidebar update details</summary>
+          <p>A tab you closed could come back to the sidebar when an older list of tabs arrived late, sometimes with an outdated title or the wrong tab highlighted. The sidebar now ignores lists older than what it already shows.</p>
+        <ul class="notes">
+          <li>Restoring a large saved session also takes less work. Matching saved tabs and preparing the sidebar no longer repeatedly scan the whole saved workspace.</li>
+          <li>When one tab changes, the rows that didn't are left as they are. Keyboard focus stays on the existing row instead of being lost to a redraw.</li>
+        </ul>
+        </details>
       </article>
 
       <!-- Background helpers: one at work for Settings, two resting. -->
-      <article class="feature" aria-labelledby="f-helpers">
-        <figure class="plate plate-art" aria-hidden="true">
-          <svg class="art" viewBox="0 0 320 232" focusable="false">
-            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
-            <g class="lift">
-              <rect class="card edge" x="20.5" y="18.5" width="279" height="86" rx="12"/>
-            </g>
-            <rect class="bar strong" x="36" y="34" width="64" height="6" rx="3"/>
-            <rect class="box" x="36.5" y="50.5" width="146" height="21" rx="7"/>
-            <text class="secret" x="46" y="64.5">••••••••••</text><rect class="caret" x="108" y="55" width="1.4" height="12"/>
-            <rect class="accent" x="192" y="50" width="94" height="22" rx="11"/>
-            <text class="on-accent" x="239" y="64.5" text-anchor="middle">Check for updates</text>
-            <circle class="mint" cx="41" cy="89" r="4"/><rect class="bar" x="51" y="87" width="104" height="4" rx="2"/>
-
-            <path class="lifeline" d="M80 105 V 140"/>
-            <path class="stroke-accent" d="M160 105 V 140"/>
-            <path class="lifeline" d="M240 105 V 140"/>
-
-            <circle class="asleep" cx="80" cy="162" r="21"/>
-            <path class="stroke-quiet" d="M80 152 l2.6 7.4 l7.4 2.6 l-7.4 2.6 l-2.6 7.4 l-2.6 -7.4 l-7.4 -2.6 l7.4 -2.6 Z"/>
-            <text class="quiet" x="96" y="146">z</text><text class="quiet" x="102" y="139">z</text>
-            <circle class="mint-soft" cx="160" cy="162" r="21"/><circle class="target" cx="160" cy="162" r="24"/>
-            <rect class="stroke-accent" x="151" y="153" width="18" height="18" rx="4"/><path class="stroke-accent" d="M155 162 l3.2 3.2 l6 -6.6"/>
-            <circle class="asleep" cx="240" cy="162" r="21"/>
-            <path class="stroke-quiet" d="M247 162 a7 7 0 1 1 -2.2 -5.1 M247 152.4 v5 h-5"/>
-            <text class="quiet" x="256" y="146">z</text><text class="quiet" x="262" y="139">z</text>
-
-            <text x="80" y="202" text-anchor="middle">Breezer AI</text><text class="quiet" x="80" y="215" text-anchor="middle">Resting</text>
-            <text x="160" y="202" text-anchor="middle">Organato</text><text class="label" x="160" y="215" text-anchor="middle">Working</text>
-            <text x="240" y="202" text-anchor="middle">Updates</text><text class="quiet" x="240" y="215" text-anchor="middle">Resting</text>
-          </svg>
-        </figure>
+      <article class="feature feature-secondary" aria-labelledby="f-helpers">
         <div class="feature-copy">
           <h3 id="f-helpers">Helpers that rest when idle</h3>
-          <ul class="notes">
-            <li>The background helpers behind Breezer AI, Organato and updates now start when something needs them and close once they've been idle, rather than staying open.</li>
-            <li>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
-            <li>Breezer AI loads its provider code with your first request. Opening Settings or serving Organato requests does not load that code just in case.</li>
-            <li>After Settings has sat quietly for a while, your next action reconnects on its own. What you typed stays in place, and an interrupted change is never resent automatically.</li>
-            <li>An update you've checked for stays ready to install. If the connection drops first, Breezer asks you to check again. The checksum, identity, signature and rollback checks are unchanged.</li>
-          </ul>
+          <p>AI, Organato and update helpers start when needed and close when idle. Your next action reconnects automatically.</p>
+          <p class="feature-limit">Update verification and rollback checks stay in place. Interrupted changes are not resent automatically.</p>
         </div>
+        <details class="feature-details">
+          <summary>Helper lifecycle</summary>
+          <ul class="notes">
+          <li><h4>Start on demand</h4>AI provider code loads with your first AI request, not when you open Settings or use Organato.</li>
+          <li><h4>Shared connection, separate requests</h4>Organato requests from Settings and new tabs share a helper. Each page keeps its own requests, so closing one page does not cancel another page's work.</li>
+          <li><h4>Reconnect safely</h4>Your next action reconnects after an idle period. Drafts stay in place; interrupted changes are never resent automatically.</li>
+          <li>An update you've checked for stays ready to install. If the connection drops first, Breezer asks you to check again. The checksum, identity, signature and rollback checks are unchanged.</li>
+        </ul>
+        </details>
       </article>
 
       <!-- Startup and storage: prepared ad-block lists; and which app copies
            cleanup removes and which it keeps. -->
-      <article class="feature" aria-labelledby="f-storage">
-        <figure class="plate plate-art" aria-hidden="true">
-          <svg class="art" viewBox="0 0 320 232" focusable="false">
-            <rect class="card lift" x="0.5" y="0.5" width="319" height="231" rx="14"/>
-            <line class="rule" x1="160" y1="22" x2="160" y2="210"/>
-
-            <rect class="paper" x="30.5" y="44.5" width="78" height="100" rx="8"/>
-            <rect class="paper" x="38.5" y="36.5" width="78" height="100" rx="8"/>
-            <rect class="card edge lift" x="46.5" y="28.5" width="78" height="100" rx="8"/>
-            <rect class="bar strong" x="56" y="40" width="44" height="5" rx="2.5"/>
-            <rect class="bar" x="56" y="54" width="58" height="4" rx="2"/>
-            <rect class="bar" x="56" y="64" width="48" height="4" rx="2"/>
-            <rect class="bar" x="56" y="74" width="54" height="4" rx="2"/>
-            <rect class="bar" x="56" y="84" width="40" height="4" rx="2"/>
-            <path class="accent" d="M110 104 l17 6.2 v12.4 c0 10 -7.4 16.6 -17 20.4 c-9.6 -3.8 -17 -10.4 -17 -20.4 v-12.4 Z"/>
-            <path class="tick" d="M103.4 122.6 l4.4 4.4 l8.6 -9.4"/>
-            <text x="76" y="174" text-anchor="middle">Lists ready</text>
-            <text class="quiet" x="76" y="188" text-anchor="middle">Custom filters</text>
-            <text class="quiet" x="76" y="200" text-anchor="middle">as before</text>
-
-            <rect class="accent" x="182" y="34" width="30" height="30" rx="8"/>
-            <path class="tick" d="M191.5 48.5 h11 v9 h-11 Z M193.8 48.5 v-2.8 a3.2 3.2 0 0 1 6.4 0 v2.8"/>
-            <text x="224" y="46">In use</text><text class="quiet" x="224" y="59">Kept</text>
-
-            <rect class="ghost" x="188.5" y="92.5" width="29" height="29" rx="8"/>
-            <rect class="card" x="181" y="99" width="31" height="31" rx="8.5"/><rect class="ghost" x="182.5" y="100.5" width="28" height="28" rx="8"/>
-            <path class="stroke-quiet" d="M192 110 l9 9 M201 110 l-9 9"/>
-            <text x="224" y="112">Session ended</text><text class="label" x="224" y="125">Removed</text>
-
-            <rect class="strong-well" x="182" y="160" width="30" height="30" rx="8"/>
-            <circle class="stroke-quiet" cx="197" cy="175" r="7"/><path class="stroke-quiet" d="M197 170.6 v4.4 l3 2"/>
-            <text x="224" y="172">Earlier version</text><text class="quiet" x="224" y="185">Kept</text>
-          </svg>
-        </figure>
+      <article class="feature feature-secondary" aria-labelledby="f-storage">
         <div class="feature-copy">
           <h3 id="f-storage">Less work at startup, less left on disk</h3>
-          <ul class="notes">
-            <li>Breezer can reuse prepared versions of unchanged built-in ad-block lists. Custom filters, list updates and your blocking settings work as before.</li>
-            <li>If a prepared list has changed or cannot be used, Breezer processes it normally instead.</li>
-            <li>While Breezer runs, it keeps a private copy of itself so macOS can still check its signature after an update. Copies left by sessions that have ended are now removed.</li>
-            <li>A copy a running Breezer still holds is never touched, and copies from earlier versions, or whose owner can't be confirmed, are kept.</li>
-          </ul>
+          <p>Breezer can reuse prepared block lists and clean up copies left by ended sessions.</p>
+          <p class="feature-limit">Running copies, older versions and copies with unknown owners are kept.</p>
         </div>
+        <details class="feature-details">
+          <summary>Startup and cleanup</summary>
+          <ul class="notes">
+          <li><h4>Prepared block lists</h4>Breezer can reuse prepared versions of unchanged built-in ad-block lists. Custom filters, list updates and your blocking settings work as before.</li>
+          <li>If a prepared list has changed or cannot be used, Breezer processes it normally instead.</li>
+          <li><h4>Private app copies</h4>While Breezer runs, it keeps a private copy of itself so macOS can still check its signature after an update. Copies left by sessions that have ended are now removed.</li>
+          <li>A copy a running Breezer still holds is never touched, and copies from earlier versions, or whose owner can't be confirmed, are kept.</li>
+        </ul>
+        </details>
       </article>
       <article class="feature" aria-labelledby="f-passkeys">
         <figure class="plate plate-art" aria-hidden="true">
@@ -455,8 +259,8 @@
             <rect class="bar" x="26" y="92" width="88" height="4" rx="2"/>
             <rect class="bar" x="26" y="104" width="72" height="4" rx="2"/>
             <rect class="mint-soft" x="22" y="132" width="112" height="43" rx="8"/>
-            <text class="label" x="32" y="150">Manage local</text>
-            <text class="label" x="32" y="164">passkeys</text>
+            <text class="label" x="32" y="150">Check passkey</text>
+            <text class="label" x="32" y="164">availability</text>
             <path class="stroke-accent dash" d="M137 154 H177"/>
             <path class="stroke-accent" d="M172 149 l6 5 l-6 5"/>
             <rect class="paper lift" x="184.5" y="34.5" width="121" height="164" rx="10"/>
@@ -467,15 +271,19 @@
             <path class="stroke-accent" d="M243 115 h20 M255 115 v6 M262 115 v4"/>
             <rect class="bar" x="196" y="155" width="96" height="4" rx="2"/>
             <rect class="bar" x="196" y="167" width="76" height="4" rx="2"/>
-            <text class="quiet" x="26" y="202">Storage and provider help</text>
+            <text class="quiet" x="26" y="194"><tspan x="26">Storage and</tspan><tspan x="26" dy="14">provider help</tspan></text>
           </svg>
         </figure>
         <div class="feature-copy">
           <h3 id="f-passkeys">Clearer passkey settings</h3>
-          <p>Passwords settings now explains where passkeys are stored and opens native local passkey management.</p>
-          <p>Touch ID and Apple Passwords remain unavailable until Breezer has the required Apple signing entitlements. Saving passwords and importing them from CSV work as before.</p>
-          <p>Password suggestions close in Chromium's usual way again as you type. The Microsoft sign-in Enter behavior remains unconfirmed, as noted below.</p>
+          <p>The Passwords page explains storage and opens the local page to check passkey availability.</p>
+          <p class="feature-limit">Touch ID and Apple Passwords remain unavailable. Saving passwords and CSV import work as before.</p>
         </div>
+        <details class="feature-details">
+          <summary>Password and passkey details</summary>
+          <p>Website passkeys still need Apple-approved signing entitlements. The local page checks availability; it does not enable Touch ID or Apple Passwords.</p>
+          <p>Password suggestions close in Chromium's usual way again as you type. The Microsoft sign-in Enter behavior remains unconfirmed, as noted below.</p>
+        </details>
       </article>
       <article class="feature" aria-labelledby="f-research">
         <figure class="plate plate-art" aria-hidden="true">
@@ -511,8 +319,11 @@
         <div class="feature-copy">
           <h3 id="f-research">Research across tabs you choose</h3>
           <p>Choose source tabs in the assistant to compare and summarize up to six pages, with source references and clear text-only sharing. Research sources never enable browser control.</p>
-          <p>Review the selected pages before sharing their text. Source labels, URLs, captured lengths, truncation and individual page errors stay visible. Remove a source, clear the list or cancel a pending capture whenever you need to.</p>
         </div>
+        <details class="feature-details">
+          <summary>Source and sharing details</summary>
+          <p>Review the selected pages before sharing their text. Source labels, URLs, captured lengths, truncation and individual page errors stay visible. Remove a source, clear the list or cancel a pending capture whenever you need to.</p>
+        </details>
       </article>
       <article class="feature" aria-labelledby="f-translation">
         <figure class="plate plate-art" aria-hidden="true">
@@ -537,10 +348,16 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-translation">Translate a page, keep the original</h3>
-          <p>Translate page text in place, choose languages and restore the original. Connect your local LibreTranslate server or use your own LibreTranslate.com key, with explicit confirmation before sharing page text.</p>
-          <p>Right-click a page and choose Translate page to begin. Translation needs your provider to be running; Breezer does not bundle translation models or use your AI account.</p>
-          <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
+          <p>Right-click a page and choose Translate page. Read in another language, then restore the original at any time.</p>
+          <p class="feature-limit">Requires your LibreTranslate server or key. Breezer asks before sharing page text.</p>
         </div>
+        <details class="feature-details">
+          <summary>Translation options</summary>
+          <h4>Provider and sharing</h4>
+          <p>Use a running LibreTranslate server on your Mac, or your own LibreTranslate.com key. Breezer does not bundle translation models or use your AI account. Sharing requires your confirmation and is limited to the chosen page.</p>
+        <h4>Stop and restore</h4>
+          <p>Stop, retry or restore the original text. Optional translation of new text stays within the chosen page while its translation window is open. Links, form values and the page's existing controls are retained.</p>
+        </details>
       </article>
       <article class="feature" aria-labelledby="f-settings">
         <figure class="plate plate-art" aria-hidden="true">
@@ -554,15 +371,15 @@
             <text class="quiet" x="40" y="97">Passwords</text>
             <rect class="mint-soft" x="17" y="111" width="86" height="27" rx="7"/>
             <circle class="accent" cx="28" cy="124" r="4"/>
-            <text class="label" x="40" y="128">Languages</text>
+            <text class="label" x="40" y="128">Translation</text>
             <path class="stroke-quiet" d="M23 181 h10 v10 H23 Z M28 186 l6 -6 m-5 0 h5 v5"/>
-            <text class="quiet" x="40" y="190">Other</text>
-            <text class="quiet" x="122" y="32">Settings / Languages</text>
+            <text class="quiet" x="40" y="190">All settings</text>
+            <text class="quiet" x="122" y="32">Settings / Translation</text>
             <rect class="box" x="120.5" y="47.5" width="187" height="30" rx="8"/>
             <circle class="stroke-quiet" cx="134" cy="61" r="5"/>
             <path class="stroke-quiet" d="M138 65 l4 4"/>
             <text class="label" x="151" y="67">translate</text>
-            <text class="quiet" x="122" y="100">Languages</text>
+            <text class="quiet" x="122" y="100">Translation</text>
             <rect class="mint-soft" x="120" y="111" width="188" height="47" rx="9"/>
             <text class="label" x="132" y="130">Translate page</text>
             <rect class="bar" x="132" y="140" width="128" height="4" rx="2"/>
@@ -573,11 +390,146 @@
         </figure>
         <div class="feature-copy">
           <h3 id="f-settings">Find settings by category or search</h3>
-          <p>Settings has a new look. Categories sit in a list on the left, and search takes you straight to the setting you need.</p>
-          <p>Press / to search by name, description or keyword. Search also offers Chromium's own settings. Choose Other to open the full browser settings page.</p>
-          <p>Back and Forward move between categories. Use the keyboard to move through categories and search results; the layout follows your Breezer theme and light or dark appearance.</p>
+          <p>Search by name, description or keyword. Press / to start, or choose a category. All settings opens the full browser settings.</p>
         </div>
+        <details class="feature-details">
+          <summary>Navigation and appearance</summary>
+          <p>Search also includes Chromium's settings. Back and Forward move between categories; keyboard navigation works through categories and results. The page follows your Breezer theme and appearance.</p>
+        </details>
       </article>
+    </section>
+
+    <section class="results" aria-labelledby="results-title">
+      <h2 id="results-title">Performance measurements</h2>
+      <details class="measurement-details">
+        <summary>Browser and saved-tab tests, including slower results</summary>
+      <h3 class="measurement-heading">Measured against Chrome and the previous Breezer</h3>
+      <p class="results-lede">We timed a pre-release Breezer 1.2.0 build beside the previous Breezer and Chrome 156. Two measurements improved in this build, and two leads over Chrome carried over from before. <a href="#results-table">See the full results</a>, including slower and unavailable measurements.</p>
+
+      <h3 class="results-group">New in this build</h3>
+      <div class="readings">
+        <article class="reading reading-wide" aria-labelledby="r-first-load">
+          <div class="reading-copy">
+            <h4 id="r-first-load">First local page after tab exercises</h4>
+            <p>63.5% less time than the previous Breezer. After each launch the test opens and switches tabs, then loads a small local page three times. The first of those loads took 262.2 ms instead of 717.4 ms (medians of 6 launches). Chrome took 52.4 ms on the same workload, so it is still quicker here.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="36.55%" height="100%" rx="4"/></svg> <span class="bar-value">262.2 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">717.4 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="7.31%" height="100%" rx="4"/></svg> <span class="bar-value">52.4 ms</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="reading reading-wide" aria-labelledby="r-saved-records">
+          <div class="reading-copy">
+            <h4 id="r-saved-records">Restoring saved-tab records</h4>
+            <p>Restoring 1,000 records took 2.90 ms instead of 189.96 ms. A separate synthetic test of the sidebar’s workspace code compares the previous Breezer code with the 1.2.0 candidate code. Building the sidebar model for the same records took 0.187 ms instead of 3.299 ms. It times this code alone, not 1,000 open tabs or overall browser speed.</p>
+          </div>
+          <div class="reading-chart">
+            <p class="bars-caption">Restore 1,000 records</p>
+            <ul class="bars" aria-label="Restore 1,000 records">
+              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="1.53%" height="100%" rx="4"/></svg> <span class="bar-value">2.90 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">189.96 ms</span></li>
+            </ul>
+            <p class="bars-caption">Build the sidebar model</p>
+            <ul class="bars" aria-label="Build the sidebar model">
+              <li class="bar candidate"><span class="bar-name">1.2.0 candidate code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="5.66%" height="100%" rx="4"/></svg> <span class="bar-value">0.187 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer code</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">3.299 ms</span></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <details class="results-more">
+        <summary>More browser measurements</summary>
+      <h3 class="results-group">Still ahead of Chrome, as before</h3>
+      <div class="readings">
+        <article class="reading" aria-labelledby="r-new-tab">
+          <div class="reading-copy">
+            <h4 id="r-new-tab">New tab: 50.3% less time than Chrome</h4>
+            <p>Breezer’s own new-tab page was ready in 98.8 ms, against 198.7 ms for Chrome’s (medians of 18 tabs). The previous Breezer measured 99.2 ms, so this lead isn’t new in 1.2.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.73%" height="100%" rx="4"/></svg> <span class="bar-value">98.8 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="49.90%" height="100%" rx="4"/></svg> <span class="bar-value">99.2 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">198.7 ms</span></li>
+            </ul>
+          </div>
+        </article>
+        <article class="reading" aria-labelledby="r-relaunch">
+          <div class="reading-copy">
+            <h4 id="r-relaunch">Relaunch: 19.5% less time than Chrome</h4>
+            <p>Quitting and reopening a set-up test profile until the page was usable took 861.3 ms, against 1,070.2 ms for Chrome (medians of 6 launches). The previous Breezer measured 846.6 ms, so this lead isn’t new either.</p>
+          </div>
+          <div class="reading-chart">
+            <ul class="bars">
+              <li class="bar candidate"><span class="bar-name">Breezer 1.2.0 candidate</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="80.48%" height="100%" rx="4"/></svg> <span class="bar-value">861.3 ms</span></li>
+              <li class="bar previous"><span class="bar-name">Previous Breezer</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="79.10%" height="100%" rx="4"/></svg> <span class="bar-value">846.6 ms</span></li>
+              <li class="bar chrome"><span class="bar-name">Chrome 156</span> <svg class="bar-mark" aria-hidden="true" focusable="false"><rect width="100.00%" height="100%" rx="4"/></svg> <span class="bar-value">1,070.2 ms</span></li>
+            </ul>
+          </div>
+        </article>
+      </div>
+      </details>
+      <p class="results-method">Measured on one Apple M1 Mac with 8 GB of memory, 6 rounds per browser. Bars show medians, start at zero and use a separate scale in each comparison. These are selected results for specific workloads, not overall browser speed.</p>
+      <p class="results-article"><a class="button secondary" href="efficiency.html">Read about the efficiency work in 1.2</a></p>
+
+      <details class="full-results">
+        <summary>Full results: all 11 measurements, including slower and unavailable ones</summary>
+        <p>Some results are slower or use more memory than Chrome or the previous Breezer, and two Chrome values couldn’t be measured. Every result is listed here.</p>
+        <div class="table-scroll" role="region" aria-labelledby="results-table" tabindex="0">
+          <table class="results-table">
+            <caption id="results-table">All 11 measurements: medians, with the lowest and highest observation beneath. Lower is better in every row.</caption>
+            <thead><tr><th scope="col">Measurement</th><th scope="col">Breezer 1.2.0 candidate</th><th scope="col">Previous Breezer</th><th scope="col">Chrome 156</th><th scope="col">Result</th></tr></thead>
+            <tbody>
+              <tr class="table-group"><th scope="colgroup" colspan="5">Speed, in milliseconds</th></tr>
+              <tr><th scope="row">Initialized-profile usable startup<span class="measure-note">Launch with a set-up test profile until the page is usable. 6 launches.</span></th><td data-label="Candidate">742.1 ms<span class="range"><span class="visually-hidden">range </span>712.8–851.2</span></td><td data-label="Previous Breezer">730.4 ms<span class="range"><span class="visually-hidden">range </span>720.8–762.6</span></td><td data-label="Chrome 156">734.9 ms<span class="range"><span class="visually-hidden">range </span>671.0–877.7</span></td><td data-label="Result" class="verdict">Within 2% of both</td></tr>
+              <tr><th scope="row">Reused-profile usable startup<span class="measure-note">Quit, then relaunch the same profile until the page is usable. 6 launches.</span></th><td data-label="Candidate">861.3 ms<span class="range"><span class="visually-hidden">range </span>784.9–990.3</span></td><td data-label="Previous Breezer">846.6 ms<span class="range"><span class="visually-hidden">range </span>764.0–1,026.2</span></td><td data-label="Chrome 156">1,070.2 ms<span class="range"><span class="visually-hidden">range </span>1,010.3–1,754.7</span></td><td data-label="Result" class="verdict">19.5% lower than Chrome; similar to previous Breezer</td></tr>
+              <tr><th scope="row">Blank-tab readiness<span class="measure-note">Open an empty tab until it is ready. 18 tabs, 3 per launch.</span></th><td data-label="Candidate">68.8 ms<span class="range"><span class="visually-hidden">range </span>50.0–228.3</span></td><td data-label="Previous Breezer">65.0 ms<span class="range"><span class="visually-hidden">range </span>49.4–84.3</span></td><td data-label="Chrome 156">66.2 ms<span class="range"><span class="visually-hidden">range </span>41.5–82.8</span></td><td data-label="Result" class="verdict">4–6% higher than both</td></tr>
+              <tr><th scope="row">Product new-tab readiness<span class="measure-note">Open the browser’s own new-tab page until it is ready. 18 tabs.</span></th><td data-label="Candidate">98.8 ms<span class="range"><span class="visually-hidden">range </span>78.1–216.5</span></td><td data-label="Previous Breezer">99.2 ms<span class="range"><span class="visually-hidden">range </span>81.1–148.9</span></td><td data-label="Chrome 156">198.7 ms<span class="range"><span class="visually-hidden">range </span>149.5–249.2</span></td><td data-label="Result" class="verdict">50.3% lower than Chrome; same as previous Breezer</td></tr>
+              <tr><th scope="row">Local-page navigation readiness<span class="measure-note">Load the same local test page until it is usable. 18 loads.</span></th><td data-label="Candidate">48.9 ms<span class="range"><span class="visually-hidden">range </span>31.9–453.0</span></td><td data-label="Previous Breezer">33.9 ms<span class="range"><span class="visually-hidden">range </span>31.3–792.8</span></td><td data-label="Chrome 156">33.1 ms<span class="range"><span class="visually-hidden">range </span>31.1–71.7</span></td><td data-label="Result" class="verdict">47.8% higher than Chrome; 44.3% higher than previous Breezer</td></tr>
+              <tr><th scope="row">Local-page loadEventEnd<span class="measure-note">The page’s own load-finished time for those loads. 18 loads.</span></th><td data-label="Candidate">11.2 ms<span class="range"><span class="visually-hidden">range </span>9.1–416.7</span></td><td data-label="Previous Breezer">11.5 ms<span class="range"><span class="visually-hidden">range </span>10.4–754.1</span></td><td data-label="Chrome 156">6.6 ms<span class="range"><span class="visually-hidden">range </span>5.3–9.8</span></td><td data-label="Result" class="verdict">69.7% higher than Chrome; similar to previous Breezer</td></tr>
+              <tr><th scope="row">First local navigation after tab exercises<span class="measure-note">The first of those three loads after each launch’s tab exercises. 6 loads.</span></th><td data-label="Candidate">262.2 ms<span class="range"><span class="visually-hidden">range </span>154.9–453.0</span></td><td data-label="Previous Breezer">717.4 ms<span class="range"><span class="visually-hidden">range </span>703.8–792.8</span></td><td data-label="Chrome 156">52.4 ms<span class="range"><span class="visually-hidden">range </span>35.5–71.7</span></td><td data-label="Result" class="verdict">63.5% lower than previous Breezer; still about 5 times Chrome’s</td></tr>
+            </tbody>
+            <tbody>
+              <tr class="table-group"><th scope="colgroup" colspan="5">Memory, in MiB</th></tr>
+              <tr><th scope="row">One-tab process-tree RSS<span class="measure-note">Resident memory of all browser processes with one tab. 6 launches, 5 samples each.</span></th><td data-label="Candidate">1,417.6 MiB<span class="range"><span class="visually-hidden">range </span>1,250.9–1,439.4</span></td><td data-label="Previous Breezer">1,245.5 MiB<span class="range"><span class="visually-hidden">range </span>1,204.0–1,349.8</span></td><td data-label="Chrome 156">1,418.3 MiB<span class="range"><span class="visually-hidden">range </span>1,349.5–1,518.0</span></td><td data-label="Result" class="verdict">Same as Chrome; 13.8% higher than previous Breezer</td></tr>
+              <tr><th scope="row">Ten-tab process-tree RSS<span class="measure-note">The same with ten tabs open. 6 launches, 5 samples each.</span></th><td data-label="Candidate">2,756.1 MiB<span class="range"><span class="visually-hidden">range </span>2,658.9–2,837.4</span></td><td data-label="Previous Breezer">2,560.8 MiB<span class="range"><span class="visually-hidden">range </span>2,524.8–2,652.1</span></td><td data-label="Chrome 156">2,515.1 MiB<span class="range"><span class="visually-hidden">range </span>2,426.3–2,568.1</span></td><td data-label="Result" class="verdict">9.6% higher than Chrome; 7.6% higher than previous Breezer</td></tr>
+              <tr><th scope="row">One-tab macOS physical footprint<span class="measure-note">Memory macOS charges to the browser’s processes, one tab. 6 launches.</span></th><td data-label="Candidate">454.8 MiB<span class="range"><span class="visually-hidden">range </span>446.6–484.7</span></td><td data-label="Previous Breezer">461.3 MiB<span class="range"><span class="visually-hidden">range </span>450.9–472.7</span></td><td data-label="Chrome 156" class="unavailable">Unavailable</td><td data-label="Result" class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
+              <tr><th scope="row">Ten-tab macOS physical footprint<span class="measure-note">The same with ten tabs open. 6 launches.</span></th><td data-label="Candidate">959.5 MiB<span class="range"><span class="visually-hidden">range </span>946.9–966.1</span></td><td data-label="Previous Breezer">956.2 MiB<span class="range"><span class="visually-hidden">range </span>952.8–976.4</span></td><td data-label="Chrome 156" class="unavailable">Unavailable</td><td data-label="Result" class="verdict">Similar to previous Breezer; Chrome unavailable</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Saved-tab records code test</h3>
+        <p>This synthetic test runs the sidebar’s workspace code on its own in Node, comparing the previous Breezer code with the 1.2.0 candidate code. It isn’t a measurement of open tabs or the browser.</p>
+        <table class="results-table component-table">
+          <caption>Milliseconds; medians of 6 alternating rounds, 11 repetitions each.</caption>
+          <thead>
+            <tr><td></td><th scope="colgroup" colspan="2">Restore</th><th scope="colgroup" colspan="2">Sidebar model</th></tr>
+            <tr><th scope="col">Records</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th><th scope="col">Previous code</th><th scope="col">1.2.0 code</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">10</th><td data-label="Restore · Previous">0.15</td><td data-label="Restore · 1.2.0">0.08</td><td data-label="Sidebar model · Previous">0.007</td><td data-label="Sidebar model · 1.2.0">0.005</td></tr>
+            <tr><th scope="row">100</th><td data-label="Restore · Previous">2.53</td><td data-label="Restore · 1.2.0">0.59</td><td data-label="Sidebar model · Previous">0.049</td><td data-label="Sidebar model · 1.2.0">0.028</td></tr>
+            <tr><th scope="row">500</th><td data-label="Restore · Previous">48.07</td><td data-label="Restore · 1.2.0">1.72</td><td data-label="Sidebar model · Previous">0.809</td><td data-label="Sidebar model · 1.2.0">0.092</td></tr>
+            <tr><th scope="row">1,000</th><td data-label="Restore · Previous">189.96</td><td data-label="Restore · 1.2.0">2.90</td><td data-label="Sidebar model · Previous">3.299</td><td data-label="Sidebar model · 1.2.0">0.187</td></tr>
+          </tbody>
+        </table>
+        <h3>How this was measured, and what it doesn’t show</h3>
+        <ul class="results-limits">
+          <li>One Apple M1 Mac with 8 GB of memory, macOS 26.7, on AC power with no thermal warning. 6 rounds rotated the launch order: 36 timed launches after 18 untimed setup launches, and all 36 timed launches passed their foreground check.</li>
+          <li>Startups use test profiles that were already set up, then reused. They aren’t cold starts after a reboot, and no caches were flushed.</li>
+          <li>Page loads use the same small local test page in every browser, not real websites over the internet.</li>
+          <li>Process-tree RSS adds up the resident memory of every browser process and can count shared memory more than once. It isn’t the memory Activity Monitor shows. Physical footprint is the memory macOS charges to those processes, including compressed memory.</li>
+          <li>Chrome’s physical footprint is unavailable: 11 of its 60 samples failed process-identity or process-tree checks, and the remaining samples aren’t summarized on their own.</li>
+          <li>CPU use couldn’t be measured: in all 36 sampling windows the CPU time stayed within the counters’ uncertainty. These results make no CPU, energy or battery-life claims.</li>
+          <li>Six rounds give medians and ranges, not statistically significant differences.</li>
+          <li>The candidate is a private ad hoc signed build of the combined 1.2.0 source (snapshot fa19c37); its internal version still reads 0.20.1.1. Its release identity and full feature checks are still pending, so the published release may measure differently.</li>
+        </ul>
+      </details>
+      </details>
     </section>
 
     <section class="patch-notes" aria-labelledby="patch-121-title">
@@ -586,59 +538,168 @@
       <div class="patch-lead">
         <figure class="plate patch-plate" aria-hidden="true">
           <svg class="art" viewBox="0 0 320 232" focusable="false">
-            <rect x="40" y="38" width="240" height="156" rx="18" fill="#f8f4e9" stroke="#526b63"/>
-            <rect x="58" y="58" width="66" height="116" rx="8" fill="#d4e7dc"/>
-            <path d="M72 78h36M72 98h28M72 118h32M72 138h22" fill="none" stroke="#37635a" stroke-width="5" stroke-linecap="round"/>
-            <rect x="140" y="62" width="118" height="38" rx="8" fill="#e6d9c8"/>
-            <rect x="140" y="112" width="118" height="54" rx="8" fill="#c4ddd4"/>
-            <path d="M156 128h76M156 146h48" fill="none" stroke="#37635a" stroke-width="5" stroke-linecap="round"/>
+            <rect class="card lift" x=".5" y=".5" width="319" height="231" rx="14"/>
+            <path class="rule" d="M24 78h272M24 154h272"/>
+            <rect class="mint-soft" x="24" y="24" width="36" height="36" rx="8"/>
+            <rect class="stroke-accent" x="34" y="32" width="18" height="14" rx="3"/>
+            <path class="stroke-accent" d="M30 38v14h18"/>
+            <text class="label" x="76" y="36">Tabs</text>
+            <text class="quiet" x="76" y="55">Keep unchanged rows</text>
+            <rect class="mint-soft" x="24" y="100" width="36" height="36" rx="8"/>
+            <path class="stroke-accent" d="M32 110h20M42 106v4m-7 0c0 8 5 13 13 16m1-16c0 8-5 13-13 16"/>
+            <text class="label" x="76" y="112">Translation</text>
+            <text class="quiet" x="76" y="131">Skip repeated visibility checks</text>
+            <rect class="mint-soft" x="24" y="176" width="36" height="36" rx="8"/>
+            <path class="stroke-accent" d="M33 184h18v14H40l-7 5zM37 189h10M37 193h7"/>
+            <text class="label" x="76" y="188">Replies</text>
+            <text class="quiet" x="76" y="207">Keep completed text</text>
           </svg>
         </figure>
         <div class="patch-copy">
-          <h3>Keep useful work, skip unchanged work</h3>
+          <p>Breezer keeps unchanged sidebar rows, avoids rescanning translated text, and preserves completed reply text.</p>
+          <p class="patch-limit">These changes reduce repeated work in the checked components. Whole-browser RAM and CPU savings have not yet been measured. Existing translation sharing, browser permissions and update verification remain in place.</p>
+        </div>
+      </div>
+      <details class="feature-details patch-details">
+        <summary>Engineering details</summary>
           <ul class="notes">
             <li>Sidebar membership updates avoid reading and serializing saved tabs. Nonvisual tab changes avoid an unnecessary sidebar redraw.</li>
             <li>Unchanged sync recovery data is no longer written repeatedly. Disposed sync clients cannot recreate their repeating alarm.</li>
             <li>Translation rescans skip repeated visibility measurements for unchanged translated text.</li>
             <li>Streamed replies keep completed content in place. Native helper messages avoid redundant copying and repeated parsing, and cancelled requests release setup work sooner.</li>
           </ul>
-          <p class="patch-limit">These changes reduce repeated work in the checked components. Whole-browser RAM and CPU savings have not yet been measured. Existing translation sharing, browser permissions and update verification remain in place.</p>
-        </div>
-      </div>
+      </details>
     </section>
 
+    <section class="patch-notes" aria-labelledby="patch-125-title">
+      <p class="release">Update 1.2.5</p>
+      <h2 id="patch-125-title">A clearer browser, down to the details</h2>
+      <div class="patch-lead">
+        <figure class="plate patch-plate" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x=".5" y=".5" width="319" height="231" rx="14"/>
+            <path class="rule" d="M20 42h280"/>
+            <circle class="bar" cx="27" cy="22" r="3"/><circle class="bar" cx="38" cy="22" r="3"/><circle class="bar" cx="49" cy="22" r="3"/>
+            <rect class="mint-soft" x="16" y="54" width="44" height="160" rx="8"/>
+            <path class="stroke-accent" d="m22 73 3 3 3-3M33 70h13v12H32V69h6l3 3"/>
+            <rect class="accent" x="25" y="96" width="26" height="22" rx="5"/>
+            <rect class="card" x="25" y="128" width="26" height="22" rx="5"/>
+            <rect class="card" x="25" y="160" width="26" height="22" rx="5"/>
+            <text class="label" x="76" y="76">Your choices, together</text>
+            <rect class="paper" x="76" y="88" width="224" height="54" rx="8"/>
+            <path class="rule" d="M88 105h112M88 119h86"/>
+            <rect class="mint-soft" x="253" y="101" width="34" height="20" rx="10"/>
+            <circle class="accent" cx="277" cy="111" r="6"/>
+            <rect class="paper" x="76" y="154" width="224" height="60" rx="8"/>
+            <text class="quiet" x="88" y="176">Write your message</text>
+            <path class="rule" d="M88 196h106"/>
+            <rect class="accent" x="247" y="184" width="40" height="20" rx="6"/>
+            <path class="tick" d="m262 194 10 0m-4-4 4 4-4 4"/>
+          </svg>
+        </figure>
+        <div class="patch-copy">
+          <p>Settings, the assistant, tabs, translation and setup now share clearer controls, more readable text and more consistent light and dark themes. Small panels keep their actions in reach.</p>
+          <p>The assistant puts writing first. Sharing and browser control are easier to distinguish, and memory choices stay together until you save them.</p>
+          <p class="patch-limit">This update refines the interface. It does not claim new whole-browser speed, RAM or battery results. The measurements above still describe the earlier build named in their methodology.</p>
+        </div>
+      </div>
+      <details class="feature-details patch-details">
+        <summary>Everything changed in this interface update</summary>
+        <h4>Settings and appearance</h4>
+        <ul class="notes">
+          <li>Reworked headings, grouped rows, spacing and supporting text across every settings category. Search results show their destination, narrow pages keep category navigation available, and links to full browser settings use clearer names.</li>
+          <li>Unified the six preset palettes and custom color across light and dark modes. Selected controls, dropdown arrows, field boundaries, destructive actions and keyboard focus are easier to distinguish.</li>
+          <li>Import, passwords, passkey availability, Organato, sync and updates use shorter guidance and clearer busy, unavailable and recovery states. Update availability leads with the new version and its relevant action.</li>
+          <li>Activity memory groups site choices, privacy guidance and Save. Unchanged choices cannot be saved again; pending writes prevent conflicting edits, failed saves retain your draft, and turning memory off clearly offers to erase its local activity.</li>
+        </ul>
+        <h4>The assistant and research</h4>
+        <ul class="notes">
+          <li>Separated the message and Send action from model selection, reasoning, speed, source tabs and browser control. The growing composer, menus and account instructions fit narrow panels, including the smallest supported layout.</li>
+          <li>Page inclusion and sharing status are clearer while loading, working or unavailable. Browser control has a labeled, anchored explanation, and sources remain explicitly text-only with screenshots and control off.</li>
+          <li>Account setup has copyable sign-in commands, copy-failure guidance and a reachable Refresh accounts action. Known provider failures show a short cause and recovery action, with technical details available separately.</li>
+          <li>The source picker makes its six-page limit visible, disables extra choices at the limit and keeps Done reachable. Research answers use readable source references, and partial failures have one main recovery message.</li>
+          <li>Attach supported text, code, CSV and image files by choosing them or dropping them into the assistant. Review or remove attachments before Send. Attachment-only messages, follow-up context and retry retain the selected files, subject to provider and size limits.</li>
+        </ul>
+        <h4>Tabs and browser chrome</h4>
+        <ul class="notes">
+          <li>Refined space selection, favorites, saved folders and active-tab styling in expanded and compact sidebars. Matching tab icons gain title initials, long labels truncate deliberately, and duplicate sidebar controls no longer compete.</li>
+          <li>Kept folder disclosure arrows completely inside the smallest compact rail at every supported text size, both open and closed.</li>
+          <li>Browser-frame colors follow the selected palette, including neutral Graphite and custom colors. Placeholder profile icons use the surrounding toolbar foreground, and the resting auto-hide edge no longer exposes sliced controls.</li>
+        </ul>
+        <h4>New tabs and setup</h4>
+        <ul class="notes">
+          <li>Kept the date and shortcut group steadier across connected, disconnected, loading and error states. Shortcut labels avoid broken hostnames, adding a shortcut no longer pushes the agenda down, and loading content reserves space.</li>
+          <li>Stale agenda information is labeled before its contents. Errors give a useful next step, settings are easier to find, and task-completion controls are consistent.</li>
+          <li>Setup has clearer progress, optional-tour scope and connection choices. Import instructions, status messages, narrow fallback notices and footer actions fit together without clipped text.</li>
+        </ul>
+        <h4>Page translation</h4>
+        <ul class="notes">
+          <li>Separated required sharing consent from automatic translation. Privacy and provider guidance are more readable, language selectors fit small windows, and dark consent boundaries remain visible.</li>
+          <li>Stop leads while translation runs. Unavailable actions recede, retry guidance respects a supplied waiting interval, and provider errors appear before their recovery action.</li>
+          <li>Translation settings save only changed choices. Saved-key removal is a distinct destructive action, with guidance and save status kept beside the controls they affect.</li>
+        </ul>
+        <h4>Release pages, motion and verification</h4>
+        <ul class="notes">
+          <li>Shortened repeated release explanations, added descriptive detail headings and a current-section indicator, and kept introductions stable when details open. Narrow artwork labels, comparison tables, article links, footer-button spacing and focus clearance were refined.</li>
+          <li>Reduced broad text fading, aligned dialogs with their backdrops and retained reduced-motion alternatives. Setup illustration changes avoid overlapping outgoing and incoming text.</li>
+          <li>Added repeatable theme, narrow-layout, state, geometry and motion checks, with before-and-after evidence. Native chrome was inspected in private compiled verification builds; these checks do not establish physical hit testing, macOS menus, restoration, auto-hide interaction, live AI-provider behavior or translation's native window bridge.</li>
+        </ul>
+        <h4>How this update was refined</h4>
+        <p>We worked through repeated rounds of changes, browser checks and independent design review. Reviewers inspected the same frozen screenshots across palettes, narrow layouts, loading and failure states, without seeing earlier scores or a target score. Concrete findings became source fixes, then fresh checks and annotated before-and-after comparisons. Native-window evidence stayed separate from simulated page fixtures, and unverified physical interaction, provider behavior and motion timing remained explicit.</p>
+      </details>
+    </section>
+
+    <section class="verification-group" aria-labelledby="verification-title">
+      <h2 id="verification-title">Known limitations</h2>
     <aside class="pending" aria-labelledby="pending-sync-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h12l-3-3M19 16H7l3 3M5 8v5M19 16v-5"/></svg>
       <div>
-        <h2 id="pending-sync-title">Still to verify: encrypted sync</h2>
-        <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+        <h3 id="pending-sync-title">Encrypted sync</h3>
+        <p class="pending-summary">Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+        <details class="feature-details">
+          <summary>Sync verification</summary>
+          <p>Native encrypted-vault setup, provider transport and the saved-workspace adapter are included in the combined source. Encrypted two-profile and password-sync checks remain pending. Passkeys are excluded from sync.</p>
+        </details>
       </div>
     </aside>
 
     <aside class="pending" aria-labelledby="pending-docs-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
       <div>
-        <h2 id="pending-docs-title">Still to verify: Google Docs editing</h2>
-        <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
+        <h3 id="pending-docs-title">Google Docs editing</h3>
+        <p class="pending-summary">Typing, editing and saved changes still need real-document checks with both AI providers.</p>
+        <details class="feature-details">
+          <summary>Docs verification</summary>
+          <p>Added a bounded Google Docs editor input path; real-document verification pending. Typing, selection, follow-up editing and saved changes still need checks in the compiled browser with both AI providers.</p>
+        </details>
       </div>
     </aside>
 
     <aside class="pending" aria-labelledby="pending-passwords-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg>
       <div>
-        <h2 id="pending-passwords-title">Still to confirm: Enter on Microsoft sign-in</h2>
-        <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
+        <h3 id="pending-passwords-title">Enter on Microsoft sign-in</h3>
+        <p class="pending-summary">Enter on Microsoft's password step remains unconfirmed.</p>
+        <details class="feature-details">
+          <summary>Microsoft sign-in verification</summary>
+          <p>Password suggestions close in Chromium's usual way again as you type. This hasn't yet been confirmed to fix pressing Enter on Microsoft's password step.</p>
         <p>A narrow Enter fallback is included for explicit username/current-password forms. Native password-picker, IME, validation and site checks remain pending.</p>
+        </details>
       </div>
     </aside>
 
     <aside class="pending" aria-labelledby="pending-title">
       <svg class="pending-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
       <div>
-        <h2 id="pending-title">Not yet: Touch ID passkeys</h2>
-        <p>Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements that Breezer does not have yet. This is separate from saving and filling passwords.</p>
+        <h3 id="pending-title">Touch ID passkeys</h3>
+        <p class="pending-summary">Touch ID passkeys are unavailable without Apple-approved signing entitlements. Saving and filling passwords are separate.</p>
+        <details class="feature-details">
+          <summary>Passkey availability</summary>
+          <p>Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements that Breezer does not have yet. This is separate from saving and filling passwords.</p>
+        </details>
       </div>
     </aside>
+    </section>
 
     <footer class="closing">
       <p>That's everything in this release.</p>

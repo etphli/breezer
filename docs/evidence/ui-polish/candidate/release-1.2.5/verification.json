@@ -1,0 +1,324 @@
+{
+  "version": "1.2.5",
+  "pageEdition": "1.2.0",
+  "verificationUtc": "2026-11-06T01:31:57.067048+00:00",
+  "fullNodeSuite": {
+    "tests": 553,
+    "pass": 551,
+    "fail": 0,
+    "skipped": 2
+  },
+  "assistantWalkthroughPassed": true,
+  "researchWalkthroughPassed": true,
+  "versionChecksPassed": 5,
+  "harnessCleanupChecksPassed": 18,
+  "nativeSourceChecksPassed": [
+    "workspace",
+    "sidebar",
+    "assistant",
+    "omnibox"
+  ],
+  "skips": [
+    "Live LibreTranslate needs explicit opt-in and a server",
+    "Local benchmark report absent"
+  ],
+  "originalFullRun": "Two cleanup harness assertions expected nine workspace cases after the tenth was added. Expected count corrected; the entire suite and both walkthroughs reran successfully. Original failure log retained.",
+  "finalPageWidths": [
+    {
+      "width": 320,
+      "pageWidth": 320,
+      "labels": [
+        "Settings and appearance",
+        "The assistant and research",
+        "Tabs and browser chrome",
+        "New tabs and setup",
+        "Page translation",
+        "Release pages, motion and verification",
+        "How this update was refined"
+      ],
+      "overflow": []
+    },
+    {
+      "width": 390,
+      "pageWidth": 390,
+      "labels": [
+        "Settings and appearance",
+        "The assistant and research",
+        "Tabs and browser chrome",
+        "New tabs and setup",
+        "Page translation",
+        "Release pages, motion and verification",
+        "How this update was refined"
+      ],
+      "overflow": []
+    },
+    {
+      "width": 1440,
+      "pageWidth": 1440,
+      "labels": [
+        "Settings and appearance",
+        "The assistant and research",
+        "Tabs and browser chrome",
+        "New tabs and setup",
+        "Page translation",
+        "Release pages, motion and verification",
+        "How this update was refined"
+      ],
+      "overflow": []
+    }
+  ],
+  "compactDisclosure": {
+    "beforeClipped": 36,
+    "afterClipped": 0,
+    "layoutCases": 144,
+    "paletteCases": 28
+  },
+  "matrix": {
+    "captures": 490,
+    "sourceHashes": {
+      "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+      "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+      "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+      "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+      "context-settings.js": "e4271e5e1b9add413beeb61beb62ea3f5429107c93baff750e9af4e260524b65",
+      "efficiency.html": "279b7d4fc0479de0e131573c214643cae9b3badbf1b55438355d3446bcb61405",
+      "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+      "manifest.json": "681bb87287f111d40ded66c337c36eb053f309789841996d2a9fc744c726ca7e",
+      "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+      "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+      "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+      "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+      "onboarding.css": "350fbfc3c8888c0e049aee5a1878533e0fa5a66ff2b8d2eeeacf7af7063d3592",
+      "onboarding.js": "25af18251f050b6a48abdb57d5eb0dce0f9d699eda1585ecc57c28827f373f3c",
+      "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+      "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+      "panel.css": "5dcb312e2a13014763fb0d413f6c2a71728c08915920670aff53cf3404e74801",
+      "panel.html": "28211da36ce2f3d19a2f6acdda60f2da2b1dda655f5fd3ad3cdb64f5614d1337",
+      "panel.js": "90d065a1a0a509c1fec5c51ce84ce3d9d0f548c54b861438e4482097bed4fad2",
+      "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+      "release-info.js": "2742f12e657382e7ba30f23ccbecd5f8d8c08f8e406adeafa7d79633456554ec",
+      "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+      "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+      "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+      "research-sources.js": "b5df7a33ba95cdfb578516f5f63eeef28204a59f46b7dce15b7925ccef69b7b5",
+      "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+      "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+      "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+      "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+      "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+      "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+      "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+      "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
+      "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+      "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+      "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+      "translation.css": "c419f42907f1c3d5e1e6050f05b6dcc0b4af18f91e4ed0ab0d9686c813f0d929",
+      "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
+      "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
+      "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+      "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+      "whats-new.css": "a10261e3dc72d2094d441b88126a57b8a397b20b9105a18ac623f33dbc017d40",
+      "whats-new.html": "9d0b7618dcaa1425500724904893e5b0a4da9703b825aca77d7e56a098c221cd",
+      "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+      "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+      "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+      "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+      "workspace.css": "2d8db5cd5feaf4828351cb7af380312174dceacc987858b82ea6c890c5a83a2d",
+      "workspace.html": "649e7f6e08a222e11a942b7ae615e07b9776b65a2568ed03001ddbff457a03a1",
+      "workspace.js": "306767b98a78bc70567a164e4a3daac349e50d8b1eb8882ad2b327bb61599623"
+    },
+    "changesAfterCapture": [
+      "manifest.json",
+      "release-info.js",
+      "whats-new.html"
+    ],
+    "note": "Fresh chevron-source matrix precedes release identity and appended update-log copy. Final page and full suite cover those edits."
+  },
+  "finalSourceHashes": {
+    "background.js": "b53dd47104663e3ebda0bd66fee1ec446f9049f01583dd137739b508d28158c1",
+    "browser-tools.js": "a89b89ada93384b35ec5326e56ec4dfdc4ef99039516ef34acd81793d450b6c9",
+    "context-background.js": "b1549470a44c6b49b582ebd8b9487e318fa47e5b7eb1da8225c72b819c871b7c",
+    "context-memory.js": "8518ec8d0567db3ea541547e79e56a5ae3f9ddddd6e68d7b945548193dc68bff",
+    "context-settings.js": "e4271e5e1b9add413beeb61beb62ea3f5429107c93baff750e9af4e260524b65",
+    "efficiency.html": "279b7d4fc0479de0e131573c214643cae9b3badbf1b55438355d3446bcb61405",
+    "icon128.png": "8e66534856d018a6087d7c49466c6396c781337faf749c312a5da131fd6d0f00",
+    "manifest.json": "1c27237b549426ca2b63c52f81c5050c3c7dc74e7b6470b6af643942ad2d4943",
+    "model-catalog.js": "cde893d06a151e964b45987da95d3a56b4d03368723d656ab99a9ed41e7284ae",
+    "newtab.css": "a7edd54da42959f58962aa2fb29cb73677779bfec601d6f5a0f6e8ba383b2167",
+    "newtab.html": "32e2d616597918cb8cf1e53d0656232bf955739de6c161e5355bba226149da96",
+    "newtab.js": "6c778b583378f3ee54fc98d7a07fe11622475dcc8a19b8a90a91ba31a3fd1ee7",
+    "onboarding.css": "350fbfc3c8888c0e049aee5a1878533e0fa5a66ff2b8d2eeeacf7af7063d3592",
+    "onboarding.js": "25af18251f050b6a48abdb57d5eb0dce0f9d699eda1585ecc57c28827f373f3c",
+    "page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "panel-theme.js": "c6b0b6109db9fac31f9547b8b797cce8c05831540807cade1f440c171bdc255d",
+    "panel.css": "5dcb312e2a13014763fb0d413f6c2a71728c08915920670aff53cf3404e74801",
+    "panel.html": "28211da36ce2f3d19a2f6acdda60f2da2b1dda655f5fd3ad3cdb64f5614d1337",
+    "panel.js": "90d065a1a0a509c1fec5c51ce84ce3d9d0f548c54b861438e4482097bed4fad2",
+    "passwords.js": "cf5bf7231513bcd495ac634ab200f8f121cdceacc7c1980a9b82f9c771ba5f66",
+    "release-info.js": "1b9a8163843db8a40b90341fe2f62f28083e91b8ca5239129f8c5a565d317272",
+    "release-notes.js": "bc7bcded80a8c9876dc9a7124ee7dc14eb6432b2e9dc0fb40c0fd48c9082bf8d",
+    "render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "research-policy.js": "78cac61f4ef542573d8120827a5e6c71666257ccc6d2cd973afaa7866e3c601c",
+    "research-sources.js": "b5df7a33ba95cdfb578516f5f63eeef28204a59f46b7dce15b7925ccef69b7b5",
+    "settings-nav.js": "38c6baa7cce692839f9ab58fd1d3143ef13b395bf1eb7671c24cc7339e9a8cd6",
+    "settings-onboarding.js": "d7235fbae1c53da5c76f9854b0cc4eb7253a9c62d1f023a934e2f84dcbfbc2fe",
+    "settings.js": "cfc3a04e1a28535669cb93f1f429954caf7d2ffad9ead10311b3f8e98d337ce1",
+    "setup-state.js": "ea22fe54eec5fa102549adfb7f4dce69a76a91472194d703dfbcb38edeea621b",
+    "shortcut-add.js": "af2fc03db562fbb931cc2339a285eb8d006849647f11f96cec52de6b87b2992d",
+    "sync-settings.js": "78f06da3e3b63a2f1a42a2c55774a890b2cc29507d330923a0115d0515442c8c",
+    "top-sites.js": "0ff3a9a02d3e21849b48bd11412651827576bf65036c3cada91f50fa4e233dc1",
+    "translation-background.js": "80346b15ae6ee3a58cf0b16caf631802036d05f7f489eb7d6efd4f75a758fd4c",
+    "translation-content.js": "82b487ae9a85e22f8b313f1c53a1bc9b7068dfbc92cdf1c867500f86512ede0d",
+    "translation-provider.js": "82a596d8d7a3db24d37d417c04ee304ce4df2e4e5c46d01738563cf8db519a40",
+    "translation-settings.js": "05b733df8edf2b1c814c7f21f25be3c892a217c2caa5aa4fcc7c68dfe210d218",
+    "translation.css": "c419f42907f1c3d5e1e6050f05b6dcc0b4af18f91e4ed0ab0d9686c813f0d929",
+    "translation.html": "e0e92762e3374dcc254c414e594ebc61609201afb0663be5a258af43453ee9db",
+    "translation.js": "f82a18421a3bc7e1bf6426c25189a135a529d806b42b7d78274e6f93f72dad00",
+    "usage-settings.js": "d72984ec6ea8896403fa729e2133718f5b7a904d7517bc5b6f8f52c30bb188b2",
+    "usage.js": "8387ef2cd12f6e805e85297856890a756ef276c45cb71fc43bc8043d94d9f1d3",
+    "whats-new.css": "a10261e3dc72d2094d441b88126a57b8a397b20b9105a18ac623f33dbc017d40",
+    "whats-new.html": "3eb4f33d55da8d33d4e123d66b3ddf61b0a87463674e8fe67f04a40fc8804038",
+    "whats-new.js": "8c269e0b03f46921d6536949bd95802b7ef6d3510fa5211f7c65435818c0eca7",
+    "workspace-store.js": "85ad4b783218d574a04713bcf89d138c659143e3c338f52f4bf70197f658b842",
+    "workspace-sync-model.js": "8186bf5a50823b4dfcb75563341570fb5db4b191ed7b8cda006850449c7ce50a",
+    "workspace-sync.js": "59cd52df779607d59c9d29af1ba1361e91aaf97d12f72d91cc1eca7ef1851c19",
+    "workspace.css": "2d8db5cd5feaf4828351cb7af380312174dceacc987858b82ea6c890c5a83a2d",
+    "workspace.html": "649e7f6e08a222e11a942b7ae615e07b9776b65a2568ed03001ddbff457a03a1",
+    "workspace.js": "306767b98a78bc70567a164e4a3daac349e50d8b1eb8882ad2b327bb61599623"
+  },
+  "previousFrozenEvidenceFilesPreserved": 1346,
+  "nativeEvidence": "Retained compiled-runtime tab/toolbar/motion evidence has matching native inputs. Current arrow has native-host renderer evidence with one scoped CSS override before final release metadata/copy. No fresh release build or whole OS-window screenshot.",
+  "nativeInputs": [
+    {
+      "path": "features/ai/native-ui/sidebar.patch",
+      "sha256": "114aaead2cbcf04028dad3d144575f6762d2447bc1e9c9ed3bd24cfc0a0aabf4"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/BUILD.gn",
+      "sha256": "22b1ed9487c4410d0a61b938414ba7c03064ac5ee128c8661e3c36fc7d9c6be3"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.cc",
+      "sha256": "08375eda4d5255c6d3f9a896b6217d021a5c360adba5c62466c8b2d9b5aae4bc"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/breezer_private_api.h",
+      "sha256": "0766a16f80936831b332165f095eae78573acd152edcbc8bb7bc3154e1aec3ba"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h",
+      "sha256": "b065a29cff92c5980e86bb037fb77aa1519d5b0b31642d5b0dd185d6d1640efb"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/extensions/api/breezer_private/workspace_sync_api.cc",
+      "sha256": "a278785364fa904271f3923f55071590ef30d79785414a1f594803994b527ec6"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/helium/breezer_workspace_prefs.h",
+      "sha256": "e9c54f58f281395fef004d25ba5b8332ebddc529afb5b9e6896481d8f335e422"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/BUILD.gn",
+      "sha256": "5b39b93ab3413b9c85d0569f8ecfa469135be3f209df854b98738b8e8b3a77ad"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.cc",
+      "sha256": "4cbf8c741c40b4e63d475b89b6f309f9c24a45500c746bb7fc248371fcab6309"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/breezer_peek/breezer_peek.h",
+      "sha256": "622e738a7e56d976f59162569878ec2f97f90c93d4939e03bffa7afa51440c79"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.cc",
+      "sha256": "cd7899e086166a97f4c7d528a665d180d2543ae54c901e1cbcbecdab07af2c62"
+    },
+    {
+      "path": "features/workspace/native/chrome/browser/ui/views/frame/breezer_workspace_view.h",
+      "sha256": "7ee35eb7194873c1ee69a89cded3c49a3d2fb3bc10a09b84900686d00f230b3b"
+    },
+    {
+      "path": "features/workspace/native/chrome/common/extensions/api/breezer_private.idl",
+      "sha256": "56c0c2caddb728f19216fbe2abbe5749f8e7cb9cdae3392fb925d7ad36507d97"
+    },
+    {
+      "path": "script/apply_breezer_ai_ui.py",
+      "sha256": "46e6a197bd55c808d83277ac192722d30170f9e44f96fdc9447bd36cfdd4dbc0"
+    },
+    {
+      "path": "script/apply_breezer_workspace.py",
+      "sha256": "2a279f15c6527315f1846c087baf6a3b242120eee6b2c9315aa715b9df4eb635"
+    },
+    {
+      "path": "script/breezer_sidebar_frame.py",
+      "sha256": "999e392f41babee34e349caecb516e805a8d6145196619df5d205ea93559fc17"
+    }
+  ],
+  "lastIndependentScores": [
+    9.8,
+    9.7
+  ],
+  "finalCorrectionRescored": false,
+  "furtherCouncil": "User requested push and main-agent release writing instead.",
+  "pcBuild": {
+    "status": "waiting for user to say PC is on",
+    "readinessResult": "SSH banner exchange timed out",
+    "launches": 0,
+    "noPolling": true
+  },
+  "limitations": [
+    "Physical interaction, native menus, restoration and physical auto-hide remain unverified",
+    "Translation native geometry/bridge and live provider execution remain unverified",
+    "Decoded frames do not establish smoothness, frame pacing or latency",
+    "No whole-browser RAM, energy, battery or new speed claim"
+  ],
+  "codeAuthor": "GPT-6.1 Sol",
+  "installedAppProfileAndCachesUnchanged": true,
+  "publishedEvidenceHashes": {
+    "sidebar-before-light.png": "bb0dbbc8f715d317c6605230cd080023526a57e017c04f788c861bf6c1cc9df7",
+    "native-workspace.log": "4bdccc6bdb81a37cb3a2bc4002d165600dbc9d1ed5dcdf5cfd10770bdef76f08",
+    "sidebar-before-geometry.json": "54d4089c074e4bddc80f7579dd79045565ed4032e398a39d3eefc630657a925d",
+    "sidebar-palette-geometry.json": "23c8149ebdfa74cc11e90fe65618a2f174690c7a4a97e8643ba8c4eb89408150",
+    "sidebar-after-geometry.json": "264482848d3929f31597be2095538c7c692d1a7496e6a49ce5bb3ff7ca8420bd",
+    "update-log-320.png": "e8209b154893131e2e2cf5600dce8c674ee5a9f8530469a47c03fde3618c739e",
+    "native-host-sidebar-manifest.json": "7a98865f975ee0c214b06f08bd7ffc0066fb8cc7cc7c1007357b3174312d68f0",
+    "native-host-sidebar.png": "32ec416dcb75d16d051436232df2d58e7e7d39d9727c19441d900b03a7f15cde",
+    "page-checks.log": "daa28dfb1f43aabe6f8826164d6f0a48b286b0c06fe06c3ba965a1c6eefe970b",
+    "full-suite.log": "32c34c0f042dec2b1dfc4c03e40623c4c9584ca35e1b9fecbb145057b131ac19",
+    "cleanup-checks.log": "aa1721a40d744cbe7e7b3af8eed9f87a4fa271549c677c70258b58249703d027",
+    "update-log-390.png": "4c51ddd20c69a2c5d0ee5a579d9d4c51b680c4d254a61566c796d8c47d86327c",
+    "final-suite.log": "d710cd0c531f684203afe05be820d65eefe4bf637e8cdf7a2c230a32e458b660",
+    "sidebar-after-dark.png": "96fa1d2274d68e67d19d7dbbb12bea1f468ba6ed0b667d41a50c38a197bd9af9",
+    "workspace-checks.log": "58fb4ffd139ab5d1f63f38edd8ab71f949a273c4848e32021fa2a8f692fe0125",
+    "sidebar-after-light.png": "13fb8b25cec5e2ee11d798a987fd8fabf18b6e697cd097b544eba029b25c42c9",
+    "matrix-before-release-copy.json": "656ae87cb744358834af43edf27ee2fec3d4b3bd2b260a9e4f16d1a52d9659a9",
+    "update-log-narrow.png": "bb9d41115824a66dc2db4c49ad0f57fc9dd5a7406c9b47e1b2884d055dfd8e83",
+    "README.md": "01de21b7b6ec60d4e48b60294b1fe7052a75326b682e6b1b8af0616d00276387",
+    "native-omnibox.log": "2108421c3f44b7c71ab25bf76c408f6e0b76e39e2ae01e08b9011bf09f9ce625",
+    "version-checks.log": "db1cf3028aba6787f0085eb3ba4c390f4b966650b8d1cba425c2e435cff27da5",
+    "native-sidebar.log": "301d8d47ec466bed0b7b9766c7cbe46a5a3075fafc084011fc28e80250939740",
+    "process-note-390.png": "6ec598a7a0a85e8f68c7a3796c3e7dadc93a6a9807107cb65fecae217931f01a",
+    "sidebar-before-dark.png": "d65131c114c380ad31ced9530ca0b0ffb05b72a1365163a49e8f4eeb82cec21a",
+    "pc-readiness.log": "5cb0c1231d33323ce235f9f008691e9d3289a9f68bba908efbb9e27d3d565890",
+    "process-note-320.png": "43fc3c311de53c22c1b52cd68e79afc909d20b85a0e98e4fb82b5997ca667a17",
+    "native-assistant.log": "6f0584b15ac58315d8e65b9b34f264b5b7f059dfbe0f960d7f0a96903f83367a",
+    "release-version-checks.log": "3d4604410efb0bdab13ea9a20bba353ee5c6492d4b3ed607a098403d4160259b",
+    "release-page-geometry.json": "116691e4d8f6aa910d90ddc578627398a1c5392e345d533b32552e2d098a1b05",
+    "page-final.log": "d48d98eaec5d78cc28b5edcfdf4f398f53ee753eb24aa1c41ed3fd7412f19ad5",
+    "process-note-1440.png": "0b531a8179e423c7c296a83a083a7a10c4959e4aee0b35d90ec2427299f6768c",
+    "update-log-1440.png": "fb6d18b749339285243120b207642480f17c3bcf151a54782185ef404a85472f",
+    "update-log-desktop.png": "74fea6a400da8a8d3924707dd63bff48e65cff449a6b03fd47c5d013e523145e"
+  },
+  "integrationWithMain": {
+    "baseCommit": "030e4e3683f4236a4bff45f6a8457b29265548fb",
+    "nodeChecks": {
+      "tests": 556,
+      "passed": 554,
+      "failed": 0,
+      "skipped": 2
+    },
+    "assistantAndResearchWalkthroughs": "passed",
+    "historicalRamFixtureSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "attachments": "file picker/drop/removal/validation/attachment-only send/retry/follow-up passed"
+  }
+}

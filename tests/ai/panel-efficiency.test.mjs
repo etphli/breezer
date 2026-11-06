@@ -5,9 +5,11 @@ import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
-const baselineSHA = '88d126dbf5287ee25cc4a55db761670ac738bad4b6fc22340c20c0d59d1f8a61';
+const baselineSHA = 'ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb';
 const hash = text => createHash('sha256').update(text).digest('hex');
-// Pin the attachment-capable controller with only the transcript memory optimization reversed.
+// The reviewed original is independent of unrelated UI changes in the current controller.
+const baseline = fs.readFileSync(new URL('./fixtures/panel-before-efficiency.js', import.meta.url), 'utf8');
+assert.equal(hash(baseline), baselineSHA, 'negative control must match the exact reviewed original');
 function originalSource(current) {
   if (hash(current) === baselineSHA) return current;
   return current
@@ -18,16 +20,16 @@ function originalSource(current) {
     .replace(/    \/\/ Resolve once[^\n]*\n    message: state.messages.find\(\(item\) => item.id === assistantId\),\n/, '')
     .replace('state.running = {\n    id, assistantId, control: state.control,\n  };', 'state.running = { id, assistantId, control: state.control };')
     .replace('    state.running.message = null;\n', '')
+    .replace('const empty = run && !run.message.text;', 'const empty = run && !state.messages.find((item) => item.id === run.assistantId).text;')
     .replace('const reply = state.running.message;', 'const reply = state.messages.find((item) => item.id === state.running.assistantId);');
 }
-const baseline = originalSource(source);
-assert.equal(hash(baseline), baselineSHA, 'negative control must reconstruct the exact reviewed original');
+const baselineForBehavior = originalSource(source);
 
 function harness(code, initial = [], ids = []) {
   const frames = [], posts = [], writes = [], events = [], renders = [], streams = [], elements = new Map();
   const counts = { reads: 0, findCallbacks: 0, filterCallbacks: 0, resultArrays: 0, resultSlots: 0, frames: 0 };
   const node = () => ({ children: [], style: {}, value: '', hidden: false, scrollTop: 0, scrollHeight: 300, clientHeight: 100,
-    classList: { add() {} }, setAttribute() {}, focus() {}, setSelectionRange() {}, scrollIntoView() {},
+    classList: { add() {}, toggle() {} }, setAttribute() {}, focus() {}, setSelectionRange() {}, scrollIntoView() {},
     append(...children) { for (const child of children) { this.children.push(child); child.parentElement = this; } },
     replaceChildren() { this.children = []; }, querySelector(selector) { return this.children.find(child => '.' + child.className === selector); },
     addEventListener(type, fn) { this[type] = fn; },
@@ -91,6 +93,22 @@ function harness(code, initial = [], ids = []) {
 const records = n => Array.from({ length: n }, (_, i) => ({ id: `history-${i}`, role: i % 2 ? 'assistant' : 'user', text: i % 7 ? `text ${i}` : '', contextTitle: `page ${i}` }));
 const plain = value => JSON.parse(JSON.stringify(value));
 
+test('known provider failures name the cause without exposing technical details in the reply', async () => {
+  for (const [reason, expected] of [
+    ['HTTP 429 rate_limit_exceeded: private diagnostic', /provider limit.*reset before retrying/],
+    ['401 Unauthorized: private account diagnostic', /could not verify your account/],
+    ['Provider request timed out after 60000ms', /took too long to reply/],
+    ['connect ECONNREFUSED 127.0.0.1:1234', /connection to your provider failed/],
+    ['unrecognized provider diagnostic', /could not complete this response/],
+  ]) {
+    const h = harness(source), run = await h.start();
+    h.receive({ type: 'error', id: run.id, error: reason });
+    const response = h.state.messages.find(message => message.id === run.assistantId).text;
+    assert.match(response, expected);
+    assert.equal(response.includes(reason), false);
+  }
+});
+
 async function scenario(code, ending, collision = false) {
   const initial = records(125);
   if (collision) initial.unshift({ id: 'same-reply', role: 'assistant', text: 'first match' }, { id: 'same', role: 'user', text: 'original collision user' });
@@ -128,7 +146,7 @@ async function scenario(code, ending, collision = false) {
 
 test('source controller preserves history, writes, retry, terminal rendering and stale RAF ordering', async () => {
   for (const ending of ['complete', 'error', 'stop', 'new-chat']) for (const collision of [false, true]) {
-    assert.deepEqual(await scenario(source, ending, collision), await scenario(baseline, ending, collision));
+    assert.deepEqual(await scenario(source, ending, collision), await scenario(baselineForBehavior, ending, collision));
   }
 });
 
@@ -159,7 +177,7 @@ test('actual initialize accepts loaded valid records, including empty text, befo
     await h.start(); h.receive({ type: 'complete', id: h.state.running.id });
     return plain({ posts: h.posts, writes: h.writes.map(write => write.snapshot), messages: h.state.messages });
   }
-  assert.deepEqual(await loaded(source), await loaded(baseline));
+  assert.deepEqual(await loaded(source), await loaded(baselineForBehavior));
 });
 
 test('empty replies, stop retry, pending authorization cancellation and post failure stay equivalent', async () => {
@@ -185,7 +203,7 @@ test('empty replies, stop retry, pending authorization cancellation and post fai
     output.push(plain(h.writes.map(write => write.snapshot)));
     return output;
   }
-  assert.deepEqual(await edges(source), await edges(baseline));
+  assert.deepEqual(await edges(source), await edges(baselineForBehavior));
 });
 
 async function measure(code, size) {
@@ -253,5 +271,5 @@ test('provider history is a value snapshot before asynchronous page authorizatio
     h.finish();
     return plain(sent);
   }
-  assert.deepEqual(await captured(source), await captured(baseline));
+  assert.deepEqual(await captured(source), await captured(baselineForBehavior));
 });

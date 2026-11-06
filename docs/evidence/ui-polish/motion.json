@@ -1,0 +1,183 @@
+[
+  {
+    "area": "spaces",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 180,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 90,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "slide-next",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 180,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset."
+  },
+  {
+    "area": "settings",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "onboarding-in",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "onboarding-in",
+        "delay": 80,
+        "direction": "normal",
+        "duration": 460,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "onboarding-in",
+        "delay": 150,
+        "direction": "normal",
+        "duration": 460,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset."
+  },
+  {
+    "area": "newtab",
+    "reducedMotion": "no-preference",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset."
+  },
+  {
+    "area": "spaces",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset."
+  },
+  {
+    "area": "settings",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset."
+  },
+  {
+    "area": "newtab",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after the UI action settled enough for its locator, not a guarantee of animation onset."
+  }
+]

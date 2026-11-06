@@ -1,0 +1,2786 @@
+TAP version 13
+# Subtest: codex adapter routes canvas/game actions through host and worker to only the consented tab
+ok 1 - codex adapter routes canvas/game actions through host and worker to only the consented tab
+  ---
+  duration_ms: 12.181292
+  ...
+# Subtest: claude adapter routes canvas/game actions through host and worker to only the consented tab
+ok 2 - claude adapter routes canvas/game actions through host and worker to only the consented tab
+  ---
+  duration_ms: 8.499708
+  ...
+# Subtest: canvas coordinate clicks use tab-scoped mouse input instead of DOM click emulation
+ok 3 - canvas coordinate clicks use tab-scoped mouse input instead of DOM click emulation
+  ---
+  duration_ms: 3.127833
+  ...
+# Subtest: game start and direction keys send physical code and bounded key down/up
+ok 4 - game start and direction keys send physical code and bounded key down/up
+  ---
+  duration_ms: 4.644834
+  ...
+# (node:88332) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: Stop interrupts a key hold, releases it only in the original tab, and rejects queued input
+ok 5 - Stop interrupts a key hold, releases it only in the original tab, and rejects queued input
+  ---
+  duration_ms: 1.242541
+  ...
+# Subtest: holdMs keeps a direction down for the requested duration using a virtual clock
+ok 6 - holdMs keeps a direction down for the requested duration using a virtual clock
+  ---
+  duration_ms: 1.276541
+  ...
+# Subtest: a held mouse button expires and is released even while its acknowledgement hangs
+ok 7 - a held mouse button expires and is released even while its acknowledgement hangs
+  ---
+  duration_ms: 2.1455
+  ...
+# Subtest: a failed key release or missing indicator stops control and cleans up held input
+ok 8 - a failed key release or missing indicator stops control and cleans up held input
+  ---
+  duration_ms: 1.185542
+  ...
+# Subtest: explicit keydown has a five second fail-safe even while its transport acknowledgement hangs
+ok 9 - explicit keydown has a five second fail-safe even while its transport acknowledgement hangs
+  ---
+  duration_ms: 0.8675
+  ...
+# Subtest: navigation while a key is held stops control and releases the key
+ok 10 - navigation while a key is held stops control and releases the key
+  ---
+  duration_ms: 0.7195
+  ...
+# Subtest: navigation requested during a held input sends no navigation after stopping control
+ok 11 - navigation requested during a held input sends no navigation after stopping control
+  ---
+  duration_ms: 0.6255
+  ...
+# Subtest: canvas mouse down/move/up preserves drag button state and release position
+ok 12 - canvas mouse down/move/up preserves drag button state and release position
+  ---
+  duration_ms: 1.582208
+  ...
+# Subtest: Stop releases a held mouse at its last drag position and a new session gets no stale release
+ok 13 - Stop releases a held mouse at its last drag position and a new session gets no stale release
+  ---
+  duration_ms: 0.578625
+  ...
+# Subtest: invalid game inputs and refused canvas targets send no input
+ok 14 - invalid game inputs and refused canvas targets send no input
+  ---
+  duration_ms: 0.636667
+  ...
+# Subtest: cancelling during canvas validation prevents late mouse input
+ok 15 - cancelling during canvas validation prevents late mouse input
+  ---
+  duration_ms: 0.977458
+  ...
+# Subtest: isolated coordinate validation accepts only visible top-level canvas CSS points
+ok 16 - isolated coordinate validation accepts only visible top-level canvas CSS points
+  ---
+  duration_ms: 3.6465
+  ...
+# Subtest: page access requires an explicit gesture for the active HTTP(S) origin
+ok 17 - page access requires an explicit gesture for the active HTTP(S) origin
+  ---
+  duration_ms: 0.099375
+  ...
+# Subtest: only the authorized current tab is captured, and a switch discards context
+ok 18 - only the authorized current tab is captured, and a switch discards context
+  ---
+  duration_ms: 0.170291
+  ...
+# Subtest: browser tools allow only scoped trusted input and refuse arbitrary execution
+ok 19 - browser tools allow only scoped trusted input and refuse arbitrary execution
+  ---
+  duration_ms: 0.934292
+  ...
+# Subtest: cancelling while debugger attaches detaches it and sends no late input
+ok 20 - cancelling while debugger attaches detaches it and sends no late input
+  ---
+  duration_ms: 0.760541
+  ...
+# Subtest: cancelling during target resolution prevents all input
+ok 21 - cancelling during target resolution prevents all input
+  ---
+  duration_ms: 0.358708
+  ...
+# Subtest: Stop detaches while a page protocol request is hung and rejects its late result
+ok 22 - Stop detaches while a page protocol request is hung and rejects its late result
+  ---
+  duration_ms: 0.603583
+  ...
+# Subtest: Stop bounds cleanup and still attempts detach if a cleanup command never returns
+ok 23 - Stop bounds cleanup and still attempts detach if a cleanup command never returns
+  ---
+  duration_ms: 752.432125
+  ...
+# Subtest: a new control session waits for the previous asynchronous detach
+ok 24 - a new control session waits for the previous asynchronous detach
+  ---
+  duration_ms: 1.63925
+  ...
+# Subtest: expired cleanup cannot remove a new session binding or reused script ID when its command resolves late
+ok 25 - expired cleanup cannot remove a new session binding or reused script ID when its command resolves late
+  ---
+  duration_ms: 750.647291
+  ...
+# Subtest: late bootstrap installation acknowledgement cannot remove the new session script
+ok 26 - late bootstrap installation acknowledgement cannot remove the new session script
+  ---
+  duration_ms: 751.444042
+  ...
+# Subtest: a timed-out detach blocks reattachment until the original detach settles
+ok 27 - a timed-out detach blocks reattachment until the original detach settles
+  ---
+  duration_ms: 751.023334
+  ...
+# Subtest: only the controlled tab and named isolated world can use the Stop binding
+ok 28 - only the controlled tab and named isolated world can use the Stop binding
+  ---
+  duration_ms: 0.328208
+  ...
+# Subtest: worker toggles the panel and forwards context only on an opted-in chat
+ok 29 - worker toggles the panel and forwards context only on an opted-in chat
+  ---
+  duration_ms: 3.263333
+  ...
+# Subtest: inactive tab updates do not query the active page or start the native host
+ok 30 - inactive tab updates do not query the active page or start the native host
+  ---
+  duration_ms: 1.436166
+  ...
+# Subtest: a delayed metadata query cannot overwrite a newer active page
+ok 31 - a delayed metadata query cannot overwrite a newer active page
+  ---
+  duration_ms: 0.558625
+  ...
+# Subtest: hiding and reopening a cached panel discards pending metadata
+ok 32 - hiding and reopening a cached panel discards pending metadata
+  ---
+  duration_ms: 0.317792
+  ...
+# Subtest: worker forwards reasoning and only Codex speed to the native host
+ok 33 - worker forwards reasoning and only Codex speed to the native host
+  ---
+  duration_ms: 0.4155
+  ...
+# Subtest: worker rejects tools without control and cancels on disconnect and tab switches
+ok 34 - worker rejects tools without control and cancels on disconnect and tab switches
+  ---
+  duration_ms: 0.918792
+  ...
+# Subtest: same-origin navigation retains control and restores its visible overlay
+ok 35 - same-origin navigation retains control and restores its visible overlay
+  ---
+  duration_ms: 0.800458
+  ...
+# Subtest: new-origin navigation revokes read-only grants while attached control continues
+ok 36 - new-origin navigation revokes read-only grants while attached control continues
+  ---
+  duration_ms: 1.030666
+  ...
+# Subtest: context preview reads metadata without page text or screenshot
+ok 37 - context preview reads metadata without page text or screenshot
+  ---
+  duration_ms: 1.516541
+  ...
+# Subtest: native Cmd+K can establish access through a successful permission probe without a command event
+ok 38 - native Cmd+K can establish access through a successful permission probe without a command event
+  ---
+  duration_ms: 0.665375
+  ...
+# Subtest: visible context chips follow active-tab metadata without granting page access
+ok 39 - visible context chips follow active-tab metadata without granting page access
+  ---
+  duration_ms: 0.702916
+  ...
+# Subtest: context-only chats may refresh their original tab snapshot but cannot act or switch tabs
+ok 40 - context-only chats may refresh their original tab snapshot but cannot act or switch tabs
+  ---
+  duration_ms: 602.00925
+  ...
+# Subtest: hiding a cached panel cancels control and the toolbar can reopen it
+ok 41 - hiding a cached panel cancels control and the toolbar can reopen it
+  ---
+  duration_ms: 0.637709
+  ...
+# Subtest: control survives focus moving to another app but stops for another browser window
+ok 42 - control survives focus moving to another app but stops for another browser window
+  ---
+  duration_ms: 0.547875
+  ...
+# Subtest: isolated page targets exclude secret fields and reject covered or stale elements
+ok 43 - isolated page targets exclude secret fields and reject covered or stale elements
+  ---
+  duration_ms: 1.73175
+  ...
+# Subtest: actual round matches one-shot prefix semantics at every split and character
+ok 44 - actual round matches one-shot prefix semantics at every split and character
+  ---
+  duration_ms: 16.799667
+  ...
+# Subtest: malformed prefixes preserve suppression and final fallback, including action newlines
+ok 45 - malformed prefixes preserve suppression and final fallback, including action newlines
+  ---
+  duration_ms: 0.6725
+  ...
+# Subtest: overlapping text keys in malformed progress retain one-shot compatibility
+ok 46 - overlapping text keys in malformed progress retain one-shot compatibility
+  ---
+  duration_ms: 1.616667
+  ...
+# Subtest: multiple StructuredOutput blocks match only the already emitted prefix
+ok 47 - multiple StructuredOutput blocks match only the already emitted prefix
+  ---
+  duration_ms: 1.128541
+  ...
+# Subtest: unrelated blocks, control requests and final validation keep existing boundaries
+ok 48 - unrelated blocks, control requests and final validation keep existing boundaries
+  ---
+  duration_ms: 0.648625
+  ...
+# Subtest: actual chat cancellation closes fake RPC and removes abort and round listeners
+ok 49 - actual chat cancellation closes fake RPC and removes abort and round listeners
+  ---
+  duration_ms: 4.737459
+  ...
+# Subtest: actual class matches baseline at every UTF-16 split and every UTF-8 byte boundary
+ok 50 - actual class matches baseline at every UTF-16 split and every UTF-8 byte boundary
+  ---
+  duration_ms: 99.149084
+  ...
+# Subtest: blank lines, malformed JSON and listener errors preserve error and message order
+ok 51 - blank lines, malformed JSON and listener errors preserve error and message order
+  ---
+  duration_ms: 3.169417
+  ...
+# Subtest: whole incoming chunk limit remains UTF-16 based before any lines are dispatched
+ok 52 - whole incoming chunk limit remains UTF-16 based before any lines are dispatched
+  ---
+  duration_ms: 1186.909666
+  ...
+# Subtest: requests, controls, notifications, failures, sends and timers retain correlations
+ok 53 - requests, controls, notifications, failures, sends and timers retain correlations
+  ---
+  duration_ms: 1.81325
+  ...
+# Subtest: cancellation preserves fragmented in-flight output, pending rejection and confirmed exit
+ok 54 - cancellation preserves fragmented in-flight output, pending rejection and confirmed exit
+  ---
+  duration_ms: 5.752583
+  ...
+# Subtest: error and close races preserve first error, reject pending once and avoid kill after exit
+ok 55 - error and close races preserve first error, reject pending once and avoid kill after exit
+  ---
+  duration_ms: 2.205584
+  ...
+# Subtest: reentrant output callbacks retain baseline ordering and suffix handling
+ok 56 - reentrant output callbacks retain baseline ordering and suffix handling
+  ---
+  duration_ms: 0.897042
+  ...
+# Subtest: confirmed child exit releases retained partial text while transport is still reachable
+ok 57 - confirmed child exit releases retained partial text while transport is still reachable
+  ---
+  duration_ms: 2.158125
+  ...
+# Subtest: fragment fixture searches each arriving chunk instead of the repeated prefix
+ok 58 - fragment fixture searches each arriving chunk instead of the repeated prefix
+  ---
+  duration_ms: 96.372667
+  ...
+# Subtest: directly imported production class preserves fragmented replies and cancellation exit promise
+ok 59 - directly imported production class preserves fragmented replies and cancellation exit promise
+  ---
+  duration_ms: 3.429083
+  ...
+# Subtest: abort during probe initialize closes owned setup before gate release
+ok 60 - abort during probe initialize closes owned setup before gate release
+  ---
+  duration_ms: 7.475542
+  ...
+# Subtest: cancellation closes setup at probe:thread/start
+ok 61 - cancellation closes setup at probe:thread/start
+  ---
+  duration_ms: 6.234167
+  ...
+# Subtest: cancellation closes setup at probe:turn/start
+ok 62 - cancellation closes setup at probe:turn/start
+  ---
+  duration_ms: 1.761667
+  ...
+# Subtest: cancellation closes setup at probe:receive
+ok 63 - cancellation closes setup at probe:receive
+  ---
+  duration_ms: 1.184041
+  ...
+# Subtest: cancellation closes setup at runtime:initialize
+ok 64 - cancellation closes setup at runtime:initialize
+  ---
+  duration_ms: 10.011792
+  ...
+# Subtest: cancellation closes setup at runtime:thread/start
+ok 65 - cancellation closes setup at runtime:thread/start
+  ---
+  duration_ms: 3.510792
+  ...
+# Subtest: cancellation closes setup at runtime:turn/start
+ok 66 - cancellation closes setup at runtime:turn/start
+  ---
+  duration_ms: 3.65775
+  ...
+# Subtest: cancellation closes setup at runtime:done
+ok 67 - cancellation closes setup at runtime:done
+  ---
+  duration_ms: 2.083167
+  ...
+# Subtest: late resolution after abort at isolate is drained
+ok 68 - late resolution after abort at isolate is drained
+  ---
+  duration_ms: 0.566833
+  ...
+# Subtest: late rejection after abort at isolate is drained
+ok 69 - late rejection after abort at isolate is drained
+  ---
+  duration_ms: 0.489666
+  ...
+# Subtest: late resolution after abort at probe:initialize is drained
+ok 70 - late resolution after abort at probe:initialize is drained
+  ---
+  duration_ms: 1.209042
+  ...
+# Subtest: late rejection after abort at probe:initialize is drained
+ok 71 - late rejection after abort at probe:initialize is drained
+  ---
+  duration_ms: 1.09725
+  ...
+# Subtest: late resolution after abort at probe:thread/start is drained
+ok 72 - late resolution after abort at probe:thread/start is drained
+  ---
+  duration_ms: 0.667416
+  ...
+# Subtest: late rejection after abort at probe:thread/start is drained
+ok 73 - late rejection after abort at probe:thread/start is drained
+  ---
+  duration_ms: 1.498417
+  ...
+# Subtest: late resolution after abort at probe:turn/start is drained
+ok 74 - late resolution after abort at probe:turn/start is drained
+  ---
+  duration_ms: 1.108
+  ...
+# Subtest: late rejection after abort at probe:turn/start is drained
+ok 75 - late rejection after abort at probe:turn/start is drained
+  ---
+  duration_ms: 1.490958
+  ...
+# Subtest: late resolution after abort at runtime:initialize is drained
+ok 76 - late resolution after abort at runtime:initialize is drained
+  ---
+  duration_ms: 2.359708
+  ...
+# Subtest: late rejection after abort at runtime:initialize is drained
+ok 77 - late rejection after abort at runtime:initialize is drained
+  ---
+  duration_ms: 1.538875
+  ...
+# Subtest: late resolution after abort at runtime:thread/start is drained
+ok 78 - late resolution after abort at runtime:thread/start is drained
+  ---
+  duration_ms: 2.244708
+  ...
+# Subtest: late rejection after abort at runtime:thread/start is drained
+ok 79 - late rejection after abort at runtime:thread/start is drained
+  ---
+  duration_ms: 2.067834
+  ...
+# Subtest: late resolution after abort at runtime:turn/start is drained
+ok 80 - late resolution after abort at runtime:turn/start is drained
+  ---
+  duration_ms: 2.809625
+  ...
+# Subtest: late rejection after abort at runtime:turn/start is drained
+ok 81 - late rejection after abort at runtime:turn/start is drained
+  ---
+  duration_ms: 1.389167
+  ...
+# Subtest: already-aborted chat creates no isolation, probe, or runtime
+ok 82 - already-aborted chat creates no isolation, probe, or runtime
+  ---
+  duration_ms: 0.146375
+  ...
+# Subtest: isolation cleanup waits for the owned process exit
+ok 83 - isolation cleanup waits for the owned process exit
+  ---
+  duration_ms: 0.393875
+  ...
+# Subtest: every standard chat runs the actual security preflight
+ok 84 - every standard chat runs the actual security preflight
+  ---
+  duration_ms: 2.253583
+  ...
+# Subtest: every fast chat runs the actual security preflight
+ok 85 - every fast chat runs the actual security preflight
+  ---
+  duration_ms: 1.799375
+  ...
+# Subtest: noncancelled preflight rejects invalid tools before runtime launch
+ok 86 - noncancelled preflight rejects invalid tools before runtime launch
+  ---
+  duration_ms: 1.010333
+  ...
+# Subtest: noncancelled preflight rejects invalid reasoning before runtime launch
+ok 87 - noncancelled preflight rejects invalid reasoning before runtime launch
+  ---
+  duration_ms: 0.928542
+  ...
+# Subtest: noncancelled preflight rejects invalid speed before runtime launch
+ok 88 - noncancelled preflight rejects invalid speed before runtime launch
+  ---
+  duration_ms: 0.864625
+  ...
+# Subtest: noncancelled preflight rejects invalid credentials before runtime launch
+ok 89 - noncancelled preflight rejects invalid credentials before runtime launch
+  ---
+  duration_ms: 0.88175
+  ...
+# Subtest: thirty cancelled replacements keep fake owned setup resources bounded
+ok 90 - thirty cancelled replacements keep fake owned setup resources bounded
+  ---
+  duration_ms: 4.255667
+  ...
+# Subtest: abort racing probe:spawn prevents initialize
+ok 91 - abort racing probe:spawn prevents initialize
+  ---
+  duration_ms: 0.278667
+  ...
+# Subtest: abort racing runtime:spawn prevents initialize
+ok 92 - abort racing runtime:spawn prevents initialize
+  ---
+  duration_ms: 1.376375
+  ...
+# Subtest: cancelling one chat leaves a separately owned runtime running
+ok 93 - cancelling one chat leaves a separately owned runtime running
+  ---
+  duration_ms: 1.449
+  ...
+# Subtest: Codex setup cancellation reaps its owned resistant child before isolation cleanup
+ok 94 - Codex setup cancellation reaps its owned resistant child before isolation cleanup
+  ---
+  duration_ms: 1067.021792
+  ...
+# Subtest: only trusted non-private settings pages can configure/view context
+ok 95 - only trusted non-private settings pages can configure/view context
+  ---
+  duration_ms: 9.837542
+  ...
+# Subtest: tab events respect permissions, never open a helper or read a document, and disposal stops recording
+ok 96 - tab events respect permissions, never open a helper or read a document, and disposal stops recording
+  ---
+  duration_ms: 1.232125
+  ...
+# Subtest: summary transport sends only a consented batch and clear cancels/disconnects its helper
+ok 97 - summary transport sends only a consented batch and clear cancels/disconnects its helper
+  ---
+  duration_ms: 6.899208
+  ...
+# Subtest: host wrapper shares normal chat busy/cancel boundaries and suppresses stale summary output
+ok 98 - host wrapper shares normal chat busy/cancel boundaries and suppresses stale summary output
+  ---
+  duration_ms: 2.216333
+  ...
+# Subtest: host wrapper returns a summary result and preserves ordinary chat behavior
+ok 99 - host wrapper returns a summary result and preserves ordinary chat behavior
+  ---
+  duration_ms: 0.728417
+  ...
+# Subtest: cancelling ordinary chat permits its replacement before old provider cleanup finishes
+ok 100 - cancelling ordinary chat permits its replacement before old provider cleanup finishes
+  ---
+  duration_ms: 0.560709
+  ...
+# Subtest: an explicit grant records the first sample and a manual summary completes through the real host adapter
+ok 101 - an explicit grant records the first sample and a manual summary completes through the real host adapter
+  ---
+  duration_ms: 4.706417
+  ...
+# Subtest: new profiles are OFF and no browsing events collect or call a provider
+ok 102 - new profiles are OFF and no browsing events collect or call a provider
+  ---
+  duration_ms: 1.65575
+  ...
+# Subtest: only explicit allowed sites and permitted normal active tabs count; URL details never persist
+ok 103 - only explicit allowed sites and permitted normal active tabs count; URL details never persist
+  ---
+  duration_ms: 0.816
+  ...
+# Subtest: configuration rejects private/sensitive sites, URLs and oversized lists
+ok 104 - configuration rejects private/sensitive sites, URLs and oversized lists
+  ---
+  duration_ms: 0.255917
+  ...
+# Subtest: retention prunes on read and persists the deletion; old/corrupt schema fails closed
+ok 105 - retention prunes on read and persists the deletion; old/corrupt schema fails closed
+  ---
+  duration_ms: 0.707125
+  ...
+# Subtest: daily aggregate buckets are bounded and saved data is viewable without provider consent
+ok 106 - daily aggregate buckets are bounded and saved data is viewable without provider consent
+  ---
+  duration_ms: 0.840417
+  ...
+# Subtest: separate provider consent, manual batching, cooldown, and changed-data checks gate summaries
+ok 107 - separate provider consent, manual batching, cooldown, and changed-data checks gate summaries
+  ---
+  duration_ms: 4.949458
+  ...
+# Subtest: clearing, disabling, revoking consent and caller cancellation suppress late results
+ok 108 - clearing, disabling, revoking consent and caller cancellation suppress late results
+  ---
+  duration_ms: 23.997167
+  ...
+# Subtest: permission revocation and clear during asynchronous observation cannot repopulate memory
+ok 109 - permission revocation and clear during asynchronous observation cannot repopulate memory
+  ---
+  duration_ms: 6.429792
+  ...
+# Subtest: host uses exact discovered Luna at low reasoning, Standard, and no browser tools or history
+ok 110 - host uses exact discovered Luna at low reasoning, Standard, and no browser tools or history
+  ---
+  duration_ms: 0.706
+  ...
+# Subtest: host rejects missing consent, arbitrary models, and extra/sensitive input before provider execution
+ok 111 - host rejects missing consent, arbitrary models, and extra/sensitive input before provider execution
+  ---
+  duration_ms: 0.472125
+  ...
+# Subtest: missing authenticated Luna gives an honest local-only fallback and never chooses an expensive model
+ok 112 - missing authenticated Luna gives an honest local-only fallback and never chooses an expensive model
+  ---
+  duration_ms: 0.155625
+  ...
+# Subtest: host enforces cancellation, text limits and a deadline even for an uncooperative provider
+ok 113 - host enforces cancellation, text limits and a deadline even for an uncooperative provider
+  ---
+  duration_ms: 5.495125
+  ...
+# Subtest: cancellation settles promptly even if the summary sender never responds
+ok 114 - cancellation settles promptly even if the summary sender never responds
+  ---
+  duration_ms: 6.622667
+  ...
+# Subtest: summary deduplication persists only a digest, not a second copy of browsing aggregates
+ok 115 - summary deduplication persists only a digest, not a second copy of browsing aggregates
+  ---
+  duration_ms: 0.576875
+  ...
+# Subtest: settings client does not collect or summarize on connect and matches only its own responses
+ok 116 - settings client does not collect or summarize on connect and matches only its own responses
+  ---
+  duration_ms: 1.248833
+  ...
+# Subtest: context settings reconnect after idle retirement and retain change notifications
+ok 117 - context settings reconnect after idle retirement and retain change notifications
+  ---
+  duration_ms: 0.277833
+  ...
+# Subtest: disconnecting an active context request rejects it without replay and allows a new request
+ok 118 - disconnecting an active context request rejects it without replay and allows a new request
+  ---
+  duration_ms: 0.147708
+  ...
+# Subtest: memory choices cannot be written before loading and lock while a save is pending
+ok 119 - memory choices cannot be written before loading and lock while a save is pending
+  ---
+  duration_ms: 0.914333
+  ...
+# Subtest: memory background refresh and failed save preserve the edited site list
+ok 120 - memory background refresh and failed save preserve the edited site list
+  ---
+  duration_ms: 2.828292
+  ...
+# Subtest: settings flow keeps local and provider consent separate and renders provider text as text
+ok 121 - settings flow keeps local and provider consent separate and renders provider text as text
+  ---
+  duration_ms: 0.739875
+  ...
+# Subtest: editor insertion is schema-bounded and unavailable to research or read-only requests
+ok 122 - editor insertion is schema-bounded and unavailable to research or read-only requests
+  ---
+  duration_ms: 0.776083
+  ...
+# Subtest: selection extends only a navigation press, in both host and worker
+ok 123 - selection extends only a navigation press, in both host and worker
+  ---
+  duration_ms: 2.906542
+  ...
+# Subtest: editor insertion preserves the caret and revalidates focus before trusted input
+ok 124 - editor insertion preserves the caret and revalidates focus before trusted input
+  ---
+  duration_ms: 1.015334
+  ...
+# Subtest: workspace-browser.test.mjs closes its server after launch failure
+ok 125 - workspace-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 11.341083
+  ...
+# Subtest: workspace-browser.test.mjs closes its server after browser close failure
+ok 126 - workspace-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 2.101625
+  ...
+# Subtest: newtab-browser.test.mjs closes its server after launch failure
+ok 127 - newtab-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.987917
+  ...
+# Subtest: newtab-browser.test.mjs closes its server after browser close failure
+ok 128 - newtab-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.932792
+  ...
+# Subtest: onboarding-browser.test.mjs closes its server after launch failure
+ok 129 - onboarding-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.335792
+  ...
+# Subtest: onboarding-browser.test.mjs closes its server after browser close failure
+ok 130 - onboarding-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.767083
+  ...
+# Subtest: whats-new-browser.test.mjs closes its server after launch failure
+ok 131 - whats-new-browser.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.060959
+  ...
+# Subtest: whats-new-browser.test.mjs closes its server after browser close failure
+ok 132 - whats-new-browser.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.749084
+  ...
+# Subtest: workspace-frame.test.mjs closes its server after launch failure
+ok 133 - workspace-frame.test.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.18025
+  ...
+# Subtest: workspace-frame.test.mjs closes its server after browser close failure
+ok 134 - workspace-frame.test.mjs closes its server after browser close failure
+  ---
+  duration_ms: 1.437792
+  ...
+# Subtest: panel-browser.mjs closes its server after launch failure
+ok 135 - panel-browser.mjs closes its server after launch failure
+  ---
+  duration_ms: 1.578583
+  ...
+# Subtest: panel-browser.mjs closes its server after browser close failure
+ok 136 - panel-browser.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.641292
+  ...
+# Subtest: research-browser.mjs closes its server after launch failure
+ok 137 - research-browser.mjs closes its server after launch failure
+  ---
+  duration_ms: 0.905209
+  ...
+# Subtest: research-browser.mjs closes its server after browser close failure
+ok 138 - research-browser.mjs closes its server after browser close failure
+  ---
+  duration_ms: 0.657125
+  ...
+# Subtest: browser-page.mjs cleans startup after launch failure
+ok 139 - browser-page.mjs cleans startup after launch failure
+  ---
+  duration_ms: 1.108792
+  ...
+# Subtest: browser-page.mjs cleans startup after browser close failure
+ok 140 - browser-page.mjs cleans startup after browser close failure
+  ---
+  duration_ms: 0.66225
+  ...
+# Subtest: docs-editor-browser.mjs cleans startup after launch failure
+ok 141 - docs-editor-browser.mjs cleans startup after launch failure
+  ---
+  duration_ms: 1.148333
+  ...
+# Subtest: docs-editor-browser.mjs cleans startup after browser close failure
+ok 142 - docs-editor-browser.mjs cleans startup after browser close failure
+  ---
+  duration_ms: 0.509917
+  ...
+# Subtest: an idle native helper exits cleanly without loading AI providers or their controllers
+ok 143 - an idle native helper exits cleanly without loading AI providers or their controllers
+  ---
+  duration_ms: 71.795042
+  ...
+# Subtest: invalid native origins are still rejected without loading AI providers
+ok 144 - invalid native origins are still rejected without loading AI providers
+  ---
+  duration_ms: 56.473708
+  ...
+# Subtest: the first AI message loads the real controller and preserves validation
+ok 145 - the first AI message loads the real controller and preserves validation
+  ---
+  duration_ms: 73.018833
+  ...
+# Subtest: both providers can advertise validated canvas mouse actions and game keys
+ok 146 - both providers can advertise validated canvas mouse actions and game keys
+  ---
+  duration_ms: 0.922459
+  ...
+# Subtest: game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions
+ok 147 - game tool schemas reject shortcuts, invalid numbers, extra fields and unconsented actions
+  ---
+  duration_ms: 0.432625
+  ...
+# Subtest: native framing decodes fragmented UTF-8 and multiple messages
+ok 148 - native framing decodes fragmented UTF-8 and multiple messages
+  ---
+  duration_ms: 0.4585
+  ...
+# Subtest: native framing rejects oversize, zero, invalid UTF-8 and truncated data
+ok 149 - native framing rejects oversize, zero, invalid UTF-8 and truncated data
+  ---
+  duration_ms: 0.133959
+  ...
+# Subtest: native framing handles every header/body split with byte-array input and empty chunks
+ok 150 - native framing handles every header/body split with byte-array input and empty chunks
+  ---
+  duration_ms: 0.952791
+  ...
+# Subtest: native framing keeps rejecting non-byte chunks, including empty arrays
+ok 151 - native framing keeps rejecting non-byte chunks, including empty arrays
+  ---
+  duration_ms: 0.086916
+  ...
+# Subtest: native framing owns partial bytes when the caller reuses an input buffer
+ok 152 - native framing owns partial bytes when the caller reuses an input buffer
+  ---
+  duration_ms: 0.14325
+  ...
+# Subtest: native framing handles repeatable fragmented/coalesced messages without losing the next header
+ok 153 - native framing handles repeatable fragmented/coalesced messages without losing the next header
+  ---
+  duration_ms: 8.161958
+  ...
+# Subtest: native framing accepts the exact input limit and rejects incomplete maximum frames
+ok 154 - native framing accepts the exact input limit and rejects incomplete maximum frames
+  ---
+  duration_ms: 15.786875
+  ...
+# Subtest: only the exact bundled extension origin is accepted
+ok 155 - only the exact bundled extension origin is accepted
+  ---
+  duration_ms: 0.464666
+  ...
+# Subtest: context and action permissions are opt-in and tools reject arbitrary execution
+ok 156 - context and action permissions are opt-in and tools reject arbitrary execution
+  ---
+  duration_ms: 0.358208
+  ...
+# Subtest: chat input rejects invalid providers, histories, ids and image URLs
+ok 157 - chat input rejects invalid providers, histories, ids and image URLs
+  ---
+  duration_ms: 0.369208
+  ...
+# Subtest: reasoning uses reported defaults and rejects unavailable model levels
+ok 158 - reasoning uses reported defaults and rejects unavailable model levels
+  ---
+  duration_ms: 0.163708
+  ...
+# Subtest: Codex Fast metadata requires a reported service tier and verified runtime support
+ok 159 - Codex Fast metadata requires a reported service tier and verified runtime support
+  ---
+  duration_ms: 0.1765
+  ...
+# Subtest: only an explicitly selected Codex Fast request enables the fast_mode feature
+ok 160 - only an explicitly selected Codex Fast request enables the fast_mode feature
+  ---
+  duration_ms: 10.807958
+  ...
+# Subtest: CLI environment removes inherited executable injection settings
+ok 161 - CLI environment removes inherited executable injection settings
+  ---
+  duration_ms: 0.096333
+  ...
+# Subtest: profile name reaches the model even when profile context is empty
+ok 162 - profile name reaches the model even when profile context is empty
+  ---
+  duration_ms: 0.230958
+  ...
+# Subtest: explicit init refreshes login discovery while concurrent inits share the in-flight request
+ok 163 - explicit init refreshes login discovery while concurrent inits share the in-flight request
+  ---
+  duration_ms: 0.661542
+  ...
+# Subtest: JSON-lines child transport correlates requests and carries notifications
+ok 164 - JSON-lines child transport correlates requests and carries notifications
+  ---
+  duration_ms: 0.866041
+  ...
+# Subtest: Codex removes catalog-native execution capabilities and fails closed for foreign tools
+ok 165 - Codex removes catalog-native execution capabilities and fails closed for foreign tools
+  ---
+  duration_ms: 0.267167
+  ...
+# Subtest: controller awaits matching browser result before completing and denies forged results
+ok 166 - controller awaits matching browser result before completing and denies forged results
+  ---
+  duration_ms: 0.819375
+  ...
+# Subtest: controller derives tool permission from consent even if a provider supplies a broader catalog
+ok 167 - controller derives tool permission from consent even if a provider supplies a broader catalog
+  ---
+  duration_ms: 0.156542
+  ...
+# Subtest: cancel rejects in-flight tools and suppresses stale text and duplicate completion
+ok 168 - cancel rejects in-flight tools and suppresses stale text and duplicate completion
+  ---
+  duration_ms: 0.373125
+  ...
+# Subtest: tool errors and timeouts terminate pending calls without executing anything locally
+ok 169 - tool errors and timeouts terminate pending calls without executing anything locally
+  ---
+  duration_ms: 4.89875
+  ...
+# Subtest: provider absence and unknown models remain truthful and do not launch chat
+ok 170 - provider absence and unknown models remain truthful and do not launch chat
+  ---
+  duration_ms: 0.473916
+  ...
+# Subtest: Claude uses no native or external tools and decodes split JSON text safely
+ok 171 - Claude uses no native or external tools and decodes split JSON text safely
+  ---
+  duration_ms: 0.231958
+  ...
+# Subtest: Claude structured output streams text, waits for result, and rejects native-tool exposure
+ok 172 - Claude structured output streams text, waits for result, and rejects native-tool exposure
+  ---
+  duration_ms: 0.5615
+  ...
+# Subtest: Codex streams agent text and waits for the extension before answering its dynamic tool request
+ok 173 - Codex streams agent text and waits for the extension before answering its dynamic tool request
+  ---
+  duration_ms: 1.028084
+  ...
+# Subtest: Claude maps only reported reasoning to --effort and never forwards Codex speed controls
+ok 174 - Claude maps only reported reasoning to --effort and never forwards Codex speed controls
+  ---
+  duration_ms: 1.0505
+  ...
+# Subtest: Codex Fast failures returned directly by turn/start include Standard retry guidance
+ok 175 - Codex Fast failures returned directly by turn/start include Standard retry guidance
+  ---
+  duration_ms: 0.2225
+  ...
+# Subtest: an unsafe Codex probe received before turn/start resolves rejects cleanly
+ok 176 - an unsafe Codex probe received before turn/start resolves rejects cleanly
+  ---
+  duration_ms: 15.724041
+  ...
+# Subtest: Codex prefers its refreshed CLI catalog and retains its restricted tool settings
+ok 177 - Codex prefers its refreshed CLI catalog and retains its restricted tool settings
+  ---
+  duration_ms: 0.714625
+  ...
+# Subtest: Codex falls back to a valid bundled catalog only when refresh has no usable catalog
+ok 178 - Codex falls back to a valid bundled catalog only when refresh has no usable catalog
+  ---
+  duration_ms: 0.207417
+  ...
+# Subtest: Codex discovery requests the refreshed catalog and intersects it with account models
+ok 179 - Codex discovery requests the refreshed catalog and intersects it with account models
+  ---
+  duration_ms: 0.494458
+  ...
+# Subtest: latest GPT models are selected by family and numeric version, with unknown IDs preserved
+ok 180 - latest GPT models are selected by family and numeric version, with unknown IDs preserved
+  ---
+  duration_ms: 0.415334
+  ...
+# Subtest: latest Claude release is selected per family and later dated aliases win ties
+ok 181 - latest Claude release is selected per family and later dated aliases win ties
+  ---
+  duration_ms: 0.375459
+  ...
+# Subtest: explicit aliases collapse to a canonical model and duplicate IDs appear once
+ok 182 - explicit aliases collapse to a canonical model and duplicate IDs appear once
+  ---
+  duration_ms: 0.07975
+  ...
+# Subtest: complete and coalesced native frames avoid temporary body buffers
+ok 183 - complete and coalesced native frames avoid temporary body buffers
+  ---
+  duration_ms: 1.445792
+  ...
+# Subtest: fragmented and shared native frames keep the owned-copy path
+ok 184 - fragmented and shared native frames keep the owned-copy path
+  ---
+  duration_ms: 0.273791
+  ...
+# Subtest: complete-body decoding preserves every split with offset and shared views
+ok 185 - complete-body decoding preserves every split with offset and shared views
+  ---
+  duration_ms: 2.929625
+  ...
+# Subtest: malformed complete bodies stay poisoned after the caller repairs its buffer
+ok 186 - malformed complete bodies stay poisoned after the caller repairs its buffer
+  ---
+  duration_ms: 0.837458
+  ...
+# Subtest: seeded malformed bodies preserve errors, follow-up pushes and finish
+ok 187 - seeded malformed bodies preserve errors, follow-up pushes and finish
+  ---
+  duration_ms: 22.024792
+  ...
+# Subtest: fragmented native frames copy bounded bytes and release the completed backing buffer
+ok 188 - fragmented native frames copy bounded bytes and release the completed backing buffer
+  ---
+  duration_ms: 82.404792
+  ...
+# Subtest: complete native frames copy only headers and release the input backing buffer
+ok 189 - complete native frames copy only headers and release the input backing buffer
+  ---
+  duration_ms: 75.521125
+  ...
+# Subtest: an open settings page starts no helper until a request and releases the idle helper
+ok 190 - an open settings page starts no helper until a request and releases the idle helper
+  ---
+  duration_ms: 306.257375
+  ...
+# Subtest: progress and overlapping requests retain the helper until every request finishes
+ok 191 - progress and overlapping requests retain the helper until every request finishes
+  ---
+  duration_ms: 303.240833
+  ...
+# Subtest: pages share one helper and route colliding UI request IDs independently
+ok 192 - pages share one helper and route colliding UI request IDs independently
+  ---
+  duration_ms: 605.064375
+  ...
+# Subtest: closing one page leaves another page request alive and ignores late replies
+ok 193 - closing one page leaves another page request alive and ignores late replies
+  ---
+  duration_ms: 3.265709
+  ...
+# Subtest: a shared helper exit fails each pending request and a later page reconnects
+ok 194 - a shared helper exit fails each pending request and a later page reconnects
+  ---
+  duration_ms: 1.450375
+  ...
+# Subtest: output frames preserve JSON values, Unicode and control characters
+ok 195 - output frames preserve JSON values, Unicode and control characters
+  ---
+  duration_ms: 1.885542
+  ...
+# Subtest: deterministic mixed UTF-16 strings produce identical complete frames
+ok 196 - deterministic mixed UTF-16 strings produce identical complete frames
+  ---
+  duration_ms: 17.349
+  ...
+# Subtest: output limit remains a UTF-8 byte limit including exact boundaries
+ok 197 - output limit remains a UTF-8 byte limit including exact boundaries
+  ---
+  duration_ms: 42.993584
+  ...
+# Subtest: JSON hooks run once and serialization errors preserve their error class
+ok 198 - JSON hooks run once and serialization errors preserve their error class
+  ---
+  duration_ms: 0.89675
+  ...
+# Subtest: valid output removes the temporary header buffer; oversized rejection remains unchanged
+ok 199 - valid output removes the temporary header buffer; oversized rejection remains unchanged
+  ---
+  duration_ms: 14.792083
+  ...
+# Subtest: prefilled allocation exposes any unwritten frame bytes
+ok 200 - prefilled allocation exposes any unwritten frame bytes
+  ---
+  duration_ms: 3.344375
+  ...
+# Subtest: producer validates every historical sample/probe and rejects malformed records
+ok 201 - producer validates every historical sample/probe and rejects malformed records
+  ---
+  duration_ms: 5.663584
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after startup failure
+ok 202 - owned SIGTERM-ignoring child is killed and reaped after startup failure
+  ---
+  duration_ms: 101.746917
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after sample failure
+ok 203 - owned SIGTERM-ignoring child is killed and reaped after sample failure
+  ---
+  duration_ms: 103.329875
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after write failure
+ok 204 - owned SIGTERM-ignoring child is killed and reaped after write failure
+  ---
+  duration_ms: 83.196459
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after reply failure
+ok 205 - owned SIGTERM-ignoring child is killed and reaped after reply failure
+  ---
+  duration_ms: 76.646542
+  ...
+# Subtest: owned SIGTERM-ignoring child is killed and reaped after close failure
+ok 206 - owned SIGTERM-ignoring child is killed and reaped after close failure
+  ---
+  duration_ms: 103.100209
+  ...
+# Subtest: startup spawn error is observed and close reaped
+ok 207 - startup spawn error is observed and close reaped
+  ---
+  duration_ms: 1.566459
+  ...
+# Subtest: original watchdog survives cleanup until child close
+ok 208 - original watchdog survives cleanup until child close
+  ---
+  duration_ms: 22.041667
+  ...
+# Subtest: producer report boundary checks deltas, source identity, structure and optional diagnostics
+ok 209 - producer report boundary checks deltas, source identity, structure and optional diagnostics
+  ---
+  duration_ms: 3.867541
+  ...
+# Subtest: new-tab frontend and native bridge agree on replies and all-day deadlines
+ok 210 - new-tab frontend and native bridge agree on replies and all-day deadlines
+  ---
+  duration_ms: 2.4055
+  ...
+# Subtest: the real background reply shows a "both" item once and to-dos only in To-dos
+ok 211 - the real background reply shows a "both" item once and to-dos only in To-dos
+  ---
+  duration_ms: 7.538708
+  ...
+# Subtest: the page and background agree on the saved-switch key
+ok 212 - the page and background agree on the saved-switch key
+  ---
+  duration_ms: 0.102709
+  ...
+# Subtest: a saved "off" answers the new tab without starting the Organato helper
+ok 213 - a saved "off" answers the new tab without starting the Organato helper
+  ---
+  duration_ms: 0.294667
+  ...
+# Subtest: helper "off" is never listed and carries no items, even for a connected account
+ok 214 - helper "off" is never listed and carries no items, even for a connected account
+  ---
+  duration_ms: 0.307459
+  ...
+# Subtest: a disabled payload with stale items, error or connection still renders as off
+ok 215 - a disabled payload with stale items, error or connection still renders as off
+  ---
+  duration_ms: 0.435709
+  ...
+# Subtest: Settings and setup changes update the saved switches; re-enabling keeps the key
+ok 216 - Settings and setup changes update the saved switches; re-enabling keeps the key
+  ---
+  duration_ms: 21.206708
+  ...
+# Subtest: new tab renders sites and Organato lanes across states
+ok 217 - new tab renders sites and Organato lanes across states
+  ---
+  duration_ms: 72441.078875
+  ...
+# Subtest: add shortcuts by URL and open tab, persist across reload and keep Add visible on narrow screens
+ok 218 - add shortcuts by URL and open tab, persist across reload and keep Add visible on narrow screens
+  ---
+  duration_ms: 2225.004709
+  ...
+# Subtest: Organato off removes the whole section and follows the switch live
+ok 219 - Organato off removes the whole section and follows the switch live
+  ---
+  duration_ms: 4544.651459
+  ...
+# Subtest: a pre-response shortcut filter cannot overwrite the loaded sites
+ok 220 - a pre-response shortcut filter cannot overwrite the loaded sites
+  ---
+  duration_ms: 23.564417
+  ...
+# Subtest: new tab files never parse HTML from strings or load remote resources
+ok 221 - new tab files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 2.10525
+  ...
+# Subtest: tone tokens stay identical to the workspace palette
+ok 222 - tone tokens stay identical to the workspace palette
+  ---
+  duration_ms: 1.846792
+  ...
+# Subtest: only http(s) URLs survive
+ok 223 - only http(s) URLs survive
+  ---
+  duration_ms: 0.301292
+  ...
+# Subtest: normalizeView drops unsafe and duplicate sites and caps the row
+ok 224 - normalizeView drops unsafe and duplicate sites and caps the row
+  ---
+  duration_ms: 0.29325
+  ...
+# Subtest: normalizeView keeps Organato enabled by default and sorts by due date
+ok 225 - normalizeView keeps Organato enabled by default and sorts by due date
+  ---
+  duration_ms: 0.419875
+  ...
+# Subtest: an item classified as both exam and assignment shows once in Upcoming
+ok 226 - an item classified as both exam and assignment shows once in Upcoming
+  ---
+  duration_ms: 0.236375
+  ...
+# Subtest: to-dos stay in To-dos and never repeat in Upcoming
+ok 227 - to-dos stay in To-dos and never repeat in Upcoming
+  ---
+  duration_ms: 0.095667
+  ...
+# Subtest: different IDs are never merged, even with the same title
+ok 228 - different IDs are never merged, even with the same title
+  ---
+  duration_ms: 0.087542
+  ...
+# Subtest: Upcoming is chronological across exams and assignments with local all-day dates
+ok 229 - Upcoming is chronological across exams and assignments with local all-day dates
+  ---
+  duration_ms: 0.272125
+  ...
+# Subtest: organatoState covers every state the section can show
+ok 230 - organatoState covers every state the section can show
+  ---
+  duration_ms: 0.349292
+  ...
+# Subtest: date-only due values are local days and relative labels read plainly
+ok 231 - date-only due values are local days and relative labels read plainly
+  ---
+  duration_ms: 0.151291
+  ...
+# Subtest: requestView sends one view request on the breezer-newtab port and closes it
+ok 232 - requestView sends one view request on the breezer-newtab port and closes it
+  ---
+  duration_ms: 4.088541
+  ...
+# Subtest: requestView fails cleanly on disconnect, timeout or a missing runtime
+ok 233 - requestView fails cleanly on disconnect, timeout or a missing runtime
+  ---
+  duration_ms: 22.668875
+  ...
+# Subtest: first-run setup walks through name, layout, theme, import, Organato and the tour
+ok 234 - first-run setup walks through name, layout, theme, import, Organato and the tour
+  ---
+  duration_ms: 18557.1975
+  ...
+# Subtest: oversized responses stop consumption and cancel the body at the existing character limit
+ok 235 - oversized responses stop consumption and cancel the body at the existing character limit
+  ---
+  duration_ms: 14.083916
+  ...
+# 2031616 bytes consumed from 4194304
+# Subtest: UTF-8 splitting, replacement and BOM behavior matches Response.text
+ok 236 - UTF-8 splitting, replacement and BOM behavior matches Response.text
+  ---
+  duration_ms: 4.264375
+  ...
+# Subtest: one oversized transport chunk is decoded only up to the rejection boundary
+ok 237 - one oversized transport chunk is decoded only up to the rejection boundary
+  ---
+  duration_ms: 2.5835
+  ...
+# 2031616 bytes decoded from one 4194304-byte chunk
+# Subtest: non-byte stream chunks retain Response.text rejection
+ok 238 - non-byte stream chunks retain Response.text rejection
+  ---
+  duration_ms: 0.470459
+  ...
+# Subtest: leading BOM removal matches the pinned Response.text implementation
+ok 239 - leading BOM removal matches the pinned Response.text implementation
+  ---
+  duration_ms: 5.007709
+  ...
+# Subtest: stalled or rejected cancellation never hides the size error or retains the reader lock
+ok 240 - stalled or rejected cancellation never hides the size error or retains the reader lock
+  ---
+  duration_ms: 8.509292
+  ...
+# Subtest: the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes
+ok 241 - the exact limit counts decoded UTF-16 characters rather than UTF-8 bytes
+  ---
+  duration_ms: 60.595583
+  ...
+# Subtest: the limit includes replacement characters emitted by the final decoder flush
+ok 242 - the limit includes replacement characters emitted by the final decoder flush
+  ---
+  duration_ms: 3.427875
+  ...
+# Subtest: empty, malformed and failed bodies preserve their error behavior
+ok 243 - empty, malformed and failed bodies preserve their error behavior
+  ---
+  duration_ms: 0.839708
+  ...
+# Subtest: abort and HTTP status still follow the original request contract
+ok 244 - abort and HTTP status still follow the original request contract
+  ---
+  duration_ms: 3.106875
+  ...
+# Subtest: a late initial view never hides the result of a newer connect attempt
+ok 245 - a late initial view never hides the result of a newer connect attempt
+  ---
+  duration_ms: 19.653166
+  ...
+# Subtest: status replies preserve typed keys and helper silence ends with a retryable error
+ok 246 - status replies preserve typed keys and helper silence ends with a retryable error
+  ---
+  duration_ms: 41.837917
+  ...
+# Subtest: progress and double clicks respect the active request
+ok 247 - progress and double clicks respect the active request
+  ---
+  duration_ms: 10.128333
+  ...
+# Subtest: idle worker retirement preserves the form and the next action reconnects
+ok 248 - idle worker retirement preserves the form and the next action reconnects
+  ---
+  duration_ms: 13.050125
+  ...
+# Subtest: a pending request is not replayed after disconnect and can be retried explicitly
+ok 249 - a pending request is not replayed after disconnect and can be retried explicitly
+  ---
+  duration_ms: 12.72975
+  ...
+# Subtest: default dashboard is enabled without sending requests or persisting a key in config
+ok 250 - default dashboard is enabled without sending requests or persisting a key in config
+  ---
+  duration_ms: 14.031667
+  ...
+# Subtest: fixed API contract supports reading, creation and versioned updates with explicit permissions
+ok 251 - fixed API contract supports reading, creation and versioned updates with explicit permissions
+  ---
+  duration_ms: 4.268333
+  ...
+# Subtest: invalid paths, fields and dates cannot become API mutations
+ok 252 - invalid paths, fields and dates cannot become API mutations
+  ---
+  duration_ms: 1.009375
+  ...
+# Subtest: Connect reports validation/save stages and avoids an unnecessary second Keychain read
+ok 253 - Connect reports validation/save stages and avoids an unnecessary second Keychain read
+  ---
+  duration_ms: 1.996208
+  ...
+# Subtest: invalid or expired credentials fail before any Keychain write
+ok 254 - invalid or expired credentials fail before any Keychain write
+  ---
+  duration_ms: 0.526917
+  ...
+# Subtest: dashboard items link directly to their task in Organato
+ok 255 - dashboard items link directly to their task in Organato
+  ---
+  duration_ms: 1.444125
+  ...
+# Subtest: large snapshot avoids eager candidate copies and stops after 180 successful targets
+ok 256 - large snapshot avoids eager candidate copies and stops after 180 successful targets
+  ---
+  duration_ms: 13.39625
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":0}
+ok 257 - snapshot ordering and filtering match baseline {"count":0}
+  ---
+  duration_ms: 0.637833
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1}
+ok 258 - snapshot ordering and filtering match baseline {"count":1}
+  ---
+  duration_ms: 0.632375
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":179}
+ok 259 - snapshot ordering and filtering match baseline {"count":179}
+  ---
+  duration_ms: 1.710791
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":180}
+ok 260 - snapshot ordering and filtering match baseline {"count":180}
+  ---
+  duration_ms: 1.756583
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":181}
+ok 261 - snapshot ordering and filtering match baseline {"count":181}
+  ---
+  duration_ms: 2.851792
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+ok 262 - snapshot ordering and filtering match baseline {"count":1000,"exclusions":true}
+  ---
+  duration_ms: 2.340875
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+ok 263 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":210}
+  ---
+  duration_ms: 1.951833
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+ok 264 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":0}
+  ---
+  duration_ms: 3.609958
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"rootOutside":true}
+ok 265 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"rootOutside":true}
+  ---
+  duration_ms: 1.9835
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+ok 266 - snapshot ordering and filtering match baseline {"count":300,"docs":true,"editorAt":20,"editorValid":false}
+  ---
+  duration_ms: 1.823625
+  ...
+# Subtest: snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+ok 267 - snapshot ordering and filtering match baseline {"count":300,"docs":false,"editorAt":20}
+  ---
+  duration_ms: 1.683917
+  ...
+# Subtest: known provider failures name the cause without exposing technical details in the reply
+ok 268 - known provider failures name the cause without exposing technical details in the reply
+  ---
+  duration_ms: 5.183208
+  ...
+# Subtest: source controller preserves history, writes, retry, terminal rendering and stale RAF ordering
+ok 269 - source controller preserves history, writes, retry, terminal rendering and stale RAF ordering
+  ---
+  duration_ms: 36.4935
+  ...
+# Subtest: storage selects truthy tail by reference and snapshots at each synchronous storage call
+ok 270 - storage selects truthy tail by reference and snapshots at each synchronous storage call
+  ---
+  duration_ms: 2.228541
+  ...
+# Subtest: actual initialize accepts loaded valid records, including empty text, before sending
+ok 271 - actual initialize accepts loaded valid records, including empty text, before sending
+  ---
+  duration_ms: 1.964708
+  ...
+# Subtest: empty replies, stop retry, pending authorization cancellation and post failure stay equivalent
+ok 272 - empty replies, stop retry, pending authorization cancellation and post failure stay equivalent
+  ---
+  duration_ms: 6.296417
+  ...
+# Subtest: negative control reproduces per-delta/frame traversal and full-filter temporary arrays
+ok 273 - negative control reproduces per-delta/frame traversal and full-filter temporary arrays
+  ---
+  duration_ms: 215.8365
+  ...
+# Subtest: current source removes hot transcript scans and bounds selected-result allocation
+ok 274 - current source removes hot transcript scans and bounds selected-result allocation
+  ---
+  duration_ms: 216.992334
+  ...
+# Subtest: sparse truthy tails preserve references, whitespace and original order without truncating live records
+ok 275 - sparse truthy tails preserve references, whitespace and original order without truncating live records
+  ---
+  duration_ms: 0.731583
+  ...
+# Subtest: provider history is a value snapshot before asynchronous page authorization
+ok 276 - provider history is a value snapshot before asynchronous page authorization
+  ---
+  duration_ms: 1.496625
+  ...
+# Subtest: explicit color modes override the OS and system follows it
+ok 277 - explicit color modes override the OS and system follows it
+  ---
+  duration_ms: 0.955542
+  ...
+# Subtest: applyTheme sets the root tone, scheme, and native color-scheme
+ok 278 - applyTheme sets the root tone, scheme, and native color-scheme
+  ---
+  duration_ms: 0.124417
+  ...
+# Subtest: the panel applies the saved appearance at load and after each appearance revision
+ok 279 - the panel applies the saved appearance at load and after each appearance revision
+  ---
+  duration_ms: 5.187916
+  ...
+# Subtest: older builds without the bridge follow the OS without throwing
+ok 280 - older builds without the bridge follow the OS without throwing
+  ---
+  duration_ms: 0.1295
+  ...
+# Subtest: getAppearance is bounded and failures keep the last good appearance
+ok 281 - getAppearance is bounded and failures keep the last good appearance
+  ---
+  duration_ms: 23.031291
+  ...
+# Subtest: every tone has light and dark palettes with readable text
+ok 282 - every tone has light and dark palettes with readable text
+  ---
+  duration_ms: 1.689167
+  ...
+# Subtest: panel palettes keep the workspace ink and accent for each tone
+ok 283 - panel palettes keep the workspace ink and accent for each tone
+  ---
+  duration_ms: 1.26175
+  ...
+# Subtest: panel CSS uses valid focus, disabled, and backdrop selectors
+ok 284 - panel CSS uses valid focus, disabled, and backdrop selectors
+  ---
+  duration_ms: 0.423541
+  ...
+# Subtest: custom colour applies to panels and is cleared when selecting a preset
+ok 285 - custom colour applies to panels and is cleared when selecting a preset
+  ---
+  duration_ms: 0.363791
+  ...
+# Subtest: custom panel colours drive its actual page and paper surfaces
+ok 286 - custom panel colours drive its actual page and paper surfaces
+  ---
+  duration_ms: 0.411792
+  ...
+# Subtest: a brand-new profile opens the setup guide, not the release notes, and only once
+ok 287 - a brand-new profile opens the setup guide, not the release notes, and only once
+  ---
+  duration_ms: 1.305167
+  ...
+# Subtest: profiles used before setup existed get release notes instead of setup
+ok 288 - profiles used before setup existed get release notes instead of setup
+  ---
+  duration_ms: 0.27175
+  ...
+# Subtest: opens release notes once per release across concurrent startup/install/window events
+ok 289 - opens release notes once per release across concurrent startup/install/window events
+  ---
+  duration_ms: 0.17525
+  ...
+# Subtest: waits for a regular window and never opens in private browsing
+ok 290 - waits for a regular window and never opens in private browsing
+  ---
+  duration_ms: 0.279208
+  ...
+# Subtest: failed tab creation remains retryable and an existing page is reused
+ok 291 - failed tab creation remains retryable and an existing page is reused
+  ---
+  duration_ms: 0.35175
+  ...
+# Subtest: a patch appends to the current minor page without reopening it
+ok 292 - a patch appends to the current minor page without reopening it
+  ---
+  duration_ms: 0.10325
+  ...
+# Subtest: codex sends labeled text-only research through the actual adapter with zero browser tools
+ok 293 - codex sends labeled text-only research through the actual adapter with zero browser tools
+  ---
+  duration_ms: 1.323791
+  ...
+# Subtest: claude sends labeled text-only research through the actual adapter with zero browser tools
+ok 294 - claude sends labeled text-only research through the actual adapter with zero browser tools
+  ---
+  duration_ms: 2.411041
+  ...
+# Subtest: explicit selection is bounded, unique and excludes internal/credential URLs
+ok 295 - explicit selection is bounded, unique and excludes internal/credential URLs
+  ---
+  duration_ms: 1.406667
+  ...
+# Subtest: collection strips browser identities, masks secrets and keeps partial failures
+ok 296 - collection strips browser identities, masks secrets and keeps partial failures
+  ---
+  duration_ms: 0.792375
+  ...
+# Subtest: source prompts identify evidence and limitations without granting any browser tools
+ok 297 - source prompts identify evidence and limitations without granting any browser tools
+  ---
+  duration_ms: 3.235292
+  ...
+# Subtest: worker sends only explicit sources, without active-page screenshot or debugger grants
+ok 298 - worker sends only explicit sources, without active-page screenshot or debugger grants
+  ---
+  duration_ms: 2.274125
+  ...
+# Subtest: worker stops research on navigation and rejects late capture
+ok 299 - worker stops research on navigation and rejects late capture
+  ---
+  duration_ms: 0.947625
+  ...
+# Subtest: worker stops research on closed and rejects late capture
+ok 300 - worker stops research on closed and rejects late capture
+  ---
+  duration_ms: 1.052291
+  ...
+# Subtest: worker stops research on active-tab and rejects late capture
+ok 301 - worker stops research on active-tab and rejects late capture
+  ---
+  duration_ms: 0.6465
+  ...
+# Subtest: worker stops research on cancel and rejects late capture
+ok 302 - worker stops research on cancel and rejects late capture
+  ---
+  duration_ms: 0.706542
+  ...
+# Subtest: worker stops research on hidden and rejects late capture
+ok 303 - worker stops research on hidden and rejects late capture
+  ---
+  duration_ms: 0.7755
+  ...
+# Subtest: worker stops research on panel-close and rejects late capture
+ok 304 - worker stops research on panel-close and rejects late capture
+  ---
+  duration_ms: 0.726667
+  ...
+# Subtest: untrusted extension ports cannot submit sources
+ok 305 - untrusted extension ports cannot submit sources
+  ---
+  duration_ms: 0.338458
+  ...
+# Subtest: native read contract gates exact documents and never widens tab permissions
+ok 306 - native read contract gates exact documents and never widens tab permissions
+  ---
+  duration_ms: 0.608125
+  ...
+# Subtest: settings routes accept a category and keep the settings view
+ok 307 - settings routes accept a category and keep the settings view
+  ---
+  duration_ms: 0.7355
+  ...
+# Subtest: every navigation category has a page, and Other leaves for native settings
+ok 308 - every navigation category has a page, and Other leaves for native settings
+  ---
+  duration_ms: 0.447834
+  ...
+# Subtest: search ranks titles above keywords and descriptions, and every word must match
+ok 309 - search ranks titles above keywords and descriptions, and every word must match
+  ---
+  duration_ms: 0.879042
+  ...
+# Subtest: settings onboarding, Organato and updates render and respond in a real browser
+ok 310 - settings onboarding, Organato and updates render and respond in a real browser
+  ---
+  duration_ms: 7252.387167
+  ...
+# Subtest: first run shows the card only after the saved choice is read
+ok 311 - first run shows the card only after the saved choice is read
+  ---
+  duration_ms: 17.7495
+  ...
+# Subtest: a dismissed card stays hidden on later visits
+ok 312 - a dismissed card stays hidden on later visits
+  ---
+  duration_ms: 10.653792
+  ...
+# Subtest: Hide persists the choice, hides the card and moves focus to the page heading
+ok 313 - Hide persists the choice, hides the card and moves focus to the page heading
+  ---
+  duration_ms: 26.09525
+  ...
+# Subtest: a failed save keeps the card and explains how to retry
+ok 314 - a failed save keeps the card and explains how to retry
+  ---
+  duration_ms: 17.538042
+  ...
+# Subtest: dismissing in another settings tab hides this card too
+ok 315 - dismissing in another settings tab hides this card too
+  ---
+  duration_ms: 9.65625
+  ...
+# Subtest: bookmarks and history opens the native import dialog without claiming success
+ok 316 - bookmarks and history opens the native import dialog without claiming success
+  ---
+  duration_ms: 17.006042
+  ...
+# Subtest: a blocked tab shows the fixed fallback address and no status
+ok 317 - a blocked tab shows the fixed fallback address and no status
+  ---
+  duration_ms: 17.730292
+  ...
+# Subtest: password steps open the existing CSV guide and never a password route directly
+ok 318 - password steps open the existing CSV guide and never a password route directly
+  ---
+  duration_ms: 19.112958
+  ...
+# Subtest: without the tabs API the import action is disabled and explained
+ok 319 - without the tabs API the import action is disabled and explained
+  ---
+  duration_ms: 8.115167
+  ...
+# Subtest: dispose stops late updates and removes the card
+ok 320 - dispose stops late updates and removes the card
+  ---
+  duration_ms: 8.671917
+  ...
+# Subtest: the module only reuses fixed password routes and stores a single flag
+ok 321 - the module only reuses fixed password routes and stores a single flag
+  ---
+  duration_ms: 0.276459
+  ...
+# Subtest: settings categories, search, Other and narrow layout work in a real browser
+ok 322 - settings categories, search, Other and narrow layout work in a real browser
+  ---
+  duration_ms: 8139.766958
+  ...
+# Subtest: focus assertions distinguish two inputs with the same label
+ok 323 - focus assertions distinguish two inputs with the same label
+  ---
+  duration_ms: 1.993917
+  ...
+# Subtest: every appearance control maps to a declared bridge field and renders the reported value
+ok 324 - every appearance control maps to a declared bridge field and renders the reported value
+  ---
+  duration_ms: 45.391333
+  ...
+# Subtest: switches, radios and swatches each write one field and persist the reported value
+ok 325 - switches, radios and swatches each write one field and persist the reported value
+  ---
+  duration_ms: 129.53675
+  ...
+# Subtest: keyboard steps on a slider keep focus and are all applied while a save is in flight
+ok 326 - keyboard steps on a slider keep focus and are all applied while a save is in flight
+  ---
+  duration_ms: 50.932792
+  ...
+# Subtest: saving one setting does not disable or dim the others
+ok 327 - saving one setting does not disable or dim the others
+  ---
+  duration_ms: 45.53875
+  ...
+# Subtest: a quick second click on a switch is applied instead of dropped
+ok 328 - a quick second click on a switch is applied instead of dropped
+  ---
+  duration_ms: 53.226416
+  ...
+# Subtest: arrowing through a radio group during a save selects the focused option
+ok 329 - arrowing through a radio group during a save selects the focused option
+  ---
+  duration_ms: 57.261167
+  ...
+# Subtest: an outside appearance change does not reset a slider the user is dragging
+ok 330 - an outside appearance change does not reset a slider the user is dragging
+  ---
+  duration_ms: 41.3785
+  ...
+# Subtest: a rejected change shows an error and the control reverts to the browser value
+ok 331 - a rejected change shows an error and the control reverts to the browser value
+  ---
+  duration_ms: 54.310833
+  ...
+# Subtest: a browser that keeps a different value reports it
+ok 332 - a browser that keeps a different value reports it
+  ---
+  duration_ms: 31.702709
+  ...
+# Subtest: without the bridge appearance controls are disabled but store-backed settings work
+ok 333 - without the bridge appearance controls are disabled but store-backed settings work
+  ---
+  duration_ms: 31.587375
+  ...
+# Subtest: rows that cannot take effect in the current layout are marked muted
+ok 334 - rows that cannot take effect in the current layout are marked muted
+  ---
+  duration_ms: 41.003209
+  ...
+# Subtest: tab behavior settings persist in the workspace store
+ok 335 - tab behavior settings persist in the workspace store
+  ---
+  duration_ms: 29.194125
+  ...
+# Subtest: spaces: rename, recolor, reorder, add and two-step delete
+ok 336 - spaces: rename, recolor, reorder, add and two-step delete
+  ---
+  duration_ms: 68.344584
+  ...
+# Subtest: a blank space name is rejected and the field shows the saved name again
+ok 337 - a blank space name is rejected and the field shows the saved name again
+  ---
+  duration_ms: 27.256125
+  ...
+# Subtest: spaces changed elsewhere appear once the user leaves a name field
+ok 338 - spaces changed elsewhere appear once the user leaves a name field
+  ---
+  duration_ms: 34.749834
+  ...
+# Subtest: browser settings links open beside the settings tab and report failures
+ok 339 - browser settings links open beside the settings tab and report failures
+  ---
+  duration_ms: 31.984041
+  ...
+# Subtest: custom color saves through the native theme field and preset restores normally
+ok 340 - custom color saves through the native theme field and preset restores normally
+  ---
+  duration_ms: 39.000375
+  ...
+# Subtest: every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+ok 341 - every visible UTF-16 prefix matches the full safe parser across block and inline boundaries
+  ---
+  duration_ms: 29.6365
+  ...
+# Subtest: deterministic malformed block combinations match at every chunk
+ok 342 - deterministic malformed block combinations match at every chunk
+  ---
+  duration_ms: 66.14975
+  ...
+# Subtest: the long formatted response matches at each streaming chunk boundary
+ok 343 - the long formatted response matches at each streaming chunk boundary
+  ---
+  duration_ms: 643.164417
+  ...
+# Subtest: committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+ok 344 - committed nodes stay attached; disposing releases the renderer and prevents further DOM writes
+  ---
+  duration_ms: 0.799917
+  ...
+# Subtest: formatted work decreases and long single-block work remains explicitly unchanged
+ok 345 - formatted work decreases and long single-block work remains explicitly unchanged
+  ---
+  duration_ms: 188.465333
+  ...
+# Subtest: panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+ok 346 - panel keeps RAF coalescing, immediate prefix output and both scroll decisions
+  ---
+  duration_ms: 2.556958
+  ...
+# Subtest: complete, stop, error and New Chat dispose streams and retain final full output
+ok 347 - complete, stop, error and New Chat dispose streams and retain final full output
+  ---
+  duration_ms: 4.743708
+  ...
+# Subtest: the full renderer remains byte-for-byte the pinned baseline
+ok 348 - the full renderer remains byte-for-byte the pinned baseline
+  ---
+  duration_ms: 0.291875
+  ...
+# Subtest: standalone probe rejects an altered baseline before reporting counts
+ok 349 - standalone probe rejects an altered baseline before reporting counts
+  ---
+  duration_ms: 1.074125
+  ...
+# Subtest: empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+ok 350 - empty replies, empty deltas and a queued RAF crossing into a new run keep existing behavior
+  ---
+  duration_ms: 3.198375
+  ...
+# Subtest: plain tail keeps its Text until fallback, resets after a boundary, and stops after disposal
+ok 351 - plain tail keeps its Text until fallback, resets after a boundary, and stops after disposal
+  ---
+  duration_ms: 0.746333
+  ...
+# Subtest: generated whitespace, control and partial-opener prefixes preserve the full-render tree
+ok 352 - generated whitespace, control and partial-opener prefixes preserve the full-render tree
+  ---
+  duration_ms: 71.454167
+  ...
+# Subtest: one delta can commit multiple blocks and seed a fresh tail without duplication
+ok 353 - one delta can commit multiple blocks and seed a fresh tail without duplication
+  ---
+  duration_ms: 0.802083
+  ...
+# Subtest: plain streams avoid repeated parser/node work while ambiguous single blocks retain it
+ok 354 - plain streams avoid repeated parser/node work while ambiguous single blocks retain it
+  ---
+  duration_ms: 5.405208
+  ...
+# Subtest: removal persists only a URL hash and Undo/reset restore it without changing history
+ok 355 - removal persists only a URL hash and Undo/reset restore it without changing history
+  ---
+  duration_ms: 5.019167
+  ...
+# Subtest: queued removals merge, malformed storage is ignored, and unsafe URLs are rejected
+ok 356 - queued removals merge, malformed storage is ignored, and unsafe URLs are rejected
+  ---
+  duration_ms: 1.36075
+  ...
+# Subtest: custom URLs persist, merge with recommendations, and can be removed and restored
+ok 357 - custom URLs persist, merge with recommendations, and can be removed and restored
+  ---
+  duration_ms: 0.88425
+  ...
+# Subtest: saved shortcuts keep space when recommendations fill the row and narrow windows reduce it
+ok 358 - saved shortcuts keep space when recommendations fill the row and narrow windows reduce it
+  ---
+  duration_ms: 1.66875
+  ...
+# Subtest: real disposable Chromium extension: provider path, DOM identity, restore, dynamic content, failure/cancel/retry and navigation
+ok 359 - real disposable Chromium extension: provider path, DOM identity, restore, dynamic content, failure/cancel/retry and navigation
+  ---
+  duration_ms: 78331.720042
+  ...
+# Subtest: live local LibreTranslate model translates the actual page in disposable Chromium
+ok 360 - live local LibreTranslate model translates the actual page in disposable Chromium # SKIP Set BREEZER_TRANSLATION_LIVE=1 with your local server running
+  ---
+  duration_ms: 0.104917
+  ...
+# Subtest: unchanged translated nodes skip visibility reads; changed, hidden and excluded text still uses eligibility checks
+ok 361 - unchanged translated nodes skip visibility reads; changed, hidden and excluded text still uses eligibility checks
+  ---
+  duration_ms: 4.450375
+  ...
+# Subtest: dynamic insertion, reveals, exclusions and site edits match the old implementation
+ok 362 - dynamic insertion, reveals, exclusions and site edits match the old implementation
+  ---
+  duration_ms: 2.750042
+  ...
+# Subtest: cancel, invalid reply, provider failure, pending site edits and retry match the old implementation
+ok 363 - cancel, invalid reply, provider failure, pending site edits and retry match the old implementation
+  ---
+  duration_ms: 7.431833
+  ...
+# Subtest: detach/reattach before a scan retains Restore, but detachment across a scan prunes the record
+ok 364 - detach/reattach before a scan retains Restore, but detachment across a scan prunes the record
+  ---
+  duration_ms: 2.777209
+  ...
+# Subtest: collected weak refs are removed while connected originals remain restorable
+ok 365 - collected weak refs are removed while connected originals remain restorable
+  ---
+  duration_ms: 1.272834
+  ...
+# Subtest: long Unicode chunks, input bounds and output limit behavior match the old implementation
+ok 366 - long Unicode chunks, input bounds and output limit behavior match the old implementation
+  ---
+  duration_ms: 2.382584
+  ...
+# Subtest: completion-only pruning is rejected because detach/reattach changes Restore
+ok 367 - completion-only pruning is rejected because detach/reattach changes Restore
+  ---
+  duration_ms: 2.278291
+  ...
+# Subtest: privacy and visibility are rechecked before writing an in-flight response
+ok 368 - privacy and visibility are rechecked before writing an in-flight response
+  ---
+  duration_ms: 2.709708
+  ...
+# Subtest: mutation reset during a pending batch, cancellation after progress and navigation preserve connected Restore
+ok 369 - mutation reset during a pending batch, cancellation after progress and navigation preserve connected Restore
+  ---
+  duration_ms: 4.677167
+  ...
+# Subtest: rate limits carry a bounded Retry-After deadline without exposing provider text
+ok 370 - rate limits carry a bounded Retry-After deadline without exposing provider text
+  ---
+  duration_ms: 12.272583
+  ...
+# Subtest: preferences default to local, opt out of dynamic sharing, and validate language codes
+ok 371 - preferences default to local, opt out of dynamic sharing, and validate language codes
+  ---
+  duration_ms: 0.35
+  ...
+# Subtest: LibreTranslate contract uses bounded text batches, no cookies/referrer/redirects, and only the chosen server receives the key
+ok 372 - LibreTranslate contract uses bounded text batches, no cookies/referrer/redirects, and only the chosen server receives the key
+  ---
+  duration_ms: 1.330958
+  ...
+# Subtest: provider rejects unsupported input, invalid/mismatched/oversized responses and hosted calls without a key
+ok 373 - provider rejects unsupported input, invalid/mismatched/oversized responses and hosted calls without a key
+  ---
+  duration_ms: 1.526459
+  ...
+# Subtest: provider reports actionable failures without reflecting server bodies or secrets; abort can be retried
+ok 374 - provider reports actionable failures without reflecting server bodies or secrets; abort can be retried
+  ---
+  duration_ms: 0.630208
+  ...
+# Subtest: the translation session refuses requests until its provider cooldown expires
+ok 375 - the translation session refuses requests until its provider cooldown expires
+  ---
+  duration_ms: 4.622083
+  ...
+# Subtest: page access comes only from context action/command; settings/content-script impersonation is refused
+ok 376 - page access comes only from context action/command; settings/content-script impersonation is refused
+  ---
+  duration_ms: 0.705792
+  ...
+# Subtest: background enforces consent and language pairs, forwards batches, aborts on cancel, and refuses navigation
+ok 377 - background enforces consent and language pairs, forwards batches, aborts on cancel, and refuses navigation
+  ---
+  duration_ms: 2.356875
+  ...
+# Subtest: manifest grants only exact optional provider origins and keeps native selected-text translation untouched
+ok 378 - manifest grants only exact optional provider origins and keeps native selected-text translation untouched
+  ---
+  duration_ms: 1.116
+  ...
+# Subtest: all themes keep settings readable and sidebar font boundaries usable
+ok 379 - all themes keep settings readable and sidebar font boundaries usable
+  ---
+  duration_ms: 6560.722625
+  ...
+# Subtest: updater starts on demand and releases empty checks and errors without closing Settings
+ok 380 - updater starts on demand and releases empty checks and errors without closing Settings
+  ---
+  duration_ms: 607.41225
+  ...
+# Subtest: pending checks, checked candidates and active installations retain their native state
+ok 381 - pending checks, checked candidates and active installations retain their native state
+  ---
+  duration_ms: 1810.192583
+  ...
+# Subtest: a later empty check releases an earlier checked candidate; stale native events cannot close its replacement
+ok 382 - a later empty check releases an earlier checked candidate; stale native events cannot close its replacement
+  ---
+  duration_ms: 605.095042
+  ...
+# Subtest: updater connections keep page ownership and close on unexpected host failure
+ok 383 - updater connections keep page ownership and close on unexpected host failure
+  ---
+  duration_ms: 1.765375
+  ...
+# Subtest: untrusted updater senders and invalid requests never launch a native helper
+ok 384 - untrusted updater senders and invalid requests never launch a native helper
+  ---
+  duration_ms: 0.898208
+  ...
+# Subtest: offers only a stable descendant release, not older or diverged commits
+ok 385 - offers only a stable descendant release, not older or diverged commits
+  ---
+  duration_ms: 1.440333
+  ...
+# Subtest: rejects missing identity, prereleases, untrusted assets, checksum conflicts and wrong architecture
+ok 386 - rejects missing identity, prereleases, untrusted assets, checksum conflicts and wrong architecture
+  ---
+  duration_ms: 0.489666
+  ...
+# Subtest: older releases without metadata explain why update cannot proceed
+ok 387 - older releases without metadata explain why update cannot proceed
+  ---
+  duration_ms: 0.130833
+  ...
+# Subtest: transaction keeps profile and rolls back after verify
+ok 388 - transaction keeps profile and rolls back after verify
+  ---
+  duration_ms: 6.046291
+  ...
+# Subtest: transaction keeps profile and rolls back after launch
+ok 389 - transaction keeps profile and rolls back after launch
+  ---
+  duration_ms: 2.938667
+  ...
+# Subtest: transaction keeps profile and retains old app backup
+ok 390 - transaction keeps profile and retains old app backup
+  ---
+  duration_ms: 2.14575
+  ...
+# (node:91275) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: update settings require an explicit install click and show helper errors
+ok 391 - update settings require an explicit install click and show helper errors
+  ---
+  duration_ms: 15.621791
+  ...
+# Subtest: idle update settings preserve status and reconnect on the next explicit check
+ok 392 - idle update settings preserve status and reconnect on the next explicit check
+  ---
+  duration_ms: 7.653459
+  ...
+# Subtest: a lost updater connection invalidates the install action and never replays installation
+ok 393 - a lost updater connection invalidates the install action and never replays installation
+  ---
+  duration_ms: 8.647625
+  ...
+# Subtest: an unanswered install restores the visible check action after timeout
+ok 394 - an unanswered install restores the visible check action after timeout
+  ---
+  duration_ms: 5.489875
+  ...
+# Subtest: handoff reuses the existing runtime and waits for the worker to acknowledge startup
+ok 395 - handoff reuses the existing runtime and waits for the worker to acknowledge startup
+  ---
+  duration_ms: 49.907083
+  ...
+# Subtest: worker exit cannot be reported as a successful handoff
+ok 396 - worker exit cannot be reported as a successful handoff
+  ---
+  duration_ms: 50.318083
+  ...
+# Subtest: worker silent cannot be reported as a successful handoff
+ok 397 - worker silent cannot be reported as a successful handoff
+  ---
+  duration_ms: 172.540375
+  ...
+# Subtest: the running worker survives replacement and deletion of its original runtime path
+ok 398 - the running worker survives replacement and deletion of its original runtime path
+  ---
+  duration_ms: 1953.836
+  ...
+# Subtest: sampling counts only consecutive active minutes and excludes sleep gaps
+ok 399 - sampling counts only consecutive active minutes and excludes sleep gaps
+  ---
+  duration_ms: 1.196834
+  ...
+# Subtest: midnight splits conservatively and monthly identifiers rotate
+ok 400 - midnight splits conservatively and monthly identifiers rotate
+  ---
+  duration_ms: 0.455
+  ...
+# Subtest: default-on sends only monthly ID and day totals, then batches for 30 minutes
+ok 401 - default-on sends only monthly ID and day totals, then batches for 30 minutes
+  ---
+  duration_ms: 3.723167
+  ...
+# Subtest: disabled reports nothing, clears local state and alarm, re-enable resets ID
+ok 402 - disabled reports nothing, clears local state and alarm, re-enable resets ID
+  ---
+  duration_ms: 0.41475
+  ...
+# Subtest: private, background, and idle windows never send or count active use
+ok 403 - private, background, and idle windows never send or count active use
+  ---
+  duration_ms: 0.617959
+  ...
+# Subtest: switching off aborts an in-flight report and never restores its local state
+ok 404 - switching off aborts an in-flight report and never restores its local state
+  ---
+  duration_ms: 0.347541
+  ...
+# Subtest: favourite tiles stay even, centred and usable across sidebar widths and themes
+ok 405 - favourite tiles stay even, centred and usable across sidebar widths and themes
+  ---
+  duration_ms: 4230.400792
+  ...
+# Subtest: floating menus cast a tight dark shadow, never a pale halo, in every scheme
+ok 406 - floating menus cast a tight dark shadow, never a pale halo, in every scheme
+  ---
+  duration_ms: 2276.918917
+  ...
+# Subtest: new-tab sites keep equal slots and icon spacing whatever the title length
+ok 407 - new-tab sites keep equal slots and icon spacing whatever the title length
+  ---
+  duration_ms: 3035.222041
+  ...
+# Subtest: What's new page renders, closes its tab and opens Settings
+ok 408 - What's new page renders, closes its tab and opens Settings
+  ---
+  duration_ms: 37093.596583
+  ...
+# Subtest: loads nothing remote
+ok 409 - loads nothing remote
+  ---
+  duration_ms: 1.224959
+  ...
+# Subtest: is CSP-safe and never injects HTML
+ok 410 - is CSP-safe and never injects HTML
+  ---
+  duration_ms: 0.305583
+  ...
+# Subtest: stores and sends nothing
+ok 411 - stores and sends nothing
+  ---
+  duration_ms: 0.172959
+  ...
+# Subtest: reads only RELEASE_VERSION from release-info.js
+ok 412 - reads only RELEASE_VERSION from release-info.js
+  ---
+  duration_ms: 0.07175
+  ...
+# Subtest: names the release only from a plain semantic version
+ok 413 - names the release only from a plain semantic version
+  ---
+  duration_ms: 0.1605
+  ...
+# Subtest: Continue browsing closes this tab, else the window
+ok 414 - Continue browsing closes this tab, else the window
+  ---
+  duration_ms: 0.196542
+  ...
+# Subtest: describes the 1.2 edition honestly, without carrying 1.1 patches
+ok 415 - describes the 1.2 edition honestly, without carrying 1.1 patches
+  ---
+  duration_ms: 0.818416
+  ...
+# Subtest: leads with selected measured wins, each naming its comparator and workload
+ok 416 - leads with selected measured wins, each naming its comparator and workload
+  ---
+  duration_ms: 0.487542
+  ...
+# Subtest: keeps every measurement, range and limit in the full results
+ok 417 - keeps every measurement, range and limit in the full results
+  ---
+  duration_ms: 28.064958
+  ...
+# Subtest: matches the local benchmark report when it is available
+ok 418 - matches the local benchmark report when it is available # SKIP benchmark report not present
+  ---
+  duration_ms: 0.304125
+  ...
+# Subtest: makes no claim the measurements do not support
+ok 419 - makes no claim the measurements do not support
+  ---
+  duration_ms: 0.311542
+  ...
+# Subtest: illustrates primary features and keeps technical notes compact
+ok 420 - illustrates primary features and keeps technical notes compact
+  ---
+  duration_ms: 0.463125
+  ...
+# Subtest: setup artwork shows the guide's steps in order
+ok 421 - setup artwork shows the guide's steps in order
+  ---
+  duration_ms: 0.100209
+  ...
+# Subtest: stays light and honours reduced motion
+ok 422 - stays light and honours reduced motion
+  ---
+  duration_ms: 0.109458
+  ...
+# Subtest: compact folder disclosure stays inside the rail at every sidebar font size
+ok 423 - compact folder disclosure stays inside the rail at every sidebar font size
+  ---
+  duration_ms: 3303.246417
+  ...
+# Subtest: sidebar releases unused route markup and reloads Settings and welcome intact
+ok 424 - sidebar releases unused route markup and reloads Settings and welcome intact
+  ---
+  duration_ms: 1236.867
+  ...
+# Subtest: empty Settings-created spaces and sidebar controls respond to held clicks
+ok 425 - empty Settings-created spaces and sidebar controls respond to held clicks
+  ---
+  duration_ms: 3047.885125
+  ...
+# Subtest: dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+ok 426 - dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+  ---
+  duration_ms: 1716.223542
+  ...
+# Subtest: delayed tab queries cannot revive closed rows or overwrite navigation and activation
+ok 427 - delayed tab queries cannot revive closed rows or overwrite navigation and activation
+  ---
+  duration_ms: 1869.84175
+  ...
+# Subtest: Arc-style sidebar and settings work against the chrome.* fixture
+ok 428 - Arc-style sidebar and settings work against the chrome.* fixture
+  ---
+  duration_ms: 6148.0025
+  ...
+# Subtest: tab updates leave unchanged rows and their audio controls intact
+ok 429 - tab updates leave unchanged rows and their audio controls intact
+  ---
+  duration_ms: 1191.508959
+  ...
+# Subtest: numbered favorite command lazily opens the saved first slot, once under rapid repeat
+ok 430 - numbered favorite command lazily opens the saved first slot, once under rapid repeat
+  ---
+  duration_ms: 1189.383041
+  ...
+# Subtest: numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+ok 431 - numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+  ---
+  duration_ms: 1257.609375
+  ...
+# Subtest: numbered favorite activation is scoped to the host window, including another window with a live target
+ok 432 - numbered favorite activation is scoped to the host window, including another window with a live target
+  ---
+  duration_ms: 1079.384917
+  ...
+# Subtest: sidebar text follows sidebarFontSize and content clears the title bar band
+ok 433 - sidebar text follows sidebarFontSize and content clears the title bar band
+  ---
+  duration_ms: 1751.876
+  ...
+# Subtest: both exported operations index containing spaces directly without per-node wrappers
+ok 434 - both exported operations index containing spaces directly without per-node wrappers
+  ---
+  duration_ms: 1.193542
+  ...
+# Subtest: favorite null bindings stay present; tombstones, falsey IDs and second bindings become today
+ok 435 - favorite null bindings stay present; tombstones, falsey IDs and second bindings become today
+  ---
+  duration_ms: 0.494625
+  ...
+# Subtest: last duplicate ID wins and each operation sees moved or replaced spaces
+ok 436 - last duplicate ID wins and each operation sees moved or replaced spaces
+  ---
+  duration_ms: 0.364958
+  ...
+# Subtest: frozen saved stores preserve node, tab and preferences identities without mutation
+ok 437 - frozen saved stores preserve node, tab and preferences identities without mutation
+  ---
+  duration_ms: 0.188208
+  ...
+# Subtest: patchMembers never requests, reads, normalizes or stringifies the saved store
+ok 438 - patchMembers never requests, reads, normalizes or stringifies the saved store
+  ---
+  duration_ms: 4.266833
+  ...
+# Subtest: overlapping windows share the exact named FIFO lock with general transactions
+ok 439 - overlapping windows share the exact named FIFO lock with general transactions
+  ---
+  duration_ms: 0.681834
+  ...
+# Subtest: unchanged writes are suppressed and removals win over sets
+ok 440 - unchanged writes are suppressed and removals win over sets
+  ---
+  duration_ms: 0.347917
+  ...
+# Subtest: malformed stored members use existing normalization without persisting cleanup alone
+ok 441 - malformed stored members use existing normalization without persisting cleanup alone
+  ---
+  duration_ms: 0.5845
+  ...
+# Subtest: session rollover retains previous and current records, resets quarantine, and stays fresh across windows
+ok 442 - session rollover retains previous and current records, resets quarantine, and stays fresh across windows
+  ---
+  duration_ms: 0.418125
+  ...
+# Subtest: a failed membership write rejects and releases the lock for the next writer
+ok 443 - a failed membership write rejects and releases the lock for the next writer
+  ---
+  duration_ms: 0.344625
+  ...
+# Subtest: only live favourite tabs in this window become peek sources, kept in sync
+ok 444 - only live favourite tabs in this window become peek sources, kept in sync
+  ---
+  duration_ms: 1310.938083
+  ...
+# Subtest: builds without setPeekSources keep the sidebar working
+ok 445 - builds without setPeekSources keep the sidebar working
+  ---
+  duration_ms: 1036.387958
+  ...
+# Subtest: failed tab icons show a fallback and recover when a valid icon arrives
+ok 446 - failed tab icons show a fallback and recover when a valid icon arrives
+  ---
+  duration_ms: 1097.894292
+  ...
+# Subtest: a tab opened between the initial query and event subscription is shown
+ok 447 - a tab opened between the initial query and event subscription is shown
+  ---
+  duration_ms: 1035.05625
+  ...
+# Subtest: workspace files never parse HTML from strings or load remote resources
+ok 448 - workspace files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 5.220833
+  ...
+# Subtest: every tone keeps text readable on sidebar surfaces in light and dark
+ok 449 - every tone keeps text readable on sidebar surfaces in light and dark
+  ---
+  duration_ms: 1.100542
+  ...
+# Subtest: routes parse the explicit native window id
+ok 450 - routes parse the explicit native window id
+  ---
+  duration_ms: 0.909875
+  ...
+# Subtest: appearance defaults and validation match the native contract
+ok 451 - appearance defaults and validation match the native contract
+  ---
+  duration_ms: 0.58625
+  ...
+# Subtest: appearance font bounds and native booleans reject an entire invalid patch
+ok 452 - appearance font bounds and native booleans reject an entire invalid patch
+  ---
+  duration_ms: 0.42325
+  ...
+# Subtest: store normalization survives corrupt data and keeps at least one space
+ok 453 - store normalization survives corrupt data and keeps at least one space
+  ---
+  duration_ms: 0.322625
+  ...
+# Subtest: space, folder, entry and favorite operations
+ok 454 - space, folder, entry and favorite operations
+  ---
+  duration_ms: 1.978167
+  ...
+# Subtest: sidebar model splits favorites, pinned and today tabs per space
+ok 455 - sidebar model splits favorites, pinned and today tabs per space
+  ---
+  duration_ms: 0.360667
+  ...
+# Subtest: moveIndex places a tab before a neighbor or at the end of the visible list
+ok 456 - moveIndex places a tab before a neighbor or at the end of the visible list
+  ---
+  duration_ms: 0.133333
+  ...
+# Subtest: restart: previous-session records restore spaces and pinned bindings by URL
+ok 457 - restart: previous-session records restore spaces and pinned bindings by URL
+  ---
+  duration_ms: 0.604375
+  ...
+# Subtest: restart: ambiguous exact URL records fall back independent of window restore order
+ok 458 - restart: ambiguous exact URL records fall back independent of window restore order
+  ---
+  duration_ms: 0.976167
+  ...
+# Subtest: restart: ambiguous path-only URL records fall back independent of window restore order
+ok 459 - restart: ambiguous path-only URL records fall back independent of window restore order
+  ---
+  duration_ms: 0.516875
+  ...
+# Subtest: restart: unique and same-assignment URL candidates keep their space
+ok 460 - restart: unique and same-assignment URL candidates keep their space
+  ---
+  duration_ms: 0.16325
+  ...
+# Subtest: restart: path match, pinned entry match, orphan pinned and reload with stable ids
+ok 461 - restart: path match, pinned entry match, orphan pinned and reload with stable ids
+  ---
+  duration_ms: 0.197458
+  ...
+# Subtest: optional per-tab hints win when available
+ok 462 - optional per-tab hints win when available
+  ---
+  duration_ms: 0.061333
+  ...
+# Subtest: rollSession keeps only the previous session for matching
+ok 463 - rollSession keeps only the previous session for matching
+  ---
+  duration_ms: 0.055875
+  ...
+# Subtest: WorkspaceStore serializes concurrent writers from different windows
+ok 464 - WorkspaceStore serializes concurrent writers from different windows
+  ---
+  duration_ms: 28.476208
+  ...
+# Subtest: WorkspaceStore: browser restart restores today tabs to their spaces
+ok 465 - WorkspaceStore: browser restart restores today tabs to their spaces
+  ---
+  duration_ms: 9.086666
+  ...
+# Subtest: WorkspaceStore persists URL quarantine before another window restores the same page
+ok 466 - WorkspaceStore persists URL quarantine before another window restores the same page
+  ---
+  duration_ms: 8.724
+  ...
+# Subtest: duplicate saved pins never borrow another space or multiply during restore
+ok 467 - duplicate saved pins never borrow another space or multiply during restore
+  ---
+  duration_ms: 0.260834
+  ...
+# Subtest: restoring a large session parses each saved URL once instead of rescanning the session per tab
+ok 468 - restoring a large session parses each saved URL once instead of rescanning the session per tab
+  ---
+  duration_ms: 3.199125
+  ...
+# Subtest: actual autoDiscardable events avoid scheduled frames and full draws, preserving state and DOM
+ok 469 - actual autoDiscardable events avoid scheduled frames and full draws, preserving state and DOM
+  ---
+  duration_ms: 29.743458
+  ...
+# Subtest: visual, membership, sorting and unknown changes retain baseline work and snapshots
+ok 470 - visual, membership, sorting and unknown changes retain baseline work and snapshots
+  ---
+  duration_ms: 24.21
+  ...
+# Subtest: first-seen tabs and full-snapshot differences redraw even with autoDiscardable-only changeInfo
+ok 471 - first-seen tabs and full-snapshot differences redraw even with autoDiscardable-only changeInfo
+  ---
+  duration_ms: 19.602042
+  ...
+# Subtest: flat cloned mutedInfo can be equivalent; mutable aliases and unknown nested data default to redraw
+ok 472 - flat cloned mutedInfo can be equivalent; mutable aliases and unknown nested data default to redraw
+  ---
+  duration_ms: 14.181708
+  ...
+# Subtest: skipped events invalidate in-flight queries at the exact event version and trigger recovery
+ok 473 - skipped events invalidate in-flight queries at the exact event version and trigger recovery
+  ---
+  duration_ms: 3.171
+  ...
+# Subtest: newer queries win and mixed bursts coalesce without dropping visual state
+ok 474 - newer queries win and mixed bursts coalesce without dropping visual state
+  ---
+  duration_ms: 2.926583
+  ...
+# Subtest: deterministic mixed stream preserves snapshots after every event and activation
+ok 475 - deterministic mixed stream preserves snapshots after every event and activation
+  ---
+  duration_ms: 129.481917
+  ...
+# Subtest: new-tab resizes keep every shortcut without storage, filtering or painting
+ok 476 - new-tab resizes keep every shortcut without storage, filtering or painting
+  ---
+  duration_ms: 21.659083
+  ...
+# Subtest: shortcut changes and explicit Reset still refresh at the same width
+ok 477 - shortcut changes and explicit Reset still refresh at the same width
+  ---
+  duration_ms: 1.767208
+  ...
+# Subtest: resize during initial shortcut filtering preserves all eight shortcuts
+ok 478 - resize during initial shortcut filtering preserves all eight shortcuts
+  ---
+  duration_ms: 1.114
+  ...
+# Subtest: failed shortcut refreshes can retry and pagehide releases storage listeners
+ok 479 - failed shortcut refreshes can retry and pagehide releases storage listeners
+  ---
+  duration_ms: 1.4065
+  ...
+# Subtest: expired Undo releases its action and clicking active Undo still invokes it once
+ok 480 - expired Undo releases its action and clicking active Undo still invokes it once
+  ---
+  duration_ms: 0.817584
+  ...
+# Subtest: footprint instrumentation has its own initialized protocol and preserves balanced orders
+ok 481 - footprint instrumentation has its own initialized protocol and preserves balanced orders
+  ---
+  duration_ms: 1.288708
+  ...
+# Subtest: footprint sums the first kernel observation after checking the full tree and both kernel identities
+ok 482 - footprint sums the first kernel observation after checking the full tree and both kernel identities
+  ---
+  duration_ms: 0.479125
+  ...
+# Subtest: footprint is unavailable for churn, PID reuse, missing values, partial capture or unsafe totals
+ok 483 - footprint is unavailable for churn, PID reuse, missing values, partial capture or unsafe totals
+  ---
+  duration_ms: 0.754083
+  ...
+# Subtest: footprint summaries require every observation and never replace missing data with zero
+ok 484 - footprint summaries require every observation and never replace missing data with zero
+  ---
+  duration_ms: 0.151708
+  ...
+# Subtest: three-app footprint summaries keep trial medians separate and retain unavailable windows
+ok 485 - three-app footprint summaries keep trial medians separate and retain unavailable windows
+  ---
+  duration_ms: 0.436916
+  ...
+# Subtest: native foreground readiness rejects covered, hidden, wrong-PID and unusable windows
+ok 486 - native foreground readiness rejects covered, hidden, wrong-PID and unusable windows
+  ---
+  duration_ms: 0.119417
+  ...
+# Subtest: two-browser protocols retain their existing alternating order
+ok 487 - two-browser protocols retain their existing alternating order
+  ---
+  duration_ms: 0.135625
+  ...
+# Subtest: three-browser order balances positions and every pair in each six-round block
+ok 488 - three-browser order balances positions and every pair in each six-round block
+  ---
+  duration_ms: 0.4135
+  ...
+# Subtest: three-browser summaries retain separate startup and memory observations
+ok 489 - three-browser summaries retain separate startup and memory observations
+  ---
+  duration_ms: 0.446083
+  ...
+# Subtest: process RSS includes every descendant and excludes unrelated user sessions
+ok 490 - process RSS includes every descendant and excludes unrelated user sessions
+  ---
+  duration_ms: 0.3925
+  ...
+# Subtest: missing browser root never adopts an unrelated process
+ok 491 - missing browser root never adopts an unrelated process
+  ---
+  duration_ms: 0.100083
+  ...
+# Subtest: summary preserves small-sample spread and even-count median
+ok 492 - summary preserves small-sample spread and even-count median
+  ---
+  duration_ms: 0.125291
+  ...
+# Subtest: benchmark does not inject automation flags that disable product functionality
+ok 493 - benchmark does not inject automation flags that disable product functionality
+  ---
+  duration_ms: 0.122458
+  ...
+# Subtest: process load retains renderer PID and full command while excluding other browser sessions
+ok 494 - process load retains renderer PID and full command while excluding other browser sessions
+  ---
+  duration_ms: 1.074958
+  ...
+# Subtest: CPU time parses observed macOS minute and centisecond formats without treating minutes as hours
+ok 495 - CPU time parses observed macOS minute and centisecond formats without treating minutes as hours
+  ---
+  duration_ms: 0.1095
+  ...
+# Subtest: settled CPU sums counter deltas across all observed processes over actual monotonic capture bounds
+ok 496 - settled CPU sums counter deltas across all observed processes over actual monotonic capture bounds
+  ---
+  duration_ms: 0.372
+  ...
+# Subtest: idle CPU and observations at or below aggregate counter uncertainty are unavailable
+ok 497 - idle CPU and observations at or below aggregate counter uncertainty are unavailable
+  ---
+  duration_ms: 0.140666
+  ...
+# Subtest: counter uncertainty grows with PID count even when observed CPU is unchanged
+ok 498 - counter uncertainty grows with PID count even when observed CPU is unchanged
+  ---
+  duration_ms: 0.361041
+  ...
+# Subtest: aggregate CPU seconds per elapsed second can exceed one core
+ok 499 - aggregate CPU seconds per elapsed second can exceed one core
+  ---
+  duration_ms: 0.055959
+  ...
+# Subtest: CPU is unavailable for process churn, PID reuse, identity changes, missing counters, or an intermediate reset
+ok 500 - CPU is unavailable for process churn, PID reuse, identity changes, missing counters, or an intermediate reset
+  ---
+  duration_ms: 0.22875
+  ...
+# Subtest: CPU is unavailable for legacy samples, insufficient samples, invalid timestamps, or overlapping captures
+ok 501 - CPU is unavailable for legacy samples, insufficient samples, invalid timestamps, or overlapping captures
+  ---
+  duration_ms: 0.108125
+  ...
+# Subtest: a double-frame timeout stays rejected and identifies the exact failing readiness stage
+ok 502 - a double-frame timeout stays rejected and identifies the exact failing readiness stage
+  ---
+  duration_ms: 0.246
+  ...
+# Subtest: failure evidence survives an unresponsive renderer without activating, navigating, or closing it
+ok 503 - failure evidence survives an unresponsive renderer without activating, navigating, or closing it
+  ---
+  duration_ms: 0.2725
+  ...
+# Subtest: failure capture before CDP connects still retains the launch and native process state
+ok 504 - failure capture before CDP connects still retains the launch and native process state
+  ---
+  duration_ms: 0.157042
+  ...
+# Subtest: content tab count excludes only runtime-verified native sidebar hosts
+ok 505 - content tab count excludes only runtime-verified native sidebar hosts
+  ---
+  duration_ms: 0.601166
+  ...
+# Subtest: untimed initialization completes the actual setup guide and closes only its resulting new tab
+ok 506 - untimed initialization completes the actual setup guide and closes only its resulting new tab
+  ---
+  duration_ms: 0.349542
+  ...
+# Subtest: untimed initialization supports the old notes page and always detaches failed sessions
+ok 507 - untimed initialization supports the old notes page and always detaches failed sessions
+  ---
+  duration_ms: 0.139333
+  ...
+# Subtest: untimed initialization never closes a setup target that navigated to an unexpected page
+ok 508 - untimed initialization never closes a setup target that navigated to an unexpected page
+  ---
+  duration_ms: 0.076834
+  ...
+# Subtest: all benchmark launches use the test keychain without disabling browser features
+ok 509 - all benchmark launches use the test keychain without disabling browser features
+  ---
+  duration_ms: 0.413292
+  ...
+# Subtest: credential-isolated results cannot be pooled under the historical protocol label
+ok 510 - credential-isolated results cannot be pooled under the historical protocol label
+  ---
+  duration_ms: 0.098958
+  ...
+# Subtest: matching compiled bytes are returned without retaining payloads or refetching the index
+ok 511 - matching compiled bytes are returned without retaining payloads or refetching the index
+  ---
+  duration_ms: 4.772584
+  ...
+# Subtest: raw text changes and unknown/user/external keys miss before a payload read
+ok 512 - raw text changes and unknown/user/external keys miss before a payload read
+  ---
+  duration_ms: 0.720125
+  ...
+# Subtest: each live compilation or trust difference selects ordinary fallback
+ok 513 - each live compilation or trust difference selects ordinary fallback
+  ---
+  duration_ms: 0.686167
+  ...
+# Subtest: a trust change during payload I/O cannot return a previously trusted result
+ok 514 - a trust change during payload I/O cannot return a previously trusted result
+  ---
+  duration_ms: 0.48825
+  ...
+# Subtest: corrupt, truncated, invalid UTF-8 and wrong-magic payloads miss
+ok 515 - corrupt, truncated, invalid UTF-8 and wrong-magic payloads miss
+  ---
+  duration_ms: 1.506209
+  ...
+# Subtest: unsafe paths, malformed catalogs and sizes outside fixed limits miss
+ok 516 - unsafe paths, malformed catalogs and sizes outside fixed limits miss
+  ---
+  duration_ms: 0.570292
+  ...
+# Subtest: resource/context errors are misses and do not poison subsequent work
+ok 517 - resource/context errors are misses and do not poison subsequent work
+  ---
+  duration_ms: 0.499875
+  ...
+# Subtest: concurrent list loads keep at most one payload buffer in flight
+ok 518 - concurrent list loads keep at most one payload buffer in flight
+  ---
+  duration_ms: 19.464333
+  ...
+# Subtest: Unicode is byte-exact, with no normalization or lone-surrogate collisions
+ok 519 - Unicode is byte-exact, with no normalization or lone-surrogate collisions
+  ---
+  duration_ms: 0.819125
+  ...
+# Subtest: the packaged-resource reader cancels a body that exceeds its fixed index limit
+ok 520 - the packaged-resource reader cancels a body that exceeds its fixed index limit
+  ---
+  duration_ms: 11.011833
+  ...
+# Subtest: password actions open pinned native pages in Breezer, without reading credentials
+ok 521 - password actions open pinned native pages in Breezer, without reading credentials
+  ---
+  duration_ms: 0.753416
+  ...
+# Subtest: no arbitrary URL or inherited object property can become a password destination
+ok 522 - no arbitrary URL or inherited object property can become a password destination
+  ---
+  duration_ms: 0.326042
+  ...
+# Subtest: unavailable integration and rejected tab opens fail without claiming import success
+ok 523 - unavailable integration and rejected tab opens fail without claiming import success
+  ---
+  duration_ms: 0.453542
+  ...
+# Subtest: runtime fixture contains only one explicit dummy credential
+ok 524 - runtime fixture contains only one explicit dummy credential
+  ---
+  duration_ms: 2.763709
+  ...
+# Subtest: persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+ok 525 - persistent identity preserves duplicate URLs; local IDs and folder expansion never sync
+  ---
+  duration_ms: 2.287917
+  ...
+# Subtest: restoring many folder states reads local pins a linear number of times
+ok 526 - restoring many folder states reads local pins a linear number of times
+  ---
+  duration_ms: 15.47375
+  ...
+# 1000 local pin reads for 1000 folders
+# Subtest: folder expansion preserves the first match within the last matching local space
+ok 527 - folder expansion preserves the first match within the last matching local space
+  ---
+  duration_ms: 0.576959
+  ...
+# Subtest: folder restoration skips unrelated pins once all matching states are found
+ok 528 - folder restoration skips unrelated pins once all matching states are found
+  ---
+  duration_ms: 0.475042
+  ...
+# Subtest: two offline clients converge with concurrent rename, move, independent field edits and restart
+ok 529 - two offline clients converge with concurrent rename, move, independent field edits and restart
+  ---
+  duration_ms: 1.553959
+  ...
+# Subtest: deletions survive stale clients, later edits and concurrent folder/space removal
+ok 530 - deletions survive stale clients, later edits and concurrent folder/space removal
+  ---
+  duration_ms: 1.0575
+  ...
+# Subtest: same-field ties use stable client order; merge is associative
+ok 531 - same-field ties use stable client order; merge is associative
+  ---
+  duration_ms: 0.927667
+  ...
+# Subtest: appearance allowlist includes only supported preferences and keeps field-level changes
+ok 532 - appearance allowlist includes only supported preferences and keeps field-level changes
+  ---
+  duration_ms: 0.651
+  ...
+# Subtest: malformed and future data reject without mutating either client
+ok 533 - malformed and future data reject without mutating either client
+  ---
+  duration_ms: 0.478417
+  ...
+# Subtest: concurrent deletion of different last spaces recovers a usable stable identity
+ok 534 - concurrent deletion of different last spaces recovers a usable stable identity
+  ---
+  duration_ms: 1.279333
+  ...
+# Subtest: concurrent capacity overflow rejects instead of silently losing saved items
+ok 535 - concurrent capacity overflow rejects instead of silently losing saved items
+  ---
+  duration_ms: 0.732042
+  ...
+# Subtest: clock and payload limits fail without replacing local state
+ok 536 - clock and payload limits fail without replacing local state
+  ---
+  duration_ms: 2.877583
+  ...
+# Subtest: incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+ok 537 - incomplete or conflicting cross-kind identities reject instead of dropping an item during normalization
+  ---
+  duration_ms: 0.29125
+  ...
+# Subtest: two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+ok 538 - two independent provider clients enforce CAS, preserve opaque bytes and reconnect after server restart
+  ---
+  duration_ms: 232.95625
+  ...
+# Subtest: provider permission, key boundaries, and native enum spellings match imported API
+ok 539 - provider permission, key boundaries, and native enum spellings match imported API
+  ---
+  duration_ms: 2.580167
+  ...
+# Subtest: cancel and dispose abort in-flight provider work without stale replies
+ok 540 - cancel and dispose abort in-flight provider work without stale replies
+  ---
+  duration_ms: 0.502125
+  ...
+# Subtest: workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership
+ok 541 - workspace worker reconciles through a native-API fixture, including restart, duplicate URLs and local membership
+  ---
+  duration_ms: 4.681458
+  ...
+# Subtest: offline changes survive capture, worker restart and remote deletion
+ok 542 - offline changes survive capture, worker restart and remote deletion
+  ---
+  duration_ms: 3.165459
+  ...
+# Subtest: unchanged sync cycles preserve durable recovery data without rewriting storage
+ok 543 - unchanged sync cycles preserve durable recovery data without rewriting storage
+  ---
+  duration_ms: 1.194375
+  ...
+# Subtest: changed local recovery data reaches storage before a failing exchange
+ok 544 - changed local recovery data reaches storage before a failing exchange
+  ---
+  duration_ms: 1.634833
+  ...
+# Subtest: remote changes remain captured if applying the local workspace fails
+ok 545 - remote changes remain captured if applying the local workspace fails
+  ---
+  duration_ms: 1.8155
+  ...
+# Subtest: untouched joining profile defaults do not overwrite remote space names or appearance
+ok 546 - untouched joining profile defaults do not overwrite remote space names or appearance
+  ---
+  duration_ms: 0.785625
+  ...
+# Subtest: disabled and disconnected clients never write or apply remote data
+ok 547 - disabled and disconnected clients never write or apply remote data
+  ---
+  duration_ms: 0.106125
+  ...
+# Subtest: invalid remote data preserves local store and membership
+ok 548 - invalid remote data preserves local store and membership
+  ---
+  duration_ms: 0.114625
+  ...
+# Subtest: CAS conflicts retry with remote edits without dropping captured local edits
+ok 549 - CAS conflicts retry with remote edits without dropping captured local edits
+  ---
+  duration_ms: 2.200625
+  ...
+# Subtest: local capture failure never publishes a partial snapshot or replaces saved data
+ok 550 - local capture failure never publishes a partial snapshot or replaces saved data
+  ---
+  duration_ms: 0.153625
+  ...
+# Subtest: explicit overflow recovery keeps pins when removing a concurrent space
+ok 551 - explicit overflow recovery keeps pins when removing a concurrent space
+  ---
+  duration_ms: 4.284083
+  ...
+# Subtest: changing providers with the same vault UUID cannot receive an old in-flight write
+ok 552 - changing providers with the same vault UUID cannot receive an old in-flight write
+  ---
+  duration_ms: 0.585
+  ...
+# Subtest: managed appearance changes do not block valid saved spaces or overwrite the local appearance
+ok 553 - managed appearance changes do not block valid saved spaces or overwrite the local appearance
+  ---
+  duration_ms: 1.361666
+  ...
+1..553
+# tests 553
+# suites 0
+# pass 551
+# fail 0
+# cancelled 0
+# skipped 2
+# todo 0
+# duration_ms 296928.683459
+PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.
+Screenshots: /tmp/breezer-ui-polish/release-1.2.5-suite
+PASS: shipped picker keyboard selection, max-six limit, loading state, chips/removal/clear, precise sharing hint, two origins, no active-page grant/screenshot/control, truncation, partial failure, cancellation/late-result rejection, navigation revocation, real fixed-script extraction/redaction. Native API transport and paid providers remain unverified.
+Screenshots: /tmp/breezer-ui-polish/release-1.2.5-suite/research-{selected-tabs,picker,partial-failure}.png

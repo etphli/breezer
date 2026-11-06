@@ -102,8 +102,12 @@ async function mountFeatures(api) {
   await Promise.all(FEATURE_MOUNTS.map(async ({ container, load }) => {
     const node = $(container);
     if (!node) return;
+    const loading = el('p', 'section-note', { role: 'status' });
+    loading.textContent = 'Loading settings…';
+    node.replaceChildren(loading);
     try {
       const handle = await (await load())({ container: node, api });
+      loading.remove();
       if (typeof handle?.dispose === 'function') addEventListener('pagehide', () => handle.dispose(), { once: true });
     } catch (failure) {
       // One feature failing to load must not take the rest of Settings with it.
@@ -116,6 +120,7 @@ async function mountFeatures(api) {
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
+  const featuresReady = mountFeatures(api);
   void mountUsageSettings({ api, container: $('usage-settings') });
   groupSection($('usage-settings'));
   const passwords = mountPasswords({ container: $('password-settings'), api });
@@ -133,7 +138,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
   }
   nav = mountSettingsNav({ api });
-  void mountFeatures(api).then(() => nav.refreshAvailability());
+  void featuresReady.then(() => nav.refreshAvailability());
   let { appearance, available, error } = await loadAppearance();
   let store = (await workspace.read()).store;
 
@@ -181,6 +186,9 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     applyAppearance(appearance);
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
+    const customSelected = /^#[0-9a-fA-F]{6}$/.test(appearance.theme);
+    $('custom-theme-note').textContent = customSelected ? 'Custom color selected' : 'Create a theme for the browser and sidebar.';
+    $('custom-theme-apply').setAttribute('aria-pressed', String(customSelected));
     if (/^#[0-9a-fA-F]{6}$/.test(appearance.theme) && document.activeElement !== $('custom-theme-color')) $('custom-theme-color').value = appearance.theme;
     for (const range of ranges) {
       const field = range.dataset.field;
@@ -327,12 +335,14 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
       const actions = el('div', 'space-actions');
       const up = el('button', 'small-button', { type: 'button', 'aria-label': `Move ${space.name} up` });
-      up.textContent = 'Up';
+      up.textContent = '↑';
+      up.title = `Move ${space.name} up`;
       up.dataset.control = 'up';
       up.disabled = index === 0;
       up.addEventListener('click', () => void mutateSpaces((draft) => moveSpace(draft, space.id, -1)));
       const down = el('button', 'small-button', { type: 'button', 'aria-label': `Move ${space.name} down` });
-      down.textContent = 'Down';
+      down.textContent = '↓';
+      down.title = `Move ${space.name} down`;
       down.dataset.control = 'down';
       down.disabled = index === store.spaces.length - 1;
       down.addEventListener('click', () => void mutateSpaces((draft) => moveSpace(draft, space.id, 1)));
@@ -435,8 +445,8 @@ export function mountUpdates(api) {
     const needsCheck = pending !== null || available || installing;
     clearTimeout(timer); clearInterval(poll); poll = null; pending = null;
     available = false; installing = false;
-    check.disabled = false; install.disabled = true; install.hidden = true;
-    if (needsCheck) status.textContent = 'Update helper disconnected. Check for updates again.';
+    check.disabled = false; check.hidden = false; install.disabled = true; install.hidden = true;
+    if (needsCheck) { status.textContent = 'The update check disconnected. Choose Check for updates to retry.'; status.dataset.state = 'error'; }
   };
   const connect = () => {
     if (port) return port;
@@ -446,10 +456,12 @@ export function mountUpdates(api) {
       if (closed || port !== connection || message.id !== pending) return;
       clearTimeout(timer); pending = null;
       check.disabled = false;
-      if (!message.ok) { status.textContent = message.error; return; }
+      if (!message.ok) { check.hidden = false; status.textContent = String(message.error).replace(/Update helper unavailable\.?/i, 'The update check is unavailable.').replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
       const value = message.value;
+      status.dataset.state = value.phase === 'failed' ? 'error' : '';
       status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
       if (value.available !== undefined) { available = value.available === true; install.hidden = !available; }
+      check.hidden = available && value.phase !== 'failed';
       install.disabled = !available;
       if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
       if (value.installing) {
@@ -468,9 +480,10 @@ export function mountUpdates(api) {
   const request = type => {
     if (closed || pending || (type === 'update-install' && !available)) return;
     pending = String(++sequence);
+    status.dataset.state = '';
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
-    timer = setTimeout(() => { pending = null; check.disabled = false; status.textContent = 'Update helper did not respond. Try again.'; }, 65_000);
+    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; install.hidden = true; status.textContent = 'The update check did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
     try { connect().postMessage({ type, id: pending }); }
     catch {
       const connection = port; port = null;
@@ -489,10 +502,15 @@ export function mountUpdates(api) {
 export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
   const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
   const controls = ['organato-connect', 'organato-disconnect', 'organato-key', ...Object.keys(mappings)];
-  let next = 0, pending, timer, closed = false, port = null;
-  const busy = value => { for (const id of controls) $(id).disabled = value; };
-  const finish = text => {
+  let next = 0, pending, timer, closed = false, port = null, connected = false;
+  const busy = value => {
+    for (const id of controls) $(id).disabled = value;
+    $('organato-disconnect').disabled = value || !connected;
+    $('organato-disconnect').hidden = !connected;
+  };
+  const finish = (text, error = false) => {
     clearTimeout(timer); pending = null; busy(false);
+    $('organato-status').dataset.state = error ? 'error' : '';
     if (text) $('organato-status').textContent = text;
   };
   const connect = () => {
@@ -505,15 +523,16 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
         $('organato-status').textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…';
         return;
       }
-      if (!message.ok) { finish(message.error); return; }
+      if (!message.ok) { finish(message.error, true); return; }
+      connected = message.value.connected === true;
       for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
-      finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show your deadlines here.');
+      finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show deadlines on your new tab.');
     });
     connection.onDisconnect.addListener(() => {
       void api.runtime.lastError;
       if (closed || port !== connection) return;
       port = null;
-      if (pending) finish('Connection closed. Try again.');
+      if (pending) finish('Connection closed. Try again.', true);
     });
     return connection;
   };
@@ -521,13 +540,14 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
     if (closed || pending?.type === 'configure') return;
     clearTimeout(timer);
     pending = { id: String(++next), type };
+    $('organato-status').dataset.state = '';
     busy(type === 'configure');
-    timer = setTimeout(() => finish('Organato connection timed out. Check your connection and try again.'), timeoutMs);
+    timer = setTimeout(() => finish('Organato connection timed out. Check your connection and try again.', true), timeoutMs);
     try { connect().postMessage({ id: pending.id, type, settings }); }
     catch {
       const connection = port; port = null;
       try { connection?.disconnect(); } catch {}
-      finish('Organato helper is unavailable. Try again.');
+      finish('Breezer could not connect to Organato. Try again.', true);
     }
   };
   for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));

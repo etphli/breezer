@@ -7,7 +7,7 @@
   <title>The efficiency work in Breezer 1.2.0</title>
   <link rel="stylesheet" href="whats-new.css">
 </head>
-<body>
+<body class="efficiency-page">
   <main class="sheet benchmark-story-page">
     <header class="masthead">
       <p class="release"><img class="mark" src="icon128.png" alt="" width="28" height="28"><span>Breezer 1.2.0</span></p>
@@ -16,23 +16,45 @@
       <div class="actions"><a class="button secondary" href="whats-new.html">Back to the update log</a></div>
     </header>
 <section class="benchmark-story" aria-labelledby="benchmark-story-title">
-  <h2 id="benchmark-story-title" class="benchmark-story-title">What we changed to reduce work</h2>
-  <p class="benchmark-story-kicker">Combined 1.2.0 candidate, not yet released. Measured on one M1 Mac against the installed Breezer and Chrome.</p>
+  <h2 id="benchmark-story-title" class="benchmark-story-title">What changed</h2>
+  <p class="benchmark-story-kicker">Combined 1.2.0 candidate, not yet released. Measured on one M1 Mac against the previous Breezer and Chrome.</p>
 
   <div class="benchmark-story-body">
     <p>Most of this work removes repeated effort. It did not make the whole browser faster, and some results got worse.</p>
 
     <h3 class="benchmark-story-heading">Saved tabs</h3>
-    <p>Restoring saved tabs used to compare each open tab with every saved record. It now builds a lookup index once per operation, and the sidebar model uses an index of saved entries too. With 1,000 synthetic saved records, matching fell from <data value="189.956">190.0&nbsp;ms</data> to <data value="2.902">2.9&nbsp;ms</data> and model building from <data value="3.299">3.30&nbsp;ms</data> to <data value="0.187">0.19&nbsp;ms</data>. That is JavaScript work on stored records, not 1,000 live tabs or overall browser speed.</p>
+    <p>Matching open tabs with saved records now builds a lookup index once per operation instead of comparing every pair. The sidebar model also indexes saved entries.</p>
+    <table class="story-table story-code-table">
+      <caption>1,000 synthetic saved records · milliseconds</caption>
+      <thead><tr><th scope="col">Work</th><th scope="col">Previous code</th><th scope="col">New code</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Matching saved tabs</th><td data-label="Previous code"><data value="189.956">189.956</data></td><td data-label="New code"><data value="2.902">2.902</data></td></tr>
+        <tr><th scope="row">Building the sidebar model</th><td data-label="Previous code"><data value="3.299">3.299</data></td><td data-label="New code"><data value="0.187">0.187</data></td></tr>
+      </tbody>
+    </table>
+    <p>This measures JavaScript work on stored records, not 1,000 live tabs or overall browser speed.</p>
 
     <h3 class="benchmark-story-heading">Less idle work</h3>
-    <p>Sidebar rows keep their elements when nothing visible changed, so keyboard focus stays put. Organato’s helper starts on first request, is shared between pages and exits when idle. The updater helper is also released when idle, and AI provider code loads only when needed. Built-in filter lists can load from checked, prepared copies, with the normal compiler as fallback. The build also used Chromium’s Apple Silicon profile-guided optimization (PGO). None of these was measured alone in the browser comparison, so none gets individual credit.</p>
+    <p>Sidebar rows keep their elements when nothing visible changed, so keyboard focus stays put.</p>
+    <p>Organato’s helper starts on first request, is shared between pages and exits when idle. The updater helper is also released when idle, and AI provider code loads only when needed.</p>
+    <p>Built-in filter lists can load from checked, prepared copies, with the normal compiler as fallback. The build also used Chromium’s Apple Silicon profile-guided optimization (PGO).</p>
+    <p>None of these was measured alone in the browser comparison, so none gets individual credit.</p>
 
-    <h3 class="benchmark-story-heading">What improved, and what was already there</h3>
-    <p>Against the installed Breezer, the first local page load after opening and closing tabs fell from <data value="717.402">717.4&nbsp;ms</data> to <data value="262.21">262.2&nbsp;ms</data>. Chrome took <data value="52.439">52.4&nbsp;ms</data>, so the pause is shorter but not gone. New tabs (<data value="98.819">98.8&nbsp;ms</data> against Chrome’s <data value="198.716">198.7&nbsp;ms</data>) and reopening an existing profile (<data value="861.277">861.3&nbsp;ms</data> against <data value="1070.2">1,070.2&nbsp;ms</data>) stay faster than Chrome, but the installed Breezer already had that lead.</p>
-
-    <h3 class="benchmark-story-heading">What got worse</h3>
-    <p>Two results regressed. Typical local navigation rose to <data value="48.87">48.9&nbsp;ms</data>, against <data value="33.879">33.9&nbsp;ms</data> for the installed Breezer and <data value="33.059">33.1&nbsp;ms</data> for Chrome. Summed process memory (RSS) with ten tabs reached <data value="2756.102">2,756.1&nbsp;MiB</data>, against <data value="2560.797">2,560.8&nbsp;MiB</data> and <data value="2515.102">2,515.1&nbsp;MiB</data>. With one tab, RSS matched Chrome but exceeded the installed Breezer. The macOS memory footprint barely moved. CPU readings were too small to measure reliably, so there is no CPU or battery claim.</p>
+    <h3 class="benchmark-story-heading">Browser results</h3>
+    <table class="story-table">
+      <caption>Selected medians · lower is better</caption>
+      <thead><tr><th scope="col">Measurement</th><th scope="col">Previous Breezer</th><th scope="col">1.2 candidate</th><th scope="col">Chrome</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">First local page after opening and closing tabs <span class="story-unit">ms</span></th><td data-label="Previous Breezer"><data value="717.402">717.4</data></td><td data-label="1.2 candidate"><data value="262.21">262.2</data></td><td data-label="Chrome"><data value="52.439">52.4</data></td></tr>
+        <tr><th scope="row">New-tab readiness <span class="story-unit">ms</span></th><td data-label="Previous Breezer">99.2</td><td data-label="1.2 candidate"><data value="98.819">98.8</data></td><td data-label="Chrome"><data value="198.716">198.7</data></td></tr>
+        <tr><th scope="row">Reopening the same profile <span class="story-unit">ms</span></th><td data-label="Previous Breezer">846.6</td><td data-label="1.2 candidate"><data value="861.277">861.3</data></td><td data-label="Chrome"><data value="1070.2">1,070.2</data></td></tr>
+        <tr><th scope="row">Typical local navigation <span class="story-unit">ms</span></th><td data-label="Previous Breezer"><data value="33.879">33.9</data></td><td data-label="1.2 candidate"><data value="48.87">48.9</data></td><td data-label="Chrome"><data value="33.059">33.1</data></td></tr>
+        <tr><th scope="row">Process-tree RSS, ten tabs <span class="story-unit">MiB</span></th><td data-label="Previous Breezer"><data value="2560.797">2,560.8</data></td><td data-label="1.2 candidate"><data value="2756.102">2,756.1</data></td><td data-label="Chrome"><data value="2515.102">2,515.1</data></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The first-load pause is shorter.</strong> Chrome is still faster. New tabs and reopening a profile retain a lead over Chrome that the previous Breezer already had.</p>
+    <p><strong>Navigation and memory regressed.</strong> Typical local navigation is slower, and ten-tab RSS is higher than both comparators. With one tab, RSS matched Chrome but exceeded the previous Breezer.</p>
+    <p>The macOS memory footprint barely moved. CPU readings were too small to measure reliably, so there is no CPU or battery claim.</p>
 
     <h3 class="benchmark-story-heading">Still to do</h3>
     <p>Next: find the causes of the navigation and memory regressions, trace the remaining first-load pause and get a valid Chrome footprint. Feature acceptance and the signed release build are also unfinished.</p>
@@ -40,17 +62,17 @@
 
   <aside class="benchmark-story-note" aria-label="How these numbers were measured">
     <h3 class="benchmark-story-note-title">How these numbers were measured</h3>
-    <ul class="benchmark-story-limits">
-      <li>Browser results: medians from six balanced rounds on one Apple M1 Mac on AC power, with 36 scored launches. Startup uses initialized or reused profiles, not a cold boot. Navigation uses a local test page, not general websites. Six rounds show medians and ranges, not statistical significance.</li>
-      <li>RSS adds up each process’s resident memory and can count shared pages more than once. Chrome’s macOS footprint is unavailable because some of its samples failed identity checks.</li>
-      <li>Saved-tab figures come from a separate synthetic test: six alternating rounds comparing the previous and new saved-tab code.</li>
-      <li>The candidate is a private, ad hoc signed build. Its app metadata still reads 0.20.1.1. Full feature checks and the release build are pending.</li>
-      <li>Evidence: <code>docs/efficiency-1.2.0.md</code> in the Breezer source.</li>
-    </ul>
+    <dl class="benchmark-story-method">
+      <dt>Browser test</dt><dd><p>Medians from six balanced rounds on one Apple M1 Mac on AC power, with 36 scored launches.</p><p>Startup uses initialized or reused profiles, not a cold boot. Navigation uses a local test page, not general websites. Six rounds show medians and ranges, not statistical significance.</p></dd>
+      <dt>Memory</dt><dd>RSS adds up each process’s resident memory and can count shared pages more than once. Chrome’s macOS footprint is unavailable because some of its samples failed identity checks.</dd>
+      <dt>Saved-tab test</dt><dd>A separate synthetic test: six alternating rounds comparing the previous and new saved-tab code.</dd>
+      <dt>Candidate build</dt><dd>A private, ad hoc signed build whose app metadata still reads 0.20.1.1. Full feature checks and the release build are pending.</dd>
+      <dt>Source</dt><dd><a href="https://github.com/etphli/breezer/blob/main/docs/efficiency-1.2.0.md" target="_blank" rel="noopener noreferrer">Measurement report and methodology</a></dd>
+    </dl>
   </aside>
 </section>
 
-    <footer class="benchmark-story-footer"><a class="button secondary" href="whats-new.html#results-table">Read the full benchmark results</a></footer>
+    <footer class="benchmark-story-footer"><a class="button secondary" href="whats-new.html#results-table">Full benchmark results</a><a class="button secondary" href="whats-new.html">Back to the update log</a></footer>
   </main>
 </body>
 </html>

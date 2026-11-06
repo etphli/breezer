@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,6 +9,49 @@ import { fileURLToPath } from 'node:url';
 const { chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright');
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../features/ai/extension');
 const evidence = process.env.BREEZER_AI_EVIDENCE || '/tmp/breezer-ai-evidence';
+const captureGeometry = [];
+async function pickerPaintMatches(page, png, geometry) {
+  return page.evaluate(async ({ png, geometry }) => {
+    const image = new Image(); image.src = `data:image/png;base64,${png}`; await image.decode();
+    const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context.fillStyle = geometry.buttonColor; context.fillRect(0, 0, 1, 1);
+    const expected = context.getImageData(0, 0, 1, 1).data;
+    context.drawImage(image, 0, 0);
+    const { left, right, top, bottom } = geometry.button;
+    return [[right - 8, top + 8], [right - 8, bottom - 8], [left + 8, bottom - 8]].every(([x, y]) => {
+      const actual = context.getImageData(Math.floor(x * image.width / geometry.viewport.width), Math.floor(y * image.height / geometry.viewport.height), 1, 1).data;
+      return [0, 1, 2].every(channel => Math.abs(actual[channel] - expected[channel]) <= 10);
+    });
+  }, { png: png.toString('base64'), geometry });
+}
+
+async function capturePicker(page, file) {
+  const geometry = await page.locator('#research-dialog').evaluate(dialog => {
+    const button = [...dialog.querySelectorAll('button')].find(node => node.textContent === 'Done');
+    return { headings: dialog.querySelectorAll('h2').length, dialog: dialog.getBoundingClientRect().toJSON(), button: button.getBoundingClientRect().toJSON(), buttonColor: getComputedStyle(button).backgroundColor, viewport: { width: innerWidth, height: innerHeight } };
+  });
+  assert.equal(geometry.headings, 1);
+  assert.ok(geometry.dialog.left >= 0 && geometry.dialog.right <= geometry.viewport.width, 'picker stays in the viewport');
+  assert.ok(geometry.button.left >= geometry.dialog.left && geometry.button.right <= geometry.dialog.right && geometry.button.top >= 0 && geometry.button.bottom <= geometry.viewport.height, 'Done stays inside the visible picker');
+  if (geometry.viewport.width === 320) {
+    const corrupt = await readFile(resolve(dirname(fileURLToPath(import.meta.url)), 'fixtures/research-picker-corrupt.png'));
+    assert.equal(await pickerPaintMatches(page, corrupt, geometry), false, 'paint guard rejects the recorded tiled capture');
+  }
+  let previous;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+    const image = await page.screenshot({ animations: 'disabled', scale: 'css' });
+    if (!await pickerPaintMatches(page, image, geometry)) { previous = undefined; continue; }
+    if (previous?.equals(image)) {
+      await writeFile(`${evidence}/${file}`, image);
+      captureGeometry.push({ file, ...geometry, stableCaptures: attempt + 1, donePaintMatches: true });
+      return;
+    }
+    previous = image;
+  }
+  assert.fail(`${file} did not settle with the visible Done action painted correctly`);
+}
 await mkdir(evidence, { recursive: true });
 const server = createServer(async (request, response) => {
   try {
@@ -87,7 +130,8 @@ try {
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   await page.locator('#research-open').focus();
   await page.keyboard.press('Enter');
-  await page.getByRole('dialog', { name: 'Research source tabs' }).waitFor();
+  await page.getByRole('dialog', { name: 'Source tabs' }).waitFor();
+  assert.equal(await page.locator('#research-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true, 'Source picker content stays inside its dialog');
   const checkboxes = page.locator('#research-options input');
   await checkboxes.nth(0).focus(); await page.keyboard.press('Space');
   await checkboxes.nth(1).focus(); await page.keyboard.press('Space');
@@ -97,8 +141,9 @@ try {
   assert.equal(await page.locator('#research-chips button').count(), 2);
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.equal(await page.locator('#context-toggle').isVisible(), false);
-  assert.match(await page.locator('#context-hint').innerText(), /2 selected tabs.*text only.*no control/);
-  await page.screenshot({ path: `${evidence}/research-selected-tabs.png` });
+  assert.equal(await page.locator('#research-label').innerText(), '2 sources');
+  assert.match(await page.locator('#context-hint').innerText(), /Text only.*screenshots and control off/);
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/research-selected-tabs.png` });
   await page.locator('#prompt').fill('Compare these two pages and cite sources.');
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => window.sent.some(message => message.type === 'chat'));
@@ -108,15 +153,18 @@ try {
   assert.equal(sent.researchSources[1].truncated, true);
   assert.equal(await page.evaluate(() => window.activePageReads || 0), 0);
   await page.evaluate(id => { window.emit({ type: 'delta', id, text: 'The sources discuss different tradeoffs [S1] [S2].' }); window.emit({ type: 'complete', id }); }, sent.id);
+  await page.locator('.message.assistant .citation').first().waitFor();
+  assert.deepEqual(await page.locator('.message.assistant .citation').allTextContents(), ['Source 1', 'Source 2']);
+  assert.equal(await page.locator('.message.assistant .citation').first().getAttribute('href'), 'https://one.test/design');
   await page.locator('#prompt').fill('Summarize again.');
   await page.evaluate(() => { window.failSecond = true; window.sent.length = 0; });
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => window.sent.some(message => message.type === 'chat'));
   const partial = await page.evaluate(() => window.sent.find(message => message.type === 'chat'));
   assert.equal(partial.researchSources[1].status, 'unavailable');
-  assert.match(await page.locator('.message-meta').last().innerText(), /S2.*closed/);
+  assert.match(await page.locator('.message-meta').last().innerText(), /2 · Comparing browser memory[\s\S]*closed/);
   await page.evaluate(id => window.emit({ type: 'complete', id }), partial.id);
-  await page.screenshot({ path: `${evidence}/research-partial-failure.png` });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/research-partial-failure.png` });
   await page.getByRole('button', { name: 'Remove source 2:', exact: false }).click();
   assert.equal(await page.locator('#research-chips button').count(), 1);
   await page.evaluate(() => { window.holdRead = true; window.sent.length = 0; });
@@ -133,13 +181,23 @@ try {
   await page.locator('#research-open').click();
   await checkboxes.nth(0).check(); await checkboxes.nth(1).check();
   for (let index = 3; index < 7; index++) await checkboxes.nth(index).check();
-  await checkboxes.nth(7).click();
+  assert.equal(await checkboxes.nth(7).isDisabled(), true, 'Unselected sources are visibly disabled at the limit');
+  await checkboxes.nth(0).uncheck();
+  assert.equal(await checkboxes.nth(7).isEnabled(), true, 'Removing a source makes another choice available');
+  await checkboxes.nth(0).check();
+  assert.equal(await checkboxes.nth(7).isDisabled(), true);
   assert.equal(await checkboxes.nth(7).isChecked(), false);
+  assert.match(await page.locator('#research-limit').innerText(), /6 of 6 selected/);
   assert.equal(await page.locator('#research-chips button').count(), 6);
-  await page.screenshot({ path: `${evidence}/research-picker.png` });
-  await page.keyboard.press('Escape');
+  await capturePicker(page, 'research-picker.png');
+  await page.setViewportSize({ width: 320, height: 640 });
+  assert.equal(await page.locator('#research-dialog').evaluate(node => node.scrollWidth <= node.clientWidth), true, 'Narrow source picker stays inside its dialog');
+  await capturePicker(page, 'research-picker-narrow.png');
+  await writeFile(`${evidence}/research-capture-geometry.json`, JSON.stringify(captureGeometry, null, 2));
+  await page.setViewportSize({ width: 400, height: 850 });
   await page.locator('#research-clear').click();
   assert.equal(await page.locator('#control-toggle').isDisabled(), false);
+  await page.keyboard.press('Escape');
 
   // Run the actual fixed native extractor script in real browser documents.
   const nativeHeader = await readFile(resolve(root, '../../workspace/native/chrome/browser/extensions/api/breezer_private/research_text.h'), 'utf8');

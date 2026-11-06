@@ -1,0 +1,18 @@
+{
+  "settingsLinks": 1,
+  "agendaSheets": 1,
+  "captures": [
+    {
+      "file": "newtab-custom-shortcuts.png",
+      "stableCaptures": 2,
+      "surfacePaintChecked": false,
+      "scale": "css"
+    },
+    {
+      "file": "newtab-add-popover.png",
+      "stableCaptures": 2,
+      "surfacePaintChecked": true,
+      "scale": "css"
+    }
+  ]
+}

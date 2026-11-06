@@ -10,6 +10,21 @@ const reply = data => new Response(JSON.stringify(data), { headers: { 'Content-T
 const event = () => ({ listeners: new Set(), addListener(fn) { this.listeners.add(fn); }, removeListener(fn) { this.listeners.delete(fn); }, fire(...args) { for (const fn of this.listeners) fn(...args); } });
 const settle = async () => { for (let i = 0; i < 8; i++) await new Promise(resolve => setImmediate(resolve)); };
 
+test('rate limits carry a bounded Retry-After deadline without exposing provider text', async () => {
+  for (const [header, delay] of [['45', 45000], [new Date(Date.now() + 60000).toUTCString(), 60000], ['invalid', 30000], ['', 30000], ['99999999999', 86400000]]) {
+    const before = Date.now();
+    await assert.rejects(providerRequest(prefs, 'languages', {
+      fetcher: async () => new Response('private provider detail', { status: 429, headers: { 'Retry-After': header } }),
+    }), error => {
+      assert.match(error.message, /rate limit/);
+      assert.equal(error.message.includes('private'), false);
+      assert.ok(error.retryAt >= before + delay - 1500);
+      assert.ok(error.retryAt <= Date.now() + delay);
+      return true;
+    });
+  }
+});
+
 test('preferences default to local, opt out of dynamic sharing, and validate language codes', () => {
   assert.deepEqual(prefs, { provider: 'local', source: 'auto', target: 'en', dynamic: false, apiKey: '' });
   assert.equal(translationPreferences({ provider: 'evil', source: '<script>', target: 'zz:evil', dynamic: 1 }).provider, 'local');
@@ -62,6 +77,26 @@ function harness() {
   installTranslation(api);
   return { api, ui, content, sent, pageSent, stored, opened, injected };
 }
+
+test('the translation session refuses requests until its provider cooldown expires', async t => {
+  const h = harness();
+  let now = 1800000000000, requests = 0;
+  t.mock.method(Date, 'now', () => now);
+  t.mock.method(globalThis, 'fetch', async () => {
+    requests++;
+    return requests === 1 ? new Response('', { status: 429, headers: { 'Retry-After': '15' } }) : reply(languages);
+  });
+  h.api.runtime.onConnect.fire(h.ui); await settle();
+  h.ui.onMessage.fire({ type: 'languages' }); await settle();
+  assert.equal(h.sent.at(-1).retryAt, now + 15000);
+  h.ui.onMessage.fire({ type: 'languages' });
+  h.ui.onMessage.fire({ type: 'start', consent: true, source: 'es', target: 'en' }); await settle();
+  assert.equal(requests, 1, 'repeated commands do not bypass provider backoff');
+  now += 15000;
+  h.ui.onMessage.fire({ type: 'languages' }); await settle();
+  assert.equal(requests, 2);
+  assert.equal(h.sent.at(-1).type, 'languages');
+});
 
 test('page access comes only from context action/command; settings/content-script impersonation is refused', async () => {
   const h = harness();

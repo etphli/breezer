@@ -20,7 +20,7 @@ test('a pre-response shortcut filter cannot overwrite the loaded sites', async (
     if (key === 'newtab.hiddenSites.v1') return { [key]: ['00'.repeat(32)] };
     if (key === 'newtab.customSites.v1') return { [key]: [{ url: 'https://hidden.example/', title: 'Hidden' }] };
     return {};
-  } } } };
+  } }, onChanged: { addListener(fn) { callbacks.set('storage', fn); }, removeListener() {} } } };
   const context = vm.createContext({ URL, Intl, Date, TextEncoder, root, api, observed, innerWidth: 1000,
     crypto: { subtle: { async digest(_algorithm, bytes) {
       if (++digests === 1) { digestReady(); await new Promise(resolve => { releaseDigest = resolve; }); }
@@ -44,16 +44,16 @@ globalThis.run=()=>startNewTab({api,root});`;
   const loaded = context.run();
   await requestStarted;
   context.innerWidth = 900;
-  callbacks.get('resize')();
+  callbacks.get('storage')({ 'newtab.hiddenSites.v1': { newValue: [] } }, 'local');
   await digestStarted;
   reply(); await loaded;
-  assert.equal(observed.shown, 5);
+  assert.equal(observed.shown, 8);
   releaseDigest();
   await new Promise(resolve => setImmediate(resolve));
-  assert.equal(observed.shown, 5, 'obsolete empty result must never erase loaded shortcuts');
+  assert.equal(observed.shown, 8, 'obsolete empty result must never erase loaded shortcuts');
   const filters = observed.filters;
-  context.innerWidth = 899; callbacks.get('resize')();
+  context.innerWidth = 899; callbacks.get('resize')?.();
   await new Promise(resolve => setImmediate(resolve));
-  assert.equal(observed.shown, 5);
-  assert.equal(observed.filters, filters, 'valid same-bucket resizes still do no work');
+  assert.equal(observed.shown, 8);
+  assert.equal(observed.filters, filters, 'resizing does not filter away shortcuts or trigger storage work');
 });

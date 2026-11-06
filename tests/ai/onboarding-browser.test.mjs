@@ -124,6 +124,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.equal(await page.title(), 'Welcome to Breezer');
     assert.equal(await heading(), 'Welcome to Breezer');
     assert.equal(await next.innerText(), 'Get started');
+    assert.equal(await page.locator('#wl-stage-count').innerText(), 'Step 1 of 8');
     assert.equal(await page.locator('#wl-back').isVisible(), false);
     assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-h-welcome');
     await pause(2200);
@@ -134,7 +135,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.equal(await heading(), 'What should Breezer AI call you?');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-name');
     await page.locator('#wl-name').pressSequentially('  Sam  ', { delay: videoDir ? 140 : 0 });
-    assert.equal(await page.locator('#wl-mini-name').innerText(), 'Sam');
+    assert.equal(await page.locator('#wl-mini-name').innerText(), ', Sam');
     await pause(900);
     await shot(page, '2-name');
     await page.keyboard.press('Enter');
@@ -193,12 +194,14 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     // Organato: optional; a key goes to the background helper, never into storage.
     assert.equal(await heading(), 'Connect Organato?');
+    assert.equal(await next.innerText(), 'Connect later');
     await pause(700);
-    await page.getByRole('button', { name: 'Connect' }).click();
+    await page.getByRole('button', { name: 'Connect', exact: true }).click();
     assert.match(await page.locator('#wl-organato-status').innerText(), /Paste your API key/);
     await page.locator('#wl-organato-key').pressSequentially('org_demo_key', { delay: videoDir ? 70 : 0 });
     await page.keyboard.press('Enter');
     await page.locator('#wl-organato-status', { hasText: 'Organato is connected' }).waitFor();
+    assert.equal(await next.innerText(), 'Continue');
     const sent = await page.evaluate(() => fx.ports['breezer-organato-settings'].sent);
     assert.deepEqual(sent.map((message) => message.type), ['view', 'configure']);
     assert.deepEqual(sent[1].settings, { key: 'org_demo_key' });
@@ -212,12 +215,13 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     const titles = [];
     for (let at = 0; at < 5; at += 1) {
       titles.push(await heading());
-      assert.equal(await page.locator('#wl-tour-count').innerText(), `${at + 1} of 5`);
+      assert.equal(await page.locator('#wl-tour-count').innerText(), `Tip ${at + 1} of 5`);
+      assert.equal(await page.locator('#wl-progress-group').isHidden(), true, 'the tour keeps one visible progress count');
       await pause(2600);
       if (at === 0 || at === 3) await shot(page, `7-tour-${at + 1}`);
       if (at === 1) {
         await page.locator('#wl-back').click();
-        assert.equal(await page.locator('#wl-tour-count').innerText(), '1 of 5');
+        assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tip 1 of 5');
         await next.click();
       }
       await next.click();
@@ -238,17 +242,22 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.deepEqual(await page.evaluate(() => fx.local['settings.onboarding.v1']), { dismissed: true });
     await context.close();
 
-    // Top tabs get the top-tab tour; Skip records a skip and leaves the import card alone.
+    // Skipping the tour keeps the completed setup choices and opens their summary.
     {
       const { context, page } = await open({ reducedMotion: 'reduce', layout: 'top' });
       for (let at = 0; at < 6; at += 1) await page.locator('#wl-next').click();
       assert.equal(await page.locator('#wl-h-tour').innerText(), 'Your tabs stay across the top');
-      assert.equal(await page.locator('#wl-tour-count').innerText(), '1 of 3');
+      assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tip 1 of 3');
       assert.equal(await page.locator('.wl-step:not([hidden])').evaluate((node) => getComputedStyle(node).animationName), 'none');
+      assert.equal(await page.locator('#wl-skip').innerText(), 'Skip tour');
       await page.locator('#wl-skip').click();
+      assert.equal(await page.locator('.wl-step[data-step="done"]').isVisible(), true);
+      assert.equal(await page.evaluate(() => fx.updated.length), 0);
+      await shot(page, '8-skip-tour');
+      await page.locator('#wl-next').click();
       await page.waitForFunction(() => fx.updated.length === 1);
-      assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'done', completed: true, skipped: true });
-      assert.equal(await page.evaluate(() => fx.local['settings.onboarding.v1']), undefined);
+      assert.deepEqual(await page.evaluate(() => fx.local['breezer.setup.v1']), { step: 'done', completed: true, skipped: false });
+      assert.deepEqual(await page.evaluate(() => fx.local['settings.onboarding.v1']), { dismissed: true });
       await context.close();
     }
 
@@ -300,6 +309,13 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       assert.equal(await page.locator('#wl-next').isDisabled(), false);
       assert.equal(await page.evaluate(() => fx.organato.enabled), true);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
+      for (const width of [320, 390]) {
+        await page.setViewportSize({ width, height: 844 });
+        const footer = await page.evaluate(() => Object.fromEntries(['wl-back', 'wl-progress', 'wl-next'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
+        assert.ok(footer['wl-back'].right + 8 <= footer['wl-progress'].left, 'Back leaves room for progress');
+        assert.ok(footer['wl-progress'].right + 8 <= footer['wl-next'].left, 'Progress leaves room for Connect later');
+      }
+      assert.equal(await page.locator('#wl-organato-status').evaluate(node => node.parentElement.id), 'wl-organato-off-status', 'Failure is adjacent to the opt-out action');
       await shot(page, '6-organato-optout-failed-narrow');
       // Retry succeeds.
       await page.evaluate(() => { fx.configure = 'ok'; });
@@ -321,7 +337,10 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       const { context, page } = await open({ reducedMotion: 'reduce', organato: { enabled: false, connected: true }, local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
       await page.locator('#wl-organato-status', { hasText: 'Organato is turned off' }).waitFor();
       assert.equal(await page.locator('#wl-organato-off').isVisible(), false);
+      assert.equal(await page.locator('#wl-skip').isVisible(), false);
+      await page.locator('#wl-next').click();
       await page.locator('#wl-skip').click();
+      await page.locator('#wl-next').click();
       await page.waitForFunction(() => fx.updated.length === 1);
       assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type }) => type)), ['view']);
       assert.equal(await page.evaluate(() => fx.organato.enabled), false);
@@ -337,6 +356,13 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       assert.equal(await page.getByRole('radio', { name: /^Top/ }).getAttribute('aria-disabled'), 'true');
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.equal(overflow, 0, 'no horizontal scrolling at 390px');
+      const noticeFits = await page.locator('#wl-bridge-note').evaluate(node => {
+        const text = document.createRange(); text.selectNodeContents(node);
+        return text.getBoundingClientRect().bottom <= node.getBoundingClientRect().bottom;
+      });
+      assert.equal(noticeFits, true, 'integration notice contains every line');
+      const nextBounds = await page.locator('#wl-next').boundingBox();
+      assert.ok(nextBounds.y + nextBounds.height <= 844, 'Continue stays available while setup content scrolls');
       await shot(page, 'narrow-no-bridge');
       await context.close();
     }

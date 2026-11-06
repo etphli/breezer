@@ -1,0 +1,35 @@
+TAP version 13
+# Subtest: first-run setup walks through name, layout, theme, import, Organato and the tour
+ok 1 - first-run setup walks through name, layout, theme, import, Organato and the tour
+  ---
+  duration_ms: 24941.608583
+  ...
+# Subtest: settings onboarding, Organato and updates render and respond in a real browser
+ok 2 - settings onboarding, Organato and updates render and respond in a real browser
+  ---
+  duration_ms: 9424.992875
+  ...
+# Subtest: real disposable Chromium extension: provider path, DOM identity, restore, dynamic content, failure/cancel/retry and navigation
+ok 3 - real disposable Chromium extension: provider path, DOM identity, restore, dynamic content, failure/cancel/retry and navigation
+  ---
+  duration_ms: 45676.952041
+  ...
+# Subtest: live local LibreTranslate model translates the actual page in disposable Chromium
+ok 4 - live local LibreTranslate model translates the actual page in disposable Chromium # SKIP Set BREEZER_TRANSLATION_LIVE=1 with your local server running
+  ---
+  duration_ms: 0.140958
+  ...
+# Subtest: What's new page renders, closes its tab and opens Settings
+ok 5 - What's new page renders, closes its tab and opens Settings
+  ---
+  duration_ms: 31218.101833
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 46055.422292

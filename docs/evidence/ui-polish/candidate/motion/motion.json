@@ -1,0 +1,685 @@
+[
+  {
+    "area": "spaces",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "slide-next",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 40,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "settings",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "onboarding-in",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 40,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "newtab",
+    "reducedMotion": "no-preference",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 80,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "onboarding",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 200,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 420,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 320,
+        "easing": "cubic-bezier(0.3, 1.35, 0.45, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 140,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 160,
+        "easing": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-in-next",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 180,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-tab-wiggle",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-tab-wiggle",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-tab-wiggle",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 520,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "wl-window",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 220,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "both",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 280,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "assistant",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "transition",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 150,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      },
+      {
+        "name": "panel-dialog-in",
+        "delay": 0,
+        "direction": "normal",
+        "duration": 120,
+        "easing": "linear",
+        "endDelay": 0,
+        "fill": "none",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 280,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "control",
+    "reducedMotion": "no-preference",
+    "animations": [
+      {
+        "name": "transition",
+        "delay": 300,
+        "direction": "normal",
+        "duration": 100,
+        "easing": "ease",
+        "endDelay": 0,
+        "fill": "backwards",
+        "iterationStart": 0,
+        "iterations": 1
+      }
+    ],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 0,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "spaces",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 240,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "settings",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "newtab",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 280,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "onboarding",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 280,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "assistant",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 320,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  },
+  {
+    "area": "control",
+    "reducedMotion": "reduce",
+    "animations": [],
+    "note": "Frame timestamps are elapsed after locator settlement, not animation onset. Setup depicts an illustration, not native tabs. Control records the assistant tooltip; it executes no browser actions.",
+    "videoFrameTimesMs": [
+      0,
+      50,
+      100,
+      150,
+      200,
+      250,
+      300,
+      400,
+      500,
+      600,
+      800,
+      1000
+    ],
+    "videoFrameOriginMs": 280,
+    "videoFrameOriginMethod": {
+      "previewPixels": 64,
+      "luminanceVarianceThreshold": 1,
+      "minimumHorizontalEdges": 16,
+      "edgeLuminanceDifference": 6,
+      "searchStepMs": 40
+    },
+    "videoFrameNote": "Decoded from the original recording. Contact-sheet times start at the first frame with visible UI edges; original videos retain blank lead-in frames. This does not establish input latency or native macOS frame pacing."
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "translation-contrast",
+    "title": "Translation action contrast",
+    "file": "translation-mint-light.png",
+    "notes": [
+      [85, 44, 33, 60, "The enabled action matches Settings: text contrast improves from 4.47:1 to 5.22:1."]
+    ]
+  }
+]

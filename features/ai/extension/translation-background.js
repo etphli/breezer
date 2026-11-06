@@ -25,10 +25,13 @@ export function installTranslation(api) {
     const tabId = Number(pageURL.searchParams.get('tab'));
     if (!Number.isInteger(tabId) || tabId < 0) return;
     let content, controller, prefs, languages, tabURL, closed = false, running = false, inFlight = null;
-    let generation = 0;
+    let generation = 0, retryAt = 0;
     const post = message => { if (!closed) { try { ui.postMessage(message); } catch {} } };
     const stop = () => { generation++; running = false; controller?.abort(); };
-    const error = message => post({ type: 'status', state: 'error', message });
+    const error = failure => {
+      if (Number.isFinite(failure?.retryAt)) retryAt = Math.max(retryAt, failure.retryAt);
+      post({ type: 'status', state: 'error', message: typeof failure === 'string' ? failure : failure.message, retryAt });
+    };
     const init = (async () => {
       const tab = await api.tabs.get(tabId);
       if (tab.incognito || !/^https?:\/\//.test(tab.url)) throw new Error('Only regular HTTP and HTTPS pages can be translated. PDFs and browser pages are unsupported.');
@@ -55,7 +58,7 @@ export function installTranslation(api) {
           if (run === generation) content.postMessage({ id: message.id, texts });
         })().catch(failure => {
           try { content.postMessage({ id: message.id, error: failure.message }); } catch {}
-          if (run === generation) { stop(); error(failure.message); }
+          if (run === generation) { stop(); error(failure); }
         }).finally(() => { inFlight = null; });
       });
       content.onDisconnect.addListener(() => { void api.runtime.lastError; stop(); error('Page connection closed. Open Translate page again after navigation.'); });
@@ -69,6 +72,10 @@ export function installTranslation(api) {
       commands = commands.then(async () => {
         await init;
         if (closed || !prefs || !content || requestedGeneration !== generation) return;
+        if (Date.now() < retryAt && ['languages', 'start'].includes(message.type)) {
+          error('Translation rate limit reached. Wait before retrying.');
+          return;
+        }
         if (message.type === 'languages') {
           if (!await api.permissions.contains({ origins: [PROVIDERS[prefs.provider].origin] })) throw new Error('Allow the translation provider connection first.');
           languages = await providerRequest(prefs, 'languages');
@@ -90,7 +97,7 @@ export function installTranslation(api) {
         controller = new AbortController(); generation++; running = true;
         content.postMessage({ type: 'start', dynamic: prefs.dynamic });
         post({ type: 'status', state: 'loading', total: 0, message: 'Translating page…' });
-      }).catch(failure => error(failure.message));
+      }).catch(failure => error(failure));
     });
     ui.onDisconnect.addListener(() => { closed = true; stop(); content?.disconnect(); });
   });

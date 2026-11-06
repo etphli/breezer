@@ -10,22 +10,26 @@
 <body>
   <main>
     <header><h1>Translate page</h1><p id="page" class="page-name"></p></header>
-    <p id="provider">Loading translation preferences…</p>
-    <p class="note">Translation needs a running local LibreTranslate server or your own LibreTranslate.com API key. Nothing is shared until you choose Translate page.</p>
-    <button id="languages" type="button">Connect and load languages</button>
+    <p id="setup-help" class="note">Translation needs a running local LibreTranslate server or your own LibreTranslate.com API key. Nothing is shared until you choose Translate page.</p>
+    <section class="translation-form" aria-label="Translation choices">
     <div class="languages">
-      <label>From<select id="source" disabled><option value="auto">Detect language</option></select></label>
+      <label>From<select id="source" disabled><option value="auto">Auto-detect</option></select></label>
       <label>To<select id="target" disabled><option value="en">English</option></select></label>
     </div>
-    <label class="check"><input id="dynamic" type="checkbox"> Also translate new text while this window is open</label>
-    <label class="check"><input id="consent" type="checkbox"> Send this page's visible text to the chosen server for this translation.</label>
-    <p class="note">Private text you can read may be included. Form fields, editors, code, PDFs and frames are excluded. Links and form values stay intact. Closing this window stops further sharing and keeps translated text on the page.</p>
+    <div class="language-tools"><button id="languages" type="button">Connect and load languages</button></div>
+    <div class="sharing-group">
+    <p id="provider" class="note">Loading translation preferences…</p>
+    <label class="check consent-choice"><input id="consent" type="checkbox"><span>Share visible page text for this translation<span class="consent-note note">Private text you can read may be included.</span></span></label>
+    <details class="sharing-details"><summary>What is shared</summary><p>Form fields, editors, code, PDFs and frames are excluded. Links and form values stay intact. Closing this window stops further sharing and keeps translated text on the page.</p></details>
+    </div>
+    <label class="check automatic-choice"><input id="dynamic" type="checkbox" role="switch"> Translate new text while this window is open</label>
+    </section>
+    <p id="status" role="status" aria-live="polite">Connecting to page…</p>
     <div class="actions">
       <button id="translate" class="primary" type="button" disabled>Translate page</button>
       <button id="cancel" type="button" disabled>Stop</button>
       <button id="restore" type="button">Restore original</button>
     </div>
-    <p id="status" role="status" aria-live="polite">Connecting to page…</p>
     <button id="settings" class="settings-link" type="button">Translation settings</button>
   </main>
   <script type="module" src="translation.js"></script>

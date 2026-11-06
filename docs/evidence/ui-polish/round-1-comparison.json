@@ -1,0 +1,23 @@
+[
+  { "id": "dark-settings", "title": "Dark settings selections", "file": "settings-redesign-general-dark.png", "notes": [
+    [91, 38, 84, 55, "Selected segments now have a distinct fill, outline and weight."],
+    [70, 83, 78, 62, "The selected close-button preference is clearer at a glance."]
+  ] },
+  { "id": "narrow-settings", "title": "Narrow settings navigation", "file": "settings-redesign-layout-narrow.png", "notes": [
+    [85, 36, 60, 21, "All categories have readable names in a two-column list."],
+    [20, 47, 20, 34, "Settings remain in a single scrolling page below navigation."]
+  ] },
+  { "id": "assistant", "title": "Assistant controls", "file": "sidebar-welcome.png", "notes": [
+    [78, 66, 70, 96, "Reasoning and speed now have visible labels."],
+    [15, 65, 55, 82, "The source chip explicitly shows whether it is included."],
+    [70, 50, 48, 89, "The input starts shorter and grows as you type."]
+  ] },
+  { "id": "sidebar", "title": "Named spaces", "file": "workspace-sidebar.png", "notes": [
+    [72, 78, 35, 94, "Spaces have readable names and a shaped selected state."],
+    [18, 83, 88, 98, "Space selection sits above the separate utility controls."]
+  ] },
+  { "id": "newtab", "title": "New-tab rhythm", "file": "newtab-connected-light.png", "notes": [
+    [80, 10, 55, 35, "Less empty space brings the agenda higher in the window."],
+    [85, 70, 32, 82, "More dated work is visible without scrolling."]
+  ] }
+]

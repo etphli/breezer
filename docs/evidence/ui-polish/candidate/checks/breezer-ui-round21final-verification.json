@@ -1,0 +1,38 @@
+{
+  "round": 21,
+  "suiteTests": 552,
+  "uniquePassingChecks": 550,
+  "failed": 0,
+  "skipped": 2,
+  "sourceFiles": 50,
+  "matrixCaptures": 490,
+  "translationCaptures": 38,
+  "customMotionSequences": 12,
+  "selectArrowChecks": 56,
+  "compactLayouts": 96,
+  "memoryBrowserCases": 16,
+  "providerErrorCases": 12,
+  "annotatedPairs": 10,
+  "newlyCompiledNativeUnits": 0,
+  "reusedCompiledNativeUnits": 9,
+  "reusedNativeWindows": 42,
+  "currentNativeSidebarCaptures": 1,
+  "currentNativeServedResources": 50,
+  "nativeProvenance": {
+    "nativeChrome": "Reused actual window and recording evidence from round19. All 16 native inputs are unchanged. Score the native tabs, toolbar and frame allocation; exclude its older sidebar web document and fictional page body.",
+    "currentSidebar": "Actual 42 CSS-pixel sidebar WebContents from the signed private round21 package. All fifty loaded extension-resource hashes match current source. Two identical renderer captures with bitmap dimensions matching settled DOM geometry. No resource overrides or DOM/style injection. Not a full release rebuild.",
+    "staging": "Initial private signing failed; retry succeeded after storage recovery. Current packaged sidebar capture passed. Fresh OS-window capture failed to start its ScreenCaptureKit stream, produced no image and cleaned up. Prior native chrome is reused with all sixteen native inputs unchanged. Installed and prior private apps remained unchanged.",
+    "limitations": [
+      "Not a full release rebuild or reproducible binary attestation.",
+      "Motion judged from decoded frames; smoothness, frame pacing and input latency unverified.",
+      "Physical hit testing, macOS menus, restoration, physical auto-hide and translation native geometry/bridge unverified.",
+      "Fixtures establish rendered UI, not provider execution."
+    ]
+  },
+  "codeAuthor": "GPT-6.1 Sol",
+  "noPrPush": true,
+  "skips": [
+    "Live LibreTranslate needs explicit opt-in and a server",
+    "Local benchmark report absent"
+  ]
+}

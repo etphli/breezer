@@ -1,0 +1,44 @@
+[
+  {
+    "width": 320,
+    "pageWidth": 320,
+    "labels": [
+      "Settings and appearance",
+      "The assistant and research",
+      "Tabs and browser chrome",
+      "New tabs and setup",
+      "Page translation",
+      "Release pages, motion and verification",
+      "How this update was refined"
+    ],
+    "overflow": []
+  },
+  {
+    "width": 390,
+    "pageWidth": 390,
+    "labels": [
+      "Settings and appearance",
+      "The assistant and research",
+      "Tabs and browser chrome",
+      "New tabs and setup",
+      "Page translation",
+      "Release pages, motion and verification",
+      "How this update was refined"
+    ],
+    "overflow": []
+  },
+  {
+    "width": 1440,
+    "pageWidth": 1440,
+    "labels": [
+      "Settings and appearance",
+      "The assistant and research",
+      "Tabs and browser chrome",
+      "New tabs and setup",
+      "Page translation",
+      "Release pages, motion and verification",
+      "How this update was refined"
+    ],
+    "overflow": []
+  }
+]

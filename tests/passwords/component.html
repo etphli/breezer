@@ -32,7 +32,7 @@ try {
   check(container.textContent.includes('does not sync'), 'one-time import claim missing');
   check(!container.querySelector('input'), 'extension must not collect credentials or CSVs');
   view.showImport();
-  check(container.querySelector('details').open, 'import guide did not expand');
+  check(container.querySelector('[data-password-import-guide]').open, 'import guide did not expand');
   check(document.activeElement.tagName === 'SUMMARY', 'guide focus was not set');
   release = 'hold';
   click('import');
@@ -62,7 +62,7 @@ try {
   click('passkeys');
   await settle();
   check(calls.at(-1).url === 'chrome://settings/passkeys', 'wrong local passkeys route');
-  check(container.textContent.includes('Local Mac passkeys are not available in this build'), 'missing signing limit');
+  check(container.textContent.includes('Touch ID and Apple Passwords require signing entitlements that this build does not have'), 'missing signing limit');
   check(container.textContent.includes('Passkeys are not included in CSV import or Breezer sync'), 'missing provider/storage limits');
   check(container.querySelector('[role="status"]').textContent.includes('Check availability there'), 'opening a page must not claim platform availability');
   const detached = container.querySelector('button');

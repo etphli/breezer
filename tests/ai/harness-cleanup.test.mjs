@@ -5,7 +5,7 @@ import { createServer } from 'node:http';
 import vm from 'node:vm';
 
 const fixtures = [
-  ['workspace-browser.test.mjs', 9], ['newtab-browser.test.mjs', 3],
+  ['workspace-browser.test.mjs', 10], ['newtab-browser.test.mjs', 3],
   ['onboarding-browser.test.mjs', 1], ['whats-new-browser.test.mjs', 1], ['workspace-frame.test.mjs', 1],
 ];
 for (const [file, expected] of fixtures) for (const phase of ['launch', 'browser close']) {

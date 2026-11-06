@@ -39,9 +39,8 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   section.dataset.passwords = '';
   section.setAttribute('aria-label', 'Passwords');
   section.append(
-    node('h2', 'Passwords'),
-    node('p', 'Save, autofill, and manage passwords in Breezer. Passwords are encrypted and stored on this Mac.', 'section-note'),
-    node('p', 'Chrome and Breezer use separate profiles. Import copies passwords once; it does not sync later changes.', 'section-note'),
+    node('h2', 'Passwords', 'sr-only'),
+    node('p', 'Your saved passwords are encrypted on this Mac.', 'section-note'),
   );
 
   const status = node('p', '', 'section-note');
@@ -52,7 +51,7 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
   error.hidden = true;
   const controls = [];
   function button(label, destination) {
-    const control = node('button', label, 'text-button');
+    const control = node('button', label, 'button');
     control.type = 'button';
     control.dataset.passwordAction = destination;
     controls.push(control);
@@ -86,38 +85,48 @@ export function mountPasswords({ container, api = globalThis.chrome, onOpened = 
     return control;
   }
 
-  section.append(button('Open password manager', 'manager'));
-  section.append(node('p', 'View, edit, or delete saved passwords. Your Mac may ask you to authenticate before showing them.', 'section-note'));
-  section.append(button('Password settings', 'settings'));
-
-  section.append(
-    node('h3', 'Passkeys'),
-    node('p', 'Create a passkey on a website, then choose it in the browser sign-in dialog or an eligible username field. Available choices depend on the website and authenticator.', 'section-note'),
-    button('Manage local passkeys', 'passkeys'),
-    node('p', 'This native page lists passkeys saved by Breezer’s Mac profile authenticator. You can edit their usernames or delete them there. It does not list passkeys held by Apple Passwords, a phone, or a security key; manage those with their provider.', 'section-note'),
-    node('p', 'Touch ID and Apple Passwords require signing entitlements that this build does not have. Local Mac passkeys are not available in this build. A compatible security key or another device may be offered by the native sign-in dialog. Phone sign-in needs Bluetooth and device approval.', 'section-note'),
-    node('p', 'Passkeys are not included in CSV import or Breezer sync. Local Mac passkeys stay tied to the Mac and Breezer profile; they are not iCloud backups. Breezer AI cannot read or enter passkeys.', 'section-note'),
+  const group = node('div', '', 'setting-group');
+  const row = (title, description, control) => {
+    const line = node('div', '', 'setting-row');
+    const label = node('div', '', 'setting-label');
+    label.append(node('span', title), node('small', description));
+    line.append(label, control); group.append(line);
+  };
+  row('Saved passwords', 'View, edit and delete. Your Mac may ask you to authenticate.', button('Open password manager', 'manager'));
+  row('Password preferences', 'Autofill, saving and password import.', button('Password settings', 'settings'));
+  row('Passkeys', 'Check local passkey support and availability on this Mac.', button('Check passkey availability', 'passkeys'));
+  section.append(group);
+  const passkeyDetails = node('details', '', 'setting-details');
+  passkeyDetails.append(node('summary', 'About passkeys'),
+    node('p', 'A website may offer a security key or another device in its sign-in dialog. Phone sign-in needs Bluetooth and device approval. Touch ID and Apple Passwords require signing entitlements that this build does not have.'),
+    node('p', 'The local passkey page lists only Breezer’s Mac profile authenticator. Apple Passwords, phone and security-key passkeys are managed with their provider. Passkeys are not included in CSV import or Breezer sync. Local passkeys stay tied to the Mac and profile; they are not iCloud backups. Breezer AI cannot read or enter passkeys.'),
   );
+  section.append(passkeyDetails);
 
-  const guide = node('details');
+  const guide = node('details', '', 'setting-details');
   guide.dataset.passwordImportGuide = '';
   guide.append(node('summary', 'Import passwords from Chrome'));
-  guide.append(node('p', 'Export your passwords from Chrome, then import the CSV into Breezer.'));
+  guide.append(node('p', 'Export from Chrome, then import the CSV into Breezer. This copies passwords once and does not sync later changes.'));
   const steps = node('ol');
-  for (const step of [
-    'In Chrome, open the menu, then Passwords and autofill, Google Password Manager, and Settings.',
-    'Under Export passwords, choose Download file. Complete Chrome\'s authentication prompt if shown.',
-    'Return to Breezer and choose Import Chrome CSV below. Select the exported .csv file in the native file picker.',
-    'Review any conflicts or errors in the native importer. Check the imported entries in Breezer\'s password manager.',
-    'After a successful import, delete the exported CSV, including any copy in the Trash. The CSV contains readable passwords.',
-  ]) steps.append(node('li', step));
+  for (const [title, description] of [
+    ["Open Chrome's password settings", 'Choose the menu, Passwords and autofill, Google Password Manager, then Settings.'],
+    ['Export the CSV', 'Under Export passwords, choose Download file and authenticate if asked.'],
+    ['Import into Breezer', 'Choose Import Chrome CSV below and select the exported file.'],
+    ['Check the import', "Review conflicts or errors, then check the saved entries in Breezer's password manager."],
+    ['Delete the export', 'After import succeeds, remove the CSV and any copy in the Trash. It contains readable passwords.'],
+  ]) {
+    const item = node('li');
+    item.append(node('strong', title), node('span', ` ${description}`));
+    steps.append(item);
+  }
   guide.append(steps);
   const help = node('a', 'Chrome export instructions');
   help.href = CHROME_EXPORT_HELP;
   help.target = '_blank';
   help.rel = 'noopener noreferrer';
-  guide.append(help, node('p', 'Keep the CSV private. Do not send it to Breezer AI, attach it to feedback, or keep it in a shared folder.'));
-  guide.append(button('Import Chrome CSV', 'import'));
+  const importActions = node('div', '', 'setting-actions');
+  importActions.append(button('Import Chrome CSV', 'import'), help);
+  guide.append(importActions, node('p', 'Keep the CSV private. Do not send it to Breezer AI, attach it to feedback, or keep it in a shared folder.'));
   section.append(guide, status, error);
 
   if (!api?.tabs?.create) {

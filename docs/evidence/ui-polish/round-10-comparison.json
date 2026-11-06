@@ -1,0 +1,254 @@
+[
+  {
+    "id": "sharing",
+    "title": "Translation consent",
+    "file": "translation-before-sharing-light-narrow.png",
+    "notes": [
+      [
+        85,
+        20,
+        44,
+        39,
+        "Required page sharing comes first; automatic translation is secondary."
+      ],
+      [
+        85,
+        84,
+        74,
+        62,
+        "Restore original is disabled until the page has translated text."
+      ]
+    ]
+  },
+  {
+    "id": "translation-error",
+    "title": "Translation recovery",
+    "file": "translation-error-light-narrow.png",
+    "notes": [
+      [
+        85,
+        84,
+        58,
+        69,
+        "Errors use the same opaque surface as the rest of the app."
+      ],
+      [
+        85,
+        26,
+        25,
+        62,
+        "Retry remains available with less visual emphasis."
+      ]
+    ]
+  },
+  {
+    "id": "accounts",
+    "title": "Account setup focus",
+    "file": "sidebar-signed-out-narrow.png",
+    "notes": [
+      [
+        85,
+        76,
+        22,
+        95,
+        "Accounts keeps a content-width focus ring."
+      ]
+    ]
+  },
+  {
+    "id": "custom",
+    "title": "Custom color selection",
+    "file": "custom-light-settings-appearance.png",
+    "notes": [
+      [
+        84,
+        38,
+        62,
+        54,
+        "The active custom theme has a visible selection outline."
+      ]
+    ]
+  },
+  {
+    "id": "custom-dark",
+    "title": "Custom color in dark mode",
+    "file": "custom-dark-settings-appearance.png",
+    "notes": [
+      [
+        84,
+        38,
+        62,
+        54,
+        "Selection stays distinct in dark mode."
+      ]
+    ]
+  },
+  {
+    "id": "search",
+    "title": "Empty search alignment",
+    "file": "settings-redesign-no-results-light.png",
+    "notes": [
+      [
+        85,
+        14,
+        33,
+        14,
+        "The empty state and group labels share the content edge."
+      ]
+    ]
+  },
+  {
+    "id": "organato",
+    "title": "Organato setup actions",
+    "file": "mint-light-onboarding.png",
+    "notes": [
+      [
+        85,
+        70,
+        89,
+        94,
+        "Connect leads while Continue is secondary until connected. The illustration remains."
+      ]
+    ]
+  },
+  {
+    "id": "reading",
+    "title": "Expanded release details",
+    "file": "whats-new-feature-expanded.png",
+    "notes": [
+      [
+        85,
+        30,
+        36,
+        48,
+        "Specific disclosure labels make the sections easier to scan."
+      ],
+      [
+        85,
+        83,
+        58,
+        79,
+        "Shorter lines and fewer separators improve the reading rhythm."
+      ]
+    ]
+  },
+  {
+    "id": "patch",
+    "title": "Patch illustration",
+    "file": "whats-new-patch-desktop.png",
+    "notes": [
+      [
+        85,
+        18,
+        28,
+        52,
+        "A smaller diagram explains the actual tab, translation and reply changes."
+      ]
+    ]
+  },
+  {
+    "id": "passkeys",
+    "title": "Passkey illustration labels",
+    "file": "whats-new-passkeys-desktop.png",
+    "notes": [
+      [
+        85,
+        78,
+        10,
+        70,
+        "The caption wraps inside its panel."
+      ]
+    ]
+  },
+  {
+    "id": "shortcuts",
+    "title": "Shortcut explanations",
+    "file": "whats-new-shortcuts-narrow.png",
+    "notes": [
+      [
+        85,
+        80,
+        45,
+        97,
+        "Keyboard exceptions move into the existing disclosure."
+      ]
+    ]
+  },
+  {
+    "id": "table",
+    "title": "Narrow browser measurements",
+    "file": "efficiency-browser-table-narrow.png",
+    "notes": [
+      [
+        85,
+        14,
+        46,
+        48,
+        "Labeled metric rows replace the tight four-column layout."
+      ]
+    ]
+  },
+  {
+    "id": "article",
+    "title": "Efficiency article hierarchy",
+    "file": "efficiency-narrow.png",
+    "notes": [
+      [
+        85,
+        18,
+        43,
+        14,
+        "A quieter title fits the reference article. Tables and technical caveats remain."
+      ]
+    ]
+  },
+  {
+    "id": "translation-settings",
+    "title": "Translation settings",
+    "file": "mint-light-settings-languages-narrow.png",
+    "notes": [
+      [
+        86,
+        78,
+        43,
+        54,
+        "Key removal appears only when the selected provider has a saved key."
+      ],
+      [
+        86,
+        88,
+        42,
+        73,
+        "Setup and privacy links have distinct labels."
+      ]
+    ]
+  },
+  {
+    "id": "response",
+    "title": "Empty reply recovery",
+    "file": "research-partial-failure.png",
+    "notes": [
+      [
+        85,
+        80,
+        42,
+        55,
+        "An empty completion says the provider returned no response."
+      ]
+    ]
+  },
+  {
+    "id": "update",
+    "title": "Update recovery guidance",
+    "file": "settings-update-unavailable-narrow.png",
+    "notes": [
+      [
+        85,
+        78,
+        44,
+        45,
+        "Recovery guidance names the visible Check for updates action."
+      ]
+    ]
+  }
+]

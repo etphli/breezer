@@ -103,7 +103,7 @@ export function applyAppearance(appearance) {
     const label = appearance.alwaysShowSidebar ? 'Auto-hide sidebar' : 'Keep sidebar visible';
     collapse.setAttribute('aria-label', label);
     collapse.setAttribute('aria-pressed', String(appearance.alwaysShowSidebar));
-    collapse.title = label;
+    collapse.title = appearance.alwaysShowSidebar ? 'Let the sidebar hide when you leave it' : 'Keep the sidebar open beside your page';
   }
   const scheme = appearance.colorMode === 'system' ? (darkQuery.matches ? 'dark' : 'light') : appearance.colorMode;
   root.dataset.scheme = scheme;
@@ -366,16 +366,26 @@ function switchSpace(spaceId, { activateTab = true, focusTab = null } = {}) {
   const current = activeTab();
   if (current && spaceOfTab(state.store, state.records, current.id) === state.activeSpaceId) state.lastActive[state.activeSpaceId] = current.id;
   state.activeSpaceId = next;
-  saveWindowState();
-  animateSpace(direction);
-  state.instant = true;
-  draw();
-  state.instant = false;
-  if (!activateTab) return;
-  const visible = visibleTabs(state.model);
+  const reveal = () => {
+    if (state.activeSpaceId !== next) return;
+    saveWindowState();
+    animateSpace(direction);
+    state.instant = true;
+    draw();
+    state.instant = false;
+  };
+  if (!activateTab) { reveal(); return; }
+  const visible = visibleTabs(buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: next }));
   const target = visible.find((tab) => tab.id === focusTab) || visible.find((tab) => tab.id === state.lastActive[next]) || visible.find((tab) => tab.active) || visible[0];
-  if (target) void activate(target.id);
-  else void createTab();
+  const activationVersion = tabEventVersion;
+  const activation = target ? api.tabs.update(target.id, { active: true }).then(tab => {
+    if (tab?.active && tabEventVersion === activationVersion && state.activeSpaceId === next) {
+      ++tabEventVersion;
+      for (const live of state.tabs.values()) live.active = live.id === tab.id;
+      state.lastActive[next] = tab.id;
+    }
+  }).catch(error => showToast(errorText(error))) : createTab();
+  void activation.finally(reveal);
 }
 
 function animateSpace(direction) {
@@ -452,7 +462,7 @@ function updateFavicon(holder, tab, url, title) {
   const src = faviconFor(tab, url);
   const fallback = () => {
     const page = urlOf(tab) || url || '';
-    holder.textContent = /^chrome:\/\/newtab/.test(page) || !page ? '' : (hostLabel(page)[0] || title[0] || '·').toUpperCase();
+    holder.textContent = /^chrome:\/\/newtab/.test(page) || !page ? '' : Array.from(hostLabel(page) || title || '·').slice(0, 2).join('').toUpperCase();
     holder.classList.toggle('blank', !holder.textContent);
   };
   if (!src || holder.dataset.failedIcon === src) {
@@ -469,6 +479,7 @@ function updateFavicon(holder, tab, url, title) {
     if (holder.contains(img) && img.getAttribute('src') === src) {
       holder.dataset.failedIcon = src;
       fallback();
+      render();
     }
   };
   if (img.getAttribute('src') !== src) img.src = src;
@@ -542,6 +553,7 @@ function updateRow(row, { title, tab, url, active, asleep, actionLabel, actionIc
   row.classList.toggle('asleep', Boolean(asleep));
   row.classList.toggle('loading', tab?.status === 'loading');
   row.classList.toggle('discarded', Boolean(tab?.discarded));
+  row.title = title;
   row.setAttribute('aria-selected', String(Boolean(selected)));
   row.setAttribute('aria-label', [title, asleep ? 'asleep' : '', tab?.audible ? 'playing audio' : ''].filter(Boolean).join(', '));
   const audible = Boolean(tab && (tab.audible || tab.mutedInfo?.muted));
@@ -587,6 +599,40 @@ function folderNode() {
 
 function drawTree(container, items) {
   reconcile(container, items);
+}
+
+function compactLabels() {
+  const rows = ['pinned', 'today'].flatMap(id => [...$(id).querySelectorAll('.row')])
+    .filter(row => !row.classList.contains('folder-row') && !row.closest('.leaving') && !row.closest('.folder-children[hidden]'));
+  const groups = new Map();
+  const labelsByRow = new Map();
+  for (const row of rows) {
+    const [title, source, url] = rowPresentation.get(row);
+    const image = row.querySelector('.favicon img');
+    const identity = image ? (source.startsWith('data:') ? source : new URL(url).hostname) : row.querySelector('.favicon').textContent;
+    const group = groups.get(identity) || [];
+    group.push({ row, words: title.match(/[\p{L}\p{N}]+/gu) || ['Tab'] });
+    groups.set(identity, group);
+  }
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const candidates = group.map(item => item.words.map(word => [...word].slice(0, 2).join('').toUpperCase()));
+    const occurrences = new Map();
+    for (const words of candidates) for (const word of new Set(words)) occurrences.set(word, (occurrences.get(word) || 0) + 1);
+    const labels = candidates.map(words => words.find(word => occurrences.get(word) === 1) || words[0]);
+    const counts = new Map(), ordinals = new Map();
+    for (const label of labels) counts.set(label, (counts.get(label) || 0) + 1);
+    group.forEach(({ row }, index) => {
+      const base = labels[index], ordinal = (ordinals.get(base) || 0) + 1;
+      ordinals.set(base, ordinal);
+      labelsByRow.set(row, counts.get(base) > 1 ? [...base][0] + ordinal : base);
+    });
+  }
+  for (const row of rows) {
+    const label = labelsByRow.get(row);
+    if (label && row.dataset.compactLabel !== label) row.dataset.compactLabel = label;
+    else if (!label && row.dataset.compactLabel) delete row.dataset.compactLabel;
+  }
 }
 
 function draw() {
@@ -689,12 +735,14 @@ function draw() {
     create: () => {
       const dot = el('button', 'space-dot', { type: 'button', role: 'tab' });
       dot.append(el('span', 'dot', { 'aria-hidden': 'true' }));
+      dot.append(el('span', 'space-label', { 'aria-hidden': 'true' }));
       return dot;
     },
     update: (dot) => {
       const selected = space.id === model.space.id;
       dot.dataset.tone = space.tone;
       dot.setAttribute('aria-selected', String(selected));
+      dot.querySelector('.space-label').textContent = space.name;
       dot.tabIndex = selected ? 0 : -1;
       dot.setAttribute('aria-label', `${space.name}, ${space.tabCount} ${space.tabCount === 1 ? 'tab' : 'tabs'}`);
       dot.title = index < 4 ? `${space.name} (⌃${index + 1})` : space.name;
@@ -703,6 +751,7 @@ function draw() {
   $('add-space').hidden = model.spaces.length >= MAX_SPACES;
 
   syncRovingFocus();
+  compactLabels();
   state.drawn = true;
 }
 

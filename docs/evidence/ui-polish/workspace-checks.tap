@@ -1,0 +1,70 @@
+TAP version 13
+# Subtest: settings categories, search, Other and narrow layout work in a real browser
+ok 1 - settings categories, search, Other and narrow layout work in a real browser
+  ---
+  duration_ms: 12163.168625
+  ...
+# Subtest: all themes keep settings readable and sidebar font boundaries usable
+ok 2 - all themes keep settings readable and sidebar font boundaries usable
+  ---
+  duration_ms: 13689.24675
+  ...
+# Subtest: sidebar releases unused route markup and reloads Settings and welcome intact
+ok 3 - sidebar releases unused route markup and reloads Settings and welcome intact
+  ---
+  duration_ms: 4662.80175
+  ...
+# Subtest: empty Settings-created spaces and sidebar controls respond to held clicks
+ok 4 - empty Settings-created spaces and sidebar controls respond to held clicks
+  ---
+  duration_ms: 4883.465417
+  ...
+# Subtest: dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+ok 5 - dragging with no Favorites preserves tab geometry and supports reorder and Favorites drops
+  ---
+  duration_ms: 3070.878375
+  ...
+# Subtest: delayed tab queries cannot revive closed rows or overwrite navigation and activation
+ok 6 - delayed tab queries cannot revive closed rows or overwrite navigation and activation
+  ---
+  duration_ms: 2039.853125
+  ...
+# Subtest: Arc-style sidebar and settings work against the chrome.* fixture
+ok 7 - Arc-style sidebar and settings work against the chrome.* fixture
+  ---
+  duration_ms: 5846.337792
+  ...
+# Subtest: tab updates leave unchanged rows and their audio controls intact
+ok 8 - tab updates leave unchanged rows and their audio controls intact
+  ---
+  duration_ms: 1012.786792
+  ...
+# Subtest: numbered favorite command lazily opens the saved first slot, once under rapid repeat
+ok 9 - numbered favorite command lazily opens the saved first slot, once under rapid repeat
+  ---
+  duration_ms: 1016.19975
+  ...
+# Subtest: numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+ok 10 - numbered saved slots reuse loaded and discarded tabs, follow reorder across spaces and restart
+  ---
+  duration_ms: 1058.542208
+  ...
+# Subtest: numbered favorite activation is scoped to the host window, including another window with a live target
+ok 11 - numbered favorite activation is scoped to the host window, including another window with a live target
+  ---
+  duration_ms: 1200.460292
+  ...
+# Subtest: sidebar text follows sidebarFontSize and content clears the title bar band
+ok 12 - sidebar text follows sidebarFontSize and content clears the title bar band
+  ---
+  duration_ms: 4646.49175
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 25459.60575

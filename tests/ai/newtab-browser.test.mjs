@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NOW, SITES, CONNECTED, at, installFixture } from './newtab-browser-fixture.mjs';
+import { captureStablePanel } from './ui-evidence-capture.mjs';
 
 // Drives the shipped newtab.html in a real browser against a chrome.* fixture
 // that answers the 'breezer-newtab' port. Sites and items below are test data.
@@ -15,93 +17,6 @@ let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
-const NOW = new Date(2026, 9, 29, 10, 0);
-const at = (days, hour = null) => {
-  if (hour == null) {
-    const day = new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() + days);
-    return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
-  }
-  return new Date(NOW.getFullYear(), NOW.getMonth(), NOW.getDate() + days, hour).toISOString();
-};
-
-const SITES = [
-  ['Mail', 'https://mail.example.com/'], ['Canvas', 'https://canvas.example.edu/'], ['Docs', 'https://docs.example.com/'],
-  ['Calendar', 'https://calendar.example.com/'], ['News', 'https://news.example.org/'], ['Music', 'https://music.example.com/'],
-  ['Maps', 'https://maps.example.com/'], ['Library', 'https://library.example.edu/'], ['Ninth', 'https://ninth.example.com/'],
-].map(([title, url]) => ({ title, url }));
-
-const CONNECTED = {
-  topSites: SITES,
-  organato: {
-    enabled: true, connected: true, error: null,
-    // As the background sends them: b1 is classified as both, so it is in
-    // exams and assignments; t1 is a to-do the exam filter also picked up.
-    exams: [
-      { id: 't1', kind: 'todo', classification: 'checkpoint', title: 'Email group about slides', dueAt: at(0) },
-      { id: 'e1', kind: 'work', classification: 'checkpoint', title: 'Chemistry unit 3 test', dueAt: at(1, 9), subject: 'Chemistry' },
-      { id: 'b1', kind: 'work', classification: 'both', title: 'Biology field study presentation', dueAt: at(4), subject: 'Biology' },
-      { id: 'e2', kind: 'work', classification: 'checkpoint', title: 'Spanish oral exam', dueAt: at(6, 13), subject: 'Spanish' },
-    ],
-    assignments: [
-      { id: 'a0', kind: 'work', classification: 'assignment', title: 'Reading reflection', dueAt: at(-1), subject: 'English' },
-      { id: 'a1', kind: 'work', classification: 'assignment', title: 'History essay draft', dueAt: at(0, 23), subject: 'History', url: 'https://canvas.example.edu/a1' },
-      { id: 'a2', kind: 'work', classification: 'assignment', title: 'Lab report: titration', dueAt: at(3, 17), subject: 'Chemistry' },
-      { id: 'b1', kind: 'work', classification: 'both', title: 'Biology field study presentation', dueAt: at(4), subject: 'Biology' },
-      { id: 'a3', kind: 'work', classification: 'assignment', title: 'Problem set 7', dueAt: at(9), subject: 'Maths' },
-    ],
-    todos: [
-      { id: 't1', kind: 'todo', classification: 'checkpoint', title: 'Email group about slides', dueAt: at(0) },
-      { id: 't2', title: 'Return library books' },
-    ],
-  },
-};
-
-function installFixture({ view, appearance, delay = 0, hang = false, switches }) {
-  // fx.view and fx.delay can be changed mid-test to script later answers.
-  window.fx = { requests: [], view, delay };
-  const port = (name) => {
-    const listeners = { message: [], disconnect: [] };
-    return {
-      name,
-      onMessage: { addListener: (fn) => listeners.message.push(fn) },
-      onDisconnect: { addListener: (fn) => listeners.disconnect.push(fn) },
-      postMessage(message) {
-        window.fx.requests.push({ name, ...message });
-        if (hang) return;
-        const answer = structuredClone(window.fx.view);
-        setTimeout(() => listeners.message.forEach((fn) => fn({ type: 'view', id: message.id, ...answer })), window.fx.delay);
-      },
-      disconnect() {},
-    };
-  };
-  const preferences = JSON.parse(localStorage.getItem('shortcut-fixture') || '{}');
-  if (switches && !('organato.switches.v1' in preferences)) { preferences['organato.switches.v1'] = switches; localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); }
-  const storageListeners = [];
-  // chrome.storage is shared by every extension page; same-origin storage events
-  // stand in for that, so a change in one tab reaches the others.
-  window.addEventListener('storage', (event) => {
-    if (event.key !== 'shortcut-fixture') return;
-    const next = JSON.parse(event.newValue || '{}');
-    const changes = {};
-    for (const key of new Set([...Object.keys(preferences), ...Object.keys(next)])) {
-      if (JSON.stringify(preferences[key]) !== JSON.stringify(next[key])) changes[key] = { oldValue: preferences[key], newValue: next[key] };
-    }
-    Object.keys(preferences).forEach((key) => delete preferences[key]);
-    Object.assign(preferences, next);
-    if (Object.keys(changes).length) for (const fn of storageListeners) fn(changes, 'local');
-  });
-  window.chrome = {
-    tabs: { query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }] },
-    runtime: {
-      connect: ({ name }) => port(name),
-      getURL: (path) => `${location.origin}/${String(path).replace(/^\//, '')}`,
-      getManifest: () => ({ permissions: ['favicon'] }),
-      lastError: undefined,
-    },
-    storage: { local: { async get(key) { return { [key]: structuredClone(preferences[key]) }; }, async set(values) { Object.assign(preferences, structuredClone(values)); localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); for (const fn of storageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); } }, onChanged: { addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { const index=storageListeners.indexOf(fn); if(index>=0) storageListeners.splice(index,1); } } },
-    ...(appearance ? { breezerPrivate: { getAppearance: async () => appearance } } : {}),
-  };
-}
 
 const COLORS = ['#1a73e8', '#c2410c', '#0f766e', '#7c3aed', '#be123c', '#15803d', '#b45309', '#334155', '#0e7490'];
 function favicon(pageUrl) {
@@ -162,11 +77,12 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.textContent('#today'), 'Thursday, October 29');
       assert.deepEqual(await page.evaluate(() => window.fx.requests.map(({ name, type, refresh }) => ({ name, type, refresh }))), [{ name: 'breezer-newtab', type: 'view', refresh: false }]);
 
-      // One row, at about the upper third.
+      // One row below the date, with room for useful content underneath.
       const tops = await page.$$eval('.site:not(.site-add)', (items) => items.map((item) => Math.round(item.getBoundingClientRect().top)));
       assert.equal(tops.length, 8);
       assert.equal(new Set(tops).size, 1);
-      assert.ok(tops[0] > 900 * 0.18 && tops[0] < 900 * 0.4, `sites row at ${tops[0]}px`);
+      const date = await page.locator('#today').boundingBox();
+      assert.ok(tops[0] >= date.y + date.height + 12 && tops[0] < 900 * .3, `sites row at ${tops[0]}px`);
       assert.equal(await page.getAttribute('.site-link', 'href'), 'https://mail.example.com/');
 
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
@@ -267,12 +183,22 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
     await withPage(browser, base, { view: CONNECTED, viewport: { width: 420, height: 860 } }, async (page) => {
       await page.waitForSelector('html[data-loaded="true"]');
       const visible = await page.$$eval('.site', (items) => items.filter((item) => item.offsetParent).map((item) => Math.round(item.getBoundingClientRect().top)));
-      assert.equal(visible.length, 4);
-      assert.equal(new Set(visible).size, 1);
+      assert.equal(visible.length, 9, 'all eight shortcuts and Add remain available at narrow widths');
+      assert.equal(new Set(visible).size, 3, 'shortcuts form complete rows without clipped tiles');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 420), true);
       const lanes = await page.$$eval('.lane', (nodes) => nodes.map((node) => node.getBoundingClientRect().top));
       assert.ok(lanes[1] > lanes[0], 'lanes stack on narrow windows');
       await page.screenshot({ path: `${evidence}/newtab-narrow.png`, fullPage: true });
+      await page.getByRole('link', { name: 'To-dos', exact: true }).click();
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'lane-todos');
+      assert.ok((await page.locator('#lane-todos').boundingBox()).y >= 0, 'To-dos jump brings its heading into view');
+      await page.evaluate(() => { history.replaceState(null, '', location.pathname); scrollTo(0, 0); });
+      const lastSite = page.locator('.site:not(.site-add) a').last();
+      await lastSite.focus();
+      const lastBox = await lastSite.boundingBox();
+      assert.ok(lastBox.x >= 0 && lastBox.x + lastBox.width <= 420, 'keyboard focus reveals the last shortcut');
+      const addBox = await page.locator('.site-add-button').boundingBox();
+      assert.ok(addBox.x >= 0 && addBox.x + addBox.width <= 420, 'Add stays inside the window');
     });
 
     await withPage(browser, base, { view: { topSites: SITES.slice(0, 5), organato: { enabled: true, connected: false } } }, async (page) => {
@@ -288,6 +214,14 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'error');
       assert.equal(await page.isVisible('#sites-empty'), true);
       assert.match(await page.textContent('#organato-status'), /API key was rejected/);
+      assert.doesNotMatch(await page.textContent('#organato-status'), /401/);
+      const layout = await page.evaluate(() => {
+        const rect = id => document.getElementById(id).getBoundingClientRect();
+        return { alertWidth: rect('organato-status').width, columnWidth: rect('organato').width, addLeft: document.querySelector('.site-add .site-name').getBoundingClientRect().left, dateLeft: rect('today').left, emptyGap: rect('sites-empty').top - document.querySelector('.site-add-button').getBoundingClientRect().bottom };
+      });
+      assert.ok(Math.abs(layout.alertWidth - layout.columnWidth) < 1, 'New-tab error spans the content column');
+      assert.ok(Math.abs(layout.addLeft - layout.dateLeft) < 1, 'Empty shortcut aligns with the date');
+      assert.ok(layout.emptyGap < 48, 'Empty hint stays with its shortcut control');
       await page.screenshot({ path: `${evidence}/newtab-error.png` });
     });
 
@@ -310,6 +244,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.waitForSelector('html[data-loaded="true"]');
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
       assert.match(await page.textContent('#organato-status'), /Showing the last update.*timed out/);
+      assert.equal(await page.getAttribute('#organato', 'data-stale'), 'true', 'stale items carry an explicit notice state');
       assert.deepEqual(await page.$$eval('[data-list="upcoming"] .item-when', (nodes) => nodes.map((node) => node.textContent)), ['In 2 days, Oct 31, 10:00 AM', 'In 9 days, Nov 7, 10:00 AM']);
       assert.equal(await page.textContent('[data-list="todos"] .item-empty'), 'Nothing on your to-do list.');
       await page.screenshot({ path: `${evidence}/newtab-stale-same-title.png` });
@@ -381,11 +316,14 @@ test('add shortcuts by URL and open tab, persist across reload and keep Add visi
   await page.getByRole('combobox').press('Escape');
   assert.equal(await page.locator('#shortcut-add').evaluate(x=>x.matches(':popover-open')), false);
   await page.setViewportSize({width:1440,height:900});
-  await page.screenshot({path:`${evidence}/newtab-custom-shortcuts.png`});
+  const checks = [{ file: 'newtab-custom-shortcuts.png', ...await captureStablePanel(page, `${evidence}/newtab-custom-shortcuts.png`) }];
   await page.getByRole('button', { name: 'Add shortcut', exact: true }).click();
   await page.getByRole('combobox').fill('project');
   await page.getByRole('option', {name: /Open project/}).waitFor();
-  await page.screenshot({path:`${evidence}/newtab-add-popover.png`});
+  checks.push({ file: 'newtab-add-popover.png', ...await captureStablePanel(page, `${evidence}/newtab-add-popover.png`, { surfaceSelector: '#shortcut-add' }) });
+  assert.equal(await page.locator('.settings-link').count(), 1);
+  assert.equal(await page.locator('main.sheet').count(), 1);
+  await writeFile(`${evidence}/newtab-capture-geometry.json`, JSON.stringify({ settingsLinks: 1, agendaSheets: 1, captures: checks }, null, 2));
  }); } finally { try { await browser?.close(); } finally { await new Promise(done => server.close(done)); } }
 });
 
@@ -432,8 +370,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 6);
       const state = await organatoGone(page);
       assert.deepEqual({ hidden: state.hidden, text: state.text, refreshVisible: state.refreshVisible, flag: state.flag, overflow: state.overflow }, { hidden: true, text: false, refreshVisible: false, flag: 'off', overflow: false });
-      // The date and sites sit a little above the middle, not up top over a blank gap.
-      assert.ok(state.skyCentre > state.height * 0.35 && state.skyCentre < state.height * 0.5, `sky centre ${state.skyCentre}`);
+      assert.ok(state.skyCentre < state.height * 0.35, 'the date keeps its top anchor with the agenda off');
       assert.equal(await page.locator('.item, .item-empty, #organato-action a').count(), 0);
       assert.equal(await page.getByRole('heading', { name: /Organato/ }).count(), 0);
       assert.equal(await page.getByRole('status').filter({ hasText: /Organato/ }).count(), 0);
@@ -444,7 +381,10 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.closest('.sheet')), null, 'nothing in the hidden sheet takes focus');
       await page.locator('.site-link').first().focus();
-      await page.screenshot({ path: `${evidence}/newtab-organato-off-light.png` });
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-keyboard-focus.png` });
+      await page.evaluate(() => document.activeElement.blur());
+      await page.mouse.move(1, 1);
+      await page.screenshot({ path: `${evidence}/newtab-organato-off-light.png`, animations: 'disabled' });
       // Shortcut controls still work with Organato off.
       await page.getByRole('button', { name: 'Remove Mail shortcut', exact: true }).click();
       await page.getByRole('button', { name: 'Undo', exact: true }).click();
@@ -491,6 +431,9 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await other.waitForSelector('html[data-loaded="true"]');
       for (const tab of [page, other]) assert.equal(await tab.getAttribute('#organato', 'data-state'), 'ready');
 
+      const dateAnchor = await other.locator('#today').boundingBox();
+      const readySheet = await other.locator('.sheet').boundingBox();
+      await other.screenshot({ path: `${evidence}/newtab-state-ready.png` });
       // A slow refresh is on its way when Organato is turned off.
       await page.evaluate(() => { window.fx.delay = 600; });
       await page.click('#refresh');
@@ -500,6 +443,9 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.waitForTimeout(200);
       assert.equal((await organatoGone(page)).hidden, true, 'the late "on" answer does not bring it back');
       assert.equal((await organatoGone(other)).hidden, true);
+      const offAnchor = await other.locator('#today').boundingBox();
+      assert.ok(Math.abs(dateAnchor.x - offAnchor.x) < 1 && Math.abs(dateAnchor.y - offAnchor.y) < 1, 'the date stays anchored across the live off switch');
+      await other.screenshot({ path: `${evidence}/newtab-state-off.png` });
 
       // Back on: the loading sheet shows, a fresh request goes out and the lanes return.
       const before = await other.evaluate(() => window.fx.requests.length);
@@ -508,6 +454,11 @@ test('Organato off removes the whole section and follows the switch live', { ski
       await page.evaluate(() => window.chrome.storage.local.set({ 'organato.switches.v1': { enabled: true, dashboardEnabled: true } }));
       await other.waitForFunction(() => !document.querySelector('.sheet').hidden && document.getElementById('organato').getAttribute('aria-busy') === 'true');
       assert.match(await other.textContent('#organato-status'), /Loading/);
+      assert.equal(await other.getAttribute('#organato', 'data-state'), 'loading');
+      const loadingSheet = await other.locator('.sheet').boundingBox();
+      const loadingAnchor = await other.locator('#today').boundingBox();
+      assert.ok(Math.abs(dateAnchor.x - loadingAnchor.x) < 1 && Math.abs(dateAnchor.y - loadingAnchor.y) < 1, 'the date stays anchored while reloading');
+      assert.ok(Math.abs(readySheet.y - loadingSheet.y) < 1 && Math.abs(readySheet.height - loadingSheet.height) < 1, 'loading reserves the full desktop agenda footprint');
       await other.screenshot({ path: `${evidence}/newtab-organato-reenabled-loading.png` });
       for (const tab of [page, other]) await tab.waitForFunction(() => document.getElementById('organato').dataset.state === 'ready');
       assert.equal(await other.evaluate(() => window.fx.requests.length), before + 1);

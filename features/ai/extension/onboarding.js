@@ -20,7 +20,7 @@ const TOP_SLIDES = [
   { focus: 'toptabs', title: 'Your tabs stay across the top', body: 'Tabs work the way you’re used to. To get spaces and favorites later, switch to the sidebar in Settings under Layout.', keys: [['⌘ T', 'New tab'], ['⌘ ,', 'Open Settings']] },
 ];
 const AI_SLIDES = [
-  { focus: 'ai', title: 'Meet Breezer AI', body: 'Press ⌘K to open the assistant beside any page. With Current page on, it reads the page you’re looking at, so you can ask for a summary or an answer.', keys: [['⌘ K', 'Open or close Breezer AI']] },
+  { focus: 'ai', title: 'Meet Breezer AI', body: 'Press ⌘K to open the assistant. Select Page + screenshot to share this tab, then ask for a summary or an answer.', keys: [['⌘ K', 'Open or close Breezer AI']] },
   { focus: 'control', title: 'Let it help, on your terms', body: 'Turn on Browser control and Breezer AI can click, type and scroll in the current tab until you turn it off. It asks before buying, sending or deleting anything.', keys: [['esc', 'Stop a reply']] },
 ];
 
@@ -170,7 +170,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
 
   const nameInput = $('wl-name');
   nameInput.value = savedName;
-  const showName = () => { $('wl-mini-name').textContent = cleanName(nameInput.value) || 'there'; };
+  const showName = () => { const name = cleanName(nameInput.value); $('wl-mini-name').textContent = name ? `, ${name}` : ''; };
   nameInput.addEventListener('input', showName);
   nameInput.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); void next(); } });
   showName();
@@ -222,14 +222,19 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     let port = null, pending = null, pendingType = null, done = null, sequence = 0, timer;
     const status = $('wl-organato-status');
     const off = $('wl-organato-off');
+    const placeStatus = kind => {
+      $(kind === 'off' ? 'wl-organato-off-status' : 'wl-organato-connect-status').append(status);
+    };
     const busy = (value) => {
       for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
       root.classList.toggle('wl-connecting', value);
     };
-    const finish = (text) => {
+    const finish = (text, error = false) => {
       const kind = pendingType;
       clearTimeout(timer); pending = null; pendingType = null; done = null; busy(false);
       if (text !== undefined) status.textContent = text;
+      status.dataset.state = error ? 'error' : '';
+      if (!error && organatoConnected && organatoEnabled) status.dataset.state = 'success';
       // A failed opt-out leaves focus where the person can try again.
       if (kind === 'off' && organatoEnabled) off.focus();
     };
@@ -238,7 +243,11 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       organatoConnected = value?.connected === true;
       organatoEnabled = value?.enabled !== false;
       mini.classList.toggle('organato-on', organatoConnected && organatoEnabled);
+      const button = $('wl-organato-connect');
+      button.textContent = organatoConnected ? 'Update connection' : 'Connect';
+      button.classList.toggle('primary', !organatoConnected);
       off.hidden = !organatoEnabled;
+      updateNavigation();
     };
     const connect = () => {
       if (port) return port;
@@ -248,7 +257,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
         if (port !== connection || message.id !== pending) return;
         if (message.type === 'progress') { status.textContent = typeof message.stage === 'string' ? message.stage : 'Connecting to Organato…'; return; }
         if (!message.ok) {
-          finish(pendingType === 'off' ? `Couldn’t turn Organato off. ${message.error || 'Try again.'}` : message.error);
+          finish(pendingType === 'off' ? 'Couldn’t turn Organato off. Try again.' : message.error, true);
           return;
         }
         const after = done;
@@ -261,21 +270,23 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
         void api.runtime.lastError;
         if (port !== connection) return;
         port = null;
-        if (pending) finish('Connection closed. Try again.');
+        if (pending) finish('Connection closed. Try again.', true);
       });
       return connection;
     };
     // A change replaces a pending read; nothing replaces a pending change.
     const request = (type, settings, { kind = type, then = null } = {}) => {
       if ((pending && pendingType !== 'view') || typeof api.runtime?.connect !== 'function') return false;
+      placeStatus(kind);
       clearTimeout(timer);
       pending = String(++sequence);
       pendingType = kind;
+      status.dataset.state = '';
       done = then;
       busy(type === 'configure');
       timer = setTimeout(() => finish(kind === 'off'
         ? 'Organato didn’t respond, so it’s still on. Try again, or turn it off later in Settings.'
-        : 'Organato didn’t respond. Check your connection and try again, or skip for now.'), 85_000);
+        : 'Organato didn’t respond. Check your connection and try again, or skip for now.', true), 85_000);
       try { connect().postMessage({ id: pending, type, settings }); }
       catch { port = null; finish(kind === 'off' ? 'The Organato helper is unavailable, so Organato is still on. Try again, or turn it off later in Settings.' : 'The Organato helper is unavailable. You can connect later in Settings.'); }
       return true;
@@ -284,12 +295,13 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     off.addEventListener('click', () => {
       status.textContent = 'Turning Organato off…';
       request('configure', { enabled: false }, { kind: 'off', then: (value) => {
-        if (value?.enabled !== false) { finish('Couldn’t turn Organato off. Try again.'); return; }
+        if (value?.enabled !== false) { finish('Couldn’t turn Organato off. Try again.', true); return; }
         finish('Organato is turned off. You can turn it on in Settings.');
         if (STEPS[index] === 'organato') void next();
       } });
     });
     $('wl-organato-connect').addEventListener('click', () => {
+      placeStatus('connect');
       const key = $('wl-organato-key').value.trim();
       if (!key) { status.textContent = 'Paste your API key first, or choose Continue to skip.'; $('wl-organato-key').focus(); return; }
       $('wl-organato-key').value = '';
@@ -313,7 +325,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     const slides = tourSlides(appearance.layout);
     slide = Math.min(slide, slides.length - 1);
     const current = slides[slide];
-    $('wl-tour-count').textContent = `${slide + 1} of ${slides.length}`;
+    $('wl-tour-count').textContent = `Tip ${slide + 1} of ${slides.length}`;
     $('wl-h-tour').textContent = current.title;
     $('wl-tour-body').textContent = current.body;
     $('wl-tour-keys').replaceChildren(...current.keys.map(([keys, label]) => {
@@ -368,8 +380,18 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     element.classList.add(className);
   }
 
+  function updateNavigation() {
+    const step = STEPS[index];
+    const lastTip = slide === tourSlides(appearance.layout).length - 1;
+    $('wl-tour-preview').textContent = `Next: ${tourSlides(appearance.layout).length} optional tips.`;
+    $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Connect later'
+      : step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
+    $('wl-skip').textContent = step === 'tour' ? 'Skip tour' : 'Skip setup';
+  }
+
   function render(direction = 0, { focus = true } = {}) {
     const step = STEPS[index];
+    root.querySelector('.wl-stage').scrollTop = 0;
     for (const section of root.querySelectorAll('.wl-step')) section.hidden = section.dataset.step !== step;
     const section = root.querySelector(`.wl-step[data-step="${step}"]`);
     if (direction) replay(section, direction > 0 ? 'wl-enter-next' : 'wl-enter-prev');
@@ -383,9 +405,11 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       else item.removeAttribute('aria-current');
     }
     $('wl-back').hidden = index === 0;
-    const slides = tourSlides(appearance.layout);
-    $('wl-next').textContent = step === 'tour' && slide < slides.length - 1 ? 'Next' : NEXT_LABELS[step] ?? 'Continue';
-    $('wl-skip').hidden = step === 'done';
+    progress.hidden = step === 'tour';
+    $('wl-progress-group').hidden = step === 'tour';
+    $('wl-stage-count').textContent = `Step ${index + 1} of ${STEPS.length}`;
+    updateNavigation();
+    $('wl-skip').hidden = step === 'done' || step === 'organato';
     if (focus) (step === 'you' ? nameInput : section.querySelector('h1')).focus({ preventScroll: true });
     if (!setup.completed && setup.step !== step) {
       setup = { ...setup, step };
@@ -435,7 +459,10 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
 
   $('wl-next').addEventListener('click', () => void next());
   $('wl-back').addEventListener('click', back);
-  $('wl-skip').addEventListener('click', () => void finish({ skipped: true }));
+  $('wl-skip').addEventListener('click', () => {
+    if (STEPS[index] === 'tour') { index = STEPS.indexOf('done'); render(1); }
+    else void finish({ skipped: true });
+  });
 
   renderAppearance();
   root.hidden = false;

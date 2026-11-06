@@ -114,11 +114,28 @@ test('a lost updater connection invalidates the install action and never replays
     first.disconnect();
     assert.equal(get('update-install').hidden, true, 'a new host has no checked release');
     assert.equal(get('update-check').disabled, false);
-    assert.match(get('update-status').textContent, /Check for updates again/);
+    assert.match(get('update-status').textContent, /Choose Check for updates to retry/);
     assert.equal(ports.length, 1, 'no automatic replay of the install request');
     userClick(get('update-check'));
     assert.equal(ports.length, 2);
     assert.deepEqual(ports[1].sent.map(message => message.type), ['update-check']);
+  } finally { mounted.dispose(); }
+});
+
+test('an unanswered install restores the visible check action after timeout', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { ports, mounted, userClick, get } = await updateSettingsFixture();
+  try {
+    const port = ports[0];
+    port.onMessage.emit({ id: port.sent[0].id, ok: true, value: { available: true, version: '1.2.0' } });
+    assert.equal(get('update-check').hidden, true);
+    userClick(get('update-install'));
+    t.mock.timers.tick(65_000);
+    assert.match(get('update-status').textContent, /Choose Check for updates/);
+    assert.equal(get('update-check').hidden, false, 'the named recovery action is visible');
+    assert.equal(get('update-check').disabled, false);
+    userClick(get('update-check'));
+    assert.equal(port.sent.at(-1).type, 'update-check');
   } finally { mounted.dispose(); }
 });
 

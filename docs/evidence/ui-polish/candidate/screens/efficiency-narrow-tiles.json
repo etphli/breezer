@@ -1,0 +1,40 @@
+{
+  "height": 4112,
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "mastheads": 1,
+  "tiles": [
+    {
+      "file": "efficiency-narrow-tile-01.png",
+      "scrollY": 0,
+      "mastheadBottom": 308.859375
+    },
+    {
+      "file": "efficiency-narrow-tile-02.png",
+      "scrollY": 744,
+      "mastheadBottom": -435.140625
+    },
+    {
+      "file": "efficiency-narrow-tile-03.png",
+      "scrollY": 1488,
+      "mastheadBottom": -1179.140625
+    },
+    {
+      "file": "efficiency-narrow-tile-04.png",
+      "scrollY": 2232,
+      "mastheadBottom": -1923.140625
+    },
+    {
+      "file": "efficiency-narrow-tile-05.png",
+      "scrollY": 2976,
+      "mastheadBottom": -2667.140625
+    },
+    {
+      "file": "efficiency-narrow-tile-06.png",
+      "scrollY": 3268,
+      "mastheadBottom": -2959.140625
+    }
+  ]
+}

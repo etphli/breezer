@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { mkdtemp, mkdir, cp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -38,6 +39,10 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   const port = await listen(server);
   const extension = join(temporary, 'extension');
   await cp(resolve('features/ai/extension'), extension, { recursive: true });
+  if (process.env.BREEZER_UI_BASELINE) {
+    assert.match(process.env.BREEZER_UI_BASELINE, /^[0-9a-f]{7,40}$/i);
+    await writeFile(join(extension, 'translation.css'), execFileSync('git', ['show', `${process.env.BREEZER_UI_BASELINE}:features/ai/extension/translation.css`]));
+  }
   // Only the shipped translation subsystem runs. Fixture-only host grants replace
   // native activeTab invocation and optional permission prompts in this test.
   await writeFile(join(extension, 'manifest.json'), JSON.stringify({ manifest_version: 3, name: 'Breezer translation acceptance fixture', version: '1.0', permissions: ['activeTab', 'scripting', 'tabs', 'contextMenus', 'storage'], host_permissions: ['http://127.0.0.1/*', 'http://localhost/*'], background: { service_worker: 'fixture-worker.js', type: 'module' } }));
@@ -53,16 +58,139 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   });
   const tabId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, page.url());
   let ui = await context.newPage();
+  const captureGeometry = [];
+  const capture = async file => {
+    const geometry = await ui.evaluate(() => ({
+      headings: [...document.querySelectorAll('h1')].map(node => ({ text: node.textContent, rect: node.getBoundingClientRect().toJSON() })),
+      main: document.querySelector('main').getBoundingClientRect().toJSON(),
+      viewport: { width: innerWidth, height: innerHeight, dpr: devicePixelRatio },
+      consentBoundaryContrast: (() => {
+        const input = document.getElementById('consent'), style = getComputedStyle(input);
+        const context = document.createElement('canvas').getContext('2d');
+        const luminance = color => {
+          context.fillStyle = color; context.fillRect(0, 0, 1, 1);
+          return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).reduce((sum, value, i) => {
+            const channel = value / 255;
+            return sum + (channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4) * [.2126, .7152, .0722][i];
+          }, 0);
+        };
+        const edge = luminance(style.borderTopColor), surface = luminance(getComputedStyle(input.closest('.sharing-group')).backgroundColor === 'rgba(0, 0, 0, 0)' ? getComputedStyle(document.querySelector('.translation-form')).backgroundColor : getComputedStyle(input.closest('.sharing-group')).backgroundColor);
+        return (Math.max(edge, surface) + .05) / (Math.min(edge, surface) + .05);
+      })(),
+      sourceFit: (() => {
+        const select = document.querySelector('#source'), style = getComputedStyle(select);
+        const canvas = document.createElement('canvas'), context = canvas.getContext('2d'); context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        const label = select.selectedOptions[0]?.textContent || '';
+        return { label, textWidth: context.measureText(label).width, availableWidth: select.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight) };
+      })(),
+    }));
+    assert.equal(geometry.headings.length, 1, `${file} has one heading`);
+    assert.ok(geometry.consentBoundaryContrast >= 3, `${file}: consent boundary has at least 3:1 contrast`);
+    assert.ok(geometry.sourceFit.textWidth <= geometry.sourceFit.availableWidth, `${file}: selected source label fits before the chevron`);
+    if (geometry.viewport.width <= 320) {
+      const stacked = await ui.evaluate(() => document.getElementById('target').getBoundingClientRect().top > document.getElementById('source').getBoundingClientRect().bottom);
+      assert.ok(stacked, `${file}: smallest layouts stack language controls`);
+    }
+    await ui.mouse.move(geometry.viewport.width - 2, 2);
+    let previous;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await ui.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+      const image = await ui.screenshot({ animations: 'disabled' });
+      const clearBelowContent = await ui.evaluate(async ({ png, bottom }) => {
+        const image = new Image(); image.src = `data:image/png;base64,${png}`; await image.decode();
+        const start = Math.ceil((bottom + 8) * image.height / innerHeight);
+        if (start >= image.height) return true;
+        const canvas = document.createElement('canvas'); canvas.width = image.width; canvas.height = image.height;
+        const context = canvas.getContext('2d');
+        context.fillStyle = getComputedStyle(document.body).backgroundColor; context.fillRect(0, 0, 1, 1);
+        const background = context.getImageData(0, 0, 1, 1).data;
+        context.drawImage(image, 0, 0);
+        const pixels = context.getImageData(0, start, image.width, image.height - start).data;
+        for (let y = 0; y < image.height - start; y += 8) for (let x = 8; x < image.width - 24; x += 8) {
+          const index = (y * image.width + x) * 4;
+          if ([0, 1, 2].some(channel => Math.abs(pixels[index + channel] - background[channel]) > 3)) return false;
+        }
+        return true;
+      }, { png: image.toString('base64'), bottom: geometry.main.bottom });
+      if (!clearBelowContent) { previous = undefined; continue; }
+      if (previous?.equals(image)) {
+        await writeFile(join(evidence, file), image);
+        captureGeometry.push({ file, ...geometry, stableCaptures: attempt + 1, clearBelowContent });
+        return;
+      }
+      previous = image;
+    }
+    assert.fail(`${file} did not settle across consecutive viewport captures`);
+  };
+  const setAppearance = appearance => ui.evaluate(async appearance => {
+    const { startPanelTheme } = await import('./panel-theme.js');
+    await startPanelTheme({ api: { breezerPrivate: { getAppearance: async () => appearance } } });
+  }, appearance);
+  const captureState = async state => {
+    if (!process.env.BREEZER_AI_EVIDENCE) return;
+    for (const colorMode of ['light', 'dark']) {
+      await setAppearance({ theme: 'mint', colorMode });
+      for (const width of state === 'before-sharing' ? [1200, 390, 320] : [1200, 390]) {
+        await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
+        await capture(`translation-${state}-${colorMode}${width === 390 ? '-narrow' : width === 320 ? '-320' : ''}.png`);
+      }
+    }
+  };
   await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
   let status = ui.locator('#status');
   await ui.locator('#languages').click();
   await ui.waitForFunction(() => document.getElementById('source').options.length > 1);
   assert.equal(requests.length, 0, 'loading languages sends no page text');
   assert.equal(await ui.locator('#translate').isDisabled(), true, 'consent is required');
+  assert.equal(await ui.locator('#restore').isDisabled(), true, 'nothing can be restored before translation');
+  await captureState('before-sharing');
   await ui.locator('#source').selectOption('es'); await ui.locator('#target').selectOption('en');
-  await ui.locator('#dynamic').check(); await ui.locator('#consent').check();
+  assert.equal(await ui.getByRole('switch', { name: 'Translate new text while this window is open' }).isChecked(), false);
+  await ui.getByRole('switch', { name: 'Translate new text while this window is open' }).check();
+  assert.equal(await ui.getByRole('checkbox', { name: /Share visible page text/ }).isChecked(), false, 'automatic translation does not grant sharing consent');
+  await ui.locator('#consent').check();
+  assert.equal(await status.textContent(), 'Ready to translate.', 'sharing confirmation updates readiness');
+  assert.equal(await ui.locator('#setup-help').isVisible(), false, 'connected setup instructions step aside');
+  assert.equal(await ui.locator('#languages').textContent(), 'Reload languages');
+  await ui.locator('#consent').uncheck();
+  assert.equal(await ui.locator('#translate').isDisabled(), true);
+  assert.match(await status.textContent(), /Confirm sharing/);
+  await ui.locator('#consent').check();
+  assert.equal(await status.textContent(), 'Ready to translate.');
+  if (process.env.BREEZER_AI_EVIDENCE) {
+    const captures = [];
+    for (const theme of ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite', '#3979bd']) for (const colorMode of ['light', 'dark']) {
+      // The real MV3 translation session is ready; only the native appearance
+      // bridge is supplied by this fixture, as in the other theme walkthroughs.
+      await setAppearance({ theme, colorMode });
+      for (const width of [1200, 390]) {
+        await ui.setViewportSize({ width, height: width === 1200 ? 900 : 844 });
+        assert.equal(await ui.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${theme}/${colorMode}/${width} translation overflow`);
+        const file = `translation-${theme.startsWith('#') ? 'custom' : theme}-${colorMode}${width === 390 ? '-narrow' : ''}.png`;
+        await capture(file);
+        const contrast = await ui.locator('#translate').evaluate(button => {
+          const context = document.createElement('canvas').getContext('2d');
+          const luminance = color => {
+            context.fillStyle = color; context.fillRect(0, 0, 1, 1);
+            return [...context.getImageData(0, 0, 1, 1).data].slice(0, 3).reduce((sum, value, index) => {
+              const channel = value / 255;
+              return sum + (channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4) * [.2126, .7152, .0722][index];
+            }, 0);
+          };
+          const style = getComputedStyle(button), ink = luminance(style.color), background = luminance(style.backgroundColor);
+          return (Math.max(ink, background) + .05) / (Math.min(ink, background) + .05);
+        });
+        assert.ok(contrast >= 4.5, `${theme}/${colorMode} enabled translation action contrast: ${contrast}`);
+        captures.push({ theme, colorMode, width, file, actionContrast: contrast });
+      }
+    }
+    await writeFile(join(evidence, 'translation-appearance.json'), JSON.stringify({ captures, note: 'Real disposable MV3 translation session with a fixture appearance bridge. Native window geometry and native bridge execution remain unverified.' }, null, 2));
+    await setAppearance({ theme: 'mint', colorMode: 'light' });
+    await ui.setViewportSize({ width: 960, height: 950 });
+  }
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('Watching'));
   assert.equal(await ui.locator('#cancel').isEnabled(), true, 'watching can be stopped without restoring');
+  assert.equal(await ui.locator('#translate').isHidden(), true, 'running translation keeps its available Stop action instead of a disabled start button');
   assert.match(await page.locator('#article').textContent(), /^English:/);
   assert.equal(await page.locator('#hello').textContent(), ' English: Hola English: mundo. ');
   assert.equal(await page.locator('#injection img').count(), 0); assert.match(await page.locator('#injection').textContent(), /<img/);
@@ -86,10 +214,12 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   ui = await context.newPage(); await ui.goto('chrome-extension://' + extensionId + '/translation.html?tab=' + tabId);
   status = ui.locator('#status');
   await ui.waitForFunction(() => document.getElementById('status').textContent.includes('remains'));
+  assert.equal(await ui.locator('#restore').isEnabled(), true, 'reopened windows can restore existing translated text');
   assert.equal(await ui.locator('#languages').isEnabled(), true);
   assert.equal(await ui.locator('#consent').isChecked(), false, 'sharing confirmation is not persisted');
   assert.equal(requests.length, beforeClose);
   await ui.locator('#restore').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('restored'));
+  assert.equal(await ui.locator('#restore').isDisabled(), true, 'restoring clears the recoverable translation state');
   assert.equal(await page.locator('#article').textContent(), 'La biblioteca abre por la mañana. Puedes leer junto a la ventana y escuchar los pájaros.');
   assert.equal(await page.locator('#hello').textContent(), ' Hola mundo. ');
   assert.equal(await page.locator('#dynamic').textContent(), 'Texto nuevo');
@@ -103,9 +233,16 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   fail = true;
   await ui.locator('#translate').click(); await ui.waitForFunction(() => document.getElementById('status').textContent.includes('rate limit'));
   assert.match(await status.textContent(), /Wait before retrying/);
+  assert.equal(await ui.locator('#translate').isDisabled(), true);
+  assert.match(await ui.locator('#translate').textContent(), /Retry in \d+s/);
+  const rateLimitRequests = requests.length;
+  await ui.locator('#translate').evaluate(button => button.click());
+  assert.equal(requests.length, rateLimitRequests, 'disabled retry sends no request');
+  await captureState('error');
+  if (process.env.BREEZER_AI_EVIDENCE) await writeFile(join(evidence, 'translation-capture-geometry.json'), JSON.stringify(captureGeometry, null, 2));
   fail = false; delay = 800;
   const incoming = new Promise(resolve => { onRequest = resolve; });
-  await ui.locator('#translate').click(); await incoming;
+  await ui.locator('#translate').click({ timeout: 40000 }); await incoming;
   await page.evaluate(() => { document.getElementById('article').textContent = 'Updated by the site during translation'; });
   await ui.locator('#cancel').click();
   await ui.waitForFunction(() => document.getElementById('status').textContent.includes('Stopped'));
@@ -132,7 +269,15 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     document.body.replaceChildren(); const container = document.createElement('div'); document.body.append(container);
     await mountTranslationSettings({ container, api: chrome });
   });
+  const saveTranslation = settings.getByRole('button', { name: 'Save translation settings' });
+  assert.equal(await saveTranslation.isDisabled(), true, 'unchanged preferences have no save action');
+  await settings.locator('#translation-key').fill('temporary-key');
+  assert.equal(await saveTranslation.isEnabled(), true);
+  await settings.locator('#translation-key').fill('');
+  assert.equal(await saveTranslation.isDisabled(), true, 'undoing the edit restores the unchanged state');
+  await settings.locator('#translation-key').fill('local-draft-secret');
   await settings.locator('#translation-provider').selectOption('hosted');
+  assert.equal(await settings.locator('#translation-key').inputValue(), '', 'changing providers clears an unsubmitted key draft');
   await settings.locator('#translation-key').fill('fixture-secret');
   await settings.getByRole('button', { name: 'Save translation settings' }).click();
   await settings.waitForFunction(() => document.body.textContent.includes('Saved.'));
@@ -143,6 +288,7 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
   const saved = await worker.evaluate(async () => (await chrome.storage.local.get('translation.v1'))['translation.v1']);
   assert.equal(saved.apiKey, '', 'changing provider never forwards its credential');
   assert.equal(saved.source, 'es'); assert.equal(saved.target, 'en');
+  assert.equal(await saveTranslation.isDisabled(), true, 'successful save returns to unchanged state');
   assert.equal(requests.length, count, 'settings and reopening never translate automatically');
   const plain = await context.newPage(); await plain.goto('http://127.0.0.1:' + port + '/plain');
   const plainId = await worker.evaluate(async url => (await chrome.tabs.query({ url }))[0].id, plain.url());

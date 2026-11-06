@@ -1,0 +1,30 @@
+{
+  "height": 3206,
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "mastheads": 1,
+  "tiles": [
+    {
+      "file": "efficiency-desktop-tile-01.png",
+      "scrollY": 0,
+      "mastheadBottom": 443.90625
+    },
+    {
+      "file": "efficiency-desktop-tile-02.png",
+      "scrollY": 800,
+      "mastheadBottom": -356.09375
+    },
+    {
+      "file": "efficiency-desktop-tile-03.png",
+      "scrollY": 1600,
+      "mastheadBottom": -1156.09375
+    },
+    {
+      "file": "efficiency-desktop-tile-04.png",
+      "scrollY": 2306,
+      "mastheadBottom": -1862.09375
+    }
+  ]
+}

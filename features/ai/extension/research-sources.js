@@ -36,13 +36,17 @@ export class ResearchSources {
     }
   }
   render() {
+    this.root.querySelector('#research-limit').textContent = `${this.size} of ${MAX_RESEARCH_SOURCES} selected`;
     this.root.querySelector('#research-open').disabled = this.busy;
     this.root.querySelector('#research-clear').hidden = !this.size;
-    for (const input of this.root.querySelectorAll('#research-options input[data-tab-id]')) input.checked = this.selected.has(Number(input.dataset.tabId));
+    for (const input of this.root.querySelectorAll('#research-options input[data-tab-id]')) {
+      input.checked = this.selected.has(Number(input.dataset.tabId));
+      input.disabled = input.dataset.loading === 'true' || (!input.checked && this.size >= MAX_RESEARCH_SOURCES);
+    }
     const chips = this.root.querySelector('#research-chips'); chips.replaceChildren();
     [...this.selected.values()].forEach((tab, index) => {
       const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'research-chip';
-      chip.textContent = `[S${index + 1}] ${maskSecrets(tab.title || new URL(tab.url).hostname)}`;
+      chip.textContent = `${index + 1} · ${maskSecrets(tab.title || new URL(tab.url).hostname)}`;
       chip.title = `Remove source: ${sourceURL(tab.url)}`;
       chip.setAttribute('aria-label', `Remove source ${index + 1}: ${maskSecrets(tab.title)}`);
       chip.addEventListener('click', () => { this.selected.delete(tab.tabId); this.revision++; this.render(); this.onChange(); if (this.busy) this.onRevoke('Source removed. Response stopped.'); this.root.querySelector('#research-open').focus(); });
@@ -62,16 +66,18 @@ export class ResearchSources {
       for (const tab of tabs) {
         const label = document.createElement('label'); label.className = 'research-option';
         const input = document.createElement('input'); input.type = 'checkbox'; input.dataset.tabId = String(tab.tabId); input.checked = this.selected.has(tab.tabId); input.disabled = tab.loading;
+        input.dataset.loading = String(Boolean(tab.loading));
         const text = document.createElement('span');
         const title = document.createElement('strong'); title.textContent = maskSecrets(tab.title || new URL(tab.url).hostname);
         const url = document.createElement('small'); url.textContent = `${sourceURL(tab.url)}${tab.loading ? ' · Loading, try again when ready' : ''}`;
         text.append(title, url); label.append(input, text); list.append(label);
         input.addEventListener('change', () => {
-          if (input.checked && this.size >= MAX_RESEARCH_SOURCES) { input.checked = false; this.root.querySelector('#research-limit').textContent = 'Choose up to six tabs.'; return; }
+          if (input.checked && this.size >= MAX_RESEARCH_SOURCES) { input.checked = false; this.root.querySelector('#research-limit').textContent = `Choose up to six tabs. ${this.size} selected.`; return; }
           if (input.checked) this.selected.set(tab.tabId, { ...tab }); else this.selected.delete(tab.tabId);
           this.revision++; this.render(); this.onChange();
         });
       }
+      this.render();
     } catch (error) { list.textContent = error.message; }
   }
   // Invoke all native reads in the send gesture's stack. No await before these

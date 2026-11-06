@@ -1,0 +1,245 @@
+TAP version 13
+# Subtest: new tab files never parse HTML from strings or load remote resources
+ok 1 - new tab files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 2.957
+  ...
+# Subtest: tone tokens stay identical to the workspace palette
+ok 2 - tone tokens stay identical to the workspace palette
+  ---
+  duration_ms: 0.875041
+  ...
+# Subtest: only http(s) URLs survive
+ok 3 - only http(s) URLs survive
+  ---
+  duration_ms: 0.1625
+  ...
+# Subtest: normalizeView drops unsafe and duplicate sites and caps the row
+ok 4 - normalizeView drops unsafe and duplicate sites and caps the row
+  ---
+  duration_ms: 0.346292
+  ...
+# Subtest: normalizeView keeps Organato enabled by default and sorts by due date
+ok 5 - normalizeView keeps Organato enabled by default and sorts by due date
+  ---
+  duration_ms: 0.486292
+  ...
+# Subtest: an item classified as both exam and assignment shows once in Upcoming
+ok 6 - an item classified as both exam and assignment shows once in Upcoming
+  ---
+  duration_ms: 0.287
+  ...
+# Subtest: to-dos stay in To-dos and never repeat in Upcoming
+ok 7 - to-dos stay in To-dos and never repeat in Upcoming
+  ---
+  duration_ms: 0.149875
+  ...
+# Subtest: different IDs are never merged, even with the same title
+ok 8 - different IDs are never merged, even with the same title
+  ---
+  duration_ms: 0.13375
+  ...
+# Subtest: Upcoming is chronological across exams and assignments with local all-day dates
+ok 9 - Upcoming is chronological across exams and assignments with local all-day dates
+  ---
+  duration_ms: 0.314083
+  ...
+# Subtest: organatoState covers every state the section can show
+ok 10 - organatoState covers every state the section can show
+  ---
+  duration_ms: 0.418167
+  ...
+# Subtest: date-only due values are local days and relative labels read plainly
+ok 11 - date-only due values are local days and relative labels read plainly
+  ---
+  duration_ms: 0.178208
+  ...
+# Subtest: requestView sends one view request on the breezer-newtab port and closes it
+ok 12 - requestView sends one view request on the breezer-newtab port and closes it
+  ---
+  duration_ms: 5.34825
+  ...
+# Subtest: requestView fails cleanly on disconnect, timeout or a missing runtime
+ok 13 - requestView fails cleanly on disconnect, timeout or a missing runtime
+  ---
+  duration_ms: 22.871041
+  ...
+# Subtest: explicit color modes override the OS and system follows it
+ok 14 - explicit color modes override the OS and system follows it
+  ---
+  duration_ms: 1.165625
+  ...
+# Subtest: applyTheme sets the root tone, scheme, and native color-scheme
+ok 15 - applyTheme sets the root tone, scheme, and native color-scheme
+  ---
+  duration_ms: 0.187459
+  ...
+# Subtest: the panel applies the saved appearance at load and after each appearance revision
+ok 16 - the panel applies the saved appearance at load and after each appearance revision
+  ---
+  duration_ms: 7.618667
+  ...
+# Subtest: older builds without the bridge follow the OS without throwing
+ok 17 - older builds without the bridge follow the OS without throwing
+  ---
+  duration_ms: 0.196667
+  ...
+# Subtest: getAppearance is bounded and failures keep the last good appearance
+ok 18 - getAppearance is bounded and failures keep the last good appearance
+  ---
+  duration_ms: 22.399125
+  ...
+# Subtest: every tone has light and dark palettes with readable text
+ok 19 - every tone has light and dark palettes with readable text
+  ---
+  duration_ms: 1.692917
+  ...
+# Subtest: panel palettes keep the workspace ink and accent for each tone
+ok 20 - panel palettes keep the workspace ink and accent for each tone
+  ---
+  duration_ms: 1.4455
+  ...
+# Subtest: panel CSS uses valid focus, disabled, and backdrop selectors
+ok 21 - panel CSS uses valid focus, disabled, and backdrop selectors
+  ---
+  duration_ms: 0.47725
+  ...
+# Subtest: custom colour applies to panels and is cleared when selecting a preset
+ok 22 - custom colour applies to panels and is cleared when selecting a preset
+  ---
+  duration_ms: 0.343458
+  ...
+# Subtest: custom panel colours drive its actual page and paper surfaces
+ok 23 - custom panel colours drive its actual page and paper surfaces
+  ---
+  duration_ms: 0.40425
+  ...
+# Subtest: settings routes accept a category and keep the settings view
+ok 24 - settings routes accept a category and keep the settings view
+  ---
+  duration_ms: 1.118459
+  ...
+# Subtest: every navigation category has a page, and Other leaves for native settings
+ok 25 - every navigation category has a page, and Other leaves for native settings
+  ---
+  duration_ms: 0.565084
+  ...
+# Subtest: search ranks titles above keywords and descriptions, and every word must match
+ok 26 - search ranks titles above keywords and descriptions, and every word must match
+  ---
+  duration_ms: 1.701542
+  ...
+# Subtest: workspace files never parse HTML from strings or load remote resources
+ok 27 - workspace files never parse HTML from strings or load remote resources
+  ---
+  duration_ms: 9.303416
+  ...
+# Subtest: every tone keeps text readable on sidebar surfaces in light and dark
+ok 28 - every tone keeps text readable on sidebar surfaces in light and dark
+  ---
+  duration_ms: 1.168542
+  ...
+# Subtest: routes parse the explicit native window id
+ok 29 - routes parse the explicit native window id
+  ---
+  duration_ms: 1.01925
+  ...
+# Subtest: appearance defaults and validation match the native contract
+ok 30 - appearance defaults and validation match the native contract
+  ---
+  duration_ms: 0.707084
+  ...
+# Subtest: appearance font bounds and native booleans reject an entire invalid patch
+ok 31 - appearance font bounds and native booleans reject an entire invalid patch
+  ---
+  duration_ms: 0.47075
+  ...
+# Subtest: store normalization survives corrupt data and keeps at least one space
+ok 32 - store normalization survives corrupt data and keeps at least one space
+  ---
+  duration_ms: 0.358208
+  ...
+# Subtest: space, folder, entry and favorite operations
+ok 33 - space, folder, entry and favorite operations
+  ---
+  duration_ms: 2.523542
+  ...
+# Subtest: sidebar model splits favorites, pinned and today tabs per space
+ok 34 - sidebar model splits favorites, pinned and today tabs per space
+  ---
+  duration_ms: 0.411959
+  ...
+# Subtest: moveIndex places a tab before a neighbor or at the end of the visible list
+ok 35 - moveIndex places a tab before a neighbor or at the end of the visible list
+  ---
+  duration_ms: 0.148875
+  ...
+# Subtest: restart: previous-session records restore spaces and pinned bindings by URL
+ok 36 - restart: previous-session records restore spaces and pinned bindings by URL
+  ---
+  duration_ms: 0.737875
+  ...
+# Subtest: restart: ambiguous exact URL records fall back independent of window restore order
+ok 37 - restart: ambiguous exact URL records fall back independent of window restore order
+  ---
+  duration_ms: 2.681792
+  ...
+# Subtest: restart: ambiguous path-only URL records fall back independent of window restore order
+ok 38 - restart: ambiguous path-only URL records fall back independent of window restore order
+  ---
+  duration_ms: 0.639167
+  ...
+# Subtest: restart: unique and same-assignment URL candidates keep their space
+ok 39 - restart: unique and same-assignment URL candidates keep their space
+  ---
+  duration_ms: 0.180541
+  ...
+# Subtest: restart: path match, pinned entry match, orphan pinned and reload with stable ids
+ok 40 - restart: path match, pinned entry match, orphan pinned and reload with stable ids
+  ---
+  duration_ms: 0.226041
+  ...
+# Subtest: optional per-tab hints win when available
+ok 41 - optional per-tab hints win when available
+  ---
+  duration_ms: 0.07175
+  ...
+# Subtest: rollSession keeps only the previous session for matching
+ok 42 - rollSession keeps only the previous session for matching
+  ---
+  duration_ms: 0.062
+  ...
+# Subtest: WorkspaceStore serializes concurrent writers from different windows
+ok 43 - WorkspaceStore serializes concurrent writers from different windows
+  ---
+  duration_ms: 30.536083
+  ...
+# Subtest: WorkspaceStore: browser restart restores today tabs to their spaces
+ok 44 - WorkspaceStore: browser restart restores today tabs to their spaces
+  ---
+  duration_ms: 13.598125
+  ...
+# Subtest: WorkspaceStore persists URL quarantine before another window restores the same page
+ok 45 - WorkspaceStore persists URL quarantine before another window restores the same page
+  ---
+  duration_ms: 7.882417
+  ...
+# Subtest: duplicate saved pins never borrow another space or multiply during restore
+ok 46 - duplicate saved pins never borrow another space or multiply during restore
+  ---
+  duration_ms: 0.2225
+  ...
+# Subtest: restoring a large session parses each saved URL once instead of rescanning the session per tab
+ok 47 - restoring a large session parses each saved URL once instead of rescanning the session per tab
+  ---
+  duration_ms: 2.728084
+  ...
+1..47
+# tests 47
+# suites 0
+# pass 47
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 172.838917

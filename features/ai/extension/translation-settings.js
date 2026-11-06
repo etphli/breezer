@@ -12,44 +12,98 @@ export async function mountTranslationSettings({ container, api }) {
   const provider = el('select', '', { id: 'translation-provider' });
   for (const [id, value] of Object.entries(PROVIDERS)) provider.append(el('option', value.name, { value: id }));
   const key = el('input', '', { id: 'translation-key', type: 'password', autocomplete: 'off', placeholder: 'Leave blank to keep saved key' });
-  const clear = el('input', '', { id: 'translation-clear-key', type: 'checkbox' });
-  const save = el('button', 'Save translation settings', { type: 'button', class: 'text-button' });
+  const clear = el('button', 'Remove saved key', { id: 'translation-clear-key', type: 'button', class: 'button danger' });
+  const save = el('button', 'Save translation settings', { type: 'button', class: 'button primary' });
   const status = el('p', '', { class: 'field-note', role: 'status' });
   const group = el('div', '', { class: 'setting-group' });
   const row = (text, id, control, help) => {
     const line = el('div', '', { class: 'setting-row' });
-    const label = el('label', text, { class: 'setting-label', for: id });
-    if (help) label.append(el('small', help));
+    const isAction = control.tagName === 'BUTTON';
+    const label = el(isAction ? 'div' : 'label', text, { class: 'setting-label', ...(isAction ? {} : { for: id }) });
+    const hint = help ? el('small', help) : null;
+    if (hint) label.append(hint);
     line.append(label, control); group.append(line);
+    return hint;
   };
-  row('Translation provider', 'translation-provider', provider);
-  row('Provider API key', 'translation-key', key, 'Stored on this device. Leave blank to keep it.');
-  row('Remove saved API key', 'translation-clear-key', clear);
-  const guide = el('p', '', { class: 'section-note' });
-  guide.append(el('a', 'Translation setup and supported content', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
+  const providerHint = row('Translation provider', 'translation-provider', provider, 'Choose a translation provider.');
+  providerHint.id = 'translation-provider-help';
+  provider.setAttribute('aria-describedby', providerHint.id);
+  row('Provider API key', 'translation-key', key, 'Stored on this device. Switching providers clears the key field.');
+  row('Saved API key', 'translation-clear-key', clear, 'Remove the key from this device.');
+  const guide = el('p', '', { class: 'section-note setting-reference' });
+  guide.append(el('a', 'LibreTranslate setup guide', { href: 'https://github.com/etphli/breezer/blob/main/docs/translation.md', target: '_blank', rel: 'noreferrer' }));
+  const details = el('details', '', { class: 'setting-details' });
+  details.append(el('summary', 'Sharing and privacy'),
+    el('p', 'Right-click a page and choose Translate page. Choose languages, translate and restore the original in the translation window. A keyboard shortcut can be set in Browser settings.'),
+    el('p', 'Local mode needs your LibreTranslate server at http://localhost:5000. Hosted mode requires your own LibreTranslate.com API key and sends page text there. Breezer does not provide a paid account or use your AI account.'),
+    el('p', 'Each translation needs your confirmation. Visible page text, including private text you can read, goes to the chosen server. Form fields, editors, code and frames are excluded. No page URL, cookies or browser credentials are included. Your provider can see your IP address. A local server may have its own connections or logging.'));
+  const actions = el('div', '', { class: 'setting-actions context-save' }); actions.append(save, status);
+  group.append(actions);
   section.append(el('h2', 'Page translation', { id: 'translation-heading' }),
-    el('p', 'Right-click a page and choose Translate page, or set a Translate page shortcut at chrome://extensions/shortcuts. Choose languages, translate and restore the original in the translation window.', { class: 'section-note' }),
-    el('p', 'Local mode needs your own LibreTranslate server at http://localhost:5000. Hosted mode sends page text to LibreTranslate.com and requires your own API key. Breezer does not provide a paid account or use your AI account.', { class: 'section-note' }),
-    group,
-    el('p', 'Nothing is translated automatically. Each translation needs your confirmation. Visible page text, including private text you can read, goes to the chosen server. Form fields, editors, code and frames are excluded. No page URL, cookies or browser credentials are included. Your provider can see your IP address. A local server may have its own network connections or logging.', { class: 'section-note' }),
-    guide, save, status);
+    el('p', 'Translate from a page’s right-click menu. Nothing is translated automatically.', { class: 'section-note' }),
+    group, guide, details);
   container.append(section);
   let prefs;
+  let busy = false;
+  save.disabled = true;
   try {
     prefs = translationPreferences((await api.storage.local.get(TRANSLATION_KEY))[TRANSLATION_KEY]);
-    provider.value = prefs.provider; status.textContent = prefs.apiKey ? 'An API key is saved on this device.' : 'No API key saved. Local servers usually do not need one.';
+    provider.value = prefs.provider; status.textContent = prefs.apiKey ? 'An API key is saved on this device.' : 'No API key saved.';
   } catch { save.disabled = true; status.textContent = 'Could not read translation settings. Reopen Settings to retry.'; }
+  const updateProviderHelp = () => {
+    providerHint.textContent = provider.value === 'hosted'
+      ? 'Use your own LibreTranslate.com API key. Page text will be shared with that service.'
+      : 'Start LibreTranslate at http://localhost:5000. Add a key if needed.';
+    key.placeholder = provider.value === prefs?.provider && prefs.apiKey ? 'Leave blank to keep saved key' : 'API key, if required';
+    clear.closest('.setting-row').hidden = !prefs?.apiKey || provider.value !== prefs.provider;
+  };
+  const pendingPreferences = () => ({
+    ...prefs,
+    provider: provider.value,
+    apiKey: key.value || (prefs?.provider === provider.value ? prefs.apiKey : ''),
+  });
+  const updateControls = () => {
+    const next = pendingPreferences();
+    save.disabled = busy || !prefs || (next.provider === prefs.provider && next.apiKey === prefs.apiKey);
+    clear.disabled = busy || !prefs?.apiKey;
+    provider.disabled = key.disabled = busy || !prefs;
+  };
+  updateProviderHelp();
+  updateControls();
   const events = new AbortController();
-  save.addEventListener('click', async () => {
-    save.disabled = true;
+  key.addEventListener('input', updateControls, { signal: events.signal });
+  provider.addEventListener('change', () => {
+    key.value = '';
+    updateProviderHelp();
+    updateControls();
+    if (prefs) status.textContent = provider.value !== prefs.provider ? 'Save to use this provider.'
+      : prefs.apiKey ? 'An API key is saved on this device.' : 'No API key saved.';
+  }, { signal: events.signal });
+  clear.addEventListener('click', async () => {
+    if (clear.disabled) return;
+    busy = true;
+    updateControls();
     try {
-      // A provider change never carries a credential to another server.
-      const next = { ...prefs, provider: provider.value, apiKey: clear.checked ? '' : (key.value || (prefs.provider === provider.value ? prefs.apiKey : '')) };
+      const next = { ...prefs, apiKey: '' };
       await api.storage.local.set({ [TRANSLATION_KEY]: next }); prefs = next;
-      key.value = ''; clear.checked = false;
+      updateProviderHelp();
+      status.textContent = 'Saved API key removed.';
+    } catch { status.textContent = 'Could not remove the saved key. Try again.'; }
+    finally { busy = false; updateControls(); }
+  }, { signal: events.signal });
+  save.addEventListener('click', async () => {
+    if (save.disabled) return;
+    // A provider change never carries a credential to another server.
+    const next = pendingPreferences();
+    busy = true;
+    updateControls();
+    try {
+      await api.storage.local.set({ [TRANSLATION_KEY]: next }); prefs = next;
+      key.value = '';
+      updateProviderHelp();
       status.textContent = 'Saved. Reopen the translation window to use these settings.';
     } catch { status.textContent = 'Could not save translation settings. Try again.'; }
-    finally { save.disabled = false; }
+    finally { busy = false; updateControls(); }
   }, { signal: events.signal });
   return { dispose() { events.abort(); key.value = ''; section.remove(); } };
 }

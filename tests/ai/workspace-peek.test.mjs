@@ -218,7 +218,7 @@ test('failed tab icons show a fallback and recover when a valid icon arrives', {
     await publish('data:image/png;base64,invalid');
     await page.waitForFunction(() => {
       const icon = document.querySelector('[data-key="t:2"] .favicon');
-      return icon?.textContent === 'G' && !icon.querySelector('img');
+      return icon?.textContent === 'GI' && !icon.querySelector('img');
     }, null, { timeout: 3000 });
     await publish('data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="green"/></svg>'));
     await icon.locator('img').waitFor();

@@ -83,13 +83,69 @@ class Element {
 }
 const walk = element => [element, ...element.children.flatMap(walk)];
 
+test('memory choices cannot be written before loading and lock while a save is pending', async () => {
+  let releaseView, releaseSave;
+  let state = { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [] };
+  const calls = [];
+  const client = { onChange() { return () => {}; }, dispose() {}, async request(type, fields) {
+    calls.push(type);
+    if (type === 'view' && calls.length === 1) return new Promise(done => { releaseView = done; });
+    if (type === 'configure') {
+      await new Promise(done => { releaseSave = done; });
+      state = { ...state, enabled: fields.enabled, sites: fields.sites };
+    }
+    return state;
+  } };
+  const doc = { createElement(tag) { return new Element(tag, doc); } }, container = new Element('div', doc);
+  const mounted = mountContextSettings({ container, client });
+  const all = () => walk(container), local = all().find(node => node.dataset.contextControl === 'enabled');
+  const sites = all().find(node => node.tagName === 'textarea'), save = all().find(node => node.tagName === 'button' && node.textContent === 'Save choices');
+  assert.equal(local.disabled, true);
+  assert.equal(save.disabled, true);
+  await save.fire('click');
+  assert.deepEqual(calls, ['view'], 'early clicks cannot replace saved preferences with defaults');
+  releaseView(state); await mounted.ready;
+  local.checked = true; sites.value = 'docs.example.org'; await local.fire('change');
+  const pending = save.fire('click');
+  assert.equal(local.disabled, true); assert.equal(sites.disabled, true); assert.equal(save.disabled, true);
+  await save.fire('click');
+  assert.equal(calls.filter(type => type === 'configure').length, 1, 'a second click does not duplicate a pending write');
+  releaseSave(); await pending;
+  assert.equal(local.disabled, false); assert.equal(save.disabled, true);
+  mounted.dispose();
+});
+
+test('memory background refresh and failed save preserve the edited site list', async () => {
+  let changed, failSave = true;
+  let state = { enabled: true, providerConsent: false, sites: ['docs.example.org'], habits: [], suggestions: [] };
+  const client = { onChange(fn) { changed = fn; return () => {}; }, dispose() {}, async request(type, fields) {
+    if (type === 'configure') {
+      if (failSave) throw Error('Could not save this test request.');
+      state = { ...state, enabled: fields.enabled, sites: fields.sites };
+    }
+    return state;
+  } };
+  const doc = { createElement(tag) { return new Element(tag, doc); } }, container = new Element('div', doc);
+  const mounted = mountContextSettings({ container, client }); await mounted.ready;
+  const all = () => walk(container), sites = all().find(node => node.tagName === 'textarea');
+  const save = all().find(node => node.tagName === 'button' && node.textContent === 'Save choices');
+  sites.value = 'docs.example.org\nnotes.example.org'; await sites.fire('input');
+  changed(); await new Promise(done => setImmediate(done));
+  assert.equal(sites.value, 'docs.example.org\nnotes.example.org');
+  await save.fire('click');
+  assert.equal(sites.value, 'docs.example.org\nnotes.example.org'); assert.equal(save.disabled, false);
+  failSave = false; await save.fire('click');
+  assert.deepEqual(state.sites, ['docs.example.org', 'notes.example.org']); assert.equal(save.disabled, true);
+  mounted.dispose();
+});
+
 test('settings flow keeps local and provider consent separate and renders provider text as text', async () => {
   assert.equal(typeof mountContextSettings, 'function');
   const calls = []; let changed;
   let state = { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 };
   const client = { onChange(fn) { changed = fn; return () => {}; }, dispose() {}, async request(type, fields) {
     calls.push({ type, fields });
-    if (type === 'configure') state = { ...state, enabled: fields.enabled, sites: fields.sites, providerConsent: false };
+    if (type === 'configure') state = { ...state, enabled: fields.enabled, sites: fields.enabled ? fields.sites : [], providerConsent: false };
     if (type === 'consent') state = { ...state, providerConsent: fields.consent };
     if (type === 'summarize') return { text: '<img src=x onerror=alert(1)>', model: 'gpt-6-luna', provider: 'codex' };
     return state;
@@ -103,16 +159,22 @@ test('settings flow keeps local and provider consent separate and renders provid
   const consent = all().find(node => node.dataset.contextControl === 'consent');
   const sites = all().find(node => node.tagName === 'textarea');
   assert.equal(local.checked, false); assert.equal(consent.checked, false);
+  assert.equal(button('Save choices').disabled, true, 'unchanged choices need no save');
   assert.equal(calls.some(call => call.type === 'summarize'), false);
   local.checked = true; sites.value = 'docs.example.org';
-  await button('Save local context choices').fire('click');
+  await local.fire('change'); await sites.fire('input');
+  assert.equal(button('Save choices').disabled, false, 'changed memory choices can be saved');
+  await button('Save choices').fire('click');
   assert.equal(state.enabled, true); assert.equal(state.providerConsent, false);
+  assert.equal(button('Save choices').disabled, true, 'saving clears the pending change');
   consent.checked = true; await consent.fire('change');
   assert.equal(state.providerConsent, true);
-  await button('Summarize with Luna').fire('click');
+  await button('Summarize with GPT-6 Luna').fire('click');
   assert.ok(all().some(node => node.textContent === '<img src=x onerror=alert(1)>'));
   assert.equal(all().some(node => node.tagName === 'img'), false);
-  await button('Disable and erase').fire('click');
+  local.checked = false;
+  await local.fire('change');
+  await button('Turn off and erase').fire('click');
   assert.equal(state.enabled, false); assert.equal(state.providerConsent, false);
   assert.equal(all().some(node => node.textContent === '<img src=x onerror=alert(1)>'), false);
   changed();

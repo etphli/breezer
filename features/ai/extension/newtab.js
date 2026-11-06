@@ -195,7 +195,7 @@ function siteTile(api, site) {
   const link = el('a', 'site-link', { href: site.url, title: `${site.title}\n${site.url}` });
   const icon = el('span', 'site-icon', { 'aria-hidden': 'true' });
   const monogram = el('span', 'site-monogram');
-  monogram.textContent = [...site.title][0]?.toUpperCase() || '?';
+  monogram.textContent = [...site.title.replace(/[^\p{L}\p{N}]/gu, '')].slice(0, 2).join('').toUpperCase() || '?';
   icon.append(monogram);
   const src = faviconUrl(api, site.url);
   if (src) {
@@ -207,6 +207,7 @@ function siteTile(api, site) {
   }
   const name = el('span', 'site-name');
   name.textContent = site.title;
+  if (site.title.toLowerCase().replace(/^www\./, '') === new URL(site.url).hostname.replace(/^www\./, '')) name.classList.add('hostname');
   link.append(icon, name);
   const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
   remove.textContent = '×';
@@ -299,7 +300,9 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   const action = root.getElementById('organato-action');
   const lanes = root.getElementById('organato-lists');
   const state = organatoState(organato);
+  const error = /\b401\b/.test(organato?.error || '') ? 'The API key was rejected. Review it in Settings.' : organato?.error;
   section.dataset.state = state;
+  section.dataset.stale = String(state === 'ready' && Boolean(organato.error || problem));
   section.removeAttribute('aria-busy');
   action.replaceChildren();
   action.hidden = true;
@@ -324,14 +327,14 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     return;
   }
   if (state === 'error') {
-    status.textContent = `Organato did not load: ${organato.error}`;
+    status.textContent = `Organato did not load: ${error}`;
     action.append(settingsLink('Review Organato in Settings'));
     action.hidden = false;
     return;
   }
 
   // Ready. A refresh error with older items still on hand keeps them visible.
-  if (organato.error) status.textContent = `Showing the last update. Organato did not refresh: ${organato.error}`;
+  if (organato.error) status.textContent = `Showing the last update. ${error}`;
   else if (problem) status.textContent = `Showing the last update. ${problem}`;
   else status.hidden = true;
   for (const list of LISTS) {
@@ -362,7 +365,8 @@ export function showOrganato(root, on) {
 
 function renderLoading(root) {
   const section = root.getElementById('organato');
-  delete section.dataset.state;
+  section.dataset.state = 'loading';
+  section.dataset.stale = 'false';
   section.setAttribute('aria-busy', 'true');
   root.getElementById('organato-lists').hidden = true;
   root.getElementById('organato-action').hidden = true;
@@ -391,13 +395,11 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
-  const siteLimit = () => globalThis.innerWidth <= 400 ? 2 : globalThis.innerWidth <= 700 ? 3 : globalThis.innerWidth <= 920 ? 5 : MAX_SITES;
-  let resizeLimit = siteLimit();
   let allSites = [], siteRevision = 0, undoKey;
   const updateSites = async () => {
     const revision = ++siteRevision;
     await shortcuts.load();
-    const sites = await shortcuts.filter(allSites, siteLimit());
+    const sites = await shortcuts.filter(allSites, MAX_SITES);
     if (revision !== siteRevision || !view) return;
     view.topSites = normalizeView({ topSites: sites }).topSites;
     paint();
@@ -432,21 +434,15 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     }
   };
   api?.storage?.onChanged?.addListener?.(changed);
-  const resized = () => {
-    const limit = siteLimit();
-    if (limit === resizeLimit) return;
-    resizeLimit = limit;
-    void updateSites().catch(() => { if (resizeLimit === limit) resizeLimit = null; });
-  };
-  globalThis.addEventListener?.('resize', resized);
   globalThis.addEventListener?.('pagehide', () => {
     disposeShortcuts();
-    globalThis.removeEventListener?.('resize', resized);
     api?.storage?.onChanged?.removeListener?.(changed);
   }, { once: true });
 
   const paint = () => {
     const at = now();
+    refreshButton.disabled = pending || off || organatoState(view?.organato) === 'setup';
+    refreshButton.hidden = refreshButton.disabled;
     renderToday(root, at);
     if (view) {
       renderSites(api, root, view.topSites);
@@ -464,6 +460,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     if (pending) { again = true; return; }
     pending = true;
     refreshButton.disabled = true;
+    refreshButton.hidden = true;
     refreshButton.setAttribute('aria-busy', 'true');
     try {
       const [result] = await Promise.all([requestView(api, { refresh }), shortcuts.load()]);
@@ -473,14 +470,12 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       }
       allSites = result.topSites || [];
       const revision = ++siteRevision;
-      const limit = siteLimit();
-      const sites = await shortcuts.filter(allSites, limit);
+      const sites = await shortcuts.filter(allSites, MAX_SITES);
       const stale = revision !== siteRevision;
       view = normalizeView({ ...result, topSites: stale ? view?.topSites || [] : sites });
-      if (stale || limit !== siteLimit()) await updateSites();
+      if (stale) await updateSites();
       problem = null;
     } catch (error) {
-      resizeLimit = null;
       problem = text(error?.message, 160) || null;
       if (!view) view = { topSites: [], organato: null };
     } finally {

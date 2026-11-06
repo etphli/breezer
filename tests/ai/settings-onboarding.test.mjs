@@ -43,7 +43,7 @@ test('first run shows the card only after the saved choice is read', async () =>
   await settle();
   assert.equal(f.section().hidden, false);
   assert.match(f.section().textContent, /Bring your Chrome data to Breezer/);
-  assert.match(f.section().textContent, /copies your data once/);
+  assert.match(f.section().textContent, /Future changes in Chrome stay there/);
   assert.doesNotMatch(f.section().textContent, /\bsync(s|ed|ing)? (with|to|from)\b|keeps? in sync/i, 'never implies sync');
   assert.doesNotMatch(f.section().textContent, /Touch ID|passkeys? (are|will be) imported/i);
   f.card.dispose();

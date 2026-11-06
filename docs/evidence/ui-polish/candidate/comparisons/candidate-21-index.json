@@ -1,0 +1,42 @@
+[
+  {
+    "file": "comparison-01.png",
+    "title": "Assistant: writing and sending have their own space"
+  },
+  {
+    "file": "comparison-02.png",
+    "title": "Compact tabs: distinguish matching icons"
+  },
+  {
+    "file": "comparison-03.png",
+    "title": "Memory off: show the choice without inactive editing controls"
+  },
+  {
+    "file": "comparison-04.png",
+    "title": "Memory on: keep related choices and Save together"
+  },
+  {
+    "file": "comparison-05.png",
+    "title": "Release details: less repetition, clearer sections"
+  },
+  {
+    "file": "comparison-06.png",
+    "title": "Known provider failures: show a useful cause"
+  },
+  {
+    "file": "comparison-07.png",
+    "title": "Model choices: readable allowance guidance"
+  },
+  {
+    "file": "comparison-08.png",
+    "title": "Setup preview: remove the text crossfade"
+  },
+  {
+    "file": "comparison-09.png",
+    "title": "Efficiency article: separate the ideas"
+  },
+  {
+    "file": "comparison-10.png",
+    "title": "Sidebar in its native host"
+  }
+]

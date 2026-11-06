@@ -1,0 +1,156 @@
+[
+  {
+    "id": "tooltip",
+    "title": "Browser-control explanation",
+    "file": "sidebar-control-tooltip-narrow.png",
+    "notes": [
+      [
+        85,
+        62,
+        49,
+        71,
+        "The explanation sits above sharing status and the composer."
+      ]
+    ]
+  },
+  {
+    "id": "picker",
+    "title": "Research capture integrity",
+    "file": "research-picker-narrow.png",
+    "notes": [
+      [
+        85,
+        37,
+        79,
+        14,
+        "A clean viewport capture shows the complete Done action. The guard rejects the recorded corrupt image."
+      ]
+    ]
+  },
+  {
+    "id": "organato",
+    "title": "Optional Organato connection",
+    "file": "mint-light-onboarding-narrow.png",
+    "notes": [
+      [
+        85,
+        60,
+        84,
+        95,
+        "Not now makes the secondary route explicit while Connect keeps its emphasis."
+      ]
+    ]
+  },
+  {
+    "id": "tour",
+    "title": "Optional setup tour",
+    "file": "onboarding-7-tour-1.png",
+    "notes": [
+      [
+        85,
+        27,
+        89.5,
+        5.5,
+        "Skip tour leads to the saved-choices summary."
+      ],
+      [
+        85,
+        69,
+        87.5,
+        93.5,
+        "Next tip makes the short tour navigation explicit."
+      ]
+    ]
+  },
+  {
+    "id": "translation",
+    "title": "Translation form rhythm",
+    "file": "translation-mint-light-narrow.png",
+    "notes": [
+      [
+        85,
+        16,
+        28,
+        18,
+        "Provider utilities sit closer to the language controls."
+      ],
+      [
+        85,
+        82,
+        49,
+        58,
+        "Tighter spacing keeps the action connected to the form."
+      ]
+    ]
+  },
+  {
+    "id": "memory",
+    "title": "Activity settings grouping",
+    "file": "mint-light-settings-assistant-enabled-narrow.png",
+    "notes": [
+      [
+        85,
+        32,
+        40,
+        62,
+        "Related activity settings sit closer together."
+      ]
+    ]
+  },
+  {
+    "id": "newtab",
+    "title": "Narrow shortcuts",
+    "file": "newtab-narrow.png",
+    "notes": [
+      [
+        85,
+        24,
+        50,
+        28,
+        "Shortcuts use tighter rows while keeping all sites and Add."
+      ]
+    ]
+  },
+  {
+    "id": "table",
+    "title": "Reference table scanning",
+    "file": "efficiency-browser-table-narrow.png",
+    "notes": [
+      [
+        85,
+        18,
+        49,
+        21,
+        "Comparator labels sit closer to their values."
+      ]
+    ]
+  },
+  {
+    "id": "results",
+    "title": "Measurement hierarchy",
+    "file": "whats-new-results.png",
+    "notes": [
+      [
+        85,
+        27,
+        35,
+        33,
+        "Short headings lead; exact measurements and qualifications stay in the text and chart."
+      ]
+    ]
+  },
+  {
+    "id": "art",
+    "title": "Illustration restraint",
+    "file": "whats-new-patch-desktop.png",
+    "notes": [
+      [
+        85,
+        22,
+        25,
+        62,
+        "Lighter illustration shadows reduce repeated raised surfaces."
+      ]
+    ]
+  }
+]

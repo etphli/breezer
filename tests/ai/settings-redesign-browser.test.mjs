@@ -5,6 +5,8 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { installFixture } from './settings-browser-fixture.mjs';
+import { TRANSLATION_KEY } from '../../features/ai/extension/translation-provider.js';
 
 // Drives the redesigned Settings page (category navigation, search and the Other tab)
 // in a headless browser against fake chrome.* APIs. Native hosting is out of scope.
@@ -15,50 +17,6 @@ let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
-function installFixture({ colorMode, theme }) {
-  const load = (key, fallback) => JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
-  const fx = { local: load('fx-local', {}), appearance: load('fx-appearance', null), calls: [], ports: {}, listeners: [] };
-  fx.appearance ??= { layout: 'sidebar', sidebarMode: 'expanded', theme, colorMode, showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true };
-  window.fx = fx;
-  const save = () => { localStorage.setItem('fx-local', JSON.stringify(fx.local)); localStorage.setItem('fx-appearance', JSON.stringify(fx.appearance)); };
-  const area = (data, name) => ({
-    async get(keys) { const list = keys == null ? Object.keys(data) : [keys].flat(); return structuredClone(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))); },
-    async set(values) {
-      const changes = {};
-      for (const [key, value] of Object.entries(values)) { changes[key] = { oldValue: data[key], newValue: structuredClone(value) }; data[key] = structuredClone(value); }
-      save();
-      setTimeout(() => fx.listeners.forEach((fn) => fn(changes, name)), 0);
-    },
-  });
-  const event = () => { const list = []; return { list, addListener: (fn) => list.push(fn), removeListener() {} }; };
-  window.chrome = {
-    runtime: {
-      getURL: (path) => `${location.origin}/${path}`,
-      getManifest: () => ({ version: '1.1.0' }),
-      onMessage: event(),
-      connect({ name }) {
-        const port = { name, sent: [], onMessage: event(), onDisconnect: event(), postMessage(message) { this.sent.push(message); }, disconnect() {} };
-        port.reply = (message) => port.onMessage.list.forEach((fn) => fn(structuredClone(message)));
-        fx.ports[name] = port;
-        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, sites: [] } }), 0);
-        if (name === 'breezer-organato-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { connected: false, dashboardEnabled: true, enabled: true, allowAI: true } }), 0);
-        if (name === 'breezer-updates') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { available: false, notice: 'Breezer is up to date.' } }), 0);
-        return port;
-      },
-    },
-    storage: { local: area(fx.local, 'local'), session: area({}, 'session'), onChanged: { addListener: (fn) => fx.listeners.push(fn) } },
-    tabs: {
-      async query() { return [{ index: 0, windowId: 1 }]; },
-      async getCurrent() { return { id: 42, index: 0, windowId: 1 }; },
-      async create(props) { fx.calls.push(['tabs.create', props]); return props; },
-      async update(id, props) { fx.calls.push(['tabs.update', id, props]); return { id, ...props }; },
-    },
-    breezerPrivate: {
-      async getAppearance() { return structuredClone(fx.appearance); },
-      async setAppearance(patch) { fx.calls.push(['setAppearance', patch]); Object.assign(fx.appearance, patch); save(); return structuredClone(fx.appearance); },
-    },
-  };
-}
 
 async function startServer() {
   const server = createServer(async (request, response) => {
@@ -79,20 +37,29 @@ test('settings categories, search, Other and narrow layout work in a real browse
   const base = `http://127.0.0.1:${server.address().port}/workspace.html`;
   const browser = await chromium.launch({ executablePath, headless: true });
   const errors = [];
-  const open = async ({ hash = '#/settings', colorMode = 'light', theme = 'mint', width = 1200, height = 860, reducedMotion = 'no-preference' } = {}) => {
+  const open = async ({ hash = '#/settings', colorMode = 'light', theme = 'mint', width = 1200, height = 860, reducedMotion = 'no-preference', initialLocal = {}, delayTranslation = false } = {}) => {
     const context = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, colorScheme: colorMode, reducedMotion });
-    await context.addInitScript(installFixture, { colorMode, theme });
+    await context.addInitScript(installFixture, { colorMode, theme, initialLocal });
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !message.location().url.endsWith('/favicon.ico')) errors.push(`${message.text()} ${message.location().url}`); });
+    if (delayTranslation) await page.route('**/translation-settings.js', async route => {
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await route.continue();
+    });
     await page.goto(`${base}${hash}`);
-    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('#settings-title').waitFor();
     await page.locator('#theme-swatches [role="radio"]').first().waitFor({ state: 'attached' });
     return page;
   };
   const current = (page) => page.locator('.nav-item[aria-current="page"]').innerText();
   const visiblePages = (page) => page.locator('.settings-page:not([hidden])').evaluateAll((nodes) => nodes.map((node) => node.dataset.page));
   try {
+    const loading = await open({ delayTranslation: true });
+    await loading.locator('#settings-search').fill('translation provider');
+    await loading.locator('#settings-results .result-title').filter({ hasText: /^Translation provider$/ }).waitFor();
+    assert.equal(await loading.locator('.nav-item[data-category="languages"]').isVisible(), true);
+    await loading.context().close();
     // ---------------------------------------------------------- categories
     const page = await open();
     await page.waitForTimeout(700); // let the import card finish its entrance
@@ -105,13 +72,34 @@ test('settings categories, search, Other and narrow layout work in a real browse
     // its native bridge. Discovery must explain that limitation without success.
     await page.locator('.nav-item[data-category="sync"]').waitFor();
     await page.getByRole('link', { name: 'Sync', exact: true }).click();
-    await page.getByText('This build does not include native sync setup.', { exact: true }).waitFor();
-    assert.equal(await page.getByRole('button', { name: 'Set up or manage sync', exact: true }).isDisabled(), true);
+    await page.getByText('Sync is not available in this version. Saved data stays on this device.', { exact: true }).waitFor();
+    assert.equal(await page.getByRole('button', { name: 'Open update settings', exact: true }).isEnabled(), true);
     await page.screenshot({ path: join(evidence, 'settings-sync-unavailable-fixture.png') });
-    await page.getByRole('link', { name: 'General', exact: true }).click();
+    await page.getByRole('button', { name: 'Open update settings', exact: true }).click();
+    await page.waitForFunction(() => location.hash === '#/settings/general');
+    await page.getByRole('button', { name: 'Check for updates', exact: true }).waitFor({ state: 'visible' });
+    assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isVisible(), true);
     // Feature modules from FEATURE_MOUNTS add their category once rendered.
     await page.locator('.nav-item[data-category="languages"]').waitFor();
     assert.equal(await page.locator('.nav-item[data-category="assistant"]').isVisible(), true, 'context settings mounted');
+    await page.getByRole('link', { name: 'Assistant', exact: true }).click();
+    await page.getByText('Local context is off. No browsing activity is being remembered.', { exact: true }).waitFor({ state: 'attached' });
+    const contextError = page.locator('#context-settings [role="alert"]');
+    assert.equal(await contextError.isHidden(), true, await contextError.textContent());
+    for (const toggle of await page.locator('#context-settings .toggle:visible').all()) {
+      const box = await toggle.boundingBox();
+      assert.ok(box.width >= 32 && box.height >= 20, 'activity toggles retain the shared switch geometry');
+    }
+    await page.locator('[data-context-control="enabled"]').check();
+    await page.getByRole('button', { name: 'Save choices', exact: true }).click();
+    await page.getByRole('heading', { name: 'Activity summary', exact: true }).waitFor();
+    const consent = page.locator('[data-context-control="consent"]');
+    assert.equal(await consent.isChecked(), false, 'local memory never enables provider consent');
+    assert.equal(await page.getByRole('button', { name: 'Summarize with GPT-6 Luna', exact: true }).isDisabled(), true);
+    await page.locator('[data-context-control="enabled"]').uncheck();
+    await page.getByRole('button', { name: 'Turn off and erase', exact: true }).click();
+    await page.getByRole('heading', { name: 'Activity summary', exact: true }).waitFor({ state: 'hidden' });
+    await page.getByRole('link', { name: 'General', exact: true }).click();
 
     await page.getByRole('link', { name: 'Appearance' }).click();
     assert.equal(await current(page), 'Appearance');
@@ -142,7 +130,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
 
     // Deep links and reloads keep the category; persisted values render.
     await page.reload();
-    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('#settings-title').waitFor();
     await page.waitForFunction(() => document.getElementById('frameless').getAttribute('aria-checked') === 'false');
     assert.equal(await current(page), 'Layout');
     await page.locator('#frameless').click();
@@ -157,7 +145,8 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await page.locator('#settings-results [role="option"]').first().waitFor();
     assert.equal(await page.locator('#settings-search').getAttribute('aria-expanded'), 'true');
     assert.deepEqual(await visiblePages(page), [], 'results replace the page');
-    assert.equal(await page.locator('#settings-results [aria-selected="true"] .result-title').innerText(), 'Appearance');
+    assert.equal(await page.locator('#settings-results [aria-selected="true"] .result-title').innerText(), 'Color mode');
+    assert.equal(await page.locator('#settings-results [aria-selected="true"] .result-meta').innerText(), 'Light');
     assert.equal(await page.locator('#settings-crumb').innerText(), 'Search');
     await page.screenshot({ path: join(evidence, 'settings-redesign-search-light.png') });
     await page.keyboard.press('Enter');
@@ -172,10 +161,33 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.ok(passkeys.includes('Passwords'), `passkeys finds Passwords: ${passkeys}`);
     await page.locator('#settings-search').fill('translate');
     await page.locator('#settings-results [aria-selected="true"]').click();
-    assert.equal(await current(page), 'Languages');
+    assert.equal(await current(page), 'Translation');
     assert.equal(await page.evaluate(() => document.activeElement.closest('#translation-settings') !== null), true);
+    assert.equal(await page.locator('#translation-clear-key').isHidden(), true, 'no removal control without a saved key');
+    for (const colorMode of ['light', 'dark']) {
+      const savedKeyPage = await open({ colorMode, width: 390, height: 844, initialLocal: { [TRANSLATION_KEY]: { provider: 'hosted', apiKey: 'fixture-provider-key' } } });
+      await savedKeyPage.getByRole('combobox', { name: 'Settings category' }).selectOption('languages');
+      await savedKeyPage.locator('#translation-provider').waitFor();
+      assert.equal(await savedKeyPage.locator('#translation-clear-key').isVisible(), true, 'saved credentials expose their removal choice');
+      assert.equal(await savedKeyPage.locator('#translation-key').inputValue(), '', 'saved credentials are never displayed');
+      assert.notEqual(await savedKeyPage.locator('#translation-provider').evaluate(node => getComputedStyle(node).backgroundImage), 'none', 'provider select keeps its arrow in both color modes');
+      const providerBounds = await savedKeyPage.locator('#translation-provider').boundingBox();
+      const keyBounds = await savedKeyPage.locator('#translation-key').boundingBox();
+      assert.ok(Math.abs(providerBounds.x - keyBounds.x) < 1 && Math.abs(providerBounds.width - keyBounds.width) < 1, 'related translation controls share both narrow edges');
+      await savedKeyPage.locator('.setting-row:has(#translation-clear-key) .setting-label').click();
+      assert.equal(await savedKeyPage.evaluate(key => window.fx.local[key].apiKey, TRANSLATION_KEY), 'fixture-provider-key', 'the row heading does not activate destructive removal');
+      await savedKeyPage.screenshot({ path: join(evidence, `settings-translation-saved-key-${colorMode}-narrow.png`), animations: 'disabled' });
+      await savedKeyPage.locator('#translation-provider').selectOption('local');
+      assert.equal(await savedKeyPage.locator('#translation-clear-key').isHidden(), true, 'removal applies only to the saved provider');
+      await savedKeyPage.locator('#translation-provider').selectOption('hosted');
+      await savedKeyPage.locator('#translation-clear-key').click();
+      await savedKeyPage.getByText('Saved API key removed.', { exact: true }).waitFor();
+      assert.equal(await savedKeyPage.locator('#translation-clear-key').isHidden(), true);
+      assert.equal(await savedKeyPage.evaluate(key => window.fx.local[key].apiKey, TRANSLATION_KEY), '');
+      await savedKeyPage.context().close();
+    }
     await page.locator('#settings-search').fill('organato key');
-    await page.locator('#settings-results [role="option"]', { hasText: 'Organato API key' }).click();
+    await page.getByRole('option', { name: 'Organato API key', exact: true }).click();
     assert.equal(await current(page), 'New tab and Organato');
     assert.equal(await page.evaluate(() => document.activeElement.id), 'organato-key');
 
@@ -198,7 +210,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await page.locator('.settings-page:not([hidden])').count(), 1);
 
     // ---------------------------------------------------------- Other
-    await page.getByRole('button', { name: 'Other' }).click();
+    await page.getByRole('button', { name: 'All browser settings' }).click();
     await page.waitForFunction(() => window.fx.calls.some(([name, id, props]) => name === 'tabs.update' && id === 42 && props.url === 'chrome://settings/'));
     assert.equal(await page.locator('#native-settings-error').isHidden(), true);
 
@@ -208,7 +220,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await dark.screenshot({ path: join(evidence, 'settings-redesign-general-dark.png') });
     await dark.getByRole('link', { name: 'Layout' }).click();
     await dark.screenshot({ path: join(evidence, 'settings-redesign-layout-dark.png') });
-    for (const [name, file] of [['Passwords', 'passwords'], ['Languages', 'languages'], ['Browser settings', 'browser'], ['Spaces', 'spaces'], ['Assistant', 'assistant'], ['Layout', 'layout']]) {
+    for (const [name, file] of [['Passwords', 'passwords'], ['Translation', 'languages'], ['Browser tools', 'browser'], ['Spaces', 'spaces'], ['Assistant', 'assistant'], ['Layout', 'layout']]) {
       await dark.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
       await dark.screenshot({ path: join(evidence, `settings-redesign-${file}-dark.png`) });
     }
@@ -228,7 +240,10 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await current(narrow), 'Layout');
     const overflow = await narrow.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert.equal(overflow, 0, 'no horizontal page scroll at 390 px');
-    assert.equal(await narrow.locator('.nav-item[aria-current="page"]').evaluate((node) => { const box = node.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth; }), true, 'selected category is in view');
+    assert.equal(await narrow.getByRole('combobox', { name: 'Settings category' }).inputValue(), 'layout');
+    await narrow.getByRole('combobox', { name: 'Settings category' }).selectOption('privacy');
+    assert.equal(await current(narrow), 'Privacy');
+    await narrow.getByRole('combobox', { name: 'Settings category' }).selectOption('layout');
     assert.equal(await narrow.locator('#settings-search').evaluate((node) => node.getBoundingClientRect().top >= 0), true);
     await narrow.screenshot({ path: join(evidence, 'settings-redesign-layout-narrow.png') });
     await narrow.locator('#settings-search').fill('font');

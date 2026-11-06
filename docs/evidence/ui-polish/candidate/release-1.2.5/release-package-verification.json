@@ -1,0 +1,32 @@
+{
+  "version": "1.2.5",
+  "sourceCommit": "44199b323cfa872e847986f4b95a9c5af8dc0e99",
+  "sha256": "15ffd57edb47afc158a1094eafdbeda90e73034b36334c08943f3988d3ca14af",
+  "bytes": 230546555,
+  "diskImageChecksumAndReadOnlyMount": true,
+  "mountedAppExactlyMatchesSignedCandidate": true,
+  "bundleFilesAndSymlinksChecked": 375,
+  "matchingHostModules": 12,
+  "deepStrictSignature": true,
+  "updaterVerifyBundle": true,
+  "macRuntime": {
+    "app": "/Users/likht.ethan/.t3/worktrees/breezer/t3-4523f995/build/release-1.2.5/Breezer.app",
+    "profile": "/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/breezer-125-release-smoke-FtZkLg",
+    "status": "passed",
+    "checks": {
+      "settingsRendered": true,
+      "nativeAppearanceApi": true,
+      "currentCompiledResourceHashes": 50,
+      "releasePageVersion": "1.2.5",
+      "assistantWithAttachmentPicker": true,
+      "newTabRendered": true
+    },
+    "limitations": [
+      "Headless disposable profile and mock Keychain; native helper/account spawning blocked for isolation. No physical input, provider execution, translation native-window geometry or performance claim."
+    ],
+    "profileRemoved": true
+  },
+  "signing": "Ad hoc, not notarized; no Developer ID identity available",
+  "installedAppChanged": false,
+  "at": "2026-11-06T04:39:39.057806+00:00"
+}

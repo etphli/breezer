@@ -34,7 +34,9 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   hide.setAttribute('aria-label', 'Hide getting started');
   head.append(heading, hide);
 
-  const intro = node('p', 'Chrome and Breezer keep separate profiles. Importing copies your data once. Changes you make in Chrome later stay in Chrome.', 'onboarding-intro');
+  const intro = node('p', 'Copy the bookmarks, history and passwords you choose from Chrome.', 'onboarding-intro');
+  const details = node('details', '', 'setting-details onboarding-details');
+  details.append(node('summary', 'Import details'), node('p', 'Chrome and Breezer keep separate profiles. Future changes in Chrome stay there.'));
 
   const paths = node('div', '', 'onboarding-paths');
   const status = node('p', '', 'status-line');
@@ -47,7 +49,8 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
 
   function path(title, body, control) {
     const item = node('div', '', 'onboarding-path');
-    item.append(node('h3', title), node('p', body), control);
+    item.append(control);
+    details.append(node('h3', title), node('p', body));
     paths.append(item);
   }
 
@@ -78,7 +81,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
     if (!disposed) status.textContent = 'Import dialog opened in a new tab. Choose what to copy there, then check your bookmarks and history.';
   }, { signal: events.signal });
   path('Bookmarks and history',
-    'Opens Breezer’s import dialog. Choose Google Chrome as the source, then select bookmarks, history, or both.',
+    'Choose Google Chrome in the import dialog, then select bookmarks, history, or both.',
     browserImport);
 
   const passwordSteps = node('button', 'Show password steps', 'button');
@@ -93,11 +96,12 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   }, { signal: events.signal });
   if (!passwords) passwordSteps.hidden = true;
   path('Passwords',
-    'Export a password file from Chrome, then import it in Breezer’s password manager. The steps are in Passwords below. Passkeys are not included.',
+    'Choose Show password steps to export from Chrome and import into Breezer. Passkeys are not included.',
     passwordSteps);
 
-  const footnote = node('p', 'After you hide this, both imports stay available in Passwords and More browser settings.', 'field-note');
-  section.append(head, intro, paths, status, error, footnote);
+  const footnote = node('p', 'Imports remain in Passwords and Browser tools.', 'field-note');
+  details.append(footnote);
+  section.append(head, intro, paths, status, error, details);
 
   if (!api?.tabs?.create) {
     browserImport.disabled = true;

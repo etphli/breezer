@@ -1,0 +1,35 @@
+{
+  "after": {
+    "allowance": {
+      "modelList": true,
+      "tuningGenericVisible": false,
+      "fastWarningVisible": true
+    },
+    "table": {
+      "border": "1px",
+      "overflow": false,
+      "headerTop": 0
+    },
+    "sections": [
+      {
+        "clicked": "Highlights",
+        "current": [
+          "Highlights"
+        ]
+      },
+      {
+        "clicked": "Measurements",
+        "current": [
+          "Measurements"
+        ]
+      },
+      {
+        "clicked": "Known limits",
+        "current": [
+          "Known limits"
+        ]
+      }
+    ],
+    "errors": []
+  }
+}

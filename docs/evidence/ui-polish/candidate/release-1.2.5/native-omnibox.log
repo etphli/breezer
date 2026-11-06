@@ -1,0 +1,3 @@
+PASS: Chromium 156.0.8078.47 plus both pinned Helium patch series; 23 targets.
+PASS: apply/check, idempotence, interrupted-file recovery, no writes on anchor failure, AI reapplication, retained upstream tests, unique settings labels.
+Native C++ tests, Chromium WebUI tests, and browser behavior still require a compiled build.

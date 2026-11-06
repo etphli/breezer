@@ -40,7 +40,7 @@ function installFixture({ colorMode, theme }) {
         port.reply = (message) => port.onMessage.list.forEach((fn) => fn(structuredClone(message)));
         fx.ports[name] = port;
         // Context settings answer immediately; Organato and updates are driven by the test.
-        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, sites: [] } }), 0);
+        if (name === 'breezer-context-settings') port.postMessage = (message) => setTimeout(() => port.reply({ id: message.id, ok: true, value: { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 } }), 0);
         return port;
       },
     },
@@ -79,7 +79,8 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     const page = await context.newPage();
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(category ? `${url}/${category}` : url);
-    await page.getByRole('heading', { name: category ? 'Settings' : 'Bring your Chrome data to Breezer', exact: true }).waitFor();
+    if (category) await page.locator('#settings-title').waitFor();
+    else await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer', exact: true }).waitFor();
     // Initial helper replies: Organato not connected, no update available.
     await page.evaluate(() => {
       const org = window.fx.ports['breezer-organato-settings'];
@@ -87,15 +88,39 @@ test('settings onboarding, Organato and updates render and respond in a real bro
       const upd = window.fx.ports['breezer-updates'];
       upd.reply({ id: upd.sent[0].id, ok: true, value: { available: false, notice: 'Breezer 1.1.0 is up to date.' } });
     });
+    if (width >= 800) {
+      const aligned = await page.evaluate(() => {
+        const column = document.querySelector('.settings-column');
+        const style = getComputedStyle(column), rect = column.getBoundingClientRect();
+        return Math.abs(document.querySelector('.crumbs').getBoundingClientRect().left - rect.left - parseFloat(style.paddingLeft)) < 1;
+      });
+      assert.equal(aligned, true, 'Settings header follows the content grid at intermediate widths');
+    }
     return { page, context };
   };
   const noOverflow = (page) => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
   try {
+    for (const colorMode of ['light', 'dark']) for (const width of [900, 390]) {
+      const { page, context } = await open({ colorMode, width });
+      const details = page.locator('.onboarding-details');
+      assert.equal(await details.locator('p').last().isVisible(), false);
+      await details.locator('summary').click();
+      assert.match(await details.innerText(), /Passkeys are not included/);
+      assert.equal(await noOverflow(page), true);
+      await page.mouse.move(4, 4);
+      await page.evaluate(() => document.activeElement.blur());
+      await page.screenshot({ path: join(evidence, `settings-onboarding-expanded-${colorMode}${width < 800 ? '-narrow' : ''}.png`) });
+      await details.locator('summary').focus();
+      await page.keyboard.press('Space');
+      assert.equal(await details.locator('p').last().isVisible(), false);
+      assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).isVisible(), true);
+      await context.close();
+    }
     // ---------------------------------------------------- light, first run
     const { page, context } = await open();
     await page.screenshot({ path: join(evidence, 'settings-onboarding-light.png') });
+    assert.equal(await page.locator('#organato-disconnect').isDisabled(), true, 'Disconnect is unavailable until connected');
     // Subtle buttons must not inherit the sidebar's hover-only .quiet opacity.
-    for (const id of ['organato-disconnect']) assert.equal(await page.locator(`#${id}`).evaluate((node) => getComputedStyle(node).opacity), '1');
     assert.equal(await page.getByRole('button', { name: 'Hide getting started' }).evaluate((node) => getComputedStyle(node).opacity), '1');
     // Native import destinations, keyboard only.
     await page.getByRole('button', { name: 'Import bookmarks and history' }).first().focus();
@@ -127,6 +152,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.locator('#organato-settings').screenshot({ path: join(evidence, 'settings-organato-busy-light.png') });
     await page.evaluate(() => { const org = window.fx.ports['breezer-organato-settings']; org.reply({ id: org.sent.at(-1).id, ok: false, error: 'Organato API key is invalid or expired.' }); });
     assert.equal(await page.locator('#organato-connect').isDisabled(), false);
+    assert.equal(await page.locator('#organato-status').evaluate(node => Math.abs(node.getBoundingClientRect().width - node.parentElement.clientWidth + parseFloat(getComputedStyle(node.parentElement).paddingLeft) + parseFloat(getComputedStyle(node.parentElement).paddingRight)) < 1), true, 'Organato error spans its available column');
     assert.match(await page.locator('#organato-status').innerText(), /invalid or expired/);
     assert.equal(await page.locator('#organato-status').evaluate((node) => getComputedStyle(node, '::before').content), 'none');
     await page.locator('#organato-settings').screenshot({ path: join(evidence, 'settings-organato-error-light.png') });
@@ -142,20 +168,41 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await page.getByRole('link', { name: 'General' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: {} }); });
     await page.getByRole('button', { name: 'Check for updates' }).click();
+    await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: false, error: 'Update helper unavailable. Try again.' }); });
+    assert.match(await page.locator('#update-status').innerText(), /unavailable/);
+    assert.match(await page.locator('#update-status').innerText(), /Choose Check for updates to retry\./);
+    assert.equal(await page.locator('#update-status').evaluate(node => Math.abs(node.getBoundingClientRect().width - node.parentElement.clientWidth) < 1), true, 'Update error spans the settings column');
+    await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-unavailable-light.png') });
+    await page.getByRole('button', { name: 'Check for updates' }).click();
     await page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: true, value: { available: true, version: '1.1.1' } }); });
     assert.equal(await page.getByRole('button', { name: 'Update and restart' }).isVisible(), true);
+    assert.equal(await page.getByRole('button', { name: 'Check for updates' }).isHidden(), true, 'Available update has one primary action');
     await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-light.png') });
+    const updateViewport = page.viewportSize();
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert.equal(await page.locator('#update-settings').evaluate(node => node.scrollWidth <= node.clientWidth), true);
+    await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-available-narrow.png') });
+    await page.setViewportSize(updateViewport);
+    await page.clock.install();
+    await page.getByRole('button', { name: 'Update and restart', exact: true }).click();
+    await page.clock.fastForward(65_000);
+    assert.match(await page.locator('#update-status').innerText(), /Choose Check for updates/);
+    assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isVisible(), true);
+    assert.equal(await page.getByRole('button', { name: 'Check for updates', exact: true }).isEnabled(), true);
+    await page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-timeout-light.png') });
+    await page.clock.resume();
 
     // ---------------------------------------------------- dismiss persists
     await page.getByRole('button', { name: 'Hide getting started' }).click();
     await page.locator('[data-onboarding]').waitFor({ state: 'hidden' });
     assert.equal(await page.evaluate(() => document.activeElement.id), 'settings-title');
     await page.reload();
-    await page.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await page.locator('#settings-title').waitFor();
     await page.waitForTimeout(100);
     assert.equal(await page.locator('[data-onboarding]').isHidden(), true, 'stays hidden after reload');
-    await page.getByRole('link', { name: 'Browser settings' }).click();
-    assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).count(), 1, 'browser import remains in More browser settings');
+    await page.screenshot({ path: join(evidence, 'settings-general-setup-dismissed.png') });
+    await page.getByRole('link', { name: 'Browser tools' }).click();
+    assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).count(), 1, 'browser import remains in Browser settings');
     await context.close();
 
     // ---------------------------------------------------- dark, custom colour
@@ -183,6 +230,11 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     await narrow.page.locator('#organato-settings').scrollIntoViewIfNeeded();
     assert.equal(await noOverflow(narrow.page), true);
     await narrow.page.locator('#organato-settings').screenshot({ path: join(evidence, 'settings-organato-narrow-busy.png') });
+    await narrow.page.locator('#settings-category-select').selectOption('general');
+    await narrow.page.getByRole('button', { name: 'Check for updates' }).click();
+    await narrow.page.evaluate(() => { const upd = window.fx.ports['breezer-updates']; upd.reply({ id: upd.sent.at(-1).id, ok: false, error: 'Update helper unavailable. Try again.' }); });
+    assert.match(await narrow.page.locator('#update-status').innerText(), /unavailable/);
+    await narrow.page.locator('#update-settings').screenshot({ path: join(evidence, 'settings-update-unavailable-narrow.png') });
     await narrow.context.close();
 
     assert.deepEqual(errors, []);

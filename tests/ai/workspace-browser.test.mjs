@@ -52,6 +52,35 @@ async function startServer() {
   return server;
 }
 
+test('compact folder disclosure stays inside the rail at every sidebar font size', { skip }, async () => {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    const page = await browser.newPage({ viewport: { width: 42, height: 820 }, reducedMotion: 'reduce' });
+    await page.addInitScript(installFixture, { seed: seed(), bridge: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const folder = page.locator('.folder').first();
+    await folder.waitFor();
+    for (const width of [42, 56, 72]) for (let font = 12; font <= 20; font++) {
+      await page.setViewportSize({ width, height: 820 });
+      await page.evaluate(async font => {
+        const { applyAppearance } = await import('/workspace.js');
+        applyAppearance({ ...window.fx.appearance, sidebarMode: 'compact', sidebarFontSize: font });
+      }, font);
+      for (const expanded of [false, true]) {
+        await folder.focus();
+        if (await folder.getAttribute('aria-expanded') !== String(expanded)) await page.keyboard.press(expanded ? 'ArrowRight' : 'ArrowLeft');
+        await page.waitForFunction(expanded => document.querySelector('.folder').getAttribute('aria-expanded') === String(expanded), expanded);
+        const rect = await folder.locator('.chevron svg').evaluate(node => node.getBoundingClientRect().toJSON());
+        assert.ok(rect.left >= 0 && rect.right <= width, JSON.stringify({ width, font, expanded, rect }));
+      }
+    }
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 test('sidebar releases unused route markup and reloads Settings and welcome intact', { skip }, async () => {
   const server = await startServer();
   let browser;
@@ -161,7 +190,7 @@ test('dragging with no Favorites preserves tab geometry and supports reorder and
     await page.locator('#sidebar.dragging').waitFor();
     assert.deepEqual(await row(3).boundingBox(), target, 'Starting a drag must keep the intended drop row under the pointer');
     await mkdir(evidence, { recursive: true });
-    await page.screenshot({ path: `${evidence}/workspace-empty-favorites-drag.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-empty-favorites-drag.png` });
     await page.mouse.move(target.x + target.width / 2, target.y + 3, { steps: 12 });
     await page.mouse.up();
     await page.waitForFunction(() => window.fx.calls.some(([name, id]) => name === 'tabs.move' && id === 4));
@@ -214,7 +243,7 @@ test('delayed tab queries cannot revive closed rows or overwrite navigation and 
     await page.waitForTimeout(150);
     assert.equal(await page.locator('#today [data-key="t:3"]').count(), 0, 'a closed tab must not return as an unresponsive ghost row');
     await mkdir(evidence, { recursive: true });
-    await page.screenshot({ path: `${evidence}/workspace-tab-query-race.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-tab-query-race.png` });
 
     await page.evaluate(() => {
       window.fx.releaseQuery = null;
@@ -288,7 +317,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     assert.equal(await page.getByRole('treeitem', { name: /Pull request #42/ }).getAttribute('aria-selected'), 'true');
     assert.equal(await page.getByRole('treeitem', { name: 'Sidebar spec, asleep' }).count(), 1, 'unbound pinned entry is asleep');
     assert.equal(await page.locator('#collapse').isVisible(), true);
-    await page.screenshot({ path: `${evidence}/workspace-sidebar.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-sidebar.png` });
 
     // New tab joins the active space.
     await page.getByRole('button', { name: 'New tab' }).click();
@@ -303,6 +332,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
 
     // Pin from the context menu, then it shows in the pinned tree.
     await tree.getByRole('treeitem', { name: /Arc review notes/ }).click({ button: 'right' });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-tab-menu.png` });
     await page.getByRole('menuitem', { name: 'Pin tab' }).click();
     await page.locator('#pinned').getByRole('treeitem', { name: 'Arc review notes' }).waitFor();
     assert.equal(await tree.getByRole('treeitem', { name: /Arc review notes/ }).count(), 0);
@@ -333,7 +363,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     assert.equal(await page.locator('#sidebar').getAttribute('data-tone'), 'rose');
     await page.waitForFunction(() => window.fx.tabs.find((tab) => tab.active)?.id === 6);
     assert.equal(await tree.getByRole('button', { name: 'Mute tab' }).count(), 1, 'audible tab shows a mute control');
-    await page.screenshot({ path: `${evidence}/workspace-sidebar-personal.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-sidebar-personal.png` });
 
     // Browser restart: storage.session is gone and every tab gets a new id.
     await page.evaluate(() => {
@@ -359,12 +389,12 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.waitForFunction(() => document.documentElement.dataset.scheme === 'dark');
     await page.waitForTimeout(400); // let the space-switch animation finish before capturing
-    await page.screenshot({ path: `${evidence}/workspace-sidebar-dark.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-sidebar-dark.png` });
 
     // ---------------------------------------------------------- settings
     const settings = await newPage({ bridge: true }, { width: 1000, height: 1400 });
     await settings.goto(`${base}/workspace.html#/settings`);
-    await settings.getByRole('heading', { name: 'Settings', exact: true }).waitFor();
+    await settings.locator('#settings-title').waitFor();
     // Categories show one at a time, like the browser's own settings.
     const go = (page, name) => page.locator('#settings-categories').getByRole('link', { name, exact: true }).click();
     await go(settings, 'Appearance');
@@ -390,10 +420,10 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
       await control.click();
       await settings.waitForFunction(({ id, value }) => document.getElementById(id).getAttribute('aria-checked') === String(value), { id, value: initial });
     }
-    await go(settings, 'Browser settings');
+    await go(settings, 'Browser tools');
     await settings.getByRole('button', { name: 'Privacy and security', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/privacy'));
-    await settings.getByRole('button', { name: 'All native browser settings', exact: true }).click();
+    await settings.getByRole('button', { name: 'All browser settings', exact: true }).click();
     await settings.waitForFunction(() => window.fx.calls.some(([name, args]) => name === 'tabs.create' && args.url === 'chrome://settings/'));
     await go(settings, 'Layout');
     for (const [label, mode] of [['Compact', 'compact'], ['Auto-hide', 'autoHide'], ['Expanded', 'expanded']]) {
@@ -439,9 +469,9 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await go(settings, 'Layout');
     await settings.locator('#centered-address-bar').click();
     await settings.waitForFunction(() => window.fx.appearance.centeredAddressBar === true);
-    await settings.screenshot({ path: `${evidence}/workspace-settings.png`, fullPage: true });
+    await settings.screenshot({ animations: 'disabled', path: `${evidence}/workspace-settings.png`, fullPage: true });
     await settings.emulateMedia({ colorScheme: 'dark' });
-    await settings.screenshot({ path: `${evidence}/workspace-settings-dark.png`, fullPage: true });
+    await settings.screenshot({ animations: 'disabled', path: `${evidence}/workspace-settings-dark.png`, fullPage: true });
 
     // A rejected change is reported and the control keeps the browser's value.
     const failing = await newPage({ bridge: true, bridgeFails: true }, { width: 900, height: 900 });
@@ -481,7 +511,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     const windowPage = await newPage({ bridge: true }, { width: 1280, height: 800 });
     await windowPage.goto(`${base}/__window.html`);
     await windowPage.frameLocator('iframe').getByRole('treeitem', { name: /Pull request #42/ }).waitFor();
-    await windowPage.screenshot({ path: `${evidence}/workspace-window.png` });
+    await windowPage.screenshot({ animations: 'disabled', path: `${evidence}/workspace-window.png` });
 
     assert.deepEqual(errors, []);
   } finally {
@@ -525,7 +555,7 @@ test('tab updates leave unchanged rows and their audio controls intact', { skip 
     await row.click();
     assert.equal(await row.getAttribute('aria-selected'), 'true');
     await mkdir(evidence, { recursive: true });
-    await page.screenshot({ path: `${evidence}/workspace-efficient-updates.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-efficient-updates.png` });
   } finally {
     try { await browser?.close(); } finally {
       await new Promise(done => server.close(done));
@@ -576,7 +606,7 @@ test('numbered favorite command lazily opens the saved first slot, once under ra
     await page.locator('#favorites .tile.active').first().waitFor();
     await page.waitForFunction(() => !document.querySelector('#today .row.active'));
     await mkdir(evidence, { recursive: true });
-    await page.screenshot({ path: `${evidence}/favorite-number-lazy-fixture.png` });
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/favorite-number-lazy-fixture.png` });
     // Failed creation releases the entry for a subsequent deliberate retry.
     await page.evaluate(() => { window.fx.failCreate = true; });
     await numberedCommand(page, 1);
