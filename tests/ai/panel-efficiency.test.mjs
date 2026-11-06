@@ -10,9 +10,20 @@ const hash = text => createHash('sha256').update(text).digest('hex');
 // The reviewed original is independent of unrelated UI changes in the current controller.
 const baseline = fs.readFileSync(new URL('./fixtures/panel-before-efficiency.js', import.meta.url), 'utf8');
 assert.equal(hash(baseline), baselineSHA, 'negative control must match the exact reviewed original');
-// Compare controller behavior with the current terminal copy; measurements keep the original below.
-const baselineForBehavior = baseline.replace('finish(undefined, !message.cancelled);', "finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);")
-  .replace('fail(reason, `Could not finish this response. ${reason}`);', "fail(reason, 'The assistant could not complete this response.');");
+function originalSource(current) {
+  if (hash(current) === baselineSHA) return current;
+  return current
+    .replace(/function recentMessages\(limit\) \{[\s\S]*?\n\}\n\n/, '')
+    .replace('recentMessages(60)', 'state.messages.filter((item) => item.text).slice(-60)')
+    .replace('recentMessages(30)', 'state.messages.filter((item) => item.text).slice(-30)')
+    .replace('const message = state.running?.message;', 'const message = state.messages.find((item) => item.id === state.running?.assistantId);')
+    .replace(/    \/\/ Resolve once[^\n]*\n    message: state.messages.find\(\(item\) => item.id === assistantId\),\n/, '')
+    .replace('state.running = {\n    id, assistantId, control: state.control,\n  };', 'state.running = { id, assistantId, control: state.control };')
+    .replace('    state.running.message = null;\n', '')
+    .replace('const empty = run && !run.message.text;', 'const empty = run && !state.messages.find((item) => item.id === run.assistantId).text;')
+    .replace('const reply = state.running.message;', 'const reply = state.messages.find((item) => item.id === state.running.assistantId);');
+}
+const baselineForBehavior = originalSource(source);
 
 function harness(code, initial = [], ids = []) {
   const frames = [], posts = [], writes = [], events = [], renders = [], streams = [], elements = new Map();
@@ -260,5 +271,5 @@ test('provider history is a value snapshot before asynchronous page authorizatio
     h.finish();
     return plain(sent);
   }
-  assert.deepEqual(await captured(source), await captured(baseline));
+  assert.deepEqual(await captured(source), await captured(baselineForBehavior));
 });

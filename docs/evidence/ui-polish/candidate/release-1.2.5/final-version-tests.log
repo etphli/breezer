@@ -1,0 +1,11 @@
+test_bundle_version_changes_only_the_public_breezer_app (__main__.ReleaseVersionTests.test_bundle_version_changes_only_the_public_breezer_app) ... ok
+test_foreign_bundle_and_symlink_are_refused (__main__.ReleaseVersionTests.test_foreign_bundle_and_symlink_are_refused) ... ok
+test_full_package_keeps_release_version_separate_from_node_version (__main__.ReleaseVersionTests.test_full_package_keeps_release_version_separate_from_node_version) ... ok
+test_native_display_uses_release_and_preserves_chromium_version (__main__.ReleaseVersionTests.test_native_display_uses_release_and_preserves_chromium_version) ... ok
+test_release_metadata_agrees_and_rejects_ambiguous_versions (__main__.ReleaseVersionTests.test_release_metadata_agrees_and_rejects_ambiguous_versions) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.016s
+
+OK
+Bundled Breezer 1.2.0, private AI host and Node 24.22.1 for arm64: /private/var/folders/6n/t9vh8ny53y986jmqgg3_4bsh0000gp/T/tmp6kc2lo05/Breezer.app/Contents/Frameworks/Breezer Framework.framework/Versions/156/Resources/breezer_ai

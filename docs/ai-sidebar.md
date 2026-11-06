@@ -12,6 +12,14 @@ The profile button edits your name and personal context. These are saved in this
 
 Enter sends and Shift+Enter adds a line. The hint beside the page chip says what the next message shares: the page and a screenshot, the page with browser control, nothing, or that the current tab is not a web page. When no model is connected or the tab has no web page, the empty conversation says so and offers the next step. A reply that fails, or is stopped before any text arrives, shows the reason in place with **Edit and resend**. That button only puts the original message back in the composer; it never sends by itself, and browser control stays off until you turn it on again.
 
+## File review
+
+Use **Attach files** beside Browser control, or drop files onto the composer. Attach up to four files, remove any chip before sending, and add a question or send files alone for a review. Text, source code, Markdown, CSV and other UTF-8 text formats are supported, along with PNG, JPEG and WebP images. PDF and Word files must be exported as text first.
+
+Text files are limited to 24,000 characters and 96 KB each; images to 512 KB each. The recent conversation plus draft can contain at most 2 MB of attachment content. Oversized, unreadable and unsupported files show an error without discarding accepted files. Files are never silently truncated.
+
+File contents are sent to the selected provider only when you send, independently of the page chip. Recent messages include their attachments for follow-up questions. Sent files remain in per-window browser session history, with the same lifetime as messages. New conversation clears them; Edit and resend restores a failed message's files. Attaching a file grants no filesystem or browser-control access.
+
 ## Research across selected tabs
 
 Choose **Sources** to select up to six HTTP(S) pages in this window for a comparison, summary or synthesis. The source chips show what the next message shares. Research sends text only, with labeled source references, truncation and individual errors. It does not share screenshots or authorize browser actions. Use **Clear all** inside the picker to return to the ordinary current-page mode or enable Browser control.

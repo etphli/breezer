@@ -1,3 +1,4 @@
+import { attachmentParts } from './attachments.mjs';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -95,7 +96,11 @@ class PartialTextStream {
 }
 
 function imageContent(context) {
-  return contextParts(context).map((part) => {
+  return claudeParts(contextParts(context));
+}
+
+function claudeParts(parts) {
+  return parts.map((part) => {
     if (part.type === 'text') return { type: 'text', text: part.text };
     const [, media_type, data] = /^data:([^;]+);base64,(.*)$/.exec(part.image);
     return { type: 'image', source: { type: 'base64', media_type, data } };
@@ -152,7 +157,7 @@ export class ClaudeProvider {
       signal.addEventListener('abort', abort, { once: true });
       try {
         await rpc.control({ subtype: 'initialize' });
-        let content = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...(chat.includeContext === true ? imageContent(chat.context) : [])];
+        let content = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...claudeParts(attachmentParts(chat)), ...(chat.includeContext === true ? imageContent(chat.context) : [])];
         for (let round = 0; round < 30; round++) {
           if (signal.aborted) throw new Error('Cancelled.');
           const result = await this.round(rpc, content, emit);

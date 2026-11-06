@@ -498,9 +498,11 @@ test('worker toggles the panel and forwards context only on an opted-in chat', a
   port.onMessage.emit({ type: 'init' });
   await tick();
   assert.ok(fake.calls.some(call => call[0] === 'native' && call[1] === NATIVE_HOST));
-  port.onMessage.emit({ type: 'chat', id: 'a', provider: 'codex', model: 'auto', message: 'Hello', includeContext: false });
+  port.onMessage.emit({ type: 'chat', id: 'a', provider: 'codex', model: 'auto', message: 'Hello', includeContext: false, attachments: [{ name: 'notes.txt', text: 'Review me' }], history: [{ role: 'user', content: 'Earlier', attachments: [{ name: 'earlier.txt', text: 'Earlier file' }] }] });
   await tick();
   assert.equal(fake.native.sent.find(value => value.id === 'a')?.context, undefined);
+  assert.deepEqual(fake.native.sent.find(value => value.id === 'a').attachments, [{ name: 'notes.txt', text: 'Review me' }]);
+  assert.equal(fake.native.sent.find(value => value.id === 'a').history[0].attachments[0].text, 'Earlier file');
   assert.equal(fake.calls.filter(call => call[0] === 'capture').length, 0);
   port.onMessage.emit({ type: 'chat', id: 'b', provider: 'codex', model: 'auto', message: 'Read this', includeContext: true });
   await tick();

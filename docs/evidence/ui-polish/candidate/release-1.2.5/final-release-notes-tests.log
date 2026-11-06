@@ -1,0 +1,40 @@
+TAP version 13
+# Subtest: a brand-new profile opens the setup guide, not the release notes, and only once
+ok 1 - a brand-new profile opens the setup guide, not the release notes, and only once
+  ---
+  duration_ms: 1.408584
+  ...
+# Subtest: profiles used before setup existed get release notes instead of setup
+ok 2 - profiles used before setup existed get release notes instead of setup
+  ---
+  duration_ms: 0.261875
+  ...
+# Subtest: opens release notes once per release across concurrent startup/install/window events
+ok 3 - opens release notes once per release across concurrent startup/install/window events
+  ---
+  duration_ms: 0.149792
+  ...
+# Subtest: waits for a regular window and never opens in private browsing
+ok 4 - waits for a regular window and never opens in private browsing
+  ---
+  duration_ms: 0.279792
+  ...
+# Subtest: failed tab creation remains retryable and an existing page is reused
+ok 5 - failed tab creation remains retryable and an existing page is reused
+  ---
+  duration_ms: 0.362459
+  ...
+# Subtest: a patch appends to the current minor page without reopening it
+ok 6 - a patch appends to the current minor page without reopening it
+  ---
+  duration_ms: 0.104042
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 61.083166

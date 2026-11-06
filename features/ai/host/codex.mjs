@@ -1,3 +1,4 @@
+import { attachmentParts } from './attachments.mjs';
 import { mkdtemp, writeFile, symlink, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -284,7 +285,7 @@ export class CodexProvider {
       done.catch(() => {});
       const started = await rpc.request('thread/start', this.threadParams(model, tools));
       scope.check();
-      const input = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...(chat.includeContext === true ? contextParts(chat.context) : [])];
+      const input = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...attachmentParts(chat), ...(chat.includeContext === true ? contextParts(chat.context) : [])];
       try {
         await rpc.request('turn/start', { threadId: started.thread.id, input: input.map((part) => part.type === 'image' ? { type: 'image', url: part.image } : part), ...options });
       } catch (error) { throw fastRequestError(error, chat.speed); }

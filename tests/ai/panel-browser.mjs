@@ -1,3 +1,4 @@
+import { attachmentParts } from '../../features/ai/host/attachments.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
@@ -429,6 +430,62 @@ try {
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-stream-scroll-${width}.png` });
   }
 
+  // Attachments use actual browser File APIs and remain in follow-up history.
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.locator('#prompt').fill('');
+  await page.locator('#context-toggle').click();
+  await page.locator('#file-input').setInputFiles([
+    { name: 'review.js', mimeType: 'text/javascript', buffer: Buffer.from('const answer = 42;') },
+    { name: 'notes.csv', mimeType: 'text/csv', buffer: Buffer.from('item,count\napples,3') },
+  ]);
+  await page.getByRole('button', { name: 'Remove notes.csv' }).click();
+  assert.equal(await page.locator('.attachment-chip').count(), 1);
+  await page.locator('#file-input').setInputFiles({ name: 'document.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.7') });
+  await page.waitForFunction(() => document.getElementById('notice-text').textContent.includes('Export PDF'));
+  assert.equal(await page.locator('.attachment-chip').count(), 1);
+  await page.locator('#file-input').setInputFiles({ name: 'huge.txt', mimeType: 'text/plain', buffer: Buffer.from('x'.repeat(24001)) });
+  await page.waitForFunction(() => document.getElementById('notice-text').textContent.includes('24,000'));
+  const image = await page.locator('#attach-files').screenshot();
+  await page.locator('#file-input').setInputFiles({ name: 'button.png', mimeType: 'image/png', buffer: image });
+  await page.getByRole('button', { name: 'Remove button.png' }).waitFor();
+  await page.setViewportSize({ width: 320, height: 850 });
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await page.screenshot({ path: `${evidence}/sidebar-files.png` });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+  await page.locator('#send').click();
+  const attachedChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.equal(attachedChat.message, 'Review the attached files.');
+  assert.equal(attachedChat.attachments[0].text, 'const answer = 42;');
+  assert.match(attachedChat.attachments[1].image, /^data:image\/png;base64,/);
+  assert.equal(await page.locator('#attach-files').isDisabled(), true);
+  await page.evaluate(id => window.emit({ type: 'error', id, error: 'Synthetic file review failure' }), attachedChat.id);
+  await page.getByRole('button', { name: 'Edit and resend' }).click();
+  assert.equal(await page.locator('.attachment-chip').count(), 2);
+  await page.getByRole('button', { name: 'Remove button.png' }).click();
+  await page.locator('#send').click();
+  const retriedChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.equal(attachmentParts(retriedChat).some(part => part.type === 'image'), false, 'Removing a retry file removes it from the provider payload, including history');
+  await page.evaluate(() => {
+    const id = window.sent.filter(message => message.type === 'chat').at(-1).id;
+    window.emit({ type: 'delta', id, text: 'The file defines answer as 42.' });
+    window.emit({ type: 'complete', id });
+  });
+  await page.locator('#prompt').fill('What is the value?');
+  await page.locator('#send').click();
+  const followUp = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
+  assert.ok(followUp.history.some(message => message.attachments?.[0]?.text === 'const answer = 42;'));
+  assert.equal(attachmentParts(followUp).some(part => part.type === 'image'), false, 'Removed retry files stay absent from later requests');
+  await page.evaluate(id => window.emit({ type: 'complete', id }), followUp.id);
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  assert.equal(await page.locator('.attachment-chip').count(), 0);
+  await page.evaluate(() => {
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['Dropped text'], 'dropped.txt', { type: 'text/plain' }));
+    document.getElementById('composer').dispatchEvent(new DragEvent('drop', { dataTransfer: transfer, bubbles: true, cancelable: true }));
+  });
+  await page.getByRole('button', { name: 'Remove dropped.txt' }).click();
+  assert.equal(await page.locator('.attachment-chip').count(), 0);
+
   // Signed out everywhere: the empty state says how to connect, and Enter opens the model menu instead of failing silently.
   await page.evaluate(() => {
     window.testProviders = [
@@ -484,7 +541,7 @@ try {
   assert.equal(await loading.locator('.context-row').isVisible(), true);
   assert.equal(await loading.locator('#context-hint').innerText(), 'Page + screenshot');
   await loading.close();
-  console.log('PASS: real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
+  console.log('PASS: file picker, drop, removal, unsupported/oversize errors, image decoding, attachment-only send, retry restoration and follow-up history; real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {
   try { await browser?.close(); } finally {

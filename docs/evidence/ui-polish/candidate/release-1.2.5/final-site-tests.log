@@ -1,0 +1,59 @@
+
+> test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: privacy, dashboard, responsive layout, errors, and the actual usage switch
+ok 1 - privacy, dashboard, responsive layout, errors, and the actual usage switch
+  ---
+  duration_ms: 2434.9165
+  ...
+# Subtest: reports permit only the documented payload and current/previous month
+ok 2 - reports permit only the documented payload and current/previous month
+  ---
+  duration_ms: 1.97525
+  ...
+# Subtest: retries and out-of-order cumulative reports never double-count or lose time
+ok 3 - retries and out-of-order cumulative reports never double-count or lose time
+  ---
+  duration_ms: 0.111417
+  ...
+# Subtest: calendar MAU includes the first of a 31-day month; hours cover exactly 30 days
+ok 4 - calendar MAU includes the first of a 31-day month; hours cover exactly 30 days
+  ---
+  duration_ms: 0.240291
+  ...
+# Subtest: month boundary does not count previous-month identifiers in current MAU
+ok 5 - month boundary does not count previous-month identifiers in current MAU
+  ---
+  duration_ms: 0.236209
+  ...
+# Subtest: only the exact Vercel-protected team host may read metrics
+ok 6 - only the exact Vercel-protected team host may read metrics
+  ---
+  duration_ms: 0.272917
+  ...
+# Subtest: retention refuses missing or malformed authentication
+ok 7 - retention refuses missing or malformed authentication
+  ---
+  duration_ms: 0.198958
+  ...
+# Subtest: collector rejects oversized and unexpected payloads before storage
+ok 8 - collector rejects oversized and unexpected payloads before storage
+  ---
+  duration_ms: 0.146833
+  ...
+# Subtest: GitHub download metrics count installers, exclude draft releases, and paginate
+ok 9 - GitHub download metrics count installers, exclude draft releases, and paginate
+  ---
+  duration_ms: 0.557916
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2751.74175

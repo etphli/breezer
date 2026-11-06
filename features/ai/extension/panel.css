@@ -1155,3 +1155,16 @@ dialog .privacy-note {
   .context-row { gap: 4px; padding-inline: 2px; }
   .context-hint { max-width: none; margin-left: 0; text-align: left; }
 }
+
+.attachment-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.attachment-list:not(:empty) { padding: 10px 10px 0; }
+.attachment-chip { display: flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 8px; background: var(--accent-soft); border-radius: 8px; color: var(--accent-ink); }
+.attachment-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attachment-remove { background: none; border: 0; color: inherit; cursor: pointer; font-size: 18px; }
+.attachment-hint { margin: 6px 2px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+
+.attachment-list { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
+.attachment-list:empty { display: none; }
+.composer:has(.attachment-chip)::before, .composer:has(.attachment-chip) textarea, .composer:has(.attachment-chip) .send-button { grid-row: 2; }
+.composer:has(.attachment-chip) :is(.model-button, .source-tools) { grid-row: 3; }
+.attachment-hint { font-size: 12px; }

@@ -19,23 +19,26 @@ renderer evidence uses an explicitly scoped CSS resource override, with all
 served resource hashes verified. It is not a new release build or an OS-window
 capture. The reviewers have not rescored this final correction or release copy.
 
-## PC build waits for the user
+## Final integration and packaging
 
-The single bounded SSH readiness check on November 6 timed out during banner
-exchange. No build, remote task or source migration was started. Do not poll or
-retry until the user says the PC is on.
+The configured Windows PC completed the first 1.2.5 incremental compilation with
+300 of 300 actions and exit code zero. Prepared source, compiled objects and the
+existing graph were preserved. That artifact is bound to source commit
+`1c788b8ef923b49a9734f8e7cfb025d99e54bbd5`; it is not yet the final release package.
 
-After that message, follow [the configured-PC runbook](pc-build.md). Inspect the
-existing task and source pins first. Preserve active work, the prepared source,
-compiled objects, graph and caches. Stage the current UI assets, native UI
-overlays and 1.2.5 version identity through a checked migration before starting
-the incremental task. The previous memory-only packet is not this UI release.
-Retrieve and verify the resulting artifact, package it with 1.2.5 metadata,
-check signatures and run the applicable acceptance checks. Do not relabel a
-previous binary as this completed build.
+The latest main branch adds assistant file attachments. The resolved integration
+passed 556 Node checks: 554 passed, zero failed and two skipped. Both assistant
+and research browser walkthroughs passed, including file selection, dropping,
+removal, validation, attachment-only messages, retry and follow-up context.
+The historical RAM comparison fixture retains its original bytes. Final resource
+refresh, app packaging, signing, Mac runtime checks and installer verification
+must cover this integrated source before publication.
 
-The installed Mac app, profiles, passwords and compiled caches remain unchanged.
-This PR push is source publication. No GitHub release, tag, installer publication
-or local installation is included. The older 1.2.1 release hold remains intact.
+The user has explicitly authorized merging PR #17 and publishing 1.2.5 after
+verification. This does not authorize replacing the installed Mac app. Profiles,
+passwords, prepared source and required compiled caches remain preserved. All
+worktrees owned by the RAM-reduction thread and its descendants are excluded
+from cleanup. The older 1.2.1 release hold remains intact.
+
 Native physical interaction, menus, restoration, auto-hide, live provider
 execution and the translation window bridge remain separate acceptance checks.

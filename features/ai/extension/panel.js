@@ -3,6 +3,35 @@ import { renderMessage, createMessageStream } from './render-message.js';
 import { latestModels } from './model-catalog.js';
 import { startPanelTheme } from './panel-theme.js';
 
+const MAX_ATTACHMENT_TOTAL = 2 * 1024 * 1024;
+const attachmentSize = file => (file.text || file.image || '').length;
+const textExtension = /\.(txt|md|markdown|csv|tsv|json|jsonl|xml|html?|css|scss|js|jsx|mjs|cjs|ts|tsx|py|rb|rs|go|java|kt|swift|c|h|cpp|hpp|cs|sh|bash|zsh|sql|ya?ml|toml|ini|cfg|log|svg)$/i;
+
+async function readAttachment(file) {
+  if (!file.size) throw new Error('This file is empty.');
+  if (file.name.length > 255) throw new Error('Use a filename shorter than 256 characters.');
+  if (['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+    if (file.size > 512 * 1024) throw new Error('Images must be 512 KB or smaller.');
+    const image = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Could not read this image.'));
+      reader.readAsDataURL(file);
+    });
+    const bitmap = await createImageBitmap(file).catch(() => { throw new Error('This image could not be decoded.'); });
+    bitmap.close();
+    return { name: file.name, image };
+  }
+  if (!file.type.startsWith('text/') && !textExtension.test(file.name)) throw new Error('Use text, code, CSV, PNG, JPEG, or WebP. Export PDF and Word documents as text first.');
+  if (file.size > 96 * 1024) throw new Error('Text files must be 96 KB or smaller.');
+  let text;
+  try { text = new TextDecoder('utf-8', { fatal: true }).decode(await file.arrayBuffer()); }
+  catch { throw new Error('Save this file as UTF-8 text and try again.'); }
+  if (!text.trim() || /[\u0000-\u0008\u000e-\u001f]/.test(text)) throw new Error('This file has no readable text or contains binary data.');
+  if (text.length > 24000) throw new Error('Text files must contain at most 24,000 characters. Split this file into smaller files.');
+  return { name: file.name, text };
+}
+
 const $ = (id) => document.getElementById(id);
 const state = {
   profile: { name: '', context: '' },
@@ -11,6 +40,10 @@ const state = {
   selection: null,
   preferences: {},
   messages: [],
+  attachments: [],
+  readingFiles: false,
+  retryMessage: null,
+  fileGeneration: 0,
   includeContext: true,
   control: false,
   controlTabId: null,
@@ -107,12 +140,15 @@ function updateControls() {
   const running = Boolean(state.running);
   document.querySelector('.panel').dataset.running = String(running);
   document.querySelector('.panel').dataset.pageState = state.pageKnown ? 'ready' : 'loading';
-  $('send').disabled = !running && (!selectedModel() || !$('prompt').value.trim());
+  $('send').disabled = !running && (!selectedModel() || (!$('prompt').value.trim() && !state.attachments.length) || state.readingFiles);
   $('send').dataset.running = String(running);
   $('send').setAttribute('aria-label', running ? 'Stop response' : 'Send message');
   $('send').title = running ? 'Stop response' : 'Send message';
   $('send-arrow').toggleAttribute('hidden', running);
   $('send-stop').hidden = !running;
+  $('attach-files').disabled = running || state.readingFiles;
+  $('file-input').disabled = running || state.readingFiles;
+  document.querySelectorAll('.attachment-remove').forEach(button => { button.disabled = running || state.readingFiles; });
   research.setBusy(running);
   $('control-toggle').disabled = running || !state.page || research.size > 0;
   $('context-toggle').hidden = research.size > 0 || !state.page;
@@ -343,9 +379,15 @@ function appendMessage(message) {
   } else body.textContent = message.text;
   linkResearchCitations(body, message.citations);
   article.append(body);
+  if (message.attachments?.length) {
+    const files = document.createElement('div');
+    files.className = 'message-meta';
+    files.textContent = message.attachments.map(file => file.name).join(', ');
+    article.append(files);
+  }
   if (message.contextTitle) {
     const meta = document.createElement('div');
-    meta.className = 'message-meta';
+    meta.className = 'message-meta context-meta';
     if (repeatedContext) { meta.classList.add('sr-only'); article.title = `Included context: ${message.contextTitle}`; }
     meta.textContent = message.contextTitle;
     if (Array.isArray(message.sourceMetadata)) renderSourceMetadata(meta, message.sourceMetadata);
@@ -415,6 +457,20 @@ function recentMessages(limit) {
   return messages.reverse();
 }
 
+// Retried files are included once, with their most recent message.
+function requestHistory() {
+  const seen = new Set(state.attachments.map(file => JSON.stringify(file)));
+  return recentMessages(30).filter(message => !message.superseded && message !== state.retryMessage).reverse().map(({ role, text: content, attachments }) => {
+    const files = (attachments || []).filter(file => {
+      const key = JSON.stringify(file);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return { role, content, ...(files.length ? { attachments: files } : {}) };
+  }).reverse();
+}
+
 function saveConversation() {
   const messages = recentMessages(60);
   return chrome.storage.session.set({ [state.sessionKey]: messages }).catch(() => {});
@@ -462,6 +518,10 @@ function offerRetry(run, failed = true) {
       prompt.focus();
       return;
     }
+    if (state.attachments.length || state.readingFiles) return notify('Send or remove your attached draft files first.');
+    state.retryMessage = original;
+    state.attachments = [...(original.attachments || [])];
+    renderAttachments();
     prompt.value = original.text;
     resizePrompt();
     prompt.focus();
@@ -545,7 +605,8 @@ function revealPanel() {
 
 async function send() {
   if (state.running) return stop();
-  const text = $('prompt').value.trim();
+  if (state.readingFiles) return;
+  const text = $('prompt').value.trim() || (state.attachments.length ? 'Review the attached files.' : '');
   const selected = selectedModel();
   if (text && !selected) {
     const connected = state.providers.some((item) => item.available && item.authenticated);
@@ -561,8 +622,10 @@ async function send() {
   $('announcer').textContent = '';
   const id = crypto.randomUUID();
   const assistantId = `${id}-reply`;
-  const history = recentMessages(30).map(({ role, text: content }) => ({ role, content }));
-  const userMessage = { id, role: 'user', text, contextTitle: research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '' };
+  if (state.retryMessage) state.retryMessage.superseded = true;
+  state.retryMessage = null;
+  const history = requestHistory();
+  const userMessage = { id, role: 'user', text, attachments: state.attachments, contextTitle: research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '' };
   const assistantMessage = { id: assistantId, role: 'assistant', text: '' };
   state.messages.push(userMessage, assistantMessage);
   appendMessage(userMessage);
@@ -572,6 +635,8 @@ async function send() {
     // Resolve once while messages only append; retain first-match behavior for duplicate IDs.
     message: state.messages.find((item) => item.id === assistantId),
   };
+  state.attachments = [];
+  renderAttachments();
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
@@ -590,7 +655,7 @@ async function send() {
       userMessage.contextTitle = summary;
       userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
       assistantMessage.citations = userMessage.sourceMetadata;
-      const meta = messageNodes.get(id)?.parentElement.querySelector('.message-meta');
+      const meta = messageNodes.get(id)?.parentElement.querySelector('.context-meta');
       if (meta) renderSourceMetadata(meta, userMessage.sourceMetadata);
       if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');
     } catch (error) {
@@ -612,7 +677,7 @@ async function send() {
     type: 'chat', id, provider: selected.provider.id, model: selected.model.id,
     ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
     ...(selected.provider.id === 'codex' ? { speed: settings.speed } : {}),
-    message: text, history, profile: state.profile,
+    message: text, attachments: userMessage.attachments, history, profile: state.profile,
     includeContext: !sources && state.includeContext, control: !sources && state.control,
     ...(sources ? { researchSources: sources } : {}),
   });
@@ -650,6 +715,67 @@ function resizePrompt() {
   $('prompt').style.height = `${Math.min(160, Math.max(24, $('prompt').scrollHeight))}px`;
   updateControls();
 }
+
+function renderAttachments() {
+  $('attachment-list').replaceChildren(...state.attachments.map((file, index) => {
+    const chip = document.createElement('div');
+    chip.className = 'attachment-chip';
+    const label = document.createElement('span');
+    label.textContent = file.name;
+    label.title = file.name;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'attachment-remove';
+    remove.textContent = '×';
+    remove.setAttribute('aria-label', `Remove ${file.name}`);
+    remove.addEventListener('click', () => {
+      state.attachments.splice(index, 1);
+      renderAttachments();
+      updateControls();
+    });
+    chip.append(label, remove);
+    return chip;
+  }));
+}
+
+async function attachFiles(files) {
+  if (state.running || state.readingFiles) return;
+  const generation = state.fileGeneration;
+  state.readingFiles = true;
+  updateControls();
+  const errors = [];
+  try {
+    for (const file of files) {
+      if (generation !== state.fileGeneration) break;
+      try {
+        if (state.attachments.length >= 4) throw new Error('Attach up to four files per message.');
+        const attachment = await readAttachment(file);
+        if (generation !== state.fileGeneration) break;
+        const prior = requestHistory().flatMap(message => message.attachments || []);
+        if ([...prior, ...state.attachments, attachment].reduce((sum, item) => sum + attachmentSize(item), 0) > MAX_ATTACHMENT_TOTAL) throw new Error('This conversation has 2 MB of files. Start a new conversation to attach more.');
+        state.attachments.push(attachment);
+      } catch (error) { errors.push(`${file.name}: ${error.message}`); }
+    }
+  } finally {
+    state.readingFiles = false;
+    renderAttachments();
+    updateControls();
+    if (generation === state.fileGeneration) notify(errors.join(' '));
+  }
+}
+$('attach-files').addEventListener('click', () => $('file-input').click());
+$('file-input').addEventListener('change', () => {
+  const files = [...$('file-input').files];
+  $('file-input').value = '';
+  void attachFiles(files);
+});
+$('composer').addEventListener('dragover', event => {
+  if (event.dataTransfer.types.includes('Files')) { event.preventDefault(); event.dataTransfer.dropEffect = state.running ? 'none' : 'copy'; }
+});
+$('composer').addEventListener('drop', event => {
+  event.preventDefault();
+  void attachFiles([...event.dataTransfer.files]);
+});
 
 $('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
 $('prompt').addEventListener('input', resizePrompt);
@@ -708,6 +834,10 @@ document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventLi
 $('new-chat').addEventListener('click', () => {
   stop();
   research.clear();
+  state.retryMessage = null;
+  state.fileGeneration++;
+  state.attachments = [];
+  renderAttachments();
   state.messages = [];
   lastContextTitle = null;
   messageNodes.clear();

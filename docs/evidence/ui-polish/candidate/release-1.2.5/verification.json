@@ -308,5 +308,17 @@
     "process-note-1440.png": "0b531a8179e423c7c296a83a083a7a10c4959e4aee0b35d90ec2427299f6768c",
     "update-log-1440.png": "fb6d18b749339285243120b207642480f17c3bcf151a54782185ef404a85472f",
     "update-log-desktop.png": "74fea6a400da8a8d3924707dd63bff48e65cff449a6b03fd47c5d013e523145e"
+  },
+  "integrationWithMain": {
+    "baseCommit": "030e4e3683f4236a4bff45f6a8457b29265548fb",
+    "nodeChecks": {
+      "tests": 556,
+      "passed": 554,
+      "failed": 0,
+      "skipped": 2
+    },
+    "assistantAndResearchWalkthroughs": "passed",
+    "historicalRamFixtureSha256": "ed7dea30709beb45cba3a340ae333603500c91de655b2ff665aabf68108a60bb",
+    "attachments": "file picker/drop/removal/validation/attachment-only send/retry/follow-up passed"
   }
 }
