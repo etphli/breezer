@@ -87,6 +87,10 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     assert.equal(geometry.headings.length, 1, `${file} has one heading`);
     assert.ok(geometry.consentBoundaryContrast >= 3, `${file}: consent boundary has at least 3:1 contrast`);
     assert.ok(geometry.sourceFit.textWidth <= geometry.sourceFit.availableWidth, `${file}: selected source label fits before the chevron`);
+    if (geometry.viewport.width <= 320) {
+      const stacked = await ui.evaluate(() => document.getElementById('target').getBoundingClientRect().top > document.getElementById('source').getBoundingClientRect().bottom);
+      assert.ok(stacked, `${file}: smallest layouts stack language controls`);
+    }
     await ui.mouse.move(geometry.viewport.width - 2, 2);
     let previous;
     for (let attempt = 0; attempt < 3; attempt++) {
