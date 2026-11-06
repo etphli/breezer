@@ -19,26 +19,41 @@ renderer evidence uses an explicitly scoped CSS resource override, with all
 served resource hashes verified. It is not a new release build or an OS-window
 capture. The reviewers have not rescored this final correction or release copy.
 
-## Final integration and packaging
+## Build and release verification
 
-The configured Windows PC completed the first 1.2.5 incremental compilation with
-300 of 300 actions and exit code zero. Prepared source, compiled objects and the
-existing graph were preserved. That artifact is bound to source commit
-`1c788b8ef923b49a9734f8e7cfb025d99e54bbd5`; it is not yet the final release package.
+The configured Windows PC completed native compilation with 300 of 300 actions
+and exit code zero. A six-action resource refresh then integrated main's file
+attachments. The prepared source, compiled objects and existing graph were
+preserved. The final 320px translation stylesheet correction was packed on the
+Mac with Chromium's GRIT DataPack compiler after the PC connection dropped.
+Only that resource changed; all other 5,890 payloads remained byte-identical.
+The additional PC CSS build was launched, but its outcome is not claimed.
 
-The latest main branch adds assistant file attachments. The resolved integration
-passed 556 Node checks: 554 passed, zero failed and two skipped. Both assistant
-and research browser walkthroughs passed, including file selection, dropping,
-removal, validation, attachment-only messages, retry and follow-up context.
-The historical RAM comparison fixture retains its original bytes. Final resource
-refresh, app packaging, signing, Mac runtime checks and installer verification
-must cover this integrated source before publication.
+The combined Node suite passed 554 of 556 checks, with zero failures and two
+explicit skips. Both assistant and research browser walkthroughs passed,
+including file selection, dropping, removal, validation, attachment-only
+messages, retry and follow-up context. The historical RAM comparison fixture
+retains its original bytes. The targeted translation run passed ten checks,
+with one opted-in live-provider skip. Password component and virtual WebAuthn
+checks pass after correcting a stale fixture selector and signing-limit copy.
+The behavior received two rounds of GPT-6.1 Sol review and approval.
 
-The user has explicitly authorized merging PR #17 and publishing 1.2.5 after
-verification. This does not authorize replacing the installed Mac app. Profiles,
-passwords, prepared source and required compiled caches remain preserved. All
-worktrees owned by the RAM-reduction thread and its descendants are excluded
-from cleanup. The older 1.2.1 release hold remains intact.
+The private Apple Silicon app passes deep strict signature, identity,
+architecture and six headless runtime checks. All 50 compiled extension
+resources match current UI source, and all twelve packaged host modules match
+source. The verified DMG mounts read-only and contains the same 375 file and
+symlink entries as the signed candidate. The updater accepts its identity,
+architecture and signature. Signing is ad hoc, not Apple notarized.
 
-Native physical interaction, menus, restoration, auto-hide, live provider
-execution and the translation window bridge remain separate acceptance checks.
+The installed 1.2.0 updater is byte-identical to current source and uses its
+existing runtime with startup acknowledgement. Nineteen updater startup,
+rollback and lifetime tests pass. Publication waits for green GitHub checks.
+The release assets provide final checksums, build provenance and update identity;
+see the [1.2.5 release](https://github.com/etphli/breezer/releases/tag/v1.2.5).
+
+The user authorized merging PR #17 and publishing 1.2.5. The installed Mac app,
+profiles, passwords, prepared source and required compiled caches remain
+unchanged. All RAM-thread worktrees and descendants are excluded from cleanup.
+The older 1.2.1 release hold remains intact. Native physical input, menus,
+restoration, auto-hide, live provider execution and translation's native window
+bridge remain outside this verification. No new browser performance claim is made.

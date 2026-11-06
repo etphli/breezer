@@ -25,7 +25,7 @@ try {
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(`http://127.0.0.1:${server.address().port}/tests/passwords/component.html`);
     await page.waitForFunction(() => ['pass', 'fail'].includes(document.documentElement.dataset.result));
-    assert.equal(await page.getAttribute('html', 'data-result'), 'pass');
+    assert.equal(await page.getAttribute('html', 'data-result'), 'pass', await page.locator('#result').innerText());
     assert.deepEqual(errors, []);
     await page.evaluate(scheme => document.documentElement.dataset.scheme = scheme, scheme);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'horizontal overflow');

@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "44199b323cfa872e847986f4b95a9c5af8dc0e99",
+  "method": "Chromium GRIT DataPack compiler on macOS; one gzip-compressed CSS resource rebuilt from exact source",
+  "entryId": 30826,
+  "allOtherResourcePayloadsByteExact": 5890,
+  "sourceSha256": "bcde2ee999e9b1f1aa28b1198f53fe2adc1c3ae226ca5596fcc72e536238a32b",
+  "beforePackSha256": "b8287d8e4a897d26c0a61ce6c9467139542587312b4dc746f29d82d60fa670cf",
+  "afterPackSha256": "860bc38df22ba731a392729fc3d2e88d19b05d2623e013d886a89f9ce2b42b94",
+  "nativeBinariesRecompiled": false,
+  "nativeCompilationReceipt": "PC 300/300 plus integration 6/6, exit0; existing verified native code retained",
+  "pcCssBuildStatus": "Launched; outcome unknown after Tailscale link loss. Not claimed as verified.",
+  "at": "2026-11-06T04:38:00.818795+00:00"
+}

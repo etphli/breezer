@@ -17,9 +17,12 @@ release copy were checked by the main agent, with no further council after the
 user requested the PR push. All implementation and release writing in this
 revision is by GPT-6.1 Sol.
 
-The version is 1.2.5; the seen-page edition remains 1.2.0. Earlier benchmark
-claims retain their original workload and build qualifications. The bounded PC
-connection attempt timed out. No build was launched, and it must wait for the
-user to say the PC is on. No release installer or installed app was changed.
+The version is 1.2.5; the seen-page edition remains 1.2.0. Earlier measurements
+retain their actual workload and build qualifications. The PC completed native
+compilation and the main-integration refresh. The corrected resource package,
+Mac runtime, signatures and DMG have passed the checks recorded here. Final
+release assets carry the checksum, build provenance and update identity.
 
-The final verification JSON records exact test results, hashes and image scope.
+The installed app and profile were not replaced. Physical native interaction,
+provider execution and broader OS acceptance remain unverified. The final
+verification receipts distinguish these limits from observed UI checks.

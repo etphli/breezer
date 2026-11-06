@@ -1,0 +1,18 @@
+{
+  "rounds": 2,
+  "model": "gpt-6.1-sol",
+  "effort": "high",
+  "verdict": "APPROVE",
+  "reviewedHead": "44199b323cfa872e847986f4b95a9c5af8dc0e99",
+  "usage": "not returned",
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "nit",
+      "outcome": "deferred",
+      "reason": "Reading-position highlight can remain on Measurements while reading patch notes; links and navigation still work. Nonblocking editorial polish outside the frozen release behavior."
+    }
+  ],
+  "behaviorChangedAfterReview": false,
+  "ciCorrection": "Inclusive 320px translation breakpoint and vertical-order browser assertion approved without new findings"
+}
