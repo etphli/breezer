@@ -24,7 +24,7 @@ test('loads nothing remote', () => {
   }
   assert.deepEqual([...css.matchAll(/url\(([^)]*)\)/g)].map((m) => m[1]), ['#breeze-ink']);
   assert.deepEqual([...html.matchAll(/\b(?:src|href)="([^"]+)"/g)].map((m) => m[1]).sort(),
-    ['#features-title', '#results-table', '#results-title', '#verification-title', 'efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings', 'workspace.html#/settings', 'workspace.html#/welcome']);
+    ['#features-title', '#patch-125-title', '#results-table', '#results-title', '#verification-title', 'efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings', 'workspace.html#/settings', 'workspace.html#/welcome']);
 });
 
 test('is CSP-safe and never injects HTML', () => {
@@ -69,7 +69,7 @@ test('Continue browsing closes this tab, else the window', async () => {
 test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
   // A new minor edition replaces the previous one's features and patches.
   assert.doesNotMatch(text, /Update 1\.1\.\d|Organato on your new tab|Your own theme color/);
-  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 1);
+  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 2);
   assert.match(text, /Update 1\.2\.1/);
   assert.match(text, /Whole-browser RAM and CPU savings have not yet been measured/);
   assert.match(text, /New profiles open this guide/);

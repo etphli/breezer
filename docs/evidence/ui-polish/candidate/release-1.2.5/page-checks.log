@@ -1,0 +1,115 @@
+TAP version 13
+# Subtest: a brand-new profile opens the setup guide, not the release notes, and only once
+ok 1 - a brand-new profile opens the setup guide, not the release notes, and only once
+  ---
+  duration_ms: 1.527458
+  ...
+# Subtest: profiles used before setup existed get release notes instead of setup
+ok 2 - profiles used before setup existed get release notes instead of setup
+  ---
+  duration_ms: 0.267333
+  ...
+# Subtest: opens release notes once per release across concurrent startup/install/window events
+ok 3 - opens release notes once per release across concurrent startup/install/window events
+  ---
+  duration_ms: 0.1535
+  ...
+# Subtest: waits for a regular window and never opens in private browsing
+ok 4 - waits for a regular window and never opens in private browsing
+  ---
+  duration_ms: 0.303166
+  ...
+# Subtest: failed tab creation remains retryable and an existing page is reused
+ok 5 - failed tab creation remains retryable and an existing page is reused
+  ---
+  duration_ms: 0.369625
+  ...
+# Subtest: a patch appends to the current minor page without reopening it
+ok 6 - a patch appends to the current minor page without reopening it
+  ---
+  duration_ms: 0.106625
+  ...
+# Subtest: What's new page renders, closes its tab and opens Settings
+ok 7 - What's new page renders, closes its tab and opens Settings
+  ---
+  duration_ms: 36354.74875
+  ...
+# Subtest: loads nothing remote
+ok 8 - loads nothing remote
+  ---
+  duration_ms: 2.20275
+  ...
+# Subtest: is CSP-safe and never injects HTML
+ok 9 - is CSP-safe and never injects HTML
+  ---
+  duration_ms: 0.329125
+  ...
+# Subtest: stores and sends nothing
+ok 10 - stores and sends nothing
+  ---
+  duration_ms: 0.176833
+  ...
+# Subtest: reads only RELEASE_VERSION from release-info.js
+ok 11 - reads only RELEASE_VERSION from release-info.js
+  ---
+  duration_ms: 0.07975
+  ...
+# Subtest: names the release only from a plain semantic version
+ok 12 - names the release only from a plain semantic version
+  ---
+  duration_ms: 0.164958
+  ...
+# Subtest: Continue browsing closes this tab, else the window
+ok 13 - Continue browsing closes this tab, else the window
+  ---
+  duration_ms: 0.205416
+  ...
+# Subtest: describes the 1.2 edition honestly, without carrying 1.1 patches
+ok 14 - describes the 1.2 edition honestly, without carrying 1.1 patches
+  ---
+  duration_ms: 0.82225
+  ...
+# Subtest: leads with selected measured wins, each naming its comparator and workload
+ok 15 - leads with selected measured wins, each naming its comparator and workload
+  ---
+  duration_ms: 0.494542
+  ...
+# Subtest: keeps every measurement, range and limit in the full results
+ok 16 - keeps every measurement, range and limit in the full results
+  ---
+  duration_ms: 27.812833
+  ...
+# Subtest: matches the local benchmark report when it is available
+ok 17 - matches the local benchmark report when it is available # SKIP benchmark report not present
+  ---
+  duration_ms: 0.322333
+  ...
+# Subtest: makes no claim the measurements do not support
+ok 18 - makes no claim the measurements do not support
+  ---
+  duration_ms: 0.357209
+  ...
+# Subtest: illustrates primary features and keeps technical notes compact
+ok 19 - illustrates primary features and keeps technical notes compact
+  ---
+  duration_ms: 0.487125
+  ...
+# Subtest: setup artwork shows the guide's steps in order
+ok 20 - setup artwork shows the guide's steps in order
+  ---
+  duration_ms: 0.097417
+  ...
+# Subtest: stays light and honours reduced motion
+ok 21 - stays light and honours reduced motion
+  ---
+  duration_ms: 0.108667
+  ...
+1..21
+# tests 21
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 36927.821708

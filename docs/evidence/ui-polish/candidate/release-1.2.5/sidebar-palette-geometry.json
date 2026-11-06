@@ -1,0 +1,1486 @@
+[
+  {
+    "theme": "mint",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "mint",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "mint",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "mint",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "tide",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "tide",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "tide",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "tide",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "dusk",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "dusk",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "dusk",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "dusk",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "rose",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "rose",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "rose",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "rose",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "pollen",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "pollen",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "pollen",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "pollen",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "graphite",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "graphite",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "graphite",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "graphite",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "#3979bd",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "#3979bd",
+    "mode": "light",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "#3979bd",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": false,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  },
+  {
+    "theme": "#3979bd",
+    "mode": "dark",
+    "width": 42,
+    "font": 20,
+    "expanded": true,
+    "clipped": false,
+    "geometry": {
+      "svg": {
+        "x": 1,
+        "y": 260,
+        "width": 8,
+        "height": 8,
+        "right": 9,
+        "bottom": 268
+      },
+      "glyph": {
+        "x": 11,
+        "y": 254,
+        "width": 20,
+        "height": 20,
+        "right": 31,
+        "bottom": 274
+      },
+      "sidebar": {
+        "x": 0,
+        "y": 0,
+        "width": 42,
+        "height": 820,
+        "right": 42,
+        "bottom": 820
+      },
+      "ancestors": [
+        {
+          "x": 0,
+          "y": 200,
+          "width": 42,
+          "height": 420,
+          "right": 42,
+          "bottom": 620
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "width": 42,
+          "height": 820,
+          "right": 42,
+          "bottom": 820
+        }
+      ],
+      "overflow": false
+    }
+  }
+]

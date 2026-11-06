@@ -35,7 +35,7 @@
          results.json. Bar widths are each median over the largest in its comparison.
          The efficiency article is its own page, efficiency.html, linked from here. -->
 
-    <nav class="page-index" aria-label="On this page"><a href="#features-title">Highlights</a><a href="#results-title">Measurements</a><a href="#verification-title">Known limits</a></nav>
+    <nav class="page-index" aria-label="On this page"><a href="#features-title">Highlights</a><a href="#patch-125-title">Update 1.2.5</a><a href="#results-title">Measurements</a><a href="#verification-title">Known limits</a></nav>
     <section class="features" aria-labelledby="features-title">
       <h2 id="features-title" class="visually-hidden">New in this release</h2>
 
@@ -568,6 +568,83 @@
             <li>Translation rescans skip repeated visibility measurements for unchanged translated text.</li>
             <li>Streamed replies keep completed content in place. Native helper messages avoid redundant copying and repeated parsing, and cancelled requests release setup work sooner.</li>
           </ul>
+      </details>
+    </section>
+
+    <section class="patch-notes" aria-labelledby="patch-125-title">
+      <p class="release">Update 1.2.5</p>
+      <h2 id="patch-125-title">A clearer browser, down to the details</h2>
+      <div class="patch-lead">
+        <figure class="plate patch-plate" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 232" focusable="false">
+            <rect class="card lift" x=".5" y=".5" width="319" height="231" rx="14"/>
+            <path class="rule" d="M20 42h280"/>
+            <circle class="bar" cx="27" cy="22" r="3"/><circle class="bar" cx="38" cy="22" r="3"/><circle class="bar" cx="49" cy="22" r="3"/>
+            <rect class="mint-soft" x="16" y="54" width="44" height="160" rx="8"/>
+            <path class="stroke-accent" d="m22 73 3 3 3-3M33 70h13v12H32V69h6l3 3"/>
+            <rect class="accent" x="25" y="96" width="26" height="22" rx="5"/>
+            <rect class="card" x="25" y="128" width="26" height="22" rx="5"/>
+            <rect class="card" x="25" y="160" width="26" height="22" rx="5"/>
+            <text class="label" x="76" y="76">Your choices, together</text>
+            <rect class="paper" x="76" y="88" width="224" height="54" rx="8"/>
+            <path class="rule" d="M88 105h112M88 119h86"/>
+            <rect class="mint-soft" x="253" y="101" width="34" height="20" rx="10"/>
+            <circle class="accent" cx="277" cy="111" r="6"/>
+            <rect class="paper" x="76" y="154" width="224" height="60" rx="8"/>
+            <text class="quiet" x="88" y="176">Write your message</text>
+            <path class="rule" d="M88 196h106"/>
+            <rect class="accent" x="247" y="184" width="40" height="20" rx="6"/>
+            <path class="tick" d="m262 194 10 0m-4-4 4 4-4 4"/>
+          </svg>
+        </figure>
+        <div class="patch-copy">
+          <p>Settings, the assistant, tabs, translation and setup now share clearer controls, more readable text and more consistent light and dark themes. Small panels keep their actions in reach.</p>
+          <p>The assistant puts writing first. Sharing and browser control are easier to distinguish, and memory choices stay together until you save them.</p>
+          <p class="patch-limit">This update refines the interface. It does not claim new whole-browser speed, RAM or battery results. The measurements above still describe the earlier build named in their methodology.</p>
+        </div>
+      </div>
+      <details class="feature-details patch-details">
+        <summary>Everything changed in this interface update</summary>
+        <h4>Settings and appearance</h4>
+        <ul class="notes">
+          <li>Reworked headings, grouped rows, spacing and supporting text across every settings category. Search results show their destination, narrow pages keep category navigation available, and links to full browser settings use clearer names.</li>
+          <li>Unified the six preset palettes and custom color across light and dark modes. Selected controls, dropdown arrows, field boundaries, destructive actions and keyboard focus are easier to distinguish.</li>
+          <li>Import, passwords, passkey availability, Organato, sync and updates use shorter guidance and clearer busy, unavailable and recovery states. Update availability leads with the new version and its relevant action.</li>
+          <li>Activity memory groups site choices, privacy guidance and Save. Unchanged choices cannot be saved again; pending writes prevent conflicting edits, failed saves retain your draft, and turning memory off clearly offers to erase its local activity.</li>
+        </ul>
+        <h4>The assistant and research</h4>
+        <ul class="notes">
+          <li>Separated the message and Send action from model selection, reasoning, speed, source tabs and browser control. The growing composer, menus and account instructions fit narrow panels, including the smallest supported layout.</li>
+          <li>Page inclusion and sharing status are clearer while loading, working or unavailable. Browser control has a labeled, anchored explanation, and sources remain explicitly text-only with screenshots and control off.</li>
+          <li>Account setup has copyable sign-in commands, copy-failure guidance and a reachable Refresh accounts action. Known provider failures show a short cause and recovery action, with technical details available separately.</li>
+          <li>The source picker makes its six-page limit visible, disables extra choices at the limit and keeps Done reachable. Research answers use readable source references, and partial failures have one main recovery message.</li>
+        </ul>
+        <h4>Tabs and browser chrome</h4>
+        <ul class="notes">
+          <li>Refined space selection, favorites, saved folders and active-tab styling in expanded and compact sidebars. Matching tab icons gain title initials, long labels truncate deliberately, and duplicate sidebar controls no longer compete.</li>
+          <li>Kept folder disclosure arrows completely inside the smallest compact rail at every supported text size, both open and closed.</li>
+          <li>Browser-frame colors follow the selected palette, including neutral Graphite and custom colors. Placeholder profile icons use the surrounding toolbar foreground, and the resting auto-hide edge no longer exposes sliced controls.</li>
+        </ul>
+        <h4>New tabs and setup</h4>
+        <ul class="notes">
+          <li>Kept the date and shortcut group steadier across connected, disconnected, loading and error states. Shortcut labels avoid broken hostnames, adding a shortcut no longer pushes the agenda down, and loading content reserves space.</li>
+          <li>Stale agenda information is labeled before its contents. Errors give a useful next step, settings are easier to find, and task-completion controls are consistent.</li>
+          <li>Setup has clearer progress, optional-tour scope and connection choices. Import instructions, status messages, narrow fallback notices and footer actions fit together without clipped text.</li>
+        </ul>
+        <h4>Page translation</h4>
+        <ul class="notes">
+          <li>Separated required sharing consent from automatic translation. Privacy and provider guidance are more readable, language selectors fit small windows, and dark consent boundaries remain visible.</li>
+          <li>Stop leads while translation runs. Unavailable actions recede, retry guidance respects a supplied waiting interval, and provider errors appear before their recovery action.</li>
+          <li>Translation settings save only changed choices. Saved-key removal is a distinct destructive action, with guidance and save status kept beside the controls they affect.</li>
+        </ul>
+        <h4>Release pages, motion and verification</h4>
+        <ul class="notes">
+          <li>Shortened repeated release explanations, added descriptive detail headings and a current-section indicator, and kept introductions stable when details open. Narrow artwork labels, comparison tables, article links, footer-button spacing and focus clearance were refined.</li>
+          <li>Reduced broad text fading, aligned dialogs with their backdrops and retained reduced-motion alternatives. Setup illustration changes avoid overlapping outgoing and incoming text.</li>
+          <li>Added repeatable theme, narrow-layout, state, geometry and motion checks, with before-and-after evidence. Native chrome was inspected in private compiled verification builds; these checks do not establish physical hit testing, macOS menus, restoration, auto-hide interaction, live AI-provider behavior or translation's native window bridge.</li>
+        </ul>
+        <h4>How this update was refined</h4>
+        <p>We worked through repeated rounds of changes, browser checks and independent design review. Reviewers inspected the same frozen screenshots across palettes, narrow layouts, loading and failure states, without seeing earlier scores or a target score. Concrete findings became source fixes, then fresh checks and annotated before-and-after comparisons. Native-window evidence stayed separate from simulated page fixtures, and unverified physical interaction, provider behavior and motion timing remained explicit.</p>
       </details>
     </section>
 

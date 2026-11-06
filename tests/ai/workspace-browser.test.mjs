@@ -52,6 +52,35 @@ async function startServer() {
   return server;
 }
 
+test('compact folder disclosure stays inside the rail at every sidebar font size', { skip }, async () => {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    const page = await browser.newPage({ viewport: { width: 42, height: 820 }, reducedMotion: 'reduce' });
+    await page.addInitScript(installFixture, { seed: seed(), bridge: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const folder = page.locator('.folder').first();
+    await folder.waitFor();
+    for (const width of [42, 56, 72]) for (let font = 12; font <= 20; font++) {
+      await page.setViewportSize({ width, height: 820 });
+      await page.evaluate(async font => {
+        const { applyAppearance } = await import('/workspace.js');
+        applyAppearance({ ...window.fx.appearance, sidebarMode: 'compact', sidebarFontSize: font });
+      }, font);
+      for (const expanded of [false, true]) {
+        await folder.focus();
+        if (await folder.getAttribute('aria-expanded') !== String(expanded)) await page.keyboard.press(expanded ? 'ArrowRight' : 'ArrowLeft');
+        await page.waitForFunction(expanded => document.querySelector('.folder').getAttribute('aria-expanded') === String(expanded), expanded);
+        const rect = await folder.locator('.chevron svg').evaluate(node => node.getBoundingClientRect().toJSON());
+        assert.ok(rect.left >= 0 && rect.right <= width, JSON.stringify({ width, font, expanded, rect }));
+      }
+    }
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 test('sidebar releases unused route markup and reloads Settings and welcome intact', { skip }, async () => {
   const server = await startServer();
   let browser;

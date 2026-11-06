@@ -536,6 +536,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   #open-settings { margin-left: 0; }
 }
 
+@container sidebar (max-width: 56px) {
+  .folder-row .chevron { left: calc(50% - var(--favicon) / 2 - 10px); width: 8px; height: 8px; }
+  .folder-row .chevron svg { width: 8px; height: 8px; }
+}
+
 /* ------------------------------------------------------------------ settings */
 
 /* Two panes, as in a native preferences window: categories and search on the left,

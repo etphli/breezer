@@ -406,3 +406,42 @@ reads. No new native image or recording is claimed. The frozen pack contains
 1,225 evidence files. Physical interaction, OS integration and frame pacing remain
 unverified; this is not a release rebuild. GPT-6.1 Sol wrote the changes. PR #17
 remains unpushed, and candidate 20 has not been scored.
+
+## Final interface and 1.2.5 preparation
+
+Round 20 subsequently returned 9.1 and 9.3 from the two Sol reviewers. Opus
+returned no score because of its account limit. Round 21 returned 9.8 and 9.7
+from the two Sol reviewers, both satisfied overall. The user removed Opus from
+the active lineup. The two actual review runs overlapped for 1,499.754 seconds.
+Their full reports and the complete score history are retained in `candidate/`.
+
+The latter review requested one correction: the folder disclosure chevron was
+clipped in the 42-pixel compact rail. The final change confines its SVG to that
+rail while preserving the folder icon's center. The original geometry check
+found 36 clipped cases; the corrected check found none across 144 layouts.
+Another 28 cases cover all seven palette choices in both modes. Eleven relevant
+workspace browser checks pass. The signed private native host also rendered the
+complete chevron in two identical captures with matching bitmap and DOM geometry.
+That probe served only the current workspace CSS through a scoped resource
+override; its manifest records the exact source hashes and cleanup. It was not a
+new packaged release or a full-window OS capture.
+
+The user then requested the PR push, version 1.2.5 and a PC build, with the main
+agent writing the complete update log. No additional council was launched.
+The final chevron correction and release copy have not been independently
+rescored. The 490-image matrix was refreshed after the chevron correction and
+before the three release metadata/HTML changes. Its original hashes remain
+intact; new page captures cover the 1.2.5 copy. Earlier frozen evidence has not
+been rewritten to imply a newer capture.
+
+The work followed repeated implementation, testing, capture and independent
+review passes. Reviewers received the same frozen evidence without earlier
+scores or a target score. Concrete findings drove the next source changes and
+annotated comparisons. Failed provider runs remain missing scores, and decoded
+motion frames remain distinct from claims about smoothness or latency.
+
+The configured PC did not answer the bounded SSH readiness check. Its build
+waits for the user to say it is on. See `docs/release-1.2.5-status.md` for the
+handoff and the final verification receipt under `candidate/release-1.2.5/`.
+GPT-6.1 Sol implemented the final corrections and wrote the 1.2.5 log. The
+installed app, user profiles and compiled caches remain unchanged.

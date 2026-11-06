@@ -6,6 +6,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
 
 // Drives the shipped whats-new.html in headless Chrome. release-info.js is
 // served from the synthetic fixture below (Main ships the real one), and
@@ -22,7 +23,7 @@ const skip = !chromium ? 'playwright is not installed' : (executablePath && !exi
 const releaseInfo = (version) => `export const RELEASE = { version: ${JSON.stringify(version)}, title: 'Yours from the first tab' };\nexport const RELEASE_VERSION = RELEASE.version;\n`;
 
 async function startServer() {
-  let release = releaseInfo('1.2.0');
+  let release = releaseInfo(RELEASE_VERSION);
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, 'http://localhost');
@@ -103,7 +104,8 @@ async function captureLongPage(page, name) {
 
 async function captureFeatureDetails(page, size) {
   for (const [name, selector] of [
-    ['patch', '.patch-notes'],
+    ['patch', 'section[aria-labelledby="patch-121-title"]'],
+    ['ui-update', 'section[aria-labelledby="patch-125-title"]'],
     ['passkeys', 'article[aria-labelledby="f-passkeys"]'],
     ['shortcuts', 'article[aria-labelledby="f-shortcuts"]'],
   ]) await page.locator(selector).screenshot({ path: `${evidence}/whats-new-${name}-${size}.png`, animations: 'disabled' });
@@ -129,8 +131,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
   try {
     browser = await chromium.launch({ executablePath, headless: true });
     await withPage(browser, base, {}, async (page) => {
-      assert.equal(await page.textContent('#release-name'), 'Breezer 1.2.0');
-      assert.equal(await page.title(), 'What\'s new in Breezer 1.2.0');
+      assert.equal(await page.textContent('#release-name'), `Breezer ${RELEASE_VERSION}`);
+      assert.equal(await page.title(), `What's new in Breezer ${RELEASE_VERSION}`);
       assert.equal(await page.textContent('h1'), 'Yours from the first tab');
       assert.deepEqual(await page.$$eval('.feature h3', (nodes) => nodes.map((node) => node.textContent)),
         ['A setup guide for new profiles', 'Shortcuts you choose', 'Tasks open where they live', 'No more ghost tabs', 'Helpers that rest when idle', 'Less work at startup, less left on disk', 'Clearer passkey settings', 'Research across tabs you choose', 'Translate a page, keep the original', 'Find settings by category or search']);
