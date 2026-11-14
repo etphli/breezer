@@ -30,7 +30,7 @@ export function comparisonPlan({ trials, initializedProfiles, baselineBreezer, p
   ] : [['breezer', 'chrome'], ['chrome', 'breezer']];
   return {
     protocol: initializedProfiles
-      ? `installed-browser-v9-initialized-${baselineBreezer ? 'three-way' : 'foreground'}${physicalFootprint ? '-footprint' : ''}`
+      ? `installed-browser-v${physicalFootprint ? 10 : 9}-initialized-${baselineBreezer ? 'three-way' : 'foreground'}${physicalFootprint ? '-footprint' : ''}`
       : 'installed-browser-v9-fresh-profile-observed-cpu',
     roundOrders: Array.from({ length: trials }, (_, index) => [...orders[index % orders.length]]),
   };
@@ -142,7 +142,7 @@ export function observedPhysicalFootprint({ rootPid, captureStartedAt, before, a
   const kernelTime = value => typeof value === 'string' && /^[1-9]\d*$/.test(value) ? BigInt(value) : null;
   let previousEnd;
   for (const usage of [usageBefore, usageAfter]) {
-    if (usage?.schema !== 1 || !Array.isArray(usage.processes) || usage.processes.length !== before.length
+    if (![1, 2].includes(usage?.schema) || !Array.isArray(usage.processes) || usage.processes.length !== before.length
         || new Set(usage.processes.map(row => row.pid)).size !== before.length) return unavailable('Missing or partial native process capture');
     const start = kernelTime(usage.captureStartedNs), end = kernelTime(usage.captureEndedNs);
     if (start === null || end === null || end < start || (previousEnd !== undefined && start < previousEnd)) return unavailable('Invalid native capture bounds');
@@ -163,6 +163,50 @@ export function observedPhysicalFootprint({ rootPid, captureStartedAt, before, a
   return { status: 'observed', miB: bytes / 1024 ** 2, processCount: before.length,
     captureStartedNs: usageBefore.captureStartedNs, captureEndedNs: usageBefore.captureEndedNs,
     identityGuardEndedNs: usageAfter.captureEndedNs, coverage: footprintCoverage };
+}
+// Each process is read at a slightly different time. Rates are bounded using
+// each read's monotonic interval; they are not a simultaneous whole-tree window.
+export function nativeCpuWindow(samples, rootPid) {
+  const coverage = 'Stable observed tree only; short-lived children between listings are unobserved. Per-process windows are sequential, not simultaneous. Bounds cover read timing only, assuming accurate instantaneous kernel counters; accounting error is not bounded.';
+  const unavailable = reason => ({ status: 'unavailable', reason, coverage });
+  if (samples.length < 2) return unavailable('At least two captures required');
+  const uint = value => typeof value === 'string' && /^(0|[1-9]\d*)$/.test(value) ? BigInt(value) : null;
+  let reference, timebase;
+  const histories = new Map();
+  for (const sample of samples) {
+    if (observedPhysicalFootprint({ rootPid, ...sample }).status !== 'observed' || sample.usageBefore.schema !== 2 || sample.usageAfter.schema !== 2) return unavailable('Invalid bracketed tree or native capture');
+    const keys = sample.before.map(row => `${row.pid}:${row.ppid}:${row.startedAt}:${row.command}:${row.role}`).sort();
+    if (reference && JSON.stringify(keys) !== JSON.stringify(reference)) return unavailable('Observed process tree changed during window');
+    reference ??= keys;
+    for (const usage of [sample.usageBefore, sample.usageAfter]) {
+      if (usage.cpuCounterUnit !== 'mach-absolute-ticks' || usage.clockUnit !== 'nanoseconds' || !Number.isSafeInteger(usage.timebaseNumer) || usage.timebaseNumer <= 0 || !Number.isSafeInteger(usage.timebaseDenom) || usage.timebaseDenom <= 0) return unavailable('Invalid CPU units or timebase');
+      const scale = `${usage.timebaseNumer}:${usage.timebaseDenom}`;
+      if (timebase && timebase !== scale) return unavailable('CPU timebase changed');
+      timebase = scale;
+      const captureStart = uint(usage.captureStartedNs), captureEnd = uint(usage.captureEndedNs);
+      for (const row of usage.processes) {
+        const start = uint(row.readStartedNs), end = uint(row.readEndedNs), user = uint(row.userTicks), system = uint(row.systemTicks);
+        if ([start, end, user, system].some(value => value === null) || start < captureStart || end > captureEnd || end < start) return unavailable('Missing counter or invalid read window');
+        const history = histories.get(row.pid) ?? [];
+        const previous = history.at(-1);
+        if (previous && (row.startAbstime !== previous.identity || row.executableUuid !== previous.uuid || start <= previous.end || user < previous.user || system < previous.system)) return unavailable('Identity, counter or window changed');
+        history.push({ start, end, user, system, identity: row.startAbstime, uuid: row.executableUuid });
+        histories.set(row.pid, history);
+      }
+    }
+  }
+  let lower = 0, upper = 0;
+  for (const history of histories.values()) {
+    const first = history[0], last = history.at(-1);
+    const minElapsed = last.start - first.end, maxElapsed = last.end - first.start;
+    if (minElapsed <= 0n) return unavailable('Overlapping CPU windows');
+    const [numer, denom] = timebase.split(':').map(BigInt);
+    const scaledDelta = (last.user - first.user + last.system - first.system) * numer;
+    lower += Number(scaledDelta) / Number(maxElapsed * denom);
+    upper += Number(scaledDelta) / Number(minElapsed * denom);
+  }
+  return { status: 'observed-native-window', coverage, sampledProcessCount: histories.size, sampleCount: samples.length,
+    cpuSecondsPerElapsedSecondLowerBound: lower, cpuSecondsPerElapsedSecondUpperBound: upper };
 }
 export function summarizeFootprints(samples) {
   if (!samples.length || samples.some(sample => sample?.status !== 'observed' || !Number.isFinite(sample.miB) || sample.miB < 0)) {
@@ -558,7 +602,7 @@ async function memorySample(instance, seconds, samples, footprintProbeExecutable
       before: tree, captureStartedAt, captureLoad: instance.captureLoad, probeExecutable: footprintProbeExecutable });
     if (index + 1 < samples) await sleep(1000);
   }
-  const result = { rssMiB: summarize(rows.map(row => row.rssMiB)), cpu: observedCpuWindow(rows, instance.result.pid), samples: rows };
+  const result = { rssMiB: summarize(rows.map(row => row.rssMiB)), cpu: footprintProbeExecutable ? nativeCpuWindow(rows.map(row => row.physicalFootprint), instance.result.pid) : observedCpuWindow(rows, instance.result.pid), samples: rows };
   if (footprintProbeExecutable) result.physicalFootprint = summarizeFootprints(rows.map(row => row.physicalFootprint));
   return result;
 }
@@ -645,7 +689,7 @@ export function aggregateTrials(trials, names = ['breezer', 'chrome']) {
   return result;
 }
 export async function main(argv = process.argv.slice(2)) {
-  const help = `Usage: node script/benchmark_browsers.mjs --prepare|--run --breezer /absolute/Breezer.app --chrome '/Applications/Google Chrome.app' --output NEW_DIRECTORY [--trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5] [--initialized-profiles] [--baseline-breezer /absolute/Previous/Breezer.app] [--physical-footprint]\n--initialized-profiles uses an untimed onboarding pass for each app and verifies each launched PID is active and frontmost at startup readiness. This is credential-isolated protocol v9, not fresh-profile startup.\n--baseline-breezer adds a previous Breezer under protocol v9 three-way. Requires initialized profiles and a multiple of six rounds; every app occupies each order position equally.\n--physical-footprint adds identity-checked macOS footprint probes under protocol v9. Requires initialized profiles and rerunning every comparison participant.\n--prepare verifies bundles, records environment, and compiles the native probes. It never launches a browser.\n--run performs measurements. Run only after builds and competing work have stopped. See docs/browser-benchmark.md.`;
+  const help = `Usage: node script/benchmark_browsers.mjs --prepare|--run --breezer /absolute/Breezer.app --chrome '/Applications/Google Chrome.app' --output NEW_DIRECTORY [--trials 6 --repetitions 3 --tabs 10 --settle-seconds 5 --memory-samples 5] [--initialized-profiles] [--baseline-breezer /absolute/Previous/Breezer.app] [--physical-footprint]\n--initialized-profiles uses an untimed onboarding pass for each app and verifies each launched PID is active and frontmost at startup readiness. This is credential-isolated protocol v9, not fresh-profile startup.\n--baseline-breezer adds a previous Breezer under protocol v9 three-way. Requires initialized profiles and a multiple of six rounds; every app occupies each order position equally.\n--physical-footprint adds identity-checked macOS footprint and CPU probes under protocol v10. Requires initialized profiles and rerunning every comparison participant.\n--prepare verifies bundles, records environment, and compiles the native probes. It never launches a browser.\n--run performs measurements. Run only after builds and competing work have stopped. See docs/browser-benchmark.md.`;
   if (argv.includes('--help') || !argv.length) { console.log(help); return; }
   const options = { trials: 6, repetitions: 3, tabs: 10, settleSeconds: 5, memorySamples: 5 };
   const valueKeys = { '--breezer': 'breezer', '--baseline-breezer': 'baselineBreezer', '--chrome': 'chrome', '--output': 'output', '--trials': 'trials', '--repetitions': 'repetitions', '--tabs': 'tabs', '--settle-seconds': 'settleSeconds', '--memory-samples': 'memorySamples' };
@@ -687,7 +731,7 @@ export async function main(argv = process.argv.slice(2)) {
     options.footprintProbeExecutable = join(options.output, 'macos-process-usage');
     await writeFile(sourcePath, source);
     execFileSync('/usr/bin/xcrun', ['clang', '-O2', '-Wall', '-Wextra', '-Werror', sourcePath, '-o', options.footprintProbeExecutable], { stdio: 'pipe', timeout: 20000 });
-    report.physicalFootprintProbe = { schema: 1, sourcePath, executable: options.footprintProbeExecutable,
+    report.physicalFootprintProbe = { schema: 2, cpuCounterUnit: 'mach-absolute-ticks', clockUnit: 'nanoseconds', sourcePath, executable: options.footprintProbeExecutable,
       sourceSha256: createHash('sha256').update(source).digest('hex'),
       executableSha256: createHash('sha256').update(await readFile(options.footprintProbeExecutable)).digest('hex') };
   }

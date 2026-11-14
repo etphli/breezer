@@ -91,10 +91,12 @@ export function createMessageStream(container) {
   let started = false;
   let mutableNodes = [];
   let plainText = null;
+  let codeText = null;
   let plainAllowed = true;
   const target = {
     replaceChildren() {
       plainText = null;
+      codeText = null;
       for (const node of mutableNodes) node.remove();
       mutableNodes = [];
     },
@@ -126,6 +128,12 @@ export function createMessageStream(container) {
         plainText = null;
         plainAllowed = true;
       }
+      // The opener is complete and the current code line has no backticks.
+      // A possible closing fence must rebuild, including its preceding newline.
+      if (codeText && !delta.includes('`')) {
+        codeText.appendData(delta);
+        return;
+      }
       // Once ambiguous, use the unchanged parser until the next stable boundary.
       if (plainAllowed && tail) {
         const safe = plainText
@@ -143,10 +151,14 @@ export function createMessageStream(container) {
         plainText = null;
       }
       renderMessage(target, tail);
+      if (fenced && !tail.includes('`', lineStart)) {
+        codeText = mutableNodes.at(-1).lastChild.lastChild;
+      }
     },
     dispose() {
       container = null;
       plainText = null;
+      codeText = null;
       plainAllowed = false;
       tail = '';
       mutableNodes = [];

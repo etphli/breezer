@@ -26,6 +26,7 @@ function installFixture(appearance) {
   const data = { local: {}, session: {} };
   const event = () => ({ addListener() {}, removeListener() {} });
   const area = (name) => ({
+    onChanged: event(),
     async get(keys) {
       const list = keys == null ? Object.keys(data[name]) : [keys].flat();
       return structuredClone(Object.fromEntries(list.filter((key) => key in data[name]).map((key) => [key, data[name][key]])));

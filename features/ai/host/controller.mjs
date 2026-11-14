@@ -1,5 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { allowedTools, validateChat, validateTool, MAX_MESSAGE_BYTES } from './protocol.mjs';
+import { allowedTools, validateChat, validateTool, MAX_MESSAGE_BYTES, MAX_OUTPUT_BYTES, messageWithinLimit } from './protocol.mjs';
+import { JsonLineProcess } from './cli.mjs';
+
+// Only these parser messages synchronously emit ordinary text. In particular,
+// terminal/result messages must flush before the provider resolves its promise.
+const textDelta = (message) => message?.method === 'item/agentMessage/delta' ||
+  message?.type === 'stream_event' && message.event?.type === 'content_block_delta' && message.event.delta?.type === 'input_json_delta';
 
 export class HostController {
   #discovery;
@@ -30,7 +36,16 @@ export class HostController {
       if (message.type === 'toolResult') { this.toolResult(message); return; }
       validateChat(message);
       if (this.#active) throw new Error('Another chat is already running. Stop it before starting a new request.');
-      const run = { id: message.id, controller: new AbortController(), tools: [] };
+      const run = { id: message.id, controller: new AbortController(), tools: [], chunks: [], bytes: 0 };
+      run.flush = (next) => {
+        if (textDelta(next)) return;
+        run.turn?.flushers.delete(run.flush);
+        run.turn = undefined;
+        if (!run.chunks.length) return;
+        const text = run.chunks.join('');
+        run.chunks = []; run.bytes = 0;
+        this.send({ type: 'delta', text, id: run.id });
+      };
       this.#active = run;
       try {
         message = { ...message, organato: this.prepareChat ? await this.prepareChat() : false };
@@ -41,19 +56,44 @@ export class HostController {
         const provider = this.providers.find((entry) => entry.id === message.provider);
         await provider.chat(message, {
           signal: run.controller.signal,
-          emit: (event) => { if (this.#active === run && !run.controller.signal.aborted) this.send({ ...event, id: run.id }); },
+          emit: (event) => this.#emit(run, event),
           callTool: (name, args) => this.callTool(run, name, args),
         });
+        run.flush();
         if (this.#active === run) this.send({ type: 'complete', id: run.id });
       } catch (error) {
+        run.flush();
         if (this.#active === run && !run.controller.signal.aborted) this.send({ type: 'error', id: run.id, error: error.message.slice(0, 1500) });
       } finally {
+        run.turn?.flushers.delete(run.flush);
+        run.turn = undefined;
+        run.chunks = [];
         if (this.#active === run) this.#active = undefined;
         this.rejectTools(run.id, new Error('Chat ended.'));
       }
     } catch (error) { this.send({ type: 'error', ...(typeof message?.id === 'string' ? { id: message.id.slice(0, 100) } : {}), error: error.message.slice(0, 1500) }); }
   }
+  #emit(run, event) {
+    if (this.#active !== run || run.controller.signal.aborted) return;
+    const turn = JsonLineProcess.outputTurn;
+    if (!turn || !textDelta(turn.message) || event?.type !== 'delta' || typeof event.text !== 'string' || Object.keys(event).length !== 2 || !Object.hasOwn(event, 'type') || !Object.hasOwn(event, 'text')) {
+      run.flush();
+      if (this.#active === run && !run.controller.signal.aborted) this.send({ ...event, id: run.id });
+      return;
+    }
+    // Count escaped UTF-8 bytes per fragment, never reserialize a growing batch.
+    // Split surrogate pairs may overestimate by 8 bytes, causing an earlier flush.
+    const bytes = Buffer.byteLength(JSON.stringify(event.text)) - 2;
+    run.overhead ??= Buffer.byteLength(JSON.stringify({ type: 'delta', text: '', id: run.id }));
+    if (run.bytes + bytes + run.overhead > MAX_OUTPUT_BYTES || run.chunks.length >= 256) run.flush();
+    if (this.#active !== run || run.controller.signal.aborted) return;
+    if (bytes + run.overhead > MAX_OUTPUT_BYTES) { this.send({ ...event, id: run.id }); return; }
+    run.turn = turn;
+    run.chunks.push(event.text); run.bytes += bytes;
+    turn.flushers.add(run.flush);
+  }
   callTool(run, name, args) {
+    run.flush();
     if (this.#active !== run || run.controller.signal.aborted) return Promise.reject(new Error('Cancelled.'));
     validateTool(name, args, run.tools);
     if (name.startsWith('organato_')) {
@@ -70,7 +110,7 @@ export class HostController {
   toolResult(message) {
     const pending = this.#pending.get(message.requestId);
     if (!pending || pending.id !== message.id || this.#active?.id !== message.id) throw new Error('Unknown browser action result.');
-    if (JSON.stringify(message).length > MAX_MESSAGE_BYTES - 1000) throw new Error('Browser action result is too large.');
+    if (!messageWithinLimit(message, MAX_MESSAGE_BYTES - 1000)) throw new Error('Browser action result is too large.');
     this.#pending.delete(message.requestId); clearTimeout(pending.timer);
     if (typeof message.error === 'string') pending.reject(new Error(message.error.slice(0, 1000)));
     else if (!message.result || typeof message.result !== 'object' || Array.isArray(message.result)) pending.reject(new Error('Invalid browser action result.'));
@@ -86,8 +126,11 @@ export class HostController {
     const run = this.#active;
     if (!run) return;
     this.#active = undefined;
-    run.controller.abort();
-    this.rejectTools(run.id, new Error('Cancelled.'));
+    try { run.flush(); }
+    finally {
+      run.controller.abort();
+      this.rejectTools(run.id, new Error('Cancelled.'));
+    }
     this.send({ type: 'complete', id: run.id, cancelled: true });
   }
   close() { this.cancel(); }

@@ -6,13 +6,21 @@ export function installFixture({ colorMode, theme, initialLocal = {} }) {
   fx.appearance ??= { layout: 'sidebar', sidebarMode: 'expanded', theme, colorMode, showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true };
   window.fx = fx;
   const save = () => { localStorage.setItem('fx-local', JSON.stringify(fx.local)); localStorage.setItem('fx-appearance', JSON.stringify(fx.appearance)); };
+  const areaListeners = new Map();
   const area = (data, name) => ({
+    onChanged: {
+      addListener(fn) { if (!areaListeners.has(name)) areaListeners.set(name, new Set()); areaListeners.get(name).add(fn); },
+      removeListener(fn) { areaListeners.get(name)?.delete(fn); },
+    },
     async get(keys) { const list = keys == null ? Object.keys(data) : [keys].flat(); return structuredClone(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))); },
     async set(values) {
       const changes = {};
       for (const [key, value] of Object.entries(values)) { changes[key] = { oldValue: data[key], newValue: structuredClone(value) }; data[key] = structuredClone(value); }
       save();
-      setTimeout(() => fx.listeners.forEach((fn) => fn(changes, name)), 0);
+      setTimeout(() => {
+        for (const fn of areaListeners.get(name) || []) fn(structuredClone(changes));
+        for (const fn of fx.listeners) fn(structuredClone(changes), name);
+      }, 0);
     },
   });
   const event = () => { const list = []; return { list, addListener: (fn) => list.push(fn), removeListener() {} }; };

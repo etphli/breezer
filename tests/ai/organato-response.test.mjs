@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Organato } from '../../features/ai/host/organato.mjs';
+import { organatoTestDirectory } from './organato-test-directory.mjs';
 
 const limit = 2_000_000;
-const service = fetcher => new Organato({ fetcher, secrets: { async get() { return 'org_' + 'x'.repeat(43); } } });
+const service = fetcher => new Organato({ configDirectory: organatoTestDirectory(), fetcher, secrets: { async get() { return 'org_' + 'x'.repeat(43); } } });
 function streamed(bytes, size = 65536) {
   let offset = 0, cancelled = false;
   const response = new Response(new ReadableStream({

@@ -22,12 +22,17 @@ function installFixture({ bridge, layout, local = {}, organato = {} }) {
   const fx = { local: structuredClone(local), session: {}, opened: [], updated: [], ports: {}, listeners: [], writes: [],
     organato: { connected: false, enabled: true, allowAI: true, dashboardEnabled: true, ...organato }, configure: 'ok' };
   window.fx = fx;
+  const areaListeners = {};
   const area = (data, name) => ({
+    onChanged: { addListener(fn) { (areaListeners[name] ||= []).push(fn); }, removeListener(fn) { const listeners = areaListeners[name] || []; const index = listeners.indexOf(fn); if (index >= 0) listeners.splice(index, 1); } },
     async get(keys) { const list = keys == null ? Object.keys(data) : [keys].flat(); return structuredClone(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))); },
     async set(values) {
       const changes = {};
       for (const [key, value] of Object.entries(values)) { changes[key] = { oldValue: data[key], newValue: structuredClone(value) }; data[key] = structuredClone(value); }
-      setTimeout(() => fx.listeners.forEach((fn) => fn(changes, name)), 0);
+      setTimeout(() => {
+        for (const fn of areaListeners[name] || []) fn(structuredClone(changes));
+        for (const fn of fx.listeners) fn(structuredClone(changes), name);
+      }, 0);
     },
   });
   const event = () => { const list = []; return { list, addListener: (fn) => list.push(fn), removeListener() {} }; };
@@ -177,7 +182,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     await shot(page, '4-theme-dark');
     await page.getByRole('radio', { name: 'Light' }).click();
     await page.waitForFunction(() => document.documentElement.dataset.scheme === 'light');
-    assert.ok(await page.evaluate(() => 'appearance.rev' in fx.session), 'other Breezer pages are told to reload appearance');
+    assert.ok(await page.evaluate(() => 'appearance.rev' in fx.local), 'other Breezer pages are told to reload appearance');
     await pause(700);
     await next.click();
 

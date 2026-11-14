@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 // First-run card on the settings page explaining how to bring data over from Chrome.
 // It only opens fixed native routes from passwords.js. It never reads Chrome files,
 // credentials, or import results, so it never reports that an import succeeded.
@@ -130,10 +131,11 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   }, { signal: events.signal });
 
   // Another settings tab may hide the card too.
-  const onChanged = (changes, area) => {
-    if (!disposed && area === 'local' && changes[ONBOARDING_KEY]?.newValue?.dismissed === true) section.hidden = true;
+  const onChanged = (changes) => {
+    if (!disposed && changes[ONBOARDING_KEY]?.newValue?.dismissed === true) section.hidden = true;
   };
-  api?.storage?.onChanged?.addListener(onChanged);
+  const storageChanges = localStorageChanges(api);
+  storageChanges?.addListener(onChanged);
 
   container.replaceChildren(section);
   // Stay hidden until the saved choice is known so a dismissed card never flashes.
@@ -146,7 +148,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
     dispose() {
       disposed = true;
       events.abort();
-      api?.storage?.onChanged?.removeListener?.(onChanged);
+      storageChanges?.removeListener(onChanged);
       section.remove();
     },
   });

@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 import { SYNC_STATE_KEY, SYNC_LOCAL_KEY, workspaceSyncForApi } from './workspace-sync.js';
 import { syncModelValues } from './workspace-sync-model.js';
 
@@ -73,8 +74,9 @@ export function mountSyncSettings({ container, api }) {
   };
   render();
   void api.storage.local.get(SYNC_STATE_KEY).then(values => render(values[SYNC_STATE_KEY]), () => render());
-  const changed = (changes, area) => { if (area === 'local' && changes[SYNC_STATE_KEY]) render(changes[SYNC_STATE_KEY].newValue); };
-  api.storage.onChanged?.addListener(changed);
+  const changed = (changes) => { if (changes[SYNC_STATE_KEY]) render(changes[SYNC_STATE_KEY].newValue); };
+  const storageChanges = localStorageChanges(api);
+  storageChanges.addListener(changed);
   button.addEventListener('click', async () => {
     if (disposed || opening) return;
     if (!available) { location.hash = '#/settings/general'; return; }
@@ -83,5 +85,5 @@ export function mountSyncSettings({ container, api }) {
     catch { if (!disposed) state.textContent = 'Could not open Sync settings. Try again.'; }
     finally { opening = false; if (!disposed) button.disabled = false; }
   });
-  return { dispose() { disposed = true; api.storage.onChanged?.removeListener?.(changed); } };
+  return { dispose() { disposed = true; storageChanges.removeListener(changed); } };
 }

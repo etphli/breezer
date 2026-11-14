@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 // The native bridge exchanges workspace metadata only. Passwords and vault keys
 // never pass through this worker, extension messages, AI prompts or storage.
 import { APPEARANCE_REV_KEY, LOCK_NAME, STORE_KEY, DEFAULT_APPEARANCE, defaultStore, normalizeStore, normalizeAppearance } from './workspace-store.js';
@@ -127,7 +128,7 @@ export class WorkspaceSync {
       const writes = {};
       if (changed) writes[STORE_KEY] = applied.store;
       await capture(writes);
-      if (Object.keys(patch).length) await this.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() });
+      if (Object.keys(patch).length) await this.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() });
       if (appearanceError) return this.state({ phase: 'appearanceBlocked', message: `Saved spaces were updated locally. Appearance remains unchanged: ${appearanceError}`, ...nativeHealth });
       return this.state({ phase: 'reconciled', vaultId: local.vaultId, ...nativeHealth });
     }
@@ -185,18 +186,19 @@ export function installWorkspaceSync(api) {
     clearTimeout(timer);
     timer = setTimeout(() => { void drain(); }, 250);
   };
-  const changed = (changes, area) => {
-    if (area === 'local' && changes[STORE_KEY] || area === 'session' && changes[APPEARANCE_REV_KEY]) schedule();
+  const changed = (changes) => {
+    if (changes[STORE_KEY] || changes[APPEARANCE_REV_KEY]) schedule();
   };
   const alarmName = 'breezer.workspace.sync';
   const alarm = value => { if (value.name === alarmName) schedule(); };
-  api.storage.onChanged?.addListener(changed);
+  const storageChanges = localStorageChanges(api);
+  storageChanges.addListener(changed);
   api.alarms?.onAlarm?.addListener(alarm);
   native.onSyncStateChanged?.addListener(schedule);
   schedule();
   return { dispose() {
     disposed = true; clearTimeout(timer);
-    api.storage.onChanged?.removeListener(changed);
+    storageChanges.removeListener(changed);
     api.alarms?.onAlarm?.removeListener(alarm);
     native.onSyncStateChanged?.removeListener(schedule);
     void api.alarms?.clear(alarmName);

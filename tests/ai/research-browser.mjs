@@ -79,10 +79,14 @@ try {
     const callbacks = [];
     window.sent = [];
     window.emit = (message) => callbacks.forEach((callback) => callback(message));
+    const areaListeners = {};
     const area = (name) => ({
+      onChanged: { addListener(fn) { (areaListeners[name] ||= []).push(fn); }, removeListener(fn) { const list = areaListeners[name] || []; const index = list.indexOf(fn); if (index >= 0) list.splice(index, 1); } },
       get: async (keys) => Object.fromEntries((Array.isArray(keys) ? keys : [keys]).filter((key) => key in storage[name]).map((key) => [key, storage[name][key]])),
       set: async (items) => {
+        const changes = Object.fromEntries(Object.entries(items).map(([key, value]) => [key, { oldValue: storage[name][key], newValue: structuredClone(value) }]));
         Object.assign(storage[name], items);
+        for (const fn of areaListeners[name] || []) fn(structuredClone(changes));
         if (name === 'local') localStorage.setItem('breezer-fixture-local', JSON.stringify(storage.local));
       },
     });

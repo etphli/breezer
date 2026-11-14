@@ -5,6 +5,8 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
+import subprocess
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -13,6 +15,7 @@ OWNED = {
     'js/breezer-compiled-filter-lists.js',
     'js/breezer-compiled-filter-context.js',
     'js/breezer-compiled-filter-build.js',
+    'js/breezer-binary-binding.js',
 }
 IMPORT = "import { bundledFilterLists } from './breezer-compiled-filter-context.js';\n"
 ANCHOR = '''    const compiledContent = this.compileFilters(rawDetails.content, {
@@ -68,13 +71,20 @@ def unhook(text):
 
 def contract_for(tree):
     folder = tree / 'third_party/ublock'
+    # Use actual resource modules in a fresh process before inventory/version reads.
+    subprocess.run([shutil.which('node') or 'node',
+                    str(ROOT / 'script/breezer_trusted_scriptlet_tokens.mjs'),
+                    '--check', str(folder / 'js')],
+                   check=True, capture_output=True, timeout=10)
     hashes = {}
     for path in sorted(folder.rglob('*.js')):
         name = path.relative_to(folder).as_posix()
         if not name.startswith(('js/', 'lib/')) or name in OWNED:
             continue
         data = path.read_bytes()
-        if name == 'js/storage.js':
+        # Native startup-body catalogs bind literal storage bytes in every realm.
+        # The older standalone experiment normalizes only its own staging hook.
+        if name == 'js/storage.js' and not (folder / 'js/breezer-startup-body.js').is_file():
             data = unhook(data.decode()).encode()
         hashes[name] = digest(data)
     version = (tree / 'chrome/VERSION').read_text()

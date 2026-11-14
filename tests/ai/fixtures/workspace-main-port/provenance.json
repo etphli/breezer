@@ -1,0 +1,21 @@
+{
+  "baseCommit": "55b86e3b9338804dbfb1a4deb39930c9cba09155",
+  "source": "git objects in the integration checkout, not private evidence or a packaged binary",
+  "files": {
+    "main-workspace.css": {
+      "originalPath": "features/ai/extension/workspace.css",
+      "sha256": "2d8db5cd5feaf4828351cb7af380312174dceacc987858b82ea6c890c5a83a2d",
+      "purpose": "Complete pre-extraction main cascade, including media/custom-color rules; bounded 1 stylesheet."
+    },
+    "main-functions.json": {
+      "originalPath": "features/ai/extension/workspace.js",
+      "functions": [
+        "draw",
+        "compactLabels",
+        "updateFavicon",
+        "switchSpace"
+      ],
+      "purpose": "Bounded current-main draw/identity/space-switch oracles. No boot code or historical whole UI file."
+    }
+  }
+}

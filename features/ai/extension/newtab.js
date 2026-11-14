@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 import { installShortcutAdder } from './shortcut-add.js';
 import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY, CUSTOM_SITES_KEY } from './top-sites.js';
 // Breezer new tab: one row of frequently visited sites and what's coming up in
@@ -121,6 +122,10 @@ export function normalizeView(raw) {
     enabled: true,
     connected: source.connected === true,
     error: text(source.error, 240) || null,
+    stale: source.stale === true,
+    updatedAt: Number.isFinite(source.updatedAt) ? source.updatedAt : null,
+    cached: source.cached === true,
+    syncedAt: typeof source.syncedAt === 'string' && Number.isFinite(Date.parse(source.syncedAt)) ? source.syncedAt : null,
   };
   // The background still sends exams and assignments separately, and an item
   // classified as both arrives in each. They become one Upcoming list here,
@@ -137,14 +142,14 @@ export function organatoState(organato) {
   if (!organato) return 'unavailable';
   if (!organato.enabled) return 'disabled';
   const hasItems = LISTS.some((list) => organato[list].length);
-  if (organato.error && !hasItems) return 'error';
+  if (organato.error && !hasItems && !organato.stale && !organato.cached) return 'error';
   if (!organato.connected && !hasItems) return 'setup';
   return 'ready';
 }
 
-// Opens a port, sends one request and waits for its matching answer. The port
-// is closed on the first answer, disconnect or timeout, so nothing lingers.
-export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_MS } = {}) {
+// Saved data can arrive before the final live answer. Keep the port open until
+// that final answer, a disconnect or the timeout.
+export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_MS, onUpdate = () => {} } = {}) {
   return new Promise((resolve, reject) => {
     if (typeof api?.runtime?.connect !== 'function') {
       reject(new Error('Breezer is not available on this page.'));
@@ -153,6 +158,7 @@ export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_
     const id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
     let port = null;
     let settled = false;
+    let updates = Promise.resolve();
     const finish = (fn, value) => {
       if (settled) return;
       settled = true;
@@ -164,7 +170,13 @@ export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_
     try {
       port = api.runtime.connect({ name: PORT_NAME });
       port.onMessage.addListener((message) => {
-        if (message?.type === 'view' && message.id === id) finish(resolve, message);
+        if (settled || message?.type !== 'view' || message.id !== id) return;
+        if (message.pending === true) {
+          updates = updates.then(() => { if (!settled) return onUpdate(message); });
+          void updates.catch(error => finish(reject, error));
+        } else {
+          void updates.then(() => finish(resolve, message), error => finish(reject, error));
+        }
       });
       port.onDisconnect.addListener(() => finish(reject, new Error('Breezer closed the connection.')));
       port.postMessage({ type: 'view', id, refresh });
@@ -302,7 +314,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   const state = organatoState(organato);
   const error = /\b401\b/.test(organato?.error || '') ? 'The API key was rejected. Review it in Settings.' : organato?.error;
   section.dataset.state = state;
-  section.dataset.stale = String(state === 'ready' && Boolean(organato.error || problem));
+  section.dataset.stale = String(state === 'ready' && Boolean(organato.cached || organato.stale || organato.error || problem));
   section.removeAttribute('aria-busy');
   action.replaceChildren();
   action.hidden = true;
@@ -334,7 +346,11 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
   }
 
   // Ready. A refresh error with older items still on hand keeps them visible.
-  if (organato.error) status.textContent = `Showing the last update. ${error}`;
+  if (organato.cached) {
+    const saved = organato.syncedAt ? ` from ${new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(organato.syncedAt))}` : '';
+    status.textContent = `Showing saved data${saved}. ${organato.error || problem ? 'Could not refresh Organato. Try Refresh on a working connection.' : 'Refreshing…'}`;
+  } else if (organato.stale) status.textContent = `Showing the last update${organato.updatedAt !== null ? ` (${new Date(organato.updatedAt).toLocaleString()})` : ''}. ${error || problem || 'Organato did not refresh.'}`;
+  else if (organato.error) status.textContent = `Showing the last update. ${error}`;
   else if (problem) status.textContent = `Showing the last update. ${problem}`;
   else status.hidden = true;
   for (const list of LISTS) {
@@ -389,20 +405,23 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let problem = null;
   let pending = false;
   let again = false;
+  let disposed = false, midnightTimer;
   // The saved switch wins over any answer: turning Organato off hides it at
   // once, including over an answer still on its way.
-  let off = false;
+  let off = false, organatoDay;
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
   let allSites = [], siteRevision = 0, undoKey;
   const updateSites = async () => {
+    if (disposed) return;
     const revision = ++siteRevision;
     await shortcuts.load();
+    if (disposed) return;
     const sites = await shortcuts.filter(allSites, MAX_SITES);
-    if (revision !== siteRevision || !view) return;
+    if (disposed || revision !== siteRevision || !view) return;
     view.topSites = normalizeView({ topSites: sites }).topSites;
-    paint();
+    paint({ sitesOnly: true });
   };
   installShortcutAdder({ api, root, preferences: shortcuts, update: updateSites });
   const disposeShortcuts = installShortcutActions({ root, remove: async site => {
@@ -418,8 +437,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     try { await shortcuts.reset(); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcuts restored.'; }
     catch { status.textContent = 'Could not restore shortcuts. Try again.'; }
   });
-  const changed = (changes, area) => {
-    if (area !== 'local') return;
+  const changed = (changes) => {
     if (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Reload this tab to try again.'; });
     if (changes[ORGANATO_SWITCHES_KEY]) {
       const nowOff = switchedOff(changes[ORGANATO_SWITCHES_KEY].newValue);
@@ -433,13 +451,23 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       void load(false);
     }
   };
-  api?.storage?.onChanged?.addListener?.(changed);
-  globalThis.addEventListener?.('pagehide', () => {
+  const storageChanges = localStorageChanges(api);
+  storageChanges?.addListener(changed);
+  const dispose = (event) => {
+    // A back-forward cached page will resume with its existing listeners.
+    if (event?.persisted) return;
+    disposed = true;
+    again = false;
+    siteRevision++;
+    clearTimeout(midnightTimer);
     disposeShortcuts();
-    api?.storage?.onChanged?.removeListener?.(changed);
-  }, { once: true });
+    storageChanges?.removeListener(changed);
+    globalThis.removeEventListener?.('pagehide', dispose);
+  };
+  globalThis.addEventListener?.('pagehide', dispose);
 
-  const paint = () => {
+  const paint = ({ sitesOnly = false } = {}) => {
+    if (disposed) return;
     const at = now();
     refreshButton.disabled = pending || off || organatoState(view?.organato) === 'setup';
     refreshButton.hidden = refreshButton.disabled;
@@ -449,21 +477,25 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       if (!view.topSites.length && shortcuts.hidden.size) root.getElementById('sites-empty').textContent = 'No visible shortcuts. Restore shortcuts or visit more sites.';
     }
     reset.hidden = shortcuts.hidden.size === 0;
-    if (off) { showOrganato(root, false); renderOrganato(root, OFF, at); return; }
+    const calendarDay = midnight(at);
+    if (sitesOnly && organatoDay === calendarDay) return;
+    if (off) { showOrganato(root, false); renderOrganato(root, OFF, at); organatoDay = calendarDay; return; }
     // Still waiting for the first answer (or the one after turning back on).
     if (!view || view.organato === undefined) { showOrganato(root, true); return; }
     showOrganato(root, view.organato?.enabled !== false);
     renderOrganato(root, view.organato, at, problem);
+    organatoDay = calendarDay;
   };
 
   const load = async (refresh) => {
+    if (disposed) return;
     if (pending) { again = true; return; }
     pending = true;
     refreshButton.disabled = true;
     refreshButton.hidden = true;
     refreshButton.setAttribute('aria-busy', 'true');
-    try {
-      const [result] = await Promise.all([requestView(api, { refresh }), shortcuts.load()]);
+    const accept = async result => {
+      if (disposed) return;
       if (result.dashboardEnabled === false) {
         globalThis.location.replace('chrome://new-tab-page/');
         return;
@@ -471,18 +503,32 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       allSites = result.topSites || [];
       const revision = ++siteRevision;
       const sites = await shortcuts.filter(allSites, MAX_SITES);
+      if (disposed) return;
       const stale = revision !== siteRevision;
       view = normalizeView({ ...result, topSites: stale ? view?.topSites || [] : sites });
       if (stale) await updateSites();
       problem = null;
+    };
+    try {
+      const preferences = shortcuts.load();
+      const [result] = await Promise.all([requestView(api, { refresh, onUpdate: async cached => {
+        await preferences;
+        await accept(cached);
+        paint();
+      } }), preferences]);
+      await accept(result);
     } catch (error) {
+      if (disposed) return;
       problem = text(error?.message, 160) || null;
       if (!view) view = { topSites: [], organato: null };
     } finally {
       pending = false;
-      refreshButton.disabled = false;
-      refreshButton.removeAttribute('aria-busy');
+      if (!disposed) {
+        refreshButton.disabled = false;
+        refreshButton.removeAttribute('aria-busy');
+      }
     }
+    if (disposed) return;
     paint();
     root.documentElement.dataset.loaded = 'true';
     // A switch flipped on while an answer was in flight asks once more.
@@ -491,9 +537,10 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
 
   // "Today" and "Tomorrow" move at midnight; repaint without asking again.
   const scheduleMidnight = () => {
+    if (disposed) return;
     const at = now();
     const next = new Date(at.getFullYear(), at.getMonth(), at.getDate() + 1).getTime() - at.getTime();
-    setTimeout(() => { paint(); scheduleMidnight(); }, next + 1000);
+    midnightTimer = setTimeout(() => { paint(); scheduleMidnight(); }, next + 1000);
   };
 
   renderToday(root, now());
@@ -502,7 +549,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   scheduleMidnight();
   // A saved "off" hides the sheet before the first answer, so it never flashes.
   const saved = Promise.resolve(api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
-    if (switchedOff(value?.[ORGANATO_SWITCHES_KEY])) { off = true; showOrganato(root, false); }
+    if (!disposed && switchedOff(value?.[ORGANATO_SWITCHES_KEY])) { off = true; showOrganato(root, false); }
   }, () => {});
   return saved.then(() => load(false));
 }

@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { accountPageTargets, aggregateTrials, captureFailureState, commonFlags, comparisonPlan, cpuTimeCentiseconds, nativeForegroundReady, observedCpuWindow, pageReady, parseProcessLoad, parseProcesses, processRole, processTree, summarize } from '../script/benchmark_browsers.mjs';
+import { accountPageTargets, aggregateTrials, captureFailureState, commonFlags, comparisonPlan, cpuTimeCentiseconds, nativeForegroundReady, observedCpuWindow, nativeCpuWindow, pageReady, parseProcessLoad, parseProcesses, processRole, processTree, summarize } from '../script/benchmark_browsers.mjs';
 import * as benchmark from '../script/benchmark_browsers.mjs';
 
 test('footprint instrumentation has its own initialized protocol and preserves balanced orders', () => {
   assert.throws(() => comparisonPlan({ trials: 6, physicalFootprint: true }), /initialized-profiles/);
   const two = comparisonPlan({ trials: 6, initializedProfiles: true, physicalFootprint: true });
-  assert.equal(two.protocol, 'installed-browser-v9-initialized-foreground-footprint');
+  assert.equal(two.protocol, 'installed-browser-v10-initialized-foreground-footprint');
   assert.deepEqual(two.roundOrders, comparisonPlan({ trials: 6, initializedProfiles: true }).roundOrders);
   const three = comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline', physicalFootprint: true });
-  assert.equal(three.protocol, 'installed-browser-v9-initialized-three-way-footprint');
+  assert.equal(three.protocol, 'installed-browser-v10-initialized-three-way-footprint');
   assert.deepEqual(three.roundOrders, comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline' }).roundOrders);
 });
 
@@ -47,7 +47,7 @@ test('footprint is unavailable for churn, PID reuse, missing values, partial cap
     x => { x.after[1].ppid = 300; }, x => { x.after[1].command = '/Other'; },
     x => { x.after[1].startedAt = '2026-10-30T00:00:02.000Z'; },
     x => { x.before[1].startedAt = x.after[1].startedAt = '2026-10-30T00:00:09.000Z'; },
-    x => { x.captureStartedAt = undefined; }, x => { x.usageBefore.schema = 2; },
+    x => { x.captureStartedAt = undefined; }, x => { x.usageBefore.schema = 3; },
     x => { x.usageBefore.processes.pop(); }, x => { x.usageAfter.processes.push(x.usageAfter.processes[0]); },
     x => { x.usageAfter.processes[0].status = 'exited'; }, x => { x.usageAfter.processes[0].status = 'unavailable'; },
     x => { x.usageAfter.processes[0].startAbstime = '2000'; },
@@ -447,4 +447,40 @@ test('untimed initialization never closes a setup target that navigated to an un
   const cdp = { attach: async () => 'session', evaluate: async () => ({ extensionId: 'namgcidocfgliiedlkdafcmifpdfiakj', seen: '1.1.0', setup: { completed: true } }), send: async method => { calls.push(method); return {}; } };
   assert.equal(await benchmark.initializeBreezerProfile(cdp, targets, state), false);
   assert.equal(calls.includes('Target.closeTarget'), false);
+});
+
+function nativeCpuFixtures() {
+  return [0, 1].map(index => {
+    const fixture = footprintFixture();
+    for (const [offset, usage] of [fixture.usageBefore, fixture.usageAfter].entries()) {
+      const base = 1000 + index * 1000 + offset * 200;
+      Object.assign(usage, { schema: 2, cpuCounterUnit: 'mach-absolute-ticks', clockUnit: 'nanoseconds', timebaseNumer: 125, timebaseDenom: 3 }); usage.captureStartedNs = String(base); usage.captureEndedNs = String(base + 100);
+      usage.processes.forEach((row, i) => Object.assign(row, { readStartedNs: String(base + 10 + i * 10), readEndedNs: String(base + 15 + i * 10), userTicks: String(index * 100 + offset * 20), systemTicks: '0' }));
+    }
+    return fixture;
+  });
+}
+test('native CPU uses per-process counter and read-window bounds including zero', () => {
+  const fixtures = nativeCpuFixtures();
+  const result = nativeCpuWindow(fixtures, 200);
+  assert.equal(result.status, 'observed-native-window');
+  assert.ok(result.cpuSecondsPerElapsedSecondLowerBound < result.cpuSecondsPerElapsedSecondUpperBound);
+  assert.ok(result.cpuSecondsPerElapsedSecondLowerBound > 7); // Two processes, 120 ticks each at 125/3 ns per tick.
+  fixtures.forEach(f => [f.usageBefore, f.usageAfter].forEach(u => u.processes.forEach(p => { p.userTicks = '0'; })));
+  assert.equal(nativeCpuWindow(fixtures, 200).cpuSecondsPerElapsedSecondUpperBound, 0);
+});
+test('native CPU rejects reuse, churn, missing counters and mismatched windows', () => {
+  for (const change of [
+    x => { x[1].usageBefore.processes[0].startAbstime = '999'; },
+    x => { x[1].before.pop(); },
+    x => { delete x[1].usageBefore.cpuCounterUnit; },
+    x => { x[1].usageAfter.timebaseNumer = 1; },
+    x => { delete x[1].usageAfter.processes[0].userTicks; },
+    x => { x[1].usageAfter.processes[0].readStartedNs = '1'; },
+    x => { x[1].usageAfter.processes[0].userTicks = '0'; },
+    x => { x[1].usageAfter.processes[0].status = 'exited'; },
+  ]) {
+    const fixtures = nativeCpuFixtures(); change(fixtures);
+    assert.equal(nativeCpuWindow(fixtures, 200).status, 'unavailable', String(change));
+  }
 });

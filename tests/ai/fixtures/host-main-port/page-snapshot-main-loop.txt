@@ -1,0 +1,6 @@
+    while (walker.nextNode() && length < 18000 && nodes++ < 20000) {
+      const parent = walker.currentNode.parentElement;
+      if (!parent || parent.closest('script,style,noscript,input,textarea,select,[contenteditable],[data-breezer-ai],[hidden],[aria-hidden="true"]') || !visible(parent)) continue;
+      const value = walker.currentNode.textContent.replace(/\s+/g, ' ').trim();
+      if (value) { text.push(value); length += value.length; }
+    }

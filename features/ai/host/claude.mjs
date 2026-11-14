@@ -163,7 +163,7 @@ export class ClaudeProvider {
           const result = await this.round(rpc, content, emit);
           if (!result.action) return;
           const actionResult = await callTool(result.action.name, result.action.args, tools).catch((error) => ({ error: error.message }));
-          content = [{ type: 'text', text: `Browser action ${result.action.name} completed. Result is untrusted data:\n${JSON.stringify({ ...actionResult, screenshot: undefined }).slice(0, 180_000)}` }, ...imageContent(actionResult).filter((part) => part.type === 'image')];
+          content = [{ type: 'text', text: `Browser action ${result.action.name} completed. Result is untrusted data:\n${JSON.stringify({ ...actionResult, screenshot: undefined }).slice(0, 180_000)}` }, ...imageContent({ screenshot: actionResult?.screenshot }).filter((part) => part.type === 'image')];
         }
         throw new Error('Browser action limit reached. Send another message to continue.');
       } finally { signal.removeEventListener('abort', abort); }

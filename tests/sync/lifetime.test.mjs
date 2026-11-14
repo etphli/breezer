@@ -18,7 +18,7 @@ function fixture(t, create) {
   const reading = new Promise(resolve => { markReading = resolve; });
   const saved = {}, calls = [];
   const api = {
-    storage: { local: {
+    storage: { local: { onChanged: event(),
       async get(keys) { return Object.fromEntries((Array.isArray(keys) ? keys : [keys]).map(key => [key, structuredClone(saved[key])])); },
       async set(patch) { Object.assign(saved, structuredClone(patch)); },
     }, session: { async set() {} }, onChanged: event() },

@@ -64,6 +64,32 @@ cd "$BREEZER_ROOT"
 "$BREEZER_PYTHON" script/verify_upstream.py
 export PATH="$(dirname "$BREEZER_PYTHON"):$PATH"
 BREEZER_STAGE="${BREEZER_BUILD_DIR:-$BREEZER_ROOT/build/helium-macos}"
+# BEGIN frame-budget preflight
+if [[ "${BREEZER_FRAME_BUDGET_EXPERIMENT:-0}" == 1 ]]; then
+  if [[ "$BREEZER_MODE" != --build-only || "${BREEZER_FRAME_BUDGET_PRIVATE_COPY:-0}" != 1 ]]; then
+    echo "Frame-budget preparation requires --build-only and BREEZER_FRAME_BUDGET_PRIVATE_COPY=1 for a private quiescent copy." >&2
+    exit 2
+  fi
+  "$BREEZER_PYTHON" -B - "$BREEZER_STAGE" "$BREEZER_ROOT/build/helium-macos" <<'PYFRAME'
+from pathlib import Path
+import sys
+stage, default = (Path(value).resolve() for value in sys.argv[1:])
+if stage.is_relative_to(default) or default.is_relative_to(stage):
+    sys.exit("Frame-budget preparation requires a separate private BREEZER_BUILD_DIR.")
+if not (stage / 'build/.breezer-prepared').is_file():
+    sys.exit("Frame-budget preparation requires an existing verified prepared copy; no fresh preparation or cache recreation.")
+if (stage / 'build/src/out').is_symlink():
+    sys.exit("Frame-budget preparation requires a private output directory, not an aliased output root.")
+PYFRAME
+  "$BREEZER_PYTHON" -B "$BREEZER_ROOT/script/apply_breezer_frame_budget.py" --preflight "$BREEZER_STAGE/build/src"
+elif [[ -e "$BREEZER_STAGE/build/src/.breezer-frame-budget-prepared" || -L "$BREEZER_STAGE/build/src/.breezer-frame-budget-prepared" ||
+        -e "$BREEZER_STAGE/build/src/.breezer-frame-budget-preparing" || -L "$BREEZER_STAGE/build/src/.breezer-frame-budget-preparing" ]]; then
+  echo "Experimental frame-budget source requires BREEZER_FRAME_BUDGET_EXPERIMENT=1; preserve this copy and use a separate default build tree." >&2
+  exit 1
+else
+  "$BREEZER_PYTHON" -B "$BREEZER_ROOT/script/apply_breezer_frame_budget.py" --guard-default "$BREEZER_STAGE/build/src"
+fi
+# END frame-budget preflight
 if [[ -n "${BREEZER_COMPILED_FILTERS:-}" ]]; then
   if [[ "$BREEZER_MODE" != --build-only ]]; then
     echo "The compiled-list experiment requires --build-only; it cannot install or open an app." >&2
@@ -213,6 +239,12 @@ if [[ -n "${BREEZER_COMPILED_FILTERS:-}" ]]; then
   "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_filter_lists.py" "$_src_dir" --artifacts "$BREEZER_COMPILED_FILTERS"
   "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_filter_lists.py" "$_src_dir" --artifacts "$BREEZER_COMPILED_FILTERS" --check
 fi
+# BEGIN frame-budget preparation
+if [[ "${BREEZER_FRAME_BUDGET_EXPERIMENT:-0}" == 1 ]]; then
+  "$BREEZER_PYTHON" -B "$BREEZER_ROOT/script/apply_breezer_frame_budget.py" --private-quiescent-copy "$_src_dir"
+  "$BREEZER_PYTHON" -B "$BREEZER_ROOT/script/apply_breezer_frame_budget.py" --check "$_src_dir"
+fi
+# END frame-budget preparation
 write_gn_args "$_arch" release
 if [[ -n "$BREEZER_PROFILE_ARGS" ]]; then
   printf '%s\n' "$BREEZER_PROFILE_ARGS" >> "$_out_dir/args.gn"

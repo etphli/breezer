@@ -40,7 +40,7 @@ export const CONNECTED = {
   },
 };
 
-export function installFixture({ view, appearance, delay = 0, hang = false, switches }) {
+export function installFixture({ view, appearance, delay = 0, hang = false, switches, cachedView }) {
   // fx.view and fx.delay can be changed mid-test to script later answers.
   window.fx = { requests: [], view, delay };
   const port = (name) => {
@@ -51,6 +51,7 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
       onDisconnect: { addListener: (fn) => listeners.disconnect.push(fn) },
       postMessage(message) {
         window.fx.requests.push({ name, ...message });
+        if (cachedView) setTimeout(() => listeners.message.forEach((fn) => fn({ type: 'view', id: message.id, ...structuredClone(cachedView), pending: true })), 0);
         if (hang) return;
         const answer = structuredClone(window.fx.view);
         setTimeout(() => listeners.message.forEach((fn) => fn({ type: 'view', id: message.id, ...answer })), window.fx.delay);
@@ -60,7 +61,7 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
   };
   const preferences = JSON.parse(localStorage.getItem('shortcut-fixture') || '{}');
   if (switches && !('organato.switches.v1' in preferences)) { preferences['organato.switches.v1'] = switches; localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); }
-  const storageListeners = [];
+  const storageListeners = [], generalStorageListeners = [];
   // chrome.storage is shared by every extension page; same-origin storage events
   // stand in for that, so a change in one tab reaches the others.
   window.addEventListener('storage', (event) => {
@@ -72,7 +73,10 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
     }
     Object.keys(preferences).forEach((key) => delete preferences[key]);
     Object.assign(preferences, next);
-    if (Object.keys(changes).length) for (const fn of storageListeners) fn(changes, 'local');
+    if (Object.keys(changes).length) {
+      for (const fn of storageListeners) fn(structuredClone(changes));
+      for (const fn of generalStorageListeners) fn(structuredClone(changes), 'local');
+    }
   });
   window.chrome = {
     tabs: { query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }] },
@@ -82,7 +86,7 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
       getManifest: () => ({ permissions: ['favicon'] }),
       lastError: undefined,
     },
-    storage: { local: { async get(key) { return { [key]: structuredClone(preferences[key]) }; }, async set(values) { Object.assign(preferences, structuredClone(values)); localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); for (const fn of storageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); } }, onChanged: { addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { const index=storageListeners.indexOf(fn); if(index>=0) storageListeners.splice(index,1); } } },
+    storage: { local: { onChanged: { addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { const index=storageListeners.indexOf(fn); if(index>=0) storageListeners.splice(index,1); } }, async get(key) { return { [key]: structuredClone(preferences[key]) }; }, async set(values) { Object.assign(preferences, structuredClone(values)); localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); for (const fn of storageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }]))); for (const fn of generalStorageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); } }, onChanged: { addListener(fn) { generalStorageListeners.push(fn); }, removeListener(fn) { const index=generalStorageListeners.indexOf(fn); if(index>=0) generalStorageListeners.splice(index,1); } } },
     ...(appearance ? { breezerPrivate: { getAppearance: async () => appearance } } : {}),
   };
 }

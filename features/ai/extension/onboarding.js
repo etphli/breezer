@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 // First-run setup: workspace.html#/welcome. Each choice is saved where the rest of
 // Breezer already reads it: appearance through chrome.breezerPrivate, the name in
 // breezerProfile (the assistant's profile), and the Organato key through the
@@ -129,7 +130,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
         let result = await callBridge('setAppearance', validateAppearancePatch({ [field]: value }));
         if (!result || typeof result !== 'object') result = await callBridge('getAppearance');
         appearance = normalizeAppearance(result);
-        await api.storage.session?.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
+        await api.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
       } catch (failure) {
         appearance = { ...previous };
         $('wl-bridge-note').textContent = `Couldn’t change that setting. ${errorText(failure)}`;
@@ -160,8 +161,8 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
   $('wl-custom-apply').addEventListener('click', () => void write('theme', $('wl-custom-color').value));
   darkQuery.addEventListener('change', () => applyAppearance(appearance));
-  api.storage.onChanged?.addListener((changes, area) => {
-    if (area === 'session' && changes[APPEARANCE_REV_KEY]) {
+  localStorageChanges(api).addListener((changes) => {
+    if (changes[APPEARANCE_REV_KEY]) {
       void writes.then(async () => { ({ appearance, available, error: bridgeError } = await loadAppearance()); renderAppearance(); });
     }
   });

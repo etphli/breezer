@@ -1,0 +1,376 @@
+{
+  "schema": 1,
+  "files": [
+    {
+      "path": "js/vapi-background.js",
+      "beforeSha256": "cbfd9ee8534fbf15adf941b601104f6790105ea5f68a5c012252cfb6b8544bc5",
+      "afterSha256": "2c1da88bc0f06d6147a69baafcb3a2e8f025fa8441e74b8db6402b26bf60af97",
+      "edits": [
+        {
+          "start": 687,
+          "remove": [
+            "                await webext.browserAction.setTitle(...arguments);\n"
+          ],
+          "insert": [
+            "                return await webext.browserAction.setTitle(...arguments);\n"
+          ]
+        },
+        {
+          "start": 704,
+          "remove": [
+            "                await webext.browserAction.setBadgeBackgroundColor(...arguments);\n"
+          ],
+          "insert": [
+            "                return await webext.browserAction.setBadgeBackgroundColor(...arguments);\n"
+          ]
+        },
+        {
+          "start": 711,
+          "remove": [
+            "                await webext.browserAction.setBadgeText(...arguments);\n"
+          ],
+          "insert": [
+            "                return await webext.browserAction.setBadgeText(...arguments);\n"
+          ]
+        },
+        {
+          "start": 718,
+          "remove": [
+            "                await webext.browserAction.setIcon(...arguments);\n"
+          ],
+          "insert": [
+            "                return await webext.browserAction.setIcon(...arguments);\n"
+          ]
+        },
+        {
+          "start": 840,
+          "remove": [],
+          "insert": [
+            "    const tabActions = new Map();\n",
+            "\n",
+            "    const invalidateTabActions = (tabId, retired = false) => {\n",
+            "        const entry = tabActions.get(tabId);\n",
+            "        if ( entry === undefined ) { return; }\n",
+            "        entry.epoch += 1;\n",
+            "        entry.retired = retired;\n",
+            "        for ( const action of entry.actions.values() ) {\n",
+            "            action.value = undefined;\n",
+            "        }\n",
+            "        // Keep outstanding writes visible to a new document or reused tab id.\n",
+            "        if ( retired && entry.pending === 0 ) { tabActions.delete(tabId); }\n",
+            "    };\n",
+            "\n",
+            "    browser.webNavigation.onCommitted.addListener(details => {\n",
+            "        if ( details.frameId === 0 ) { invalidateTabActions(details.tabId); }\n",
+            "    });\n",
+            "    browser.webNavigation.onErrorOccurred.addListener(details => {\n",
+            "        if ( details.frameId === 0 ) { invalidateTabActions(details.tabId); }\n",
+            "    });\n",
+            "    browser.tabs.onUpdated.addListener((tabId, changeInfo) => {\n",
+            "        if ( changeInfo.status !== undefined || changeInfo.url !== undefined ) {\n",
+            "            invalidateTabActions(tabId);\n",
+            "        }\n",
+            "    });\n",
+            "    browser.tabs.onRemoved.addListener(tabId => {\n",
+            "        invalidateTabActions(tabId, true);\n",
+            "    });\n",
+            "    browser.tabs.onReplaced.addListener((addedTabId, removedTabId) => {\n",
+            "        invalidateTabActions(removedTabId, true);\n",
+            "        invalidateTabActions(addedTabId, true);\n",
+            "    });\n",
+            "    browser.tabs.onCreated.addListener(tab => {\n",
+            "        invalidateTabActions(tab.id, true);\n",
+            "    });\n",
+            "\n",
+            "    const setTabAction = (method, details, value) => {\n",
+            "        const { tabId } = details;\n",
+            "        let entry = tabActions.get(tabId);\n",
+            "        if ( entry === undefined ) {\n",
+            "            entry = { epoch: 0, retired: false, pending: 0, actions: new Map() };\n",
+            "            tabActions.set(tabId, entry);\n",
+            "        }\n",
+            "        entry.retired = false;\n",
+            "        let action = entry.actions.get(method);\n",
+            "        if ( action === undefined ) {\n",
+            "            action = { pending: 0, overlap: false, value: undefined };\n",
+            "            entry.actions.set(method, action);\n",
+            "        }\n",
+            "        if ( value !== undefined && action.pending === 0 && action.value === value ) {\n",
+            "            return;\n",
+            "        }\n",
+            "        if ( action.pending !== 0 ) { action.overlap = true; }\n",
+            "        action.value = undefined;\n",
+            "        action.pending += 1;\n",
+            "        entry.pending += 1;\n",
+            "        const epoch = entry.epoch;\n",
+            "        browserAction[method](details).then(succeeded => {\n",
+            "            action.pending -= 1;\n",
+            "            entry.pending -= 1;\n",
+            "            // Callback order need not be the order in which native writes apply.\n",
+            "            if ( action.pending === 0 ) {\n",
+            "                if ( succeeded === true && action.overlap === false &&\n",
+            "                    entry.epoch === epoch ) {\n",
+            "                    action.value = value;\n",
+            "                }\n",
+            "                action.overlap = false;\n",
+            "            }\n",
+            "            if ( entry.retired && entry.pending === 0 ) {\n",
+            "                tabActions.delete(tabId);\n",
+            "            }\n",
+            "        });\n",
+            "    };\n",
+            "\n"
+          ]
+        },
+        {
+          "start": 851,
+          "remove": [],
+          "insert": [
+            "        // Loading and unknown-status tabs may still have action values reset.\n",
+            "        if ( tab.status !== 'complete' ) { invalidateTabActions(tab.id); }\n"
+          ]
+        },
+        {
+          "start": 860,
+          "remove": [
+            "                browserAction.setIcon(\n",
+            "                    Object.assign({ tabId: tab.id }, icons[state])\n"
+          ],
+          "insert": [
+            "                setTabAction('setIcon',\n",
+            "                    Object.assign({ tabId: tab.id }, icons[state]), icons[state]\n"
+          ]
+        },
+        {
+          "start": 865,
+          "remove": [
+            "                browserAction.setBadgeText({\n",
+            "                    tabId: tab.id,\n",
+            "                    text: (parts & 0b1000) === 0 ? badge : ''\n",
+            "                });\n"
+          ],
+          "insert": [
+            "                const text = (parts & 0b1000) === 0 ? badge : '';\n",
+            "                setTabAction('setBadgeText', { tabId: tab.id, text },\n",
+            "                    typeof text === 'string' ? text : undefined\n",
+            "                );\n"
+          ]
+        },
+        {
+          "start": 871,
+          "remove": [
+            "                browserAction.setBadgeBackgroundColor({ tabId: tab.id, color });\n"
+          ],
+          "insert": [
+            "                setTabAction('setBadgeBackgroundColor', { tabId: tab.id, color },\n",
+            "                    typeof color === 'string' ? color : undefined\n",
+            "                );\n"
+          ]
+        },
+        {
+          "start": 882,
+          "remove": [
+            "            browserAction.setTitle({ tabId: tab.id, title });\n"
+          ],
+          "insert": [
+            "            setTabAction('setTitle', { tabId: tab.id, title }, title);\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/webext.js",
+      "beforeSha256": "173d7475ba50943ca3a12cbc98410525a0423b278e70f67877d56753366b2d30",
+      "afterSha256": "e83cdcb5729b6f8d54f33ec1ee834d5b632d2af160752ea7820ea787d9b3ade9",
+      "edits": [
+        {
+          "start": 41,
+          "remove": [],
+          "insert": [
+            "// Action results must distinguish an acknowledged write from a swallowed error.\n",
+            "const promisifyAction = function(thisArg, fnName) {\n",
+            "    const fn = thisArg[fnName];\n",
+            "    return function(...args) {\n",
+            "        return new Promise(resolve => {\n",
+            "            try {\n",
+            "                fn.call(thisArg, ...args, function() {\n",
+            "                    resolve(chrome.runtime.lastError === undefined);\n",
+            "                });\n",
+            "            } catch(ex) {\n",
+            "                console.error(ex);\n",
+            "                resolve(false);\n",
+            "            }\n",
+            "        });\n",
+            "    };\n",
+            "};\n",
+            "\n"
+          ]
+        },
+        {
+          "start": 73,
+          "remove": [
+            "        setBadgeBackgroundColor: promisifyNoFail(chrome.browserAction, 'setBadgeBackgroundColor'),\n",
+            "        setBadgeText: promisifyNoFail(chrome.browserAction, 'setBadgeText'),\n",
+            "        setIcon: promisifyNoFail(chrome.browserAction, 'setIcon'),\n",
+            "        setTitle: promisifyNoFail(chrome.browserAction, 'setTitle'),\n"
+          ],
+          "insert": [
+            "        setBadgeBackgroundColor: promisifyAction(chrome.browserAction, 'setBadgeBackgroundColor'),\n",
+            "        setBadgeText: promisifyAction(chrome.browserAction, 'setBadgeText'),\n",
+            "        setIcon: promisifyAction(chrome.browserAction, 'setIcon'),\n",
+            "        setTitle: promisifyAction(chrome.browserAction, 'setTitle'),\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/traffic.js",
+      "beforeSha256": "a014cb1eb4d0332a2d2b1f073496f094c79b03e0bf3d29df6a7214a350c86969",
+      "afterSha256": "c6029ce2fcfb8ee8534ec70da2f359b8f860a96555e60f7b1c057d4fb06f2368",
+      "edits": [
+        {
+          "start": 1306,
+          "remove": [],
+          "insert": [
+            "        const types = Array.from(vAPI.net.validTypes).filter(type =>\n",
+            "            type !== 'main_frame'\n",
+            "        );\n"
+          ]
+        },
+        {
+          "start": 1313,
+          "remove": [],
+          "insert": [
+            "            types,\n"
+          ]
+        },
+        {
+          "start": 1318,
+          "remove": [],
+          "insert": [
+            "            types,\n"
+          ]
+        },
+        {
+          "start": 1323,
+          "remove": [],
+          "insert": [
+            "            types,\n"
+          ]
+        },
+        {
+          "start": 1328,
+          "remove": [],
+          "insert": [
+            "            types,\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/trusted-tokens.js",
+      "beforeSha256": "b1ee17da79e9829bbdb65711c84f659496c0b9100db03371be512540fa5319c7",
+      "afterSha256": "18c36a5fd119415bca416bb550ccd8808e550f3c201610e427ce61752770f864",
+      "edits": [
+        {
+          "start": 21,
+          "remove": [
+            "import { builtinScriptlets } from './resources/scriptlets.js';\n"
+          ],
+          "insert": [
+            "import { trustedScriptletTokens } from './trusted-scriptlet-tokens.js';\n"
+          ]
+        },
+        {
+          "start": 41,
+          "remove": [
+            "    for ( const { name, requiresTrust, aliases } of builtinScriptlets ) {\n",
+            "        if ( requiresTrust !== true ) { continue; }\n",
+            "        addTrustedToken(out, name);\n",
+            "        if ( Array.isArray(aliases) === false ) { continue; }\n",
+            "        addTrustedToken(out, ...aliases);\n"
+          ],
+          "insert": [
+            "    for ( const token of trustedScriptletTokens ) {\n",
+            "        out.add(token);\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/breezer-startup-body.js",
+      "beforeSha256": "a66e9b0af0a9f7acef838ce4ad72f3e3eafff63b38f2b0e2d21b86f21e24d3e0",
+      "afterSha256": "0bdf517cf459d11ba8d0d22fee21b9a5db141923bcc92ceeff14991d92e30d21",
+      "edits": [
+        {
+          "start": 22467,
+          "remove": [],
+          "insert": [
+            "        const types = Array.from(vAPI.net.validTypes).filter((type) => type !== \"main_frame\");\n"
+          ]
+        },
+        {
+          "start": 22474,
+          "remove": [],
+          "insert": [
+            "          types,\n"
+          ]
+        },
+        {
+          "start": 22479,
+          "remove": [],
+          "insert": [
+            "          types,\n"
+          ]
+        },
+        {
+          "start": 22484,
+          "remove": [],
+          "insert": [
+            "          types,\n"
+          ]
+        },
+        {
+          "start": 22489,
+          "remove": [],
+          "insert": [
+            "          types,\n"
+          ]
+        },
+        {
+          "start": 22937,
+          "remove": [
+            "import { builtinScriptlets } from \"./resources/scriptlets.js\";\n"
+          ],
+          "insert": [
+            "import { trustedScriptletTokens } from \"./trusted-scriptlet-tokens.js\";\n"
+          ]
+        },
+        {
+          "start": 22944,
+          "remove": [
+            "  for (const { name: name2, requiresTrust, aliases } of builtinScriptlets) {\n",
+            "    if (requiresTrust !== true) {\n",
+            "      continue;\n",
+            "    }\n",
+            "    addTrustedToken(out, name2);\n",
+            "    if (Array.isArray(aliases) === false) {\n",
+            "      continue;\n",
+            "    }\n",
+            "    addTrustedToken(out, ...aliases);\n"
+          ],
+          "insert": [
+            "  for (const token of trustedScriptletTokens) {\n",
+            "    out.add(token);\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/trusted-scriptlet-tokens.js",
+      "beforeSha256": null,
+      "afterSha256": "edb34b39337b10381e7668f8a026ff91c7a8f425c50804a547f7e4881f9b555b",
+      "payload": "trusted-scriptlet-tokens.js"
+    }
+  ]
+}

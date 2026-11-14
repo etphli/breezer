@@ -4,6 +4,32 @@ import { TextDecoder, types } from 'node:util';
 export const MAX_MESSAGE_BYTES = 16 * 1024 * 1024;
 export const MAX_OUTPUT_BYTES = 1024 * 1024;
 
+// Only NativeDecoder.dispatch can authorize this synchronous validation shortcut.
+// The byte count is never read from fields supplied by the extension.
+const dispatchedBytes = new WeakMap();
+export function messageWithinLimit(message, limit) {
+  const bytes = dispatchedBytes.get(message);
+  if (bytes !== undefined && bytes <= limit) {
+    let remaining = 256;
+    const expansion = (value, depth = 0) => {
+      if (--remaining < 0 || depth > 64) return Infinity;
+      // A JSON number can expand, for example 1e20 becomes 21 digits.
+      if (typeof value === 'number') return Math.max(0, String(value).length - 1);
+      if (!value || typeof value !== 'object') return 0;
+      let extra = 0;
+      for (const key in value) {
+        extra += expansion(value[key], depth + 1);
+        if (extra > limit - bytes) break;
+      }
+      return extra;
+    };
+    // JSON string tokens, keys, punctuation and literals cannot grow in UTF-16
+    // units beyond their original UTF-8 bytes. Reserve for number expansion.
+    if (bytes + expansion(message) <= limit) return true;
+  }
+  return JSON.stringify(message).length <= limit;
+}
+
 export function encodeMessage(value) {
   const json = Buffer.from(JSON.stringify(value));
   if (json.length > MAX_OUTPUT_BYTES) throw new Error('Native response is too large.');
@@ -14,6 +40,7 @@ export function encodeMessage(value) {
 }
 
 export class NativeDecoder {
+  #sizes = new WeakMap();
   #header = Buffer.alloc(4);
   #headerBytes = 0;
   #body = null;
@@ -36,7 +63,9 @@ export class NativeDecoder {
           const body = chunk.subarray(offset, offset + length);
           try {
             const text = new TextDecoder('utf-8', { fatal: true }).decode(body);
-            messages.push(JSON.parse(text));
+            const message = JSON.parse(text);
+            if (message && typeof message === 'object') this.#sizes.set(message, length);
+            messages.push(message);
           } catch (error) {
             this.#body = Buffer.alloc(length);
             this.#body.set(body);
@@ -56,12 +85,23 @@ export class NativeDecoder {
       offset += size;
       if (this.#bodyBytes !== this.#body.length) break;
       const text = new TextDecoder('utf-8', { fatal: true }).decode(this.#body);
-      messages.push(JSON.parse(text));
+      const message = JSON.parse(text);
+      if (message && typeof message === 'object') this.#sizes.set(message, this.#body.length);
+      messages.push(message);
       this.#body = null;
       this.#bodyBytes = 0;
       this.#headerBytes = 0;
     }
     return messages;
+  }
+  // Dispatch unmodified decoder output. Authorization ends before any await;
+  // ordinary receive callers, including later calls with this object, fall back.
+  dispatch(message, receive) {
+    const bytes = this.#sizes.get(message);
+    this.#sizes.delete(message);
+    if (bytes !== undefined) dispatchedBytes.set(message, bytes);
+    try { return receive(message); }
+    finally { dispatchedBytes.delete(message); }
   }
   finish() {
     if (this.#headerBytes || this.#body !== null) throw new Error('Truncated native message.');

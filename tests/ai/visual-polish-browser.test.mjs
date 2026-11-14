@@ -97,6 +97,7 @@ function installSidebarFixture({ seed, appearance }) {
   const setActive = (id) => { for (const tab of fx.tabs) tab.active = tab.id === id; fire('tabs.onActivated', { tabId: id, windowId: 7 }); };
   let nextId = 100;
   const area = (name) => ({
+    onChanged: event(`storage.${name}.onChanged`),
     async get(keys) {
       const list = keys == null ? Object.keys(fx[name]) : [keys].flat();
       return copy(Object.fromEntries(list.filter((key) => key in fx[name]).map((key) => [key, fx[name][key]])));
@@ -105,6 +106,7 @@ function installSidebarFixture({ seed, appearance }) {
       const changes = {};
       for (const [key, value] of Object.entries(values)) { changes[key] = { oldValue: fx[name][key], newValue: copy(value) }; fx[name][key] = copy(value); }
       fire('storage.onChanged', changes, name);
+      fire(`storage.${name}.onChanged`, changes);
     },
   });
   window.chrome = {
@@ -332,7 +334,7 @@ const NEW_TAB_SITES = [
 function installNewTabFixture({ view, appearance }) {
   window.fx = { requests: [] };
   const preferences = {};
-  const listeners = [];
+  const listeners = [], localListeners = [];
   window.chrome = {
     runtime: {
       connect: ({ name }) => {
@@ -351,8 +353,9 @@ function installNewTabFixture({ view, appearance }) {
     },
     storage: {
       local: {
+        onChanged: { addListener: fn => localListeners.push(fn), removeListener(fn) { const index = localListeners.indexOf(fn); if (index >= 0) localListeners.splice(index, 1); } },
         async get(key) { return { [key]: structuredClone(preferences[key]) }; },
-        async set(values) { Object.assign(preferences, structuredClone(values)); for (const fn of listeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); },
+        async set(values) { Object.assign(preferences, structuredClone(values)); for (const fn of localListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: structuredClone(value) }]))); for (const fn of listeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); },
       },
       onChanged: { addListener: (fn) => listeners.push(fn), removeListener() {} },
     },

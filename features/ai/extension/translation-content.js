@@ -75,12 +75,15 @@
         }
         if (remaining) item.chunks.push(remaining);
       }
-      const queue = pending.flatMap(item => item.chunks.map(chunk => {
-        const text = chunk.trim();
-        const prefix = chunk.match(/^\s*/u)[0], suffix = text ? chunk.match(/\s*$/u)[0] : '';
-        const index = item.parts.length; item.parts.push(text ? null : chunk);
-        return { item, index, text, prefix, suffix };
-      })).filter(part => part.text);
+      const queue = [];
+      for (const item of pending) {
+        for (const chunk of item.chunks) {
+          const text = chunk.trim();
+          const prefix = chunk.match(/^\s*/u)[0], suffix = text ? chunk.match(/\s*$/u)[0] : '';
+          const index = item.parts.length; item.parts.push(text ? null : chunk);
+          if (text) queue.push({ item, index, text, prefix, suffix });
+        }
+      }
       while (queue.length && active && run === epoch) {
         const batch = []; let length = 0;
         while (queue.length && batch.length < 32 && length + queue[0].text.length <= 4000) { const part = queue.shift(); batch.push(part); length += part.text.length; }
