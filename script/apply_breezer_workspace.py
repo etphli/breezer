@@ -761,6 +761,18 @@ def replacements():
                 '      "//chrome/browser/extensions/api/breezer_private",\n',
             ),
         ],
+        "chrome/browser/ui/ui_features.cc": [
+            (
+                'BASE_FEATURE(kTabHoverCardImages, base::FEATURE_ENABLED_BY_DEFAULT);\n',
+                'BASE_FEATURE(kTabHoverCardImages,\n'
+                '#if BUILDFLAG(IS_MAC)\n'
+                '             base::FEATURE_DISABLED_BY_DEFAULT\n'
+                '#else\n'
+                '             base::FEATURE_ENABLED_BY_DEFAULT\n'
+                '#endif\n'
+                ');\n',
+            ),
+        ],
         "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
         AVATAR_STATE: _avatar_replacements(),
         HIDDEN_SCROLLBAR: hidden_scrollbar_replacements(),
@@ -819,6 +831,10 @@ def transform(name, content):
             raise ValueError(f"Unknown non-diagnostic hidden scrollbar source: {name}")
         return after
     text = content.decode("utf-8")
+    if name == "chrome/browser/ui/ui_features.cc":
+        before, after = replacements()[name][0]
+        if (text.count(before), text.count(after)) not in ((1, 0), (0, 1)):
+            raise ValueError("Ambiguous native hover-card default anchors")
     for before, after in replacements()[name]:
         # A removal's shorter result can already occur inside its original.
         # Recognize the full original first, rather than skipping the removal.
