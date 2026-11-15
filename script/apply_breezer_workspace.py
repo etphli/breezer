@@ -30,22 +30,28 @@ VERTICAL_CONTROLLER = "chrome/browser/ui/tabs/vertical_tab_strip_state_controlle
 WINDOW_FEATURES = "chrome/browser/ui/browser_window/internal/browser_window_features.cc"
 AVATAR_STATE = "chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc"
 HIDDEN_SCROLLBAR = "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.cc"
+HIDDEN_SCROLLBAR_HEADER = "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.h"
 HIDDEN_SCROLLBAR_DATA = ROOT / "features/performance/hidden-scrollbar"
 
 
-def hidden_scrollbar_replacements():
-    """Accept only the complete non-diagnostic donor or the exact fixed source."""
+def hidden_scrollbar_replacements(name=HIDDEN_SCROLLBAR):
+    """Require complete known native files for both scrollbar implementation and header."""
     pins = json.loads((HIDDEN_SCROLLBAR_DATA / "pins.json").read_text())
-    if pins["schema"] != 1 or pins["source_file"] != HIDDEN_SCROLLBAR:
+    if pins["schema"] != 2 or set(pins["files"]) != {HIDDEN_SCROLLBAR, HIDDEN_SCROLLBAR_HEADER}:
         raise ValueError("Unexpected hidden scrollbar pin contract")
-    contents = []
-    for directory, key in (("baseline", "before_sha256"), ("payload", "after_sha256")):
-        path = HIDDEN_SCROLLBAR_DATA / directory / "rounded_scroll_bar.cc"
+    row = pins["files"][name]
+    def read(relative, expected):
+        path = HIDDEN_SCROLLBAR_DATA / relative
+        if not path.resolve().is_relative_to(HIDDEN_SCROLLBAR_DATA.resolve()) or path.is_symlink():
+            raise ValueError("Unsafe hidden scrollbar source path")
         content = path.read_bytes()
-        if hashlib.sha256(content).hexdigest() != pins[key]:
-            raise ValueError(f"Hidden scrollbar {directory} hash mismatch")
-        contents.append(content.decode("utf-8"))
-    return [tuple(contents)]
+        if hashlib.sha256(content).hexdigest() != expected:
+            raise ValueError("Hidden scrollbar native pin mismatch: " + relative)
+        return content.decode("utf-8")
+    before = read(row["baseline"], row["before_sha256"])
+    after = read(row["payload"], row["after_sha256"])
+    donors = [before] + [read(p["path"], p["sha256"]) for p in row["previous"]]
+    return [(donor, after) for donor in donors]
 
 
 def _avatar_replacements():
@@ -758,6 +764,7 @@ def replacements():
         "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
         AVATAR_STATE: _avatar_replacements(),
         HIDDEN_SCROLLBAR: hidden_scrollbar_replacements(),
+        HIDDEN_SCROLLBAR_HEADER: hidden_scrollbar_replacements(HIDDEN_SCROLLBAR_HEADER),
         **_peek_replacements(),
     })
 
@@ -777,8 +784,7 @@ def fingerprint():
     inputs = [ROOT / "script/apply_breezer_workspace.py",
               ROOT / "script/breezer_sidebar_frame.py"]
     inputs.extend(sorted(path for path in NATIVE.rglob("*") if path.is_file()))
-    inputs.extend(HIDDEN_SCROLLBAR_DATA / name for name in (
-        "pins.json", "baseline/rounded_scroll_bar.cc", "payload/rounded_scroll_bar.cc"))
+    inputs.extend(sorted(path for path in HIDDEN_SCROLLBAR_DATA.rglob("*") if path.is_file()))
     for path in inputs:
         name = path.relative_to(ROOT).as_posix()
         digest.update(name.encode() + b"\0")
@@ -805,10 +811,13 @@ def source_file(tree, name):
 
 
 def transform(name, content):
-    if name == HIDDEN_SCROLLBAR:
-        before, after = hidden_scrollbar_replacements()[0]
-        if content not in (before.encode("utf-8"), after.encode("utf-8")):
+    if name in (HIDDEN_SCROLLBAR, HIDDEN_SCROLLBAR_HEADER):
+        choices = hidden_scrollbar_replacements(name)
+        after = choices[0][1].encode("utf-8")
+        known = {before.encode("utf-8") for before, _ in choices} | {after}
+        if content not in known:
             raise ValueError(f"Unknown non-diagnostic hidden scrollbar source: {name}")
+        return after
     text = content.decode("utf-8")
     for before, after in replacements()[name]:
         # A removal's shorter result can already occur inside its original.

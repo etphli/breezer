@@ -64,25 +64,31 @@ def check(source, output, case=None, quiet=False):
 
 
 def preparation_checks(output):
+    # Native changes are limited to the hidden callback, its Init animator and
+    # two includes. Full files are independently pinned by the workspace hook.
     before, after = workspace.hidden_scrollbar_replacements()[0]
-    # All other source bytes, including scroll/model/layout/drag and hover
-    # methods, must remain identical to the licensed non-diagnostic baseline.
-    restored = after.replace(extract(after, 'Thumb::OnBoundsChanged'),
-                             extract(before, 'Thumb::OnBoundsChanged'), 1)
-    restored = restored.replace('#include "base/memory/scoped_refptr.h"\n', '', 1)
+    restored = after
+    for method in ('Thumb::OnBoundsChanged', 'Thumb::Init'):
+        restored = restored.replace(extract(after, method), extract(before, method), 1)
+    for name in ('base/memory/scoped_refptr.h', 'ui/compositor/layer_animation_delegate.h'):
+        restored = restored.replace(f'#include "{name}"\n', '', 1)
     if restored != before:
-        raise AssertionError('Scrollbar changes extend outside the callback and its include')
-    for original in (before, after):
-        if workspace.transform(workspace.HIDDEN_SCROLLBAR, original.encode()) != after.encode():
-            raise AssertionError('Scrollbar preparation is not convergent')
-    for drift in (before + '\n', after + '\n', '// diagnostic\n' + before,
-                  after.replace('return true;', 'return false;', 1)):
-        try:
-            workspace.transform(workspace.HIDDEN_SCROLLBAR, drift.encode())
-        except ValueError:
-            pass
-        else:
-            raise AssertionError('Unknown donor accepted')
+        raise AssertionError('Scrollbar changes extend outside the scoped methods/includes')
+    old_header, header = workspace.hidden_scrollbar_replacements(workspace.HIDDEN_SCROLLBAR_HEADER)[0]
+    if header.replace('#include "base/memory/weak_ptr.h"\n', '', 1).replace(
+            '    base::WeakPtrFactory<Thumb> weak_ptr_factory_{this};\n', '', 1) != old_header:
+        raise AssertionError('Unexpected scrollbar header change')
+    for name in (workspace.HIDDEN_SCROLLBAR, workspace.HIDDEN_SCROLLBAR_HEADER):
+        choices = workspace.hidden_scrollbar_replacements(name)
+        for donor in [a for a, _ in choices] + [choices[0][1]]:
+            if workspace.transform(name, donor.encode()) != choices[0][1].encode():
+                raise AssertionError('Non-convergent native transform')
+            try:
+                workspace.transform(name, (donor + '\n').encode())
+            except ValueError:
+                pass
+            else:
+                raise AssertionError('Unknown full source accepted')
     with tempfile.TemporaryDirectory(prefix='breezer-scrollbar-preparation-') as directory:
         root = Path(directory)
         data = root / DATA.relative_to(ROOT)
@@ -95,60 +101,29 @@ def preparation_checks(output):
             shutil.copyfile(ROOT / 'script' / name, root / 'script' / name)
         with mock.patch.multiple(workspace, ROOT=root, NATIVE=native, HIDDEN_SCROLLBAR_DATA=data):
             identity = workspace.fingerprint()
-            for name in ('pins.json', 'baseline/rounded_scroll_bar.cc', 'payload/rounded_scroll_bar.cc'):
-                path = data / name
+            for path in sorted(p for p in data.rglob('*') if p.is_file()):
                 saved = path.read_bytes()
                 path.write_bytes(saved + b'\n')
                 if workspace.fingerprint() == identity:
-                    raise AssertionError('Scrollbar input missing from workspace fingerprint: ' + name)
-                try:
-                    workspace.hidden_scrollbar_replacements()
-                except ValueError:
-                    if name == 'pins.json':
-                        raise
-                else:
-                    if name != 'pins.json':
-                        raise AssertionError('Corrupted payload/baseline pin accepted')
+                    raise AssertionError('Fingerprint omitted ' + str(path))
                 path.write_bytes(saved)
             if workspace.fingerprint() != identity:
                 raise AssertionError('Fingerprint failed to recover')
-        # Exercise the real writer on a fresh minimal source tree. The full
-        # workspace fixture separately checks all other upstream targets.
-        tree = root / 'source'
-        target = tree / workspace.HIDDEN_SCROLLBAR
-        target.parent.mkdir(parents=True)
-        target.write_bytes(before.encode())
-        sentinel = tree / 'out/compiled-cache'
-        sentinel.parent.mkdir()
-        sentinel.write_bytes(b'preserve compiled output')
-        with mock.patch.multiple(workspace,
-                                 replacements=lambda: {workspace.HIDDEN_SCROLLBAR: [(before, after)]},
-                                 added_files=lambda: {}):
-            try:
-                workspace.apply(tree, check=True)
-            except ValueError:
-                pass
-            else:
-                raise AssertionError('Check accepted an unapplied scrollbar')
-            if target.read_bytes() != before.encode():
-                raise AssertionError('Check wrote the source')
-            if workspace.apply(tree) != 1 or target.read_bytes() != after.encode():
-                raise AssertionError('Fresh source was not prepared')
-            if workspace.apply(tree) != 0 or workspace.apply(tree, check=True) != 0:
-                raise AssertionError('Writer replay was not idempotent')
-            target.write_bytes(before.encode() + b'// drift\n')
-            try:
-                workspace.apply(tree)
-            except ValueError:
-                pass
-            else:
-                raise AssertionError('Writer accepted unknown donor')
-            if target.read_bytes() != before.encode() + b'// drift\n':
-                raise AssertionError('Drift failure wrote the source')
-        if sentinel.read_bytes() != b'preserve compiled output':
-            raise AssertionError('Preparation modified compiled output')
-    message = 'PASS: exact donor/payload pins, idempotent transform, donor drift rejection, unchanged non-callback source, preparation fingerprint inputs.\n'
+            for name in (workspace.HIDDEN_SCROLLBAR, workspace.HIDDEN_SCROLLBAR_HEADER):
+                row = __import__('json').loads((data / 'pins.json').read_text())['files'][name]
+                for key in ('baseline', 'payload'):
+                    path = data / row[key]
+                    saved = path.read_bytes()
+                    path.write_bytes(saved + b'\n')
+                    try:
+                        workspace.hidden_scrollbar_replacements(name)
+                    except ValueError:
+                        pass
+                    else:
+                        raise AssertionError('Corrupt full-file input accepted')
+                    path.write_bytes(saved)
     output.mkdir(parents=True, exist_ok=True)
+    message = 'PASS: native cc/header pins, previous donor migration, idempotence, source scope, drift rejection and fingerprints.\n'
     (output / 'preparation.log').write_text(message)
     print(message, end='')
 

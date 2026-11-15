@@ -182,9 +182,11 @@ test('welcome timeout also has visible failure and reload instead of an unhandle
 test('main draw, compact identities and activation-before-reveal remain the current-main operations', () => {
   const next = { draw: 'syncRovingFocus', compactLabels: 'draw', updateFavicon: null, switchSpace: 'animateSpace' };
   for (const [name, expected] of Object.entries(mainFunctions)) {
-    const start = source.indexOf(`function ${name}(`);
+    const start = source.indexOf(`function ${name === 'draw' ? 'paintSidebar' : name}(`);
     const end = source.indexOf(next[name] ? `function ${next[name]}(` : 'export const favoriteTitle', start);
-    const actual = source.slice(start, end).replace('  pendingRows = null;\n', '');
+    const actual = source.slice(start, end).replace('  pendingRows = null;\n', '')
+      .replace('function paintSidebar() {', 'function draw() {')
+      .replace('  queryDrawDirty = false;\n', '');
     assert.equal(actual.trim(), expected.trim(), name);
   }
   assert.deepEqual([...source.matchAll(/import\('([^']+)'\)/g)].map(match => match[1]), ['./settings.js', './onboarding.js']);

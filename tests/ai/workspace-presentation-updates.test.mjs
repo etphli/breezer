@@ -169,7 +169,7 @@ test('held transfer queries cannot postpone structural membership changes behind
     assert.equal(both[1].pending().rows, null);
     flush(both); equal(both); assert.equal(both[1].counters.models, 1, direction);
     for (const h of both) { h.releaseQuery(); for (let i = 0; i < 12; i++) await Promise.resolve(); }
-    flush(both); equal(both); assert.equal(both[1].counters.models, 2, direction);
+    flush(both); equal(both); assert.equal(both[1].counters.models, direction === 'detach' ? 1 : 2, direction);
   }
 });
 
@@ -202,11 +202,11 @@ test('row bursts invalidate in-flight query snapshots and preserve exact recover
   equal(both); assert.deepEqual(both.map(h => Array.from(h.versions())), [[100, 2], [100, 2]]);
 });
 
-test('authoritative query completion promotes queued row work even for an equivalent tab snapshot', async () => {
+test('equal query completion preserves queued row work for an equivalent snapshot', async () => {
   const both = await pair();
   for (const h of both) { burst(h); await h.refreshTabs(); }
-  assert.equal(both[1].pending().rows, null); flush(both); equal(both);
-  assert.equal(both[1].counters.models, 1); assert.equal(both[1].counters.queries, 1);
+  assert.deepEqual(Array.from(both[1].pending().rows), [3]); flush(both); equal(both);
+  assert.equal(both[1].counters.models, 0); assert.equal(both[1].counters.queries, 1);
 });
 
 test('saved and hidden rows, unknown fields and mutable aliases keep complete reconciliation', async () => {

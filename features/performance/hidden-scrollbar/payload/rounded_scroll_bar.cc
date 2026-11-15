@@ -13,6 +13,7 @@
 #include "ui/color/color_id.h"
 #include "ui/color/color_provider.h"
 #include "ui/compositor/layer.h"
+#include "ui/compositor/layer_animation_delegate.h"
 #include "ui/compositor/layer_animator.h"
 #include "ui/compositor/scoped_layer_animation_settings.h"
 #include "ui/gfx/canvas.h"
@@ -45,7 +46,43 @@ void RoundedScrollBar::Thumb::Init() {
   SetPaintToLayer();
   layer()->SetFillsBoundsOpaquely(false);
   StartHideCountdown();
-  layer()->SetAnimator(ui::LayerAnimator::CreateImplicitAnimator());
+  // Intercept this Thumb's layer bounds before LayerAnimator creates a sequence.
+  // Query IsDrawn at each setter; visibility notifications can arrive too late.
+  class BoundsAnimator final : public ui::LayerAnimator {
+   public:
+    explicit BoundsAnimator(base::WeakPtr<Thumb> thumb)
+        : ui::LayerAnimator(
+              ui::LayerAnimator::CreateImplicitAnimator()->GetTransitionDuration()),
+          thumb_(thumb) {}
+
+    void SetBounds(const gfx::Rect& bounds) override {
+      const unsigned request = ++bounds_request_;
+      auto* thumb = thumb_.get();
+      if (!thumb || !delegate() || delegate()->GetLayer() != thumb->layer() ||
+          thumb->IsDrawn()) {
+        ui::LayerAnimator::SetBounds(bounds);
+        return;
+      }
+      // An older drawn animation may still be running. Match the callback's
+      // timer-before-completion ordering and retain the animator across it.
+      thumb->hide_timer_.Stop();
+      scoped_refptr<ui::LayerAnimator> retain(this);
+      ui::Layer* const target_layer = thumb->layer();
+      StopAnimatingProperty(ui::LayerAnimationElement::BOUNDS);
+      // Completion may reenter SetBounds or detach the layer. Do not overwrite
+      // a newer request or apply this request to a different owner.
+      if (request == bounds_request_ && delegate() &&
+          delegate()->GetLayer() == target_layer) {
+        delegate()->SetBoundsFromAnimation(
+            bounds, ui::PropertyChangeReason::NOT_FROM_ANIMATION);
+      }
+    }
+
+   private:
+    base::WeakPtr<Thumb> thumb_;
+    unsigned bounds_request_ = 0;
+  };
+  layer()->SetAnimator(base::MakeRefCounted<BoundsAnimator>(weak_ptr_factory_.GetWeakPtr()));
 }
 
 gfx::Size RoundedScrollBar::Thumb::CalculatePreferredSize(

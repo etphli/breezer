@@ -1,0 +1,6 @@
+{
+  "sourceCommit": "3f983a26af363c46c81a54691eea58b99c87dca4",
+  "source": "features/ai/extension/workspace.js",
+  "sha256": "330a506c245456e2ad995ce9e0c90781960c9a33e657b80614806467e0184c8c",
+  "purpose": "Frozen pre-composition source for differential lifecycle and DOM tests."
+}

@@ -1,25 +1,28 @@
-# Hidden native scrollbar bounds completion
+# Hidden native scrollbar scheduling
 
-The production workspace overlay applies `payload/rounded_scroll_bar.cc` to
-`chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.cc`. `pins.json` accepts
-only the exact non-diagnostic PC donor or the exact candidate. The baseline and
-payload retain Chromium's copyright header and `LICENSE.chromium`.
+The existing workspace hook applies two fully pinned files to Chromium's
+`chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.{cc,h}`. It accepts the
+licensed baseline, the earlier callback-only implementation and the exact
+current payload. Unknown source fails before any workspace writes.
 
-`View::SetLayerBounds` starts the implicit BOUNDS animation before
-`Thumb::OnBoundsChanged`. The hidden callback stops the hide countdown, retains
-the animator, completes BOUNDS and OPACITY to their existing final targets, then
-returns without accessing the view again. It does not change model geometry,
-skip layout, force opacity to zero, disable global animation or add per-tab state.
-The drawn branch and every other method retain their original bytes.
+`View::SetLayerBounds` calls the implicit bounds animator before invoking
+`Thumb::OnBoundsChanged`. Completing an animation in that callback still lets
+the animator enqueue work first. The Thumb now installs a bounds animator that
+checks `IsDrawn()` when each bounds request arrives. A hidden owning Thumb stops
+its countdown, completes any older bounds request and writes the new target
+directly. It creates no new BOUNDS sequence on this path. Drawn, detached-owner
+and foreign-layer requests retain the base animator behavior and duration.
 
-This corrects an observed scheduling owner. It does not establish a CPU saving
-or satisfy a performance ceiling. All eight latest balanced ceilings remain
-missed until Root repeats the comparison and obtains an accepted result.
+A weak owner reference, retained animator, request generation and delegate/layer
+checks protect completion callbacks that detach, reparent or reenter. The
+existing hidden callback still completes BOUNDS and OPACITY. Show, Hide, hover,
+scrolling and model geometry retain their previous behavior. Other properties
+are untouched. Geometry changes can still schedule lower-layer work.
 
 ## Preparation
 
-From a clean Breezer checkout, after normal pinned Chromium/Helium source
-preparation, use the existing hook on a private, quiescent source copy:
+After normal Chromium/Helium preparation, use the existing hook on quiescent
+private source:
 
 ```sh
 python3 script/apply_breezer_workspace.py "$CHROMIUM_SOURCE"
@@ -27,72 +30,58 @@ python3 script/apply_breezer_workspace.py --check "$CHROMIUM_SOURCE"
 python3 script/apply_breezer_workspace.py --fingerprint
 ```
 
-The normal build wrapper already calls this hook. Its workspace fingerprint
-includes the baseline, payload and pins. Existing preparation markers therefore
-refuse stale reuse before changing source or compiled output. Use a separate
-build directory or Root's separately verified overlay migration. Do not delete
-markers or compiled caches to bypass that check.
-
-There is no separate scrollbar applier, marker or build-wrapper path.
+The normal build wrapper calls this hook. Its fingerprint includes both native
+files, the known donors, pins and regression fixtures. Existing preparation
+markers reject stale reuse. Preserve compiled caches and markers; use the
+normal fresh-build or verified migration route.
 
 ## Offline regression
 
-Python 3 and a local C++20 compiler with AddressSanitizer and
-UndefinedBehaviorSanitizer are required. No download, app launch or native
-browser build occurs. This check needs only tracked checkout files:
+Python 3 and a C++20 compiler with AddressSanitizer and UndefinedBehaviorSanitizer
+are required. All inputs are tracked; these commands download nothing:
 
 ```sh
-python3 script/check_breezer_hidden_scrollbar.py
-python3 script/check_breezer_hidden_scrollbar.py --failure-controls
+python3 -B script/check_breezer_hidden_scrollbar.py --failure-controls
+python3 -B script/check_breezer_hidden_scrollbar_prestart.py
+python3 -B script/check_breezer_workspace.py --offline
+python3 -B script/check_breezer_preparation.py
 ```
 
-Reproduce the original failure with the same actual-method fixture:
+The first check exercises fifteen actual callback/lifecycle cases and six
+deliberately broken callbacks. The second extracts actual Init and lifecycle
+methods into a bounded twenty-two-case fixture. Pinned reference View, Layer
+and animator methods drive its lower-layer doubles. The reference provenance
+and Chromium license are retained beside it.
+
+Reproduce the pre-start failure against the previous callback-only code:
 
 ```sh
-python3 script/check_breezer_hidden_scrollbar.py \
-  --source features/performance/hidden-scrollbar/baseline/rounded_scroll_bar.cc \
-  --case hidden-bounds
+python3 -B script/check_breezer_hidden_scrollbar_prestart.py \
+  --source features/performance/hidden-scrollbar/previous/rounded_scroll_bar.cc \
+  --case hidden-no-start
 ```
 
-The baseline must exit 1 with `BOUNDS/OPACITY still active`. The default payload
-must pass all cases. `--output DIRECTORY` retains extracted C++, source hashes,
-compile commands and run logs. Failure controls deliberately omit each required
-stop, move the timer stop after callbacks, remove the animator reference and
-replace the narrow stops with a global stop. Each must fail its targeted case;
-the missing-reference control must report a sanitizer use-after-free.
+That control must fail because hidden SetBounds enqueues a scheduler request.
+Use `--output DIRECTORY` to retain extracted C++, commands and logs. Tests cover
+hidden ancestors, visibility changes at call time, final targets, timer ordering,
+reentrancy, owner destruction, detachment, reparenting, unrelated properties and
+drawn-path observations. Preparation checks cover both files, previous-source
+migration, idempotence, source drift and fingerprints. The full workspace fixture
+checks all targets and cache preservation before writes.
 
-The fixture inserts the actual bounds, Show, Hide, countdown, size-animation and
-mouse enter/exit methods verbatim. Controlled doubles model their lower-layer
-API. It exercises final targets, unrelated transform preservation, idle and
-visible behavior, size animation, reshow, scrolling, hover, pressed state,
-repeated updates, reentrancy, layer detachment, owner detachment and destruction.
-Preparation checks use the real workspace transformer/writer and verify exact
-pins, idempotence, drift rejection, source scope, fingerprints and output-cache
-preservation.
+## Proof limits
 
-With the existing pinned upstream source cache available, also run:
+The exact payload compiled in the private PGO build on the PC and passed the Mac
+two-launch filtering/sidebar check. That check does not certify visible native
+scrollbar presentation, drag, DPI, accessibility or arbitrary deletion observers.
+The standalone doubles do not establish those behaviors either.
 
-```sh
-python3 script/check_breezer_workspace.py --offline
-python3 script/check_breezer_preparation.py
-```
+The callback's local lifetime handling does not make a View caller safe if an
+arbitrary observer deletes that View and the caller subsequently accesses it.
+Property completion also completes the containing sequence; arbitrary future
+mixed-property sequences are outside this contract.
 
-The workspace check covers the complete overlay, interrupted replay and donor
-drift before any writes. It supplies this target from the licensed baseline in
-the checkout and prepares other targets from the existing upstream fixture.
-
-## Remaining validation
-
-The doubles do not compile Chromium headers or model the native compositor,
-sequence scheduling, widget hierarchy, DPI, accessibility, drag or fallback UI.
-They do not prove browser-level safety when a caller continues after a view
-destroys itself. Root owns native compilation, widget/GPU functional checks and
-the original live loop. The local source review supports the callback lifetime
-choice: `StopAnimatingProperty` retains itself per call, `Layer::SetAnimator`
-clears the delegate on detachment, and progression checks for a missing delegate.
-The callback's extra reference spans both calls.
-
-The Thumb's implicit animations are separate property sequences. Chromium's
-property-stop API completes a whole sequence that contains that property; this
-patch does not change that API or claim isolation within arbitrary mixed-property
-sequences created by future callers.
+No saving is established for this pre-start candidate. The previous callback-only
+candidate missed all eight balanced performance ceilings. The combined current
+candidate still needs a fresh guarded comparison; performance and merge remain
+held until its required gates pass.

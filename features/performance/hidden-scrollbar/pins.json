@@ -1,8 +1,26 @@
 {
-  "schema": 1,
-  "source_file": "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.cc",
-  "before_sha256": "1a594e8ad8b71094eb1eaaae756c66839c3035d00d6f84177c8c3df89014b3ec",
-  "after_sha256": "3d269a0080eefa1cdb1e2ac78f8c0ab02c86746c1966a466efba7280e0fddae2",
+  "schema": 2,
+  "files": {
+    "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.cc": {
+      "baseline": "baseline/rounded_scroll_bar.cc",
+      "payload": "payload/rounded_scroll_bar.cc",
+      "before_sha256": "1a594e8ad8b71094eb1eaaae756c66839c3035d00d6f84177c8c3df89014b3ec",
+      "after_sha256": "1a88ca60b77e64eadab0056cac6ae68953616f7c62b4b6a03b812c2463d7e8bb",
+      "previous": [
+        {
+          "path": "previous/rounded_scroll_bar.cc",
+          "sha256": "3d269a0080eefa1cdb1e2ac78f8c0ab02c86746c1966a466efba7280e0fddae2"
+        }
+      ]
+    },
+    "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.h": {
+      "baseline": "baseline/rounded_scroll_bar.h",
+      "payload": "payload/rounded_scroll_bar.h",
+      "before_sha256": "b11d6ed55849a10b165ca0711ada56897fafebc3d584d66ff1e450f9fe323156",
+      "after_sha256": "771e0e23b6bebb5868a7afd489c4a2a6deac33295e732f34b62be1f139557dfb",
+      "previous": []
+    }
+  },
   "provenance": {
     "chromium_version": "156.0.8078.47",
     "helium_commit": "f29a25968e483f8bb85e47829ccd487bbe229199",

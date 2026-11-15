@@ -94,7 +94,7 @@ test('main two-character fallback and failed favicon redraw recompute compact id
 });
 
 test('negative control exposes stale compact labels if the row batch omits recomputation', async () => {
-  const mutant = source.replace('    compactLabels();\n    syncRovingFocus();\n  });', '    syncRovingFocus();\n  });');
+  const mutant = source.replace('      compactLabels();\n      syncRovingFocus();', '      syncRovingFocus();');
   assert.notEqual(mutant, source);
   const both = await duplicatePair(mutant);
   assert.notDeepEqual(both[1].snapshot().dom, both[0].snapshot().dom);

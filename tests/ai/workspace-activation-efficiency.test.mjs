@@ -84,7 +84,7 @@ const settle = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(
 
 test('identical window snapshots skip session writes; changed selection and failed writes remain retryable', async () => {
   const h = await harness(candidate);
-  activate(h, 4); activate(h, 4); h.saveWindowState(); await settle();
+  activate(h, 4); await settle(); activate(h, 4); h.saveWindowState(); await settle();
   assert.equal(h.counters.writes.filter(w => w[0] === 'session').length, 1);
   activate(h, 3); await settle();
   assert.equal(h.counters.writes.filter(w => w[0] === 'session').length, 2);
@@ -125,9 +125,9 @@ test('newer tab events fence stale activation completion before space reveal', a
 });
 
 test('negative control catches repeated session writes without snapshot deduplication', async () => {
-  const mutant = candidate.replace('if (signature === savedWindowState) return;', '');
+  const mutant = candidate.replace('windowStateWrite?.saved && ', 'false && ');
   assert.notEqual(mutant, candidate);
   const h = await harness(mutant);
-  activate(h, 4); activate(h, 4);
+  activate(h, 4); await settle(); activate(h, 4); await settle();
   assert.equal(h.counters.writes.filter(w => w[0] === 'session').length, 2);
 });

@@ -299,7 +299,7 @@ def main():
         originals = source_fixture.prepare(
             tree, offline=args.offline,
             wanted_paths=tuple(name for name in workspace.replacements()
-                               if name != workspace.HIDDEN_SCROLLBAR)
+                               if name not in (workspace.HIDDEN_SCROLLBAR, workspace.HIDDEN_SCROLLBAR_HEADER))
         )
         # This target uses the exact licensed non-diagnostic PC donor, retained
         # in the checkout so clean-checkout regression replay needs no download.
@@ -308,6 +308,9 @@ def main():
         scrollbar.parent.mkdir(parents=True, exist_ok=True)
         scrollbar.write_bytes(baseline)
         originals.add(workspace.HIDDEN_SCROLLBAR)
+        header = tree / workspace.HIDDEN_SCROLLBAR_HEADER
+        header.write_bytes(workspace.hidden_scrollbar_replacements(workspace.HIDDEN_SCROLLBAR_HEADER)[0][0].encode("utf-8"))
+        originals.add(workspace.HIDDEN_SCROLLBAR_HEADER)
         original_bytes = {
             name: (tree / name).read_bytes()
             for name in originals

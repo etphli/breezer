@@ -180,16 +180,26 @@ function flushRecords() {
   return workspace.patchMembers(set, remove).catch((error) => showToast(`Couldn’t save tab spaces. ${errorText(error)}`));
 }
 
-let savedWindowState = '';
-function saveWindowState() {
+let windowStateWrite = null;
+let windowStateWritesPending = 0;
+async function saveWindowState() {
   const key = windowStateKey(state.windowId);
   const value = { activeSpaceId: state.activeSpaceId, lastActive: { ...state.lastActive } };
-  const signature = JSON.stringify([key, value]);
-  if (signature === savedWindowState) return;
-  savedWindowState = signature;
-  void api.storage.session.set({ [key]: value }).catch(() => {
-    if (savedWindowState === signature) savedWindowState = '';
-  });
+  const serialized = JSON.stringify(value);
+  if (windowStateWrite?.saved && windowStateWrite.key === key && windowStateWrite.serialized === serialized) return;
+  const write = { key, serialized, saved: false };
+  // Different overlapping writes make completion order ambiguous. Keep sending
+  // every change immediately, and only deduplicate a successful isolated write.
+  windowStateWrite = windowStateWritesPending ? null : write;
+  ++windowStateWritesPending;
+  try {
+    await api.storage.session.set({ [key]: value });
+    if (windowStateWrite === write) write.saved = true;
+  } catch {
+    if (windowStateWrite === write) windowStateWrite = null;
+  } finally {
+    --windowStateWritesPending;
+  }
 }
 
 async function mutate(fn) {
@@ -208,14 +218,68 @@ async function mutate(fn) {
 // A query can return after newer tab events or another query have been handled.
 let tabQueryVersion = 0;
 let tabEventVersion = 0;
+let queryDrawDirty = false;
+let pendingTabAttachments = 0;
 async function refreshTabs() {
   const version = ++tabQueryVersion;
   const events = tabEventVersion;
   const tabs = await api.tabs.query({ windowId: state.windowId });
   if (version !== tabQueryVersion) return;
   if (events !== tabEventVersion) { scheduleRefresh(); return; }
+  // A query may only confirm changes already drawn by the event handlers.
+  // Keep the existing references used by the model and row actions in that case.
+  if (state.drawn && !queryDrawDirty && !pendingTabAttachments
+      && !(typeof api.breezerPrivate?.setPeekSources === 'function' && state.peekKey === null)
+      && sameTabPresentation(tabs)) {
+    for (const tab of tabs) {
+      const previous = state.tabs.get(tab.id);
+      for (const key of Object.keys(previous)) if (!Object.hasOwn(tab, key)) delete previous[key];
+      Object.defineProperties(previous, Object.getOwnPropertyDescriptors(tab));
+    }
+    return;
+  }
   state.tabs = new Map(tabs.map((tab) => [tab.id, tab]));
   render();
+}
+
+function sameTabPresentation(tabs) {
+  if (tabs.length !== state.tabs.size) return false;
+  const previousTabs = state.tabs.values();
+  const scalar = value => value === null || (typeof value !== 'object' && typeof value !== 'function');
+  const fields = value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value) || !Object.isExtensible(value) || Object.getOwnPropertySymbols(value).length) return null;
+    const proto = Object.getPrototypeOf(value);
+    const constructor = proto && Object.getOwnPropertyDescriptor(proto, 'constructor')?.value;
+    if (!proto || Object.getPrototypeOf(proto) !== null || constructor?.name !== 'Object' || constructor.prototype !== proto) return null;
+    const standard = ['constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString'];
+    if (Object.getOwnPropertyNames(proto).some(key => !standard.includes(key))) return null;
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    if (Object.values(descriptors).some(d => !d.enumerable || !d.configurable || !d.writable || !Object.hasOwn(d, 'value'))) return null;
+    return Object.keys(descriptors);
+  };
+  const flatEqual = (a, b) => {
+    if (a === b) return false; // Shared mutable nested state is not evidence of equality.
+    const left = fields(a), right = fields(b);
+    return left && right && left.length === right.length && left.every(key =>
+      Object.hasOwn(b, key) && scalar(a[key]) && scalar(b[key]) && Object.is(a[key], b[key]));
+  };
+  for (const tab of tabs) {
+    const previous = previousTabs.next().value;
+    const before = fields(previous), after = fields(tab);
+    if (!before || !after || previous === tab || previous.id !== tab.id) return false;
+    for (const key of new Set([...before, ...after])) {
+      const a = previous[key], b = tab[key];
+      if (key === 'highlighted' || key === 'autoDiscardable' || key === 'selected' || key === 'lastAccessed') {
+        if ((Object.hasOwn(previous, key) && !scalar(a)) || (Object.hasOwn(tab, key) && !scalar(b))) return false;
+        continue;
+      }
+      if (!Object.hasOwn(previous, key) || !Object.hasOwn(tab, key)) return false;
+      if (scalar(a) && scalar(b) && Object.is(a, b)) continue;
+      if (key === 'mutedInfo' && flatEqual(a, b)) continue;
+      return false;
+    }
+  }
+  return true;
 }
 
 // Chromium shifts other tabs' indices without events on create, close and pin; re-read them once.
@@ -468,18 +532,23 @@ function render(tabId) {
   else pendingRows?.add(tabId);
   if (frame || !state.store) return;
   frame = requestAnimationFrame(() => {
-    frame = 0;
-    const rows = pendingRows && [...pendingRows].map(id => {
-      const tab = state.tabs.get(id);
-      return { tab, row: todayRow(tab) };
-    });
-    pendingRows = null;
-    if (!rows || rows.some(({ row }) => !row)) { draw(); return; }
-    for (const { row, tab } of rows) {
-      updateRow(row, { title: displayTitle(null, tab), tab, active: tab.active, selected: tab.active, actionLabel: 'Close tab', actionIcon: 'close' });
+    try {
+      frame = 0;
+      const rows = pendingRows && [...pendingRows].map(id => {
+        const tab = state.tabs.get(id);
+        return { tab, row: todayRow(tab) };
+      });
+      pendingRows = null;
+      if (!rows || rows.some(({ row }) => !row)) { draw(); return; }
+      for (const { row, tab } of rows) {
+        updateRow(row, { title: displayTitle(null, tab), tab, active: tab.active, selected: tab.active, actionLabel: 'Close tab', actionIcon: 'close' });
+      }
+      compactLabels();
+      syncRovingFocus();
+    } catch (error) {
+      queryDrawDirty = true;
+      throw error;
     }
-    compactLabels();
-    syncRovingFocus();
   });
 }
 
@@ -685,6 +754,17 @@ function compactLabels() {
 }
 
 function draw() {
+  const queued = Boolean(frame);
+  if (frame) { cancelAnimationFrame(frame); frame = 0; }
+  queryDrawDirty = true;
+  try { paintSidebar(); }
+  catch (error) {
+    if (queued) render();
+    throw error;
+  }
+}
+
+function paintSidebar() {
   pendingRows = null;
   if (!state.store) return;
   const model = buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: state.activeSpaceId });
@@ -803,6 +883,7 @@ function draw() {
   syncRovingFocus();
   compactLabels();
   state.drawn = true;
+  queryDrawDirty = false;
 }
 
 // ---------------------------------------------------------------- keyboard focus
@@ -1464,19 +1545,23 @@ function onActivated({ tabId, windowId }) {
 function onAttached(tabId, info) {
   if (!belongsHere(info.newWindowId)) return;
   ++tabEventVersion;
+  queryDrawDirty = true;
+  ++pendingTabAttachments;
   state.peekKey = null;
   void api.tabs.get(tabId).then((tab) => {
     ++tabEventVersion;
+    queryDrawDirty = true;
     state.tabs.set(tabId, tab);
     const record = state.records[tabId];
     setRecord(tabId, { s: state.activeSpaceId, e: record?.e || '' });
     return refreshTabs();
-  }).catch(() => {});
+  }).catch(() => {}).finally(() => { --pendingTabAttachments; });
 }
 
 function onDetached(tabId, info) {
   if (!belongsHere(info.oldWindowId)) return;
   ++tabEventVersion;
+  queryDrawDirty = true;
   state.peekKey = null;
   state.tabs.delete(tabId);
   // The receiving window rewrites the record; don't race it with a delete.
@@ -1586,7 +1671,7 @@ function bindSidebar() {
     if (space) switchSpace(space.id);
   });
   darkQuery.addEventListener('change', () => applyAppearance(state.appearance));
-  addEventListener('pagehide', () => { void flushRecords(); });
+  addEventListener('pagehide', () => { void flushRecords(); if (!windowStateWritesPending) void saveWindowState(); });
 
   const sidebar = $('sidebar');
   sidebar.addEventListener('click', (event) => {
