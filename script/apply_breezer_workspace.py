@@ -9,6 +9,7 @@ changes build output or removes source files.
 
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
@@ -28,6 +29,23 @@ LAYOUT_CONTROLLER = "chrome/browser/ui/helium/helium_layout_state_controller.cc"
 VERTICAL_CONTROLLER = "chrome/browser/ui/tabs/vertical_tab_strip_state_controller_impl.cc"
 WINDOW_FEATURES = "chrome/browser/ui/browser_window/internal/browser_window_features.cc"
 AVATAR_STATE = "chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc"
+HIDDEN_SCROLLBAR = "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.cc"
+HIDDEN_SCROLLBAR_DATA = ROOT / "features/performance/hidden-scrollbar"
+
+
+def hidden_scrollbar_replacements():
+    """Accept only the complete non-diagnostic donor or the exact fixed source."""
+    pins = json.loads((HIDDEN_SCROLLBAR_DATA / "pins.json").read_text())
+    if pins["schema"] != 1 or pins["source_file"] != HIDDEN_SCROLLBAR:
+        raise ValueError("Unexpected hidden scrollbar pin contract")
+    contents = []
+    for directory, key in (("baseline", "before_sha256"), ("payload", "after_sha256")):
+        path = HIDDEN_SCROLLBAR_DATA / directory / "rounded_scroll_bar.cc"
+        content = path.read_bytes()
+        if hashlib.sha256(content).hexdigest() != pins[key]:
+            raise ValueError(f"Hidden scrollbar {directory} hash mismatch")
+        contents.append(content.decode("utf-8"))
+    return [tuple(contents)]
 
 
 def _avatar_replacements():
@@ -739,6 +757,7 @@ def replacements():
         ],
         "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
         AVATAR_STATE: _avatar_replacements(),
+        HIDDEN_SCROLLBAR: hidden_scrollbar_replacements(),
         **_peek_replacements(),
     })
 
@@ -758,6 +777,8 @@ def fingerprint():
     inputs = [ROOT / "script/apply_breezer_workspace.py",
               ROOT / "script/breezer_sidebar_frame.py"]
     inputs.extend(sorted(path for path in NATIVE.rglob("*") if path.is_file()))
+    inputs.extend(HIDDEN_SCROLLBAR_DATA / name for name in (
+        "pins.json", "baseline/rounded_scroll_bar.cc", "payload/rounded_scroll_bar.cc"))
     for path in inputs:
         name = path.relative_to(ROOT).as_posix()
         digest.update(name.encode() + b"\0")
@@ -784,6 +805,10 @@ def source_file(tree, name):
 
 
 def transform(name, content):
+    if name == HIDDEN_SCROLLBAR:
+        before, after = hidden_scrollbar_replacements()[0]
+        if content not in (before.encode("utf-8"), after.encode("utf-8")):
+            raise ValueError(f"Unknown non-diagnostic hidden scrollbar source: {name}")
     text = content.decode("utf-8")
     for before, after in replacements()[name]:
         # A removal's shorter result can already occur inside its original.

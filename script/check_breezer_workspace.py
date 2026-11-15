@@ -71,6 +71,28 @@ def check_overlay(tree, originals):
     require(file_hashes(tree) == drifted, "Anchor failure partially modified the source fixture")
     target.write_bytes(intact)
 
+    # Unknown donor bytes, including diagnostic prefixes and changes outside the
+    # callback, must fail before repairing an earlier unapplied workspace file.
+    scrollbar = tree / workspace.HIDDEN_SCROLLBAR
+    fixed_scrollbar = scrollbar.read_bytes()
+    baseline = originals[workspace.HIDDEN_SCROLLBAR]
+    for content in (baseline + b"// diagnostic marker\n",
+                    b"// diagnostic marker\n" + fixed_scrollbar,
+                    fixed_scrollbar.replace(b"return true;", b"return false;", 1)):
+        scrollbar.write_bytes(content)
+        (tree / interrupted).write_bytes(originals[interrupted])
+        drifted = file_hashes(tree)
+        try:
+            workspace.apply(tree)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Unknown hidden scrollbar donor did not fail closed")
+        require(file_hashes(tree) == drifted, "Scrollbar failure partially wrote workspace files")
+    scrollbar.write_bytes(fixed_scrollbar)
+    require(workspace.apply(tree) > 0, "Workspace recovery did not converge")
+    require(file_hashes(tree) == applied, "Scrollbar drift control did not restore fixture")
+
     added = workspace.added_files()
     idl = added["chrome/common/extensions/api/breezer_private.idl"].read_text()
     api = added[
@@ -275,8 +297,17 @@ def main():
         if args.no_cache:
             source_fixture.CACHE = temporary / "pristine"
         originals = source_fixture.prepare(
-            tree, offline=args.offline, wanted_paths=tuple(workspace.replacements())
+            tree, offline=args.offline,
+            wanted_paths=tuple(name for name in workspace.replacements()
+                               if name != workspace.HIDDEN_SCROLLBAR)
         )
+        # This target uses the exact licensed non-diagnostic PC donor, retained
+        # in the checkout so clean-checkout regression replay needs no download.
+        baseline = workspace.hidden_scrollbar_replacements()[0][0].encode("utf-8")
+        scrollbar = tree / workspace.HIDDEN_SCROLLBAR
+        scrollbar.parent.mkdir(parents=True, exist_ok=True)
+        scrollbar.write_bytes(baseline)
+        originals.add(workspace.HIDDEN_SCROLLBAR)
         original_bytes = {
             name: (tree / name).read_bytes()
             for name in originals
