@@ -591,7 +591,9 @@ function folderNode() {
   glyph.append(icon('folder'));
   const title = el('span', 'title');
   const count = el('span', 'count', { 'aria-hidden': 'true' });
-  head.append(chevron, glyph, title, count);
+  const dropHint = el('span', 'folder-drop-hint', { 'aria-hidden': 'true' });
+  dropHint.textContent = 'Move into folder';
+  head.append(chevron, glyph, title, count, dropHint);
   const group = el('div', 'folder-children', { role: 'group' });
   folder.append(head, group);
   return folder;
@@ -1158,19 +1160,29 @@ function dropTargetAt(x, y) {
   }
   if (tree.classList.contains('divider-row')) return { zone: 'pinned', folderId: null, index: state.model.space.pinned.length, line: $('pinned').lastElementChild || $('pinned'), after: true };
   const row = hit.closest('.folder-row, [data-key^="e:"]');
+  if (!row && hit.closest('.folder-children')) {
+    const folder = hit.closest('.folder');
+    return { zone: 'pinned', folderId: folder.dataset.key.slice(2), into: folder };
+  }
   if (!row) return { zone: 'pinned', folderId: null, index: state.model.space.pinned.length, line: $('pinned').lastElementChild || $('pinned'), after: true };
   const rect = row.getBoundingClientRect();
   const ratio = (y - rect.top) / rect.height;
   if (row.classList.contains('folder-row')) {
     const folderNode = row.closest('.folder');
     const folderId = folderNode.dataset.key.slice(2);
-    const index = state.model.space.pinned.findIndex((node) => node.kind === 'folder' && node.folder.id === folderId);
-    if (ratio > 0.25 && ratio < 0.75) return { zone: 'pinned', folderId, index: undefined, into: folderNode };
-    return { zone: 'pinned', folderId: null, index: index + (ratio >= 0.75 ? 1 : 0), line: row, after: ratio >= 0.75 };
+    const index = state.model.pinned.findIndex((node) => node.kind === 'folder' && node.folder.id === folderId);
+    // Folder moves reorder at the root. Tabs and saved pages get almost the
+    // entire folder header; only the outer four pixels mean before/after.
+    const movingFolder = state.drag?.item.type === 'folder';
+    if (!movingFolder && y >= rect.top + 4 && y <= rect.bottom - 4) {
+      return { zone: 'pinned', folderId, into: folderNode };
+    }
+    const after = ratio > 0.5;
+    return { zone: 'pinned', folderId: null, index: index + (after ? 1 : 0), line: row, after };
   }
   const item = state.items.get(row.dataset.key);
   const parent = item.folder;
-  const list = parent ? state.model.space.pinned.find((node) => node.kind === 'folder' && node.folder.id === parent.id).children.map((child) => child.entry.id) : state.model.space.pinned.map((node) => (node.kind === 'folder' ? node.folder.id : node.entry.id));
+  const list = parent ? state.model.pinned.find((node) => node.kind === 'folder' && node.folder.id === parent.id).children.map((child) => child.entry.id) : state.model.pinned.map((node) => (node.kind === 'folder' ? node.folder.id : node.entry.id));
   const after = ratio > 0.5;
   return { zone: 'pinned', folderId: parent?.id ?? null, index: list.indexOf(item.entry.id) + (after ? 1 : 0), line: row, after };
 }
@@ -1208,6 +1220,7 @@ async function performDrop(source, target) {
     if (target.zone === 'pinned') {
       if (item.type === 'tab') await pinTab(item.tab, { folderId: target.folderId, index: target.index });
       else await mutate((store) => moveNode(store, entryId, { spaceId: state.activeSpaceId, folderId: target.folderId, index: target.index }));
+      if (target.folderId) await mutate((store) => setFolderOpen(store, target.folderId, true));
       return;
     }
     if (target.zone === 'today') {
@@ -1251,8 +1264,15 @@ function onPointerMove(event) {
     $('favorites').hidden = false;
     try { $('sidebar').setPointerCapture(event.pointerId); } catch { /* Pointer already released. */ }
   }
-  state.drag.target = dropTargetAt(event.clientX, event.clientY);
+  state.drag.target = validDropTarget(dropTargetAt(event.clientX, event.clientY));
   showDropTarget(state.drag.target);
+}
+
+function validDropTarget(target) {
+  const item = state.drag?.item;
+  if (!target || !item) return null;
+  if (item.type === 'folder' && (target.zone === 'today' || target.zone === 'favorites' || target.folderId)) return null;
+  return target;
 }
 
 function endDrag(commit) {
@@ -1545,10 +1565,14 @@ function bindSidebar() {
   sidebar.addEventListener('pointerdown', onPointerDown);
   sidebar.addEventListener('pointermove', onPointerMove);
   sidebar.addEventListener('pointerup', (event) => {
-    if (state.drag) endDrag(true);
+    if (state.drag && event.pointerId === state.drag.pointerId) {
+      state.drag.target = validDropTarget(dropTargetAt(event.clientX, event.clientY));
+      endDrag(true);
+    }
     else if (state.press?.pointerId === event.pointerId) state.press = null;
   });
   sidebar.addEventListener('pointercancel', () => endDrag(false));
+  sidebar.addEventListener('lostpointercapture', () => endDrag(false));
   sidebar.addEventListener('wheel', (event) => {
     // Two-finger horizontal swipe switches spaces.
     if (Math.abs(event.deltaX) < 30 || Math.abs(event.deltaX) < Math.abs(event.deltaY) * 2) return;

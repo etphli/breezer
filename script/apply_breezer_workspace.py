@@ -15,6 +15,7 @@ import shutil
 import tempfile
 
 import breezer_sidebar_frame as sidebar_frame
+import breezer_tab_groups as tab_groups
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -690,6 +691,7 @@ def replacements():
                 '  registry->RegisterStringPref(breezer_workspace::prefs::kSidebarMode, "expanded");\n'
                 '  registry->RegisterIntegerPref(breezer_workspace::prefs::kSidebarFontSize,\n'
                 '                                breezer_workspace::kDefaultSidebarFontSize);\n'
+                '  registry->RegisterDictionaryPref("breezer.workspace.tab_group_colors");\n'
                 '  registry->RegisterIntegerPref(\n'
                 '      breezer_workspace::prefs::kAppearanceDefaultsVersion, 0);\n',
             ),
@@ -740,6 +742,7 @@ def replacements():
         "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
         AVATAR_STATE: _avatar_replacements(),
         **_peek_replacements(),
+        **tab_groups.replacements(),
     })
 
 
@@ -756,7 +759,8 @@ def added_files():
 def fingerprint():
     digest = hashlib.sha256()
     inputs = [ROOT / "script/apply_breezer_workspace.py",
-              ROOT / "script/breezer_sidebar_frame.py"]
+              ROOT / "script/breezer_sidebar_frame.py",
+              ROOT / "script/breezer_tab_groups.py"]
     inputs.extend(sorted(path for path in NATIVE.rglob("*") if path.is_file()))
     for path in inputs:
         name = path.relative_to(ROOT).as_posix()
