@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 import { ResearchSources, maskSecrets } from './research-sources.js';
 import { renderMessage, createMessageStream } from './render-message.js';
 import { latestModels } from './model-catalog.js';
@@ -939,8 +940,8 @@ $('profile-form').addEventListener('submit', async (event) => {
 });
 
 // Setup or another panel may save the profile while this panel is open.
-chrome.storage.onChanged?.addListener((changes, area) => {
-  const profile = area === 'local' ? changes.breezerProfile?.newValue : null;
+localStorageChanges(chrome).addListener((changes) => {
+  const profile = changes.breezerProfile?.newValue;
   if (profile && typeof profile.name === 'string' && typeof profile.context === 'string') { state.profile = profile; applyProfile(); }
 });
 

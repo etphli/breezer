@@ -1,0 +1,948 @@
+{
+  "schema": 1,
+  "scope": "bounded offline source closure; not a complete compiler inventory or a generation input",
+  "upstreamInputs": {
+    "upstream.lock.json": "54d2dfa6b17f203916accbdc394aba2213ae379618f78603abeaa7349a1d34d5",
+    "upstream/helium-macos/helium-chromium/deps.ini": "3c9be209e0c17ea683d98fda36bb5626a92083a10e88b4057f5d38480d253e99"
+  },
+  "ublockOrigin": {
+    "version": "1.75.0",
+    "archiveSha256": "49214674f7c6c474e60da647c05bd28463b1f7a55b2a2b0a53e9d297ef7bf3c6",
+    "url": "https://github.com/imputnet/uBlock/releases/download/1.75.0/uBlock0_1.75.0.chromium.zip",
+    "note": "Saved prepared modules include local transformations; per-file retained contract pins are authoritative, not an assertion of unmodified archive bytes."
+  },
+  "overlayManifestSha256": "7806b4ccb27e162f653a868702a1a1ed8c3fe6db257160d431dba40ba9c5721a",
+  "provenance": {
+    "build/overnight-filter-integration-20261115-sol/source-inputs.json": "29e6bab75a4e6fac60502fb7beeeac8efff84b60824d69778dd60be40083e025",
+    "build/overnight-filter-integration-20261115-sol/generation-inputs/source-manifest.json": "d94f95222a720dc9f5a0ce0922e45bcd17d1472a35d9747108a3c932de634dd0",
+    "build/blocker-mainframe-headers-20261112-sol/source-binding.json": "54220b60d8a9769857258e0f40f6aa0880a4ca0648708964cd4a59e77dac3909"
+  },
+  "baselineCompilerSourceCount": 60,
+  "candidateCompilerSourceCount": 62,
+  "headerRecordCount": 110,
+  "historicalCompiledListCount": 11,
+  "files": {
+    "baseline/third_party/ublock/js/arglist-parser.js": {
+      "bytes": 4803,
+      "sha256": "57dbdf89705f59d79bb20189c8b1c784ea4105323d0bcd07eec74e818cc8c106",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/arglist-parser.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/arglist-parser.js",
+          "sha256": "57dbdf89705f59d79bb20189c8b1c784ea4105323d0bcd07eec74e818cc8c106",
+          "bytes": 4803
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/background.js": {
+      "bytes": 13059,
+      "sha256": "46470fa3ec5d3b1a2767b168d421e3c5b422664a462a6ac54f9942f77eb37936",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/background.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/background.js",
+          "sha256": "46470fa3ec5d3b1a2767b168d421e3c5b422664a462a6ac54f9942f77eb37936",
+          "bytes": 13059
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/biditrie.js": {
+      "bytes": 35038,
+      "sha256": "0ba0246daab18c7faab48322b662c6c8669770e11054d113226e71b0771b9024",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/biditrie.js",
+        "ledgerInput": {
+          "path": "build/blocker-mainframe-headers-20261112-sol/reference/js/biditrie.js",
+          "sha256": "0ba0246daab18c7faab48322b662c6c8669770e11054d113226e71b0771b9024",
+          "bytes": 35038
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/breezer-startup-body.js": {
+      "bytes": 1115196,
+      "sha256": "a66e9b0af0a9f7acef838ce4ad72f3e3eafff63b38f2b0e2d21b86f21e24d3e0",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/breezer-startup-body.js",
+        "ledgerInput": {
+          "path": "build/current-pgo-ai-package-20261111-root/composed/filter-layer/Resources/ublock/js/breezer-startup-body.js",
+          "sha256": "a66e9b0af0a9f7acef838ce4ad72f3e3eafff63b38f2b0e2d21b86f21e24d3e0",
+          "bytes": 1115196
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/filtering-context.js": {
+      "bytes": 14690,
+      "sha256": "8d6d8eec4013a637754907a8cbfa29dba3c921ef484118b6925f6de1f4308d91",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/filtering-context.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/filtering-context.js",
+          "sha256": "8d6d8eec4013a637754907a8cbfa29dba3c921ef484118b6925f6de1f4308d91",
+          "bytes": 14690
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/hntrie.js": {
+      "bytes": 28444,
+      "sha256": "e6a2555b9e6329059d37f3810c0bd91a3ded212c611cb524880e5372d9a7d37b",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/hntrie.js",
+        "ledgerInput": {
+          "path": "build/blocker-mainframe-headers-20261112-sol/reference/js/hntrie.js",
+          "sha256": "e6a2555b9e6329059d37f3810c0bd91a3ded212c611cb524880e5372d9a7d37b",
+          "bytes": 28444
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/jsonpath.js": {
+      "bytes": 23140,
+      "sha256": "e540f29cc99c4c27a86711ad2ad2d61a4640c445595b97cf27160563acfc82db",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/jsonpath.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/jsonpath.js",
+          "sha256": "e540f29cc99c4c27a86711ad2ad2d61a4640c445595b97cf27160563acfc82db",
+          "bytes": 23140
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/pagestore.js": {
+      "bytes": 39981,
+      "sha256": "9a0384a2f04196c8d0a144526edc8f15fe65962c362369f56f05122ee9bc2bf6",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/pagestore.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/pagestore.js",
+          "sha256": "9a0384a2f04196c8d0a144526edc8f15fe65962c362369f56f05122ee9bc2bf6",
+          "bytes": 39981
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/redirect-resources.js": {
+      "bytes": 5762,
+      "sha256": "1766febc40ecd611c834b63f9838a08699cf89b208a78677d3a2d355696476c3",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/redirect-resources.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/redirect-resources.js",
+          "sha256": "1766febc40ecd611c834b63f9838a08699cf89b208a78677d3a2d355696476c3",
+          "bytes": 5762
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/regex-analyzer.js": {
+      "bytes": 8369,
+      "sha256": "d0b6e2417248598c5fd8dce44b988e4e17eb65542412bd8c419093251ee7f159",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/regex-analyzer.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/regex-analyzer.js",
+          "sha256": "d0b6e2417248598c5fd8dce44b988e4e17eb65542412bd8c419093251ee7f159",
+          "bytes": 8369
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/abort-current-script.js": {
+      "bytes": 4329,
+      "sha256": "820b2234576b91a7d71b8ff380a03d604a561a83a0ad7334900d146b616e380d",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/abort-current-script.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/abort-current-script.js",
+          "sha256": "820b2234576b91a7d71b8ff380a03d604a561a83a0ad7334900d146b616e380d",
+          "bytes": 4329
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/attribute.js": {
+      "bytes": 10460,
+      "sha256": "c8cfbf5f44baa8d80f8150218540d50fce0a6d4f65823ec15648ae105603a90e",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/attribute.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/attribute.js",
+          "sha256": "c8cfbf5f44baa8d80f8150218540d50fce0a6d4f65823ec15648ae105603a90e",
+          "bytes": 10460
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/base.js": {
+      "bytes": 1405,
+      "sha256": "5eb0f5c20866149f99537e64959c51c466f9b43cd4fde1682ae0534a4096a4b8",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/base.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/base.js",
+          "sha256": "5eb0f5c20866149f99537e64959c51c466f9b43cd4fde1682ae0534a4096a4b8",
+          "bytes": 1405
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/cookie.js": {
+      "bytes": 13633,
+      "sha256": "31cf19e9dd0f6e5c957e9e952647e1bc7094ff603303924625c3c530a009a315",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/cookie.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/cookie.js",
+          "sha256": "31cf19e9dd0f6e5c957e9e952647e1bc7094ff603303924625c3c530a009a315",
+          "bytes": 13633
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/create-html.js": {
+      "bytes": 5074,
+      "sha256": "0d8025aa3748395c6d0c7bd1b7487a2d2d8b1632e109b509576341cb7254fedf",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/create-html.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/create-html.js",
+          "sha256": "0d8025aa3748395c6d0c7bd1b7487a2d2d8b1632e109b509576341cb7254fedf",
+          "bytes": 5074
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/href-sanitizer.js": {
+      "bytes": 5856,
+      "sha256": "b17df68062d8d87240c970763c10e891224961759b6178cb7c58e1ade2ed7bfc",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/href-sanitizer.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/href-sanitizer.js",
+          "sha256": "b17df68062d8d87240c970763c10e891224961759b6178cb7c58e1ade2ed7bfc",
+          "bytes": 5856
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/json-edit.js": {
+      "bytes": 48269,
+      "sha256": "cff39a24d2ae6311bbd769785dd56bddecdb0e2a7d80a7e64d2b33869a03a1b7",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/json-edit.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/json-edit.js",
+          "sha256": "cff39a24d2ae6311bbd769785dd56bddecdb0e2a7d80a7e64d2b33869a03a1b7",
+          "bytes": 48269
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/json-prune.js": {
+      "bytes": 9860,
+      "sha256": "e4f13cc99cb4ae8428de4889135ed5f62e30f02c397f3f5f4b2941189bd76ced",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/json-prune.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/json-prune.js",
+          "sha256": "e4f13cc99cb4ae8428de4889135ed5f62e30f02c397f3f5f4b2941189bd76ced",
+          "bytes": 9860
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/localstorage.js": {
+      "bytes": 6536,
+      "sha256": "ea2ebb44b8189fb4c98e08a86c2ac6afde781c6b3d6af03195b8fcaeaef89ced",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/localstorage.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/localstorage.js",
+          "sha256": "ea2ebb44b8189fb4c98e08a86c2ac6afde781c6b3d6af03195b8fcaeaef89ced",
+          "bytes": 6536
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/noeval.js": {
+      "bytes": 1947,
+      "sha256": "0b42472114120bd586410d0bbfd912c198de1abb0b3b62d11183ff6b893e5731",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/noeval.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/noeval.js",
+          "sha256": "0b42472114120bd586410d0bbfd912c198de1abb0b3b62d11183ff6b893e5731",
+          "bytes": 1947
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/object-prune.js": {
+      "bytes": 9102,
+      "sha256": "fc68ac88bcadc6774c0a1a3d87b142a9062d804dc5f0f87bb18a7d48c690d135",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/object-prune.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/object-prune.js",
+          "sha256": "fc68ac88bcadc6774c0a1a3d87b142a9062d804dc5f0f87bb18a7d48c690d135",
+          "bytes": 9102
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/parse-replace.js": {
+      "bytes": 1935,
+      "sha256": "fca20f23d68dfc906a02838330e26d1123dce48fcdaa086b37dba5c0d5b38e57",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/parse-replace.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/parse-replace.js",
+          "sha256": "fca20f23d68dfc906a02838330e26d1123dce48fcdaa086b37dba5c0d5b38e57",
+          "bytes": 1935
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-addeventlistener.js": {
+      "bytes": 6370,
+      "sha256": "ce919028953e4cb4a49db61e0649d475ccab7b3cf150c77aeb001305a384b8c8",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-addeventlistener.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-addeventlistener.js",
+          "sha256": "ce919028953e4cb4a49db61e0649d475ccab7b3cf150c77aeb001305a384b8c8",
+          "bytes": 6370
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-bab.js": {
+      "bytes": 3283,
+      "sha256": "ef5762c46a193211b335e0cb2ea439865cb98cb9cd4df8a90b159ddd35a66094",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-bab.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-bab.js",
+          "sha256": "ef5762c46a193211b335e0cb2ea439865cb98cb9cd4df8a90b159ddd35a66094",
+          "bytes": 3283
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-clipboard-write.js": {
+      "bytes": 5734,
+      "sha256": "c16b573b6d91438ff0d16db9fcc336542ad38877e8e11ecfe8fc9e1f118156c1",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-clipboard-write.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-clipboard-write.js",
+          "sha256": "c16b573b6d91438ff0d16db9fcc336542ad38877e8e11ecfe8fc9e1f118156c1",
+          "bytes": 5734
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-dialog.js": {
+      "bytes": 2234,
+      "sha256": "904fcae08eb72ea2e1624650c7e24741fc80f717f8c2438367807fbca195821d",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-dialog.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-dialog.js",
+          "sha256": "904fcae08eb72ea2e1624650c7e24741fc80f717f8c2438367807fbca195821d",
+          "bytes": 2234
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-fetch.js": {
+      "bytes": 6587,
+      "sha256": "46ab941003b999cb506201c786eaf428e78a4c3e519656f45361d7b0a1b6c887",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-fetch.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-fetch.js",
+          "sha256": "46ab941003b999cb506201c786eaf428e78a4c3e519656f45361d7b0a1b6c887",
+          "bytes": 6587
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-innerHTML.js": {
+      "bytes": 4129,
+      "sha256": "18719306c7beb87b5f09d5b241cf2ec893638e3fb96a93d2218cbde217bbee2d",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-innerHTML.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-innerHTML.js",
+          "sha256": "18719306c7beb87b5f09d5b241cf2ec893638e3fb96a93d2218cbde217bbee2d",
+          "bytes": 4129
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-navigation.js": {
+      "bytes": 2252,
+      "sha256": "bd7031b200172aca316b489e4b4e95a52e891b1098b83c483a45f8cf7995ac49",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-navigation.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-navigation.js",
+          "sha256": "bd7031b200172aca316b489e4b4e95a52e891b1098b83c483a45f8cf7995ac49",
+          "bytes": 2252
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-settimeout.js": {
+      "bytes": 7926,
+      "sha256": "4a5152c4cc9715183bc9e49c4e4e27a87f02b978de89b71c6a1586cc9cc15f95",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-settimeout.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-settimeout.js",
+          "sha256": "4a5152c4cc9715183bc9e49c4e4e27a87f02b978de89b71c6a1586cc9cc15f95",
+          "bytes": 7926
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/prevent-xhr.js": {
+      "bytes": 12276,
+      "sha256": "3619684e46f0cfc7a9f48553cc8e8f193c807b61a07e4b9e9a7ff043c242d9bf",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/prevent-xhr.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/prevent-xhr.js",
+          "sha256": "3619684e46f0cfc7a9f48553cc8e8f193c807b61a07e4b9e9a7ff043c242d9bf",
+          "bytes": 12276
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/proxy-apply.js": {
+      "bytes": 6376,
+      "sha256": "7fb12b6e29dcdae0dcaa5709e76271bf6152eb0dfc7e55894ffceb3eafd8a4ca",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/proxy-apply.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/proxy-apply.js",
+          "sha256": "7fb12b6e29dcdae0dcaa5709e76271bf6152eb0dfc7e55894ffceb3eafd8a4ca",
+          "bytes": 6376
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/replace-argument.js": {
+      "bytes": 4968,
+      "sha256": "667a602eee73ced208f9f42a6eba85300a0fb81b6dedbd6abbbc1a974a6cde10",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/replace-argument.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/replace-argument.js",
+          "sha256": "667a602eee73ced208f9f42a6eba85300a0fb81b6dedbd6abbbc1a974a6cde10",
+          "bytes": 4968
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/run-at.js": {
+      "bytes": 2949,
+      "sha256": "12daa1b79691095b8ba782b77122ef68923ff2dd1020f3b1b008fc33adf95a6c",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/run-at.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/run-at.js",
+          "sha256": "12daa1b79691095b8ba782b77122ef68923ff2dd1020f3b1b008fc33adf95a6c",
+          "bytes": 2949
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/safe-self.js": {
+      "bytes": 7994,
+      "sha256": "e7b95af1ff71e4571c62339dc39fd530dce1599da27a887761a4dd25526aa35f",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/safe-self.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/safe-self.js",
+          "sha256": "e7b95af1ff71e4571c62339dc39fd530dce1599da27a887761a4dd25526aa35f",
+          "bytes": 7994
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/scriptlets.js": {
+      "bytes": 71994,
+      "sha256": "8c414bbfa63fbd7d1e5586d9938f9ba97f4c61d7d1c6050764efd0b76126a215",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/scriptlets.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/scriptlets.js",
+          "sha256": "8c414bbfa63fbd7d1e5586d9938f9ba97f4c61d7d1c6050764efd0b76126a215",
+          "bytes": 71994
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/set-constant.js": {
+      "bytes": 9880,
+      "sha256": "827d8ca244d2fbcdb967592c9247958e9e6eb7ebbe7186d0165015093ced0ab9",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/set-constant.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/set-constant.js",
+          "sha256": "827d8ca244d2fbcdb967592c9247958e9e6eb7ebbe7186d0165015093ced0ab9",
+          "bytes": 9880
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/shared.js": {
+      "bytes": 1448,
+      "sha256": "26b04fa095d81230f46ac90addf6810a01bbf096f06afd14304dfbb9001995e2",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/shared.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/shared.js",
+          "sha256": "26b04fa095d81230f46ac90addf6810a01bbf096f06afd14304dfbb9001995e2",
+          "bytes": 1448
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/spoof-css.js": {
+      "bytes": 6544,
+      "sha256": "dd30b098802b23ef0b46c62d9242c0af49997a6d66afac54493791d7fbcee225",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/spoof-css.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/spoof-css.js",
+          "sha256": "dd30b098802b23ef0b46c62d9242c0af49997a6d66afac54493791d7fbcee225",
+          "bytes": 6544
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/stack-trace.js": {
+      "bytes": 5075,
+      "sha256": "7a912904f5816f09605cbafa6e40be595e520f96eeb8e267e4f628f29a9767db",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/stack-trace.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/stack-trace.js",
+          "sha256": "7a912904f5816f09605cbafa6e40be595e520f96eeb8e267e4f628f29a9767db",
+          "bytes": 5075
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/utils.js": {
+      "bytes": 15938,
+      "sha256": "17b876f443cbf999cfaef3c4f610f46d5e7ea719c8516aea8473c739d02e3fda",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/utils.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/utils.js",
+          "sha256": "17b876f443cbf999cfaef3c4f610f46d5e7ea719c8516aea8473c739d02e3fda",
+          "bytes": 15938
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/resources/vod.js": {
+      "bytes": 6324,
+      "sha256": "8de2a299d79f51336ebaa5ac66c2c8f73e0ca34dfe562e1e18da557d0b594899",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/resources/vod.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/resources/vod.js",
+          "sha256": "8de2a299d79f51336ebaa5ac66c2c8f73e0ca34dfe562e1e18da557d0b594899",
+          "bytes": 6324
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/static-filtering-io.js": {
+      "bytes": 4538,
+      "sha256": "bcb5ad3e1789a3b41f65a0862ae1c4cfe1e01d227c107db8fb75f1466766b3f3",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/static-filtering-io.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/static-filtering-io.js",
+          "sha256": "bcb5ad3e1789a3b41f65a0862ae1c4cfe1e01d227c107db8fb75f1466766b3f3",
+          "bytes": 4538
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/static-filtering-parser.js": {
+      "bytes": 170419,
+      "sha256": "f989e66719b89d86015024a3c2a01316e2bd86a3c4cf8e90c6ab0a9f32765173",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/static-filtering-parser.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/static-filtering-parser.js",
+          "sha256": "f989e66719b89d86015024a3c2a01316e2bd86a3c4cf8e90c6ab0a9f32765173",
+          "bytes": 170419
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/static-net-filtering.js": {
+      "bytes": 198478,
+      "sha256": "d9bec1596ab3c507755aa4a96be41d380accd2ce836d2d94f2d220d822c8e0d2",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/static-net-filtering.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/static-net-filtering.js",
+          "sha256": "d9bec1596ab3c507755aa4a96be41d380accd2ce836d2d94f2d220d822c8e0d2",
+          "bytes": 198478
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/storage.js": {
+      "bytes": 72121,
+      "sha256": "8a6d5f1b421e91e2c5cbd26a981d91e98d4bd2e1e2800e54e80914faf95cf1b9",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/storage.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/storage.js",
+          "sha256": "8a6d5f1b421e91e2c5cbd26a981d91e98d4bd2e1e2800e54e80914faf95cf1b9",
+          "bytes": 72121
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/tab.js": {
+      "bytes": 43140,
+      "sha256": "bf366709e8e9eba12e9028efb30593c9300db83665d5d579b0b9a154044234a8",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/tab.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/tab.js",
+          "sha256": "bf366709e8e9eba12e9028efb30593c9300db83665d5d579b0b9a154044234a8",
+          "bytes": 43140
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/tasks.js": {
+      "bytes": 1257,
+      "sha256": "dfeab767fd9e28fbbc0e00456b3d3de4c502b493f73fabe582ebaecf97e11886",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/tasks.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/tasks.js",
+          "sha256": "dfeab767fd9e28fbbc0e00456b3d3de4c502b493f73fabe582ebaecf97e11886",
+          "bytes": 1257
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/traffic.js": {
+      "bytes": 47190,
+      "sha256": "a014cb1eb4d0332a2d2b1f073496f094c79b03e0bf3d29df6a7214a350c86969",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/traffic.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/traffic.js",
+          "sha256": "a014cb1eb4d0332a2d2b1f073496f094c79b03e0bf3d29df6a7214a350c86969",
+          "bytes": 47190
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/trusted-tokens.js": {
+      "bytes": 2251,
+      "sha256": "b1ee17da79e9829bbdb65711c84f659496c0b9100db03371be512540fa5319c7",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/trusted-tokens.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/trusted-tokens.js",
+          "sha256": "b1ee17da79e9829bbdb65711c84f659496c0b9100db03371be512540fa5319c7",
+          "bytes": 2251
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/uri-utils.js": {
+      "bytes": 5667,
+      "sha256": "5bd770a3c59cbaba9b74cd8645c9876787c70cce6a96eabc15798727bd2784a5",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/uri-utils.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/uri-utils.js",
+          "sha256": "5bd770a3c59cbaba9b74cd8645c9876787c70cce6a96eabc15798727bd2784a5",
+          "bytes": 5667
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/urlskip.js": {
+      "bytes": 6186,
+      "sha256": "1d71ddafee30b70137e603e32c79b5ae65af65e7b71f4b61ae65301d76216d6d",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/urlskip.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/urlskip.js",
+          "sha256": "1d71ddafee30b70137e603e32c79b5ae65af65e7b71f4b61ae65301d76216d6d",
+          "bytes": 6186
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/vapi-background-ext.js": {
+      "bytes": 10570,
+      "sha256": "95f8e0bac86ef5780a2bd691586bb0293f189967e0a217aa30fb1b30f02b0edc",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/vapi-background-ext.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/vapi-background-ext.js",
+          "sha256": "95f8e0bac86ef5780a2bd691586bb0293f189967e0a217aa30fb1b30f02b0edc",
+          "bytes": 10570
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/vapi-background.js": {
+      "bytes": 62820,
+      "sha256": "cbfd9ee8534fbf15adf941b601104f6790105ea5f68a5c012252cfb6b8544bc5",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/vapi-background.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/vapi-background.js",
+          "sha256": "cbfd9ee8534fbf15adf941b601104f6790105ea5f68a5c012252cfb6b8544bc5",
+          "bytes": 62820
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/js/webext.js": {
+      "bytes": 7821,
+      "sha256": "173d7475ba50943ca3a12cbc98410525a0423b278e70f67877d56753366b2d30",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/js/webext.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/js/webext.js",
+          "sha256": "173d7475ba50943ca3a12cbc98410525a0423b278e70f67877d56753366b2d30",
+          "bytes": 7821
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "baseline/third_party/ublock/lib/csstree/css-tree.js": {
+      "bytes": 167973,
+      "sha256": "ecc4507fac946cbe442962e11bb058195dbe72545cce42f34338a83726ec56e0",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/lib/csstree/css-tree.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/lib/csstree/css-tree.js",
+          "sha256": "ecc4507fac946cbe442962e11bb058195dbe72545cce42f34338a83726ec56e0",
+          "bytes": 167973
+        }
+      },
+      "license": "MIT"
+    },
+    "baseline/third_party/ublock/lib/publicsuffixlist/publicsuffixlist.js": {
+      "bytes": 21051,
+      "sha256": "282288bb44a4fd0a8cf2157ab64ea82963820cce4e7fd5483ecdd266e6755eeb",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/lib/publicsuffixlist/publicsuffixlist.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/lib/publicsuffixlist/publicsuffixlist.js",
+          "sha256": "282288bb44a4fd0a8cf2157ab64ea82963820cce4e7fd5483ecdd266e6755eeb",
+          "bytes": 21051
+        }
+      },
+      "license": "GPL-3.0"
+    },
+    "baseline/third_party/ublock/lib/punycode.js": {
+      "bytes": 13615,
+      "sha256": "329249856a82a02f69fb2d929f89e02aefa6b04cca4ef6a3b9bebfa48d6e824c",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/lib/punycode.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/lib/punycode.js",
+          "sha256": "329249856a82a02f69fb2d929f89e02aefa6b04cca4ef6a3b9bebfa48d6e824c",
+          "bytes": 13615
+        }
+      },
+      "license": "MIT"
+    },
+    "baseline/third_party/ublock/lib/regexanalyzer/regex.js": {
+      "bytes": 72046,
+      "sha256": "5191149eb2577fab7a67ef10c7bb3e165c75c7b242a4f9d5215d0e7589a141cb",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/lib/regexanalyzer/regex.js",
+        "ledgerInput": {
+          "path": "build/binary-startup-v10-fixture-20261108-root/source/third_party/ublock/lib/regexanalyzer/regex.js",
+          "sha256": "5191149eb2577fab7a67ef10c7bb3e165c75c7b242a4f9d5215d0e7589a141cb",
+          "bytes": 72046
+        }
+      },
+      "license": "author-permission-see-LICENSES/regexanalyzer.md"
+    },
+    "baseline/chrome/VERSION": {
+      "bytes": 102,
+      "sha256": "e7fdd453013cd0b1bd3e25df5d6c2ffdda14a447639a4de9672a48e1c9dd4849",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/chrome/VERSION"
+      },
+      "license": "BSD-3-Clause"
+    },
+    "baseline/v8/include/v8-version.h": {
+      "bytes": 772,
+      "sha256": "c23e2850379c1466962face2fc162003a079445c69fae93843f931e5d86acfb9",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/v8/include/v8-version.h"
+      },
+      "license": "BSD-3-Clause"
+    },
+    "baseline/third_party/ublock/package.json": {
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/baseline/third_party/ublock/package.json"
+      },
+      "license": "test-module-format"
+    },
+    "headers/header-records.txt": {
+      "bytes": 14389,
+      "sha256": "1da0df7c265892a84f14a235243d31c8db3f6da4dad53a574fbaba99b5139097",
+      "origin": {
+        "path": "build/blocker-mainframe-headers-20261112-sol/rules/header-rows.json",
+        "sha256": "9aa634b10ba5f802013330901398a35ea1bab52721b55d0a9a047340e06cdbde",
+        "selectedRows": 110,
+        "compiledListPins": {
+          "easylist": {
+            "bytes": 3400542,
+            "list": "easylist",
+            "path": "ublock/assets/breezer-compiled/7568d823f262e725b4c191e7ed0652f203113edaae7a5520dab73a4b6fc723be.txt",
+            "sha256": "7568d823f262e725b4c191e7ed0652f203113edaae7a5520dab73a4b6fc723be"
+          },
+          "easyprivacy": {
+            "bytes": 2304025,
+            "list": "easyprivacy",
+            "path": "ublock/assets/breezer-compiled/d7b22c0781c06f5972ad78619e50ef358dfdacad550797c0eeef7a126cff758c.txt",
+            "sha256": "d7b22c0781c06f5972ad78619e50ef358dfdacad550797c0eeef7a126cff758c"
+          },
+          "helium-annoyances": {
+            "bytes": 131,
+            "list": "helium-annoyances",
+            "path": "ublock/assets/breezer-compiled/6d6adc82dad37ae5dcc0bba15d7598ade6333f9a84f292e14154a7ac16275342.txt",
+            "sha256": "6d6adc82dad37ae5dcc0bba15d7598ade6333f9a84f292e14154a7ac16275342"
+          },
+          "helium-unbreak": {
+            "bytes": 756,
+            "list": "helium-unbreak",
+            "path": "ublock/assets/breezer-compiled/a7c14c2d003947c49305b37111016c3b4abf28b4faa194a3079f78cee9e0ade8.txt",
+            "sha256": "a7c14c2d003947c49305b37111016c3b4abf28b4faa194a3079f78cee9e0ade8"
+          },
+          "plowe-0": {
+            "bytes": 115939,
+            "list": "plowe-0",
+            "path": "ublock/assets/breezer-compiled/1b5be02e36612018ab56622dc62da24743b9877c8a70fe987fd37a5334b3530e.txt",
+            "sha256": "1b5be02e36612018ab56622dc62da24743b9877c8a70fe987fd37a5334b3530e"
+          },
+          "ublock-badware": {
+            "bytes": 466970,
+            "list": "ublock-badware",
+            "path": "ublock/assets/breezer-compiled/5b8e8646ce453f92625588a46ef430b1764697ceded6f00918eb925315e6d5dc.txt",
+            "sha256": "5b8e8646ce453f92625588a46ef430b1764697ceded6f00918eb925315e6d5dc"
+          },
+          "ublock-filters": {
+            "bytes": 4897654,
+            "list": "ublock-filters",
+            "path": "ublock/assets/breezer-compiled/e424958217cd43f127148cfa53dd1b80306f5ba02b1e828c2bec2dc57f229722.txt",
+            "sha256": "e424958217cd43f127148cfa53dd1b80306f5ba02b1e828c2bec2dc57f229722"
+          },
+          "ublock-privacy": {
+            "bytes": 394836,
+            "list": "ublock-privacy",
+            "path": "ublock/assets/breezer-compiled/1beb9322477c9c1a162d0b8609017c58328eebabc69409bef366f0a841254f51.txt",
+            "sha256": "1beb9322477c9c1a162d0b8609017c58328eebabc69409bef366f0a841254f51"
+          },
+          "ublock-quick-fixes": {
+            "bytes": 87979,
+            "list": "ublock-quick-fixes",
+            "path": "ublock/assets/breezer-compiled/ebeff1fa23610da4bc40d71bcebeee9cda98d430a0d323677dacdded738b46b7.txt",
+            "sha256": "ebeff1fa23610da4bc40d71bcebeee9cda98d430a0d323677dacdded738b46b7"
+          },
+          "ublock-unbreak": {
+            "bytes": 269343,
+            "list": "ublock-unbreak",
+            "path": "ublock/assets/breezer-compiled/6425e16fd7278ec2630256000a2c674e7d2b94f0052da117c9dee2be75466b7e.txt",
+            "sha256": "6425e16fd7278ec2630256000a2c674e7d2b94f0052da117c9dee2be75466b7e"
+          },
+          "urlhaus-1": {
+            "bytes": 5163370,
+            "list": "urlhaus-1",
+            "path": "ublock/assets/breezer-compiled/780333be9daa853b0739bb6090fcc8da1bd280d03bdc8458fbecd40e5d37538a.txt",
+            "sha256": "780333be9daa853b0739bb6090fcc8da1bd280d03bdc8458fbecd40e5d37538a"
+          }
+        }
+      },
+      "license": "GPL-3.0-or-later"
+    },
+    "headers/public_suffix_list.dat": {
+      "bytes": 334129,
+      "sha256": "bb3d3bb844f1d172de41f0c5089e7b2b7243b02698e4a64120ffcf49ec84c0ee",
+      "origin": {
+        "path": "build/blocker-mainframe-headers-20261112-sol/reference/assets/thirdparties/publicsuffix.org/list/effective_tld_names.dat",
+        "version": "2026-09-15_10-18-26_UTC",
+        "commit": "3955e3ec29b94c3cca7bd4509c5f14a7c0959e26"
+      },
+      "license": "MPL-2.0"
+    },
+    "LICENSES/GPL-3.0.txt": {
+      "bytes": 35126,
+      "sha256": "e73d33841f942fa73aa5a63d4a6399cc39a29564db1dbca0915485842fcb236d",
+      "origin": {
+        "path": "build/wasm-hn-only-root/source/third_party/ublock/LICENSE.txt"
+      },
+      "license": "license-notice"
+    },
+    "LICENSES/css-tree-MIT.txt": {
+      "bytes": 1065,
+      "sha256": "be1fdbf86bfd2c72d8bce3b46fb28b24dd5e147b7d299c810c599509ddc0a66e",
+      "origin": {
+        "path": "build/wasm-hn-only-root/source/third_party/ublock/lib/csstree/LICENSE"
+      },
+      "license": "license-notice"
+    },
+    "LICENSES/regexanalyzer.md": {
+      "bytes": 411,
+      "sha256": "9c7a8c6b6976d56996fc14db915562bf53a43e5d5331d90e4c6b90b3f1fbb1cc",
+      "origin": {
+        "path": "build/wasm-hn-only-root/source/third_party/ublock/lib/regexanalyzer/README.md"
+      },
+      "license": "license-notice"
+    },
+    "LICENSES/punycode-MIT.txt": {
+      "bytes": 1077,
+      "sha256": "d3ac9001060f2c2c1660710b2995d0726168c05f98559a571fc713ce4e7b2e90",
+      "origin": {
+        "url": "https://github.com/mathiasbynens/punycode.js/tree/v1.3.2",
+        "note": "MIT grant transcribed; author attribution retained in lib/punycode.js"
+      },
+      "license": "license-notice"
+    },
+    "baseline/third_party/ublock/js/cachestorage.js": {
+      "bytes": 27629,
+      "sha256": "a0c04caaf9073dbd20b5b2786fd31c51f4b3baeff69ddf66b4fd17b2e32670ca",
+      "license": "GPL-3.0-or-later",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/root-reproduction/third_party/ublock/js/cachestorage.js",
+        "nativeCompilerContractSHA256": "5dd943e5a6b7f2c5203bb372827df80effc661c541c2da4f5d37652e8757c520",
+        "note": "Exact unchanged module bound to the retained native image contract"
+      }
+    }
+  }
+}

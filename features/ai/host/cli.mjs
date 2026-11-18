@@ -35,6 +35,8 @@ export function runCli(binary, args, { timeout = 20_000, env = cliEnvironment(),
 }
 
 export class JsonLineProcess extends EventEmitter {
+  static #outputTurn;
+  static get outputTurn() { return this.#outputTurn; }
   #buffer = '';
   #pending = new Map();
   #counter = 0;
@@ -45,26 +47,42 @@ export class JsonLineProcess extends EventEmitter {
     this.exited = new Promise((resolve) => this.child.once('close', resolve));
     this.child.stdout.setEncoding('utf8');
     this.child.stdout.on('data', (chunk) => {
-      const prefixLength = this.#buffer.length;
-      this.#buffer += chunk;
-      if (this.#buffer.length > 16 * 1024 * 1024) return this.close(new Error('CLI output exceeded its limit.'));
-      // Search the arriving chunk before touching the accumulated string rope.
-      // Once a newline arrives, slicing/parsing materializes that line only once.
-      let index = chunk.indexOf('\n');
-      if (index !== -1) index += prefixLength;
-      for (; index !== -1; index = this.#buffer.indexOf('\n')) {
-        const line = this.#buffer.slice(0, index); this.#buffer = this.#buffer.slice(index + 1);
-        if (!line.trim()) continue;
-        try {
-          const message = JSON.parse(line);
-          const key = message.id ?? message.response?.request_id;
-          const pending = this.#pending.get(key);
-          if (pending && (!message.method || message.type === 'control_response')) {
-            clearTimeout(pending.timer); this.#pending.delete(key);
-            if (message.error || message.response?.subtype === 'error') pending.reject(new Error(message.error?.message || message.response?.error || 'CLI request failed.'));
-            else pending.resolve(message.result ?? message.response?.response);
-          } else this.emit('message', message);
-        } catch (error) { this.close(new Error(`Invalid CLI response: ${error.message}`)); }
+      const previous = JsonLineProcess.#outputTurn;
+      previous?.flush();
+      const turn = { message: undefined, flushers: new Set(), flush: (next) => {
+        for (const flush of turn.flushers) {
+          try { flush(next); }
+          catch (error) { this.close(new Error(`Invalid CLI response: ${error.message}`)); }
+        }
+      } };
+      JsonLineProcess.#outputTurn = turn;
+      try {
+        const prefixLength = this.#buffer.length;
+        this.#buffer += chunk;
+        if (this.#buffer.length > 16 * 1024 * 1024) return this.close(new Error('CLI output exceeded its limit.'));
+        // Search the arriving chunk before touching the accumulated string rope.
+        // Once a newline arrives, slicing/parsing materializes that line only once.
+        let index = chunk.indexOf('\n');
+        if (index !== -1) index += prefixLength;
+        for (; index !== -1; index = this.#buffer.indexOf('\n')) {
+          const line = this.#buffer.slice(0, index); this.#buffer = this.#buffer.slice(index + 1);
+          if (!line.trim()) continue;
+          try {
+            const message = JSON.parse(line);
+            turn.message = message;
+            turn.flush(message);
+            const key = message.id ?? message.response?.request_id;
+            const pending = this.#pending.get(key);
+            if (pending && (!message.method || message.type === 'control_response')) {
+              clearTimeout(pending.timer); this.#pending.delete(key);
+              if (message.error || message.response?.subtype === 'error') pending.reject(new Error(message.error?.message || message.response?.error || 'CLI request failed.'));
+              else pending.resolve(message.result ?? message.response?.response);
+            } else this.emit('message', message);
+          } catch (error) { this.close(new Error(`Invalid CLI response: ${error.message}`)); }
+        }
+      } finally {
+        try { turn.flush(); }
+        finally { JsonLineProcess.#outputTurn = previous; }
       }
     });
     this.child.stderr.on('data', () => {});
@@ -97,6 +115,7 @@ export class JsonLineProcess extends EventEmitter {
   close(error = new Error('Cancelled.')) {
     if (this.closed) return this.exited;
     this.closed = true;
+    JsonLineProcess.#outputTurn?.flush();
     for (const pending of this.#pending.values()) { clearTimeout(pending.timer); pending.reject(error); }
     this.#pending.clear();
     this.child.kill('SIGTERM');

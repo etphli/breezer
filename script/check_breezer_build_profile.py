@@ -147,6 +147,10 @@ class BuildProfileTests(unittest.TestCase):
         anchor = 'BREEZER_STAGE="'
         guard = anchor + source.split(anchor, 1)[1].split('\nmkdir -p "$BREEZER_STAGE"', 1)[0]
         project = self.root / "guard project"
+        for name in ("script/apply_breezer_frame_budget.py", "features/performance/frame-budget/pins.json"):
+            target = project / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / name, target)
         default = project / "build/helium-macos"
         default.mkdir(parents=True)
         sentinel = default / "compiled-object"
@@ -155,7 +159,8 @@ class BuildProfileTests(unittest.TestCase):
         alias.symlink_to(default, target_is_directory=True)
         separate = project / "build/isolated stage"
         env = {key: value for key, value in os.environ.items()
-               if key not in ("BREEZER_BUILD_DIR", "BREEZER_COMPILED_FILTERS", "BREEZER_MODE")}
+               if key not in ("BREEZER_BUILD_DIR", "BREEZER_COMPILED_FILTERS", "BREEZER_MODE",
+                              "BREEZER_FRAME_BUDGET_EXPERIMENT", "BREEZER_FRAME_BUDGET_PRIVATE_COPY")}
         env.update(BREEZER_ROOT=str(project), BREEZER_PYTHON=sys.executable,
                    BREEZER_COMPILED_FILTERS=str(self.root / "artifacts"))
         shell = ('set -euo pipefail\n' + guard

@@ -6,15 +6,17 @@ import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { CDP, parseProcesses, processTree } from './benchmark_browsers.mjs';
+import { verifyTrustedScriptletData } from './breezer_trusted_scriptlet_tokens.mjs';
 
 export const canonical = value => JSON.stringify(value, (_key, item) => item && typeof item === 'object' && !Array.isArray(item)
   ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) : item);
 export const sha256 = value => createHash('sha256').update(value).digest('hex');
 const sleep = ms => new Promise(done => setTimeout(done, ms));
 const blockerPrefix = 'chrome-extension://blockjmkbacgjkknlgpkjjiijinjdanf/';
-const ownedModules = new Set(['js/breezer-compiled-filter-lists.js', 'js/breezer-compiled-filter-context.js', 'js/breezer-compiled-filter-build.js']);
+const ownedModules = new Set(['js/breezer-compiled-filter-lists.js', 'js/breezer-compiled-filter-context.js', 'js/breezer-compiled-filter-build.js', 'js/breezer-binary-binding.js']);
 
 export async function compilerContract(source) {
+  await verifyTrustedScriptletData(join(source, 'third_party/ublock/js'));
   const version = await readFile(join(source, 'chrome/VERSION'), 'utf8');
   const parts = ['MAJOR', 'MINOR', 'BUILD', 'PATCH'].map(key => version.match(new RegExp(`^${key}=(\\d+)$`, 'm'))?.[1]);
   assert.ok(parts.every(Boolean), 'Missing Chromium version');
@@ -34,7 +36,7 @@ export async function withBuiltinBlocker({ browser, engineVersion, onLaunch }, w
   // HeadlessChrome does not match uBlock's Chromium UA test. Use the shipping
   // engine token so generation has the same compiler environment as the GUI.
   const userAgent = `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) ${engineVersion} Safari/537.36`;
-  const proc = spawn(browser, [`--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--headless=new', `--user-agent=${userAgent}`, '--remote-debugging-port=0', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+  const proc = spawn(browser, [`--user-data-dir=${profile}`, '--no-first-run', '--no-default-browser-check', '--headless=new', '--use-mock-keychain', `--user-agent=${userAgent}`, '--remote-debugging-port=0', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
   const logs = [];proc.stderr.on('data', chunk => logs.push(chunk));
   let cdp, current, launchError;
   proc.on('error', error => { launchError = error; });

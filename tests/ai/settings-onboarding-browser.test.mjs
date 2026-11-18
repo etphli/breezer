@@ -19,13 +19,18 @@ function installFixture({ colorMode, theme }) {
   const load = (key, fallback) => JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
   const fx = { local: load('fx-local', {}), opened: [], ports: {}, listeners: [] };
   window.fx = fx;
+  const areaListeners = {};
   const area = (data, persist) => ({
+    onChanged: { addListener(fn) { (areaListeners[persist ? 'local' : 'session'] ||= []).push(fn); }, removeListener(fn) { const listeners = areaListeners[persist ? 'local' : 'session'] || []; const index = listeners.indexOf(fn); if (index >= 0) listeners.splice(index, 1); } },
     async get(keys) { const list = keys == null ? Object.keys(data) : [keys].flat(); return structuredClone(Object.fromEntries(list.filter((k) => k in data).map((k) => [k, data[k]]))); },
     async set(values) {
       const changes = {};
       for (const [key, value] of Object.entries(values)) { changes[key] = { oldValue: data[key], newValue: structuredClone(value) }; data[key] = structuredClone(value); }
       persist?.();
-      setTimeout(() => fx.listeners.forEach((fn) => fn(changes, persist ? 'local' : 'session')), 0);
+      setTimeout(() => {
+        for (const fn of areaListeners[persist ? 'local' : 'session'] || []) fn(structuredClone(changes));
+        for (const fn of fx.listeners) fn(structuredClone(changes), persist ? 'local' : 'session');
+      }, 0);
     },
   });
   const event = () => { const list = []; return { list, addListener: (fn) => list.push(fn), removeListener() {} }; };

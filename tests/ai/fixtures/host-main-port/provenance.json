@@ -1,0 +1,32 @@
+{
+  "main": "55b86e3b9338804dbfb1a4deb39930c9cba09155",
+  "fixtures": [
+    {
+      "path": "controller-before.mjs",
+      "source": "docs/evidence/performance-1.2.6/host-stream-efficiency-20261112-sol/before/controller.mjs",
+      "sha256": "74cb66a83e619ad2f566266fcb5a100f6f326553530efbad240053daab06bb51",
+      "adaptation": "Exact historical bytes; loader redirects only protocol.mjs to current-main validation, including attachments."
+    },
+    {
+      "path": "cli-before.mjs",
+      "source": "docs/evidence/performance-1.2.6/host-stream-efficiency-20261112-sol/before/cli.mjs",
+      "sha256": "f6b9f4c0c8faf9e00a7c369114bbde8f12aeac4a5591072866cec82c1f27b1a9",
+      "adaptation": "Exact historical bytes; loader redirects only protocol.mjs to current-main validation, including attachments."
+    },
+    {
+      "path": "page-snapshot-main-loop.txt",
+      "source": "55b86e3b9338804dbfb1a4deb39930c9cba09155:features/ai/extension/page-context.js",
+      "sha256": "d752fce046fb9774ad7164cb650cba8b405761215c1e1fe9bbe14cf24be0ab77",
+      "selection": "Only snapshot text walk; reconstruct main by substituting for candidate optimized loop."
+    }
+  ],
+  "currentMainOracles": {
+    "features/ai/extension/render-message.js": "5b056e6e82250617cbea7c6c9bbfeeb37753a380f3ade26dbd0533d389f44a35",
+    "features/ai/extension/page-context.js": "739feb2bf813b1256323a915ee16c082ef6a89a89d82cbb7b85cf24edfc7b4b4",
+    "features/ai/extension/panel.js": "f0a297315141c0aae56814418e04b2178d86129aa55d8c5e7022d012495c99c0"
+  },
+  "generatedFixtures": {
+    "historical-host.mjs": "Loads only the two pinned historical modules, redirecting protocol import to real integrated protocol.",
+    "panel-storage-fixture.mjs": "Adds area-specific events around the existing main panel-browser fixture storage API."
+  }
+}

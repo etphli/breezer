@@ -17,7 +17,6 @@ let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
-
 const COLORS = ['#1a73e8', '#c2410c', '#0f766e', '#7c3aed', '#be123c', '#15803d', '#b45309', '#334155', '#0e7490'];
 function favicon(pageUrl) {
   const host = new URL(pageUrl).hostname;
@@ -329,6 +328,50 @@ test('add shortcuts by URL and open tab, persist across reload and keep Add visi
 
 
 // Organato off: the whole lower sheet goes, whatever the answer carries.
+test('saved Organato tasks display during a blocked refresh, after reload and on recovery', { skip }, async () => {
+  await mkdir(evidence, { recursive: true });
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  let browser;
+  const cachedView = { ...CONNECTED, organato: { ...CONNECTED.organato, cached: true, syncedAt: '2026-10-28T21:36:00Z' } };
+  const failedView = { ...cachedView, organato: { ...cachedView.organato, error: 'fetch failed' } };
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    await withPage(browser, base, { cachedView, view: failedView, delay: 1200 }, async page => {
+      await page.waitForFunction(() => document.querySelectorAll('[data-list="upcoming"] .item').length === 7);
+      assert.equal(await page.getAttribute('#refresh', 'aria-busy'), 'true', 'tasks render before the network finishes');
+      assert.match(await page.textContent('#organato-status'), /Showing saved data from.*Refreshing/);
+      await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
+      assert.equal(await page.getAttribute('#organato', 'data-stale'), 'true');
+      assert.match(await page.textContent('#organato-status'), /Showing saved data from.*Could not refresh/);
+      assert.equal(await page.locator('#organato-action a').count(), 0);
+      await page.screenshot({ path: `${evidence}/newtab-organato-cached-offline.png` });
+      await page.reload();
+      await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal(await page.locator('[data-list="upcoming"] .item').count(), 7);
+      await page.setViewportSize({ width: 390, height: 844 });
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      await page.screenshot({ path: `${evidence}/newtab-organato-cached-narrow.png` });
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await page.screenshot({ path: `${evidence}/newtab-organato-cached-dark.png` });
+      await page.evaluate(value => { window.fx.view = value; window.fx.delay = 0; }, CONNECTED);
+      await page.click('#refresh');
+      await page.waitForFunction(() => document.getElementById('organato-status').hidden);
+      assert.equal(await page.getAttribute('#organato', 'data-stale'), 'false');
+    });
+    const empty = { organato: { enabled: true, connected: true, cached: true, syncedAt: '2026-10-28T21:36:00Z', error: 'fetch failed' } };
+    await withPage(browser, base, { view: empty }, async page => {
+      await page.waitForSelector('html[data-loaded="true"]');
+      assert.equal(await page.getAttribute('#organato', 'data-state'), 'ready');
+      assert.match(await page.textContent('[data-list="upcoming"]'), /No exams or assignments/);
+      assert.match(await page.textContent('#organato-status'), /Showing saved data/);
+    });
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 const OFF_SWITCHES = { enabled: false, dashboardEnabled: true };
 const CACHED_OFF = { topSites: SITES.slice(0, 6), organato: { ...CONNECTED.organato, enabled: false, error: 'Old refresh failure' } };
 async function organatoGone(page) {

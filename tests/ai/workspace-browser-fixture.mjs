@@ -63,7 +63,7 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
     sessionStorage.setItem('fx-session', JSON.stringify(fx.session));
     localStorage.setItem('fx-appearance', JSON.stringify(fx.appearance));
   };
-  const event = (name) => ({ addListener: (fn) => (fx.listeners[name] ||= []).push(fn), removeListener() {} });
+  const event = (name) => ({ addListener: (fn) => (fx.listeners[name] ||= []).push(fn), removeListener(fn) { const list = fx.listeners[name] || []; const i = list.indexOf(fn); if (i >= 0) list.splice(i, 1); } });
   const fire = (name, ...args) => setTimeout(() => (fx.listeners[name] || []).forEach((fn) => fn(...structuredClone(args))), 0);
   fx.fire = fire;
   const copy = (value) => structuredClone(value);
@@ -83,6 +83,7 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
   };
   let nextId = Math.max(0, ...fx.tabs.map((tab) => tab.id)) + 1;
   const area = (name) => ({
+    onChanged: event(`storage.${name}.onChanged`),
     async get(keys) {
       const list = keys == null ? Object.keys(fx[name]) : [keys].flat();
       return copy(Object.fromEntries(list.filter((key) => key in fx[name]).map((key) => [key, fx[name][key]])));
@@ -95,6 +96,7 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
       }
       save();
       fire('storage.onChanged', changes, name);
+      fire(`storage.${name}.onChanged`, changes);
     },
   });
   const hostOf = (url) => { try { return new URL(url).hostname; } catch { return url; } };

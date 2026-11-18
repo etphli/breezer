@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 import {
   APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
@@ -141,6 +142,7 @@ const activeTab = () => [...state.tabs.values()].find((tab) => tab.active) || nu
 const canFavicon = Boolean(api?.runtime?.getManifest?.().permissions?.includes('favicon'));
 
 function setRecord(tabId, patch) {
+  const previous = state.records[tabId];
   const record = { s: state.activeSpaceId, ...state.records[tabId], ...patch, u: urlOf(state.tabs.get(tabId)) };
   if (!record.e) delete record.e;
   delete record.k;
@@ -148,6 +150,9 @@ function setRecord(tabId, patch) {
   pending.set[tabId] = record;
   pending.remove.delete(String(tabId));
   scheduleFlush();
+  // An empty URL patch can still create membership or default its space.
+  if (pendingRows && (Object.keys(patch).length || !previous
+      || previous.s !== record.s || previous.e !== record.e)) render();
 }
 
 function dropRecord(tabId, persist = true) {
@@ -157,6 +162,7 @@ function dropRecord(tabId, persist = true) {
     pending.remove.add(String(tabId));
     scheduleFlush();
   }
+  if (pendingRows) render();
 }
 
 function scheduleFlush() {
@@ -174,14 +180,32 @@ function flushRecords() {
   return workspace.patchMembers(set, remove).catch((error) => showToast(`Couldn’t save tab spaces. ${errorText(error)}`));
 }
 
-function saveWindowState() {
-  void api.storage.session.set({ [windowStateKey(state.windowId)]: { activeSpaceId: state.activeSpaceId, lastActive: state.lastActive } }).catch(() => {});
+let windowStateWrite = null;
+let windowStateWritesPending = 0;
+async function saveWindowState() {
+  const key = windowStateKey(state.windowId);
+  const value = { activeSpaceId: state.activeSpaceId, lastActive: { ...state.lastActive } };
+  const serialized = JSON.stringify(value);
+  if (windowStateWrite?.saved && windowStateWrite.key === key && windowStateWrite.serialized === serialized) return;
+  const write = { key, serialized, saved: false };
+  // Different overlapping writes make completion order ambiguous. Keep sending
+  // every change immediately, and only deduplicate a successful isolated write.
+  windowStateWrite = windowStateWritesPending ? null : write;
+  ++windowStateWritesPending;
+  try {
+    await api.storage.session.set({ [key]: value });
+    if (windowStateWrite === write) write.saved = true;
+  } catch {
+    if (windowStateWrite === write) windowStateWrite = null;
+  } finally {
+    --windowStateWritesPending;
+  }
 }
 
 async function mutate(fn) {
   try {
     const result = await workspace.update(fn);
-    // storage.onChanged re-renders every window; read back now so this one updates without waiting.
+    // Local storage changes re-render every window; read back now so this one updates without waiting.
     state.store = (await workspace.read()).store;
     render();
     return result;
@@ -194,14 +218,68 @@ async function mutate(fn) {
 // A query can return after newer tab events or another query have been handled.
 let tabQueryVersion = 0;
 let tabEventVersion = 0;
+let queryDrawDirty = false;
+let pendingTabAttachments = 0;
 async function refreshTabs() {
   const version = ++tabQueryVersion;
   const events = tabEventVersion;
   const tabs = await api.tabs.query({ windowId: state.windowId });
   if (version !== tabQueryVersion) return;
   if (events !== tabEventVersion) { scheduleRefresh(); return; }
+  // A query may only confirm changes already drawn by the event handlers.
+  // Keep the existing references used by the model and row actions in that case.
+  if (state.drawn && !queryDrawDirty && !pendingTabAttachments
+      && !(typeof api.breezerPrivate?.setPeekSources === 'function' && state.peekKey === null)
+      && sameTabPresentation(tabs)) {
+    for (const tab of tabs) {
+      const previous = state.tabs.get(tab.id);
+      for (const key of Object.keys(previous)) if (!Object.hasOwn(tab, key)) delete previous[key];
+      Object.defineProperties(previous, Object.getOwnPropertyDescriptors(tab));
+    }
+    return;
+  }
   state.tabs = new Map(tabs.map((tab) => [tab.id, tab]));
   render();
+}
+
+function sameTabPresentation(tabs) {
+  if (tabs.length !== state.tabs.size) return false;
+  const previousTabs = state.tabs.values();
+  const scalar = value => value === null || (typeof value !== 'object' && typeof value !== 'function');
+  const fields = value => {
+    if (!value || typeof value !== 'object' || Array.isArray(value) || !Object.isExtensible(value) || Object.getOwnPropertySymbols(value).length) return null;
+    const proto = Object.getPrototypeOf(value);
+    const constructor = proto && Object.getOwnPropertyDescriptor(proto, 'constructor')?.value;
+    if (!proto || Object.getPrototypeOf(proto) !== null || constructor?.name !== 'Object' || constructor.prototype !== proto) return null;
+    const standard = ['constructor', '__defineGetter__', '__defineSetter__', 'hasOwnProperty', '__lookupGetter__', '__lookupSetter__', 'isPrototypeOf', 'propertyIsEnumerable', 'toString', 'valueOf', '__proto__', 'toLocaleString'];
+    if (Object.getOwnPropertyNames(proto).some(key => !standard.includes(key))) return null;
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    if (Object.values(descriptors).some(d => !d.enumerable || !d.configurable || !d.writable || !Object.hasOwn(d, 'value'))) return null;
+    return Object.keys(descriptors);
+  };
+  const flatEqual = (a, b) => {
+    if (a === b) return false; // Shared mutable nested state is not evidence of equality.
+    const left = fields(a), right = fields(b);
+    return left && right && left.length === right.length && left.every(key =>
+      Object.hasOwn(b, key) && scalar(a[key]) && scalar(b[key]) && Object.is(a[key], b[key]));
+  };
+  for (const tab of tabs) {
+    const previous = previousTabs.next().value;
+    const before = fields(previous), after = fields(tab);
+    if (!before || !after || previous === tab || previous.id !== tab.id) return false;
+    for (const key of new Set([...before, ...after])) {
+      const a = previous[key], b = tab[key];
+      if (key === 'highlighted' || key === 'autoDiscardable' || key === 'selected' || key === 'lastAccessed') {
+        if ((Object.hasOwn(previous, key) && !scalar(a)) || (Object.hasOwn(tab, key) && !scalar(b))) return false;
+        continue;
+      }
+      if (!Object.hasOwn(previous, key) || !Object.hasOwn(tab, key)) return false;
+      if (scalar(a) && scalar(b) && Object.is(a, b)) continue;
+      if (key === 'mutedInfo' && flatEqual(a, b)) continue;
+      return false;
+    }
+  }
+  return true;
 }
 
 // Chromium shifts other tabs' indices without events on create, close and pin; re-read them once.
@@ -446,9 +524,40 @@ export async function openSettings() {
 // ---------------------------------------------------------------- rendering
 
 let frame = 0;
-function render() {
+// null means a full draw; a Set contains only Today tab IDs needing presentation.
+let pendingRows = null;
+function render(tabId) {
+  if (tabId === undefined) pendingRows = null;
+  else if (!frame) pendingRows = new Set([tabId]);
+  else pendingRows?.add(tabId);
   if (frame || !state.store) return;
-  frame = requestAnimationFrame(() => { frame = 0; draw(); });
+  frame = requestAnimationFrame(() => {
+    try {
+      frame = 0;
+      const rows = pendingRows && [...pendingRows].map(id => {
+        const tab = state.tabs.get(id);
+        return { tab, row: todayRow(tab) };
+      });
+      pendingRows = null;
+      if (!rows || rows.some(({ row }) => !row)) { draw(); return; }
+      for (const { row, tab } of rows) {
+        updateRow(row, { title: displayTitle(null, tab), tab, active: tab.active, selected: tab.active, actionLabel: 'Close tab', actionIcon: 'close' });
+      }
+      compactLabels();
+      syncRovingFocus();
+    } catch (error) {
+      queryDrawDirty = true;
+      throw error;
+    }
+  });
+}
+
+function todayRow(tab) {
+  if (!tab || !state.drawn || state.records[tab.id]?.e
+      || state.model?.space.id !== state.activeSpaceId
+      || spaceOfTab(state.store, state.records, tab.id) !== state.activeSpaceId
+      || !state.model.today.includes(tab)) return null;
+  return [...$('today').children].find(row => row.dataset.key === `t:${tab.id}` && !row.classList.contains('leaving'));
 }
 
 function faviconFor(tab, url) {
@@ -502,8 +611,17 @@ function syncPeekSources(model) {
 
 // Keyed reconcile: reuses nodes so focus, hover and transitions survive re-renders.
 function reconcile(container, items) {
+  const unseen = globalThis.innerWidth === 0 || document.visibilityState === 'hidden';
+  const still = state.instant || reducedMotion.matches || !state.drawn
+    || unseen;
   const existing = new Map();
-  for (const child of container.children) if (!child.classList.contains('leaving')) existing.set(child.dataset.key, child);
+  for (const child of unseen ? [...container.children] : container.children) {
+    if (!child.classList.contains('leaving')) {
+      if (unseen && child.classList.contains('entering')) child.classList.remove('entering');
+      existing.set(child.dataset.key, child);
+    }
+    else if (unseen) child.remove();
+  }
   let previous = null;
   for (const item of items) {
     let node = existing.get(item.key);
@@ -511,7 +629,7 @@ function reconcile(container, items) {
       node = item.create();
       node.dataset.key = item.key;
       node.dataset.kind = item.kind;
-      if (state.drawn && !state.instant && !reducedMotion.matches) node.classList.add('entering');
+      if (!still) node.classList.add('entering');
     }
     existing.delete(item.key);
     item.update(node);
@@ -520,7 +638,7 @@ function reconcile(container, items) {
     previous = node;
   }
   for (const node of existing.values()) {
-    if (reducedMotion.matches || !state.drawn || state.instant) { node.remove(); continue; }
+    if (still) { node.remove(); continue; }
     node.classList.add('leaving');
     node.setAttribute('aria-hidden', 'true');
     node.inert = true;
@@ -591,7 +709,9 @@ function folderNode() {
   glyph.append(icon('folder'));
   const title = el('span', 'title');
   const count = el('span', 'count', { 'aria-hidden': 'true' });
-  head.append(chevron, glyph, title, count);
+  const dropHint = el('span', 'folder-drop-hint', { 'aria-hidden': 'true' });
+  dropHint.textContent = 'Move into folder';
+  head.append(chevron, glyph, title, count, dropHint);
   const group = el('div', 'folder-children', { role: 'group' });
   folder.append(head, group);
   return folder;
@@ -636,6 +756,18 @@ function compactLabels() {
 }
 
 function draw() {
+  const queued = Boolean(frame);
+  if (frame) { cancelAnimationFrame(frame); frame = 0; }
+  queryDrawDirty = true;
+  try { paintSidebar(); }
+  catch (error) {
+    if (queued) render();
+    throw error;
+  }
+}
+
+function paintSidebar() {
+  pendingRows = null;
   if (!state.store) return;
   const model = buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: state.activeSpaceId });
   state.model = model;
@@ -753,6 +885,7 @@ function draw() {
   syncRovingFocus();
   compactLabels();
   state.drawn = true;
+  queryDrawDirty = false;
 }
 
 // ---------------------------------------------------------------- keyboard focus
@@ -1158,19 +1291,29 @@ function dropTargetAt(x, y) {
   }
   if (tree.classList.contains('divider-row')) return { zone: 'pinned', folderId: null, index: state.model.space.pinned.length, line: $('pinned').lastElementChild || $('pinned'), after: true };
   const row = hit.closest('.folder-row, [data-key^="e:"]');
+  if (!row && hit.closest('.folder-children')) {
+    const folder = hit.closest('.folder');
+    return { zone: 'pinned', folderId: folder.dataset.key.slice(2), into: folder };
+  }
   if (!row) return { zone: 'pinned', folderId: null, index: state.model.space.pinned.length, line: $('pinned').lastElementChild || $('pinned'), after: true };
   const rect = row.getBoundingClientRect();
   const ratio = (y - rect.top) / rect.height;
   if (row.classList.contains('folder-row')) {
     const folderNode = row.closest('.folder');
     const folderId = folderNode.dataset.key.slice(2);
-    const index = state.model.space.pinned.findIndex((node) => node.kind === 'folder' && node.folder.id === folderId);
-    if (ratio > 0.25 && ratio < 0.75) return { zone: 'pinned', folderId, index: undefined, into: folderNode };
-    return { zone: 'pinned', folderId: null, index: index + (ratio >= 0.75 ? 1 : 0), line: row, after: ratio >= 0.75 };
+    const index = state.model.pinned.findIndex((node) => node.kind === 'folder' && node.folder.id === folderId);
+    // Folder moves reorder at the root. Tabs and saved pages get almost the
+    // entire folder header; only the outer four pixels mean before/after.
+    const movingFolder = state.drag?.item.type === 'folder';
+    if (!movingFolder && y >= rect.top + 4 && y <= rect.bottom - 4) {
+      return { zone: 'pinned', folderId, into: folderNode };
+    }
+    const after = ratio > 0.5;
+    return { zone: 'pinned', folderId: null, index: index + (after ? 1 : 0), line: row, after };
   }
   const item = state.items.get(row.dataset.key);
   const parent = item.folder;
-  const list = parent ? state.model.space.pinned.find((node) => node.kind === 'folder' && node.folder.id === parent.id).children.map((child) => child.entry.id) : state.model.space.pinned.map((node) => (node.kind === 'folder' ? node.folder.id : node.entry.id));
+  const list = parent ? state.model.pinned.find((node) => node.kind === 'folder' && node.folder.id === parent.id).children.map((child) => child.entry.id) : state.model.pinned.map((node) => (node.kind === 'folder' ? node.folder.id : node.entry.id));
   const after = ratio > 0.5;
   return { zone: 'pinned', folderId: parent?.id ?? null, index: list.indexOf(item.entry.id) + (after ? 1 : 0), line: row, after };
 }
@@ -1208,6 +1351,7 @@ async function performDrop(source, target) {
     if (target.zone === 'pinned') {
       if (item.type === 'tab') await pinTab(item.tab, { folderId: target.folderId, index: target.index });
       else await mutate((store) => moveNode(store, entryId, { spaceId: state.activeSpaceId, folderId: target.folderId, index: target.index }));
+      if (target.folderId) await mutate((store) => setFolderOpen(store, target.folderId, true));
       return;
     }
     if (target.zone === 'today') {
@@ -1251,8 +1395,15 @@ function onPointerMove(event) {
     $('favorites').hidden = false;
     try { $('sidebar').setPointerCapture(event.pointerId); } catch { /* Pointer already released. */ }
   }
-  state.drag.target = dropTargetAt(event.clientX, event.clientY);
+  state.drag.target = validDropTarget(dropTargetAt(event.clientX, event.clientY));
   showDropTarget(state.drag.target);
+}
+
+function validDropTarget(target) {
+  const item = state.drag?.item;
+  if (!target || !item) return null;
+  if (item.type === 'folder' && (target.zone === 'today' || target.zone === 'favorites' || target.folderId)) return null;
+  return target;
 }
 
 function endDrag(commit) {
@@ -1293,11 +1444,10 @@ function onCreated(tab) {
   render();
 }
 
-// Only autoDiscardable is proven unused by the model, presentation and actions.
 // Check the full snapshot too: changeInfo need not describe every changed field.
-function onlyAutoDiscardableChanged(previous, change, tab) {
+function onlyTabFieldsChanged(previous, change, tab, fields) {
   const keys = Object.keys(change);
-  if (!previous || previous === tab || keys.length !== 1 || keys[0] !== 'autoDiscardable') return false;
+  if (!previous || previous === tab || !keys.length || keys.some(key => !fields.includes(key))) return false;
   const sameScalar = (a, b) => (a === null || typeof a !== 'object')
     && (b === null || typeof b !== 'object') && Object.is(a, b);
   const sameFields = (a, b, same) => {
@@ -1305,8 +1455,8 @@ function onlyAutoDiscardableChanged(previous, change, tab) {
     return fields.length === Object.keys(b).length
       && fields.every(key => Object.hasOwn(b, key) && same(a[key], b[key], key));
   };
-  const before = Object.keys(previous).filter(key => key !== 'autoDiscardable');
-  const after = Object.keys(tab).filter(key => key !== 'autoDiscardable');
+  const before = Object.keys(previous).filter(key => !fields.includes(key));
+  const after = Object.keys(tab).filter(key => !fields.includes(key));
   return before.length === after.length && before.every(key => {
     if (!Object.hasOwn(tab, key)) return false;
     const a = previous[key], b = tab[key];
@@ -1319,11 +1469,31 @@ function onlyAutoDiscardableChanged(previous, change, tab) {
   });
 }
 
+const TODAY_ROW_FIELDS = ['title', 'status', 'favIconUrl', 'discarded', 'audible', 'autoDiscardable', 'url', 'pendingUrl'];
+
 function onUpdated(tabId, change, tab) {
   if (!belongsHere(tab.windowId)) return;
   ++tabEventVersion;
-  const unchanged = onlyAutoDiscardableChanged(state.tabs.get(tabId), change, tab);
-  state.tabs.set(tabId, tab);
+  const previous = state.tabs.get(tabId);
+  const unchanged = onlyTabFieldsChanged(previous, change, tab, ['autoDiscardable']);
+  // Ordinary Today presentation changes cannot alter membership or ordering.
+  // Saved rows and any pending full draw still take the complete model path.
+  const row = !unchanged && (!frame || pendingRows)
+    && !(typeof api.breezerPrivate?.setPeekSources === 'function' && state.peekKey === null)
+    && Object.keys(change).some(key => key !== 'autoDiscardable')
+    && onlyTabFieldsChanged(previous, change, tab, TODAY_ROW_FIELDS)
+    ? todayRow(previous)
+    : null;
+  if (unchanged || row) {
+    // The rendered model still refers to previous. Keep one snapshot per tab
+    // while preserving every field and its exact presence in the snapshot.
+    for (const key of row ? TODAY_ROW_FIELDS : ['autoDiscardable']) {
+      if (Object.hasOwn(tab, key)) previous[key] = tab[key];
+      else delete previous[key];
+    }
+  } else {
+    state.tabs.set(tabId, tab);
+  }
   if (change.url && state.records[tabId]) setRecord(tabId, {});
   if (change.pinned === false && state.records[tabId]?.e) {
     // Unpinned outside the sidebar: keep the entry, release the tab into today.
@@ -1331,7 +1501,8 @@ function onUpdated(tabId, change, tab) {
     setRecord(tabId, { s: found?.space?.id ?? state.activeSpaceId, e: '' });
   }
   if (change.pinned !== undefined) scheduleRefresh();
-  if (!unchanged) render();
+  if (row) render(tabId);
+  else if (!unchanged) render();
 }
 
 function onRemoved(tabId, info) {
@@ -1354,9 +1525,23 @@ function onRemoved(tabId, info) {
 function onActivated({ tabId, windowId }) {
   if (!belongsHere(windowId)) return;
   ++tabEventVersion;
-  for (const tab of state.tabs.values()) tab.active = tab.id === tabId;
+  const active = [...state.tabs.values()].filter((tab) => tab.active);
+  const next = state.tabs.get(tabId);
   const space = spaceOfTab(state.store, state.records, tabId);
-  render();
+  // Only reuse the last model when both rows are ordinary Today tabs and no
+  // other change is waiting to be drawn. Other activations need reconciliation.
+  const today = $('today');
+  const rows = active.length === 1 && next && !frame && state.drawn && space === state.activeSpaceId
+    && state.model?.today.includes(active[0]) && state.model.today.includes(next)
+    ? [active[0], next].map((tab) => [...today.children].find((row) => row.dataset.key === `t:${tab.id}` && !row.classList.contains('leaving')))
+    : [];
+  for (const tab of state.tabs.values()) tab.active = tab.id === tabId;
+  if (rows.length === 2 && rows.every(Boolean)) {
+    for (const [index, tab] of [active[0], next].entries()) {
+      updateRow(rows[index], { title: displayTitle(null, tab), tab, active: tab.active, selected: tab.active, actionLabel: 'Close tab', actionIcon: 'close' });
+    }
+    syncRovingFocus();
+  } else render();
   if (!space || space === state.activeSpaceId) {
     if (space) { state.lastActive[space] = tabId; saveWindowState(); }
     return;
@@ -1380,19 +1565,23 @@ function onActivated({ tabId, windowId }) {
 function onAttached(tabId, info) {
   if (!belongsHere(info.newWindowId)) return;
   ++tabEventVersion;
+  queryDrawDirty = true;
+  ++pendingTabAttachments;
   state.peekKey = null;
   void api.tabs.get(tabId).then((tab) => {
     ++tabEventVersion;
+    queryDrawDirty = true;
     state.tabs.set(tabId, tab);
     const record = state.records[tabId];
     setRecord(tabId, { s: state.activeSpaceId, e: record?.e || '' });
     return refreshTabs();
-  }).catch(() => {});
+  }).catch(() => {}).finally(() => { --pendingTabAttachments; });
 }
 
 function onDetached(tabId, info) {
   if (!belongsHere(info.oldWindowId)) return;
   ++tabEventVersion;
+  queryDrawDirty = true;
   state.peekKey = null;
   state.tabs.delete(tabId);
   // The receiving window rewrites the record; don't race it with a delete.
@@ -1486,12 +1675,12 @@ function bindSidebar() {
   api.tabs.onAttached.addListener(onAttached);
   api.tabs.onDetached.addListener(onDetached);
   api.tabs.onReplaced?.addListener(onReplaced);
-  api.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes[STORE_KEY]) {
+  localStorageChanges(api).addListener((changes) => {
+    if (changes[STORE_KEY]) {
       state.store = normalizeStore(changes[STORE_KEY].newValue);
       render();
     }
-    if (area === 'session' && changes[APPEARANCE_REV_KEY]) {
+    if (changes[APPEARANCE_REV_KEY]) {
       void loadAppearance().then(({ appearance }) => { state.appearance = appearance; applyAppearance(appearance); });
     }
   });
@@ -1502,7 +1691,7 @@ function bindSidebar() {
     if (space) switchSpace(space.id);
   });
   darkQuery.addEventListener('change', () => applyAppearance(state.appearance));
-  addEventListener('pagehide', () => { void flushRecords(); });
+  addEventListener('pagehide', () => { void flushRecords(); if (!windowStateWritesPending) void saveWindowState(); });
 
   const sidebar = $('sidebar');
   sidebar.addEventListener('click', (event) => {
@@ -1545,10 +1734,14 @@ function bindSidebar() {
   sidebar.addEventListener('pointerdown', onPointerDown);
   sidebar.addEventListener('pointermove', onPointerMove);
   sidebar.addEventListener('pointerup', (event) => {
-    if (state.drag) endDrag(true);
+    if (state.drag && event.pointerId === state.drag.pointerId) {
+      state.drag.target = validDropTarget(dropTargetAt(event.clientX, event.clientY));
+      endDrag(true);
+    }
     else if (state.press?.pointerId === event.pointerId) state.press = null;
   });
   sidebar.addEventListener('pointercancel', () => endDrag(false));
+  sidebar.addEventListener('lostpointercapture', () => endDrag(false));
   sidebar.addEventListener('wheel', (event) => {
     // Two-finger horizontal swipe switches spaces.
     if (Math.abs(event.deltaX) < 30 || Math.abs(event.deltaX) < Math.abs(event.deltaY) * 2) return;
@@ -1590,7 +1783,7 @@ function bindSidebar() {
       void callBridge('setAppearance', { alwaysShowSidebar }).then(async (result) => {
         state.appearance = normalizeAppearance(result);
         applyAppearance(state.appearance);
-        await api.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() });
+        await api.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() });
       }).catch((error) => showToast(`Couldn’t change the sidebar. ${errorText(error)}`));
     });
   }
@@ -1608,28 +1801,82 @@ function bindSidebar() {
 
 // ---------------------------------------------------------------- router
 
+let settingsStyles;
+let routeReloading = false;
+
+function loadSettingsStyles() {
+  if (settingsStyles) return settingsStyles;
+  settingsStyles = new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'settings.css';
+    let settled = false;
+    const finish = (loaded) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (loaded) resolve();
+      else {
+        link.remove();
+        settingsStyles = null;
+        reject(new Error('Settings stylesheet unavailable.'));
+      }
+    };
+    const timer = setTimeout(() => finish(false), 10000);
+    link.addEventListener('load', () => finish(true), { once: true });
+    link.addEventListener('error', () => finish(false), { once: true });
+    document.head.append(link);
+  });
+  return settingsStyles;
+}
+
+function showRouteError() {
+  if (routeReloading) return;
+  const notice = document.createElement('div');
+  notice.setAttribute('role', 'alert');
+  const message = document.createElement('p');
+  message.textContent = 'This page couldn’t load. Reload to try again.';
+  const retry = document.createElement('button');
+  retry.type = 'button';
+  retry.textContent = 'Reload';
+  retry.addEventListener('click', () => location.reload());
+  notice.append(message, retry);
+  document.body.append(notice);
+}
+
 async function boot() {
-  const route = parseRoute(location.hash);
-  if (route.view === 'settings') {
-    document.body.classList.add('route-settings');
-    const { mountSettings } = await import('./settings.js');
-    await mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, BridgeUnavailable, darkQuery });
-    return;
+  try {
+    const route = parseRoute(location.hash);
+    if (route.view === 'settings') {
+      await loadSettingsStyles();
+      if (routeReloading) return;
+      document.body.classList.add('route-settings');
+      const { mountSettings } = await import('./settings.js');
+      if (routeReloading) return;
+      await mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, BridgeUnavailable, darkQuery });
+      return;
+    }
+    if (location.hash.startsWith('#/welcome')) {
+      await loadSettingsStyles();
+      if (routeReloading) return;
+      const { mountWelcome } = await import('./onboarding.js');
+      if (routeReloading) return;
+      await mountWelcome({ api, callBridge, loadAppearance, applyAppearance, darkQuery });
+      return;
+    }
+    $('settings').remove();
+    $('welcome').remove();
+    await initSidebar(route);
+  } catch {
+    showRouteError();
   }
-  if (location.hash.startsWith('#/welcome')) {
-    const { mountWelcome } = await import('./onboarding.js');
-    await mountWelcome({ api, callBridge, loadAppearance, applyAppearance, darkQuery });
-    return;
-  }
-  $('settings').remove();
-  $('welcome').remove();
-  await initSidebar(route);
 }
 
 // Settings switches categories in place (#/settings/<category>); every other route change reloads.
 addEventListener('hashchange', (event) => {
   const settings = (url) => parseRoute(new URL(url).hash).view === 'settings';
   if (settings(event.oldURL) && settings(event.newURL)) return;
+  routeReloading = true;
   location.reload();
 });
 void boot();

@@ -56,3 +56,11 @@ test('dashboard items link directly to their task in Organato', () => fixture(as
   await service.configure({ key });
   assert.equal((await service.list()).items[0].url, 'https://organato.vercel.app/items/id1');
 }));
+
+test('AI list reads contact Organato each time for current item versions', () => fixture(async (service, calls) => {
+  await service.configure({ key });
+  const baseline = calls.length;
+  await service.tool('organato_list_items', {});
+  await service.tool('organato_list_items', {});
+  assert.equal(calls.length - baseline, 2);
+}));

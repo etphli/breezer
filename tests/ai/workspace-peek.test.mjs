@@ -53,6 +53,7 @@ function installFixture({ seed, withPeekApi }) {
   const fire = (name, ...args) => setTimeout(() => (fx.listeners[name] || []).forEach((fn) => fn(...copy(args))), 0);
   fx.fire = fire;
   const area = (name) => ({
+    onChanged: event(`storage.${name}.onChanged`),
     async get(keys) {
       const list = keys == null ? Object.keys(fx[name]) : [keys].flat();
       return copy(Object.fromEntries(list.filter((key) => key in fx[name]).map((key) => [key, fx[name][key]])));
@@ -64,6 +65,7 @@ function installFixture({ seed, withPeekApi }) {
         fx[name][key] = copy(value);
       }
       fire('storage.onChanged', changes, name);
+      fire(`storage.${name}.onChanged`, changes);
     },
   });
   window.chrome = {

@@ -1,3 +1,4 @@
+import { storageBus, event as storageEvent } from './storage-bus.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CONTEXT_KEY } from '../../features/ai/extension/context-memory.js';
@@ -7,7 +8,7 @@ const event = () => ({ listeners: [], addListener(fn) { this.listeners.push(fn);
 test('settings client does not collect or summarize on connect and matches only its own responses', async () => {
   assert.equal(typeof createContextClient, 'function', 'Context settings controls are missing');
   const port = { onMessage: event(), onDisconnect: event(), sent: [], postMessage(m) { this.sent.push(m); }, disconnect() { this.onDisconnect.fire(); } };
-  const client = createContextClient({ runtime: { connect({ name }) { assert.equal(name, 'breezer-context-settings'); return port; } }, storage: { onChanged: event() } });
+  const client = createContextClient({ runtime: { connect({ name }) { assert.equal(name, 'breezer-context-settings'); return port; } }, storage: { local: { onChanged: event() } } });
   assert.deepEqual(port.sent, []);
   const reading = client.request('view');
   const request = port.sent[0];
@@ -24,8 +25,8 @@ test('settings client does not collect or summarize on connect and matches only 
 });
 
 test('context settings reconnect after idle retirement and retain change notifications', async () => {
-  const ports=[],changed=event();
-  const api={storage:{onChanged:changed},runtime:{connect(){
+  const ports=[],bus=storageBus(),storage=bus.context('context'),changed={listeners:storage.local.onChanged.listeners,fire:async(changes,area)=>{await storage[area].set(Object.fromEntries(Object.entries(changes).map(([k,v])=>[k,v.newValue])));await bus.flush();}};
+  const api={storage,runtime:{connect(){
     const port={onMessage:event(),onDisconnect:event(),sent:[],closed:false,
       postMessage(message){if(this.closed)throw new Error('Disconnected port');this.sent.push(message)},
       disconnect(){this.closed=true;this.onDisconnect.fire()}};
@@ -38,10 +39,10 @@ test('context settings reconnect after idle retirement and retain change notific
     let notifications=0;client.onChange(()=>notifications++);
     ports[0].disconnect();
     assert.equal(ports.length,1,'Idle retirement must not immediately wake the worker');
-    changed.fire({unrelated:{newValue:1}},'local');
-    changed.fire({[CONTEXT_KEY]:{newValue:{enabled:false}}},'sync');
+    await changed.fire({unrelated:{newValue:1}},'local');
+    await changed.fire({[CONTEXT_KEY]:{newValue:{enabled:false}}},'sync');
     assert.equal(notifications,0);
-    changed.fire({[CONTEXT_KEY]:{newValue:{enabled:false}}},'local');
+    await changed.fire({[CONTEXT_KEY]:{newValue:{enabled:false}}},'local');
     assert.equal(notifications,1,'Stored context changes remain observable while disconnected');
     const next=client.request('view');next.catch(()=>{});
     assert.equal(ports.length,2);
@@ -52,12 +53,12 @@ test('context settings reconnect after idle retirement and retain change notific
     assert.equal((await next).enabled,true);
     ports[1].onMessage.fire({type:'context-changed'});assert.equal(notifications,2);
   } finally {client.dispose()}
-  assert.equal(changed.listeners.length,0);
+  assert.equal(changed.listeners.size,0);
   await assert.rejects(client.request('view'),/closed|disconnect/i);
 });
 
 test('disconnecting an active context request rejects it without replay and allows a new request',async()=>{
-  const ports=[];const api={storage:{onChanged:event()},runtime:{connect(){
+  const ports=[];const api={storage:{local:{onChanged:event()}},runtime:{connect(){
     const port={onMessage:event(),onDisconnect:event(),sent:[],postMessage(message){this.sent.push(message)},disconnect(){this.onDisconnect.fire()}};
     ports.push(port);return port;
   }}};

@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 // Full-page settings route: workspace.html#/settings/<category>. Layout and theme go through
 // chrome.breezerPrivate (native prefs); spaces and tab behavior live in the workspace store.
 import {
@@ -245,7 +246,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
       if (appearance[field] !== value) {
         showError(errorId, `The browser kept ${FIELD_LABELS[field]} at ${VALUE_LABELS[appearance[field]] ?? appearance[field]}.`);
       }
-      await api.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
+      await api.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
     } catch (failure) {
       showError(errorId, `Couldn’t change the ${FIELD_LABELS[field]}. ${errorText(failure)}`);
     } finally {
@@ -422,14 +423,14 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     });
   }
 
-  api.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes[STORE_KEY]) {
+  localStorageChanges(api).addListener((changes) => {
+    if (changes[STORE_KEY]) {
       store = normalizeStore(changes[STORE_KEY].newValue);
       const editing = document.activeElement?.matches?.('.space-name-input');
       if (editing) spacesStale = true;
       else renderSpaces();
     }
-    if (area === 'session' && changes[APPEARANCE_REV_KEY]) void refreshAppearance();
+    if (changes[APPEARANCE_REV_KEY]) void refreshAppearance();
   });
 
   renderAppearance();

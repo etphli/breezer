@@ -1,3 +1,98 @@
+const createDashboardCache = (() => {
+const HOUR = 60 * 60 * 1000;
+const encoder = new TextEncoder();
+const authFailure = error => error?.status === 401 || error?.status === 403;
+const temporaryFailure = error => error?.code === 'NETWORK_ERROR' || (error?.status >= 500 && error.status <= 599);
+function cacheable(value, maximumBytes) {
+  if (!value || !Array.isArray(value.items) || value.items.length > 2000 || typeof value.truncated !== 'boolean') return false;
+  if (!value.items.every(item => item && typeof item === 'object' && !Array.isArray(item)
+    && typeof item.id === 'string' && typeof item.title === 'string'
+    && ['work','todo'].includes(item.kind))) return false;
+  try {
+    const text = JSON.stringify(value);
+    return text.length <= maximumBytes && (text.length * 3 <= maximumBytes || encoder.encode(text).byteLength <= maximumBytes);
+  } catch { return false; }
+}
+function changed() {
+  const error = new Error('Organato changed while the dashboard was loading. Try again.');
+  error.code = 'DASHBOARD_CHANGED';
+  return error;
+}
+
+// One worker owns this memory entry. Saved helper progress is admitted only
+// through the current fingerprint and epoch, and never replaces a live entry.
+function createDashboardCache({ now = Date.now, maximumBytes = 1024 * 1024 } = {}) {
+  let epoch = 0, blocked = 0, entry = null, pending = null, identity = null;
+  const invalidate = () => { epoch++; entry = null; pending?.listeners.clear(); pending = null; };
+  const hold = () => {
+    blocked++; invalidate(); let released = false;
+    return () => { if (!released) { released = true; blocked--; invalidate(); } };
+  };
+  const load = async ({ fingerprint, refresh = false, fetch, onCached, active = () => true, signal }) => {
+    if (typeof fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(fingerprint)) {
+      invalidate(); identity = null;
+      return { value: await fetch(), cached: false };
+    }
+    if (identity !== fingerprint) { invalidate(); identity = fingerprint; }
+    const at = now();
+    if (entry && at < entry.updatedAt) invalidate();
+    if (!blocked && !refresh && entry && at - entry.updatedAt < HOUR) {
+      return { value: entry.value, cached: true, updatedAt: entry.updatedAt };
+    }
+    const listener = { onCached, active };
+    const attach = operation => {
+      if (signal?.aborted) return;
+      operation.listeners.add(listener);
+      const remove = () => operation.listeners.delete(listener);
+      signal?.addEventListener('abort', remove, { once: true });
+      listener.cleanup = () => signal?.removeEventListener('abort', remove);
+    };
+    if (!blocked && !refresh && pending) {
+      attach(pending);
+      if (pending.saved && active()) onCached?.(pending.saved);
+      return pending.promise;
+    }
+    if (refresh) { epoch++; pending?.listeners.clear(); pending = null; }
+    const version = epoch, fallback = entry, mayCache = blocked === 0;
+    const operation = { listeners: new Set(), saved: null };
+    attach(operation);
+    const progress = value => {
+      if (version !== epoch || identity !== fingerprint || blocked || !mayCache || fallback || !cacheable(value, maximumBytes) || value.fingerprint !== fingerprint) return;
+      operation.saved = value;
+      for (const reader of operation.listeners) if (reader.active()) reader.onCached?.(value);
+    };
+    operation.promise = Promise.resolve().then(async () => {
+      try {
+        const value = await fetch(progress);
+        if (version !== epoch || identity !== fingerprint) throw changed();
+        const updatedAt = now();
+        if (mayCache && !blocked && cacheable(value, maximumBytes)) entry = { value, updatedAt };
+        else entry = null;
+        return { value, cached: false, updatedAt };
+      } catch (error) {
+        if (version !== epoch || identity !== fingerprint) throw changed();
+        if (authFailure(error)) { invalidate(); throw error; }
+        if (mayCache && !blocked && temporaryFailure(error) && !fallback && operation.saved) {
+          return { value: operation.saved, cached: true, saved: true, stale: true, error: error.message };
+        }
+        if (mayCache && !blocked && temporaryFailure(error) && fallback && now() >= fallback.updatedAt) {
+          return { value: fallback.value, cached: true, stale: true, updatedAt: fallback.updatedAt, error: error.message };
+        }
+        throw error;
+      } finally {
+        for (const reader of operation.listeners) reader.cleanup?.();
+        operation.listeners.clear();
+        if (pending === operation) pending = null;
+      }
+    });
+    if (mayCache) pending = operation;
+    return operation.promise;
+  };
+  return { load, invalidate, hold, fence: () => { const version = epoch; return () => version === epoch; } };
+}
+
+return createDashboardCache;
+})();
 import { prepareResearch, researchSelection } from './research-policy.js';
 import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
@@ -46,10 +141,12 @@ function createOrganatoTransport(api) {
       if (native !== connection) return;
       const request = pending.get(message?.id);
       if (!request) return;
+      if (message.type === 'organato-cache') { request.progress?.(message.value); return; }
       if (message.type === 'organato-progress') { request.progress?.(message.stage); return; }
       pending.delete(message.id);
       clearTimeout(request.timer);
-      message.ok ? request.resolve(message.value) : request.reject(new Error(message.error));
+      if (message.ok) request.resolve(message.value);
+      else { const error = new Error(message.error); if (message.status !== undefined) error.status = message.status; if (message.code !== undefined) error.code = message.code; request.reject(error); }
       releaseWhenIdle();
     });
     connection.onDisconnect.addListener(() => {
@@ -85,6 +182,8 @@ export function installBackground(api) {
   installWorkspaceSync(api);
   installUsage(api);
   const organato = createOrganatoTransport(api);
+  const dashboardCache = createDashboardCache();
+  const cacheOwner = {};
   installReleaseNotes(api);
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
@@ -143,43 +242,110 @@ export function installBackground(api) {
     let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
     const settings = port.name === 'breezer-organato-settings';
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
-    let closed = false;
-    const ask = (type, values = {}, progress) => organato.ask(port, type, values, progress, settings ? 90000 : 65000);
+    let closed = false, revision = 0, readerController;
+    const ask = (type, values = {}, progress) => closed
+      ? Promise.reject(new Error('Closed'))
+      : organato.ask(port, type, values, progress, settings ? 90000 : 65000);
     const remember = value => { if (value && typeof value === 'object') void saveOrganatoSwitches(api, value); return value; };
     port.onMessage.addListener(message => {
       void (async () => {
         if (closed || typeof message?.id !== 'string' || message.id.length > 100) return;
+        if (!settings) { readerController?.abort(); readerController = new AbortController(); }
+        const readerSignal = readerController?.signal;
+        const requestRevision = settings ? revision : ++revision;
         let value;
         if (settings) {
           if (!['view', 'configure'].includes(message.type)) throw new Error('Unknown settings action.');
-          value = remember(await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); }));
+          const release = message.type === 'configure' ? dashboardCache.hold() : null;
+          try { value = remember(await ask(message.type === 'view' ? 'organato-view' : 'organato-configure', { settings: message.settings }, stage => { if (!closed) port.postMessage({ type: 'progress', id: message.id, stage }); })); } finally { release?.(); }
         } else {
           if (!['view', 'refresh'].includes(message.type)) throw new Error('Unknown new-tab action.');
-          // A saved "off" answers without the helper; otherwise the helper's file decides.
+          // Saved master-off always skips the helper; dashboard-off does so except on refresh.
           // Settings and setup own the saved copy; a new tab only fills it in once
           // (profiles from before it existed), so a slow read never overwrites a newer choice.
+          const sites = Promise.resolve().then(() => api.topSites.get());
+          // Observe an early failure while retaining the existing config-first error order.
+          void sites.catch(() => {});
           const saved = await loadOrganatoSwitches(api);
-          const config = saved?.enabled === false ? saved : await ask('organato-view');
-          if (!saved) remember(config);
-          const topSites = (await api.topSites.get()).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
-          // Off carries no account state or items, so nothing stale can be drawn.
-          const organato = config.enabled === false ? { enabled: false } : { ...config, exams: [], assignments: [], todos: [] };
-          if (config.enabled !== false && config.connected && config.dashboardEnabled) {
-            try {
-              const result = await ask('organato-list');
-              const items = result.items.map(item => ({ ...item, dueAt: item.dueAt || item.dueDateLocal, allDay: !item.dueAt && Boolean(item.dueDateLocal) })).filter(item => !['submitted', 'completed'].includes(item.workingStatus)).sort((a, b) => String(a.dueAt || a.dueDateLocal || '9999').localeCompare(String(b.dueAt || b.dueDateLocal || '9999')));
-              organato.exams = items.filter(item => item.kind !== 'todo' && ['checkpoint', 'both'].includes(item.classification)).slice(0, 200);
-              organato.assignments = items.filter(item => item.kind === 'work' && ['assignment', 'both'].includes(item.classification)).slice(0, 200);
-              organato.todos = items.filter(item => item.kind === 'todo').slice(0, 200);
-              organato.truncated = result.truncated;
-            } catch (error) { organato.error = error.message; }
+          let config;
+          const refresh = message.refresh === true || message.type === 'refresh';
+          const getConfig = () => saved?.enabled === false || (!refresh && saved?.dashboardEnabled === false)
+            ? Promise.resolve(saved) : ask('organato-view', { dashboardCache: 1 });
+          try { config = await getConfig(); } catch (error) {
+            dashboardCache.invalidate();
+            const topSites = (await sites.catch(() => [])).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
+            if (!closed) port.postMessage({ type: 'view', id: message.id, topSites, organato: { error: error.message } });
+            return;
           }
-          value = { topSites, organato, dashboardEnabled: config.dashboardEnabled };
+          if (!saved) remember(config);
+          let savedResult = null;
+          let valid = () => true;
+          const active = () => !closed && revision === requestRevision && valid();
+          const applyList = (dashboard, result, cached = false) => {
+            const items = result.items.map(item => ({ ...item, dueAt: item.dueAt || item.dueDateLocal, allDay: !item.dueAt && Boolean(item.dueDateLocal) })).filter(item => !['submitted', 'completed'].includes(item.workingStatus)).sort((a, b) => String(a.dueAt || a.dueDateLocal || '9999').localeCompare(String(b.dueAt || b.dueDateLocal || '9999')));
+            dashboard.exams = items.filter(item => item.kind !== 'todo' && ['checkpoint', 'both'].includes(item.classification)).slice(0, 200);
+            dashboard.assignments = items.filter(item => item.kind === 'work' && ['assignment', 'both'].includes(item.classification)).slice(0, 200);
+            dashboard.todos = items.filter(item => item.kind === 'todo').slice(0, 200);
+            dashboard.truncated = result.truncated;
+            dashboard.syncedAt = result.syncedAt;
+            dashboard.cached = cached;
+          };
+          const progress = result => {
+            savedResult = result;
+            const currentFence = valid;
+            void sites.then(rawSites => {
+              if (!currentFence() || !active() || savedResult !== result || result.fingerprint !== config.fingerprint) return;
+              const dashboard = { ...config, exams: [], assignments: [], todos: [] };
+              applyList(dashboard, result, true);
+              port.postMessage({ type: 'view', id: message.id, pending: true, topSites: rawSites.slice(0, 32).filter(site => /^https?:\/\//.test(site.url)), organato: dashboard, dashboardEnabled: config.dashboardEnabled });
+            }).catch(() => {});
+          };
+          const loadList = async () => {
+            for (let attempt = 0; ; attempt++) {
+              const fingerprint = config.cacheCapability === 1 && /^[a-f0-9]{64}$/.test(config.fingerprint || '') ? config.fingerprint : null;
+              if (!fingerprint) {
+                dashboardCache.invalidate();
+                return { value: await ask('organato-list', { refresh }) };
+              }
+              try {
+                const loading = dashboardCache.load({ fingerprint, refresh: refresh && attempt === 0, onCached: progress, active, signal: readerSignal, fetch: async onCached => {
+                  const result = await organato.ask(cacheOwner, 'organato-list', { refresh, dashboardIdentity: fingerprint }, onCached, 65000);
+                  if (result?.fingerprint !== fingerprint) { const error = new Error('Organato context changed.'); error.code = 'DASHBOARD_CHANGED'; throw error; }
+                  return result;
+                } });
+                valid = dashboardCache.fence();
+                return await loading;
+              } catch (error) {
+                if (error.code !== 'DASHBOARD_CHANGED' || attempt || closed) throw error;
+                config = await getConfig();
+                if (config.enabled === false || !config.connected || !config.dashboardEnabled) throw error;
+              }
+            }
+          };
+          const list = config.enabled !== false && config.connected && config.dashboardEnabled ? loadList() : null;
+          valid = dashboardCache.fence();
+          if (!list) { dashboardCache.invalidate(); valid = dashboardCache.fence(); }
+          // Sites errors retain priority, even if the concurrent list fails first.
+          void list?.catch(() => {});
+          const topSites = (await sites).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
+          // Off carries no account state or items, so nothing stale can be drawn.
+          const dashboard = config.enabled === false ? { enabled: false } : { ...config, exams: [], assignments: [], todos: [] };
+          if (list) {
+            try {
+              const loaded = await list;
+              const result = loaded.value;
+              if (loaded.stale) { dashboard.stale = true; dashboard.updatedAt = loaded.updatedAt; dashboard.error = loaded.error; }
+              if (!active()) throw Object.assign(new Error('Organato dashboard context changed.'), { code: 'DASHBOARD_CHANGED' });
+              applyList(dashboard, result, loaded.saved === true);
+            } catch (error) { savedResult = null; dashboard.error = error.message; dashboard.exams = []; dashboard.assignments = []; dashboard.todos = []; }
+          }
+          savedResult = null;
+          value = { topSites, organato: config.enabled === false ? { enabled: false } : dashboard, dashboardEnabled: config.dashboardEnabled };
         }
-        if (!closed) port.postMessage(settings ? { id: message.id, ok: true, value } : { type: 'view', id: message.id, ...value });
+        if (!closed && revision === requestRevision) port.postMessage(settings ? { id: message.id, ok: true, value } : { type: 'view', id: message.id, ...value });
       })().catch(error => { if (!closed) { try { port.postMessage(settings ? { id: message.id, ok: false, error: error.message } : { type: 'view', id: message.id, topSites: [], organato: { error: error.message } }); } catch {} } });
     });
-    port.onDisconnect.addListener(() => { closed = true; organato.close(port); });
+    port.onDisconnect.addListener(() => { closed = true; readerController?.abort(); organato.close(port); });
   });
   const panels = new Set();
   let activeRun = null;
@@ -222,7 +388,10 @@ export function installBackground(api) {
   };
   const connectNative = panel => {
     if (panel.native) return panel.native;
-    const native = api.runtime.connectNative(NATIVE_HOST);
+    const release = dashboardCache.hold();
+    let native;
+    try { native = api.runtime.connectNative(NATIVE_HOST); } catch (error) { release(); throw error; }
+    panel.releaseCache = release;
     panel.native = native;
     native.onMessage.addListener(message => {
       if (!message || typeof message !== 'object') return;
@@ -261,6 +430,7 @@ export function installBackground(api) {
     native.onDisconnect.addListener(() => {
       if (panel.native !== native) return;
       panel.native = null;
+      panel.releaseCache?.(); panel.releaseCache = null;
       const detail = api.runtime.lastError?.message;
       const error = `Breezer AI could not connect to its local helper. Restart Breezer and reopen the sidebar. If it still cannot connect, reinstall Breezer.${detail ? ` ${detail}` : ''}`;
       post(panel.port, { type: 'error', error });
@@ -310,7 +480,10 @@ export function installBackground(api) {
         context, includeContext: message.includeContext === true || run.control, control: run.control,
       });
     } catch (error) {
-      if (!run.cancelled) { post(panel.port, { type: 'error', id: run.id, error: error.message }); await cancel(run); }
+      if (!run.cancelled && activeRun === run) {
+        if (panel.native) { try { panel.native.disconnect(); } catch {} panel.native = null; panel.releaseCache?.(); panel.releaseCache = null; }
+        post(panel.port, { type: 'error', id: run.id, error: error.message }); await cancel(run);
+      }
     }
   };
   api.runtime.onConnect.addListener(port => {
@@ -328,7 +501,10 @@ export function installBackground(api) {
             panel.windowId = tab?.windowId;
             await tools.verifyGrant(tab);
             void contextMemory.observeGranted(tab);
-            if (!panel.closed) connectNative(panel).postMessage({ type: 'init' });
+            if (!panel.closed) {
+              const native = connectNative(panel);
+              try { native.postMessage({ type: 'init' }); } catch (error) { try { native.disconnect(); } catch {} panel.native = null; panel.releaseCache?.(); panel.releaseCache = null; throw error; }
+            }
           })();
           await panel.ready;
         } else if (message.type === 'research-begin') {
@@ -355,6 +531,7 @@ export function installBackground(api) {
       panels.delete(panel);
       if (activeRun?.panel === panel) void cancel(activeRun);
       try { panel.native?.disconnect(); } catch {}
+      panel.native = null; panel.releaseCache?.(); panel.releaseCache = null;
     });
   });
   const toggle = tab => {

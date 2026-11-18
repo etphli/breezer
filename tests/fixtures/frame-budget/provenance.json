@@ -1,0 +1,20 @@
+{
+  "scope": "Three exact Chromium/Helium base source files for preparation-gate tests; no compiled/native acceptance",
+  "chromiumVersion": "156.0.8078.47",
+  "origin": "Retained frame-budget-integration-root/base-fixture",
+  "sourceFiles": {
+    "components/viz/client/frame_eviction_manager.cc": {
+      "before_sha256": "a2172221d1bf926b29b5d5a421f7aeedfe4cb4000ef55bde510c3a68aca9ee7d",
+      "after_sha256": "d491855a140705849cc43f629601bc1a02293fe4491647ee077a8e730742f206"
+    },
+    "components/viz/client/frame_eviction_manager.h": {
+      "before_sha256": "72cd0b3a01b82043b1efe057d9ba69ffdfc9d07024d3c83e8f0ff2f7294cfd65",
+      "after_sha256": "72cd0b3a01b82043b1efe057d9ba69ffdfc9d07024d3c83e8f0ff2f7294cfd65"
+    },
+    "components/viz/client/frame_eviction_manager_unittest.cc": {
+      "before_sha256": "f0eb4cf8d65e4ff43e38c192deb6bd0cebed8fae81820dd089b5c16f8d92916c",
+      "after_sha256": "59ba0afdc9871f8ddf168382f561374a5d1b0013ad4c3f578cb7bf9ef93890a6"
+    }
+  },
+  "licenseSha256": "368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b"
+}

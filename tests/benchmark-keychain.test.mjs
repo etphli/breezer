@@ -9,5 +9,5 @@ test('all benchmark launches use the test keychain without disabling browser fea
 
 test('credential-isolated results cannot be pooled under the historical protocol label', () => {
   const plan = comparisonPlan({ trials: 6, initializedProfiles: true, baselineBreezer: '/baseline', physicalFootprint: true });
-  assert.equal(plan.protocol, 'installed-browser-v9-initialized-three-way-footprint');
+  assert.equal(plan.protocol, 'installed-browser-v10-initialized-three-way-footprint');
 });

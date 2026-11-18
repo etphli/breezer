@@ -1,3 +1,4 @@
+import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -14,11 +15,11 @@ async function newtab({ duringInitialFilter } = {}) {
     return nodes.get(id);
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
-  const api = { storage: { local: { async get() { return {}; } }, onChanged: {
+  const api = { storage: { local: { async get() { return {}; }, onChanged: {
     addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { storageListeners.splice(storageListeners.indexOf(fn), 1); },
-  } } };
+  } } } };
   let firstFilter = true;
-  const context = vm.createContext({ URL, Intl, Date, root, api, counters, innerWidth: 1000,
+  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, root, api, counters, innerWidth: 1000,
     setTimeout: () => 1, clearTimeout() {},
     addEventListener(name, fn) { callbacks.set(name, fn); },
     removeEventListener(name, fn) { if (callbacks.get(name) === fn) callbacks.delete(name); },
@@ -95,7 +96,7 @@ async function toast() {
   const functions = source.slice(source.indexOf('let toastTimer = 0;'), source.indexOf('// ---------------------------------------------------------------- drag and drop'));
   const nodes = Object.fromEntries(['toast', 'toast-text', 'toast-action'].map(id => [id, {}]));
   let timeout;
-  const context = vm.createContext({ $: id => nodes[id], setTimeout(fn) { timeout = fn; return 1; }, clearTimeout() {} });
+  const context = vm.createContext({ localStorageChanges, $: id => nodes[id], setTimeout(fn) { timeout = fn; return 1; }, clearTimeout() {} });
   vm.runInContext(functions + '\nglobalThis.show=showToast;globalThis.hide=hideToast;', context);
   return { context, nodes, expire: () => timeout() };
 }

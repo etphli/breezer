@@ -24,8 +24,8 @@ function fakeApi(getAppearance) {
   return {
     breezerPrivate: getAppearance ? { getAppearance } : {},
     runtime: {},
-    storage: { onChanged: { addListener: (fn) => listeners.push(fn) } },
-    emit: (changes, area) => listeners.forEach((fn) => fn(changes, area)),
+    storage: { local: { onChanged: { addListener: (fn) => listeners.push(fn) } } },
+    emit: (changes, area) => { if (area === 'local') listeners.forEach((fn) => fn(changes)); },
   };
 }
 
@@ -56,18 +56,18 @@ test('the panel applies the saved appearance at load and after each appearance r
   assert.deepEqual(root.dataset, { tone: 'rose', scheme: 'light' }, 'OS dark, forced light');
 
   current = { theme: 'graphite', colorMode: 'dark' };
-  api.emit({ unrelated: {} }, 'session');
-  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 2 } }, 'local');
+  api.emit({ unrelated: {} }, 'local');
+  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 2 } }, 'session');
   await settle();
-  assert.equal(root.dataset.tone, 'rose', 'only session appearance.rev triggers a reload');
+  assert.equal(root.dataset.tone, 'rose', 'only local appearance.rev triggers a reload');
 
   query.flip(false);
-  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 3 } }, 'session');
+  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 3 } }, 'local');
   await settle();
   assert.deepEqual(root.dataset, { tone: 'graphite', scheme: 'dark' }, 'OS light, forced dark');
 
   current = { theme: 'tide', colorMode: 'system' };
-  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 4 } }, 'session');
+  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 4 } }, 'local');
   await settle();
   assert.equal(root.dataset.scheme, 'light');
   query.flip(true);
@@ -77,7 +77,7 @@ test('the panel applies the saved appearance at load and after each appearance r
 test('older builds without the bridge follow the OS without throwing', async () => {
   const root = fakeRoot();
   const query = fakeQuery(true);
-  await startPanelTheme({ api: { breezerPrivate: { authorizeCurrentPage: async () => true }, storage: {} }, root, darkQuery: query });
+  await startPanelTheme({ api: { breezerPrivate: { authorizeCurrentPage: async () => true }, storage: { local: { onChanged: { addListener() {} } } } }, root, darkQuery: query });
   assert.deepEqual(root.dataset, { tone: 'mint', scheme: 'dark' });
   query.flip(false);
   assert.equal(root.dataset.scheme, 'light');
@@ -94,7 +94,7 @@ test('getAppearance is bounded and failures keep the last good appearance', asyn
   const root = fakeRoot();
   await startPanelTheme({ api, root, darkQuery: fakeQuery(false) });
   fail = true;
-  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 9 } }, 'session');
+  api.emit({ [APPEARANCE_REV_KEY]: { newValue: 9 } }, 'local');
   await settle();
   assert.deepEqual(root.dataset, { tone: 'dusk', scheme: 'dark' });
 });

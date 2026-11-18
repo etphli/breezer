@@ -1,3 +1,4 @@
+import { storageBus, event as storageEvent } from './storage-bus.mjs';
 // Drives the shipped settings page (workspace.html#/settings + settings.js)
 // against a fake DOM, fake chrome.storage and a controllable breezerPrivate
 // bridge. Native outcomes are out of scope; workspace-native.mjs covers them.
@@ -25,26 +26,9 @@ test('focus assertions distinguish two inputs with the same label', () => {
 const settle = async (rounds = 6) => { for (let i = 0; i < rounds; i += 1) await new Promise((resolve) => setTimeout(resolve, 0)); };
 
 function fakeStorage() {
-  const listeners = [];
-  const area = (name) => {
-    const data = {};
-    return {
-      data,
-      async get(keys) {
-        const list = keys == null ? Object.keys(data) : [keys].flat();
-        return Object.fromEntries(list.filter((key) => key in data).map((key) => [key, structuredClone(data[key])]));
-      },
-      async set(values) {
-        const changes = {};
-        for (const [key, value] of Object.entries(values)) {
-          changes[key] = { oldValue: data[key], newValue: structuredClone(value) };
-          data[key] = structuredClone(value);
-        }
-        setTimeout(() => { for (const fn of listeners) fn(changes, name); }, 0);
-      },
-    };
-  };
-  return { local: area('local'), session: area('session'), onChanged: { addListener: (fn) => listeners.push(fn) } };
+  const bus = storageBus(); const storage = bus.context('settings');
+  for (const area of ['local','session']) { const set = storage[area].set; storage[area].set = async values => { await set(values); setTimeout(() => { void bus.flush(); }, 0); }; }
+  return storage;
 }
 
 // breezerPrivate stand-in. With `hold`, each setAppearance waits for release().
@@ -150,7 +134,7 @@ test('switches, radios and swatches each write one field and persist the reporte
   await settle();
   assert.equal(page.bridge.native.theme, 'rose');
   assert.equal(page.document.documentElement.dataset.tone, 'rose');
-  assert.ok(page.storage.session.data[APPEARANCE_REV_KEY], 'other documents are told to reload appearance');
+  assert.ok(page.storage.local.data[APPEARANCE_REV_KEY], 'other documents are told to reload appearance');
 });
 
 test('keyboard steps on a slider keep focus and are all applied while a save is in flight', async () => {
@@ -213,7 +197,7 @@ test('an outside appearance change does not reset a slider the user is dragging'
   width.value = '320';
   width.dispatchEvent(event('input'));
   page.bridge.native.theme = 'tide';
-  await page.storage.session.set({ [APPEARANCE_REV_KEY]: Date.now() });
+  await page.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() });
   await settle();
   assert.equal(page.document.documentElement.dataset.tone, 'tide', 'outside change still applies');
   assert.equal(width.value, '320');

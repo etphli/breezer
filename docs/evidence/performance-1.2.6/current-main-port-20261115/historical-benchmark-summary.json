@@ -1,0 +1,120 @@
+{
+  "scope": "Historical frozen private package, not the current-main source port",
+  "basePerformanceHead": "476d985391bb0254f45c1e20e6db600445ea5e8b",
+  "newSourceBase": "55b86e3b9338804dbfb1a4deb39930c9cba09155",
+  "rawSha256": "5b1311195c143fa7e35fe4a07f0dcebb060f8b49e780f381f7a22db510abec7b",
+  "verifiedDataSha256": "b35cb678b14037217471c75a3137b9fbab39143f1d29633aabf31e20c3f62aab",
+  "packageReceiptSha256": "453c536c7dabe3e1cfda7ed94a2e29edb4b95414006f8cf9186f88f02c80f7a0",
+  "trials": 8,
+  "pairs": 4,
+  "metrics": [
+    {
+      "key": "startup",
+      "label": "Startup",
+      "unit": "ms",
+      "baseline": 746.1620625000214,
+      "candidate": 796.9466870000178,
+      "ratio": 1.0680611184249198,
+      "targetRatioCeiling": 1
+    },
+    {
+      "key": "earlyNavigation",
+      "label": "Early navigation",
+      "unit": "ms",
+      "baseline": 41.0335625000007,
+      "candidate": 73.43331299998135,
+      "ratio": 1.789591459429829,
+      "targetRatioCeiling": 1
+    },
+    {
+      "key": "switches",
+      "label": "Tab switching",
+      "unit": "ms",
+      "baseline": 37.9237500000163,
+      "candidate": 37.74752099999023,
+      "ratio": 0.9953530703048619,
+      "targetRatioCeiling": 1
+    },
+    {
+      "key": "navigations",
+      "label": "Warm navigation",
+      "unit": "ms",
+      "baseline": 38.63302099998691,
+      "candidate": 43.610479500028305,
+      "ratio": 1.1288394842340463,
+      "targetRatioCeiling": 1
+    },
+    {
+      "key": "blankTabs",
+      "label": "Blank tab",
+      "unit": "ms",
+      "baseline": 47.925604499992914,
+      "candidate": 65.6373124999518,
+      "ratio": 1.3695667104201368,
+      "targetRatioCeiling": 1
+    },
+    {
+      "key": "oneTabFootprint",
+      "label": "One-tab footprint",
+      "unit": "MiB",
+      "baseline": 428.45965576171875,
+      "candidate": 457.4803161621094,
+      "ratio": 1.0677325391320625,
+      "targetRatioCeiling": null
+    },
+    {
+      "key": "tenTabFootprint",
+      "label": "Ten-tab footprint",
+      "unit": "MiB",
+      "baseline": 853.9588623046875,
+      "candidate": 732.73095703125,
+      "ratio": 0.858040111035016,
+      "targetRatioCeiling": 0.8
+    },
+    {
+      "key": "idleCpuLower",
+      "label": "Idle CPU lower",
+      "unit": "CPU-s/s",
+      "baseline": 0.02637671757676198,
+      "candidate": 0.03726212871277968,
+      "ratio": 1.412690134939603,
+      "targetRatioCeiling": null
+    },
+    {
+      "key": "idleCpuUpper",
+      "label": "Idle CPU upper",
+      "unit": "CPU-s/s",
+      "baseline": 0.026376794564755904,
+      "candidate": 0.03726224524740103,
+      "ratio": 1.4126904296851153,
+      "targetRatioCeiling": 1
+    },
+    {
+      "key": "activeCpuLower",
+      "label": "Active CPU lower",
+      "unit": "CPU-s/s",
+      "baseline": 0.37145922551002303,
+      "candidate": 0.5466927478372734,
+      "ratio": 1.4717436270068411,
+      "targetRatioCeiling": null
+    },
+    {
+      "key": "activeCpuUpper",
+      "label": "Active CPU upper",
+      "unit": "CPU-s/s",
+      "baseline": 0.37146207312592816,
+      "candidate": 0.5466971044198623,
+      "ratio": 1.4717440728720863,
+      "targetRatioCeiling": 1
+    }
+  ],
+  "performanceAcceptance": false,
+  "releaseAcceptance": false,
+  "limitations": [
+    "This package predates current-main integration and privacy fixes.",
+    "Native outline strips and saved-frame budget1 were experimental.",
+    "Four pairs support descriptive medians only.",
+    "Supplemental idle was incomplete and is not scored.",
+    "No causal saving is established for this source port."
+  ]
+}

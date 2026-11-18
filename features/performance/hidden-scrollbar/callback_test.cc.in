@@ -1,0 +1,306 @@
+// Controlled lower-layer doubles. The methods under test are inserted verbatim
+// from rounded_scroll_bar.cc by check_breezer_hidden_scrollbar.py.
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#define FROM_HERE 0
+template <class T> class scoped_refptr {
+ public:
+  scoped_refptr(T* value) : value_(value) { if (value_) value_->AddRef(); }
+  scoped_refptr(const scoped_refptr& other) : scoped_refptr(other.value_) {}
+  ~scoped_refptr() { if (value_) value_->Release(); }
+  T* operator->() const { return value_; }
+  T* get() const { return value_; }
+ private:
+  T* value_;
+};
+namespace gfx {
+struct Rect {
+  int x = 0, y = 0, width = 9, height = 9;
+  bool operator==(const Rect&) const = default;
+};
+}
+struct State {
+  bool timer = false, animator_destroyed = false;
+  bool delegate = true;
+  unsigned active = 0;
+  gfx::Rect bounds, target_bounds;
+  float opacity = 1, target_opacity = 1;
+  int starts = 0, stops = 0, fade_duration = 0;
+  std::vector<unsigned> completed;
+  std::function<void(unsigned)> on_completed;
+};
+namespace ui {
+struct MouseEvent {};
+struct LayerAnimationElement {
+  enum AnimatableProperty { BOUNDS = 1, OPACITY = 2, TRANSFORM = 4 };
+};
+class LayerAnimator {
+ public:
+  explicit LayerAnimator(std::shared_ptr<State> state) : state_(state) {}
+  void AddRef() { ++refs_; }
+  void Release() { if (--refs_ == 0) delete this; }
+  void StopAnimatingProperty(LayerAnimationElement::AnimatableProperty property) {
+    // Chromium retains itself per call, removes the sequence before completing,
+    // and skips progression when Layer::SetAnimator has cleared its delegate.
+    scoped_refptr<LayerAnimator> retain(this);
+    if (!(state_->active & property)) return;
+    state_->active &= ~property;
+    if (!state_->delegate) return;
+    if (property == LayerAnimationElement::BOUNDS)
+      state_->bounds = state_->target_bounds;
+    if (property == LayerAnimationElement::OPACITY)
+      state_->opacity = state_->target_opacity;
+    state_->completed.push_back(property);
+    auto callback = state_->on_completed;
+    if (callback) callback(property);
+  }
+  void StopAnimating() {
+    StopAnimatingProperty(LayerAnimationElement::BOUNDS);
+    StopAnimatingProperty(LayerAnimationElement::OPACITY);
+    StopAnimatingProperty(LayerAnimationElement::TRANSFORM);
+  }
+  std::shared_ptr<State> state_;
+ private:
+  ~LayerAnimator() { state_->animator_destroyed = true; }
+  int refs_ = 0;
+};
+class Layer {
+ public:
+  explicit Layer(std::shared_ptr<State> state)
+      : state_(state), animator_(new LayerAnimator(state)) {}
+  ~Layer() { state_->delegate = false; }
+  LayerAnimator* GetAnimator() { return animator_.get(); }
+  float GetTargetOpacity() const { return state_->target_opacity; }
+  void SetOpacity(float value) {
+    state_->target_opacity = value;
+    state_->active |= LayerAnimationElement::OPACITY;
+  }
+ private:
+  std::shared_ptr<State> state_;
+  scoped_refptr<LayerAnimator> animator_;
+};
+class ScopedLayerAnimationSettings {
+ public:
+  explicit ScopedLayerAnimationSettings(LayerAnimator* animator) : animator_(animator) {}
+  void SetTransitionDuration(int duration) { animator_->state_->fade_duration = duration; }
+ private:
+  LayerAnimator* animator_;
+};
+int GetOverlayScrollbarFadeDuration() { return 200; }
+int GetOverlayScrollbarFadeDelay() { return 500; }
+}
+namespace base {
+template <class T> T* Unretained(T* value) { return value; }
+template <class Method, class T> auto BindOnce(Method method, T* value) {
+  return [method, value] { (value->*method)(); };
+}
+}
+namespace views {
+struct Button { enum ButtonState { STATE_NORMAL, STATE_HOVERED, STATE_PRESSED }; };
+template <class T> T* AsViewClass(T* value) { return value; }
+}
+class Timer {
+ public:
+  explicit Timer(std::shared_ptr<State> state) : state_(state) {}
+  void Stop() { state_->timer = false; ++state_->stops; callback_ = {}; }
+  void Start(int, int, std::function<void()> callback) {
+    state_->timer = true; ++state_->starts; callback_ = std::move(callback);
+  }
+  void Fire() {
+    auto callback = std::move(callback_);
+    state_->timer = false;
+    if (callback) callback();
+  }
+ private:
+  std::shared_ptr<State> state_;
+  std::function<void()> callback_;
+};
+namespace tabs {
+class RoundedScrollBar {
+ public:
+  class Thumb {
+   public:
+    explicit Thumb(std::shared_ptr<State> state)
+        : hide_timer_(state), layer_(std::make_unique<ui::Layer>(state)) {}
+    bool IsDrawn() const { return drawn; }
+    ui::Layer* layer() { return layer_.get(); }
+    views::Button::ButtonState GetState() const { return state; }
+    void set_is_animating_size(bool value) { is_animating_size_ = value; }
+    void OnBoundsChanged(const gfx::Rect& previous_bounds);
+    void Show();
+    void Hide();
+    void StartHideCountdown();
+    bool drawn = false, is_animating_size_ = false;
+    views::Button::ButtonState state = views::Button::STATE_NORMAL;
+    Timer hide_timer_;
+    std::unique_ptr<ui::Layer> layer_;
+  };
+  explicit RoundedScrollBar(Thumb* thumb) : thumb_(thumb) {}
+  Thumb* GetThumb() { return thumb_; }
+  void SetIsAnimatingSize(bool is_animating);
+  void OnMouseEntered(const ui::MouseEvent& event);
+  void OnMouseExited(const ui::MouseEvent& event);
+ private:
+  Thumb* thumb_;
+};
+
+// @ACTUAL_METHODS@
+}
+
+void Require(bool condition, const char* message) {
+  if (!condition) throw std::runtime_error(message);
+}
+using E = ui::LayerAnimationElement;
+using Thumb = tabs::RoundedScrollBar::Thumb;
+struct Fixture {
+  std::shared_ptr<State> s = std::make_shared<State>();
+  std::unique_ptr<Thumb> thumb = std::make_unique<Thumb>(s);
+  void Bounds(int y) {
+    // Models the seam after View::SetLayerBounds has already queued BOUNDS.
+    s->target_bounds = {0, y, 9, 9};
+    s->active |= E::BOUNDS;
+    thumb->OnBoundsChanged({});
+  }
+  void Quiet() {
+    Require(!(s->active & (E::BOUNDS | E::OPACITY)), "BOUNDS/OPACITY still active");
+    Require(!s->timer, "hide countdown still running");
+    Require(s->bounds == s->target_bounds, "final bounds were lost");
+    Require(s->opacity == s->target_opacity, "final opacity was lost");
+  }
+};
+int main(int argc, char** argv) {
+  int failures = 0, count = 0;
+  auto test = [&](const char* name, auto body) {
+    if (argc > 1 && std::string(argv[1]) != name) return;
+    ++count;
+    try { body(); std::cout << "PASS " << name << '\n'; }
+    catch (const std::exception& error) {
+      ++failures; std::cout << "FAIL " << name << ": " << error.what() << '\n';
+    }
+  };
+  test("hidden-bounds", [] {
+    Fixture f; f.thumb->StartHideCountdown(); f.Bounds(4); f.Quiet();
+  });
+  test("hidden-bounds-opacity", [] {
+    Fixture f; f.s->opacity = .4f; f.s->target_opacity = .8f;
+    f.s->active = E::OPACITY | E::TRANSFORM;
+    f.thumb->StartHideCountdown(); f.Bounds(11); f.Quiet();
+    Require(f.s->active == E::TRANSFORM, "unrelated property stopped");
+  });
+  test("hidden-no-animation", [] {
+    Fixture f; f.thumb->StartHideCountdown(); f.thumb->OnBoundsChanged({}); f.Quiet();
+    Require(f.s->completed.empty(), "invented completion");
+  });
+  test("hidden-opacity-only", [] {
+    Fixture f; f.s->opacity = .7f; f.s->target_opacity = 0;
+    f.s->active = E::OPACITY; f.thumb->StartHideCountdown();
+    f.thumb->OnBoundsChanged({}); f.Quiet();
+  });
+  test("visible-normal", [] {
+    Fixture f; f.thumb->drawn = true; f.s->target_opacity = 0; f.s->opacity = 0;
+    f.Bounds(20);
+    Require(f.s->active == (E::BOUNDS | E::OPACITY), "visible animations stopped");
+    Require(f.s->target_opacity == 1 && f.s->timer, "visible show/countdown changed");
+    f.thumb->hide_timer_.Fire();
+    Require(f.s->target_opacity == 0 && f.s->fade_duration == 200, "fade changed");
+  });
+  test("visible-hover-pressed", [] {
+    for (auto state : {views::Button::STATE_HOVERED, views::Button::STATE_PRESSED}) {
+      Fixture f; f.thumb->drawn = true; f.thumb->state = state;
+      f.thumb->StartHideCountdown(); f.Bounds(6);
+      Require(!f.s->timer && f.s->starts == 1, "hover/press restarted countdown");
+      Require(f.s->active & E::BOUNDS, "visible bounds stopped");
+    }
+  });
+  test("visible-no-animation", [] {
+    Fixture f; f.thumb->drawn = true; f.thumb->OnBoundsChanged({});
+    Require(f.s->active == 0 && f.s->timer && f.s->target_opacity == 1,
+            "visible idle callback changed");
+  });
+  test("size-animation", [] {
+    for (bool drawn : {false, true}) {
+      Fixture f; f.thumb->drawn = drawn;
+      tabs::RoundedScrollBar bar(f.thumb.get());
+      f.thumb->StartHideCountdown(); bar.SetIsAnimatingSize(true); f.Bounds(29);
+      if (!drawn) f.Quiet();
+      else Require(f.s->active == (E::BOUNDS | E::OPACITY) && f.s->timer &&
+                   f.s->target_opacity == 0 && f.s->fade_duration == 200,
+                   "visible size-animation hide changed");
+    }
+  });
+  test("recovery-scroll-hover", [] {
+    Fixture f; tabs::RoundedScrollBar bar(f.thumb.get());
+    bar.SetIsAnimatingSize(true); f.Bounds(15); f.Quiet();
+    bar.SetIsAnimatingSize(false); f.thumb->drawn = true; f.Bounds(24);
+    Require(f.s->timer && f.s->target_opacity == 1 && (f.s->active & E::BOUNDS),
+            "reshown scroll did not recover");
+    bar.OnMouseEntered({}); Require(!f.s->timer, "hover did not stop timer");
+    bar.OnMouseExited({}); Require(f.s->timer, "exit did not restart timer");
+    f.thumb->hide_timer_.Fire();
+    Require(f.s->target_opacity == 0 && f.s->fade_duration == 200, "recovery fade changed");
+  });
+  test("repeated-updates", [] {
+    Fixture f;
+    for (int y : {4, 11, 20, 29, 29, 24, 15, 6, 0}) { f.Bounds(y); f.Quiet(); }
+  });
+  test("completion-detaches-layer", [] {
+    Fixture f;
+    f.s->active = E::OPACITY; f.thumb->StartHideCountdown();
+    f.s->on_completed = [&](unsigned) {
+      Require(!f.s->timer, "timer stopped after completion");
+      f.thumb->layer_.reset();
+    };
+    f.Bounds(4);
+    Require(f.s->animator_destroyed && f.s->completed == std::vector<unsigned>{E::BOUNDS},
+            "detached animator lifetime/completion changed");
+  });
+  test("completion-detaches-view", [] {
+    Fixture f; std::unique_ptr<Thumb> detached;
+    f.s->active = E::OPACITY; f.thumb->StartHideCountdown();
+    f.s->on_completed = [&](unsigned property) {
+      Require(!f.s->timer, "timer stopped after completion");
+      if (property == E::BOUNDS) detached = std::move(f.thumb);
+    };
+    f.Bounds(4); f.Quiet();
+    Require(!f.thumb && detached && !f.s->animator_destroyed,
+            "detached view was not kept alive by its new owner");
+  });
+  test("completion-destroys-view", [] {
+    Fixture f; f.s->active = E::OPACITY; f.thumb->StartHideCountdown();
+    f.s->on_completed = [&](unsigned) {
+      Require(!f.s->timer, "timer stopped after completion");
+      f.thumb.reset();
+    };
+    f.Bounds(4);
+    Require(!f.thumb && f.s->animator_destroyed, "view/animator not released");
+  });
+  test("opacity-completion-destroys-view", [] {
+    Fixture f; f.s->active = E::OPACITY; f.thumb->StartHideCountdown();
+    f.s->on_completed = [&](unsigned property) {
+      Require(!f.s->timer, "timer stopped after completion");
+      if (property == E::OPACITY) f.thumb.reset();
+    };
+    f.Bounds(4);
+    Require(!f.thumb && f.s->animator_destroyed &&
+            f.s->completed == std::vector<unsigned>{E::BOUNDS, E::OPACITY},
+            "opacity destruction did not finish safely");
+  });
+  test("completion-reenters-bounds", [] {
+    Fixture f; bool entered = false; f.thumb->StartHideCountdown();
+    f.s->on_completed = [&](unsigned property) {
+      Require(!f.s->timer, "timer stopped after completion");
+      if (property == E::BOUNDS && !entered) { entered = true; f.Bounds(29); }
+    };
+    f.Bounds(4); f.Quiet();
+    Require(entered && f.s->bounds.y == 29, "reentrant final bounds lost");
+  });
+  Require(count > 0, "unknown test case");
+  std::cout << count - failures << '/' << count << " passed\n";
+  return failures ? 1 : 0;
+}

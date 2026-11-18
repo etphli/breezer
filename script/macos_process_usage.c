@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <libproc.h>
+#include <mach/mach_time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/resource.h>
@@ -32,23 +33,34 @@ int main(int argc, char **argv) {
       return 2;
     }
   }
-  printf("{\"schema\":1,\"captureStartedNs\":\"%" PRIu64
-         "\",\"processes\":[", monotonic_ns());
+  mach_timebase_info_data_t timebase;
+  if (mach_timebase_info(&timebase) != KERN_SUCCESS || !timebase.numer || !timebase.denom) return 1;
+  printf("{\"schema\":2,\"cpuCounterUnit\":\"mach-absolute-ticks\",\"clockUnit\":\"nanoseconds\",\"timebaseNumer\":%u,\"timebaseDenom\":%u,\"captureStartedNs\":\"%" PRIu64
+         "\",\"processes\":[", timebase.numer, timebase.denom, monotonic_ns());
   for (int i = 1; i < argc; ++i) {
     pid_t pid = (pid_t)strtol(argv[i], NULL, 10);
     struct rusage_info_v4 info = {0};
     if (i > 1) putchar(',');
     printf("{\"pid\":%d", pid);
-    if (proc_pid_rusage(pid, RUSAGE_INFO_V4, (rusage_info_t *)&info) != 0) {
-      printf(",\"status\":\"unavailable\",\"errno\":%d}", errno);
+    uint64_t read_start = monotonic_ns();
+    int result = proc_pid_rusage(pid, RUSAGE_INFO_V4, (rusage_info_t *)&info);
+    int saved_errno = errno;
+    uint64_t read_end = monotonic_ns();
+    if (result != 0) {
+      printf(",\"status\":\"unavailable\",\"errno\":%d}", saved_errno);
       continue;
     }
     if (info.ri_proc_exit_abstime != 0) {
       printf(",\"status\":\"exited\"}");
       continue;
     }
-    printf(",\"status\":\"ok\",\"startAbstime\":\"%" PRIu64
-           "\",\"executableUuid\":\"", info.ri_proc_start_abstime);
+    printf(",\"status\":\"ok\",\"readStartedNs\":\"%" PRIu64
+           "\",\"readEndedNs\":\"%" PRIu64
+           "\",\"userTicks\":\"%" PRIu64
+           "\",\"systemTicks\":\"%" PRIu64
+           "\",\"startAbstime\":\"%" PRIu64
+           "\",\"executableUuid\":\"", read_start, read_end,
+           info.ri_user_time, info.ri_system_time, info.ri_proc_start_abstime);
     for (size_t j = 0; j < sizeof(info.ri_uuid); ++j) {
       printf("%02x", info.ri_uuid[j]);
     }

@@ -1,6 +1,7 @@
+import { localStorageChanges } from './storage-events.js';
 // Keeps the assistant panel on the profile's Breezer tone and color mode. The
 // appearance comes from chrome.breezerPrivate.getAppearance; workspace pages bump
-// storage.session['appearance.rev'] after every change, so an open panel follows
+// storage.local['appearance.rev'] after every change, so an open panel follows
 // along. Builds without the bridge (and test fixtures) keep the OS color scheme.
 import { APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, normalizeAppearance } from './workspace-store.js';
 
@@ -57,8 +58,8 @@ export function startPanelTheme({ api = globalThis.chrome, root = document.docum
 
   apply();
   darkQuery.addEventListener?.('change', apply);
-  api?.storage?.onChanged?.addListener?.((changes, area) => {
-    if (area === 'session' && changes?.[APPEARANCE_REV_KEY]) void refresh();
+  localStorageChanges(api)?.addListener((changes) => {
+    if (changes?.[APPEARANCE_REV_KEY]) void refresh();
   });
   return refresh();
 }

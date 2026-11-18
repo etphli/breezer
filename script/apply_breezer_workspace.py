@@ -9,12 +9,14 @@ changes build output or removes source files.
 
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
 import shutil
 import tempfile
 
 import breezer_sidebar_frame as sidebar_frame
+import breezer_tab_groups as tab_groups
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -28,6 +30,29 @@ LAYOUT_CONTROLLER = "chrome/browser/ui/helium/helium_layout_state_controller.cc"
 VERTICAL_CONTROLLER = "chrome/browser/ui/tabs/vertical_tab_strip_state_controller_impl.cc"
 WINDOW_FEATURES = "chrome/browser/ui/browser_window/internal/browser_window_features.cc"
 AVATAR_STATE = "chrome/browser/ui/views/profiles/avatar_toolbar_button_state_manager.cc"
+HIDDEN_SCROLLBAR = "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.cc"
+HIDDEN_SCROLLBAR_HEADER = "chrome/browser/ui/views/tabs/shared/rounded_scroll_bar.h"
+HIDDEN_SCROLLBAR_DATA = ROOT / "features/performance/hidden-scrollbar"
+
+
+def hidden_scrollbar_replacements(name=HIDDEN_SCROLLBAR):
+    """Require complete known native files for both scrollbar implementation and header."""
+    pins = json.loads((HIDDEN_SCROLLBAR_DATA / "pins.json").read_text())
+    if pins["schema"] != 2 or set(pins["files"]) != {HIDDEN_SCROLLBAR, HIDDEN_SCROLLBAR_HEADER}:
+        raise ValueError("Unexpected hidden scrollbar pin contract")
+    row = pins["files"][name]
+    def read(relative, expected):
+        path = HIDDEN_SCROLLBAR_DATA / relative
+        if not path.resolve().is_relative_to(HIDDEN_SCROLLBAR_DATA.resolve()) or path.is_symlink():
+            raise ValueError("Unsafe hidden scrollbar source path")
+        content = path.read_bytes()
+        if hashlib.sha256(content).hexdigest() != expected:
+            raise ValueError("Hidden scrollbar native pin mismatch: " + relative)
+        return content.decode("utf-8")
+    before = read(row["baseline"], row["before_sha256"])
+    after = read(row["payload"], row["after_sha256"])
+    donors = [before] + [read(p["path"], p["sha256"]) for p in row["previous"]]
+    return [(donor, after) for donor in donors]
 
 
 def _avatar_replacements():
@@ -690,6 +715,7 @@ def replacements():
                 '  registry->RegisterStringPref(breezer_workspace::prefs::kSidebarMode, "expanded");\n'
                 '  registry->RegisterIntegerPref(breezer_workspace::prefs::kSidebarFontSize,\n'
                 '                                breezer_workspace::kDefaultSidebarFontSize);\n'
+                '  registry->RegisterDictionaryPref("breezer.workspace.tab_group_colors");\n'
                 '  registry->RegisterIntegerPref(\n'
                 '      breezer_workspace::prefs::kAppearanceDefaultsVersion, 0);\n',
             ),
@@ -737,9 +763,24 @@ def replacements():
                 '      "//chrome/browser/extensions/api/breezer_private",\n',
             ),
         ],
+        "chrome/browser/ui/ui_features.cc": [
+            (
+                'BASE_FEATURE(kTabHoverCardImages, base::FEATURE_ENABLED_BY_DEFAULT);\n',
+                'BASE_FEATURE(kTabHoverCardImages,\n'
+                '#if BUILDFLAG(IS_MAC)\n'
+                '             base::FEATURE_DISABLED_BY_DEFAULT\n'
+                '#else\n'
+                '             base::FEATURE_ENABLED_BY_DEFAULT\n'
+                '#endif\n'
+                ');\n',
+            ),
+        ],
         "chrome/browser/ui/browser_command_controller.cc": _numbered_tab_replacements(),
         AVATAR_STATE: _avatar_replacements(),
+        HIDDEN_SCROLLBAR: hidden_scrollbar_replacements(),
+        HIDDEN_SCROLLBAR_HEADER: hidden_scrollbar_replacements(HIDDEN_SCROLLBAR_HEADER),
         **_peek_replacements(),
+        **tab_groups.replacements(),
     })
 
 
@@ -756,8 +797,10 @@ def added_files():
 def fingerprint():
     digest = hashlib.sha256()
     inputs = [ROOT / "script/apply_breezer_workspace.py",
-              ROOT / "script/breezer_sidebar_frame.py"]
+              ROOT / "script/breezer_sidebar_frame.py",
+              ROOT / "script/breezer_tab_groups.py"]
     inputs.extend(sorted(path for path in NATIVE.rglob("*") if path.is_file()))
+    inputs.extend(sorted(path for path in HIDDEN_SCROLLBAR_DATA.rglob("*") if path.is_file()))
     for path in inputs:
         name = path.relative_to(ROOT).as_posix()
         digest.update(name.encode() + b"\0")
@@ -784,7 +827,18 @@ def source_file(tree, name):
 
 
 def transform(name, content):
+    if name in (HIDDEN_SCROLLBAR, HIDDEN_SCROLLBAR_HEADER):
+        choices = hidden_scrollbar_replacements(name)
+        after = choices[0][1].encode("utf-8")
+        known = {before.encode("utf-8") for before, _ in choices} | {after}
+        if content not in known:
+            raise ValueError(f"Unknown non-diagnostic hidden scrollbar source: {name}")
+        return after
     text = content.decode("utf-8")
+    if name == "chrome/browser/ui/ui_features.cc":
+        before, after = replacements()[name][0]
+        if (text.count(before), text.count(after)) not in ((1, 0), (0, 1)):
+            raise ValueError("Ambiguous native hover-card default anchors")
     for before, after in replacements()[name]:
         # A removal's shorter result can already occur inside its original.
         # Recognize the full original first, rather than skipping the removal.

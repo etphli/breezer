@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
+import { newtabRenderer } from './fixtures/organato-main-port/newtab-render.mjs';
+import { installFixture } from './newtab-browser-fixture.mjs';
 import {
   PORT_NAME, MAX_SITES, daysUntil, normalizeView, organatoState, parseDue, relativeDay, requestView, safeUrl, urgency,
 } from '../../features/ai/extension/newtab.js';
@@ -166,6 +169,13 @@ test('date-only due values are local days and relative labels read plainly', () 
   assert.deepEqual([null, -2, 0, 2, 9].map(urgency), ['none', 'overdue', 'today', 'soon', 'later']);
 });
 
+test('a saved empty list remains ready after a network error and bad timestamps are discarded', () => {
+  const view = normalizeView({ organato: { connected: true, cached: true, error: 'fetch failed', syncedAt: '2026-11-11T00:00:00Z', exams: [], assignments: [], todos: [] } });
+  assert.equal(organatoState(view.organato), 'ready');
+  assert.equal(view.organato.syncedAt, '2026-11-11T00:00:00Z');
+  assert.equal(normalizeView({ organato: { syncedAt: '<img onerror=alert(1)>' } }).organato.syncedAt, null);
+});
+
 function fakeApi(respond) {
   const sent = [];
   let disconnected = 0;
@@ -211,4 +221,61 @@ test('requestView fails cleanly on disconnect, timeout or a missing runtime', as
   await assert.rejects(requestView(fakeApi((_, port) => port.drop())), /closed the connection/);
   await assert.rejects(requestView(fakeApi(() => {}), { timeoutMs: 20 }), /too long/);
   await assert.rejects(requestView({}), /not available/);
+});
+
+
+test('main site rendering keeps two-character monograms and hostname labels', () => {
+  const h = newtabRenderer();
+  const sites = h.normalizeView({ topSites: [
+    { title: 'Mail account', url: 'https://mail.example/' },
+    { url: 'https://www.news.example/' },
+  ] }).topSites;
+  h.renderSites({}, h.root, sites);
+  const [mail, news, add] = h.node('sites').children;
+  assert.equal(mail.children[0].children[0].children[0].textContent, 'MA');
+  assert.equal(news.children[0].children[0].children[0].textContent, 'NE');
+  assert.equal(news.children[0].children[1].textContent, 'news.example');
+  assert.equal(news.children[0].children[1].classList.contains('hostname'), true);
+  assert.equal(add.children[0].children[1].textContent, 'Add shortcut');
+});
+
+test('saved and stale data keep the main notice state and friendly 401 copy', () => {
+  const h = newtabRenderer();
+  const saved = h.normalizeView({ organato: { connected: true, cached: true, syncedAt: '2026-11-10T00:00:00Z' } }).organato;
+  h.renderOrganato(h.root, saved);
+  assert.equal(h.node('organato').dataset.state, 'ready');
+  assert.equal(h.node('organato').dataset.stale, 'true');
+  assert.match(h.node('organato-status').textContent, /Showing saved data from .*Refreshing/);
+  h.renderOrganato(h.root, { ...saved, error: 'fetch failed' });
+  assert.match(h.node('organato-status').textContent, /Could not refresh Organato/);
+  for (const stale of [false, true]) {
+    const denied = h.normalizeView({ organato: { connected: true, stale, error: 'Rejected (401)' } }).organato;
+    h.renderOrganato(h.root, denied);
+    assert.equal(h.node('organato').dataset.state, stale ? 'ready' : 'error');
+    assert.match(h.node('organato-status').textContent, /The API key was rejected. Review it in Settings./);
+    assert.doesNotMatch(h.node('organato-status').textContent, /401/);
+  }
+  h.renderOrganato(h.root, h.normalizeView({ organato: { connected: true } }).organato);
+  assert.equal(h.node('organato').dataset.stale, 'false');
+  assert.equal(h.node('organato-status').hidden, true);
+});
+
+test('shared browser fixture delivers local and general storage events in both tabs', async () => {
+  const callbacks = new Map(), saved = new Map();
+  const window = { addEventListener: (name, fn) => callbacks.set(name, fn) };
+  runInNewContext(`(${installFixture.toString()})({view: {}})`, {
+    window, structuredClone, location: { origin: 'https://fixture.invalid' },
+    localStorage: { getItem: key => saved.get(key), setItem: (key, value) => saved.set(key, value) },
+  });
+  const local = [], general = [];
+  window.chrome.storage.local.onChanged.addListener((...args) => local.push(args));
+  window.chrome.storage.onChanged.addListener((...args) => general.push(args));
+  await window.chrome.storage.local.set({ test: 1 });
+  callbacks.get('storage')({ key: 'shortcut-fixture', newValue: JSON.stringify({ test: 2 }) });
+  assert.equal(local.length, 2);
+  assert.equal(general.length, 2);
+  assert.equal(local[0].length, 1, 'area-local listeners receive only changes');
+  assert.equal(local[1][0].test.oldValue, 1);
+  assert.equal(local[1][0].test.newValue, 2);
+  assert.equal(general[1][1], 'local');
 });

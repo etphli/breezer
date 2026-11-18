@@ -1,0 +1,482 @@
+// Only marked methods/macros are extracted production/reference code.
+// All other types are controlled doubles, not Chromium integration.
+#include <algorithm>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+#define FROM_HERE 0
+#define TRACE_EVENT1(...) ((void)0)
+template<class T> class scoped_refptr {
+ public:
+  scoped_refptr(T* p) : p_(p) { if (p_) p_->AddRef(); }
+  scoped_refptr(const scoped_refptr& p) : scoped_refptr(p.p_) {}
+  template<class U> scoped_refptr(const scoped_refptr<U>& p) : scoped_refptr(p.get()) {}
+  scoped_refptr& operator=(const scoped_refptr& p) {
+    if (p.p_) p.p_->AddRef();
+    if (p_) p_->Release();
+    p_ = p.p_; return *this;
+  }
+  ~scoped_refptr() { if (p_) p_->Release(); }
+  T* operator->() const { return p_; }
+  T* get() const { return p_; }
+ private: T* p_;
+};
+namespace base {
+template<class T> class WeakPtr {
+ public:
+  WeakPtr(T* p,std::weak_ptr<int> token) : p_(p),token_(token) {}
+  T* get() const { return token_.expired() ? nullptr : p_; }
+ private: T* p_; std::weak_ptr<int> token_;
+};
+template<class T> class WeakPtrFactory {
+ public:
+  explicit WeakPtrFactory(T* p) : p_(p) {}
+  WeakPtr<T> GetWeakPtr() { return {p_,token_}; }
+ private: T* p_; std::shared_ptr<int> token_=std::make_shared<int>(0);
+};
+struct TimeDelta { int ms = 0; bool is_zero() const { return ms == 0; } };
+TimeDelta Milliseconds(int v) { return {v}; }
+template<class T, class... A> scoped_refptr<T> MakeRefCounted(A&&... a) {
+  return new T(std::forward<A>(a)...);
+}
+template<class T> T* Unretained(T* p) { return p; }
+template<class M, class T> auto BindOnce(M m, T* p) { return [m,p] { (p->*m)(); }; }
+}
+namespace gfx {
+struct Vector2d { int x=0, y=0; };
+struct Point { int x=0,y=0; Vector2d OffsetFromOrigin() const { return {x,y}; } };
+struct Size {
+  int w=9,h=9;
+  bool operator==(const Size&) const = default;
+};
+struct Rect {
+  Rect() = default;
+  explicit Rect(Size s) : w(s.w),h(s.h) {}
+  Rect(int x,int y,int w,int h) : xx(x),yy(y),w(w),h(h) {}
+  int xx=0,yy=0,w=9,h=9;
+  int x() const { return xx; } int y() const { return yy; }
+  int width() const { return w; } int height() const { return h; }
+  Size size() const { return {w,h}; }
+  Vector2d OffsetFromOrigin() const { return {xx,yy}; }
+  Rect operator+(Vector2d v) const { return {xx+v.x,yy+v.y,w,h}; }
+  bool operator==(const Rect&) const = default;
+};
+using RectF = Rect;
+}
+struct State {
+  bool timer=false;
+  unsigned active=0;
+  gfx::Rect bounds,target_bounds;
+  float opacity=1,target_opacity=1;
+  int starts=0,stops=0,fade_duration=0;
+  int requests=0,collection_starts=0,completed=0,opacity_requests=0;
+  int ax_updates=0,layouts=0,layer_notifications=0,paint_bounds=0,snaps=0;
+  std::function<void(unsigned)> on_completed;
+  std::function<void()> on_base_destructor;
+};
+namespace ui {
+struct MouseEvent {};
+enum class PropertyChangeReason { NOT_FROM_ANIMATION };
+struct TargetValue;
+struct LayerAnimationElement {
+  using TargetValue = ui::TargetValue;
+  enum AnimatableProperty { BOUNDS=1,OPACITY=2,TRANSFORM=4 };
+  gfx::Rect target; base::TimeDelta duration;
+  static std::unique_ptr<LayerAnimationElement> CreateBoundsElement(
+      const gfx::Rect& v, base::TimeDelta d) {
+    return std::make_unique<LayerAnimationElement>(LayerAnimationElement{v,d});
+  }
+  void set_tween_type(int) {}
+};
+struct LayerAnimationSequence {
+  explicit LayerAnimationSequence(std::unique_ptr<LayerAnimationElement> e) : element(std::move(e)) {}
+  std::unique_ptr<LayerAnimationElement> element;
+};
+class Layer;
+class LayerAnimationDelegate {
+ public:
+  virtual ~LayerAnimationDelegate() = default;
+  virtual Layer* GetLayer() = 0;
+  virtual void SetBoundsFromAnimation(const gfx::Rect&, PropertyChangeReason) = 0;
+};
+class LayerAnimator {
+ public:
+  enum PreemptionStrategy { IMMEDIATELY_SET_NEW_TARGET,ENQUEUE_NEW_ANIMATION };
+  explicit LayerAnimator(base::TimeDelta d) : duration_(d) {}
+  void AddRef() { ++refs_; }
+  void Release() { if (--refs_ == 0) delete this; }
+  static scoped_refptr<LayerAnimator> CreateImplicitAnimator() { return new LayerAnimator({120}); }
+  virtual void SetBounds(const gfx::Rect&);
+  gfx::Rect GetTargetBounds() const;
+  virtual void SetOpacity(float v) { ++s->opacity_requests; s->target_opacity=v; s->active |= LayerAnimationElement::OPACITY; }
+  void SetTransform() { s->active |= LayerAnimationElement::TRANSFORM; }
+  void StopAnimatingProperty(LayerAnimationElement::AnimatableProperty p) {
+    scoped_refptr<LayerAnimator> retain(this);
+    if (!(s->active&p)) return;
+    s->active &= ~p;
+    if (!delegate()) return;
+    if (p==LayerAnimationElement::BOUNDS) s->bounds=s->target_bounds;
+    if (p==LayerAnimationElement::OPACITY) s->opacity=s->target_opacity;
+    ++s->completed;
+    auto callback=s->on_completed;
+    if (callback) callback(p);
+  }
+  void StartAnimation(LayerAnimationSequence* raw) {
+    std::unique_ptr<LayerAnimationSequence> sequence(raw);
+    ++s->requests; ++s->collection_starts;
+    s->active |= LayerAnimationElement::BOUNDS;
+    s->target_bounds=sequence->element->target;
+  }
+  void GetTargetValue(struct TargetValue*) const;
+  base::TimeDelta GetTransitionDuration() const { return duration_; }
+  std::shared_ptr<State> s;
+  LayerAnimationDelegate* delegate_=nullptr;
+  PreemptionStrategy preemption_strategy_=IMMEDIATELY_SET_NEW_TARGET;
+  int tween_type_=0;
+  struct WeakFactory { bool GetWeakPtr() { return true; } } weak_ptr_factory_;
+ protected:
+  virtual ~LayerAnimator() = default;
+  LayerAnimationDelegate* delegate() const { return delegate_; }
+ private: int refs_=0; base::TimeDelta duration_;
+};
+struct TargetValue { explicit TargetValue(LayerAnimationDelegate*) {} gfx::Rect bounds; };
+// Alias expected by the exact getter expansion.
+// @ANIMATOR_DECL_ALIAS@
+void LayerAnimator::GetTargetValue(TargetValue* t) const { t->bounds=s->target_bounds; }
+class Layer : public LayerAnimationDelegate {
+ public:
+  explicit Layer(std::shared_ptr<State> s) : s(s), animator_(new LayerAnimator({0})) {
+    animator_->s=s; animator_->delegate_=this;
+  }
+  ~Layer() { animator_->delegate_=nullptr; }
+  Layer* GetLayer() override { return this; }
+  void SetBoundsFromAnimation(const gfx::Rect& v, PropertyChangeReason) override {
+    s->bounds=v;
+    if (!(s->active & LayerAnimationElement::BOUNDS)) s->target_bounds=v;
+  }
+  void SetBounds(const gfx::Rect&);
+  LayerAnimator* GetAnimator() { return animator_.get(); }
+  void SetAnimator(scoped_refptr<LayerAnimator> a) {
+    animator_->delegate_=nullptr; animator_=a;
+    animator_->s=s; animator_->delegate_=this;
+  }
+  void SetOpacity(float v) { GetAnimator()->SetOpacity(v); }
+  float GetTargetOpacity() { return s->target_opacity; }
+  void SetFillsBoundsOpaquely(bool) {}
+  float device_scale_factor() const { return 1; }
+  gfx::Size size() const { return s->bounds.size(); }
+  std::shared_ptr<State> s;
+ private: scoped_refptr<LayerAnimator> animator_;
+};
+class ScopedLayerAnimationSettings {
+ public:
+  explicit ScopedLayerAnimationSettings(LayerAnimator* a) : a_(a) {}
+  void SetTransitionDuration(int d) { a_->s->fade_duration=d; }
+ private: scoped_refptr<LayerAnimator> a_;
+};
+int GetOverlayScrollbarFadeDuration() { return 200; }
+int GetOverlayScrollbarFadeDelay() { return 500; }
+namespace metadata { template<class... A> int MakeUniquePropertyKey(A...) { return 0; } }
+// @LAYER@
+// @ANIMATOR@
+}
+namespace views {
+enum class ViewLayer { kExclude };
+enum class PropertyEffects { kNone };
+constexpr int kXChangedKey=0,kYChangedKey=1,kWidthChangedKey=2,kHeightChangedKey=3;
+struct LayerOffsetData {
+  LayerOffsetData() = default;
+  LayerOffsetData(float, gfx::Vector2d v) : v(v) {}
+  gfx::Vector2d v;
+  gfx::Vector2d offset() const { return v; }
+  void operator+=(gfx::Vector2d a) { v.x+=a.x; v.y+=a.y; }
+  LayerOffsetData operator+(gfx::Vector2d a) const { auto b=*this; b+=a; return b; }
+};
+class View;
+struct ViewObserver {
+  void OnViewLayerBoundsSet(View*) {}
+  void OnViewBoundsChanged(View*) {}
+};
+class View {
+ public:
+  explicit View(std::shared_ptr<State> state) : ax{state}, s(state) {}
+  virtual ~View() { if(s->on_base_destructor) s->on_base_destructor(); life.reset(); }
+  bool GetVisible() const { return visible_; }
+  virtual bool IsDrawn() const;
+  virtual void OnBoundsChanged(const gfx::Rect&) {}
+  ui::Layer* layer() const { return layer_.get(); }
+  void SetPaintToLayer() { layer_=std::make_unique<ui::Layer>(s); }
+  void SetFlipCanvasOnPaintForRTLUI(bool) {}
+  void SetBoundsRect(const gfx::Rect&);
+  void SetLayerBounds(const gfx::Size&,const LayerOffsetData&);
+  gfx::Size size() const { return bounds_.size(); }
+  gfx::Point GetMirroredPosition() const { return {bounds_.x(),bounds_.y()}; }
+  bool GetMirrored() const { return false; }
+  LayerOffsetData CalculateOffsetToAncestorWithLayer(void*) const { return {}; }
+  void SchedulePaintBoundsChanged(bool) { ++s->paint_bounds; }
+  void LayoutImmediately() { ++s->layouts; }
+  const char* GetClassName() const { return "double"; }
+  void UpdateChildLayerBounds(const LayerOffsetData&) {}
+  bool GetNeedsNotificationWhenVisibleBoundsChangeImpl() const { return false; }
+  void OnVisibleBoundsChangedImpl() {}
+  void OnPropertyChanged(int,PropertyEffects) {}
+  struct AX { std::shared_ptr<State> s; void SetBounds(const gfx::RectF&) { ++s->ax_updates; } } ax;
+  AX& GetViewAccessibility() { return ax; }
+  std::vector<ui::Layer*> GetLayersInOrder(ViewLayer) { return {}; }
+  void SnapLayerToPixelBoundary(const LayerOffsetData&) { ++s->snaps; }
+  struct Observers {
+    View* owner;
+    void Notify(void(ViewObserver::*)(View*),View*) { ++owner->s->layer_notifications; }
+  } observers_{this};
+  std::shared_ptr<State> s;
+  std::shared_ptr<int> life=std::make_shared<int>(0);
+  std::unique_ptr<ui::Layer> layer_;
+  bool visible_=true,needs_layout_=false;
+  View* parent_=nullptr;
+  gfx::Rect bounds_;
+  std::vector<View*> children_;
+  std::vector<View*>* descendants_to_notify_=nullptr;
+};
+// Weak-token stand-in. Real ViewTracker uses ViewObserver deletion notifications.
+class ViewTracker {
+ public:
+  explicit ViewTracker(View* v) : v_(v),life_(v->life) {}
+  View* view() const { return life_.expired() ? nullptr : v_; }
+ private: View* v_; std::weak_ptr<int> life_;
+};
+struct Button { enum ButtonState { STATE_NORMAL,STATE_HOVERED,STATE_PRESSED }; };
+template<class T> T* AsViewClass(T* v) { return v; }
+// @VIEW@
+}
+class Timer {
+ public:
+  explicit Timer(std::shared_ptr<State> s) : s_(s) {}
+  void Stop() { s_->timer=false; ++s_->stops; callback_={}; }
+  void Start(int,int,std::function<void()> cb) { s_->timer=true; ++s_->starts; callback_=std::move(cb); }
+  void Fire() { auto cb=std::move(callback_); s_->timer=false; if(cb) cb(); }
+ private: std::shared_ptr<State> s_; std::function<void()> callback_;
+};
+namespace tabs {
+class RoundedScrollBar {
+ public:
+  class Thumb : public views::View {
+   public:
+    explicit Thumb(std::shared_ptr<State> s) : views::View(s),hide_timer_(s) {}
+    void Init(); void OnBoundsChanged(const gfx::Rect&) override;
+    void Show(); void Hide(); void StartHideCountdown();
+    void set_is_animating_size(bool v) { is_animating_size_=v; }
+    views::Button::ButtonState GetState() const { return state; }
+    views::Button::ButtonState state=views::Button::STATE_NORMAL;
+    Timer& timer() { return hide_timer_; }
+   private:
+    Timer hide_timer_;
+    bool is_animating_size_=false;
+    // @FACTORY@
+  };
+  explicit RoundedScrollBar(Thumb* t) : thumb_(t) {}
+  Thumb* GetThumb() { return thumb_; }
+  void SetIsAnimatingSize(bool); void OnMouseEntered(const ui::MouseEvent&);
+  void OnMouseExited(const ui::MouseEvent&);
+ private: Thumb* thumb_;
+};
+// @THUMB@
+}
+void Require(bool v,const char* m) { if(!v) throw std::runtime_error(m); }
+using E=ui::LayerAnimationElement;
+using Thumb=tabs::RoundedScrollBar::Thumb;
+struct RootView : views::View {
+  explicit RootView(std::shared_ptr<State> s) : View(s) {}
+  bool IsDrawn() const override { return widget_visible; }
+  bool widget_visible=false;
+};
+struct Fixture {
+  std::shared_ptr<State> s=std::make_shared<State>();
+  RootView root{s};
+  views::View parent{s};
+  std::unique_ptr<Thumb> t=std::make_unique<Thumb>(s);
+  Fixture() { parent.parent_=&root; t->parent_=&parent; t->Init(); }
+  void Bounds(int y,int h=9) { t->SetBoundsRect({0,y,9,h}); }
+  void Drawn() { root.widget_visible=true; }
+};
+int main(int argc,char** argv) {
+  int count=0,failures=0;
+  auto test=[&](const char* name,auto body) {
+    if(argc>1 && std::string(argv[1])!=name) return;
+    ++count;
+    try { body(); std::cout<<"PASS "<<name<<'\n'; }
+    catch(const std::exception& e) { ++failures; std::cout<<"FAIL "<<name<<": "<<e.what()<<'\n'; }
+  };
+  if(argc>1 && std::string(argv[1])=="whole-caller-deletion-counterexample") {
+    test("whole-caller-deletion-counterexample",[] {
+      Fixture f; f.Drawn(); f.Bounds(4); f.root.widget_visible=false;
+      f.s->on_completed=[&](unsigned) { f.t.reset(); };
+      // Intentionally unsafe custom observer. The actual enclosing View method
+      // continues after the callback. This is not part of the passing suite.
+      f.Bounds(11);
+    });
+  }
+  test("hidden-no-start",[] {
+    Fixture f; f.Bounds(4);
+    Require(f.s->requests==0 && f.s->collection_starts==0,"hidden SetBounds enqueued/started a scheduler request");
+    Require(f.s->active==0 && !f.s->timer,"hidden work remains active");
+    Require(f.t->bounds_==gfx::Rect(0,4,9,9) && f.s->bounds==f.t->bounds_,"hidden geometry lost");
+    Require(f.s->ax_updates==1 && f.s->paint_bounds==2 && f.s->snaps==1,"caller notifications skipped");
+  });
+  test("hidden-ancestor-first-and-repeat",[] {
+    Fixture f; f.Drawn(); f.parent.visible_=false;
+    for(int y:{4,11,20,29,29,24,15,6,0}) f.Bounds(y);
+    Require(f.s->requests==0,"first or repeated hidden bounds scheduled");
+    Require(f.s->bounds==f.t->bounds_ && f.s->ax_updates==8,"repeated model/AX behavior changed");
+  });
+  test("init-unattached",[] {
+    Fixture f; f.t->parent_=nullptr; f.Bounds(11);
+    Require(f.s->requests==0 && !f.s->timer,"unattached thumb started bounds animation");
+  });
+  test("hide-before-descendant-notification",[] {
+    Fixture f; f.Drawn(); f.Bounds(4);
+    int before=f.s->requests;
+    // SetVisible changes visible_ and calls parent before propagation. No
+    // Thumb notification is sent here, deliberately exposing cached state.
+    f.parent.visible_=false; f.Bounds(11);
+    Require(f.s->requests==before,"stale visibility scheduled a hidden animation");
+    Require(f.s->bounds==f.t->bounds_ && !f.s->timer,"hidden target/timer not reconciled");
+  });
+  test("show-before-descendant-notification",[] {
+    Fixture f; f.Bounds(4); f.Drawn(); f.Bounds(11);
+    Require(f.s->requests==1 && (f.s->active&E::BOUNDS),"reshown bounds did not animate");
+    Require(f.s->timer,"reshown countdown missing");
+  });
+  test("model-size-layout",[] {
+    Fixture f; f.Bounds(4,15);
+    Require(f.s->requests==0 && f.s->layouts==1 && f.s->ax_updates==1,"hidden layout/AX changed");
+  });
+  test("visible-normal-fade",[] {
+    Fixture f; f.Drawn(); f.s->opacity=f.s->target_opacity=0; f.Bounds(20);
+    Require(f.s->requests==1 && f.s->active==(E::BOUNDS|E::OPACITY),"visible animation changed");
+    Require(f.s->timer && f.s->target_opacity==1,"visible show/countdown changed");
+    f.t->timer().Fire();
+    Require(f.s->target_opacity==0 && f.s->fade_duration==200,"drawn fade changed");
+    Require(f.t->layer()->GetAnimator()->GetTransitionDuration().ms==120,"implicit duration changed");
+  });
+  test("visible-equivalence",[] {
+    Fixture f; f.Drawn(); tabs::RoundedScrollBar bar(f.t.get());
+    for(auto state:{views::Button::STATE_NORMAL,views::Button::STATE_HOVERED,
+                    views::Button::STATE_PRESSED}) {
+      f.t->state=state; f.Bounds(4+int(state)*7);
+      bar.SetIsAnimatingSize(true); f.Bounds(25+int(state)*7);
+      bar.SetIsAnimatingSize(false); f.Bounds(45+int(state)*7);
+      bar.OnMouseEntered({}); bar.OnMouseExited({}); f.t->timer().Fire();
+      std::cout<<"OBS "<<f.s->requests<<' '<<f.s->opacity_requests<<' '
+               <<f.s->active<<' '<<f.s->target_opacity<<' '<<f.s->timer<<' '
+               <<f.s->starts<<' '<<f.s->stops<<' '<<f.s->fade_duration<<' '
+               <<f.s->target_bounds.y()<<' '<<f.s->ax_updates<<' '
+               <<f.t->layer()->GetAnimator()->GetTransitionDuration().ms<<'\n';
+    }
+  });
+  test("visible-hover-pressed",[] {
+    for(auto state:{views::Button::STATE_HOVERED,views::Button::STATE_PRESSED}) {
+      Fixture f; f.Drawn(); f.t->state=state; f.Bounds(6);
+      Require(f.s->requests==1 && !f.s->timer,"hover/pressed behavior changed");
+    }
+  });
+  test("collapse-expand-scroll-hover",[] {
+    Fixture f; f.Drawn(); tabs::RoundedScrollBar bar(f.t.get());
+    bar.SetIsAnimatingSize(true); f.Bounds(29);
+    Require(f.s->requests==1 && f.s->target_opacity==0 && f.s->fade_duration==200,"drawn collapse changed");
+    f.parent.visible_=false; f.Bounds(24);
+    Require(f.s->requests==1 && !f.s->timer && f.s->active==0,"hidden collapse scheduled work");
+    bar.SetIsAnimatingSize(false); f.parent.visible_=true; f.Bounds(15);
+    Require(f.s->requests==2 && f.s->target_opacity==1,"expand/scroll did not recover");
+    bar.OnMouseEntered({}); Require(!f.s->timer,"hover timer changed");
+    bar.OnMouseExited({}); Require(f.s->timer,"exit timer changed");
+  });
+  test("hidden-enqueue-strategy",[] {
+    Fixture f;
+    f.t->layer()->GetAnimator()->preemption_strategy_=ui::LayerAnimator::ENQUEUE_NEW_ANIMATION;
+    f.Bounds(4);
+    Require(f.s->requests==0,"hidden ENQUEUE strategy started animation");
+    Require(f.t->layer()->GetAnimator()->preemption_strategy_==ui::LayerAnimator::ENQUEUE_NEW_ANIMATION,
+            "preemption settings changed");
+  });
+  test("other-property-preserved",[] {
+    Fixture f; f.t->layer()->GetAnimator()->SetTransform(); f.Bounds(4);
+    Require(f.s->active==E::TRANSFORM,"unrelated property stopped");
+  });
+  test("timer-before-completion",[] {
+    Fixture f; f.Drawn(); f.Bounds(4); f.root.widget_visible=false;
+    f.s->on_completed=[&](unsigned p) { if(p==E::BOUNDS) Require(!f.s->timer,"timer still live during bounds completion"); };
+    f.Bounds(11); Require(f.s->bounds==f.t->bounds_,"new target lost after completing old target");
+  });
+  test("completion-reenters-new-bounds",[] {
+    Fixture f; f.Drawn(); f.Bounds(4); f.root.widget_visible=false;
+    bool entered=false;
+    f.s->on_completed=[&](unsigned p) {
+      if(p==E::BOUNDS && !entered) { entered=true; f.Bounds(29); }
+    };
+    f.Bounds(11);
+    Require(entered && f.s->bounds==f.t->bounds_ && f.s->bounds.y()==29,
+            "older outer request overwrote reentrant model bounds");
+    Require(f.s->requests==1,"hidden reentry enqueued animation");
+  });
+  test("hidden-layer-offset-update",[] {
+    Fixture f;
+    // Ancestor layer movement can call SetLayerBounds without OnBoundsChanged.
+    views::LayerOffsetData offset; offset += gfx::Vector2d{7,13};
+    f.t->SetLayerBounds({9,9},offset);
+    Require(f.s->requests==0 && f.s->bounds==gfx::Rect(7,13,9,9),
+            "hidden direct layer offset update scheduled or lost geometry");
+  });
+  test("fallback-ordinary-view",[] {
+    auto s=std::make_shared<State>(); views::View v(s); v.SetPaintToLayer();
+    v.layer()->SetAnimator(ui::LayerAnimator::CreateImplicitAnimator());
+    v.SetBoundsRect({0,4,9,9});
+    Require(s->requests==1,"ordinary hidden View animation globally suppressed");
+  });
+  test("completion-reparents-animator",[] {
+    Fixture f; f.Drawn(); f.Bounds(4); f.root.widget_visible=false;
+    ui::Layer other(std::make_shared<State>());
+    auto* a=f.t->layer()->GetAnimator();
+    f.s->on_completed=[&](unsigned) { other.SetAnimator(a); };
+    a->SetBounds({0,11,9,9});
+    Require(other.s->bounds==gfx::Rect(),"old request applied to different owner");
+  });
+  test("non-thumb-fallback",[] {
+    Fixture f; ui::Layer other(std::make_shared<State>());
+    scoped_refptr<ui::LayerAnimator> a=f.t->layer()->GetAnimator();
+    other.SetAnimator(a); other.SetBounds({0,11,9,9});
+    Require(other.s->requests==1 && (other.s->active&E::BOUNDS),"non-owner layer animation suppressed");
+  });
+  test("owner-teardown-fallback",[] {
+    Fixture f; scoped_refptr<ui::LayerAnimator> a=f.t->layer()->GetAnimator();
+    f.s->on_base_destructor=[&] { a->SetBounds({0,11,9,9}); };
+    f.t.reset(); f.s->on_base_destructor={};
+    Require(f.s->requests==1,"base teardown accessed destroyed Thumb members");
+  });
+  test("retained-animator-after-owner-deletion",[] {
+    Fixture f; scoped_refptr<ui::LayerAnimator> a=f.t->layer()->GetAnimator();
+    f.t.reset(); ui::Layer other(std::make_shared<State>()); other.SetAnimator(a);
+    other.SetBounds({0,4,9,9});
+    Require(other.s->requests==1,"missing owner fallback failed");
+  });
+  test("completion-detaches-layer-direct-animator",[] {
+    Fixture f; f.Drawn(); f.Bounds(4); f.root.widget_visible=false;
+    auto* a=f.t->layer()->GetAnimator();
+    f.s->on_completed=[&](unsigned) { f.t->layer_.reset(); };
+    a->SetBounds({0,11,9,9});
+    Require(!f.t->layer() && f.s->requests==1,"detached delegate reused");
+  });
+  test("completion-deletes-owner-direct-animator",[] {
+    Fixture f; f.Drawn(); f.Bounds(4); f.root.widget_visible=false;
+    auto* a=f.t->layer()->GetAnimator();
+    f.s->on_completed=[&](unsigned) { f.t.reset(); };
+    a->SetBounds({0,11,9,9});
+    Require(!f.t && f.s->requests==1,"deleted owner reused");
+  });
+  Require(count>0,"unknown case");
+  std::cout<<count-failures<<'/'<<count<<" passed\n";
+  return failures?1:0;
+}

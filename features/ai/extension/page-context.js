@@ -186,10 +186,19 @@ export function pageContext(operation, args = {}) {
     const text = [];
     let length = 0;
     let nodes = 0;
+    let lastParent;
+    let eligible;
     while (walker.nextNode() && length < 18000 && nodes++ < 20000) {
-      const parent = walker.currentNode.parentElement;
-      if (!parent || parent.closest('script,style,noscript,input,textarea,select,[contenteditable],[data-breezer-ai],[hidden],[aria-hidden="true"]') || !visible(parent)) continue;
-      const value = walker.currentNode.textContent.replace(/\s+/g, ' ').trim();
+      const node = walker.currentNode;
+      const parent = node.parentElement;
+      if (parent !== lastParent) { lastParent = parent; eligible = undefined; }
+      // Bound the early scan so large excluded text stays unread.
+      const content = node.length <= 256 ? node.textContent : null;
+      if (content !== null && !/\S/.test(content)) continue;
+      // These synchronous isolated-world DOM reads cannot run page callbacks.
+      if (eligible === undefined) eligible = !!parent && !parent.closest('script,style,noscript,input,textarea,select,[contenteditable],[data-breezer-ai],[hidden],[aria-hidden="true"]') && visible(parent);
+      if (!eligible) continue;
+      const value = (content ?? node.textContent).replace(/\s+/g, ' ').trim();
       if (value) { text.push(value); length += value.length; }
     }
     return { url: location.href, title: document.title, text: text.join(' ').slice(0, 18000), viewport: { width: innerWidth, height: innerHeight }, elements };

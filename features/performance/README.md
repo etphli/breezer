@@ -1,10 +1,12 @@
 # Compiled filter-list experiment
 
 This experiment skips uBlock's parser/compiler for unchanged packaged lists.
-It is opt-in. Packaged native byte checks, existing-cache and saved-engine
-restart checks, 640 differential request decisions, concurrent raw-list updates,
-and paired cold-filter diagnostics have passed. GUI acceptance remains unfinished.
-It is not enabled by ordinary builds. The installed app is unchanged.
+It is opt-in and is not enabled by ordinary builds. The main integration has
+bounded offline source tests. Packaged native byte checks, existing-cache and
+saved-engine restart checks, 640 differential request decisions, concurrent
+raw-list updates and cold-filter diagnostics must be repeated for the integrated
+source. Historical private-binary results do not verify this variant. GUI and
+performance acceptance remain open. The installed app is unchanged.
 
 `compiled-filter-lists.mjs` owns one operation, `tryLoad`. A hit returns compiled
 text; every missing, stale, incompatible or corrupt resource returns a miss.
@@ -33,6 +35,12 @@ Checksums detect stale or corrupt artifacts within the signed app, and add no
 independent trust authority.
 
 ## Reproduce
+
+For the current native startup-body profile, first apply the
+[exact filter source overlays](filter-source-overlays/README.md) to a new private
+copy. They include generated trusted-token metadata checked against real resource
+modules before compiler-contract admission. Their source-plan output is not a
+generation receipt. The original prepared tree and installed app stay unchanged.
 
 Start with a prepared source tree and a browser built from those exact compiler
 sources and engine versions. Generation uses only explicit packaged local asset

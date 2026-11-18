@@ -18,7 +18,7 @@ function fixture({ saved = {}, tabs = true, createFails = false, setFails = fals
   const data = structuredClone(saved);
   const api = {
     storage: {
-      local: {
+      local: { onChanged: { addListener: (fn) => listeners.push(fn), removeListener(fn) { const i=listeners.indexOf(fn); if(i>=0) listeners.splice(i,1); } },
         async get(key) { return key in data ? { [key]: structuredClone(data[key]) } : {}; },
         async set(values) {
           if (setFails) throw new Error('quota');

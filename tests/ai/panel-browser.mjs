@@ -5,6 +5,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
+import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
 import { captureStablePanel } from './ui-evidence-capture.mjs';
 
 // This exercises the shipped UI in a real browser, with a deterministic extension
@@ -52,7 +53,7 @@ try {
     };
     requestAnimationFrame(sample);
   });
-  await page.addInitScript(installPanelFixture);
+  await page.addInitScript({ content: `(${installPanelFixture.toString()})(); (${installPanelAreaEvents.toString()})();` });
   await page.addInitScript(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => { window.copiedCommand = text; } } }));
   await page.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
@@ -531,7 +532,7 @@ try {
   assert.deepEqual(errors, []);
   await writeFile(`${evidence}/panel-capture-geometry.json`, JSON.stringify(captureChecks, null, 2));
   const loading = await browser.newPage({ viewport: { width: 320, height: 640 } });
-  await loading.addInitScript(installPanelFixture, { contextDelay: 30_000 });
+  await loading.addInitScript({ content: `(${installPanelFixture.toString()})({ contextDelay: 30_000 }); (${installPanelAreaEvents.toString()})();` });
   await loading.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
   await loading.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
   assert.equal(await loading.locator('#context-toggle').isHidden(), true, 'unresolved page context has no sharing control');

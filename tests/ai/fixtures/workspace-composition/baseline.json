@@ -1,0 +1,15 @@
+{
+  "sourceCommit": "3f983a26af363c46c81a54691eea58b99c87dca4",
+  "source": "features/ai/extension/workspace.js",
+  "sha256": "b91571f33d65acffbaffbd1a57416321c2f2763aa03eabd02d39867c9267fa1f",
+  "purpose": "Pre-composition efficiency baseline with identical PR20 folder UI behavior; original draw/query/persistence algorithms retained.",
+  "originalSha256": "330a506c245456e2ad995ce9e0c90781960c9a33e657b80614806467e0184c8c",
+  "appliedSourceDeltas": [
+    {
+      "head": "d3ab19213e16842dfde27ba2e85ea61a6c329375",
+      "base": "55b86e3b9338804dbfb1a4deb39930c9cba09155",
+      "path": "features/ai/extension/workspace.js",
+      "scope": "folderNode, drop target/commit, pointer drag/cancellation only"
+    }
+  ]
+}

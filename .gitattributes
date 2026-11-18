@@ -4,3 +4,5 @@ features/storage/code-sign-clones/*.patch whitespace=-blank-at-eol
 # Raw TAP diagnostics retain the test runner's blank-line indentation.
 docs/evidence/ui-polish/candidate/checks/*.log whitespace=-blank-at-eol
 docs/evidence/ui-polish/candidate/release-1.2.5/*.log whitespace=-blank-at-eol
+# This literal upstream fixture retains whitespace included in its source hash.
+tests/filter-source-overlays/fixtures/main-port-20261115/baseline/third_party/ublock/js/cachestorage.js whitespace=-blank-at-eol

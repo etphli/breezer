@@ -10,6 +10,8 @@ ROOT = Path(__file__).resolve().parent.parent
 IDENTITY = json.loads((ROOT / 'features/ai/integration/identity.json').read_text())
 EXTENSION_ID = IDENTITY['extension_id']
 HOST = IDENTITY['native_host']
+RESOURCE_LIMIT = 64
+RESOURCE_KEY = '<(SHARED_INTERMEDIATE_DIR)/components/breezer_ai/resources.grd'
 
 # Only these upstream files are changed. Resource files live under components/.
 PATCHED_FILES = (
@@ -47,11 +49,11 @@ def resources(tree):
     manifest = json.loads((source / 'manifest.json').read_text())
     if manifest.get('key') != IDENTITY['public_key']:
         raise ValueError('Breezer AI manifest key does not match integration identity')
+    files = sorted(p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file())
+    if len(files) > RESOURCE_LIMIT:
+        raise ValueError('Breezer AI resources exceed the reserved GRIT allocation')
     target = tree / 'components/breezer_ai'
     target.mkdir(parents=True, exist_ok=True)
-    files = sorted(p.relative_to(source).as_posix() for p in source.rglob('*') if p.is_file())
-    if len(files) > 50:
-        raise ValueError('Breezer AI resources exceed the reserved GRIT allocation')
     for file in files:
         destination = target / file
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -84,6 +86,16 @@ grit("breezer_ai") {
   deps = [ ":breezer_ai_grd" ]
 }
 ''')
+
+
+def reserve_resources(tree):
+    path = 'tools/gritsettings/resource_ids.spec'
+    replace(tree, path,
+            '<(SHARED_INTERMEDIATE_DIR)/ash/webui/connectivity_diagnostics/resources/resources.grd',
+            RESOURCE_KEY)
+    # Keep the macOS component's reservation and the file-count limit in step.
+    prefix = f'"{RESOURCE_KEY}": {{\n    "META": {{"sizes": {{"includes": ['
+    replace(tree, path, prefix + '50],}},', prefix + f'{RESOURCE_LIMIT}],}}}},')
 
 
 def apply(tree):
@@ -121,9 +133,7 @@ def apply(tree):
     r('chrome/chrome_paks.gni', '      "//components/extstore_fixups",',
       '      "//components/extstore_fixups",\n      "//components/breezer_ai",')
     # Like Helium's extstore resources, use an unused ChromeOS allocation on macOS.
-    r('tools/gritsettings/resource_ids.spec',
-      '"<(SHARED_INTERMEDIATE_DIR)/ash/webui/connectivity_diagnostics/resources/resources.grd"',
-      '"<(SHARED_INTERMEDIATE_DIR)/components/breezer_ai/resources.grd"')
+    reserve_resources(tree)
     r('chrome/app/chrome_command_ids.h',
       '#endif  // CHROME_APP_CHROME_COMMAND_IDS_H_',
       '#define IDC_TOGGLE_BREEZER_AI 34092\n\n#endif  // CHROME_APP_CHROME_COMMAND_IDS_H_')

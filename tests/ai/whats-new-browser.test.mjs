@@ -105,6 +105,7 @@ async function captureLongPage(page, name) {
 async function captureFeatureDetails(page, size) {
   for (const [name, selector] of [
     ['patch', 'section[aria-labelledby="patch-121-title"]'],
+    ['patch-126', 'section[aria-labelledby="patch-126-title"]'],
     ['ui-update', 'section[aria-labelledby="patch-125-title"]'],
     ['passkeys', 'article[aria-labelledby="f-passkeys"]'],
     ['shortcuts', 'article[aria-labelledby="f-shortcuts"]'],
@@ -174,6 +175,13 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       await page.click('.masthead [data-action="continue"]');
       await page.waitForFunction(() => window.fx.removed.length === 1);
       assert.deepEqual(await page.evaluate(() => window.fx), { removed: [42], closed: 0 });
+    });
+
+    await withPage(browser, base, {}, async page => {
+      const patch = page.locator('section[aria-labelledby="patch-126-title"]');
+      assert.equal(await patch.locator('xpath=following-sibling::*[1]').getAttribute('aria-labelledby'), 'verification-title');
+      await page.locator('.page-index a[href="#patch-126-title"]').click();
+      await page.waitForFunction(() => document.querySelector('.page-index [aria-current="location"]')?.hash === '#patch-126-title');
     });
 
     // Technical explanations and extra measurements remain available on demand.

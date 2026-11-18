@@ -1,0 +1,20 @@
+{
+  "chromiumVersion": "156.0.8078.47",
+  "license": "LICENSE.chromium",
+  "extractedFrom": [
+    {
+      "source": "ui/views/view.cc",
+      "sha256": "b90a032ac9c2d68baa2c70ba877fceaf2a82c264742d2d71fdc1454aa5ad30c3"
+    },
+    {
+      "source": "ui/compositor/layer_animator.cc",
+      "sha256": "91e6062aaa9577455bfbe3b58d0f8b65c1396917207c227e2a4183aa912ae412"
+    },
+    {
+      "source": "ui/compositor/layer.cc",
+      "sha256": "b17d15321a84cfc0ee02f93a83c2275cf1c5cb84d661c4866db9ab8db8b486be"
+    }
+  ],
+  "referenceMethodsSha256": "75f20cae7f71f7f833c67c17d5e2812df6aef84dd8087907bc570c34ebd5deda",
+  "scope": "Pinned extracted reference methods in a controlled C++ regression fixture. The doubles are not a native Chromium integration test."
+}

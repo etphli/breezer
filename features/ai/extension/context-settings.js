@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 import { CONTEXT_KEY } from './context-memory.js';
 
 export function createContextClient(api = globalThis.chrome) {
@@ -28,11 +29,12 @@ export function createContextClient(api = globalThis.chrome) {
     });
     return connection;
   };
-  const changed = (changes, area) => {
-    if (closed || port || area !== 'local' || !Object.hasOwn(changes, CONTEXT_KEY)) return;
+  const changed = (changes) => {
+    if (closed || port || !Object.hasOwn(changes, CONTEXT_KEY)) return;
     for (const listener of listeners) listener();
   };
-  api.storage.onChanged.addListener(changed);
+  const storageChanges = localStorageChanges(api);
+  storageChanges.addListener(changed);
   return {
     request(type, fields = {}) {
       if (closed) return Promise.reject(new Error('Context settings connection closed.'));
@@ -49,7 +51,7 @@ export function createContextClient(api = globalThis.chrome) {
       });
     },
     onChange(listener) { listeners.add(listener); return () => listeners.delete(listener); },
-    dispose() { closed = true; failPending(); listeners.clear(); api.storage.onChanged.removeListener(changed); port?.disconnect(); port = null; },
+    dispose() { closed = true; failPending(); listeners.clear(); storageChanges.removeListener(changed); port?.disconnect(); port = null; },
   };
 }
 

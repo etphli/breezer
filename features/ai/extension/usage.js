@@ -1,3 +1,4 @@
+import { localStorageChanges } from './storage-events.js';
 export const USAGE_ENABLED = 'breezer.usage.enabled';
 export const USAGE_STATE = 'breezer.usage.month';
 export const USAGE_ALARM = 'breezer-usage';
@@ -34,8 +35,11 @@ export function installUsage(api, { now = Date.now, send = fetch } = {}) {
       api.idle.queryState(60), api.storage.local.get(USAGE_STATE),
     ]);
     const active = idle === 'active' && windows.some(window => window.focused && !window.incognito);
-    const state = advanceUsage(stored[USAGE_STATE], now(), active);
+    const previous = stored[USAGE_STATE];
+    const state = advanceUsage(previous, now(), active);
     if (!await enabled()) return;
+    // An inactive timestamp cannot contribute to the next active interval.
+    if (previous?.month === state.month && previous.active === false && !active) return;
     await api.storage.local.set({ [USAGE_STATE]: state });
     if (!active || !Object.keys(state.days).length || (state.sentAt && now() - state.sentAt < 30 * 60_000)) return;
     request = new AbortController();
@@ -63,8 +67,8 @@ export function installUsage(api, { now = Date.now, send = fetch } = {}) {
     }
   };
   api.alarms.onAlarm.addListener(alarm => { if (alarm.name === USAGE_ALARM) void enqueue(sample); });
-  api.storage.onChanged.addListener((changes, area) => {
-    if (area !== 'local' || !changes[USAGE_ENABLED]) return;
+  localStorageChanges(api).addListener((changes) => {
+    if (!changes[USAGE_ENABLED]) return;
     if (changes[USAGE_ENABLED].newValue === false) request?.abort();
     void enqueue(configure);
   });
