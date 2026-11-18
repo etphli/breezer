@@ -69,7 +69,10 @@ test('Continue browsing closes this tab, else the window', async () => {
 test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
   // A new minor edition replaces the previous one's features and patches.
   assert.doesNotMatch(text, /Update 1\.1\.\d|Organato on your new tab|Your own theme color/);
-  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 2);
+  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 3);
+  assert.match(text, /Update 1\.2\.6/);
+  assert.match(text, /Use New group in the horizontal tab strip/);
+  assert.match(text, /you can still see saved tasks offline/);
   assert.match(text, /Update 1\.2\.1/);
   assert.match(text, /Whole-browser RAM and CPU savings have not yet been measured/);
   assert.match(text, /New profiles open this guide/);

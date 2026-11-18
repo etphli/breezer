@@ -51,7 +51,7 @@ jobs:
         run: |
           python -B tests/filter-source-overlays/fixtures/main-port-20261115/prepare.py --check
           python -B tests/filter_source_overlays_test.py
-          node --test tests/filter-source-overlays/tokens-contract.test.mjs tests/filter-source-overlays/toolbar-behavior.test.mjs tests/filter-source-overlays/toolbar-reduction.test.mjs
+          node --test tests/filter-source-overlays/tokens-contract.test.mjs tests/filter-source-overlays/toolbar-behavior.test.mjs tests/filter-source-overlays/toolbar-reduction.test.mjs tests/filter-source-overlays/cache-keys.test.mjs tests/filter-source-overlays/css-parser.test.mjs
           node tests/filter-source-overlays/headers.test.mjs
       - name: Verify native AI source integration
         run: python script/check_ai_overlay.py

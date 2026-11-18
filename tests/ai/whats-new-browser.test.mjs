@@ -105,6 +105,7 @@ async function captureLongPage(page, name) {
 async function captureFeatureDetails(page, size) {
   for (const [name, selector] of [
     ['patch', 'section[aria-labelledby="patch-121-title"]'],
+    ['patch-126', 'section[aria-labelledby="patch-126-title"]'],
     ['ui-update', 'section[aria-labelledby="patch-125-title"]'],
     ['passkeys', 'article[aria-labelledby="f-passkeys"]'],
     ['shortcuts', 'article[aria-labelledby="f-shortcuts"]'],
