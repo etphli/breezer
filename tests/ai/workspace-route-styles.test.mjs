@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { parseRoute } from '../../features/ai/extension/workspace-store.js';
+import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
 
 const read = name => readFileSync(new URL(`../../features/ai/extension/${name}`, import.meta.url), 'utf8');
 const source = read('workspace.js');
@@ -191,6 +192,6 @@ test('main draw, compact identities and activation-before-reveal remain the curr
   }
   assert.deepEqual([...source.matchAll(/import\('([^']+)'\)/g)].map(match => match[1]), ['./settings.js', './onboarding.js']);
   assert.match(read('workspace.html'), /<link rel="stylesheet" href="workspace.css">/);
-  assert.equal(JSON.parse(read('manifest.json')).version, '1.2.5');
+  assert.equal(JSON.parse(read('manifest.json')).version, RELEASE_VERSION);
   assert.match(JSON.parse(read('manifest.json')).content_security_policy.extension_pages, /script-src 'self'/);
 });
