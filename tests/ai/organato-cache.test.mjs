@@ -47,7 +47,32 @@ test('cache saves only dashboard fields, uses private permissions and replaces a
   service.fetcher = async () => { throw new TypeError('fetch failed'); };
   await assert.rejects(service.list(undefined, { onCached: value => { cached = value; } }), /fetch failed/);
   assert.deepEqual(cached.items, []);
-  assert.deepEqual(await readdir(directory), ['organato-cache.json']);
+  assert.deepEqual((await readdir(directory)).sort(), ['organato-cache.json', 'organato-cache.lock']);
+}));
+
+test('a delayed helper cannot replace a newer successful empty sync', { timeout: 6000 }, () => fixture(async (old, directory) => {
+  const recent = new Organato({ configDirectory: directory, secrets: old.secrets, fetcher: async () => Response.json({ items: [] }) });
+  for (const helper of [old, recent]) {
+    const collect = helper.collectList.bind(helper);
+    helper.collectList = async (...args) => ({ ...await collect(...args), syncedAt: '2026-11-18T02:34:56.789Z' });
+  }
+  let waiting, release;
+  const ready = new Promise(resolve => { waiting = resolve; });
+  const paused = new Promise(resolve => { release = resolve; });
+  const save = old.saveList.bind(old);
+  old.saveList = async (...args) => { waiting(); await paused; return save(...args); };
+  const stale = old.list();
+  try {
+    await ready;
+    assert.deepEqual((await recent.list()).items, []);
+  } finally {
+    release();
+    await stale;
+  }
+  const offline = new Organato({ configDirectory: directory, secrets: old.secrets, fetcher: async () => { throw new TypeError('fetch failed'); } });
+  let cached;
+  await assert.rejects(offline.list(undefined, { onCached: value => { cached = value; } }), /fetch failed/);
+  assert.deepEqual(cached.items, []);
 }));
 
 test('failed pagination and malformed responses keep the last complete sync', () => fixture(async service => {

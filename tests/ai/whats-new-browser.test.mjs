@@ -177,6 +177,13 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       assert.deepEqual(await page.evaluate(() => window.fx), { removed: [42], closed: 0 });
     });
 
+    await withPage(browser, base, {}, async page => {
+      const patch = page.locator('section[aria-labelledby="patch-126-title"]');
+      assert.equal(await patch.locator('xpath=following-sibling::*[1]').getAttribute('aria-labelledby'), 'verification-title');
+      await page.locator('.page-index a[href="#patch-126-title"]').click();
+      await page.waitForFunction(() => document.querySelector('.page-index [aria-current="location"]')?.hash === '#patch-126-title');
+    });
+
     // Technical explanations and extra measurements remain available on demand.
     await withPage(browser, base, {}, async page => {
       await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-default.png`, animations: 'disabled' });

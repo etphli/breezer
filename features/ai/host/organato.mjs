@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, rename, rm, stat } from 'node:fs/promises';
+import { mkdir, open, readFile, writeFile, rename, rm, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID, createHash } from 'node:crypto';
@@ -12,6 +12,31 @@ const accountId = key => createHash('sha256').update(key).digest('hex');
 const CACHE_LIMIT = 8_000_000;
 const cacheFields = new Set(['id', 'url', 'version', 'title', 'kind', 'classification', 'dueAt', 'dueDateLocal', 'workingStatus', 'subjectId']);
 const cacheItem = item => Object.fromEntries(Object.entries(item).filter(([name, value]) => cacheFields.has(name) && (value === null || ['string', 'number', 'boolean'].includes(typeof value))));
+// Use an OS advisory lock for the write/invalidate transaction across helpers.
+// The lock holder releases it when the parent closes its pipe or exits.
+async function withCacheLock(directory, action) {
+  await mkdir(directory, { recursive: true, mode: 0o700 });
+  const path = join(directory, 'organato-cache.lock');
+  await (await open(path, 'a', 0o600)).close();
+  const mac = process.platform === 'darwin';
+  const child = spawn(mac ? '/usr/bin/lockf' : '/usr/bin/flock', [
+    ...(mac ? ['-k', '-t', '3'] : ['-w', '3']), path,
+    '/bin/sh', '-c', 'printf 1; read -r reply || :',
+  ], { stdio: ['pipe', 'pipe', 'ignore'] });
+  const closed = new Promise(resolve => child.once('close', resolve));
+  child.stdin.on('error', () => {});
+  try {
+    await new Promise((resolve, reject) => {
+      child.once('error', reject);
+      child.once('close', () => reject(new Error('Organato cache lock unavailable.')));
+      child.stdout.once('data', data => data.toString() === '1' ? resolve() : reject(new Error('Invalid Organato cache lock response.')));
+    });
+    return await action();
+  } finally {
+    child.stdin.end();
+    await closed;
+  }
+}
 async function responseText(response) {
   if (!response.body) return '';
   const reader = response.body.getReader(), decoder = new TextDecoder('utf-8', { ignoreBOM: true });
@@ -85,23 +110,21 @@ export class Organato {
     this.cacheQueue = operation.catch(() => {});
     return operation;
   }
-  // Invalidation outlives a helper process. A stale writer can race the final
-  // rename, but its old revision will never be admitted by a subsequent reader.
+  // Invalidation outlives a helper process. Readers admit only the current revision.
   async cacheRevision() {
     try { return await readFile(join(this.directory, 'organato-cache-revision'), 'utf8'); }
     catch (error) { return error.code === 'ENOENT' ? '' : null; }
   }
   async clearCache() {
     this.cacheGeneration++;
-    await this.cacheOperation(async () => {
-      await mkdir(this.directory, { recursive: true, mode: 0o700 });
+    await this.cacheOperation(() => withCacheLock(this.directory, async () => {
       const temporary = join(this.directory, `organato-cache-${randomUUID()}.tmp`);
       try {
         await writeFile(temporary, randomUUID(), { mode: 0o600 });
         await rename(temporary, join(this.directory, 'organato-cache-revision'));
       } finally { await rm(temporary, { force: true }); }
       await rm(join(this.directory, 'organato-cache.json'), { force: true });
-    });
+    }));
   }
   async cachedList(key) {
     const generation = this.cacheGeneration;
@@ -118,21 +141,36 @@ export class Organato {
       return { items: saved.items.map(cacheItem), truncated: saved.truncated === true, syncedAt: saved.syncedAt };
     } catch { return null; }
   }
-  async saveList(result, key, generation, sequence, revision) {
+  async saveList(result, key, generation, sequence, revision, order) {
     // Cache failures must not turn a successful live sync into a dashboard error.
     await this.cacheOperation(async () => {
       if (revision === null || await this.cacheRevision() !== revision || sequence < this.savedSequence || generation !== this.cacheGeneration || this.cacheHolds || await this.secrets.get() !== key) return;
       if (!Array.isArray(result.items) || result.items.length > 2000) return;
       const items = result.items.map(cacheItem);
-      const data = JSON.stringify({ schema: 1, revision, account: accountId(key), items, truncated: result.truncated === true, syncedAt: result.syncedAt });
+      const account = accountId(key);
+      const data = JSON.stringify({ schema: 1, revision, account, items, truncated: result.truncated === true, syncedAt: result.syncedAt, order });
       if (Buffer.byteLength(data) > CACHE_LIMIT) return;
       await mkdir(this.directory, { recursive: true, mode: 0o700 });
       const temporary = join(this.directory, `organato-cache-${randomUUID()}.tmp`);
       try {
         await writeFile(temporary, data, { mode: 0o600 });
         if (revision === null || await this.cacheRevision() !== revision || sequence < this.savedSequence || generation !== this.cacheGeneration || this.cacheHolds || await this.secrets.get() !== key) return;
-        await rename(temporary, join(this.directory, 'organato-cache.json'));
-        this.savedSequence = sequence;
+        await withCacheLock(this.directory, async () => {
+          if (await this.cacheRevision() !== revision || generation !== this.cacheGeneration || this.cacheHolds) return;
+          const path = join(this.directory, 'organato-cache.json');
+          let before;
+          try {
+            if ((await stat(path)).size <= CACHE_LIMIT) before = JSON.parse(await readFile(path, 'utf8'));
+          } catch (error) {
+            if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error;
+          }
+          if (before?.schema === 1 && before.revision === revision && before.account === account) {
+            const previousTime = Date.parse(before.syncedAt), time = Date.parse(result.syncedAt);
+            if (previousTime > time || (previousTime === time && /^\d{1,24}$/.test(before.order) && BigInt(before.order) > BigInt(order))) return;
+          }
+          await rename(temporary, path);
+          this.savedSequence = sequence;
+        });
       } finally { await rm(temporary, { force: true }); }
     }).catch(() => {});
   }
@@ -165,8 +203,9 @@ export class Organato {
         if (cached) await onCached({ ...cached, fingerprint: expected });
       }
       const result = await this.collectList(signal, context.key, validate);
+      const order = process.hrtime.bigint().toString();
       await validate();
-      await this.saveList(result, context.key, generation, sequence, revision);
+      await this.saveList(result, context.key, generation, sequence, revision, order);
       await validate();
       return { ...result, fingerprint: expected };
     } catch (error) {
@@ -240,8 +279,9 @@ export class Organato {
     }
     try {
       const result = await this.collectList(signal, context.key, validate);
+      const order = process.hrtime.bigint().toString();
       await validate();
-      if (context.config.dashboardEnabled) await this.saveList(result, context.key, generation, sequence, revision);
+      if (context.config.dashboardEnabled) await this.saveList(result, context.key, generation, sequence, revision, order);
       await validate();
       return result;
     } catch (error) {
