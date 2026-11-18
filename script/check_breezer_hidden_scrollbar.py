@@ -97,7 +97,7 @@ def preparation_checks(output):
         native.mkdir(parents=True)
         (native / 'unrelated.cc').write_text('preserve native input\n')
         (root / 'script').mkdir()
-        for name in ('apply_breezer_workspace.py', 'breezer_sidebar_frame.py'):
+        for name in ('apply_breezer_workspace.py', 'breezer_sidebar_frame.py', 'breezer_tab_groups.py'):
             shutil.copyfile(ROOT / 'script' / name, root / 'script' / name)
         with mock.patch.multiple(workspace, ROOT=root, NATIVE=native, HIDDEN_SCROLLBAR_DATA=data):
             identity = workspace.fingerprint()
