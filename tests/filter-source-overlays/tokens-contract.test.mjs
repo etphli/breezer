@@ -118,7 +118,7 @@ test('actual compiler contract includes generated module and rejects stale data 
   const expectedNames = Object.keys(manifest.files)
     .filter(name => /^baseline\/third_party\/ublock\/(js|lib)\/.*\.js$/.test(name))
     .map(name => name.replace('baseline/third_party/ublock/', ''));
-  expectedNames.push('js/trusted-scriptlet-tokens.js');
+  expectedNames.push('js/trusted-scriptlet-tokens.js', 'js/breezer-css-parser.js');
   assert.deepEqual(Object.keys(valid.sourceHashes), expectedNames.sort());
   assert.equal(typeof valid.sourceHashes['js/trusted-scriptlet-tokens.js'], 'string');
   assert.ok(!Object.hasOwn(valid.sourceHashes, 'js/breezer-binary-binding.js'));

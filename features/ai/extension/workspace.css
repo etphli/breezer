@@ -338,6 +338,9 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .folder-row.contains-active { background: color-mix(in srgb, var(--raised) 50%, transparent); }
 .folder-children { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; padding-left: 14px; }
 .folder.drop-into > .folder-row { background: color-mix(in srgb, var(--focus) 14%, transparent); box-shadow: inset 0 0 0 1.5px var(--focus); }
+.folder-drop-hint { display: none; color: var(--focus); font-size: var(--fs-small); padding-right: 8px; white-space: nowrap; }
+.folder.drop-into > .folder-row > .count { display: none; }
+.folder.drop-into > .folder-row > .folder-drop-hint { display: block; }
 
 .divider-row {
   display: flex;
@@ -517,6 +520,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Compact rail when the native resize makes the sidebar very narrow. */
 @container sidebar (max-width: 150px) {
+  .folder.drop-into > .folder-row > .folder-drop-hint { display: none; }
   /* One centred column of square caps rather than full-width slabs. */
   .favorites { grid-template-columns: 1fr; justify-items: center; }
   .tile { width: min(100%, 44px); height: 40px; }

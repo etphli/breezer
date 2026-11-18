@@ -4,8 +4,15 @@
   "files": {
     "main-workspace.css": {
       "originalPath": "features/ai/extension/workspace.css",
-      "sha256": "2d8db5cd5feaf4828351cb7af380312174dceacc987858b82ea6c890c5a83a2d",
-      "purpose": "Complete pre-extraction main cascade, including media/custom-color rules; bounded 1 stylesheet."
+      "sha256": "61ffb3915a7f41b61216874a8ceee62c1bf9c13963ddcd3cc9e1dcb47990888a",
+      "purpose": "Pre-extraction main cascade plus PR20 folder-drop styles; route split inverse still verifies the full expected cascade.",
+      "originalSha256": "2d8db5cd5feaf4828351cb7af380312174dceacc987858b82ea6c890c5a83a2d",
+      "appliedSourceDeltas": [
+        {
+          "head": "d3ab19213e16842dfde27ba2e85ea61a6c329375",
+          "scope": "four folder drop hint CSS rules only"
+        }
+      ]
     },
     "main-functions.json": {
       "originalPath": "features/ai/extension/workspace.js",

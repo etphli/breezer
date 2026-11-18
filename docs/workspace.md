@@ -31,6 +31,16 @@ The full-page settings screen provides:
 - Space names, colors, and order.
 - New-tab placement and close-button behavior.
 
+## Horizontal tab groups and folder drops
+
+With top tabs, **New group** in the tab strip opens a new tab in a group and opens its editor. Right-click a group header to rename it, choose a stock colour, or use the **Custom colour** controls. The Red, Green and Blue sliders work with the pointer and arrow keys. The hex field accepts any six-digit RGB colour, with or without `#`. **Apply colour** commits the preview. Choosing a stock swatch removes the custom override.
+
+Custom colours are local to the profile. They follow the group into another window, survive session ID relabeling on restore, and use the saved group's identity when it is reopened. Chromium's standard palette ID remains available to sync and other clients; the custom RGB value is not synced. Group text keeps Chromium's contrasting foreground selection for readability.
+
+In the sidebar, dragging a tab, favorite or saved page over a folder highlights its header and shows **Move into folder**. All but the outer four pixels of the header accept pages; those edges insert before or after the folder. Dropping into a closed folder opens it. Folder drags reorder folders at the root rather than nesting them. Escape or a canceled pointer capture leaves membership unchanged.
+
+The headless workspace browser test covers folder drops, cancellation, persistence and reordering against the real sidebar document. Native group controls and RGB persistence have source-overlay checks and `BreezerTabGroupColorBrowserTest.*` cases staged for `browser_tests`. Native compilation, physical input, colour contrast and restore/reopen acceptance still require the combined app build before release.
+
 ## First-run setup
 
 A brand-new profile opens the setup guide at `workspace.html#/welcome` instead of the release notes. `release-notes.js` treats a profile as new when it has no `breezer.releaseNotesSeen`, no `breezer.setup.v1`, no `settings.onboarding.v1` and no `breezerProfile`; it records the current notes version at the same time, so the notes page does not follow. Profiles used before 1.2.0 keep getting the notes page once per minor release.

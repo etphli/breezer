@@ -11,14 +11,14 @@
     "url": "https://github.com/imputnet/uBlock/releases/download/1.75.0/uBlock0_1.75.0.chromium.zip",
     "note": "Saved prepared modules include local transformations; per-file retained contract pins are authoritative, not an assertion of unmodified archive bytes."
   },
-  "overlayManifestSha256": "57cc681077f1bcacac1b9e56a2ebb639539ddd568b877ad6ca8cc41c26d57f18",
+  "overlayManifestSha256": "7806b4ccb27e162f653a868702a1a1ed8c3fe6db257160d431dba40ba9c5721a",
   "provenance": {
     "build/overnight-filter-integration-20261115-sol/source-inputs.json": "29e6bab75a4e6fac60502fb7beeeac8efff84b60824d69778dd60be40083e025",
     "build/overnight-filter-integration-20261115-sol/generation-inputs/source-manifest.json": "d94f95222a720dc9f5a0ce0922e45bcd17d1472a35d9747108a3c932de634dd0",
     "build/blocker-mainframe-headers-20261112-sol/source-binding.json": "54220b60d8a9769857258e0f40f6aa0880a4ca0648708964cd4a59e77dac3909"
   },
-  "baselineCompilerSourceCount": 59,
-  "candidateCompilerSourceCount": 60,
+  "baselineCompilerSourceCount": 60,
+  "candidateCompilerSourceCount": 62,
   "headerRecordCount": 110,
   "historicalCompiledListCount": 11,
   "files": {
@@ -933,6 +933,16 @@
         "note": "MIT grant transcribed; author attribution retained in lib/punycode.js"
       },
       "license": "license-notice"
+    },
+    "baseline/third_party/ublock/js/cachestorage.js": {
+      "bytes": 27629,
+      "sha256": "a0c04caaf9073dbd20b5b2786fd31c51f4b3baeff69ddf66b4fd17b2e32670ca",
+      "license": "GPL-3.0-or-later",
+      "origin": {
+        "path": "build/overnight-filter-integration-20261115-sol/root-reproduction/third_party/ublock/js/cachestorage.js",
+        "nativeCompilerContractSHA256": "5dd943e5a6b7f2c5203bb372827df80effc661c541c2da4f5d37652e8757c520",
+        "note": "Exact unchanged module bound to the retained native image contract"
+      }
     }
   }
 }

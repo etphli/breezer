@@ -217,6 +217,48 @@ test('dragging with no Favorites preserves tab geometry and supports reorder and
   }
 });
 
+test('folder drops accept the row edges, preserve order and open closed destinations', { skip }, async () => {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    const initial = seed();
+    initial.local['workspace.v1'].spaces[0].pinned[0].open = false;
+    const page = await browser.newPage({ viewport: { width: 300, height: 820 }, reducedMotion: 'reduce' });
+    await page.addInitScript(installFixture, { seed: initial, bridge: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const folder = page.locator('[data-key="f:f-design"]');
+    await folder.waitFor();
+    async function drag(source, yOffset, cancel = false) {
+      const from = await source.boundingBox();
+      const to = await folder.locator('.folder-row').boundingBox();
+      await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(to.x + to.width / 2, to.y + yOffset, { steps: 12 });
+      if (cancel) await page.keyboard.press('Escape');
+      else await page.locator('.folder.drop-into').waitFor();
+      await mkdir(evidence, { recursive: true });
+      if (!cancel) await page.screenshot({ path: `${evidence}/workspace-folder-drop.png`, animations: 'disabled' });
+      await page.mouse.up();
+    }
+    await drag(page.locator('[data-key="t:3"]'), 5);
+    await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces[0].pinned[0].children.some(e => e.url === 'https://github.com/etphli/breezer/pull/42'));
+    assert.equal(await folder.getAttribute('aria-expanded'), 'true');
+    assert.deepEqual(await page.evaluate(() => window.fx.local['workspace.v1'].spaces[0].pinned.map(n => n.id)), ['f-design', 'e-linear']);
+    await drag(page.locator('[data-key="e:e-linear"]'), 6);
+    await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces[0].pinned[0].children.some(e => e.id === 'e-linear'));
+    const before = await page.evaluate(() => window.fx.local['workspace.v1']);
+    await drag(page.locator('[data-key="t:4"]'), 6, true);
+    assert.deepEqual(await page.evaluate(() => window.fx.local['workspace.v1']), before, 'Escape must leave membership unchanged');
+    assert.equal(await page.locator('.drop-into, .lifted, .sidebar.dragging').count(), 0);
+    await page.reload();
+    await folder.waitFor();
+    assert.equal(await folder.locator('[data-key="e:e-linear"]').count(), 1, 'Drop survives sidebar reload');
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 test('delayed tab queries cannot revive closed rows or overwrite navigation and activation', { skip }, async () => {
   const server = await startServer();
   let browser;

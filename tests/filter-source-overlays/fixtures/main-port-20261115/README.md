@@ -1,16 +1,17 @@
 # Filter source fixture
 
 This is a bounded offline test fixture, prepared from the retained November 15
-source pins. It contains 59 real JavaScript modules and their version inputs.
+source pins. It contains 60 real JavaScript modules and their version inputs.
 The candidate is built from those bytes by the production overlay applicator.
 No engine functions are replaced. It is a partial compiler inventory, so its
-60-module candidate contract is not the historical 173-module production contract
+62-module candidate contract is not the full 174-module production candidate
 and cannot establish package or generation readiness.
 
 The static import closure starts at `static-net-filtering.js`,
 `static-filtering-io.js`, `filtering-context.js`, `publicsuffixlist.js` and
 `trusted-tokens.js`. Additional text-only inputs are the exact overlay targets,
-`background.js`, `vapi-background-ext.js`, `tab.js`, `pagestore.js` and `storage.js`.
+`background.js`, `vapi-background-ext.js`, `tab.js`, `pagestore.js`, `storage.js`
+and `cachestorage.js`.
 The entire flattened startup body is retained because the production overlay
 pins its whole input and output. The tests evaluate only the relevant sections.
 UI modules, extension HTML, generated image wrappers, app resources and unrelated

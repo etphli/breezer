@@ -11,7 +11,7 @@ ROOT = HERE.parents[3]
 sys.path.insert(0, str(ROOT / 'script'))
 import apply_breezer_filter_source_overlays as overlays
 
-MANIFEST_SHA256 = 'd4d2595e7de12f4d8be0a7929fa7f8a0ee9e2e64e8e1040117ead4861ab7c200'
+MANIFEST_SHA256 = '66960c3eb5522653a85420f791b34c84e037de02201a56c40ba7e04b485efa5f'
 
 
 def digest(data):

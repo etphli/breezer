@@ -181,7 +181,7 @@
     {
       "path": "js/webext.js",
       "beforeSha256": "173d7475ba50943ca3a12cbc98410525a0423b278e70f67877d56753366b2d30",
-      "afterSha256": "e83cdcb5729b6f8d54f33ec1ee834d5b632d2af160752ea7820ea787d9b3ade9",
+      "afterSha256": "e20f10bd15e013e5e66a21117046a378d9e4e380388aee6fb2c13280db72f64b",
       "edits": [
         {
           "start": 41,
@@ -219,6 +219,15 @@
             "        setBadgeText: promisifyAction(chrome.browserAction, 'setBadgeText'),\n",
             "        setIcon: promisifyAction(chrome.browserAction, 'setIcon'),\n",
             "        setTitle: promisifyAction(chrome.browserAction, 'setTitle'),\n"
+          ]
+        },
+        {
+          "start": 98,
+          "remove": [],
+          "insert": [
+            "            getKeys: typeof chrome.storage.local.getKeys === 'function'\n",
+            "                ? promisify(chrome.storage.local, 'getKeys')\n",
+            "                : undefined,\n"
           ]
         }
       ]
@@ -300,8 +309,123 @@
     {
       "path": "js/breezer-startup-body.js",
       "beforeSha256": "a66e9b0af0a9f7acef838ce4ad72f3e3eafff63b38f2b0e2d21b86f21e24d3e0",
-      "afterSha256": "0bdf517cf459d11ba8d0d22fee21b9a5db141923bcc92ceeff14991d92e30d21",
+      "afterSha256": "622950b362dcafea483442e575c00738f79e2dca196561afb034587f2a0c1c60",
       "edits": [
+        {
+          "start": 767,
+          "remove": [
+            "// lib/csstree/css-tree.js\n"
+          ],
+          "insert": [
+            "// js/breezer-css-parser.js\n"
+          ]
+        },
+        {
+          "start": 2440,
+          "remove": [
+            "  return s.lexer = new Ke({ generic: true, types: e.types, atrules: e.atrules, properties: e.properties, node: e.node }, s), s;\n"
+          ],
+          "insert": [
+            "  return s;\n"
+          ]
+        },
+        {
+          "start": 3291,
+          "remove": [
+            "var init_css_tree = __esm({\n",
+            "  \"lib/csstree/css-tree.js\"() {\n"
+          ],
+          "insert": [
+            "var init_breezer_css_parser = __esm({\n",
+            "  \"js/breezer-css-parser.js\"() {\n"
+          ]
+        },
+        {
+          "start": 4682,
+          "remove": [
+            "    init_css_tree();\n"
+          ],
+          "insert": [
+            "    init_breezer_css_parser();\n"
+          ]
+        },
+        {
+          "start": 9125,
+          "remove": [
+            "var STORAGE_NAME, extensionStorage, pendingWrite, keysFromGetArg, fastCache, cacheStorage, cacheAPI, memoryStorage, idbStorage, cacheAPIs, cachestorage_default;\n"
+          ],
+          "insert": [
+            "var STORAGE_NAME, extensionStorage, extensionStorageKeys, pendingWrite, keysFromGetArg, fastCache, cacheStorage, cacheAPI, memoryStorage, idbStorage, cacheAPIs, cachestorage_default;\n"
+          ]
+        },
+        {
+          "start": 9130,
+          "remove": [],
+          "insert": [
+            "    extensionStorageKeys = async () => {\n",
+            "        if ( typeof extensionStorage.getKeys === 'function' ) {\n",
+            "            const keys = await extensionStorage.getKeys().catch(() => undefined);\n",
+            "            if ( Array.isArray(keys) ) {\n",
+            "                const names = Object.create(null);\n",
+            "                for ( const key of keys ) { names[key] = true; }\n",
+            "                return Object.keys(names);\n",
+            "            }\n",
+            "        }\n",
+            "        const bin = await extensionStorage.get(null).catch(() => undefined);\n",
+            "        return Object.keys(bin || {});\n",
+            "    };\n"
+          ]
+        },
+        {
+          "start": 9239,
+          "remove": [
+            "          const backend = cacheAPIs[fastCache];\n",
+            "          await Promise.all([readBarrier, backendReadiness.get(fastCache)]);\n",
+            "          const results = pendingClear === void 0 ? await Promise.all([\n",
+            "            backend.keys(),\n",
+            "            extensionStorage.get(null).catch(() => ({}))\n",
+            "          ]) : [[], {}];\n",
+            "          const keys = new Set(results[0]);\n",
+            "          for (const key of Object.keys(results[1] || {})) {\n",
+            "            keys.add(key);\n",
+            "          }\n",
+            "          for (const [key, entry] of pendingWrite) {\n",
+            "            if (entry.value === removed) {\n",
+            "              keys.delete(key);\n",
+            "            } else {\n",
+            "              keys.add(key);\n"
+          ],
+          "insert": [
+            "            const backend = cacheAPIs[fastCache];\n",
+            "            await Promise.all([ readBarrier, backendReadiness.get(fastCache) ]);\n",
+            "            const results = pendingClear === undefined ? await Promise.all([\n",
+            "                backend.keys(),\n",
+            "                extensionStorageKeys(),\n",
+            "            ]) : [ [], [] ];\n",
+            "            const keys = new Set(results[0]);\n",
+            "            for ( const key of results[1] ) { keys.add(key); }\n",
+            "            for ( const [ key, entry ] of pendingWrite ) {\n",
+            "                if ( entry.value === removed ) { keys.delete(key); }\n",
+            "                else { keys.add(key); }\n"
+          ]
+        },
+        {
+          "start": 9255,
+          "remove": [
+            "          }\n",
+            "          return new Set([...keys].filter((key) => !regex || regex.test(key)));\n"
+          ],
+          "insert": [
+            "            return new Set([...keys].filter(key => !regex || regex.test(key)));\n"
+          ]
+        },
+        {
+          "start": 9258,
+          "remove": [],
+          "insert": [
+            "\n"
+          ]
+        },
         {
           "start": 22467,
           "remove": [],
@@ -371,6 +495,73 @@
       "beforeSha256": null,
       "afterSha256": "edb34b39337b10381e7668f8a026ff91c7a8f425c50804a547f7e4881f9b555b",
       "payload": "trusted-scriptlet-tokens.js"
+    },
+    {
+      "path": "js/cachestorage.js",
+      "beforeSha256": "a0c04caaf9073dbd20b5b2786fd31c51f4b3baeff69ddf66b4fd17b2e32670ca",
+      "afterSha256": "5ee1a42ef0a99085541187142aefe94cc549ac4f057f60581531cd952341fe37",
+      "edits": [
+        {
+          "start": 62,
+          "remove": [],
+          "insert": [
+            "const extensionStorageKeys = async () => {\n",
+            "    if ( typeof extensionStorage.getKeys === 'function' ) {\n",
+            "        const keys = await extensionStorage.getKeys().catch(() => undefined);\n",
+            "        if ( Array.isArray(keys) ) {\n",
+            "            const names = Object.create(null);\n",
+            "            for ( const key of keys ) { names[key] = true; }\n",
+            "            return Object.keys(names);\n",
+            "        }\n",
+            "    }\n",
+            "    const bin = await extensionStorage.get(null).catch(() => undefined);\n",
+            "    return Object.keys(bin || {});\n",
+            "};\n"
+          ]
+        },
+        {
+          "start": 171,
+          "remove": [
+            "                extensionStorage.get(null).catch(() => ({})),\n",
+            "            ]) : [ [], {} ];\n"
+          ],
+          "insert": [
+            "                extensionStorageKeys(),\n",
+            "            ]) : [ [], [] ];\n"
+          ]
+        },
+        {
+          "start": 174,
+          "remove": [
+            "            for ( const key of Object.keys(results[1] || {}) ) { keys.add(key); }\n"
+          ],
+          "insert": [
+            "            for ( const key of results[1] ) { keys.add(key); }\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/static-filtering-parser.js",
+      "beforeSha256": "f989e66719b89d86015024a3c2a01316e2bd86a3c4cf8e90c6ab0a9f32765173",
+      "afterSha256": "34daa34edd721e131f06c572b4ee0cad0a74e02e317085a411a915f87df164a8",
+      "edits": [
+        {
+          "start": 21,
+          "remove": [
+            "import * as cssTree from '../lib/csstree/css-tree.js';\n"
+          ],
+          "insert": [
+            "import * as cssTree from './breezer-css-parser.js';\n"
+          ]
+        }
+      ]
+    },
+    {
+      "path": "js/breezer-css-parser.js",
+      "beforeSha256": null,
+      "afterSha256": "7ce37a60536637b6a686325033af3836171da021c2c797f1ea8f46a7286e584d",
+      "payload": "breezer-css-parser.js"
     }
   ]
 }
