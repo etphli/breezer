@@ -96,22 +96,30 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 /* ---------------------------------------------------------------------- sky */
 
 .sky {
+  --sky-top: clamp(40px, 7vh, 72px);
+  --date-size: clamp(30px, 4.2vw, 44px);
+  --date-gap: 22px;
+  --date-lines: 1;
+  --shortcuts-height: 170px;
   width: var(--column);
   margin: 0 auto;
-  /* Puts the row of sites at about a third of the way down the window. */
-  padding: clamp(40px, 7vh, 72px) 0 clamp(20px, 3vh, 28px);
+  padding-top: var(--sky-top);
+}
+
+/* Keep the sheet below the tallest shortcut layout without moving the tiles. */
+.sky:has(+ .sheet:not([hidden])) {
+  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--shortcuts-height));
 }
 
 .today {
-  margin: 0 0 22px;
+  margin: 0 0 var(--date-gap);
   font-family: var(--serif);
-  font-size: clamp(30px, 4.2vw, 44px);
+  font-size: var(--date-size);
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
 
-/* Reserves the row's height so the sheet stays put while sites load or when there are none. */
 .sites-nav { min-height: 107px; }
 
 .sites {
@@ -179,7 +187,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .placeholder .site-icon { margin: 10px auto 8px; box-shadow: none; background: var(--hover); }
 .placeholder .site-name { display: block; width: 56px; height: 10px; margin: 0 auto; border-radius: 5px; background: var(--hover); }
 
-.sites-empty { margin: 0; padding-top: 12px; color: var(--muted); }
+.sites-empty { margin: 0; color: var(--muted); }
 
 /* -------------------------------------------------------------------- sheet */
 
@@ -379,7 +387,6 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 .site-remove:focus-visible, .shortcut-feedback button:focus-visible, .shortcut-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .shortcut-feedback { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 36px; margin-top: 4px; font-size: 12px; color: var(--muted); }
 #shortcut-status { min-width: 0; }
-.sky { padding-bottom: 0; }
 .shortcut-feedback button { border: 0; padding: 4px 7px; color: var(--accent); background: transparent; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .shortcut-menu { position: fixed; z-index: 100; padding: 5px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--raised); box-shadow: 0 5px 25px #0002; }
 .shortcut-menu button { display: block; padding: 10px 14px; border: 0; border-radius: 5px; color: inherit; background: transparent; font: inherit; cursor: pointer; }
@@ -411,16 +418,17 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
   .sites { margin-left: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px 4px; }
   .site { width: 100%; }
 }
+/* Below 872px the nine tiles need a second row (48px margins, 88px tracks and 4px gaps). */
+@media (560px < width < 872px) { .sky { --shortcuts-height: 282px; } }
 @media (max-width: 560px) {
   .sites { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sites { row-gap: 4px; }
   .site { min-height: 72px; }
   .site-icon { width: 40px; height: 40px; border-radius: 11px; }
   .site-link { gap: 4px; padding-block: 6px 4px; }
-  .today { margin-bottom: 16px; text-align: center; }
+  .today { text-align: center; }
   .sites > .site-add:only-child { grid-column: 1 / -1; justify-self: center; }
-  .sky { padding-top: clamp(32px, 6vh, 48px); padding-bottom: 8px; }
-  .sky { padding-bottom: 0; }
+  .sky { --sky-top: clamp(32px, 6vh, 48px); --date-gap: 16px; --date-lines: 2; --shortcuts-height: 320px; }
 }
 #refresh:disabled { opacity: .5; cursor: default; }
 
