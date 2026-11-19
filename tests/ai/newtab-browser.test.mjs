@@ -89,6 +89,66 @@ test('a fresh New Tab shows cached icons while Organato and favicon requests are
   }
 });
 
+test('the Organato box stays in place while a burst of New Tabs loads', { skip }, async () => {
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const longTitle = 'A longer shortcut title that takes two lines';
+  const siteCases = {
+    full: SITES.map(site => ({ ...site, title: longTitle })),
+    few: SITES.slice(0, 1),
+    empty: [],
+  };
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    await mkdir(evidence, { recursive: true });
+    for (const [width, locale = 'en-US', date = NOW] of [
+      [1440], [872], [871], [420], [401, 'de-DE', new Date(2026, 8, 10, 10)], [320],
+    ]) {
+      const context = await browser.newContext({ viewport: { width, height: 900 }, locale });
+      try {
+        let resume;
+        const moduleReady = new Promise(resolve => { resume = resolve; });
+        await context.route('**/newtab.js', async route => { await moduleReady; await route.continue(); });
+        await context.addInitScript(installFixture, { view: CONNECTED, siteCases });
+        await context.addInitScript(() => {
+          window.sheetTops = {};
+          new MutationObserver(() => {
+            const sheet = document.querySelector('.sheet');
+            if (!sheet?.querySelector('#organato-lists') || !document.querySelector('link[rel="stylesheet"]').sheet) return;
+            const sites = document.getElementById('sites');
+            const placeholders = sites.querySelector('.placeholder');
+            if (!placeholders && sites.hasAttribute('aria-busy')) return;
+            const phase = placeholders ? 'placeholders' : sheet.querySelector('#organato').dataset.state === 'ready' ? 'ready' : 'sites';
+            window.sheetTops[phase] ??= sheet.getBoundingClientRect().top;
+          }).observe(document, { childList: true, subtree: true, attributes: true });
+        });
+        const pages = await Promise.all(Object.keys(siteCases).map(() => context.newPage()));
+        let initial;
+        try {
+          initial = await Promise.all(pages.map(async (page, index) => {
+            await page.clock.setFixedTime(date);
+            await page.goto(`${base}/newtab.html?sites=${Object.keys(siteCases)[index]}`, { waitUntil: 'commit' });
+            await page.waitForFunction(() => document.querySelector('.sheet') && document.querySelector('link[rel="stylesheet"]').sheet);
+            return page.locator('.sheet').evaluate(sheet => sheet.getBoundingClientRect().top);
+          }));
+          if (width === 1440) await pages[0].screenshot({ path: `${evidence}/newtab-organato-burst-initial.png` });
+        } finally { resume(); }
+        const samples = await Promise.all(pages.map(async (page, index) => {
+          await page.waitForSelector('html[data-loaded="true"]');
+          return { ...await page.evaluate(() => window.sheetTops), initial: initial[index] };
+        }));
+        for (const sample of samples) assert.deepEqual(Object.keys(sample).sort(), ['initial', 'placeholders', 'ready', 'sites']);
+        const tops = samples.flatMap(Object.values);
+        assert.ok(Math.max(...tops) - Math.min(...tops) < 1, `${width}px: ${JSON.stringify(samples)}`);
+        if (width === 1440) await pages[0].screenshot({ path: `${evidence}/newtab-organato-burst-ready.png`, animations: 'disabled' });
+      } finally { await context.close(); }
+    }
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 test('parallel New Tabs merge icons and refresh retries a shortcut that used Chromium’s default', { skip }, async () => {
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
