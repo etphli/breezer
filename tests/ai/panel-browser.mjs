@@ -78,9 +78,11 @@ try {
     const writing = await page.locator('#prompt').boundingBox();
     assert.ok(tip.y + tip.height <= writing.y, 'Control explanation leaves the writing area uncovered');
     const trigger = await page.locator('#control-toggle').boundingBox();
-    assert.ok(tip.y >= trigger.y + trigger.height - 4, 'Control explanation sits below the permission controls');
+    assert.ok(tip.y + tip.height <= trigger.y, 'Control explanation sits above the permission controls');
     const suggestion = await page.locator('[data-control="true"]').boundingBox();
     assert.ok(tip.y >= suggestion.y + suggestion.height, 'Control explanation leaves the suggestion uncovered');
+    const sharing = await page.locator('#context-toggle').boundingBox();
+    assert.ok(sharing.x + sharing.width < trigger.x, 'Sharing and control fit side by side without overlap');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
     await page.mouse.move(1, 1);
   }

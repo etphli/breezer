@@ -250,7 +250,7 @@ function renderModels() {
     const instructions = steps.querySelector('[data-provider="codex"]');
     instructions.hidden = typeof codex?.setup !== 'string';
     instructions.querySelector('code').textContent = codex?.setup || '';
-    steps.querySelector('[data-account-shell-hint]').textContent = 'Run it in PowerShell, then refresh.';
+    steps.querySelector('[data-account-shell-hint]').textContent = 'Open PowerShell and paste the command. Follow the sign-in prompts, then return here and refresh accounts.';
   }
   $('model-options').replaceChildren();
   if (!state.providers.length) {

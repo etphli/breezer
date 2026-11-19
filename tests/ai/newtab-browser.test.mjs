@@ -201,8 +201,9 @@ test('parallel New Tabs merge icons and refresh retries a shortcut that used Chr
     const first = await context.newPage();
     const second = await context.newPage();
     await Promise.all([first.goto(`${base}/newtab.html?sites=first`), second.goto(`${base}/newtab.html?sites=second`)]);
+    await first.bringToFront();
     const cachedUrls = page => page.evaluate(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.map(entry => entry.url));
-    await first.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length >= 2);
+    await first.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length >= 2, null, { polling: 50 });
     assert.deepEqual((await cachedUrls(first)).sort(), [SITES[0].url, SITES[1].url].sort());
     assert.equal(await first.getByRole('link', { name: 'New site', exact: true }).locator('.site-monogram').isVisible(), true);
     known = true;

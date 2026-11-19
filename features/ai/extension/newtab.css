@@ -206,7 +206,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .site-name.hostname { display: block; white-space: nowrap; text-overflow: ellipsis; }
 .site-caption { min-width: 0; max-width: 100%; text-align: center; }
 .site-caption:has(.site-host) .site-name { -webkit-line-clamp: 1; }
-.site-host { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); font-size: 11px; line-height: 16px; }
+.site-host { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); font-size: 12px; font-weight: 550; line-height: 16px; }
 .site-add .site-name { max-width: none; overflow: visible; white-space: nowrap; text-align: center; font-size: 12px; }
 .sites:has(> .site-add:only-child) { margin-left: 0; }
 .site-add:only-child { width: max-content; flex: 0 0 auto; min-height: 0; }
@@ -216,6 +216,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .placeholder .site-name { display: block; width: 56px; height: 10px; margin: 0 auto; border-radius: 5px; background: var(--hover); }
 
 .sites-empty { margin: 0; color: var(--muted); }
+:root:has(.organato[data-state="error"]) .sites-empty { transform: translateY(-6px); }
 
 /* -------------------------------------------------------------------- sheet */
 
@@ -224,7 +225,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   flex: 1;
   width: var(--sheet-width);
   margin: 0 auto;
-  padding: 28px max(16px, calc((var(--sheet-width) - var(--column)) / 2));
+  padding: 28px max(8px, calc((var(--sheet-width) - var(--column)) / 2));
   border-radius: 16px 16px 0 0;
   background: var(--sheet);
   box-shadow: 0 0 0 0.5px var(--line), 0 -1px 3px rgb(0 0 0 / 0.04);
@@ -381,6 +382,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
 .item-subject { color: var(--muted); }
 .item-kind { padding: 0 5px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 20%, var(--sheet)); font-size: .9em; font-weight: 650; color: var(--ink); }
 .item[data-urgency="overdue"] .item-when { color: var(--danger); }
+.item[data-urgency="overdue"] .item-when::before { content: "!" / ""; display: inline-grid; place-items: center; width: 1.1em; height: 1.1em; margin-inline-end: 4px; border: 1px solid currentColor; border-radius: 50%; font-size: .85em; line-height: 1; }
 
 .item-empty, .item-more { font-size: 14px; color: var(--muted); }
 .item-more { padding-left: 52px; }
@@ -394,7 +396,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
   .lanes { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .agenda-switch { display: flex; gap: 5px; padding: 4px; border-radius: 8px; background: var(--hover); }
   .agenda-switch button { flex: 1; min-height: 36px; border: 0; border-radius: 6px; padding: 4px 8px; background: none; color: var(--muted); font-size: 13px; cursor: pointer; }
-  .agenda-switch button[aria-pressed="true"] { color: var(--ink); background: var(--raised); box-shadow: inset 0 0 0 1px var(--line); font-weight: 650; }
+  .agenda-switch button[aria-pressed="true"] { color: var(--canvas); background: var(--ink); font-weight: 650; }
   .lanes:not([data-lane="todos"]) .lane-todos, .lanes[data-lane="todos"] .lane-upcoming { display: none; }
   .lanes .lane-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 }
@@ -417,7 +419,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
 :root[data-scheme="dark"][data-tone="custom"] { --air: color-mix(in srgb, var(--custom-seed) 12%, #111318); --air-deep: color-mix(in srgb, var(--custom-seed) 20%, #171a20); --card: color-mix(in srgb, var(--custom-seed) 14%, #272b33); --ink: #f1f3f6; --muted: #bcc3ce; --accent: oklch(from var(--custom-seed) max(l, .78) min(c, .15) h); }
 
 .site { position: relative; }
-.site-remove { position: absolute; top: -5px; right: 0; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--raised); cursor: pointer; opacity: 0; font: inherit; }
+.site-remove { position: absolute; top: 4px; right: 5px; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; color: var(--ink); background: var(--raised); cursor: pointer; opacity: 0; font: inherit; }
 .site:hover .site-remove, .site:focus-within .site-remove { opacity: 1; }
 .site-remove:focus-visible, .shortcut-feedback button:focus-visible, .shortcut-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .shortcut-feedback { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 36px; margin-top: 4px; font-size: 12px; color: var(--muted); }
@@ -432,7 +434,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
 .sites { padding-block: 7px; }
 
 .site-add-button { width: 100%; border: 0; background: transparent; cursor: pointer; anchor-name: --shortcut-add; }
-.site-add .site-icon { background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); font-size: 26px; font-weight: 300; }
+.site-add .site-icon { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--muted) 68%, transparent); color: var(--ink); font-size: 25px; font-weight: 400; }
 .site-add-button:hover .site-icon { color: var(--accent); background: var(--hover); }
 .shortcut-add { position-anchor: --shortcut-add; inset: auto; top: anchor(bottom); left: anchor(left); position-try-fallbacks: flip-inline, flip-block; margin: 6px 0; width: min(340px, calc(100vw - 32px)); padding: 14px; border: 1px solid var(--line); border-radius: 12px; color: var(--ink); background: var(--raised); box-shadow: 0 1px 2px rgb(0 0 0 / 0.1), 0 10px 24px -10px rgb(0 0 0 / 0.28); }
 .shortcut-add h2 { margin: 0 0 10px; font: 400 18px var(--serif); }

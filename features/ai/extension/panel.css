@@ -223,10 +223,8 @@ button:hover {
   outline: none;
 }
 
-.panel:has(#welcome:not([hidden])) .toolbar { margin-bottom: auto; }
-.panel:has(#welcome:not([hidden])) .conversation { flex: 0 1 auto; }
-.panel:has(#welcome:not([hidden])) .compose-area { margin-bottom: auto; }
-.panel:has(~ dialog[open]) .welcome { visibility: hidden; }
+.panel:has(#welcome:not([hidden])) .conversation { justify-content: safe center; }
+.panel:has(~ dialog[open]) :is(.welcome, .compose-area) { visibility: hidden; }
 
 .welcome {
   width: min(100%, 460px);
@@ -269,7 +267,6 @@ h1 {
 .suggestions button:hover:not(:disabled) {
   background: var(--hover);
 }
-.suggestions [data-control="true"] { background: transparent; border-color: transparent; color: var(--muted); }
 
 .suggestions svg {
   color: var(--muted);
@@ -625,7 +622,7 @@ h1 {
 
 .context-chip {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 2;
   justify-self: start;
   min-width: 0;
   max-width: 100%;
@@ -680,7 +677,7 @@ h1 {
   overflow: hidden;
   clip-path: inset(50%);
 }
-.context-row > .control-toggle { grid-column: 2; grid-row: 1; }
+.context-row > .control-toggle { grid-column: 2; grid-row: 2; }
 
 .composer {
   position: relative;
@@ -761,8 +758,11 @@ h1 {
   background: var(--tint);
   color: var(--accent-ink);
 }
-.control-tip { visibility: hidden; grid-column: 1 / -1; margin-top: -5px; padding: 0 5px 4px; color: var(--muted); font-size: 12px; line-height: 1.35; }
-.context-row:has(.control-toggle:not([data-tip-dismissed]):is(:hover, :focus-visible)) .control-tip { visibility: visible; }
+.control-status { min-width: 17px; text-align: right; font-weight: 650; }
+.control-status::after { content: "Off"; }
+.control-toggle[aria-pressed=true] .control-status::after { content: "On"; }
+.control-tip { display: none; grid-column: 1 / -1; grid-row: 1; padding: 5px 5px 0; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.context-row:has(.control-toggle:not([data-tip-dismissed]):is(:hover, :focus-visible)) .control-tip { display: block; }
 .compose-area:has(.research-chips:not(:empty)) .control-tip,
 .panel:has(#context-toggle[hidden]) .control-tip,
 .panel[data-running="true"] .control-tip { display: none; }
@@ -1260,11 +1260,13 @@ dialog .privacy-note {
 @media (max-width: 350px) {
   .toolbar-actions { gap: 2px; }
   #new-chat { padding-inline: 3px; }
+  .context-chip { gap: 6px; padding-inline: 3px; white-space: nowrap; }
+  .control-toggle { gap: 4px; padding-inline: 4px; }
   .source-tools .source-button svg { display: none; }
 }
 
 @media (max-width: 270px) {
-  #new-chat span, #open-profile span:last-child { display: none; }
+  #new-chat span, #open-profile span:last-child, .control-status { display: none; }
 }
 
 .attachment-list { display: flex; flex-wrap: wrap; gap: 6px; }

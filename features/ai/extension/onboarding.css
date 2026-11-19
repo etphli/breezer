@@ -168,7 +168,7 @@ body.route-welcome { overflow: auto; background: var(--air); }
 
 /* Summary */
 .wl-summary { margin: 0; display: grid; max-width: 460px; }
-.wl-summary div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); }
+.wl-summary div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: baseline; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); }
 .wl-summary dt { color: var(--muted); }
 .wl-summary dd { margin: 0; font-weight: 600; text-align: right; }
 

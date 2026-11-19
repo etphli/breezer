@@ -1358,9 +1358,8 @@ function openItemMenu(found, rect) {
       ...folders.map((folder) => ({ label: `Move to ${folder.name}`, run: () => mutate((store) => moveNode(store, entry.id, { spaceId: state.activeSpaceId, folderId: folder.id })).catch(() => {}) })),
       { label: 'Copy link', run: () => copyLink(entry.url) },
       ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, entry.id, { spaceId })).catch(() => {})),
-      '-',
-      ...(tab ? [{ label: 'Close tab', danger: true, run: () => closeTabs([tab.id]) }] : []),
       { label: 'Unpin', run: () => unpinEntry(entry, tab) },
+      ...(tab ? ['-', { label: 'Close tab', danger: true, run: () => closeTabs([tab.id]) }] : []),
     ];
   } else if (item.type === 'favorite') {
     const { entry, tab } = item;

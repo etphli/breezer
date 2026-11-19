@@ -366,7 +366,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
 
   function renderSummary() {
-    const theme = /^#/.test(appearance.theme) ? 'Your own color' : TONE_NAMES[appearance.theme] ?? appearance.theme;
+    const theme = /^#/.test(appearance.theme) ? 'Custom color' : TONE_NAMES[appearance.theme] ?? appearance.theme;
     const rows = [
       ['Tabs', appearance.layout === 'top' ? 'Across the top' : `Sidebar, ${{ expanded: 'expanded', compact: 'compact', autoHide: 'auto-hide' }[appearance.sidebarMode] ?? 'expanded'}`],
       ['Color', `${theme}, ${{ system: 'following your system', light: 'light', dark: 'dark' }[appearance.colorMode] ?? appearance.colorMode}`],

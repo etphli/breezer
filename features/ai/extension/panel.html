@@ -28,7 +28,7 @@
             <p>Copy a sign-in command.</p>
             <div data-provider="codex"><span>Codex</span><code>codex login</code><button type="button" data-copy-command aria-label="Copy Codex sign-in command">Copy</button></div>
             <div data-provider="claude"><span>Claude</span><code>claude auth login</code><button type="button" data-copy-command aria-label="Copy Claude sign-in command">Copy</button></div>
-            <p data-account-shell-hint>Run it in Terminal, then refresh.</p>
+            <p data-account-shell-hint>Open Terminal and paste the command. Follow the sign-in prompts, then return here and refresh accounts.</p>
           </details>
           <button type="button" id="welcome-action" class="welcome-action" hidden></button>
           <button type="button" id="draft-toggle" class="draft-toggle" aria-controls="prompt" aria-expanded="false" hidden>Write a draft</button>
@@ -53,7 +53,7 @@
         <button type="button" id="context-toggle" class="context-chip" aria-pressed="true" aria-describedby="context-title context-hint" title="Include the current page and a screenshot with your message">
           <span id="sharing-label">Page + screenshot</span><span id="context-title" class="sr-only">Current page</span>
         </button>
-        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><span>Browser control</span><span class="control-state" aria-hidden="true"></span></button>
+        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><span>Browser control</span><span class="control-state" aria-hidden="true"></span><span class="control-status" aria-hidden="true"></span></button>
         <span id="context-hint" class="context-hint" data-state="shared">Page + screenshot</span>
         <span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span>
       </div>
