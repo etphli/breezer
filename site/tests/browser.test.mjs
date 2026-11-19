@@ -6,6 +6,7 @@ import { resolve, extname } from 'node:path';
 import { chromium } from '../../tests/ai/node_modules/playwright/index.mjs';
 import { dashboardPage } from '../lib/dashboard-page.js';
 import { aggregateUsage } from '../lib/metrics.js';
+import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
 
 test('homepage films, privacy, dashboard, responsive layout, errors, and the actual usage switch', { timeout: 60_000 }, async () => {
   const root = resolve(new URL('../../', import.meta.url).pathname);
@@ -22,7 +23,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
         res.setHeader('Content-Type', 'text/html');
         res.end(`<!doctype html><html><head><title>Usage settings fixture</title><link rel="stylesheet" href="/extension/workspace.css"></head><body><main id="settings"><div id="usage-settings"></div></main><script type="module">import {mountUsageSettings} from '/extension/usage-settings.js'; window.saved={};window.api={storage:{local:{get:async k=>({[k]:saved[k]}),set:async v=>Object.assign(saved,v)}}};await mountUsageSettings({api,container:document.getElementById('usage-settings')});</script></body></html>`); return;
       }
-      const relative = path.startsWith('/extension/') ? `features/ai/extension/${path.slice(11)}` : `site/${path === '/' ? 'index.html' : path === '/privacy-policy' ? 'privacy-policy/index.html' : path.slice(1)}`;
+      const pages = { '/': 'index.html', '/privacy-policy': 'privacy-policy/index.html', '/download': 'download/index.html' };
+      const relative = path.startsWith('/extension/') ? `features/ai/extension/${path.slice(11)}` : `site/${pages[path] ?? path.slice(1)}`;
       const file = resolve(root, relative);
       if (!file.startsWith(root + '/')) { res.writeHead(404).end(); return; }
       res.setHeader('Content-Type', { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4' }[extname(file)] || 'application/octet-stream');
@@ -51,6 +53,7 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     page.on('request', request => { if (request.url().endsWith('.mp4')) mediaRequests.push(request.url()); });
     await page.goto(origin);
     assert.equal(await page.title(), 'Breezer: a calmer browser for Mac');
+    assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${RELEASE_VERSION.replaceAll('.', '\\.')} for Mac`));
     const videos = page.locator('#videos video');
     const originals = (await readdir(resolve(root, 'advertising'))).filter(file => file.endsWith('.mp4')).sort();
     assert.deepEqual(await videos.locator('source').evaluateAll(sources => sources.map(source => source.getAttribute('src').split('/').at(-1)).sort()), originals);
@@ -83,6 +86,13 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     assert.equal(await page.locator('.film-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
     await page.screenshot({ path: `${evidence}/videos-mobile.png` });
     await page.setViewportSize({ width: 1440, height: 1050 });
+    await page.goto(`${origin}/download`);
+    const tag = `v${RELEASE_VERSION}`;
+    assert.equal(await page.locator('.release').innerText(), `Version ${RELEASE_VERSION}`);
+    assert.equal(await page.getByRole('link', { name: 'Download Breezer', exact: true }).getAttribute('href'),
+      `https://github.com/etphli/breezer/releases/download/${tag}/Breezer-${tag}-arm64.dmg`);
+    assert.equal(await page.getByRole('link', { name: 'Release notes', exact: true }).getAttribute('href'),
+      `https://github.com/etphli/breezer/releases/tag/${tag}`);
     await page.getByRole('link', { name: 'Privacy policy', exact: true }).click();
     await page.getByRole('heading', { name: 'Your browsing. Your business.' }).waitFor();
     assert.equal(await page.locator('article section').count(), 9);
