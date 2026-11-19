@@ -282,6 +282,84 @@ async function openPages(browser, base, proposals, appearance = { theme: '#3b6e8
   return { context, card, tab, errors };
 }
 
+test('a new tab keeps the cached first frame until the live artwork loads and unloads it when hidden', { skip }, async () => {
+  const { PNG } = await import('pngjs');
+  await mkdir(evidence, { recursive: true });
+  const { server } = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({ executablePath, headless: true });
+  const html = `<style>
+    :root { --opening-color: green; }
+    :root > body { --opening-color: red; }
+    .scene { position: absolute; inset: 0; animation: startup 200ms step-end both; }
+    @keyframes startup { from { background: var(--opening-color); } to { background: blue; } }
+  </style><div class="scene"></div>`;
+  const key = 'theme.firstFrame.v1';
+  try {
+    const { context, card, tab } = await openPages(browser, base, [
+      { name: 'First frame', theme: '#274c77', colorMode: 'light', html },
+    ]);
+    await card.getByRole('button', { name: 'Apply theme' }).click();
+    await card.getByText('Applied “First frame”.').waitFor();
+    await tab.waitForFunction((key) => JSON.parse(localStorage.getItem('shortcut-fixture'))?.[key]?.image, key, { timeout: 2500 });
+    await tab.close();
+
+    const next = await context.newPage();
+    await next.setViewportSize({ width: 1280, height: 800 });
+    await next.addInitScript({ content: `if (window === window.top) (${installFixture})(${JSON.stringify({ view: CONNECTED })});` });
+    // Delay only the app's load notification so we can inspect what it paints
+    // while the still is covering the live frame.
+    await next.addInitScript(() => {
+      if (window !== window.top) return;
+      let hidden = true;
+      Object.defineProperty(document, 'hidden', { get: () => hidden });
+      window.setTabHidden = (value) => {
+        hidden = value;
+        delete window.finishArtworkLoad;
+        document.dispatchEvent(new Event('visibilitychange'));
+      };
+      const addEventListener = HTMLIFrameElement.prototype.addEventListener;
+      HTMLIFrameElement.prototype.addEventListener = function (type, listener, options) {
+        if (type === 'load' && this.className === 'theme-artwork') {
+          return addEventListener.call(this, type, (event) => {
+            window.finishArtworkLoad = () => listener.call(this, event);
+          }, options);
+        }
+        return addEventListener.call(this, type, listener, options);
+      };
+    });
+    await next.goto(`${base}/newtab.html`);
+    await next.waitForSelector('html[data-loaded="true"]');
+    assert.equal(await next.locator('iframe.theme-artwork').count(), 0, 'a hidden tab opens without live artwork');
+    await next.evaluate(() => window.setTabHidden(false));
+    await next.waitForFunction(() => typeof window.finishArtworkLoad === 'function', null, { timeout: 2500 });
+    const pixel = async (name) => {
+      const shot = await next.screenshot({ path: `${evidence}/${name}.png` });
+      const { width, data } = PNG.sync.read(shot);
+      return [...data.subarray((100 * width + 30) * 4, (100 * width + 30) * 4 + 3)];
+    };
+    const [stillRed, , stillBlue] = await pixel('theme-newtab-first-frame');
+    assert.ok(stillRed > stillBlue + 60, `the cached opening frame is red: ${stillRed}, ${stillBlue}`);
+
+    await next.evaluate(() => window.finishArtworkLoad());
+    await next.locator('img.theme-first-frame').waitFor({ state: 'detached' });
+    await next.frameLocator('iframe.theme-artwork').locator('.scene').evaluate((node) => Promise.all(node.getAnimations().map((animation) => animation.finished)));
+    const [liveRed, , liveBlue] = await pixel('theme-newtab-live-frame');
+    assert.ok(liveBlue > liveRed + 60, `the live artwork advances to blue: ${liveRed}, ${liveBlue}`);
+
+    await next.evaluate(() => window.setTabHidden(true));
+    await next.locator('iframe.theme-artwork').waitFor({ state: 'detached', timeout: 2500 });
+    await next.evaluate(() => window.setTabHidden(false));
+    await next.waitForFunction(() => typeof window.finishArtworkLoad === 'function', null, { timeout: 2500 });
+    const [returnRed, , returnBlue] = await pixel('theme-newtab-return-frame');
+    assert.ok(returnRed > returnBlue + 60, `the still covers the restarted animation: ${returnRed}, ${returnBlue}`);
+    await context.close();
+  } finally {
+    await browser.close();
+    server.close();
+  }
+});
+
 test('a pasted image paints crisply behind the artwork in the preview and the new tab', { skip }, async () => {
   const { PNG } = await import('pngjs');
   await mkdir(evidence, { recursive: true });
@@ -352,6 +430,15 @@ test('a pasted image paints crisply behind the artwork in the preview and the ne
     await second.getByRole('button', { name: 'Apply theme' }).click();
     await second.getByText('Applied “Harbour, image only”.').waitFor();
     await tab.waitForFunction(() => !document.querySelector('iframe.theme-artwork') && document.querySelector('img.theme-image'));
+    const imageSurvivedTabSwitch = await tab.evaluate(() => {
+      const picture = document.querySelector('img.theme-image');
+      Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+      delete document.hidden;
+      document.dispatchEvent(new Event('visibilitychange'));
+      return picture === document.querySelector('img.theme-image');
+    });
+    assert.equal(imageSurvivedTabSwitch, true, 'returning to an image-only theme keeps the mounted image');
     await tab.screenshot({ path: `${evidence}/theme-newtab-image-only.png` });
 
     // Restore returns to the look from before the first theme: no image.
