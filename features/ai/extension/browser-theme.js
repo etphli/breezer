@@ -24,6 +24,7 @@ import { APPEARANCE_REV_KEY, normalizeAppearance, validateAppearancePatch } from
 
 export const ARTWORK_KEY = 'theme.artwork.v1';
 export const PREVIOUS_LOOK_KEY = 'theme.previous.v1';
+const FIRST_FRAME_KEY = 'theme.firstFrame.v1';
 const MAX_NAME_LENGTH = 48;
 const MAX_ARTWORK_LENGTH = 40000;
 const MAX_STORED_ARTWORK_LENGTH = 120000;
@@ -221,6 +222,9 @@ function sanitizeArtwork(html, { doc = globalThis.document } = {}) {
   return `${css ? `<style>${css}</style>` : ''}${holder.innerHTML}`;
 }
 
+const ARTWORK_LAYOUT = ':root{color-scheme:normal}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}body{position:relative}svg{display:block}';
+const REDUCED_MOTION = '@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}';
+
 // The complete srcdoc for an artwork frame. The CSP comes first and the
 // reduced-motion rule last; sanitized CSS has no !important, so it cannot win.
 export function artworkDocument(safeHtml) {
@@ -228,9 +232,9 @@ export function artworkDocument(safeHtml) {
     + `<meta http-equiv="Content-Security-Policy" content="${ARTWORK_CSP}">`
     + '<meta name="referrer" content="no-referrer">'
     // color-scheme stays "normal" here and on the iframe, so Chrome keeps the frame transparent in dark pages.
-    + '<style>:root{color-scheme:normal}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}body{position:relative}svg{display:block}</style>'
+    + `<style>${ARTWORK_LAYOUT}</style>`
     + `</head><body>${safeHtml}`
-    + '<style>*,*::before,*::after{pointer-events:none!important;user-select:none!important}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}</style>'
+    + `<style>*,*::before,*::after{pointer-events:none!important;user-select:none!important}${REDUCED_MOTION}</style>`
     + '</body></html>';
 }
 
@@ -248,7 +252,7 @@ function createThemeImage(doc, image, { className = 'theme-image', decoding = 'a
   return node;
 }
 
-function createArtworkFrame(doc, html, { className = 'theme-artwork' } = {}) {
+function createArtworkFrame(doc, safeHtml, { className = 'theme-artwork' } = {}) {
   const frame = doc.createElement('iframe');
   frame.className = className;
   frame.setAttribute('sandbox', '');
@@ -259,7 +263,7 @@ function createArtworkFrame(doc, html, { className = 'theme-artwork' } = {}) {
   frame.setAttribute('tabindex', '-1');
   frame.inert = true;
   frame.style.colorScheme = 'normal';
-  frame.srcdoc = artworkDocument(sanitizeArtwork(html, { doc }));
+  frame.srcdoc = artworkDocument(safeHtml);
   return frame;
 }
 
@@ -415,7 +419,7 @@ async function applyLocked(api, area, proposal, html, now) {
   };
   const next = native ? { theme: proposal.theme, colorMode: proposal.colorMode } : null;
   const appearance = await saveLook(api, area, current, next, {
-    [ARTWORK_KEY]: record, [PREVIOUS_LOOK_KEY]: previous, [APPEARANCE_REV_KEY]: now(),
+    [ARTWORK_KEY]: record, [FIRST_FRAME_KEY]: null, [PREVIOUS_LOOK_KEY]: previous, [APPEARANCE_REV_KEY]: now(),
   }, now);
   const kept = appearance && (appearance.theme.toLowerCase() !== proposal.theme || appearance.colorMode !== proposal.colorMode);
   return { applied: record, native, appearance, kept: Boolean(kept) };
@@ -434,7 +438,7 @@ async function restoreLocked(api, area, now) {
   const current = previous.appearance ? await readRestorableAppearance(api) : null;
   const artwork = readArtworkRecord(previous.artwork);
   const appearance = await saveLook(api, area, current, previous.appearance, {
-    [ARTWORK_KEY]: artwork, [PREVIOUS_LOOK_KEY]: null, [APPEARANCE_REV_KEY]: now(),
+    [ARTWORK_KEY]: artwork, [FIRST_FRAME_KEY]: null, [PREVIOUS_LOOK_KEY]: null, [APPEARANCE_REV_KEY]: now(),
   }, now);
   return { restored: true, appearance, artwork };
 }
@@ -478,7 +482,7 @@ export function renderThemeProposal(container, raw, { api = globalThis.chrome } 
     Object.assign(image.style, { position: 'absolute', inset: '0', display: 'block', width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none', userSelect: 'none' });
     stage.append(image);
   }
-  if (proposal.html) stage.append(createArtworkFrame(doc, proposal.html, { className: 'theme-proposal-art' }));
+  if (proposal.html) stage.append(createArtworkFrame(doc, sanitizeArtwork(proposal.html, { doc }), { className: 'theme-proposal-art' }));
   if (!proposal.image && !proposal.html) stage.classList.add('theme-proposal-stage-plain');
   // A sketch of the new tab's sheet, so the preview shows how content sits on the art.
   const sketch = element(doc, 'div', 'theme-proposal-sketch');
@@ -565,23 +569,140 @@ export function renderThemeProposal(container, raw, { api = globalThis.chrome } 
 
 // ------------------------------------------------------------------- new tab
 
+function firstFrameViewport(view, { fingerprint }) {
+  const { innerWidth: width, innerHeight: height } = view;
+  if (!width || !height || width > 4096 || height > 4096 || view.matchMedia('(forced-colors: active)').matches) return null;
+  const dark = view.matchMedia('(prefers-color-scheme: dark)').matches;
+  const reducedMotion = view.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return { width, height, key: `${fingerprint}:${width}x${height}:${dark}:${reducedMotion}` };
+}
+
+function rasterArtworkCss(css) {
+  const sheet = new CSSStyleSheet();
+  sheet.replaceSync(css);
+  const retargetRoot = (rules) => {
+    for (const rule of rules) {
+      if (rule instanceof CSSStyleRule) {
+        const selector = rule.selectorText.replace(/"[^"]*"|'[^']*'|:root(?![\w-])/gi,
+          (token) => token.toLowerCase() === ':root' ? '[data-artwork-root]' : token);
+        if (selector !== rule.selectorText) rule.selectorText = selector;
+      }
+      if (rule.cssRules) retargetRoot(rule.cssRules);
+    }
+  };
+  retargetRoot(sheet.cssRules);
+  return Array.from(sheet.cssRules, (rule) => rule.cssText).join('\n');
+}
+
+async function rasterizeFirstFrame(doc, safeHtml, { width, height }) {
+  // SVG image mode has no scripts or external resources. Use the same sanitized
+  // graphics as the live frame, with the CSS timeline paused on its first frame.
+  const template = doc.createElement('template');
+  template.innerHTML = safeHtml;
+  const still = doc.implementation.createHTMLDocument();
+  // The outer SVG is :root in image mode. Retarget artwork selectors to the
+  // embedded HTML element with the same CSS specificity.
+  still.documentElement.setAttribute('data-artwork-root', '');
+  const styles = template.content.querySelector('style');
+  if (styles && /:root/i.test(styles.textContent)) styles.textContent = rasterArtworkCss(styles.textContent);
+  const layout = still.createElement('style');
+  layout.textContent = ARTWORK_LAYOUT;
+  still.head.append(layout);
+  const pause = still.createElement('style');
+  pause.textContent = `*,*::before,*::after{animation-play-state:paused!important;transition:none!important}${REDUCED_MOTION}`;
+  still.body.append(template.content, pause);
+  const markup = new XMLSerializer().serializeToString(still.documentElement);
+  const svg = `<svg xmlns="${SVG_NS}" width="${width}" height="${height}"><foreignObject width="100%" height="100%">${markup}</foreignObject></svg>`;
+  const source = doc.createElement('img');
+  source.src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  await source.decode();
+  const scale = Math.min(1, 1280 / Math.max(width, height));
+  const canvas = doc.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(width * scale));
+  canvas.height = Math.max(1, Math.round(height * scale));
+  canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
+  return normalizeThemeImage(canvas.toDataURL('image/webp', 0.85));
+}
+
+function afterArtworkPaint(view) {
+  return new Promise((resolve) => view.requestAnimationFrame(() => view.requestAnimationFrame(resolve)));
+}
+
 // Paints the applied image and artwork behind the page and follows later
 // applies and restores. root gets data-artwork="on" while either is showing,
 // and data-theme-image="on" while the image is.
 export function startThemeArtwork({ api = globalThis.chrome, doc = globalThis.document } = {}) {
   const root = doc.documentElement;
-  let frame = null;
+  const view = doc.defaultView;
+  let artwork = null;
   let picture = null;
   let shownHtml = '';
   let shownImage = '';
   let request = 0;
   const mark = () => {
-    if (frame || picture) root.dataset.artwork = 'on';
+    if (artwork?.frame || artwork?.poster || picture) root.dataset.artwork = 'on';
     else delete root.dataset.artwork;
     if (picture) root.dataset.themeImage = 'on';
     else delete root.dataset.themeImage;
   };
-  const show = (record) => {
+  const insertArtwork = (node) => {
+    if (picture) picture.after(node);
+    else doc.body.prepend(node);
+  };
+  const clearArtwork = () => {
+    artwork?.frame?.remove();
+    artwork?.poster?.remove();
+    artwork = null;
+    shownHtml = '';
+  };
+  const loadArtwork = async (active, record, cached) => {
+    const viewport = firstFrameViewport(view, record);
+    if (viewport && cached?.key === viewport.key) {
+      try {
+        const poster = createThemeImage(doc, normalizeThemeImage(cached.image), { className: 'theme-first-frame' });
+        await poster.decode();
+        if (artwork !== active) return;
+        active.poster = poster;
+        insertArtwork(poster);
+        mark();
+        await afterArtworkPaint(view);
+      } catch { /* a missing or undecodable still falls back to live artwork */ }
+    }
+    if (artwork !== active) return;
+    const safeHtml = sanitizeArtwork(record.html, { doc });
+    const frame = createArtworkFrame(doc, safeHtml);
+    active.frame = frame;
+    if (active.poster) frame.style.opacity = '0';
+    frame.addEventListener('load', async () => {
+      await afterArtworkPaint(view);
+      if (artwork !== active) return;
+      if (active.poster) {
+        frame.style.removeProperty('opacity');
+        active.poster.remove();
+        active.poster = null;
+        return;
+      }
+      if (!viewport) return;
+      view.requestIdleCallback(async () => {
+        if (artwork !== active) return;
+        try {
+          const image = await rasterizeFirstFrame(doc, safeHtml, viewport);
+          await exclusive(async () => {
+            if (artwork !== active) return;
+            const area = storageArea(api);
+            const values = await readKeys(area, [ARTWORK_KEY, FIRST_FRAME_KEY]);
+            const current = readArtworkRecord(values[ARTWORK_KEY]);
+            if (current?.html !== record.html || current?.fingerprint !== record.fingerprint) return;
+            if (values[FIRST_FRAME_KEY]?.key === viewport.key && values[FIRST_FRAME_KEY]?.image === image) return;
+            await area.set({ [FIRST_FRAME_KEY]: { key: viewport.key, image } });
+          });
+        } catch { /* caching is optional */ }
+      });
+    }, { once: true });
+    insertArtwork(frame);
+    mark();
+  };
+  const show = (record, cached) => {
     const html = record?.html ?? '';
     const image = record?.image ?? '';
     if (image !== shownImage) {
@@ -598,30 +719,29 @@ export function startThemeArtwork({ api = globalThis.chrome, doc = globalThis.do
     }
     if (picture && doc.body.firstElementChild !== picture) doc.body.prepend(picture);
     if (html !== shownHtml) {
+      clearArtwork();
       shownHtml = html;
-      frame?.remove();
-      frame = null;
-      try {
-        if (html) {
-          frame = createArtworkFrame(doc, html);
-          if (picture) picture.after(frame);
-          else doc.body.prepend(frame);
-        }
-      } catch { frame = null; }
+      artwork = html ? { frame: null, poster: null } : null;
+      if (artwork) void loadArtwork(artwork, record, cached).catch(() => {});
     }
     mark();
   };
   const refresh = async () => {
     const id = ++request;
-    let applied = null;
+    if (doc.hidden) {
+      clearArtwork();
+      mark();
+      return;
+    }
+    let values;
     try {
-      const values = await readKeys(storageArea(api), [ARTWORK_KEY]);
-      applied = readArtworkRecord(values[ARTWORK_KEY]);
+      values = await readKeys(storageArea(api), [ARTWORK_KEY, FIRST_FRAME_KEY]);
     } catch { return; }
-    if (id === request) show(applied);
+    if (id === request) show(readArtworkRecord(values[ARTWORK_KEY]), values[FIRST_FRAME_KEY]);
   };
   localStorageChanges(api)?.addListener((changes) => {
     if (changes?.[ARTWORK_KEY]) void refresh();
   });
+  doc.addEventListener('visibilitychange', () => void refresh());
   return refresh();
 }
