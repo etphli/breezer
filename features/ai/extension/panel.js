@@ -343,6 +343,11 @@ function setModelMenu(open, focus = false) {
   }
 }
 
+function dismissModelMenu() {
+  setModelMenu(false);
+  $('model-button').focus();
+}
+
 function setPage(page) {
   state.pageKnown = true;
   state.page = page?.url && /^https?:\/\//i.test(page.url) ? page : null;
@@ -1097,6 +1102,7 @@ $('new-chat').addEventListener('click', () => {
   $('prompt').focus();
 });
 $('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
+$('close-model-menu').addEventListener('click', dismissModelMenu);
 $('model-menu').addEventListener('keydown', (event) => {
   if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
   const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')].filter(button => button.checkVisibility());
@@ -1155,7 +1161,7 @@ document.addEventListener('click', (event) => {
 });
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
-    if (!$('model-menu').hidden) { setModelMenu(false); $('model-button').focus(); }
+    if (!$('model-menu').hidden) dismissModelMenu();
     else if (state.running) stop();
   }
 });
