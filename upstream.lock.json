@@ -5,6 +5,14 @@
     "commit": "9aa975a56de8c2376d7c22f71da564b9426cda5f",
     "path": "upstream/helium-macos"
   },
+  "helium_windows": {
+    "repository": "https://github.com/imputnet/helium-windows.git",
+    "commit": "e4b527255e3e0546ac140b7cb52d285fadb2d7d0",
+    "source_sha256": {
+      "chromium-156.0.8078.47-base.tar.zst": "d086d3b8c01b6d192bb54383459979641d2fa57e7c2599b9cb1f70b96c6a10be",
+      "chromium-156.0.8078.47-win-x64.tar.zst": "63d8ef766743e4821ea4ca81b65c49cf37f64cbd61021f204c5fdc2a694ec5d4"
+    }
+  },
   "helium": {
     "repository": "https://github.com/imputnet/helium.git",
     "commit": "f29a25968e483f8bb85e47829ccd487bbe229199",

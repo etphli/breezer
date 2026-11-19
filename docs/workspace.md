@@ -2,6 +2,14 @@
 
 Breezer's workspace uses custom tabs on the left, bookmarks across the top, and an assistant on the right. Chromium manages the real tabs, navigation, pinned state, and session restore.
 
+## Windows workspace
+
+The Windows component includes the sidebar, spaces, themes, browser settings, translation, and a new-tab dashboard with shortcuts. Find the dashboard toggle under **New tab** in Settings. The setup guide covers layout, appearance, and data import, followed by a tour and summary.
+
+The bundled assistant, Organato integration, and in-app updater require the macOS helper. Windows setup and settings omit these features.
+
+On Windows, press Ctrl+T to open a tab, Ctrl+W to close it, or Alt+F to open the browser menu. Ctrl+Shift+1 through Ctrl+Shift+4 switches spaces. Ctrl+1 through Ctrl+8 keeps the saved-slot behavior described below.
+
 ## Use the sidebar
 
 Click **New tab** or press Command T to create a page. Click a row to switch pages. Close a row with its close button or a middle click. Right-click a row for pin, folder, and move actions. Drag rows to reorder them.
@@ -67,7 +75,7 @@ Features add settings through `FEATURE_MOUNTS` in `settings.js`. Each entry name
 
 ## Chrome import card
 
-On first visit, a **Bring your Chrome data to Breezer** card sits at the top of General. **Import bookmarks and history** opens the native import dialog (`chrome://settings/importData`), where an installed Google Chrome can be chosen as the source for bookmarks and history. **Show password steps** switches to Passwords and expands the Chrome CSV guide there. The card never reads Chrome files or credentials and never reports that an import succeeded; the user checks results in the native pages. **Hide** stores `{ dismissed: true }` under `settings.onboarding.v1` in `chrome.storage.local`, and open Settings tabs hide the card too. After that, the browser import stays in **More browser settings** and the password guide stays in **Passwords**.
+On first visit, a **Bring your browser data to Breezer** card sits at the top of General. **Import browser data** opens the native dialog (`chrome://settings/importData`), which lists supported browser profiles and accepts a bookmarks HTML file. **Show password steps** opens the CSV guide in Passwords. Check import results in the native pages. **Hide** stores `{ dismissed: true }` under `settings.onboarding.v1` in `chrome.storage.local` and hides the card in open Settings tabs. Browser import remains in **Browser tools** and the CSV guide remains in **Passwords**. See [password import and management](passwords.md) for supported sources.
 
 Appearance choices apply to the profile. Space colors identify spaces within the sidebar. The **More browser settings** section, under Browser settings, opens native categories in a new tab, including page fonts, search, privacy, site permissions, autofill, downloads, accessibility, and system settings. **All native browser settings** opens `chrome://settings/` directly. The browser menu, Command comma, and general native Settings actions open the workspace hub when its component extension is enabled. Native category routes and the fallback for builds without the extension remain available.
 
@@ -123,6 +131,8 @@ The migration records `breezer.workspace.appearance_defaults_version = 2`. It pr
 `node --test tests/ai/workspace-store.test.mjs tests/ai/workspace-static.test.mjs` checks JavaScript bounds and static safety. The existing `tests/ai/workspace-browser.test.mjs` drives the shipped page with a deterministic browser API fixture. `python3 -B script/check_breezer_workspace.py --no-cache` downloads a pinned source fixture into temporary storage and checks overlay application, idempotence, interrupted application, and anchor drift without reading or writing the shared cache.
 
 `tests/ai/settings-nav.test.mjs` checks settings routes, category pages and search ranking. `tests/ai/settings-redesign-browser.test.mjs` drives categories, Back, keyboard navigation, search results, no results, the All settings destination, persistence, dark mode and a 390 px layout in headless Chrome, and writes screenshots to `BREEZER_AI_EVIDENCE`.
+
+`node --test tests/ai/windows-component.test.mjs` prepares the Windows component, starts its service worker with a browser API fixture, and checks setup, settings, and the dashboard in headless Chrome. Windows caption controls and native keyboard dispatch need the compiled Windows application.
 
 `tests/ai/workspace-peek.test.mjs` checks peek-source syncing and saved favorite identity in the sidebar fixture. `script/check_breezer_workspace.py` checks the Peek source hooks, trigger conditions and the opacity-only, reduced-motion-aware entrance. `node tests/ai/peek-native.mjs /path/Breezer.app` drives the compiled app. App-owned native UI DevTools exercises Expand, Close, the backdrop and root Escape. Physical macOS pointer routing and focused-page keyboard dispatch remain unverified. Same-site and scripted-creation fixtures are required for the 1.1.3 candidate; authenticated Google Docs and Canvas/Reshet workflows require separate acceptance.
 

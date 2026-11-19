@@ -1,4 +1,5 @@
 import { localStorageChanges } from './storage-events.js';
+import { PLATFORM } from './platform.js';
 import {
   APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
@@ -893,7 +894,8 @@ function paintSidebar() {
       dot.querySelector('.space-label').textContent = space.name;
       dot.tabIndex = selected ? 0 : -1;
       dot.setAttribute('aria-label', `${space.name}, ${space.tabCount} ${space.tabCount === 1 ? 'tab' : 'tabs'}`);
-      dot.title = index < 4 ? `${space.name} (⌃${index + 1})` : space.name;
+      const modifier = PLATFORM === 'windows' ? 'Ctrl+Shift+' : '⌃';
+      dot.title = index < 4 ? `${space.name} (${modifier}${index + 1})` : space.name;
     },
   })));
   $('add-space').hidden = model.spaces.length >= MAX_SPACES;
@@ -1733,7 +1735,7 @@ function onActivated({ tabId, windowId }) {
     if (space) { state.lastActive[space] = tabId; saveWindowState(); }
     return;
   }
-  // Chromium may pick a neighbor from a hidden space after a native close (⌘W).
+  // Closing a native tab can activate a neighbor from a hidden space.
   // Wait briefly for onRemoved; if that's what happened, stay in this space.
   setTimeout(() => {
     const fallback = state.closeFallback;
@@ -1874,7 +1876,7 @@ function bindSidebar() {
     }
     if (changes[APPEARANCE_REV_KEY]) void refreshAppearance();
   });
-  // Native ⌃1–⌃4 commands are forwarded by the background worker.
+  // Space commands are forwarded by the background worker.
   api.runtime.onMessage.addListener((message) => {
     if (message?.type === 'breezer.theme.refresh') { void refreshAppearance(); return; }
     if (message?.type !== 'breezer.workspace.space' || message.windowId !== state.windowId) return;
@@ -1945,6 +1947,7 @@ function bindSidebar() {
   for (const name of TREES) $(name).addEventListener('keydown', onTreeKey);
   $('favorites').addEventListener('keydown', onFavoritesKey);
   $('menu').addEventListener('keydown', onMenuKey);
+  if (PLATFORM === 'windows') $('new-tab').title = 'New tab (Ctrl+T)';
   $('new-tab').addEventListener('click', () => void newTab());
   $('new-tab').addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown') { event.preventDefault(); focusItem(treeItems($('today'))[0]); }
@@ -1980,7 +1983,7 @@ function bindSidebar() {
   }
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && state.drag) { endDrag(false); return; }
-    if (event.ctrlKey && !event.metaKey && !event.altKey && /^[1-9]$/.test(event.key)) {
+    if (PLATFORM === 'mac' && event.ctrlKey && !event.metaKey && !event.altKey && /^[1-9]$/.test(event.key)) {
       const space = state.store.spaces[Number(event.key) - 1];
       if (space) { event.preventDefault(); switchSpace(space.id); }
     }

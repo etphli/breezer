@@ -1,0 +1,67 @@
+--- a/chrome/browser/importer/importer_list.cc
++++ b/chrome/browser/importer/importer_list.cc
+@@ -255,8 +255,12 @@
+   }
+ 
+   for (auto& profile : profiles) {
+-    profile.services_supported &= ~(user_data_importer::PASSWORDS
+-                                    | user_data_importer::AUTOFILL_FORM_DATA);
++    profile.services_supported &= ~user_data_importer::AUTOFILL_FORM_DATA;
++    // Keep the existing native Firefox importer on Windows.
++    if (!BUILDFLAG(IS_WIN) ||
++        profile.importer_type != user_data_importer::TYPE_FIREFOX) {
++      profile.services_supported &= ~user_data_importer::PASSWORDS;
++    }
+   }
+ 
+   return profiles;
+@@ -299,10 +303,5 @@
+ 
+   source_profiles_.assign(profiles.begin(), profiles.end());
+ 
+-  for (auto& profile : source_profiles_) {
+-    if (profile.services_supported & user_data_importer::PASSWORDS)
+-      profile.services_supported ^= user_data_importer::PASSWORDS;
+-  }
+-
+   std::move(profiles_loaded_callback).Run();
+ }
+--- a/chrome/browser/resources/settings/people_page/import_data_dialog.ts
++++ b/chrome/browser/resources/settings/people_page/import_data_dialog.ts
+@@ -80,6 +80,11 @@
+     autofillFormData: false,
+     extensions: false,
+   };
++  protected readonly savedPasswordsPref_: chrome.settingsPrivate.PrefObject<boolean> = {
++    key: 'import_dialog_saved_passwords',
++    type: chrome.settingsPrivate.PrefType.BOOLEAN,
++    value: false,
++  };
+   protected accessor noImportDataTypeSelected_: boolean = false;
+   protected accessor importStatus_: ImportDataStatus = ImportDataStatus.INITIAL;
+   private browserProxy_: ImportDataBrowserProxy =
+@@ -181,7 +186,12 @@
+       });
+       this.browserProxy_.importData(this.$.browserSelect.selectedIndex, types);
+     }
+-    checkboxes.forEach(checkbox => checkbox.sendPrefChange());
++    checkboxes.forEach(checkbox => {
++      // Ask for explicit consent in every import dialog.
++      if (checkbox.id !== 'importDialogSavedPasswords') {
++        checkbox.sendPrefChange();
++      }
++    });
+   }
+ 
+   protected onCloseClick_() {
+--- a/chrome/browser/resources/settings/people_page/import_data_dialog.html.ts
++++ b/chrome/browser/resources/settings/people_page/import_data_dialog.html.ts
+@@ -57,7 +57,7 @@
+             </settings-checkbox>
+             <settings-checkbox id="importDialogSavedPasswords"
+                 ?hidden="${!this.selected_.passwords}"
+-                pref-key="import_dialog_saved_passwords"
++                .pref="${this.savedPasswordsPref_}"
+                 label="$i18n{importPasswords}" no-set-pref>
+             </settings-checkbox>
+             <settings-checkbox id="importDialogSearchEngine"

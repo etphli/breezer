@@ -13,7 +13,7 @@ export async function releaseDownloads(fetcher = fetch) {
     if (batch.length < 100) break;
     if (page >= 20) throw new Error('Release history exceeds dashboard limit');
   }
-  return releases.map(release => ({ version: release.tag_name, downloads: release.assets.filter(asset => /\.dmg$/i.test(asset.name)).reduce((sum, asset) => sum + asset.download_count, 0) }));
+  return releases.map(release => ({ version: release.tag_name, downloads: release.assets.filter(asset => /\.dmg$/i.test(asset.name) || /^Breezer-Windows-x64(-Setup\.exe|\.zip)$/.test(asset.name)).reduce((sum, asset) => sum + asset.download_count, 0) }));
 }
 
 export default async function handler(request, response) {

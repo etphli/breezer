@@ -29,7 +29,7 @@ def replace_file(path, replacements):
     path.write_text(text)
 
 
-def brand_product(tree):
+def brand_product(tree, *, macos=True):
     branding = tree / "chrome/app/theme/chromium/BRANDING"
     values = {
         "COMPANY_FULLNAME": "Breezer contributors",
@@ -49,13 +49,14 @@ def brand_product(tree):
         f"{key}={values[key]}" if (key := line.split("=", 1)[0]) in values else line
         for line in lines
     ) + "\n")
-    replace_file(tree / "chrome/common/chrome_paths_mac.mm", {
-        "net.imput.helium": BUNDLE_ID,
-    })
-    replace_file(tree / "components/os_crypt/common/keychain_password_mac.mm", {
-        '"Helium Storage Key"': '"Breezer Storage Key"',
-        'kDefaultAccountName[] = "Helium"': 'kDefaultAccountName[] = "Breezer"',
-    })
+    if macos:
+        replace_file(tree / "chrome/common/chrome_paths_mac.mm", {
+            "net.imput.helium": BUNDLE_ID,
+        })
+        replace_file(tree / "components/os_crypt/common/keychain_password_mac.mm", {
+            '"Helium Storage Key"': '"Breezer Storage Key"',
+            'kDefaultAccountName[] = "Helium"': 'kDefaultAccountName[] = "Breezer"',
+        })
     replace_file(tree / "chrome/app/chrome_crash_reporter_client.cc", {
         'const char* product_name = "Helium"': 'const char* product_name = "Breezer"',
     })
@@ -114,7 +115,7 @@ def brand_strings(tree):
         utility.replace_xtb_translation = original_translation
 
 
-def brand_onboarding(tree):
+def brand_onboarding(tree, *, native_icons=True):
     onboarding = tree / "components/helium_onboarding"
     replace_file(onboarding / "index.html", {
         "<title>Helium Setup</title>": "<title>Breezer Setup</title>",
@@ -133,7 +134,11 @@ def brand_onboarding(tree):
         path.write_text(text)
     logo = ROOT / "assets/branding/breezer-logo.png"
     shutil.copyfile(logo, onboarding / "public/breezer-logo.png")
-    scale(logo, 32, onboarding / "public/favicon.png")
+    if native_icons:
+        scale(logo, 32, onboarding / "public/favicon.png")
+    else:
+        with Image.open(logo) as source:
+            source.resize((32, 32), Image.Resampling.LANCZOS).save(onboarding / "public/favicon.png")
 
 
 def scale(logo, size, target):
@@ -192,6 +197,11 @@ def brand_icons(tree):
         "--app-icon", "AppIcon", "--output-partial-info-plist", str(output / "icon-info.plist"),
     ], check=True)
 
+    brand_shared_icons(tree)
+
+
+def brand_shared_icons(tree):
+    logo = ROOT / "assets/branding/breezer-logo.png"
     for line in (CORE / "resources/helium_resources.txt").read_text().splitlines():
         parts = line.split()
         if len(parts) != 2 or not parts[0].endswith(".png"):

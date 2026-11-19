@@ -208,6 +208,8 @@ test('main draw, compact identities and activation-before-reveal remain the curr
     const slice = source.slice(start, end);
     const actual = (name === 'draw' ? stripFolderColorDraw(slice) : slice).replace('  pendingRows = null;\n', '')
       .replace('function paintSidebar() {', 'function draw() {')
+      .replace("      const modifier = PLATFORM === 'windows' ? 'Ctrl+Shift+' : '⌃';\n", '')
+      .replace(/\(\$\{modifier\}/, '(⌃')
       .replace('  queryDrawDirty = false;\n', '');
     assert.equal(actual.trim(), expected.trim(), name);
   }

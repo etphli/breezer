@@ -1,19 +1,21 @@
 # Password import and management
 
-Settings includes password management and a Chrome CSV import guide. The build applies a separate native overlay to restore password saving and its native entry points.
+Settings includes password management and a CSV import guide for Chrome, Edge and other password managers that export compatible files. The build applies a native overlay to restore password saving and its entry points.
 
-Chrome and Breezer use separate profiles and Keychain identities. Import copies passwords into Breezer once. It does not keep Chrome and Breezer in sync. The extension never reads a password database, CSV, username, password, or native manager result. It only opens fixed browser routes through `chrome.tabs.create`.
+Import makes a one-time copy in the Breezer profile. Breezer uses the platform's native password store and an independent Keychain identity on macOS. The extension only opens fixed browser routes through `chrome.tabs.create`. Chromium handles the files and saved entries.
 
 ## User flow
 
 The component has password actions and a separate passkey section:
 
-- Manage local passkeys opens Chromium's Mac profile passkey page. The section explains current signing limits and external-provider ownership.
+- Check passkey availability opens Chromium's passkey settings. On macOS, the section explains the current signing limits and external-provider ownership.
 - Open password manager opens Breezer's native saved-password list.
 - Password settings opens native controls for saving, automatic sign-in, and supported authentication before filling.
-- Import passwords from Chrome expands an export/import guide. Import Chrome CSV opens the native importer and file picker.
+- Import passwords expands the guide. Import password CSV opens the native importer and file picker.
 
-Chrome's current [official export instructions](https://support.google.com/chrome/answer/13068232?hl=en), checked on 2026-10-27, describe opening its menu, choosing Passwords and autofill, then Google Password Manager and Settings. In Export passwords, choose Download file. The guide sends the user back to Breezer to select that CSV, review native conflict/error results, and delete the readable export after success, including copies in the Trash. It never claims that opening the importer means an import succeeded. CSV import does not transfer passkeys.
+Export saved passwords as CSV, then select the file in Breezer. Review conflicts or errors in the native importer. After verifying the imported entries, delete the readable export and remove it from the Trash or Recycle Bin. Password CSVs do not transfer passkeys. [Chrome export instructions](https://support.google.com/chrome/answer/13068232?hl=en), [Edge export instructions](https://support.microsoft.com/en-us/edge/export-passwords-in-microsoft-edge).
+
+On Windows, choose **Import browser data** in Browser tools to import the categories offered for a detected browser profile. **Bookmarks HTML File** accepts an HTML export when the source profile is unavailable. For Firefox, the built-in importer offers **Saved passwords**. Select it explicitly and close Firefox if prompted. Use an authenticated CSV export for Firefox profiles protected by a Primary Password. [Firefox export instructions](https://support.mozilla.org/en-US/kb/export-login-data-firefox).
 
 ## Settings agent integration
 
@@ -40,9 +42,9 @@ passwords.dispose();
 
 `mountPasswords` is synchronous. `api` defaults to `globalThis.chrome`; `onOpened` defaults to a no-op and should not throw. Buttons are disabled while opening a native tab. Failed opens show a fixed fallback address without displaying raw error text. `dispose` removes listeners and suppresses post-await notifications. A missing tabs API disables native actions and explains that Breezer is needed.
 
-`createPasswordActions({api}).open(destination)` exposes the same fixed routes without rendering. It rejects unknown destinations. `browserImport` is available to a general browser-data import component, but is deliberately not presented as password import.
+`createPasswordActions({api}).open(destination)` exposes the same fixed routes without rendering. It rejects unknown destinations. The `browserImport` route opens Chromium's native browser chooser.
 
-The main Settings page mounts this component in its Passwords section. It does not create another settings page. The first-run card in `settings-onboarding.js` receives the returned handle and calls `showImport()` for **Show password steps**, and uses `createPasswordActions` only for the `browserImport` route, labelled as bookmarks and history.
+The main Settings page mounts this component in its Passwords section. The first-run card calls `showImport()` for **Show password steps** and opens `browserImport` for **Import browser data**.
 
 ## Native preparation
 
@@ -65,7 +67,7 @@ The patch restores only password functionality removed by Helium:
 - Restores Chromium's native password action, so the password page-action controller and save/update bubble have their normal action item. It also restores the password icon in app windows.
 - Restores the native manage-passwords footer in autofill suggestions.
 
-No custom encryption or authentication is added. The patch does not enable direct browser password import or change the native password store, importer, cryptography, authentication, or account settings.
+The shared password overlay uses Chromium's native password store, CSV importer and device authentication. The Windows-only [import patch](../features/passwords/native-ui/windows-import.patch) keeps the existing Firefox NSS import capability and leaves **Saved passwords** unchecked each time the import dialog opens. The inherited Helium startup patch disables automatic first-run import.
 
 ## Pinned implementation evidence
 
@@ -73,8 +75,8 @@ The inspected source is Chromium `156.0.8078.47` with Helium `f29a25968e483f8bb8
 
 - `chrome/browser/ui/webui/chrome_web_ui_configs.cc` registers `PasswordManagerUIConfig`; `chrome/chrome_paks.gni` retains the password-manager resources.
 - `chrome/browser/resources/password_manager/router.ts` defines `/passwords`, `/settings`, and `UrlParam.START_IMPORT = 'import'`. `settings_section.ts` calls `launchImport()` when `?import=true`. The literal query is `import`, not `startImport`.
-- `chrome/browser/resources/settings/route.ts` defines `/importData`. That dialog imports supported browser data, but does not promise Chrome passwords.
-- `chrome/utility/importer/chrome_importer.cc` implements history and bookmarks only. Both `brave/custom-importer.patch` and `helium/core/disable-unsupported-importers.patch` remove password choices. There is no supported direct Chrome password/Keychain importer to expose in this pin. Leaving these restrictions intact avoids advertising an unimplemented import.
+- `chrome/browser/resources/settings/route.ts` defines `/importData`. The native handler intersects the selected categories with the source profile's capabilities.
+- `chrome/utility/importer/chrome_importer.cc` implements history and bookmarks for detected Chromium-based browsers. The Windows profile list exposes native Firefox password import only. Its import implementation and Firefox NSS authentication are unchanged.
 - `passwords_importer.ts` defaults to `PasswordStoreSet.DEVICE` for non-account users and preserves the native parser, conflict selection, errors, and optional source-file deletion. Breezer's non-Google profile does not activate Google account password storage. Helium's `password_manager_features_util.cc` requires active upload to Google before enabling that store. If Main later adds account storage or password sync providers, re-audit these local-only claims before shipping them.
 - `ProfilePasswordStoreFactory` creates the profile store with `profile->GetPath()` and `g_browser_process->os_crypt_async()`. `LoginDatabase` encrypts password values through that native encryptor and fails writes on encryption failure. This does not claim that all password metadata is encrypted.
 - Branding assigns `Breezer Storage Key` / `Breezer` in `keychain_password_mac.mm`; it does not reuse Chrome's Keychain item. This identity difference does not provide Chrome sync.
@@ -117,7 +119,7 @@ Source assertions do not prove native import, authentication prompts, persistent
 
 1. Launch the compiled Breezer with a new temporary `--user-data-dir`. Do not use an existing Breezer or Chrome profile. The browser may create/access its Breezer Keychain item, so Main should run on its isolated test account if existing Keychain identity must also be isolated.
 2. Open the settings Passwords entry. Check the guide, then cancel the native CSV file picker once. No successful-import message should appear in the component.
-3. Select `tests/passwords/dummy.csv` through Import Chrome CSV. Expect one import into the device/profile store. Review the native result and find `dummy@example.test` in the native manager. Do not record or print any other credential.
+3. Select `tests/passwords/dummy.csv` through **Import password CSV**. Expect one import into the device/profile store. Review the native result and find `dummy@example.test` in the native manager. Do not record or print any other credential.
 4. Open the dummy entry, cancel OS authentication first and verify details remain unavailable. Retry and authenticate. View and edit only this dummy entry; close/reopen the manager to confirm the edit persists. Authentication may be cached according to Chromium's native validity period.
 5. With the local fixture server running, visit `http://localhost:8765/tests/passwords/login.html`. Focus the username/password field and select the imported dummy suggestion. Confirm both fields autofill and the native manage-passwords footer opens Breezer's manager. Do not log field values or dump the database.
 6. Restart that disposable profile and confirm the dummy entry persists. Delete it in the native manager, then reopen the fixture and confirm it is no longer offered. Test native saving/update with a dummy local login fixture if required by Main's broader save-flow verification.
@@ -125,3 +127,17 @@ Source assertions do not prove native import, authentication prompts, persistent
 8. Confirm real enterprise password restrictions are respected if applicable. Test source-file deletion only on a temporary copy of the dummy CSV. Remove disposable fixture copies/profile after review.
 
 Return native runtime results to Main separately. Until those steps pass, claim verified UI routing and source integration only.
+
+### Windows import smoke
+
+Run on an unlocked Windows desktop with the compiled Breezer binary and its matching ChromeDriver:
+
+```powershell
+python script/windows/smoke_import.py --browser C:\path\to\chrome.exe --driver C:\path\to\chromedriver.exe
+```
+
+The smoke test uses a fresh Breezer profile, imports a synthetic bookmarks HTML file and a copy of the committed dummy CSV through the standard Windows file pickers, then checks both saved entries in Chromium's native pages.
+
+To check Firefox direct import, use a disposable Windows account where Firefox has only one profile named `Breezer import smoke`. In Firefox's password manager, add a single synthetic login for `https://breezer-firefox-smoke.example.test/` with username `dummy-firefox@example.test` and any dummy password. Close Firefox and rerun with `--firefox-fixture`. The check confirms **Saved passwords** starts unchecked, enables it and verifies the dummy entry. It requires Firefox and Breezer builds of the same architecture.
+
+Run `python tests/windows_import_test.py` for the Windows patch contract checks. Set `BREEZER_WINDOWS_IMPORT_SOURCE` to the prepared Windows source directory to check the compiled source inputs.

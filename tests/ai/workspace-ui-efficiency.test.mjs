@@ -1,4 +1,5 @@
 import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
+import { HAS_NATIVE_HELPER } from '../../features/ai/extension/platform.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -19,7 +20,7 @@ async function newtab({ duringInitialFilter } = {}) {
     addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { storageListeners.splice(storageListeners.indexOf(fn), 1); },
   } } } };
   let firstFilter = true;
-  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, root, api, counters, innerWidth: 1000,
+  const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, root, api, counters, innerWidth: 1000,
     setTimeout: () => 1, clearTimeout() {},
     addEventListener(name, fn) { callbacks.set(name, fn); },
     removeEventListener(name, fn) { if (callbacks.get(name) === fn) callbacks.delete(name); },

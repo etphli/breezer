@@ -40,7 +40,7 @@ try {
     } else if (area === 'settings') {
       await page.addInitScript(settingsFixture, { theme: 'mint', colorMode: 'light' });
       await page.goto(`${base}/workspace.html#/settings`);
-      await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer' }).waitFor();
+      await page.getByRole('heading', { name: 'Bring your browser data to Breezer' }).waitFor();
     } else if (area === 'newtab') {
       await page.addInitScript(newtabFixture, { view: CONNECTED, appearance: { theme: 'mint', colorMode: 'light' }, delay: 400 });
       await page.clock.setFixedTime(NOW);
