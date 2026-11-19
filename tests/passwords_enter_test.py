@@ -72,7 +72,8 @@ class LoginEnterSourceTest(unittest.TestCase):
                       'FormSubmission::kPostMethod', 'NoValidate()',
                       'input->IsDisabledOrReadOnly()', '!input->IsFocusable()',
                       'FormControlType::kInputHidden', 'FormControlType::kInputEmail',
-                      'FormControlType::kInputPassword', '"username"', '"current-password"']:
+                      'FormControlType::kInputPassword', 'input->IDLExposedAutofillValue()',
+                      'field == "username"', 'field == "current-password"']:
             self.assertIn(guard, self.submit)
         self.assertIn('username->Value().empty() || !username->ListedElement::IsValidElement()', self.submit)
         self.assertIn('password->Value().empty()', self.submit)
