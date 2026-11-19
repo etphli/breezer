@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>What's new in Breezer</title>
-  <link rel="stylesheet" href="whats-new.css?v=1.3.1">
+  <link rel="stylesheet" href="whats-new.css?v=1.3.5">
 </head>
 <body>
   <svg class="grain" aria-hidden="true" focusable="false"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.25  0 0 0 0 0.2  0 0 0 0 0.12  0 0 0 0.55 0"/></filter><rect width="100%" height="100%" filter="url(#grain)"/></svg>
@@ -23,14 +23,15 @@
         </defs>
         <path class="breeze-line" pathLength="1" d="M6 78 C 120 30, 210 112, 330 66 S 520 14, 560 54 C 590 84, 552 112, 526 92 C 506 76, 528 46, 566 50 C 596 54, 618 70, 634 64"/>
       </svg>
-      <p class="lede">A new logo and breezer:// pages, folder colors you pick yourself, an assistant that can read your tab and memory counts, and themes made from a sentence or a picture.</p>
+      <p class="lede">Find favorites by name, reach everyday settings faster, and see when Breezer AI can control a page.</p>
       <div class="actions">
         <button class="button primary" type="button" data-action="continue">Continue browsing</button>
         <a class="button secondary" href="workspace.html#/settings">Open Settings</a>
       </div>
+      <p><a href="#patch-135">What changed in 1.3.5</a></p>
     </header>
 
-    <nav class="page-index" aria-label="On this page"><a href="#features-title">Highlights</a><a href="#patch-131">1.3.1</a><a href="#verification-title">Known limits</a></nav>
+    <nav class="page-index" aria-label="On this page"><a href="#features-title">Highlights</a><a href="#patch-131">1.3.1</a><a href="#patch-135">1.3.5</a><a href="#verification-title">Known limits</a></nav>
     <section class="features" aria-labelledby="features-title">
       <h2 id="features-title" class="visually-hidden">New in Breezer 1.3</h2>
 
@@ -522,6 +523,64 @@
             <h3>More room for your New Tab background</h3>
             <p>The Organato card leaves space on both sides, so your background stays visible with the AI sidebar open in fullscreen. The card holds its place while several new tabs load.</p>
           </div>
+        </div>
+      </div>
+      <div class="patch-pair">
+        <div class="patch-copy">
+          <h3>Animated New Tab backgrounds</h3>
+          <p>Breezer shows a saved still of the opening frame while the live artwork loads. The animation unloads when you leave the tab and restarts when you return.</p>
+        </div>
+        <div class="patch-copy">
+          <h3>Breezer AI</h3>
+          <p>Ask Breezer AI to make your browser dark purple, then apply the theme preview when you're ready. Ask about tabs or memory to see measured tab counts for this window and all regular windows, with Breezer's memory shown separately from system RAM.</p>
+          <p>Read-only replies keep running if you close the sidebar or switch tabs or windows. Reopen the sidebar in the original window to read the reply. Browser control stops when you leave the sidebar, tab, or window.</p>
+          <p>Close the model picker with ×, including while Reasoning and speed is open. Focus returns to the model selector.</p>
+        </div>
+      </div>
+      <div class="patch-pair">
+        <div class="patch-copy">
+          <h3>Breezer Settings in the address bar</h3>
+          <p>The address bar now shows Breezer Settings while you browse settings. Focus it to reveal the full address.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="patch-notes" id="patch-135" aria-labelledby="patch-135-title">
+      <p class="release">Update 1.3.5</p>
+      <h2 id="patch-135-title">Favorites, tabs, and settings</h2>
+      <div class="patch-lead">
+        <figure class="plate patch-plate" aria-hidden="true">
+          <svg class="art" viewBox="0 0 320 192" focusable="false">
+            <rect class="card lift" x="1" y="1" width="318" height="190" rx="13"/>
+            <rect class="well" x="12" y="15" width="76" height="162" rx="9"/>
+            <rect class="s1" x="19" y="33" width="30" height="36" rx="5"/>
+            <rect class="paper" x="51" y="33" width="30" height="36" rx="5"/>
+            <circle class="bar strong" cx="34" cy="44" r="4"/>
+            <circle class="bar" cx="66" cy="44" r="4"/>
+            <rect class="bar strong" x="24" y="56" width="20" height="3" rx="1.5"/>
+            <rect class="bar" x="56" y="56" width="20" height="3" rx="1.5"/>
+            <path class="line" d="M22 89h52m-52 18h43m-43 18h47"/>
+            <rect class="bar strong" x="107" y="35" width="99" height="8" rx="4"/>
+            <rect class="s1" x="107" y="60" width="30" height="25" rx="6"/>
+            <rect class="s2" x="145" y="60" width="30" height="25" rx="6"/>
+            <rect class="s3" x="183" y="60" width="30" height="25" rx="6"/>
+            <rect class="well" x="107" y="141" width="196" height="36" rx="8"/>
+            <path class="line" d="M118 153h67m-67 10h46m80-10h42m-42 10h32"/>
+          </svg>
+        </figure>
+        <div class="patch-copy">
+          <h3>Find your favorites by name</h3>
+          <p>Sidebar favorites show their names, and an outline marks the active favorite.</p>
+        </div>
+      </div>
+      <div class="patch-pair">
+        <div class="patch-copy">
+          <h3>See what the assistant can do</h3>
+          <p>Suggested actions sit near the message field. The composer shows whether browser control is on or off.</p>
+        </div>
+        <div class="patch-copy">
+          <h3>Find everyday settings first</h3>
+          <p>General opens with tab preferences and update controls. Browser import is grouped below them.</p>
         </div>
       </div>
     </section>

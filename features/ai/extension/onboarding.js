@@ -6,9 +6,10 @@ import { localStorageChanges } from './storage-events.js';
 import { APPEARANCE_REV_KEY, TONES, TONE_NAMES, normalizeAppearance, validateAppearancePatch } from './workspace-store.js';
 import { SETUP_KEY, STEPS, normalizeSetup } from './setup-state.js';
 import { createPasswordActions } from './passwords.js';
+import { HAS_NATIVE_HELPER, PLATFORM } from './platform.js';
 
 export const PROFILE_KEY = 'breezerProfile';
-// The Chrome import card in Settings; finishing setup covers what it explains.
+// The import card in Settings; finishing setup covers what it explains.
 const IMPORT_CARD_KEY = 'settings.onboarding.v1';
 export const NAME_MAX = 80;
 
@@ -24,9 +25,24 @@ const AI_SLIDES = [
   { focus: 'ai', title: 'Meet Breezer AI', body: 'Press ⌘K to open the assistant. Select Page + screenshot to share this tab, then ask for a summary or an answer.', keys: [['⌘ K', 'Open or close Breezer AI']] },
   { focus: 'control', title: 'Let it help, on your terms', body: 'Turn on Browser control and Breezer AI can click, type and scroll in the current tab until you turn it off. It asks before buying, sending or deleting anything.', keys: [['esc', 'Stop a reply']] },
 ];
+const WINDOWS_TOUR_KEYS = {
+  '⌘ T': ['Ctrl+T', 'New tab'],
+  '⌘ W': ['Ctrl+W', 'Close tab'],
+  '⌃ 1–4': ['Ctrl+Shift+1–4', 'Switch space'],
+  '⌘ ,': ['Alt+F', 'Open browser menu'],
+  '⌘ K': ['Ctrl+Shift+K', 'Open or close Breezer AI'],
+};
 
 export function tourSlides(layout) {
-  return [...(layout === 'top' ? TOP_SLIDES : SIDEBAR_SLIDES), ...AI_SLIDES];
+  const slides = layout === 'top' ? TOP_SLIDES : SIDEBAR_SLIDES;
+  if (PLATFORM === 'windows') {
+    return [...slides, ...AI_SLIDES].map((slide) => ({
+      ...slide,
+      body: slide.body.replace('⌘K', 'Ctrl+Shift+K'),
+      keys: slide.keys.map(([keys, action]) => WINDOWS_TOUR_KEYS[keys] || [keys, action]),
+    }));
+  }
+  return [...slides, ...AI_SLIDES];
 }
 
 export function cleanName(value) {
@@ -42,6 +58,8 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   const root = $('welcome');
   const mini = $('wl-mini');
   const passwords = createPasswordActions({ api });
+  const steps = HAS_NATIVE_HELPER ? STEPS : STEPS.filter((step) => step !== 'you' && step !== 'organato');
+  if (!HAS_NATIVE_HELPER) $('wl-welcome-description').textContent = 'Choose your tabs and color, then bring over your browser data.';
   const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   doc.title = 'Welcome to Breezer';
   doc.body.classList.add('route-welcome');
@@ -59,13 +77,13 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   const local = api.storage.local;
   const [loaded, saved] = await Promise.all([
     loadAppearance(),
-    local.get([SETUP_KEY, PROFILE_KEY]).catch(() => ({})),
+    local.get(HAS_NATIVE_HELPER ? [SETUP_KEY, PROFILE_KEY] : SETUP_KEY).catch(() => ({})),
   ]);
   let { appearance, available, error: bridgeError } = loaded;
   const profile = saved[PROFILE_KEY] && typeof saved[PROFILE_KEY] === 'object' ? saved[PROFILE_KEY] : {};
   let savedName = typeof profile.name === 'string' ? profile.name : '';
   let setup = normalizeSetup(saved[SETUP_KEY]);
-  let index = setup.completed ? 0 : STEPS.indexOf(setup.step);
+  let index = setup.completed ? 0 : Math.max(0, steps.indexOf(setup.step));
   let slide = 0;
   let organatoConnected = false;
   // Organato is on unless the helper reports it was turned off.
@@ -197,6 +215,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
 
   // ------------------------------------------------------------ import
 
+  $('wl-import-firefox').hidden = PLATFORM !== 'windows';
   async function openImport(button, destination, done) {
     $('wl-import-error').hidden = true;
     $('wl-import-status').textContent = '';
@@ -215,11 +234,11 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   $('wl-import-browser').addEventListener('click', (event) => void openImport(event.currentTarget, 'browserImport',
     'Import dialog opened in a new tab. Come back here when you’re done.'));
   $('wl-import-passwords').addEventListener('click', (event) => void openImport(event.currentTarget, 'import',
-    'Password import opened in a new tab. Choose the file you exported from Chrome.'));
+    'Password import opened in a new tab. Choose the CSV you exported.'));
 
   // ------------------------------------------------------------ Organato
 
-  const organato = (() => {
+  const organato = HAS_NATIVE_HELPER ? (() => {
     let port = null, pending = null, pendingType = null, done = null, sequence = 0, timer;
     const status = $('wl-organato-status');
     const off = $('wl-organato-off');
@@ -227,7 +246,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       $(kind === 'off' ? 'wl-organato-off-status' : 'wl-organato-connect-status').append(status);
     };
     const busy = (value) => {
-      for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
+      for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-organato-later', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
       root.classList.toggle('wl-connecting', value);
     };
     const finish = (text, error = false) => {
@@ -248,6 +267,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       button.textContent = organatoConnected ? 'Update connection' : 'Connect';
       button.classList.toggle('primary', !organatoConnected);
       off.hidden = !organatoEnabled;
+      $('wl-organato-off-choice').hidden = !organatoEnabled;
       updateNavigation();
     };
     const connect = () => {
@@ -298,27 +318,29 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       request('configure', { enabled: false }, { kind: 'off', then: (value) => {
         if (value?.enabled !== false) { finish('Couldn’t turn Organato off. Try again.', true); return; }
         finish('Organato is turned off. You can turn it on in Settings.');
-        if (STEPS[index] === 'organato') void next();
+        if (steps[index] === 'organato') void next();
       } });
     });
     $('wl-organato-connect').addEventListener('click', () => {
       placeStatus('connect');
       const key = $('wl-organato-key').value.trim();
-      if (!key) { status.textContent = 'Paste your API key first, or choose Continue to skip.'; $('wl-organato-key').focus(); return; }
+      if (!key) { status.textContent = 'Paste your API key first, or choose Connect later.'; $('wl-organato-key').focus(); return; }
       $('wl-organato-key').value = '';
       status.textContent = 'Connecting to Organato…';
       request('configure', { key });
     });
     $('wl-organato-key').addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); $('wl-organato-connect').click(); } });
     return { view: () => request('view'), dispose: () => { clearTimeout(timer); port?.disconnect(); port = null; } };
-  })();
-  if (typeof api.runtime?.connect === 'function') organato.view();
-  else {
-    $('wl-organato-connect').disabled = true;
-    $('wl-organato-off').disabled = true;
-    $('wl-organato-status').textContent = 'Open this page in Breezer to connect Organato.';
+  })() : null;
+  if (organato) {
+    if (typeof api.runtime?.connect === 'function') organato.view();
+    else {
+      $('wl-organato-connect').disabled = true;
+      $('wl-organato-off').disabled = true;
+      $('wl-organato-status').textContent = 'Open this page in Breezer to connect Organato.';
+    }
+    addEventListener('pagehide', () => organato.dispose(), { once: true });
   }
-  addEventListener('pagehide', () => organato.dispose(), { once: true });
 
   // ------------------------------------------------------------ tour and summary
 
@@ -344,26 +366,28 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
 
   function renderSummary() {
-    const theme = /^#/.test(appearance.theme) ? 'Your own color' : TONE_NAMES[appearance.theme] ?? appearance.theme;
+    const theme = /^#/.test(appearance.theme) ? 'Custom color' : TONE_NAMES[appearance.theme] ?? appearance.theme;
     const rows = [
-      ['Breezer AI calls you', savedName || 'No name'],
       ['Tabs', appearance.layout === 'top' ? 'Across the top' : `Sidebar, ${{ expanded: 'expanded', compact: 'compact', autoHide: 'auto-hide' }[appearance.sidebarMode] ?? 'expanded'}`],
-      ['Color', `${theme}, ${{ system: 'following your Mac', light: 'light', dark: 'dark' }[appearance.colorMode] ?? appearance.colorMode}`],
-      ['Organato', !organatoEnabled ? 'Turned off' : organatoConnected ? 'Connected' : 'Not connected'],
+      ['Color', `${theme}, ${{ system: 'following your system', light: 'light', dark: 'dark' }[appearance.colorMode] ?? appearance.colorMode}`],
     ];
+    if (HAS_NATIVE_HELPER) {
+      rows.unshift(['Breezer AI calls you', savedName || 'No name']);
+      rows.push(['Organato', !organatoEnabled ? 'Turned off' : organatoConnected ? 'Connected' : 'Not connected']);
+    }
     $('wl-summary').replaceChildren(...rows.flatMap(([term, value]) => {
       const dt = doc.createElement('dt'); dt.textContent = term;
       const dd = doc.createElement('dd'); dd.textContent = value;
       const row = doc.createElement('div'); row.append(dt, dd);
       return [row];
     }));
-    $('wl-h-done').textContent = savedName ? `You’re all set, ${savedName}` : 'You’re all set';
+    $('wl-h-done').textContent = HAS_NATIVE_HELPER && savedName ? `You’re all set, ${savedName}` : 'You’re all set';
   }
 
   // ------------------------------------------------------------ steps
 
   const progress = $('wl-progress');
-  progress.replaceChildren(...STEPS.map((step) => {
+  progress.replaceChildren(...steps.map((step) => {
     const item = doc.createElement('li');
     item.dataset.step = step;
     const label = doc.createElement('span');
@@ -382,16 +406,17 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
 
   function updateNavigation() {
-    const step = STEPS[index];
+    const step = steps[index];
     const lastTip = slide === tourSlides(appearance.layout).length - 1;
-    $('wl-tour-preview').textContent = `Next: ${tourSlides(appearance.layout).length} optional tips.`;
-    $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Connect later'
-      : step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
+    const connectLater = step === 'organato' && !organatoConnected && organatoEnabled;
+    $('wl-organato-later-choice').hidden = !connectLater;
+    $('wl-next').hidden = connectLater;
+    $('wl-next').textContent = step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
     $('wl-skip').textContent = step === 'tour' ? 'Skip tour' : 'Skip setup';
   }
 
   function render(direction = 0, { focus = true } = {}) {
-    const step = STEPS[index];
+    const step = steps[index];
     root.querySelector('.wl-stage').scrollTop = 0;
     for (const section of root.querySelectorAll('.wl-step')) section.hidden = section.dataset.step !== step;
     const section = root.querySelector(`.wl-step[data-step="${step}"]`);
@@ -408,7 +433,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     $('wl-back').hidden = index === 0;
     progress.hidden = step === 'tour';
     $('wl-progress-group').hidden = step === 'tour';
-    $('wl-stage-count').textContent = `Step ${index + 1} of ${STEPS.length}`;
+    $('wl-stage-count').textContent = `Step ${index + 1} of ${steps.length}`;
     updateNavigation();
     $('wl-skip').hidden = step === 'done' || step === 'organato';
     if (focus) (step === 'you' ? nameInput : section.querySelector('h1')).focus({ preventScroll: true });
@@ -436,7 +461,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
 
   async function next() {
-    const step = STEPS[index];
+    const step = steps[index];
     if (step === 'you' && !(await saveName())) return;
     if (step === 'tour' && slide < tourSlides(appearance.layout).length - 1) {
       slide += 1;
@@ -450,18 +475,19 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
 
   function back() {
-    if (STEPS[index] === 'tour' && slide > 0) { slide -= 1; render(0); return; }
+    if (steps[index] === 'tour' && slide > 0) { slide -= 1; render(0); return; }
     if (index === 0) return;
-    if (STEPS[index] === 'you') void saveName();
+    if (steps[index] === 'you') void saveName();
     index -= 1;
-    if (STEPS[index] === 'tour') slide = tourSlides(appearance.layout).length - 1;
+    if (steps[index] === 'tour') slide = tourSlides(appearance.layout).length - 1;
     render(-1);
   }
 
   $('wl-next').addEventListener('click', () => void next());
+  $('wl-organato-later').addEventListener('click', () => void next());
   $('wl-back').addEventListener('click', back);
   $('wl-skip').addEventListener('click', () => {
-    if (STEPS[index] === 'tour') { index = STEPS.indexOf('done'); render(1); }
+    if (steps[index] === 'tour') { index = steps.indexOf('done'); render(1); }
     else void finish({ skipped: true });
   });
 
@@ -471,5 +497,5 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   // One orchestrated entrance: the miniature Breezer assembles itself.
   if (!reducedMotion?.matches) root.classList.add('wl-intro');
   root.dataset.ready = 'true';
-  return { next, back, finish, get step() { return STEPS[index]; }, get slide() { return slide; } };
+  return { next, back, finish, get step() { return steps[index]; }, get slide() { return slide; } };
 }

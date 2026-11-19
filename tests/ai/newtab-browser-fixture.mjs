@@ -85,7 +85,9 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
     }
   });
   window.chrome = {
-    tabs: { query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }] },
+    tabs: {
+      query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }],
+    },
     runtime: {
       connect: ({ name }) => port(name),
       getURL: (path) => `${location.origin}/${String(path).replace(/^\//, '')}`,

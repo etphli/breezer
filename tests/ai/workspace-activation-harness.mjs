@@ -1,4 +1,5 @@
 import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
+import { PLATFORM } from '../../features/ai/extension/platform.js';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import * as store from '../../features/ai/extension/workspace-store.js';
@@ -53,7 +54,9 @@ class Node {
   contains(n) { return n === this || this.children.some(c => c.contains(n)); }
   snapshot() { return { tag: this.tag, classes: [...this.classes].sort(), dataset: this.dataset, attrs: this.attrs,
     text: this.text, hidden: this.hidden, tabIndex: this.tabIndex, title: this.title, src: this.src,
-    children: this.children.map(n => n.snapshot()) }; }
+    // Favorite names are verified in the browser fixture. Keep this comparison
+    // focused on the DOM that the pinned pre-polish workspace also rendered.
+    children: this.children.filter(n => !n.classList.contains('tile-label')).map(n => n.snapshot()) }; }
 }
 const plain = value => JSON.parse(JSON.stringify(value));
 export const sourcePath = new URL('../../features/ai/extension/workspace.js', import.meta.url);
@@ -100,7 +103,7 @@ export async function harness(source, sharedStorage, options = {} = {}) {
   };
   if (options.peek) api.breezerPrivate = { setPeekSources(ids) { peekCalls.push([...ids]); return peekReject ? Promise.reject(new Error('Fixture Peek failure')) : Promise.resolve(); } };
   if (sharedStorage) api.storage = sharedStorage;
-  const context = vm.createContext({ localStorageChanges, ...store, buildSidebarModel(args) { counters.models++; return store.buildSidebarModel(args); }, WorkspaceStore: boot ? class extends store.WorkspaceStore { async reconcile(args) { const result=await super.reconcile(args); options.reconcile?.({browserTabs,listeners}); return result; } } : class { async patchMembers(set, remove) { counters.writes.push(['members', plain(set), plain(remove)]);
+  const context = vm.createContext({ localStorageChanges, PLATFORM, ...store, buildSidebarModel(args) { counters.models++; return store.buildSidebarModel(args); }, WorkspaceStore: boot ? class extends store.WorkspaceStore { async reconcile(args) { const result=await super.reconcile(args); options.reconcile?.({browserTabs,listeners}); return result; } } : class { async patchMembers(set, remove) { counters.writes.push(['members', plain(set), plain(remove)]);
       for (const [id, record] of Object.entries(set)) persisted.local[store.MEMBERS_KEY].tabs[id] = { ...structuredClone(record), k: 'S1' };
       for (const id of remove) delete persisted.local[store.MEMBERS_KEY].tabs[id]; } },
     chrome: api, URL, console, Date: FixtureDate, innerWidth:width, innerHeight:height, CSS:{escape:s=>s}, matchMedia: () => ({ matches: reduced, addEventListener() {} }), addEventListener(name,fn) {(globalEvents[name] ||= []).push(fn);},

@@ -13,7 +13,8 @@ const read = (name) => readFileSync(new URL(name, dir), 'utf8');
 
 test('new tab files never parse HTML from strings or load remote resources', () => {
   for (const name of ['newtab.html', 'newtab.css', 'newtab.js']) {
-    const source = read(name);
+    // This exact anchor navigates only when the user activates it.
+    const source = read(name).replace(/<a class="organato-open" href="https:\/\/organato\.vercel\.app" rel="noreferrer">/, '<a>');
     assert.doesNotMatch(source, /\.innerHTML|\.outerHTML|insertAdjacentHTML|document\.write|\beval\(|new Function\(/, name);
     assert.doesNotMatch(source, /@import|@font-face|url\(\s*['"]?https?:/i, name);
     const remote = [...source.matchAll(/https?:\/\/[^\s'"`)]+/g)].map((match) => match[0]).filter((url) => url !== 'http://www.w3.org/2000/svg');
@@ -25,6 +26,7 @@ test('new tab files never parse HTML from strings or load remote resources', () 
   assert.doesNotMatch(html, /\sstyle=/i, 'no inline styles');
   assert.match(html, /<script type="module" src="newtab\.js"><\/script>/);
   assert.match(html, /href="workspace\.html#\/settings"/);
+  assert.match(html, /<a class="organato-open" href="https:\/\/organato\.vercel\.app" rel="noreferrer">Open Organato<\/a>/);
 });
 
 test('tone tokens stay identical to the workspace palette', () => {
@@ -234,8 +236,9 @@ test('main site rendering keeps two-character monograms and hostname labels', ()
   const [mail, news, add] = h.node('sites').children;
   assert.equal(mail.children[0].children[0].children[0].textContent, 'MA');
   assert.equal(news.children[0].children[0].children[0].textContent, 'NE');
-  assert.equal(news.children[0].children[1].textContent, 'news.example');
-  assert.equal(news.children[0].children[1].classList.contains('hostname'), true);
+  const name = news.children[0].children[1].children[0];
+  assert.equal(name.textContent, 'news.example');
+  assert.equal(name.classList.contains('hostname'), true);
   assert.equal(add.children[0].children[1].textContent, 'Add shortcut');
 });
 

@@ -10,6 +10,7 @@ import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY, CUSTOM_S
 import { startPanelTheme } from './panel-theme.js';
 // Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
 import { startThemeArtwork } from './browser-theme.js';
+import { HAS_NATIVE_HELPER } from './platform.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -262,19 +263,19 @@ function createFaviconCache(api) {
       const icon = icons.get(url);
       return icon?.expires > Date.now() ? icon.png : null;
     },
-    async save(url, img) {
-      if (!storage?.set || url.length > 4096) return;
+    async accept(url, img) {
       try {
         const png = rasterize(img);
-        if (png.length > FAVICON_MAX_LENGTH) return;
-        defaultPng ??= readDefault(img.ownerDocument);
-        if (png === await defaultPng) return;
-        const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
-        remember(icons, entry);
-        remember(dirty, entry);
-      } catch { return; }
-      if (saveTimer) return;
-      saveTimer = setTimeout(() => void flush().catch(() => {}), 30);
+        defaultPng ??= readDefault(img.ownerDocument).catch(() => null);
+        if (png === await defaultPng) return false;
+        if (storage?.set && url.length <= 4096 && png.length <= FAVICON_MAX_LENGTH) {
+          const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
+          remember(icons, entry);
+          remember(dirty, entry);
+          saveTimer ??= setTimeout(() => void flush().catch(() => {}), 30);
+        }
+      } catch { /* A usable image can still be shown when it can't be cached. */ }
+      return true;
     },
   };
 }
@@ -290,22 +291,31 @@ function siteTile(api, site, favicons, retryIcons) {
   if (src) {
     const img = el('img', '', { alt: '', width: '28', height: '28', decoding: 'sync' });
     let cached = favicons?.get(site.url);
-    img.addEventListener('load', () => {
-      icon.classList.add('has-icon');
-      if (!cached) void favicons?.save(site.url, img);
+    img.addEventListener('load', async () => {
+      if (cached || !favicons || await favicons.accept(site.url, img)) icon.classList.add('has-icon');
+      else img.remove();
     }, { once: true });
     img.addEventListener('error', () => {
       if (cached) { cached = null; img.src = src; }
       else img.remove();
     });
     img.src = cached || src;
-    if (img.complete && img.naturalWidth) icon.classList.add('has-icon');
+    if (cached && img.complete && img.naturalWidth) icon.classList.add('has-icon');
     icon.append(img);
   }
   const name = el('span', 'site-name');
   name.textContent = site.title;
-  if (site.title.toLowerCase().replace(/^www\./, '') === new URL(site.url).hostname.replace(/^www\./, '')) name.classList.add('hostname');
-  link.append(icon, name);
+  const host = new URL(site.url).hostname.replace(/^www\./, '');
+  const isHost = site.title.toLowerCase().replace(/^www\./, '') === host;
+  if (isHost) name.classList.add('hostname');
+  const caption = el('span', 'site-caption');
+  caption.append(name);
+  if (!isHost && site.title.length >= 36) {
+    const domain = el('span', 'site-host', { 'aria-hidden': 'true' });
+    domain.textContent = host;
+    caption.append(domain);
+  }
+  link.append(icon, caption);
   const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
   remove.textContent = '×';
   item.append(link, remove);
@@ -339,18 +349,18 @@ const monthDay = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'sh
 const clock = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const longDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
-function itemRow(item, now) {
+function itemRow(item, now, list) {
   const days = item.due ? daysUntil(item.due, now) : null;
   const row = el('li', 'item', { 'data-urgency': urgency(days) });
 
   const stub = el('span', 'stub', { 'aria-hidden': 'true' });
-  const day = el('span', 'stub-day');
-  const week = el('span', 'stub-week');
-  if (item.due) {
+  if (list === 'upcoming' && item.due) {
+    const day = el('span', 'stub-day');
+    const week = el('span', 'stub-week');
     day.textContent = String(item.due.getDate());
     week.textContent = weekday.format(item.due);
+    stub.append(day, week);
   }
-  stub.append(day, week);
 
   const body = el('span', 'item-body');
   const title = item.url ? el('a', 'item-title', { href: item.url }) : el('span', 'item-title');
@@ -442,7 +452,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     const items = organato[list];
     const target = lanes.querySelector(`[data-list="${list}"]`);
     const limit = MAX_ITEMS[list];
-    const shown = items.slice(0, limit).map((item) => itemRow(item, now));
+    const shown = items.slice(0, limit).map((item) => itemRow(item, now, list));
     if (!items.length) {
       const empty = el('li', 'item-empty');
       empty.textContent = EMPTY[list];
@@ -454,6 +464,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     }
     target.replaceChildren(...shown);
     lanes.querySelector(`[data-count="${list}"]`).textContent = items.length ? String(items.length) : '';
+    lanes.querySelector(`button[data-lane="${list}"] .lane-count`).textContent = String(items.length);
   }
 }
 
@@ -486,6 +497,14 @@ function renderToday(root, now) {
 // ------------------------------------------------------------------ page
 
 export function startNewTab({ api = globalThis.chrome, root = document, now = () => new Date() } = {}) {
+  const lanes = root.getElementById('organato-lists');
+  const laneButtons = lanes.querySelectorAll('.agenda-switch button');
+  for (const button of laneButtons) {
+    button.addEventListener('click', () => {
+      lanes.dataset.lane = button.dataset.lane;
+      for (const choice of laneButtons) choice.setAttribute('aria-pressed', String(choice === button));
+    });
+  }
   let view = null;
   let problem = null;
   let pending = false;
@@ -493,7 +512,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let disposed = false, midnightTimer;
   // The saved switch wins over any answer: turning Organato off hides it at
   // once, including over an answer still on its way.
-  let off = false, organatoDay;
+  let off = !HAS_NATIVE_HELPER, organatoDay;
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const favicons = createFaviconCache(api);
@@ -528,7 +547,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   });
   const changed = (changes) => {
     if (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Reload this tab to try again.'; });
-    if (changes[ORGANATO_SWITCHES_KEY]) {
+    if (HAS_NATIVE_HELPER && changes[ORGANATO_SWITCHES_KEY]) {
       const nowOff = switchedOff(changes[ORGANATO_SWITCHES_KEY].newValue);
       if (nowOff === off) return;
       off = nowOff;
@@ -594,13 +613,20 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       allSites = Array.isArray(sites) ? sites : [];
       await filterSites();
     };
+    const recoverSites = async () => {
+      if (allSites?.length) return;
+      let sites;
+      try { sites = await api.topSites?.get(); } catch { /* Visits may be unavailable. */ }
+      await acceptSites(sites);
+    };
     const accept = async result => {
       if (disposed) return;
       if (result.dashboardEnabled === false) {
         globalThis.location.replace('chrome://new-tab-page/');
         return;
       }
-      await acceptSites(result.topSites);
+      if (result.organato?.error && !result.topSites?.length) await recoverSites();
+      else await acceptSites(result.topSites);
       if (disposed) return;
       view = normalizeView({ organato: result.organato });
       problem = null;
@@ -625,7 +651,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       if (disposed) return;
       problem = text(error?.message, 160) || null;
       if (!view) view = { organato: null };
-      if (!visibleSites) await acceptSites([]);
+      if (!visibleSites) await recoverSites();
     } finally {
       pending = false;
       if (!disposed) {
@@ -653,10 +679,13 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   refreshButton.addEventListener('click', () => void load(true));
   scheduleMidnight();
   // A saved "off" hides the sheet before the first answer, so it never flashes.
-  const saved = Promise.resolve(api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
-    if (!disposed && switchedOff(value?.[ORGANATO_SWITCHES_KEY])) { off = true; showOrganato(root, false); }
+  const saved = Promise.resolve(HAS_NATIVE_HELPER && api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
+    if (switchedOff(value?.[ORGANATO_SWITCHES_KEY])) off = true;
   }, () => {});
-  return saved.then(() => load(false));
+  return saved.then(() => {
+    if (!disposed) showOrganato(root, !off);
+    return load(false);
+  });
 }
 
 if (typeof document !== 'undefined' && document.getElementById('organato')) {

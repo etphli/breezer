@@ -23,7 +23,6 @@ function controls() {
   $('translate').hidden = running;
   $('cancel').disabled = !running;
   $('cancel').hidden = !running;
-  $('cancel').classList.toggle('primary', running);
   $('restore').disabled = !connected || translatedTotal === 0;
   $('restore').hidden = translatedTotal === 0;
   $('languages').disabled = !connected || !prefs || running || remaining > 0;
@@ -81,7 +80,8 @@ port.onMessage.addListener(message => {
         controls();
       }, 1000);
     }
-    status(`${message.message}${message.skipped ? ` ${message.skipped} text sections exceed the safety limit and were left unchanged.` : ''}`, message.state);
+    const watching = message.state === 'done' && prefs?.dynamic ? ' Watching for new text while this window is open.' : '';
+    status(`${message.message}${watching}${message.skipped ? ` ${message.skipped} text sections exceed the safety limit and were left unchanged.` : ''}`, message.state);
   }
   controls();
 });

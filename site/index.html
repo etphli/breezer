@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#f3ebda">
-  <title>Breezer: a calmer browser for Mac</title>
-  <meta name="description" content="Breezer is a Chromium browser for Mac with tabs down the side, your day on every new tab, and an assistant that reads the page with you.">
-  <meta property="og:title" content="Breezer: a calmer browser for Mac">
-  <meta property="og:description" content="Tabs down the side, your day on every new tab, and an assistant beside the page.">
+  <title>Breezer: a calmer browser</title>
+  <meta name="description" content="Breezer is an open-source Chromium browser with tabs down the side, spaces and folders, and a customizable New Tab.">
+  <meta property="og:title" content="Breezer: a calmer browser">
+  <meta property="og:description" content="Tabs down the side, spaces and folders, and a customizable New Tab.">
   <meta property="og:image" content="https://breezer-browser.vercel.app/shots/newtab-light.jpg">
   <meta property="og:url" content="https://breezer-browser.vercel.app/">
   <meta name="twitter:card" content="summary_large_image">
@@ -38,7 +38,7 @@
   <main id="main">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="release reveal"><img class="mark" src="/icon128.png" alt="" width="28" height="28"><span>Breezer <span data-mac-version>1.3.0</span> for Mac</span></p>
+        <p class="release reveal"><img class="mark" src="/icon128.png" alt="" width="28" height="28"><span id="home-version">Breezer <span data-mac-version>1.3.1</span> for Mac</span></p>
         <h1 id="hero-title" class="title split"><span>A calmer way</span> <span>to use the web</span></h1>
         <svg class="breeze" viewBox="0 0 640 120" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
           <defs>
@@ -49,12 +49,12 @@
           </defs>
           <path class="breeze-line" pathLength="1" d="M6 78 C 120 30, 210 112, 330 66 S 520 14, 560 54 C 590 84, 552 112, 526 92 C 506 76, 528 46, 566 50 C 596 54, 618 70, 634 64"/>
         </svg>
-        <p class="lede reveal">Breezer is a Chromium browser with tabs down the side, your day on every new tab, and an assistant that reads the page with you.</p>
+        <p class="lede reveal">Breezer is a Chromium browser with tabs down the side, spaces and folders, and a New Tab you can make your own.</p>
         <div class="actions reveal">
-          <a class="button primary magnetic shine" href="/download">Download for Mac</a>
+          <a class="button primary magnetic shine" id="home-download" href="/download">Download for Mac</a>
           <a class="button secondary" href="#day">See what's inside</a>
         </div>
-        <p class="fine reveal">Free for Apple Silicon Macs. Built on Chromium 156.</p>
+        <p class="fine reveal" id="home-platforms">Free for Apple Silicon Macs. Built on Chromium 156.</p>
       </div>
 
       <div class="stage" data-scroll>
@@ -62,7 +62,7 @@
           <div class="chrome" aria-hidden="true"><i></i><i></i><i></i><span class="url">New tab</span></div>
           <div class="window-body">
             <img class="win-sidebar" src="/shots/sidebar.png" alt="" width="480" height="1640">
-            <img class="win-page" src="/shots/newtab-light.jpg" alt="Breezer's new tab showing the date, eight site shortcuts and a Coming up in Organato list with assignments, exams and to-dos." width="2880" height="1800" fetchpriority="high">
+            <img class="win-page" src="/shots/newtab-light.jpg" alt="Breezer's new tab with site shortcuts and upcoming work from Organato." width="1440" height="900" fetchpriority="high">
           </div>
         </div>
         <img class="float float-assistant" src="/shots/assistant.png" alt="The Breezer assistant summarizing a page in the sidebar." width="800" height="1700">
@@ -83,12 +83,12 @@
           <h2 id="day-title" class="section-title split">Your day opens with every tab</h2>
           <ol class="steps">
             <li class="step" data-step="0">
-              <h3>The sites you use most</h3>
-              <p>Shortcuts sit under the date in one even row. Add your own or hide one, right on the page.</p>
+              <h3>Search or open a favorite</h3>
+              <p>Search with your default engine or open a shortcut. Add and remove shortcuts right on the page.</p>
             </li>
             <li class="step" data-step="1">
               <h3>What's coming up</h3>
-              <p>Connect Organato and new tabs list upcoming exams, assignments and to-dos. Your API key stays in macOS Keychain.</p>
+              <p>Connect Organato to see exams, assignments and to-dos on New Tab. Breezer protects your API key on your device.</p>
             </li>
             <li class="step" data-step="2">
               <h3>In any colour you like</h3>
@@ -100,8 +100,8 @@
           <div class="window story-window">
             <div class="chrome" aria-hidden="true"><i></i><i></i><i></i><span class="url">New tab</span></div>
             <div class="swap">
-              <img src="/shots/newtab-light.jpg" alt="Breezer's new tab in the light mint theme." width="2880" height="1800" loading="lazy">
-              <img class="swap-dark" src="/shots/newtab-dark.jpg" alt="The same new tab in the dark tide theme." width="2880" height="1800" loading="lazy">
+              <img src="/shots/newtab-light.jpg" alt="Breezer's new tab in the light mint theme." width="1440" height="900" loading="lazy">
+              <img class="swap-dark" src="/shots/newtab-dark.jpg" alt="The same new tab in the dark tide theme." width="1440" height="900" loading="lazy">
               <span class="focus-ring ring-sites" aria-hidden="true"></span>
               <span class="focus-ring ring-organato" aria-hidden="true"></span>
             </div>
@@ -132,11 +132,11 @@
 
     <section id="assistant" class="chapter assistant" aria-labelledby="assistant-title" data-scroll>
       <div class="assistant-head">
-        <h2 id="assistant-title" class="section-title split">An assistant beside the page, not in the way</h2>
-        <p class="reveal">Open it on the right whenever you need a hand. It sees the page and a screenshot, and answers with the Codex or Claude account you already use.</p>
+        <h2 id="assistant-title" class="section-title split">An assistant beside the page</h2>
+        <p class="reveal">Ask about a page from the sidebar using your Codex or Claude account. Page sharing and browser control each have their own switch.</p>
       </div>
       <div class="fan">
-        <img class="fan-card fan-left" src="/shots/assistant-dark.png" alt="The assistant's welcome screen in dark mode, offering to summarize the page, find an answer or help do something." width="720" height="1620" loading="lazy">
+        <img class="fan-card fan-left" src="/shots/assistant-dark.png" alt="The assistant's welcome screen in dark mode, with suggested actions and a browser control switch." width="800" height="1700" loading="lazy">
         <img class="fan-card fan-right" src="/shots/assistant.png" alt="The assistant answering a request to summarize a page." width="800" height="1700" loading="lazy">
       </div>
       <div class="control">
@@ -152,14 +152,14 @@
 
     <section class="chapter duo" aria-labelledby="move-title">
       <article class="duo-item">
-        <figure class="paper-shot tilt"><img src="/shots/settings.jpg" alt="Breezer Settings, with a panel for importing Chrome bookmarks, history and passwords, and layout options." width="1800" height="1900" loading="lazy"></figure>
+        <figure class="paper-shot tilt"><img src="/shots/settings.jpg" alt="Breezer Settings, with tab preferences, updates, and browser import controls." width="2400" height="1720" loading="lazy"></figure>
         <h2 id="move-title" class="split">Move in from Chrome</h2>
-        <p class="reveal">Bring over bookmarks, history and passwords from Settings. Breezer is Chromium underneath, so your sites work the way they always have.</p>
+        <p class="reveal">Bring over bookmarks, history and passwords from Settings. On Windows, Chrome and Edge passwords can move using an exported CSV.</p>
       </article>
       <article class="duo-item">
         <figure class="paper-shot tilt"><img src="/shots/whats-new.jpg" alt="Breezer's illustrated What's new page." width="2880" height="1800" loading="lazy"></figure>
         <h2 class="split">Updates you can read</h2>
-        <p class="reveal">Install updates from Settings. Each release opens an illustrated page once, explaining what changed and what it can't do yet.</p>
+        <p class="reveal">On Mac, install updates from Settings. Each major feature update opens an illustrated page with the highlights.</p>
       </article>
     </section>
 
@@ -259,7 +259,7 @@
       <div class="actions center reveal">
         <a class="button primary large magnetic shine" href="/download">Download Breezer</a>
       </div>
-      <p class="fine reveal">Version <span data-mac-version>1.3.0</span>, for Macs with Apple Silicon.</p>
+      <p class="fine reveal" id="home-download-platforms">Version <span data-mac-version>1.3.1</span>, for Macs with Apple Silicon.</p>
     </section>
   </main>
 

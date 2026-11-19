@@ -1,4 +1,5 @@
 import { localStorageChanges } from './storage-events.js';
+import { PLATFORM } from './platform.js';
 import {
   APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
@@ -807,12 +808,15 @@ function paintSidebar() {
       create: () => {
         const tile = el('button', 'tile', { type: 'button', tabindex: '-1' });
         tile.append(el('span', 'favicon', { 'aria-hidden': 'true' }));
+        tile.append(el('span', 'tile-label', { 'aria-hidden': 'true' }));
         return tile;
       },
       update: (tile) => {
         // A favourite keeps its saved identity while its live tab browses.
         const title = favoriteTitle(item.entry);
-        updateFavicon(tile.firstChild, null, item.entry.url, title);
+        const [icon, label] = tile.children;
+        updateFavicon(icon, null, item.entry.url, title);
+        if (label.textContent !== title) label.textContent = title;
         tile.title = title;
         tile.setAttribute('aria-label', `${title}${item.tab ? '' : ', asleep'}`);
         tile.setAttribute('aria-pressed', String(Boolean(item.tab?.active)));
@@ -893,7 +897,8 @@ function paintSidebar() {
       dot.querySelector('.space-label').textContent = space.name;
       dot.tabIndex = selected ? 0 : -1;
       dot.setAttribute('aria-label', `${space.name}, ${space.tabCount} ${space.tabCount === 1 ? 'tab' : 'tabs'}`);
-      dot.title = index < 4 ? `${space.name} (⌃${index + 1})` : space.name;
+      const modifier = PLATFORM === 'windows' ? 'Ctrl+Shift+' : '⌃';
+      dot.title = index < 4 ? `${space.name} (${modifier}${index + 1})` : space.name;
     },
   })));
   $('add-space').hidden = model.spaces.length >= MAX_SPACES;
@@ -1049,7 +1054,9 @@ function onFavoritesKey(event) {
     tile.focus();
   };
   const handlers = {
-    ArrowRight: () => go(at + 1), ArrowLeft: () => go(at - 1), ArrowDown: () => go(at + 4), ArrowUp: () => go(at - 4),
+    ArrowRight: () => go(at + 1), ArrowLeft: () => go(at - 1),
+    ArrowDown: () => go(at + Number(getComputedStyle($('favorites')).getPropertyValue('--favorite-columns'))),
+    ArrowUp: () => go(at - Number(getComputedStyle($('favorites')).getPropertyValue('--favorite-columns'))),
     Home: () => go(0), End: () => go(tiles.length - 1), Delete: () => closeItem(found), Backspace: () => closeItem(found),
     ContextMenu: () => openItemMenu(found, tiles[at].getBoundingClientRect()),
   };
@@ -1157,11 +1164,16 @@ function placeMenu() {
   const menu = $('menu');
   const rect = menuRect;
   const bounds = $('sidebar').getBoundingClientRect();
+  const below = bounds.bottom - rect.bottom - 12;
+  const above = rect.top - bounds.top - 12;
+  const fitsBelow = menu.scrollHeight <= below;
+  const openAbove = !fitsBelow && above > below;
+  menu.style.maxHeight = `${Math.max(0, openAbove ? above : below)}px`;
   const height = menu.offsetHeight;
   const width = menu.offsetWidth;
-  const top = Math.min(Math.max(8, rect.bottom + 4), bounds.height - height - 8);
+  const top = (openAbove ? rect.top - height - 4 : rect.bottom + 4) - bounds.top;
   const left = Math.min(Math.max(8, rect.left + 8), bounds.width - width - 8);
-  menu.style.top = `${top < rect.bottom && rect.top - height - 4 > 8 ? rect.top - height - 4 : top}px`;
+  menu.style.top = `${Math.max(8, top)}px`;
   menu.style.left = `${Math.max(4, left)}px`;
 }
 
@@ -1346,9 +1358,8 @@ function openItemMenu(found, rect) {
       ...folders.map((folder) => ({ label: `Move to ${folder.name}`, run: () => mutate((store) => moveNode(store, entry.id, { spaceId: state.activeSpaceId, folderId: folder.id })).catch(() => {}) })),
       { label: 'Copy link', run: () => copyLink(entry.url) },
       ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, entry.id, { spaceId })).catch(() => {})),
-      '-',
-      ...(tab ? [{ label: 'Close tab', run: () => closeTabs([tab.id]) }] : []),
-      { label: 'Unpin', danger: true, run: () => unpinEntry(entry, tab) },
+      { label: 'Unpin', run: () => unpinEntry(entry, tab) },
+      ...(tab ? ['-', { label: 'Close tab', danger: true, run: () => closeTabs([tab.id]) }] : []),
     ];
   } else if (item.type === 'favorite') {
     const { entry, tab } = item;
@@ -1741,7 +1752,7 @@ function onActivated({ tabId, windowId }) {
     if (space) { state.lastActive[space] = tabId; saveWindowState(); }
     return;
   }
-  // Chromium may pick a neighbor from a hidden space after a native close (⌘W).
+  // Closing a native tab can activate a neighbor from a hidden space.
   // Wait briefly for onRemoved; if that's what happened, stay in this space.
   setTimeout(() => {
     const fallback = state.closeFallback;
@@ -1816,11 +1827,11 @@ async function adoptPinned(tabIds) {
 // ---------------------------------------------------------------- sidebar boot
 
 async function initSidebar(route) {
-  $('sidebar').hidden = false;
   document.body.classList.add('route-sidebar');
   try {
     state.windowId = route.windowId ?? (await api.windows.getCurrent()).id;
   } catch {
+    $('sidebar').hidden = false;
     showToast('Couldn’t find this window.');
     return;
   }
@@ -1846,6 +1857,7 @@ async function initSidebar(route) {
   // Re-read after subscribing: tabs can open while initial reconciliation awaits.
   await refreshTabs();
   draw();
+  $('sidebar').hidden = false;
   if (orphanPinned.length) void adoptPinned(orphanPinned);
 }
 
@@ -1874,6 +1886,9 @@ function bindSidebar() {
     const { appearance } = await loadAppearance();
     state.appearance = appearance;
     applyAppearance(appearance);
+    if (state.model) {
+      $('sidebar').dataset.tone = document.documentElement.dataset.tone === 'custom' ? 'custom' : state.model.space.tone;
+    }
   };
   localStorageChanges(api).addListener((changes) => {
     if (changes[STORE_KEY]) {
@@ -1882,7 +1897,7 @@ function bindSidebar() {
     }
     if (changes[APPEARANCE_REV_KEY]) void refreshAppearance();
   });
-  // Native ⌃1–⌃4 commands are forwarded by the background worker.
+  // Space commands are forwarded by the background worker.
   api.runtime.onMessage.addListener((message) => {
     if (message?.type === 'breezer.theme.refresh') { void refreshAppearance(); return; }
     if (message?.type !== 'breezer.workspace.space' || message.windowId !== state.windowId) return;
@@ -1927,7 +1942,7 @@ function bindSidebar() {
     const found = itemFromNode(event.target);
     if (event.target.closest('input')) return;
     event.preventDefault();
-    if (found?.item) openItemMenu(found, { left: event.clientX - 8, right: event.clientX, top: event.clientY, bottom: event.clientY });
+    if (found?.item) openItemMenu(found, found.node.getBoundingClientRect());
     else if (event.target.closest('.space-head, #empty-hit, .space-pane')) openSpaceMenu();
   });
   sidebar.addEventListener('pointerdown', onPointerDown);
@@ -1953,6 +1968,7 @@ function bindSidebar() {
   for (const name of TREES) $(name).addEventListener('keydown', onTreeKey);
   $('favorites').addEventListener('keydown', onFavoritesKey);
   $('menu').addEventListener('keydown', onMenuKey);
+  if (PLATFORM === 'windows') $('new-tab').title = 'New tab (Ctrl+T)';
   $('new-tab').addEventListener('click', () => void newTab());
   $('new-tab').addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown') { event.preventDefault(); focusItem(treeItems($('today'))[0]); }
@@ -1988,7 +2004,7 @@ function bindSidebar() {
   }
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && state.drag) { endDrag(false); return; }
-    if (event.ctrlKey && !event.metaKey && !event.altKey && /^[1-9]$/.test(event.key)) {
+    if (PLATFORM === 'mac' && event.ctrlKey && !event.metaKey && !event.altKey && /^[1-9]$/.test(event.key)) {
       const space = state.store.spaces[Number(event.key) - 1];
       if (space) { event.preventDefault(); switchSpace(space.id); }
     }

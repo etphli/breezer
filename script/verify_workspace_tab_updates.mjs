@@ -3,6 +3,7 @@ import vm from 'node:vm';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import * as store from '../features/ai/extension/workspace-store.js';
+import { PLATFORM } from '../features/ai/extension/platform.js';
 import { seed } from '../tests/ai/workspace-browser-fixture.mjs';
 
 // Deterministic DOM contract, not a layout engine. All production draw/reconcile/
@@ -55,7 +56,7 @@ export async function harness(source) {
   const api = { runtime: { getManifest: () => ({ permissions: [] }), getURL: p => `fixture://${p}` },
     storage: { session: { async set(v) { counters.writes.push(['session', plain(v)]); Object.assign(persisted.session, structuredClone(v)); } } },
     tabs: { async query() { counters.queries++; const snapshot = structuredClone(browserTabs); if (held) { held = false; await new Promise(r => { release = r; }); } return snapshot; } } };
-  const context = vm.createContext({ ...store, WorkspaceStore: class { async patchMembers(set, remove) { counters.writes.push(['members', plain(set), plain(remove)]);
+  const context = vm.createContext({ ...store, PLATFORM, WorkspaceStore: class { async patchMembers(set, remove) { counters.writes.push(['members', plain(set), plain(remove)]);
       for (const [id, record] of Object.entries(set)) persisted.local[store.MEMBERS_KEY].tabs[id] = { ...structuredClone(record), k: 'S1' };
       for (const id of remove) delete persisted.local[store.MEMBERS_KEY].tabs[id]; } },
     chrome: api, URL, console, Date: FixtureDate, matchMedia: () => ({ matches: true }), addEventListener() {},

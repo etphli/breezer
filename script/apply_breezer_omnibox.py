@@ -17,6 +17,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 PATCH = ROOT / "features/omnibox/omnibox-suggestions.patch"
+UPSTREAM_WEBUI_TEST = "chrome/test/data/webui/settings/search_page_test.ts"
 INPUTS = (
     "script/apply_breezer_omnibox.py",
     "features/omnibox/omnibox-suggestions.patch",
@@ -70,9 +71,12 @@ def source_file(tree, name):
     return path
 
 
-def apply(tree, check=False):
+def apply(tree, check=False, *, allow_missing_upstream_test=False):
     tree = Path(tree).resolve()
     changes = sections()
+    upstream_test = tree / UPSTREAM_WEBUI_TEST
+    if allow_missing_upstream_test and not upstream_test.exists() and not upstream_test.is_symlink():
+        changes.pop(UPSTREAM_WEBUI_TEST, None)
     originals = {name: source_file(tree, name).read_bytes() for name in changes}
     replacements = {}
     with tempfile.TemporaryDirectory(prefix="breezer-omnibox-") as directory:
@@ -119,16 +123,19 @@ def main():
     parser.add_argument("source_tree", nargs="?", type=Path)
     parser.add_argument("--check", action="store_true", help="Verify installed changes without writing")
     parser.add_argument("--fingerprint", action="store_true", help="Print the separate overlay input SHA-256")
+    parser.add_argument("--allow-missing-upstream-test", action="store_true",
+                        help="Allow the WebUI test file omitted from the Windows source archive")
     args = parser.parse_args()
     try:
         if args.fingerprint:
-            if args.source_tree is not None or args.check:
-                parser.error("--fingerprint does not take a source tree or --check")
+            if args.source_tree is not None or args.check or args.allow_missing_upstream_test:
+                parser.error("--fingerprint does not take a source tree or other options")
             print(fingerprint())
             return
         if args.source_tree is None:
             parser.error("Provide the prepared Chromium source tree")
-        changed = apply(args.source_tree, check=args.check)
+        changed = apply(args.source_tree, check=args.check,
+                        allow_missing_upstream_test=args.allow_missing_upstream_test)
         print(f"Breezer omnibox overlay verified; {changed} files updated.")
     except (OSError, ValueError) as error:
         parser.exit(1, f"Cannot prepare Breezer omnibox: {error}\n")

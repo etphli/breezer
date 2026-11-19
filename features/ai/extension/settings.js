@@ -11,6 +11,8 @@ import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
 import { mountSettingsNav } from './settings-nav.js';
+import { HAS_APP_UPDATER, HAS_NATIVE_HELPER } from './platform.js';
+import { DASHBOARD_ENABLED_KEY, readDashboardPreference } from './dashboard-preference.js';
 
 // Settings owned by feature modules. Each entry names an empty container in workspace.html
 // and loads a function called as mount({ container, api }). It may be async and may return
@@ -131,8 +133,21 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   const passwordSteps = { showImport() { nav?.open('passwords'); passwords.showImport(); } };
   const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords: passwordSteps });
   addEventListener('pagehide', () => onboarding.dispose(), { once: true });
-  if (typeof api.runtime?.connect === 'function') {
-    mountUpdates(api);
+  if (!HAS_NATIVE_HELPER) {
+    const assistantGroup = $('nav-group-ai');
+    const newTab = document.querySelector('#settings-categories [data-category="newtab"]');
+    newTab.querySelector('span').textContent = 'New tab';
+    $('settings-categories').querySelector('[aria-label="Breezer"]').append(newTab.closest('li'));
+    assistantGroup.nextElementSibling.remove();
+    assistantGroup.remove();
+    $('organato-heading').textContent = 'New tab';
+    $('organato-settings').dataset.searchTerms = 'dashboard shortcuts';
+    $('organato-settings').closest('[data-page]').setAttribute('aria-label', 'New tab');
+    for (const element of document.querySelectorAll('[data-native-helper]')) element.remove();
+    void mountDashboardPreference(api);
+  } else if (typeof api.runtime?.connect === 'function') {
+    if (HAS_APP_UPDATER) mountUpdates(api);
+    else $('update-settings').remove();
     mountOrganato(api);
     const contextSettings = mountContextSettings({ container: $('context-settings'), api });
     groupSection($('context-settings'));
@@ -186,10 +201,22 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   function renderAppearance() {
     applyAppearance(appearance);
+    const preview = $('layout-preview');
+    preview.dataset.tabs = appearance.layout;
+    preview.dataset.sidebar = !appearance.alwaysShowSidebar && appearance.frameless
+      ? 'autoHide' : appearance.sidebarMode;
+    preview.dataset.topBar = !appearance.frameless || appearance.alwaysShowTopBar ? 'visible' : 'autoHide';
+    preview.dataset.address = appearance.centeredAddressBar ? 'center' : 'left';
+    preview.dataset.url = appearance.minimalUrl ? 'minimal' : 'full';
+    const sidebarNames = { expanded: 'Expanded sidebar', compact: 'Compact sidebar', autoHide: 'Sidebar on hover' };
+    const tabs = appearance.layout === 'top' ? 'Tabs across the top'
+      : appearance.frameless && preview.dataset.sidebar === 'autoHide' && appearance.sidebarMode !== 'autoHide'
+        ? `${sidebarNames[appearance.sidebarMode]} on hover in frameless mode` : sidebarNames[preview.dataset.sidebar];
+    $('layout-preview-summary').textContent = `${tabs}. ${preview.dataset.topBar === 'autoHide' ? 'Top bar on hover.' : 'Top bar visible.'}`;
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
     const customSelected = /^#[0-9a-fA-F]{6}$/.test(appearance.theme);
-    $('custom-theme-note').textContent = customSelected ? 'Custom color selected' : 'Create a theme for the browser and sidebar.';
+    $('custom-theme-note').textContent = customSelected ? 'Custom color overrides the sidebar’s space color while selected.' : 'Use one color across the browser and sidebar.';
     $('custom-theme-apply').setAttribute('aria-pressed', String(customSelected));
     if (/^#[0-9a-fA-F]{6}$/.test(appearance.theme) && document.activeElement !== $('custom-theme-color')) $('custom-theme-color').value = appearance.theme;
     for (const range of ranges) {
@@ -503,6 +530,37 @@ export function mountUpdates(api) {
   window.addEventListener('pagehide', dispose, { once: true });
   request('update-check');
   return { dispose };
+}
+
+async function mountDashboardPreference(api) {
+  const input = $('dashboard-enabled');
+  input.disabled = true;
+  try {
+    input.checked = await readDashboardPreference(api);
+  } catch {
+    showError('dashboard-error', 'Could not load your dashboard setting. Reload Settings to try again.');
+    return;
+  }
+  input.disabled = false;
+  input.addEventListener('change', async () => {
+    const enabled = input.checked;
+    input.disabled = true;
+    showError('dashboard-error', '');
+    try {
+      await api.storage.local.set({ [DASHBOARD_ENABLED_KEY]: enabled });
+    } catch {
+      input.checked = !enabled;
+      showError('dashboard-error', 'Could not save your dashboard setting. Try again.');
+    } finally {
+      input.disabled = false;
+    }
+  });
+  const onChanged = (changes) => {
+    if (changes[DASHBOARD_ENABLED_KEY]) input.checked = changes[DASHBOARD_ENABLED_KEY].newValue !== false;
+  };
+  const events = localStorageChanges(api);
+  events?.addListener(onChanged);
+  window.addEventListener('pagehide', () => events?.removeListener(onChanged), { once: true });
 }
 
 export function mountOrganato(api, { timeoutMs = 85000 } = {}) {

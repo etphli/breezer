@@ -23,7 +23,7 @@
       <div class="divider-row">
         <span class="section-label">Today</span>
         <span class="rule" aria-hidden="true"></span>
-        <button id="clear-today" class="meta-button" title="Close every unpinned tab in this space">Clear</button>
+        <button id="clear-today" class="meta-button" title="Close every unpinned tab in this space">Close today’s tabs</button>
       </div>
 
       <button id="new-tab" class="new-tab" title="New tab (⌘T)"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span>New tab</span></button>
@@ -68,10 +68,10 @@
         <h2 id="nav-group-ai" class="nav-group">Breezer AI</h2>
         <ul class="nav-list" aria-labelledby="nav-group-ai">
           <li><a class="nav-item" href="#/settings/assistant" data-category="assistant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2.5 8.2 6 11.5 7.2 8.2 8.4 7 12 5.8 8.4 2.5 7.2 5.8 6 7 2.5ZM12 10.5l.6 1.4 1.4.6-1.4.6L12 14.5l-.6-1.4-1.4-.6 1.4-.6.6-1.4Z"/></svg><span>Assistant</span></a></li>
-          <li><a class="nav-item" href="#/settings/newtab" data-category="newtab"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 9.5l1.3 1.3 2.7-2.6"/></svg><span>New tab and Organato</span></a></li>
         </ul>
         <h2 id="nav-group-browser" class="nav-group">Browser</h2>
         <ul class="nav-list" aria-labelledby="nav-group-browser">
+          <li><a class="nav-item" href="#/settings/newtab" data-category="newtab"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 9.5l1.3 1.3 2.7-2.6"/></svg><span>New tab and Organato</span></a></li>
           <li><a class="nav-item" href="#/settings/languages" data-category="languages"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.3 3.4 2.3 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.7 5.9 5.7 8s.7 3.9 2.3 5.5"/></svg><span>Translation</span></a></li>
           <li><a class="nav-item" href="#/settings/browser" data-category="browser"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Browser tools</span></a></li>
           <li><button id="open-native-settings" class="nav-item" type="button" aria-describedby="native-settings-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 8 8"/><path d="M11.5 9.5v2.5a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h2.5"/></svg><span>All browser settings</span></button></li>
@@ -97,7 +97,6 @@
           <div id="settings-results" class="search-results" role="listbox" aria-label="Search results" hidden></div>
 
           <section class="settings-page" data-page="general" aria-label="General">
-            <div id="settings-onboarding"></div>
             <section class="settings-section" aria-labelledby="tabs-heading">
               <h2 id="tabs-heading">Tabs</h2>
               <div class="setting-group">
@@ -118,12 +117,14 @@
               </div>
               <p id="tabs-error" class="field-error" role="alert" hidden></p>
             </section>
-            <section id="update-settings" class="settings-section" aria-labelledby="update-heading" data-search-terms="update upgrade version release restart github">
+            <section id="update-settings" class="settings-section" aria-labelledby="update-heading" data-native-helper data-search-terms="update upgrade version release restart github">
               <h2 id="update-heading">Breezer updates</h2>
-              <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
               <div class="setting-group">
                 <div class="setting-row update-row">
-                  <div class="setting-label"><small>Checks stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</small></div>
+                  <div class="setting-label">
+                    <span id="update-status" class="status-line update-status" role="status" aria-live="polite">Ready to check for updates.</span>
+                    <small>Updating restarts Breezer and keeps your profile and passwords.</small>
+                  </div>
                   <div class="update-actions">
                     <button id="update-check" class="button" type="button">Check for updates</button>
                     <button id="update-install" class="button primary" type="button" hidden>Update and restart</button>
@@ -131,6 +132,7 @@
                 </div>
               </div>
             </section>
+            <div id="settings-onboarding"></div>
           </section>
 
           <section class="settings-page" data-page="appearance" aria-label="Appearance" hidden>
@@ -147,7 +149,7 @@
                   </span>
                 </div>
                 <div class="setting-row" data-search-terms="dark mode light mode system color scheme night">
-                  <div class="setting-label"><span id="mode-label">Color mode</span><small>Light, dark, or your Mac’s appearance.</small></div>
+                  <div class="setting-label"><span id="mode-label">Color mode</span><small>Light, dark, or your system appearance.</small></div>
                   <div class="segmented" role="radiogroup" aria-labelledby="mode-label" data-field="colorMode">
                     <button role="radio" data-value="system">System</button>
                     <button role="radio" data-value="light">Light</button>
@@ -173,6 +175,10 @@
           </section>
 
           <section class="settings-page" data-page="layout" aria-label="Layout" hidden>
+            <figure id="layout-preview" class="layout-preview">
+              <div class="layout-preview-window" aria-hidden="true"><i class="layout-preview-toolbar"></i><i class="layout-preview-tabs"></i><i class="layout-preview-content"></i></div>
+              <figcaption><strong>Window preview</strong><span id="layout-preview-summary"></span></figcaption>
+            </figure>
             <section class="settings-section" aria-labelledby="layout-heading">
               <h2 id="layout-heading">Tabs and sidebar</h2>
               <div class="setting-group">
@@ -266,7 +272,7 @@
           </section>
 
           <section class="settings-page" data-page="passwords" aria-label="Passwords" hidden>
-            <div id="password-settings" data-search-terms="passwords passkeys touch id security key apple passwords autofill sign in credentials import chrome csv export"></div>
+            <div id="password-settings" data-search-terms="passwords passkeys touch id security key apple passwords autofill sign in credentials import chrome edge firefox csv export"></div>
           </section>
 
           <section class="settings-page" data-page="sync" aria-label="Sync" data-optional hidden>
@@ -284,21 +290,21 @@
           <section class="settings-page" data-page="newtab" aria-label="New tab and Organato" hidden>
             <section id="organato-settings" class="settings-section" aria-labelledby="organato-heading" data-search-terms="organato dashboard deadlines assignments homework api key">
               <h2 id="organato-heading" class="sr-only">New tab and Organato</h2>
-              <p class="section-note">Your Organato API key stays in macOS Keychain.</p>
+              <p class="section-note" data-native-helper>Your Organato API key is saved in encrypted storage on this device.</p>
               <div class="setting-group">
                 <div class="setting-row" data-search-terms="new tab page dashboard home">
                   <label class="setting-label" for="dashboard-enabled">Breezer new-tab dashboard<small>Open new tabs on Breezer’s dashboard instead of a blank page.</small></label>
                   <input id="dashboard-enabled" class="toggle" type="checkbox" checked>
                 </div>
-                <div class="setting-row" data-search-terms="exams assignments to-dos deadlines">
+                <div class="setting-row" data-native-helper data-search-terms="exams assignments to-dos deadlines">
                   <label class="setting-label" for="organato-enabled">Organato on the dashboard<small>Show upcoming exams, assignments, and <span class="keep-word">to-dos</span>.</small></label>
                   <input id="organato-enabled" class="toggle" type="checkbox" checked>
                 </div>
-                <div class="setting-row" data-search-terms="ai assistant organato tools">
+                <div class="setting-row" data-native-helper data-search-terms="ai assistant organato tools">
                   <label class="setting-label" for="organato-ai">Organato in the AI sidebar<small>Let Breezer AI read and update Organato when you ask it to.</small></label>
                   <input id="organato-ai" class="toggle" type="checkbox" checked>
                 </div>
-                <div class="key-field" data-search-terms="api key connect disconnect token">
+                <div class="key-field" data-native-helper data-search-terms="api key connect disconnect token">
                   <label for="organato-key">Organato API key</label>
                   <div class="key-row">
                     <input id="organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="organato-key-note">
@@ -309,6 +315,7 @@
                   <p id="organato-status" class="status-line" role="status" aria-live="polite"></p>
                 </div>
               </div>
+              <p id="dashboard-error" class="field-error" role="alert" hidden></p>
             </section>
           </section>
 
@@ -340,7 +347,7 @@
               <h2 id="browser-data-heading">Saved data</h2>
               <ul class="link-list setting-group">
                 <li data-search-terms="downloads folder location ask where to save"><button data-url="chrome://settings/downloads">Downloads</button><small>Choose where downloads are saved.</small></li>
-                <li data-search-terms="import chrome safari firefox bookmarks history"><button data-url="chrome://settings/importData">Import bookmarks and history</button><small>Copy bookmarks and history from another browser.</small></li>
+                <li data-search-terms="import chrome edge safari firefox bookmarks favorites history html"><button data-url="chrome://settings/importData">Import browser data</button><small>Choose a browser or a bookmarks HTML file.</small></li>
                 <li data-search-terms="bookmarks manager organize"><button data-url="chrome://bookmarks">Bookmarks</button><small>Organize saved pages.</small></li>
               </ul>
             </section>
@@ -350,7 +357,7 @@
                 <li data-search-terms="system proxy hardware acceleration background apps"><button data-url="chrome://settings/system">System</button><small>Background activity, graphics and proxy settings.</small></li>
                 <li data-search-terms="reset restore defaults"><button data-url="chrome://settings/reset">Reset settings</button><small>Restore browser settings to their defaults.</small></li>
                 <li data-search-terms="about version build"><button data-url="chrome://settings/help">About Breezer</button><small>Version and build information.</small></li>
-                <li data-search-terms="keyboard shortcuts hotkeys extensions commands"><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button><small>Choose extension and assistant shortcuts.</small></li>
+                <li data-search-terms="keyboard shortcuts hotkeys extensions commands"><button data-url="chrome://extensions/shortcuts">Keyboard shortcuts</button><small>Choose shortcuts for extensions and Breezer commands.</small></li>
               </ul>
             </section>
           </section>
@@ -370,7 +377,7 @@
       <div class="wl-copy">
         <section class="wl-step" data-step="welcome" aria-labelledby="wl-h-welcome">
           <h1 id="wl-h-welcome" tabindex="-1">Welcome to Breezer</h1>
-          <p class="wl-lede">Choose your name, tabs and color. Connect services now or later. Everything can be changed in Settings.</p>
+          <p id="wl-welcome-description" class="wl-lede">Choose your name, tabs and color. Connect services now or later. Everything can be changed in Settings.</p>
         </section>
 
         <section class="wl-step" data-step="you" aria-labelledby="wl-h-you" hidden>
@@ -413,11 +420,11 @@
           <p class="wl-lede">It colors the sidebar, the assistant, Settings and new tabs. This page changes as you choose.</p>
           <div id="wl-swatches" class="wl-swatches" role="radiogroup" aria-labelledby="wl-h-theme" data-field="theme"></div>
           <div class="setting-row wl-row">
-            <label class="setting-label" for="wl-custom-color">Your own color<small>Breezer builds a matching light and dark theme.</small></label>
-            <span class="wl-custom"><input id="wl-custom-color" type="color" value="#23866b"><button id="wl-custom-apply" class="button" type="button">Use this color</button></span>
+            <label class="setting-label" for="wl-custom-color">Custom color<small>Breezer builds a matching light and dark theme.</small></label>
+            <span class="wl-custom"><input id="wl-custom-color" type="color" value="#23866b"><button id="wl-custom-apply" class="button" type="button">Apply color</button></span>
           </div>
           <div class="setting-row wl-row">
-            <div class="setting-label"><span id="wl-mode-label">Appearance</span><small>System follows your Mac.</small></div>
+            <div class="setting-label"><span id="wl-mode-label">Color mode</span><small>Choose light, dark, or match your device.</small></div>
             <div class="segmented" role="radiogroup" aria-labelledby="wl-mode-label" data-field="colorMode">
               <button type="button" role="radio" data-value="system">System</button>
               <button type="button" role="radio" data-value="light">Light</button>
@@ -427,22 +434,23 @@
         </section>
 
         <section class="wl-step" data-step="import" aria-labelledby="wl-h-import" hidden>
-          <h1 id="wl-h-import" tabindex="-1">Bring your things from Chrome</h1>
-          <p class="wl-lede">Importing copies your data once. Changes you make in Chrome later stay in Chrome.</p>
+          <h1 id="wl-h-import" tabindex="-1">Bring your browser data</h1>
+          <p class="wl-lede">Importing makes a one-time copy of the data you choose.</p>
           <div class="wl-paths">
             <div class="wl-path">
               <h2>Bookmarks and history</h2>
-              <p>Opens the import dialog in a new tab. Choose Google Chrome, then pick what to copy.</p>
-              <button id="wl-import-browser" class="button" type="button">Open import dialog</button>
+              <p>Choose a browser and pick what to copy, or select Bookmarks HTML File to use an export.</p>
+              <p id="wl-import-firefox" hidden>Choose Firefox and check Saved passwords if it appears.</p>
+              <button id="wl-import-browser" class="button" type="button">Import browser data</button>
             </div>
             <div class="wl-path">
               <h2>Passwords</h2>
               <ol class="wl-steps-list">
-                <li>In Chrome, open Password Manager, then Settings, and choose Export passwords.</li>
-                <li>Back in Breezer, choose Import passwords and select the exported file.</li>
-                <li>Delete the exported file afterwards, including from the Trash.</li>
+                <li>Export a password CSV from Chrome, Edge or your password manager.</li>
+                <li>Select the CSV in Breezer and check the result.</li>
+                <li>Delete the CSV and remove it from the Trash or Recycle Bin.</li>
               </ol>
-              <button id="wl-import-passwords" class="button" type="button">Import passwords</button>
+              <button id="wl-import-passwords" class="button" type="button">Import password CSV</button>
             </div>
           </div>
           <p id="wl-import-status" class="status-line" role="status" aria-live="polite"></p>
@@ -451,19 +459,25 @@
 
         <section class="wl-step" data-step="organato" aria-labelledby="wl-h-organato" hidden>
           <h1 id="wl-h-organato" tabindex="-1">Connect Organato?</h1>
-          <p class="wl-lede">See Organato tasks on new tabs. Breezer AI can update them when you ask. <span id="wl-tour-preview"></span></p>
+          <p class="wl-lede">See Organato tasks on new tabs. Breezer AI can update them when you ask.</p>
           <div class="key-field wl-key">
             <label for="wl-organato-key">Organato API key</label>
             <div class="key-row">
               <input id="wl-organato-key" class="text-input" type="password" autocomplete="off" spellcheck="false" placeholder="org_…" aria-describedby="wl-organato-note">
               <button id="wl-organato-connect" class="button primary" type="button">Connect</button>
             </div>
-            <p id="wl-organato-note" class="field-note">Get a key from <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>. Saved in macOS Keychain.</p>
+            <p id="wl-organato-note" class="field-note">Get a key from <a href="https://organato.vercel.app" target="_blank" rel="noreferrer">Organato Settings</a>. Breezer encrypts the key on this device.</p>
           </div>
           <div id="wl-organato-connect-status"><p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p></div>
           <div class="wl-optout">
-            <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
-            <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Change this later in Settings.</p>
+            <div id="wl-organato-later-choice">
+              <button id="wl-organato-later" class="button primary" type="button" aria-describedby="wl-organato-later-note">Connect later</button>
+              <p id="wl-organato-later-note" class="field-note">Keep Organato available in Settings.</p>
+            </div>
+            <div id="wl-organato-off-choice">
+              <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
+              <p id="wl-organato-off-note" class="field-note">Turn it off on New Tab and in Breezer AI.</p>
+            </div>
             <div id="wl-organato-off-status"></div>
           </div>
         </section>

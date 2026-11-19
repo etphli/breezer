@@ -16,12 +16,20 @@ export class ResearchSources {
     this.api = api; this.root = root; this.onChange = onChange; this.onRevoke = onRevoke;
     this.selected = new Map(); this.revision = 0; this.busy = false;
     this.dialog = root.querySelector('#research-dialog');
+    this.list = root.querySelector('#research-options');
+    this.scrollHint = root.querySelector('#research-scroll');
+    this.list.addEventListener('scroll', () => this.updateScrollHint(), { passive: true });
+    new ResizeObserver(() => this.updateScrollHint()).observe(this.list);
     root.querySelector('#research-open').addEventListener('click', () => this.open());
     root.querySelector('#research-close').addEventListener('click', () => this.dialog.close());
     root.querySelector('#research-clear').addEventListener('click', () => this.clear());
     this.render();
   }
   get size() { return this.selected.size; }
+  updateScrollHint() {
+    const { scrollTop, clientHeight, scrollHeight } = this.list;
+    this.scrollHint.hidden = !this.dialog.open || scrollHeight - clientHeight - scrollTop <= 2;
+  }
   setBusy(value) { this.busy = value; this.render(); if (value) this.dialog.close(); }
   clear(reason, reportRevocation = true) {
     const revoke = this.busy && this.size > 0;
@@ -35,8 +43,15 @@ export class ResearchSources {
       this.clear(source ? `${maskSecrets(source.title)}: ${reason}` : reason, reportRevocation);
     }
   }
+  markUnavailable(sources) {
+    for (const source of sources) {
+      const tab = this.selected.get(source.tabId);
+      if (tab && tab.documentId === source.documentId) tab.unavailable = source.status !== 'available';
+    }
+    this.render();
+  }
   render() {
-    this.root.querySelector('#research-limit').textContent = `${this.size} of ${MAX_RESEARCH_SOURCES} selected`;
+    this.root.querySelector('#research-limit').textContent = `${this.size} selected · Limit ${MAX_RESEARCH_SOURCES}`;
     this.root.querySelector('#research-open').disabled = this.busy;
     this.root.querySelector('#research-clear').hidden = !this.size;
     for (const input of this.root.querySelectorAll('#research-options input[data-tab-id]')) {
@@ -46,30 +61,38 @@ export class ResearchSources {
     const chips = this.root.querySelector('#research-chips'); chips.replaceChildren();
     [...this.selected.values()].forEach((tab, index) => {
       const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'research-chip';
-      chip.textContent = `${index + 1} · ${maskSecrets(tab.title || new URL(tab.url).hostname)}`;
+      const title = maskSecrets(tab.title || new URL(tab.url).hostname);
+      chip.toggleAttribute('data-unavailable', Boolean(tab.unavailable));
+      chip.textContent = `${index + 1} · ${title}${tab.unavailable ? ' · Unavailable' : ''}`;
       chip.title = `Remove source: ${sourceURL(tab.url)}`;
-      chip.setAttribute('aria-label', `Remove source ${index + 1}: ${maskSecrets(tab.title)}`);
+      chip.setAttribute('aria-label', `Remove source ${index + 1}: ${title}${tab.unavailable ? ', unavailable' : ''}`);
       chip.addEventListener('click', () => { this.selected.delete(tab.tabId); this.revision++; this.render(); this.onChange(); if (this.busy) this.onRevoke('Source removed. Response stopped.'); this.root.querySelector('#research-open').focus(); });
       chips.append(chip);
     });
   }
   async open() {
-    if (this.busy) return;
+    if (this.busy || this.dialog.open) return;
     this.dialog.showModal();
-    const list = this.root.querySelector('#research-options'); list.textContent = 'Loading tabs…';
+    const list = this.list;
+    list.textContent = 'Loading tabs…';
     try {
       if (!this.api.breezerPrivate?.getResearchTabs) throw new Error('Selected-tab research needs a Breezer build with the native text reader.');
       const tabs = await this.api.breezerPrivate.getResearchTabs();
       if (!this.dialog.open) return;
       list.replaceChildren();
-      if (!tabs.length) list.textContent = 'Open an ordinary web page in this window to use it as a source.';
-      for (const tab of tabs) {
+      const availableIds = new Set(tabs.map(tab => tab.tabId));
+      const unavailable = [...this.selected.values()].filter(tab => !availableIds.has(tab.tabId));
+      if (!tabs.length && !unavailable.length) list.textContent = 'Open an ordinary web page in this window to use it as a source.';
+      for (const tab of [...tabs, ...unavailable]) {
+        const unavailable = !availableIds.has(tab.tabId) || this.selected.get(tab.tabId)?.unavailable;
         const label = document.createElement('label'); label.className = 'research-option';
         const input = document.createElement('input'); input.type = 'checkbox'; input.dataset.tabId = String(tab.tabId); input.checked = this.selected.has(tab.tabId); input.disabled = tab.loading;
         input.dataset.loading = String(Boolean(tab.loading));
         const text = document.createElement('span');
         const title = document.createElement('strong'); title.textContent = maskSecrets(tab.title || new URL(tab.url).hostname);
-        const url = document.createElement('small'); url.textContent = `${sourceURL(tab.url)}${tab.loading ? ' · Loading, try again when ready' : ''}`;
+        const url = document.createElement('small'); url.textContent = unavailable
+          ? 'Unavailable. Uncheck to remove.'
+          : `${sourceURL(tab.url)}${tab.loading ? ' · Loading, try again when ready' : ''}`;
         text.append(title, url); label.append(input, text); list.append(label);
         input.addEventListener('change', () => {
           if (input.checked && this.size >= MAX_RESEARCH_SOURCES) { input.checked = false; this.root.querySelector('#research-limit').textContent = `Choose up to six tabs. ${this.size} selected.`; return; }
@@ -79,6 +102,7 @@ export class ResearchSources {
       }
       this.render();
     } catch (error) { list.textContent = error.message; }
+    this.updateScrollHint();
   }
   // Invoke all native reads in the send gesture's stack. No await before these
   // calls: native rejects reads from passive tab events or provider tools.

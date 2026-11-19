@@ -3,6 +3,12 @@
 The canonical public site is https://breezer-browser.vercel.app. Vercel builds
 `site/` from GitHub `main`. `getbreezer.vercel.app` is another public alias.
 
+The homepage and download page show Windows availability only when the latest
+GitHub release has a nonempty Windows installer or ZIP, its matching checksum
+file, and a SHA-256 digest for the package. The pages share a session cache.
+The same lookup updates the Mac download and checksum when both Mac assets are
+published. The download HTML contains the verified Mac fallback for 1.3.1.
+
 ## Pages and visual direction
 
 The privacy page borrows the readable introduction, sticky contents navigation,
@@ -46,9 +52,9 @@ never cached. The page has noindex and a restrictive CSP.
 
 ## What the numbers mean
 
-- Installer downloads sum GitHub `.dmg` asset download counts across published
-  releases, including prereleases. They count transfers, not installations or
-  unique people. Updates and repeated downloads may count again.
+- Downloads sum GitHub asset counts for the Mac `.dmg` and the Windows installer
+  and ZIP across published releases, including prereleases. This counts each
+  transfer, including updates and repeated downloads.
 - MAU counts distinct reporting identifiers in the current UTC calendar month.
   Identifiers rotate each month, so this avoids misleading cross-month
   deduplication. Multiple profiles and reinstallations can overcount people.

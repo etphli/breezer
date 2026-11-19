@@ -7,6 +7,7 @@ import { normalizeThemeProposal, readThemeState, renderThemeProposal, restorePre
 import { detectBrowserTask } from './browser-task-intent.js';
 import { preparePastedImage } from './clipboard-image.js';
 import { themeReferenceImages } from './theme-references.js';
+import { PLATFORM } from './platform.js';
 
 const BROWSER_TASKS = {
   stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
@@ -227,6 +228,7 @@ function renderWelcomeStatus(selected) {
   $('welcome-account-steps').hidden = !showAccounts;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
+  $('draft-toggle').hidden = !action;
   document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending || state.pageKnown && !state.page && !research.size;
   document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
@@ -242,6 +244,14 @@ function providerLabel(id) {
 }
 
 function renderModels() {
+  if (PLATFORM === 'windows') {
+    const codex = state.providers.find((provider) => provider.id === 'codex');
+    const steps = $('welcome-account-steps');
+    const instructions = steps.querySelector('[data-provider="codex"]');
+    instructions.hidden = typeof codex?.setup !== 'string';
+    instructions.querySelector('code').textContent = codex?.setup || '';
+    steps.querySelector('[data-account-shell-hint]').textContent = 'Open PowerShell and paste the command. Follow the sign-in prompts, then return here and refresh accounts.';
+  }
   $('model-options').replaceChildren();
   if (!state.providers.length) {
     const note = document.createElement('p');
@@ -291,7 +301,7 @@ function renderModels() {
       const error = document.createElement('p');
       error.className = 'provider-error';
       error.textContent = provider.available && provider.authenticated ? provider.error
-        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is not available on this Mac.`;
+        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is unavailable on this device.`;
       group.append(error);
       if (!provider.available || !provider.authenticated) {
         const connect = document.createElement('button');
@@ -302,9 +312,10 @@ function renderModels() {
           setModelMenu(false);
           $('account-title').textContent = `Connect ${providerLabel(provider.id)}`;
           $('account-instructions').replaceChildren(...[...$('welcome-account-steps').children]
-            .filter(node => node.tagName !== 'SUMMARY' && (!node.dataset.provider || node.dataset.provider === provider.id))
+            .filter(node => node.tagName !== 'SUMMARY' && !node.hidden && (!node.dataset.provider || node.dataset.provider === provider.id))
             .map(node => node.cloneNode(true)));
-          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
+          if (!provider.available) $('account-instructions').querySelector('p').textContent = PLATFORM === 'windows' && provider.error
+            ? provider.error : `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
           $('account-dialog').showModal();
         });
         group.replaceChildren(connect);
@@ -379,7 +390,7 @@ function setControl(on) {
 function applyProfile() {
   const name = state.profile.name.trim();
   $('greeting-name').textContent = name ? `, ${name}` : '';
-  $('open-profile').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
+  $('profile-initial').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
 }
 
 function appendMessage(message) {
@@ -556,7 +567,16 @@ function renderSourceMetadata(meta, sources) {
       : `Unavailable · ${source.error}`;
     row.append(title, status); list.append(row);
   }
-  details.append(list); meta.replaceChildren(details);
+  details.append(list);
+  if (unavailable) {
+    const review = document.createElement('button');
+    review.type = 'button';
+    review.className = 'review-sources';
+    review.textContent = 'Review source tabs';
+    review.addEventListener('click', () => void research.open());
+    details.append(review);
+  }
+  meta.replaceChildren(details);
 }
 
 function recentMessages(limit) {
@@ -717,7 +737,7 @@ function providerFailureSummary(reason) {
   if (/unauthori[sz]ed|authentication|not signed in|sign[ -]in|\b401\b/i.test(reason)) return 'The provider could not verify your account. Check its sign-in, then try again.';
   if (/timed? out|timeout|deadline exceeded/i.test(reason)) return 'The provider took too long to reply. Try again.';
   if (/ECONNREFUSED|ENETUNREACH|network error|connection (?:failed|closed|refused)|fetch failed/i.test(reason)) return 'The connection to your provider failed. Check your connection, then try again.';
-  return 'The assistant could not complete this response.';
+  return 'The assistant could not complete this response. You can edit your message and try again.';
 }
 
 function revealPanel() {
@@ -790,6 +810,7 @@ async function send() {
     try {
       sources = await capture;
       if (state.running?.id !== id) return;
+      research.markUnavailable(sources);
       const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
       userMessage.contextTitle = summary;
       userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
@@ -1049,18 +1070,6 @@ $('control-toggle').addEventListener('click', () => {
   notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
 });
-function positionControlTip() {
-  const trigger = $('control-toggle').getBoundingClientRect();
-  const footer = document.querySelector('.context-row').getBoundingClientRect();
-  const tip = $('control-tip');
-  const center = trigger.left + trigger.width / 2 - footer.left;
-  const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));
-  tip.style.left = `${left}px`;
-  tip.style.bottom = `${footer.bottom - trigger.top + 8}px`;
-  tip.style.setProperty('--tip-pointer', `${center - left}px`);
-}
-for (const type of ['pointerenter', 'focus']) $('control-toggle').addEventListener(type, positionControlTip);
-addEventListener('resize', positionControlTip);
 const resetControlTip = () => {
   if (!$('control-toggle').matches(':hover, :focus-visible')) delete $('control-toggle').dataset.tipDismissed;
 };
@@ -1113,6 +1122,12 @@ $('model-menu').addEventListener('keydown', (event) => {
 });
 $('model-menu').addEventListener('focusout', (event) => {
   if (event.relatedTarget && !$('model-menu').contains(event.relatedTarget) && event.relatedTarget !== $('model-button')) setModelMenu(false);
+});
+$('draft-toggle').addEventListener('click', () => {
+  const open = document.querySelector('.panel').toggleAttribute('data-drafting');
+  $('draft-toggle').textContent = open ? 'Hide draft' : 'Write a draft';
+  $('draft-toggle').setAttribute('aria-expanded', String(open));
+  if (open) $('prompt').focus();
 });
 $('welcome-action').addEventListener('click', () => {
   if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);

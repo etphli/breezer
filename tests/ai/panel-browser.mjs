@@ -2,7 +2,7 @@ import { attachmentParts } from '../../features/ai/host/attachments.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
-import { resolve, dirname, extname } from 'node:path';
+import { resolve, dirname, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
 import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
@@ -19,7 +19,7 @@ const server = createServer(async (request, response) => {
   try {
     const pathname = new URL(request.url, 'http://localhost').pathname;
     const path = resolve(root, `.${pathname}`);
-    if (!path.startsWith(`${root}/`)) throw new Error('Outside fixture root');
+    if (!path.startsWith(`${root}${sep}`)) throw new Error('Outside fixture root');
     const content = await readFile(path);
     response.setHeader('Content-Type', ({ '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png' })[extname(path)] || 'application/octet-stream');
     response.end(content);
@@ -78,9 +78,11 @@ try {
     const writing = await page.locator('#prompt').boundingBox();
     assert.ok(tip.y + tip.height <= writing.y, 'Control explanation leaves the writing area uncovered');
     const trigger = await page.locator('#control-toggle').boundingBox();
-    assert.ok(Math.abs(trigger.y - tip.y - tip.height - 8) < 1, 'Tooltip is anchored directly above Browser control');
-    const pointer = await page.locator('#control-tip').evaluate(node => parseFloat(node.style.getPropertyValue('--tip-pointer')));
-    assert.ok(Math.abs(tip.x + pointer - trigger.x - trigger.width / 2) < 1, 'Tooltip pointer follows the browser-control trigger');
+    assert.ok(tip.y + tip.height <= trigger.y, 'Control explanation sits above the permission controls');
+    const suggestion = await page.locator('[data-control="true"]').boundingBox();
+    assert.ok(tip.y >= suggestion.y + suggestion.height, 'Control explanation leaves the suggestion uncovered');
+    const sharing = await page.locator('#context-toggle').boundingBox();
+    assert.ok(sharing.x + sharing.width < trigger.x, 'Sharing and control fit side by side without overlap');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
     await page.mouse.move(1, 1);
   }
@@ -198,6 +200,7 @@ try {
   assert.equal(await page.locator('#account-instructions code').textContent(), 'claude auth login');
   for (const scheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: scheme });
+    await page.waitForFunction(scheme => document.documentElement.dataset.scheme === scheme, scheme);
     for (const width of [400, 320]) {
       await page.setViewportSize({ width, height: width === 320 ? 640 : 850 });
       const file = `sidebar-account-dialog-${scheme}${width === 320 ? '-narrow' : ''}.png`;
@@ -586,6 +589,7 @@ try {
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
   assert.match(await page.locator('#welcome-status').innerText(), /Sign in to Codex or Claude/);
   assert.equal(await page.locator('#model-label').innerText(), 'Accounts');
+  await page.getByRole('button', { name: 'Write a draft', exact: true }).click();
   await page.getByLabel('Message Breezer').fill('Hello');
   await page.getByLabel('Message Breezer').press('Enter');
   assert.equal(await page.locator('#notice').isVisible(), false);
@@ -593,6 +597,7 @@ try {
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Hello');
   assert.equal(await page.locator('#model-menu').isVisible(), true);
   await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Hide draft', exact: true }).click();
   await page.setViewportSize({ width: 320, height: 640 });
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   const signInGap = await page.evaluate(() => document.querySelector('#welcome-status').getBoundingClientRect().top - document.querySelector('#welcome h1').getBoundingClientRect().bottom);
@@ -604,6 +609,7 @@ try {
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), false, 'commands are secondary to the sign-in explanation');
   await page.getByRole('button', { name: 'Set up an account', exact: true }).click();
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), true, 'sign-in instructions remain available');
+  assert.equal(await page.locator('#prompt').isVisible(), false, 'the draft stays collapsed while signing in');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-instructions-narrow.png` });
   await page.getByRole('button', { name: 'Copy Codex sign-in command' }).click();
   await page.waitForFunction(() => window.copiedCommand === 'codex login');

@@ -10,6 +10,7 @@ import { installFixture as settingsFixture } from './settings-browser-fixture.mj
 import { installFixture as workspaceFixture, seed } from './workspace-browser-fixture.mjs';
 import { installFixture as newtabFixture, CONNECTED, NOW } from './newtab-browser-fixture.mjs';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
+import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
 import { captureStablePanel } from './ui-evidence-capture.mjs';
 
 const root = resolve('features/ai/extension');
@@ -114,11 +115,18 @@ try {
     await newtab.setViewportSize({ width: 390, height: 844 });
     await shot(newtab, 'newtab-narrow');
     const panel = await context.newPage();
-    await panel.addInitScript(installPanelFixture);
-    await panel.addInitScript(appearance => { chrome.breezerPrivate.getAppearance = async () => appearance; }, { theme, colorMode });
+    await panel.addInitScript({ content: `
+      (${installPanelFixture.toString()})();
+      (${installPanelAreaEvents.toString()})();
+      chrome.breezerPrivate.getAppearance = async () => (${JSON.stringify({ theme, colorMode })});
+    ` });
     await panel.setViewportSize({ width: 400, height: 850 });
     await panel.goto(`${base}/panel.html`);
     await panel.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+    await panel.waitForFunction(({ tone, scheme }) => {
+      const { dataset } = document.documentElement;
+      return dataset.tone === tone && dataset.scheme === scheme;
+    }, { tone: theme.startsWith('#') ? 'custom' : theme, scheme: colorMode });
     await shot(panel, 'assistant');
     await panel.setViewportSize({ width: 320, height: 640 });
     await shot(panel, 'assistant-narrow');

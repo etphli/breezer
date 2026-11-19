@@ -243,7 +243,7 @@ test('folder drops accept the row edges, preserve order and open closed destinat
     }
     await drag(page.locator('[data-key="t:3"]'), 5);
     await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces[0].pinned[0].children.some(e => e.url === 'https://github.com/etphli/breezer/pull/42'));
-    assert.equal(await folder.getAttribute('aria-expanded'), 'true');
+    await page.waitForFunction(() => document.querySelector('[data-key="f:f-design"]')?.getAttribute('aria-expanded') === 'true');
     assert.deepEqual(await page.evaluate(() => window.fx.local['workspace.v1'].spaces[0].pinned.map(n => n.id)), ['f-design', 'e-linear']);
     await drag(page.locator('[data-key="e:e-linear"]'), 6);
     await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces[0].pinned[0].children.some(e => e.id === 'e-linear'));
@@ -360,6 +360,16 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     assert.equal(await page.getByRole('treeitem', { name: 'Sidebar spec, asleep' }).count(), 1, 'unbound pinned entry is asleep');
     assert.equal(await page.locator('#collapse').isVisible(), true);
     await page.screenshot({ animations: 'disabled', path: `${evidence}/workspace-sidebar.png` });
+
+    const spaceTone = await page.locator('#sidebar').getAttribute('data-tone');
+    const changeTheme = theme => page.evaluate(async theme => {
+      window.fx.appearance.theme = theme;
+      await chrome.storage.local.set({ 'appearance.rev': Date.now() });
+    }, theme);
+    await changeTheme('#8562b9');
+    await page.waitForFunction(() => document.querySelector('#sidebar').dataset.tone === 'custom');
+    await changeTheme('mint');
+    await page.waitForFunction(tone => document.querySelector('#sidebar').dataset.tone === tone, spaceTone);
 
     // New tab joins the active space.
     await page.getByRole('button', { name: 'New tab' }).click();
