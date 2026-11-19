@@ -624,6 +624,115 @@ def _peek_replacements():
     }
 
 
+def _settings_address_replacements():
+    header = '#include "chrome/browser/ui/helium/breezer_settings_url.h"\n'
+    return {
+        "chrome/browser/ui/omnibox/chrome_omnibox_client.cc": [
+            ('#include "chrome/browser/ui/hats/hats_service_factory.h"\n',
+             '#include "chrome/browser/ui/hats/hats_service_factory.h"\n' + header),
+            ('  if (ShouldUseMinimalLocationBar() && !in_progress) {\n',
+             '  if (breezer_workspace::IsSettingsURL(GetNavigationEntryURL())) {\n'
+             '    const auto full_url = GetFormattedFullURL();\n'
+             '    // Keep the permanent text stable when a blurred draft is restored.\n'
+             '    if (edit_model && edit_model->focus_state() == OMNIBOX_FOCUS_NONE &&\n'
+             '        (!in_progress ||\n'
+             '         edit_model->GetPermanentDisplayText() != full_url) &&\n'
+             '        !GetPrefs()->GetBoolean(omnibox::kPreventUrlElisionsInOmnibox)) {\n'
+             '      return breezer_workspace::kSettingsAddressLabel;\n'
+             '    }\n'
+             '    return full_url;\n'
+             '  }\n\n'
+             '  if (ShouldUseMinimalLocationBar() && !in_progress) {\n'),
+            ('  if (GetPrefs()->GetBoolean(prefs::kHeliumMinimalLocationBar)) {\n'
+             '    location_bar_->UpdateWithoutTabRestore();\n',
+             '  if (GetPrefs()->GetBoolean(prefs::kHeliumMinimalLocationBar) ||\n'
+             '      breezer_workspace::IsSettingsURL(GetNavigationEntryURL())) {\n'
+             '    location_bar_->UpdateWithoutTabRestore();\n'),
+        ],
+        "chrome/browser/ui/views/location_bar/location_icon_state_helper.cc": [
+            ('#include "chrome/browser/extensions/extension_ui_util.h"\n',
+             '#include "chrome/browser/extensions/extension_ui_util.h"\n' + header),
+            ('  if (is_editing_or_empty) {\n'
+             '    return false;\n'
+             '  }\n\n'
+             '  // Generic MIME handler indicator:',
+             '  if (is_editing_or_empty ||\n'
+             '      breezer_workspace::IsSettingsURL(model->GetURL())) {\n'
+             '    return false;\n'
+             '  }\n\n'
+             '  // Generic MIME handler indicator:'),
+        ],
+        "chrome/browser/ui/views/location_bar/location_bar_view_browsertest.cc": [
+            ('// Ensure that middle-clicking the location icon performs a "paste and go".\n',
+             'IN_PROC_BROWSER_TEST_F(LocationBarViewBrowserTest,\n'
+             '                       BreezerSettingsAddress) {\n'
+             '  const GURL workspace_url(\n'
+             '      "chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/workspace.html");\n'
+             '  const GURL settings_url = workspace_url.Resolve("#/settings/general");\n'
+             '  ASSERT_TRUE(ui_test_utils::NavigateToURL(browser(), settings_url));\n'
+             '  auto* tab = browser()->GetTabStripModel()->GetActiveWebContents();\n'
+             '  tab->Focus();\n'
+             '  ASSERT_EQ(settings_url, tab->GetLastCommittedURL());\n'
+             '\n'
+             '  auto* location_bar = GetLocationBarView();\n'
+             '  auto* omnibox = location_bar->omnibox_view();\n'
+             '  EXPECT_EQ(u"Breezer Settings", omnibox->GetText());\n'
+             '  EXPECT_FALSE(location_bar->location_icon_view()->ShouldShowLabel());\n'
+             '\n'
+             '  const std::u16string full_url = base::UTF8ToUTF16(settings_url.spec());\n'
+             '  location_bar->FocusLocation(/*is_user_initiated=*/true,\n'
+             '                              /*clear_focus_if_failed=*/false);\n'
+             '  ASSERT_TRUE(omnibox->HasFocus());\n'
+             '  EXPECT_EQ(full_url, omnibox->GetText());\n'
+             '  omnibox->SetUserText(u"draft", /*update_popup=*/false);\n'
+             '  auto* edit_model = location_bar->GetOmniboxController()->edit_model();\n'
+             '  EXPECT_TRUE(edit_model->OnEscapeKeyPressed());\n'
+             '  EXPECT_TRUE(omnibox->HasFocus());\n'
+             '  EXPECT_EQ(full_url, omnibox->GetText());\n'
+             '  std::u16string copied_text = omnibox->GetText();\n'
+             '  GURL copied_url;\n'
+             '  bool write_url = false;\n'
+             '  edit_model->AdjustTextForCopy(0, &copied_text, &copied_url, &write_url);\n'
+             '  EXPECT_TRUE(write_url);\n'
+             '  EXPECT_EQ(settings_url, copied_url);\n'
+             '  EXPECT_EQ(full_url, copied_text);\n'
+             '\n'
+             '  omnibox->SetUserText(u"saved draft", /*update_popup=*/false);\n'
+             '  tab->Focus();\n'
+             '  auto* tab_strip = browser()->GetTabStripModel();\n'
+             '  ASSERT_TRUE(ui_test_utils::NavigateToURLWithDisposition(\n'
+             '      browser(), GURL("about:blank"),\n'
+             '      WindowOpenDisposition::NEW_FOREGROUND_TAB,\n'
+             '      ui_test_utils::BROWSER_TEST_WAIT_FOR_LOAD_STOP));\n'
+             '  tab_strip->GetActiveWebContents()->Focus();\n'
+             '  tab_strip->ActivateTabAt(tab_strip->GetIndexOfWebContents(tab));\n'
+             '  ASSERT_FALSE(omnibox->HasFocus());\n'
+             '  ASSERT_TRUE(edit_model->user_input_in_progress());\n'
+             '  omnibox->RequestFocus();\n'
+             '  EXPECT_EQ(u"saved draft", omnibox->GetText());\n'
+             '  EXPECT_TRUE(edit_model->OnEscapeKeyPressed());\n'
+             '  tab->Focus();\n'
+             '  EXPECT_EQ(u"Breezer Settings", omnibox->GetText());\n'
+             '\n'
+             '  auto* prefs = browser()->GetProfile()->GetPrefs();\n'
+             '  prefs->SetBoolean(omnibox::kPreventUrlElisionsInOmnibox, true);\n'
+             '  EXPECT_EQ(full_url, omnibox->GetText());\n'
+             '  prefs->ClearPref(omnibox::kPreventUrlElisionsInOmnibox);\n'
+             '  EXPECT_EQ(u"Breezer Settings", omnibox->GetText());\n'
+             '\n'
+             '  ASSERT_TRUE(ui_test_utils::NavigateToURL(\n'
+             '      browser(), workspace_url.Resolve("#/settings/layout")));\n'
+             '  EXPECT_EQ(u"Breezer Settings", omnibox->GetText());\n'
+             '  ASSERT_TRUE(ui_test_utils::NavigateToURL(\n'
+             '      browser(), workspace_url.Resolve("#/settingsx")));\n'
+             '  EXPECT_NE(u"Breezer Settings", omnibox->GetText());\n'
+             '  EXPECT_TRUE(location_bar->location_icon_view()->ShouldShowLabel());\n'
+             '}\n\n'
+             '// Ensure that middle-clicking the location icon performs a "paste and go".\n'),
+        ],
+    }
+
+
 def replacements():
     return sidebar_frame.merge({
         REGION: _region_replacements(),
@@ -782,6 +891,7 @@ def replacements():
         AVATAR_STATE: _avatar_replacements(),
         HIDDEN_SCROLLBAR: hidden_scrollbar_replacements(),
         HIDDEN_SCROLLBAR_HEADER: hidden_scrollbar_replacements(HIDDEN_SCROLLBAR_HEADER),
+        **_settings_address_replacements(),
         **_peek_replacements(),
         **tab_groups.replacements(),
     })
