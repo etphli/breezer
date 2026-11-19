@@ -1,17 +1,20 @@
 const TAB_REQUESTS = [
-  /^(?:how many|what|which) (?:browser |open )?tabs(?: (?:do )?i (?:currently )?have(?: open)?| are (?:currently )?open)?$/,
+  /^(?:how many|what|which) (?:browser |open )?tabs(?: (?:do )?i (?:currently )?have(?: open)?| have i got open| are (?:currently )?open)?$/,
   /^what are (?:all )?(?:my |the )?(?:open |browser )?tabs$/,
   /^(?:count|list|show(?: me)?|tell me) (?:all )?(?:my |the )?(?:(?:currently )?open |browser )?tabs(?: (?:i have|that are) open)?$/,
+  /^(?:show(?: me)?|give me) (?:a )?list of (?:all )?(?:my |the )?(?:(?:currently )?open |browser )?tabs$/,
   /^(?:(?:show(?: me)?|check|what(?: is|'s)) )?(?:my |the )?(?:current |open )?tab (?:count|list)$/,
 ];
 
-const MEMORY_SUBJECT = '(?:breezer|(?:my|this|the) (?:browser|tab|mac|computer|device|system)|(?:my |the )?(?:open )?tabs)';
+const MEMORY_SUBJECT = '(?:breezer|(?:my|this|the) (?:browser|tab|mac|pc|computer|device|system)|(?:my |the )?(?:open )?tabs)';
 const MEMORY_REQUESTS = [
   /^how much (?:of my )?(?:ram|memory) (?:(?:do )?i have(?: left| free| available| total)?|is (?:available|free|left|(?:being )?used|in use))$/,
   new RegExp(`^how much (?:ram|memory) (?:(?:is|are|do|does) ${MEMORY_SUBJECT} (?:using|use|have)|${MEMORY_SUBJECT} (?:is|are) using)$`),
+  new RegExp(`^how much (?:ram|memory) is (?:being )?used by ${MEMORY_SUBJECT}$`),
   /^(?:what(?: is|'s) |(?:what|which) (?:of my |browser )?tabs? (?:is |are )?)(?:uses?|using(?: up)?|eating(?: up)?|taking up|hogging|consuming) (?:all (?:of )?|most of |(?:the )?most |so much )?(?:my |the )?(?:ram|memory)$/,
   /^(?:(?:show(?: me)?|check|tell me|what(?: is|'s) my) )?(?:my |the )?(?:current )?(?:system |browser |tab )?(?:ram|memory) (?:usage|stats)(?: by tab)?$/,
   /^(?:(?:show(?: me)?|check|tell me|what(?: is|'s)) )?(?:my |the )?(?:available|free|total|used|installed) (?:system )?(?:ram|memory)$/,
+  /^which of (?:my |the )?(?:open )?tabs? (?:is |are )?(?:us(?:e|ing)|tak(?:es?|ing) up|consum(?:es?|ing)) (?:the )?most (?:ram|memory)$/,
 ];
 
 function asksAboutTabs(request) {
@@ -22,12 +25,13 @@ function asksAboutTabs(request) {
 function asksForStats(request) {
   const parts = request.split(/,? and /).map(part => part
     .replace(/^(?:show(?: me)?|tell me) (?=(?:how much|how many|what|which) )/, '')
-    .replace(/ (?:right now|currently|at the moment)$/, ''));
+    .replace(/ (?:right now|currently|at the moment)$/, '')
+    .replace(/ (?:compared to|vs\.?|versus) (?:my|the|this) (?:computer|system|mac|pc|browser)$/, ''));
   const startsWithTabs = asksAboutTabs(parts[0]);
   return parts.every((part, index) => {
-    const memory = part.replace(/ on (?:my|this) (?:mac|computer|device|system)$/, '');
+    const memory = part.replace(/ on (?:(?:my|this) (?:mac|pc|computer|device|system)|windows|macos)$/, '');
     return asksAboutTabs(part) || MEMORY_REQUESTS.some(pattern => pattern.test(memory)) ||
-      (index === 1 && startsWithTabs && /^how much (?:ram|memory) are they using$/.test(part));
+      (index === 1 && startsWithTabs && /^(?:how much (?:ram|memory) are they using|which (?:one|ones) (?:uses?|(?:is|are) using|takes? up) (?:the )?most (?:ram|memory))$/.test(part));
   });
 }
 
@@ -43,8 +47,11 @@ const BROWSER_DESIGN = new RegExp(
   `(?:${BROWSER}(?:'s)? ${DESIGN}|${DESIGN} for (?:my |the |this )?${BROWSER})` +
   `(?: (?:to|with|from|using|based on|inspired by|that|like) .+)?$`,
 );
-const GIVE_BROWSER_DESIGN = new RegExp(`^give (?:my |the |this )?${BROWSER} (?:a |an )?${STYLE_WORDS}${DESIGN}$`);
-const SHORT_THEME = new RegExp(`^(?:${CREATE_DESIGN} (?:me )?|give me )(?:a|an) ${STYLE_WORDS}theme(?: with .+)?$`);
+const GIVE_BROWSER_DESIGN = new RegExp(`^give (?:my |the |this )?${BROWSER} (?:a |an )?${STYLE_WORDS}${DESIGN}(?: with .+)?$`);
+const THEME_DESCRIPTION = String.raw`(?:(?!(?:on|about|for|of|to|with)\b)[\w-]+ ){0,8}`;
+const SHORT_THEME = new RegExp(`^(?:${CREATE_DESIGN} (?:me )?|give me |i'd like )(?:a|an) ${THEME_DESCRIPTION}theme(?: (?:with|that|like|inspired by|based on) .+)?$`);
+const COLOR_WORD = '(?:dark|light|warm|cool|soft|muted|pastel|deep|bright|black|white|grey|gray|red|orange|yellow|green|blue|navy|teal|turquoise|cyan|pink|purple|violet|lavender|magenta|brown|beige|charcoal|gold|silver)';
+const BROWSER_COLOR = new RegExp(`^make (?:my |the |this )?${BROWSER} ${COLOR_WORD}(?:[ -]${COLOR_WORD}){0,3}$`);
 const PROJECT_DESIGN = /\b(?:(?:app|website|site|blog|game|react|vue|angular|shopify|wordpress) theme|(?:in|for|on) (?:[\w-]+ ){0,3}(?:app|website|site|blog|game|component|project|react|vue|angular|shopify|wordpress))\b/;
 const IMAGE_DESIGN = new RegExp(
   `^(?:(?:${DESIGN_ACTION} (?:me )?(?:a |an |my |the )?(?:${DESIGN}|palette)|theme) (?:from|based on|using) ${IMAGE}|` +
@@ -61,7 +68,7 @@ export function detectBrowserTask(text, context = {}) {
 
   if (asksForStats(request)) return 'stats';
   if (PROJECT_DESIGN.test(request)) return '';
-  if (SHORT_THEME.test(request) || BROWSER_DESIGN.test(request) || GIVE_BROWSER_DESIGN.test(request) ||
+  if (SHORT_THEME.test(request) || BROWSER_DESIGN.test(request) || GIVE_BROWSER_DESIGN.test(request) || BROWSER_COLOR.test(request) ||
       (IMAGE_DESIGN.test(request) && context.hasImage) || (THEME_REVISION.test(request) && context.hasTheme)) return 'theme';
   return '';
 }

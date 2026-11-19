@@ -93,7 +93,7 @@ test('worker sends only explicit sources, without active-page screenshot or debu
   assert.match(fake.native.sent.at(-1).error, /control is off/);
 });
 
-for (const kind of ['navigation', 'closed', 'active-tab', 'cancel', 'hidden', 'panel-close']) test(`worker stops research on ${kind} and rejects late capture`, async () => {
+for (const kind of ['navigation', 'closed', 'active-tab', 'cancel', 'hidden', 'panel-close']) test(`research revokes future capture on ${kind}`, async () => {
   const fake = await worker();
   await send(fake);
   if (kind === 'navigation') fake.api.tabs.onUpdated.emit(7, { status: 'loading' }, { active: false });
@@ -103,11 +103,23 @@ for (const kind of ['navigation', 'closed', 'active-tab', 'cancel', 'hidden', 'p
   if (kind === 'panel-close') fake.api.sidePanel.onClosed.emit({ windowId: 3 });
   if (kind === 'hidden') fake.port.onMessage.emit({ type: 'visibility', visible: false });
   await tick();
-  assert.ok(fake.native.sent.some(message => message.type === 'cancel'));
+  assert.equal(fake.native.sent.some(message => message.type === 'cancel'), kind === 'cancel');
   const count = fake.native.sent.filter(message => message.type === 'chat').length;
   fake.port.onMessage.emit({ ...chat(sources), includeContext: false });
   await tick(); await tick();
   assert.equal(fake.native.sent.filter(message => message.type === 'chat').length, count);
+});
+
+test('closing the panel before selected-source validation finishes prevents provider dispatch', async () => {
+  const fake = await worker();
+  const pending = [];
+  fake.api.tabs.get = id => new Promise(resolve => pending.push(() => resolve({ id, windowId: 3, url: selected.find(source => source.tabId === id).expectedUrl })));
+  await send(fake);
+  assert.equal(pending.length, selected.length);
+  fake.api.sidePanel.onClosed.emit({ windowId: 3 });
+  pending.forEach(resolve => resolve());
+  await tick();
+  assert.equal(fake.native.sent.some(message => message.type === 'chat'), false);
 });
 
 test('untrusted extension ports cannot submit sources', async () => {

@@ -622,12 +622,12 @@ try {
   await studio.getByRole('button', { name: 'Browser tools' }).click();
   await studio.screenshot({ path: `${evidence}/sidebar-browser-tools.png` });
   await studio.getByRole('button', { name: 'Close browser tools' }).click();
-  await studio.getByLabel('Message Breezer').fill('How many tabs are open and how much RAM are they using?');
+  await studio.getByLabel('Message Breezer').fill('What browser tabs are open and which one uses the most RAM?');
   await studio.getByRole('button', { name: 'Clear Browser stats' }).waitFor();
   await studio.getByRole('button', { name: 'Clear Browser stats' }).click();
   assert.equal(await studio.locator('#context-toggle').isVisible(), true, 'dismissing inferred stats restores the ordinary composer');
   await studio.getByLabel('Message Breezer').fill('');
-  await studio.getByLabel('Message Breezer').fill('How many tabs are open and how much RAM are they using?');
+  await studio.getByLabel('Message Breezer').fill('What browser tabs are open and which one uses the most RAM?');
   await studio.getByRole('button', { name: 'Clear Browser stats' }).waitFor();
   await studio.getByRole('button', { name: 'Send message', exact: true }).click();
   const statsChat = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
@@ -635,10 +635,21 @@ try {
   assert.equal(statsChat.includeContext, false);
   assert.equal(statsChat.control, false);
   await studio.evaluate(id => {
-    window.emit({ type: 'delta', id, text: 'There are 4 tabs. The 3 loaded tabs use two renderer processes.' });
+    window.emit({ type: 'browser-stats', id, stats: {
+      windowTabCount: 3, totalTabCount: 4,
+      browserMemory: { footprintBytes: 512 * 1024 ** 2, sampleComplete: true },
+      systemMemory: { availableBytes: 2 * 1024 ** 3, totalBytes: 8 * 1024 ** 3 },
+    } });
+  }, statsChat.id);
+  const stats = studio.locator('.browser-stats');
+  assert.deepEqual(await stats.locator('dt').allTextContents(), ['Tabs in this window', 'Tabs in all regular windows', 'Breezer memory', 'System RAM available']);
+  assert.deepEqual(await stats.locator('dd').allTextContents(), ['3', '4', '512 MiB', '2 GiB of 8 GiB']);
+  await studio.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-measured-browser-stats.png` });
+  await studio.evaluate(id => {
+    window.emit({ type: 'delta', id, text: 'The 3 tabs in this window use two renderer processes.' });
     window.emit({ type: 'complete', id });
   }, statsChat.id);
-  await studio.getByText('There are 4 tabs.', { exact: false }).waitFor();
+  await studio.getByText('The 3 tabs in this window', { exact: false }).waitFor();
   const ordinaryPaste = await studio.evaluate(async () => {
     const prompt = document.getElementById('prompt');
     const text = new DataTransfer();
@@ -719,6 +730,27 @@ try {
   await studio.getByRole('button', { name: 'Browser tools' }).click();
   await studio.getByRole('dialog', { name: 'Browser tools' }).getByRole('button', { name: 'Restore previous look' }).click();
   await studio.waitForFunction(() => window.testAppearance.theme === 'mint');
+  await studio.getByRole('button', { name: 'Close browser tools' }).click();
+  await studio.getByLabel('Message Breezer').fill('Make my browser dark purple');
+  await studio.getByRole('button', { name: 'Clear Theme design' }).waitFor();
+  await studio.getByRole('button', { name: 'Send message', exact: true }).click();
+  const resumed = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
+  await studio.locator('#close-panel').click();
+  assert.equal(await studio.evaluate(id => window.sent.some(message => message.type === 'cancel' && message.id === id), resumed.id), false);
+  await studio.reload();
+  await studio.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  await studio.evaluate(({ id, message, browserTask }) => window.emit({
+    type: 'turn-state', id, user: { id, role: 'user', text: message }, text: 'A dark purple', browserTask,
+  }), resumed);
+  await studio.getByText('A dark purple', { exact: true }).waitFor();
+  await studio.getByRole('button', { name: 'Stop response', exact: true }).waitFor();
+  await studio.evaluate(id => {
+    window.emit({ type: 'delta', id, text: ' palette.' });
+    window.emit({ type: 'complete', id, themeProposal: { name: 'Blackberry', theme: '#39255a', colorMode: 'dark' } });
+  }, resumed.id);
+  await studio.getByText('A dark purple palette.', { exact: true }).waitFor();
+  await studio.getByText('Blackberry', { exact: true }).waitFor();
+  await studio.waitForFunction(id => window.sent.some(message => message.type === 'turn-saved' && message.id === id), resumed.id);
   await studio.close();
   console.log('PASS: file picker, drop, removal, unsupported/oversize errors, image decoding, attachment-only send, retry restoration and follow-up history; real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);

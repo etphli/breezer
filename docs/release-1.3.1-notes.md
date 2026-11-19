@@ -1,5 +1,11 @@
 # Breezer 1.3.1 draft notes
 
+## Breezer AI
+
+Ask for a theme in plain language, such as “Make my browser dark purple,” then apply the preview when you're ready. Ask about tabs or memory to see measured tab totals for this window and all regular windows, with Breezer memory shown separately from system RAM. Read-only replies keep running when you close the sidebar or switch tabs or windows. Reopen the sidebar in the original window to see the reply.
+
+Before publishing, run `node tests/ai/browser-stats-native.mjs <Breezer executable>` on the macOS and Windows candidates. In a disposable profile, send natural-language theme and stats requests through the side panel, close and reopen it during a reply, and verify that the reply resumes. Verify that a browser-control turn still stops when you leave its tab.
+
 ## Password sign-in
 
 Press Enter in the password field to submit more two-field sign-in forms that have no submit button. This includes forms that group their username and password fields for autofill or mark the username field for passkeys. The sign-in form still runs its normal validation and submit handlers.

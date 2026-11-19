@@ -108,6 +108,7 @@ test('keeps navigation, research and coding requests in ordinary chat', () => {
     'Make me a charcoal theme with purple accents for my website.',
     'Make a browser theme with colors for my website.',
     'Make a tutorial on browser themes.',
+    'Make a tutorial on browser theme.',
     'Make a color scheme from this image for my site.',
     'What colors are in this image?',
     'Use this as my profile photo.',
@@ -118,4 +119,26 @@ test('keeps navigation, research and coding requests in ordinary chat', () => {
   ]) {
     assert.equal(detectBrowserTask(prompt, { hasImage: true }), '', prompt);
   }
+});
+
+test('recognizes conversational requests about this browser', () => {
+  for (const prompt of [
+    'Show me a list of my open tabs',
+    'What browser tabs are open and which one uses the most RAM?',
+    'How much RAM is my browser using on Windows?',
+    'How much RAM is being used by the browser?',
+    'How much RAM is Breezer using compared to my computer?',
+    'Which of my tabs is taking up the most memory?',
+    'How many tabs have I got open?',
+    'Can you show me what tabs I have open?',
+  ]) assert.equal(detectBrowserTask(prompt), 'stats', prompt);
+
+  for (const prompt of [
+    'Make my browser dark purple',
+    'I’d like a Breezer theme with an animated night sky.',
+    'Make me a really dark blue and purple theme',
+    'Create a theme that looks like a forest at night',
+    'Set my New Tab wallpaper to a rainy forest.',
+    'Give Breezer a purple theme with animated stars.',
+  ]) assert.equal(detectBrowserTask(prompt), 'theme', prompt);
 });

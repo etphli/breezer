@@ -413,6 +413,7 @@ function appendMessage(message) {
     article.append(prompt);
   } else article.append(body);
   if (message.themeProposal) themeCards.add(renderThemeProposal(article, message.themeProposal));
+  if (message.stats) renderStats(body, message.stats);
   if (message.attachments?.length) {
     const files = document.createElement('div');
     files.className = 'message-meta';
@@ -431,6 +432,37 @@ function appendMessage(message) {
   messageNodes.set(message.id, body);
   $('welcome').hidden = true;
   return body;
+}
+
+function renderStats(body, { windowTabCount, totalTabCount, browserMemory, systemMemory }) {
+  const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 });
+  const count = value => value === null ? 'Unavailable' : number.format(value);
+  const memory = bytes => {
+    if (bytes === null) return 'Unavailable';
+    const unit = bytes >= 1024 ** 3 ? 'GiB' : 'MiB';
+    return `${number.format(bytes / 1024 ** (unit === 'GiB' ? 3 : 2))} ${unit}`;
+  };
+  const footprint = browserMemory.footprintBytes;
+  const available = systemMemory.availableBytes;
+  const total = systemMemory.totalBytes;
+  const rows = [
+    ['Tabs in this window', count(windowTabCount)],
+    ['Tabs in all regular windows', count(totalTabCount)],
+    ['Breezer memory', memory(footprint) + (footprint !== null && !browserMemory.sampleComplete ? ' (partial)' : '')],
+    ['System RAM available', available !== null && total !== null ? `${memory(available)} of ${memory(total)}` : memory(available)],
+  ];
+  if (available === null && total !== null) rows.push(['System RAM total', memory(total)]);
+  const stats = document.createElement('dl');
+  stats.className = 'browser-stats';
+  stats.setAttribute('aria-label', 'Measured browser stats');
+  for (const [label, value] of rows) {
+    const term = document.createElement('dt');
+    term.textContent = label;
+    const detail = document.createElement('dd');
+    detail.textContent = value;
+    stats.append(term, detail);
+  }
+  body.before(stats);
 }
 
 function selectText(element) {
@@ -549,9 +581,11 @@ function requestHistory() {
   }).reverse();
 }
 
-function saveConversation() {
+function saveConversation(completedId) {
   const messages = recentMessages(60);
-  return chrome.storage.session.set({ [state.sessionKey]: messages }).catch(() => {});
+  return chrome.storage.session.set({ [state.sessionKey]: messages }).then(() => {
+    if (completedId && state.port) post({ type: 'turn-saved', id: completedId });
+  }).catch(() => {});
 }
 
 function scrollToBottom() {
@@ -617,7 +651,7 @@ function activityLabel(label) {
   $('activity-label').textContent = sharing ? `${sharing} · ${label}` : label;
 }
 
-function finish(label, keepControl = false) {
+function finish(label, keepControl = false, completedId) {
   if (state.running) {
     state.running.renderer?.dispose();
     state.running.renderer = null;
@@ -639,7 +673,7 @@ function finish(label, keepControl = false) {
   if (!keepControl) setControl(false);
   $('activity').hidden = true;
   updateControls();
-  saveConversation();
+  saveConversation(completedId);
   // The stop button turns into a disabled send button; keep keyboard focus in the composer.
   if (document.activeElement === $('send') || document.activeElement === document.body) $('prompt').focus();
 }
@@ -649,16 +683,16 @@ function stop() {
   const run = state.running;
   const replied = Boolean(state.messages.find((item) => item.id === run.assistantId)?.text);
   post({ type: 'cancel', id: run.id });
-  finish('Stopped.');
+  finish('Stopped.', false, run.submitted && !run.control ? run.id : undefined);
   if (!replied) offerRetry(run, false);
 }
 
 // The reason is shown in the reply itself, so it is only announced, not repeated in the notice bar.
-function fail(reason, label) {
+function fail(reason, label, completedId) {
   const run = state.running;
   notify('');
   $('announcer').textContent = label;
-  finish(label);
+  finish(label, false, completedId);
   const body = run && messageNodes.get(run.assistantId);
   if (body && reason && !label.includes(reason)) {
     const details = document.createElement('details');
@@ -697,6 +731,9 @@ async function send() {
     return;
   }
   const browserTask = draftBrowserTask();
+  const includeContext = !browserTask && !research.size && state.includeContext;
+  const control = !browserTask && !research.size && state.control;
+  const tabId = state.page?.tabId;
   const text = $('prompt').value.trim() || (state.attachments.length ? 'Review the attached files.' : '');
   const selected = selectedModel();
   if (text && !selected) {
@@ -727,7 +764,7 @@ async function send() {
   appendMessage(userMessage);
   appendMessage(assistantMessage);
   state.running = {
-    id, assistantId, browserTask, control: !browserTask && state.control,
+    id, assistantId, browserTask, control,
     ...(browserTask === 'theme' ? { themeImages: themeReferenceImages(state.attachments, history).map(file => file.image) } : {}),
     // Resolve once while messages only append; retain first-match behavior for duplicate IDs.
     message: state.messages.find((item) => item.id === assistantId),
@@ -759,7 +796,7 @@ async function send() {
       if (state.running?.id === id) fail(error.message, `Could not read selected sources. ${error.message}`);
       return;
     }
-  } else if (!browserTask && (state.includeContext || state.control)) {
+  } else if (includeContext || control) {
     try {
       const allowed = await chrome.breezerPrivate.authorizeCurrentPage();
       if (!allowed) throw new Error('Page access is only available on ordinary HTTP or HTTPS web pages.');
@@ -775,23 +812,67 @@ async function send() {
     ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
     ...(selected.provider.id === 'codex' ? { speed: settings.speed } : {}),
     message: text, attachments: userMessage.attachments, history, profile: state.profile,
-    includeContext: !browserTask && !sources && state.includeContext, control: !browserTask && !sources && state.control,
+    contextTitle: userMessage.contextTitle, includeContext, control,
+    ...(includeContext || control ? { tabId } : {}),
     ...(browserTask ? { browserTask } : {}),
     ...(sources ? { researchSources: sources } : {}),
   });
+  if (sent && state.running?.id === id) state.running.submitted = true;
   if (!sent) offerRetry({ id, assistantId, browserTask, control: false });
 }
 
+function restoreTurn({ id, user, text, browserTask, terminal, themeImage, stats }) {
+  const assistantId = `${id}-reply`;
+  if (state.running?.id === id) {
+    if (stats) receive({ type: 'browser-stats', id, stats });
+    state.running.message.text = text;
+    renderDelta();
+  } else {
+    if (state.running) return;
+    if (messageNodes.has(assistantId)) {
+      if (terminal) post({ type: 'turn-saved', id });
+      return;
+    }
+    const message = { id: assistantId, role: 'assistant', text: '', citations: user.sourceMetadata, stats };
+    if (!messageNodes.has(id)) {
+      state.messages.push(user);
+      appendMessage(user);
+    }
+    state.messages.push(message);
+    appendMessage(message);
+    message.text = text;
+    setControl(false);
+    state.running = { id, assistantId, browserTask, control: false, submitted: true, message };
+    $('activity').hidden = false;
+    activityLabel('Thinking');
+    updateControls();
+    if (text && !terminal) renderDelta();
+    scrollToBottom();
+  }
+  if (terminal) receive({ ...terminal, themeImage });
+}
+
 function receive(message) {
-  if (message.type === 'research-invalidated') { research.invalidate(message.tabId, message.reason); return; }
+  if (message.type === 'turn-state') return restoreTurn(message);
+  if (message.type === 'research-invalidated') { research.invalidate(message.tabId, message.reason, !state.running?.submitted); return; }
   if (message.type === 'status') return acceptProviders(message.providers);
   if (message.type === 'context') return setPage(message.context);
   if (message.id && message.id !== state.running?.id) return;
-  if (message.type === 'error') {
+  if (message.type === 'browser-stats' && state.running && !state.running.message.stats) {
+    state.running.message.stats = message.stats;
+    renderStats(messageNodes.get(state.running.assistantId), message.stats);
+    scrollToBottom();
+  } else if (message.type === 'error') {
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
     if (!state.running) return notify(reason);
-    fail(reason, message.source === 'browser-control' ? 'Browser control stopped.' : providerFailureSummary(reason));
+    const completedId = state.running.submitted && !state.running.control ? message.id : undefined;
+    if (message.source === 'theme') {
+      state.running.message.text = '';
+      fail(reason, reason, completedId);
+    } else {
+      fail(reason, message.source === 'browser-control' ? 'Browser control stopped.' : providerFailureSummary(reason), completedId);
+    }
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
     reply.text += message.text || '';
@@ -799,21 +880,23 @@ function receive(message) {
   } else if (message.type === 'complete') {
     const run = state.running;
     if (!run) return;
+    const completedId = run.submitted && !run.control ? run.id : undefined;
     const empty = run && !run.message.text;
     if (!message.cancelled && run.browserTask === 'theme' && message.themeProposal) {
       try {
         const { name, theme, colorMode, html, imageAttachment } = message.themeProposal;
-        const image = run.themeImages[imageAttachment - 1];
+        const image = message.themeImage ?? run.themeImages?.[imageAttachment - 1];
         if (imageAttachment !== undefined && (!Number.isInteger(imageAttachment) || !image)) {
           throw new Error('This theme referred to an image that wasn’t attached.');
         }
         run.message.themeProposal = normalizeThemeProposal({ name, theme, colorMode, html, image });
       }
-      catch (error) { return fail(error.message, 'Breezer could not preview this theme.'); }
+      catch (error) { return fail(error.message, 'Breezer could not preview this theme.', completedId); }
     }
     const hasPreview = Boolean(run.message?.themeProposal);
-    finish(message.cancelled ? 'Stopped.' : hasPreview ? 'Theme ready to preview.' : 'The provider returned no response.', !message.cancelled);
-    if (empty && !message.cancelled && !hasPreview) offerRetry(run);
+    const hasResult = hasPreview || Boolean(run.message.stats);
+    finish(message.cancelled ? 'Stopped.' : hasPreview ? 'Theme ready to preview.' : hasResult ? 'Browser stats measured.' : 'The provider returned no response.', !message.cancelled, completedId);
+    if (empty && !message.cancelled && !hasResult) offerRetry(run);
   }
   else if (message.type === 'activity' && state.running) {
     $('activity').hidden = !message.active;
@@ -906,7 +989,7 @@ $('prompt').addEventListener('keydown', (event) => {
   }
 });
 $('close-panel').addEventListener('click', async () => {
-  stop();
+  if (state.running?.control) stop();
   try { await chrome.sidePanel.close({ windowId: state.windowId }); }
   catch (error) { notify(error.message); }
 });
@@ -1009,6 +1092,7 @@ $('new-chat').addEventListener('click', () => {
   notify('');
   updateControls();
   saveConversation();
+  post({ type: 'clear-turn' });
   post({ type: 'context' });
   $('prompt').focus();
 });
@@ -1077,7 +1161,11 @@ document.addEventListener('keydown', (event) => {
 });
 document.addEventListener('visibilitychange', () => {
   if (state.port) post({ type: 'visibility', visible: !document.hidden });
-  if (document.hidden) { stop(); research.clear(); }
+  if (document.hidden) {
+    if (state.running?.control) stop();
+    setControl(false);
+    research.clear(undefined, !state.running?.submitted);
+  }
   else if (state.port) { revealPanel(); post({ type: 'context' }); }
 });
 $('open-profile').addEventListener('click', () => {
