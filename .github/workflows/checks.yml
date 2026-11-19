@@ -110,7 +110,14 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npx playwright install chromium ${BROWSER_INSTALL_OPTION:+"$BROWSER_INSTALL_OPTION"}
-          if ! node --input-type=module -e "import { chromium } from 'playwright'; await (await chromium.launch()).close();"; then
+          if ! node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          await (await chromium.launch()).close();
+          if (!process.env.BROWSER_INSTALL_OPTION) {
+            await (await chromium.launch({ channel: 'chromium' })).close();
+          }
+          JS
+          then
             npx playwright install-deps chromium
           fi
       - name: Verify sidebar and visible browser control
