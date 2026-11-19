@@ -10,6 +10,10 @@ Before publishing, run `node tests/ai/browser-stats-native.mjs <Breezer executab
 
 Breezer saves one still of your animated theme's opening frame. The still stays visible while the live artwork loads. Breezer unloads the animation when the tab is hidden and restarts it when you return.
 
+## Organato on Mac
+
+The New Tab card leaves room for your background when the AI sidebar is open in fullscreen. The card stays in place when you open several new tabs quickly.
+
 ## Password sign-in
 
 Press Enter in the password field to submit more two-field sign-in forms that have no submit button. This includes forms that group their username and password fields for autofill or mark the username field for passkeys. The sign-in form still runs its normal validation and submit handlers.
