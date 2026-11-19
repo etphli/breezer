@@ -115,7 +115,7 @@ def brand_icons(tree):
 def apply_import_patch(tree):
     patch = ROOT / "features/passwords/native-ui/windows-import.patch"
     patch_data = patch.read_text(encoding="utf-8").encode("utf-8")
-    command = ["git", "apply", "--whitespace=nowarn"]
+    command = ["git", "-c", "core.autocrlf=false", "apply", "--whitespace=nowarn"]
     env = {**os.environ, "GIT_CEILING_DIRECTORIES": str(tree.parent)}
     if subprocess.run([*command, "--reverse", "--check", "-"], cwd=tree,
                       input=patch_data, env=env, capture_output=True).returncode != 0:
