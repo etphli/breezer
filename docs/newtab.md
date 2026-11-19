@@ -161,7 +161,11 @@ The background contract above is unchanged; the page combines the arrays in
   three files makes 23, so the GRIT reservation must grow before
   `apply_breezer_ai.py` will accept them.
 - Favicons come from the extension's `/_favicon/` endpoint (the manifest already
-  has the `favicon` permission). If it fails, a serif monogram stays in place.
+  has the `favicon` permission). New Tab renders shortcuts as soon as the
+  browser returns the site list while Organato loads separately. It keeps
+  up to eight rendered icons for 15 minutes in browser-session storage.
+  The current site list and shortcut preferences still decide what appears.
+  If an icon fails to load, its monogram stays in place.
 - Organato's `kind: 'todo'` items map to `todos`. How exams and assignments
   are told apart (for example `classification: 'checkpoint'`) is Main's choice;
   overlap between the arrays is harmless because the page merges by `id`.

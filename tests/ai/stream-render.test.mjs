@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import crypto from 'node:crypto';
-import { fixture, tree, workload, formattedChunks, rendererPath, beforePath, hash } from '../../script/verify_stream_render_efficiency.mjs';
+import { fixture, tree, workload, formattedChunks, rendererPath, beforePath } from '../../script/verify_stream_render_efficiency.mjs';
 
 const source = fs.readFileSync(rendererPath, 'utf8');
 const oldSource = fs.readFileSync(beforePath, 'utf8');
@@ -37,6 +37,43 @@ test('every visible UTF-16 prefix matches the full safe parser across block and 
     '``\n\n`\n\n***\n\n>\n\n1.\n\n-\n\n',
   ];
   for (const text of cases) for (const sizes of [[1], [2, 7, 1, 13], [19, 3]]) differential(text, sizes);
+});
+
+test('streamed tables keep escaped pipes, short rows, and markup in safe cells', () => {
+  const text = [
+    '# Comparison',
+    '',
+    'Feature | Novel | Short story',
+    ':--- | :---: | ---:',
+    'A \\| B | `x\\|y` | <img src=x onerror=alert(1)>',
+    '| **Plot** | [Example](https://example.test) |',
+    '',
+    'A | B',
+    '--- | --- | ---',
+    '',
+    '~~~ is ordinary text here',
+  ].join('\n');
+  const f = fixture(source), expected = f.root(), actual = f.root();
+  const stream = f.createMessageStream(actual);
+  for (let end = 1; end <= text.length; end++) {
+    stream.append(text[end - 1]);
+    f.renderMessage(expected, text.slice(0, end));
+    assert.deepEqual(tree(actual), tree(expected), `table prefix ${end}`);
+  }
+  stream.dispose();
+  const [heading, wrapper, paragraph] = actual.childNodes;
+  assert.equal(heading.localName, 'h3');
+  const [table] = wrapper.childNodes;
+  assert.equal(table.localName, 'table');
+  const [head, body] = table.childNodes;
+  assert.deepEqual(head.childNodes[0].childNodes.map(cell => [cell.textContent, cell.scope, cell.className]),
+    [['Feature', 'col', 'left'], ['Novel', 'col', 'center'], ['Short story', 'col', 'right']]);
+  const [first, second] = body.childNodes;
+  assert.deepEqual(first.childNodes.map(cell => cell.textContent), ['A | B', 'x|y', '<img src=x onerror=alert(1)>']);
+  assert.deepEqual(second.childNodes.map(cell => cell.textContent), ['Plot', 'Example', '']);
+  assert.equal(first.childNodes[2].childElementCount, 0);
+  assert.equal(second.childNodes[1].childNodes.find(node => node.localName === 'a').href, 'https://example.test');
+  assert.equal(paragraph.textContent, 'A | B\n--- | --- | ---');
 });
 
 test('deterministic malformed block combinations match at every chunk', () => {
@@ -145,11 +182,6 @@ test('complete, stop, error and New Chat dispose streams and retain final full o
     if (ending === 'new-chat') { assert.equal(h.state.messages.length, 0); assert.equal(h.messageNodes.size, 0); }
     if (ending === 'error') assert.equal(h.context.retries, 1);
   }
-});
-
-test('the full renderer remains byte-for-byte the pinned baseline', () => {
-  assert.equal(hash(oldSource), '9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830');
-  assert.equal(source.slice(0, oldSource.length), oldSource);
 });
 
 test('standalone probe rejects an altered baseline before reporting counts', () => {

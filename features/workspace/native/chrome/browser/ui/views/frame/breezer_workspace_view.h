@@ -14,6 +14,7 @@
 #include "base/values.h"
 #include "chrome/browser/ui/tabs/tab_strip_user_gesture_details.h"
 #include "chrome/browser/ui/views/extensions/extension_view_views.h"
+#include "content/public/browser/web_contents_observer.h"
 #include "extensions/browser/extension_host_registry.h"
 #include "extensions/browser/extension_registry.h"
 #include "extensions/browser/extension_registry_observer.h"
@@ -22,6 +23,10 @@
 #include "ui/views/view.h"
 
 class BrowserWindowInterface;
+
+namespace content {
+class RenderFrameHost;
+}  // namespace content
 
 namespace extensions {
 class ExtensionHost;
@@ -44,7 +49,8 @@ class BreezerWorkspaceView final
     : public views::View,
       public ExtensionViewViews::Observer,
       public extensions::ExtensionHostRegistry::Observer,
-      public extensions::ExtensionRegistryObserver {
+      public extensions::ExtensionRegistryObserver,
+      private content::WebContentsObserver {
   METADATA_HEADER(BreezerWorkspaceView, views::View)
 
  public:
@@ -78,6 +84,7 @@ class BreezerWorkspaceView final
 
   // views::View:
   void OnBoundsChanged(const gfx::Rect& previous_bounds) override;
+  void OnThemeChanged() override;
 
   // Call before removing this view while code inside the document may still be
   // running (for example a layout change requested by the document). The host
@@ -95,6 +102,8 @@ class BreezerWorkspaceView final
   // Push the current band and corners to the document.
   void UpdateTitlebarArea();
   void UpdateCornerRadii();
+  content::RenderFrameHost* GetSidebarFrame() const;
+  void UpdateToolbarBackground();
   void HandleCloseExtensionHost(extensions::ExtensionHost* host);
   void OnNumberedTabResult(int index,
                           TabStripUserGestureDetails gesture,
@@ -102,6 +111,9 @@ class BreezerWorkspaceView final
 
   // ExtensionViewViews::Observer:
   void OnViewDestroying() override;
+
+  // content::WebContentsObserver:
+  void PrimaryMainDocumentElementAvailable() override;
 
   // extensions::ExtensionHostRegistry::Observer:
   void OnExtensionHostRenderProcessGone(

@@ -10,6 +10,8 @@ Codex also has a Standard / Fast menu. Standard is the initial setting. Fast use
 
 The profile button edits your name and personal context. These are saved in this browser and included with messages to the chosen provider. Conversation history is kept in browser session storage per window. It is not synced or retained after the browser session ends.
 
+Hover or tab to a sent prompt and use its copy icon to reuse the text. Markdown tables in responses keep their rows and columns. Scroll inside a table when it is wider than the sidebar.
+
 Enter sends and Shift+Enter adds a line. The hint beside the page chip says what the next message shares: the page and a screenshot, the page with browser control, nothing, or that the current tab is not a web page. When no model is connected or the tab has no web page, the empty conversation says so and offers the next step. A reply that fails, or is stopped before any text arrives, shows the reason in place with **Edit and resend**. That button only puts the original message back in the composer; it never sends by itself, and browser control stays off until you turn it on again.
 
 ## File review
@@ -48,9 +50,9 @@ Normal page questions use Chromium's `activeTab` permission granted by explicitl
 
 ## Google Docs editor input
 
-On HTTPS Google Docs document edit pages, a recognized canvas editor appears as **Document editor** in control snapshots. The assistant clicks that target to focus the document, then uses insert typing at the current caret or selection. Shift with an arrow, Home or End can extend the selection for follow-up editing. Ordinary field typing still replaces the chosen field.
+On HTTPS Google Docs document edit pages, a recognized canvas editor appears as **Document editor** in control snapshots. The assistant types at the current caret or selection. If the editor needs focus, the assistant can click a visible document page or ask you to place the cursor. Shift with an arrow, Home or End can extend the selection for follow-up editing. Ordinary field typing still replaces the chosen field.
 
-The editor input is bound to the exact document URL, visible editor, same-origin text-input frame, frame document and focused editable element. Changed focus, navigation, stale targets and recognizable secret fields refuse further input. A new snapshot and click are required after the editor changes. Escape inside the input frame also stops control. Embedded frames are covered during screenshot capture; research still extracts top-document text only and never enables control.
+The editor input is bound to the exact document URL, visible editor, same-origin text-input frame, frame document and focused editable element. Changed focus, navigation, stale targets and recognizable secret fields refuse further input. Take a fresh snapshot after the editor changes. A new request can continue at the existing selection while the document stays focused. Escape inside the input frame also stops control. Screenshot capture covers embedded frames, and research extracts only top-document text.
 
 This path is verified against a synthetic Docs-shaped canvas, hit layer and off-screen same-origin contenteditable frame using real Chromium input. It has **not** been accepted against an authenticated disposable Google Doc or a compiled Breezer app. See [diagnosis and acceptance limits](ai-docs-control.md).
 

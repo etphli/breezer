@@ -1,6 +1,9 @@
 // Shared signed-in provider and page-context fixture for the assistant.
 export const installPanelFixture = ({ contextDelay = 10 } = {}) => {
-    const storage = { local: JSON.parse(localStorage.getItem('breezer-fixture-local') || '{}'), session: {} };
+    const storage = {
+      local: JSON.parse(localStorage.getItem('breezer-fixture-local') || '{}'),
+      session: JSON.parse(globalThis.sessionStorage?.getItem('breezer-fixture-session') || '{}'),
+    };
     const callbacks = [];
     window.sent = [];
     window.emit = (message) => callbacks.forEach((callback) => callback(message));

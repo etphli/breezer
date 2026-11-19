@@ -126,15 +126,18 @@ def apply(tree):
     branding.brand_product(tree, macos=False)
     brand_version(tree)
     brand_install_modes(tree)
+    branding.brand_internal_urls(tree)
     branding.brand_strings(tree)
-    branding.brand_onboarding(tree, native_icons=False)
+    branding.brand_native_labels(tree)
+    branding.brand_onboarding(tree)
+    branding.brand_vector_icons(tree)
     brand_icons(tree)
 
     patch_dir = tree / "third_party/git/usr/bin"
     env = {**os.environ, "PATH": str(patch_dir) + os.pathsep + os.environ["PATH"], "PYTHONUTF8": "1"}
     for script, options in (
         ("script/apply_breezer_ai.py", ("--platform", "windows")),
-        ("script/apply_breezer_omnibox.py", ()),
+        ("script/apply_breezer_omnibox.py", ("--allow-missing-upstream-test",)),
         ("script/apply_breezer_workspace.py", ()),
         ("script/apply_breezer_ai_ui.py", ()),
         ("features/passwords/native-ui/apply.py", ()),

@@ -733,7 +733,10 @@ def replacements():
                 '    ]\n'
                 '    public_deps +=\n'
                 '        [ "//chrome/browser/ui/views/extensions:extension_view_views" ]\n'
-                '    deps += [\n',
+                '    deps += [\n'
+                '      "//chrome/browser/ui/color:color_headers",\n'
+                '      "//ui/color",\n'
+                '      "//ui/gfx:color_utils",\n',
             ),
         ],
         "chrome/common/extensions/api/api_sources.gni": [

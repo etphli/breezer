@@ -76,8 +76,9 @@ export class BrowserTools {
     const [tab] = await this.api.tabs.query({ active: true, windowId: session.tab.windowId });
     this.assertSession(session);
     if (!tab || tab.id !== session.tab.id || !isWebURL(tab.url)) {
-      void this.stop(session);
-      throw new Error('The active page changed or is not a web page. Browser control stopped.');
+      const error = new Error('The active page changed or is not a web page. Browser control stopped.');
+      void this.stop(session, error.message);
+      throw error;
     }
     session.tab = { ...tab };
     return tab;
@@ -105,7 +106,11 @@ export class BrowserTools {
   async world(session) {
     const { frameTree } = await this.protocol(session, 'Page.getFrameTree');
     const frame = frameTree.frame;
-    if (!isWebURL(frame.url)) { void this.stop(session); throw new Error('Browser control only works on http or https pages.'); }
+    if (!isWebURL(frame.url)) {
+      const error = new Error('Browser control only works on http or https pages.');
+      void this.stop(session, error.message);
+      throw error;
+    }
     const documentKey = `${frame.id}:${frame.loaderId}`;
     session.mainFrameId = frame.id;
     if (session.world?.documentKey === documentKey) return session.world;
@@ -196,7 +201,7 @@ export class BrowserTools {
       await this.injectControl(session, 'overlay-start', { sessionId: id });
       await this.check(session);
       return session;
-    } catch (error) { await this.stop(session); throw error; }
+    } catch (error) { await this.stop(session, error.message); throw error; }
   }
 
   async detach(session) {
@@ -208,7 +213,7 @@ export class BrowserTools {
     await bounded(pending);
   }
 
-  async stop(session = this.session) {
+  async stop(session = this.session, reason) {
     if (!session) return;
     if (session.stopping) return session.stopping;
     session.stopped = true;
@@ -250,7 +255,7 @@ export class BrowserTools {
         cleanupActive = false;
         await this.detach(session);
       }
-      this.onStop(session.id);
+      this.onStop(session.id, reason);
     })();
     this.lastCleanup = session.stopping;
     return session.stopping;
@@ -262,8 +267,9 @@ export class BrowserTools {
     session.ready = new Promise((resolve, reject) => { session.resolveReady = resolve; session.rejectReady = reject; });
     session.ready.catch(() => {});
     session.navigationTimeout = setTimeout(() => {
-      session.rejectReady?.(new Error('The page took too long to load. Browser control stopped.'));
-      void this.stop(session);
+      const error = new Error('The page took too long to load. Browser control stopped.');
+      session.rejectReady?.(error);
+      void this.stop(session, error.message);
     }, 30000);
   }
 
@@ -280,7 +286,7 @@ export class BrowserTools {
       session.resolveReady();
       session.ready = null;
     } catch (error) {
-      if (!session.stopped) { session.rejectReady?.(error); await this.stop(session); }
+      if (!session.stopped) { session.rejectReady?.(error); await this.stop(session, error.message); }
     }
   }
 
@@ -304,7 +310,7 @@ export class BrowserTools {
   async command(session, method, params, focus = {}) {
     await this.check(session);
     try { await this.injectControl(session, 'control-check', { sessionId: session.id }); }
-    catch (error) { await this.stop(session); throw error; }
+    catch (error) { await this.stop(session, error.message); throw error; }
     await this.check(session);
     if (focus.focusId) await this.injectControl(session, 'check-focus', focus);
     await this.protocol(session, method, params);
@@ -313,7 +319,7 @@ export class BrowserTools {
 
   execute(session, name, args = {}) {
     const work = session.queue.then(() => this.perform(session, name, args)).catch(async error => {
-      if (session.keys.size || session.buttons.size) await this.stop(session);
+      if (session.keys.size || session.buttons.size) await this.stop(session, error.message);
       throw error;
     });
     session.queue = work.catch(() => {});
@@ -348,7 +354,7 @@ export class BrowserTools {
       clearTimeout(session.buttons.get(button)?.timer);
       session.buttons.delete(button);
       await this.injectControl(session, 'bind-editor', point);
-    } catch (error) { await this.stop(session); throw error; }
+    } catch (error) { await this.stop(session, error.message); throw error; }
   }
 
   waitForRelease(session, milliseconds) {
@@ -391,7 +397,7 @@ export class BrowserTools {
       await this.command(session, 'Input.dispatchKeyEvent', { type: 'keyUp', ...params }, focus);
       clearTimeout(held.timer);
       session.keys.delete(params.code);
-    } catch (error) { await this.stop(session); throw error; }
+    } catch (error) { await this.stop(session, error.message); throw error; }
   }
 
   async perform(session, name, args) {

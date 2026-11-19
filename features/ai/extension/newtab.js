@@ -152,7 +152,7 @@ export function organatoState(organato) {
 
 // Saved data can arrive before the final live answer. Keep the port open until
 // that final answer, a disconnect or the timeout.
-export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_MS, onUpdate = () => {} } = {}) {
+export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_MS, onUpdate = () => {}, onSites } = {}) {
   return new Promise((resolve, reject) => {
     if (typeof api?.runtime?.connect !== 'function') {
       reject(new Error('Breezer is not available on this page.'));
@@ -173,16 +173,18 @@ export function requestView(api, { refresh = false, timeoutMs = REQUEST_TIMEOUT_
     try {
       port = api.runtime.connect({ name: PORT_NAME });
       port.onMessage.addListener((message) => {
-        if (settled || message?.type !== 'view' || message.id !== id) return;
-        if (message.pending === true) {
-          updates = updates.then(() => { if (!settled) return onUpdate(message); });
+        if (settled || message?.id !== id || !['sites', 'view'].includes(message.type)) return;
+        if (message.type === 'sites' || message.pending === true) {
+          updates = updates.then(() => {
+            if (!settled) return message.type === 'sites' ? onSites?.(message.topSites) : onUpdate(message);
+          });
           void updates.catch(error => finish(reject, error));
         } else {
           void updates.then(() => finish(resolve, message), error => finish(reject, error));
         }
       });
       port.onDisconnect.addListener(() => finish(reject, new Error('Breezer closed the connection.')));
-      port.postMessage({ type: 'view', id, refresh });
+      port.postMessage({ type: 'view', id, refresh, ...(onSites ? { earlySites: true } : {}) });
     } catch (error) {
       finish(reject, error);
     }
@@ -198,26 +200,107 @@ function el(tag, className, attrs = {}) {
   return node;
 }
 
-function faviconUrl(api, url) {
+function faviconUrl(api, url, retry = false) {
   const canFavicon = api?.runtime?.getManifest?.().permissions?.includes('favicon');
   return canFavicon && typeof api.runtime.getURL === 'function'
-    ? api.runtime.getURL(`/_favicon/?pageUrl=${encodeURIComponent(url)}&size=64`)
+    ? api.runtime.getURL(`/_favicon/?pageUrl=${encodeURIComponent(url)}&size=64${retry ? `&retry=${Date.now()}` : ''}`)
     : null;
 }
 
-function siteTile(api, site) {
+const FAVICON_CACHE_KEY = 'newtab.icons.v1';
+const FAVICON_SIZE = 64;
+const FAVICON_MAX_LENGTH = 32 * 1024;
+const FAVICON_TTL_MS = 15 * 60 * 1000;
+
+function createFaviconCache(api) {
+  const storage = api?.storage?.session;
+  const icons = new Map();
+  const dirty = new Map();
+  let saveTimer, defaultPng;
+  const read = async () => {
+    const values = await storage?.get(FAVICON_CACHE_KEY);
+    const saved = values?.[FAVICON_CACHE_KEY];
+    const entries = Array.isArray(saved) ? saved.slice(-MAX_SITES).filter(Boolean) : [];
+    return entries.filter(({ url, png, expires }) =>
+      typeof url === 'string' && url.length <= 4096 && typeof png === 'string'
+          && png.length <= FAVICON_MAX_LENGTH && png.startsWith('data:image/png;base64,iVBORw0KGgo')
+          && expires > Date.now());
+  };
+  const remember = (cache, entry) => {
+    cache.delete(entry.url);
+    cache.set(entry.url, entry);
+    if (cache.size > MAX_SITES) cache.delete(cache.keys().next().value);
+  };
+  const rasterize = img => {
+    const canvas = img.ownerDocument.createElement('canvas');
+    canvas.width = canvas.height = FAVICON_SIZE;
+    canvas.getContext('2d').drawImage(img, 0, 0, FAVICON_SIZE, FAVICON_SIZE);
+    return canvas.toDataURL('image/png');
+  };
+  const readDefault = async doc => {
+    // Chromium serves a theme-dependent generic bitmap when no site icon is known.
+    const img = doc.createElement('img');
+    img.src = faviconUrl(api, 'about:blank');
+    await img.decode();
+    return rasterize(img);
+  };
+  const flush = async () => {
+    saveTimer = undefined;
+    const batch = [...dirty.values()];
+    dirty.clear();
+    const write = async () => {
+      const shared = new Map((await read()).map(entry => [entry.url, entry]));
+      for (const entry of batch) remember(shared, entry);
+      await storage.set({ [FAVICON_CACHE_KEY]: [...shared.values()] });
+    };
+    const locks = globalThis.navigator?.locks;
+    if (locks) await locks.request(FAVICON_CACHE_KEY, write);
+    else await write();
+  };
+  return {
+    ready: read().then(entries => { for (const entry of entries) remember(icons, entry); }).catch(() => {}),
+    get(url) {
+      const icon = icons.get(url);
+      return icon?.expires > Date.now() ? icon.png : null;
+    },
+    async save(url, img) {
+      if (!storage?.set || url.length > 4096) return;
+      try {
+        const png = rasterize(img);
+        if (png.length > FAVICON_MAX_LENGTH) return;
+        defaultPng ??= readDefault(img.ownerDocument);
+        if (png === await defaultPng) return;
+        const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
+        remember(icons, entry);
+        remember(dirty, entry);
+      } catch { return; }
+      if (saveTimer) return;
+      saveTimer = setTimeout(() => void flush().catch(() => {}), 30);
+    },
+  };
+}
+
+function siteTile(api, site, favicons, retryIcons) {
   const item = el('li', 'site');
   const link = el('a', 'site-link', { href: site.url, title: `${site.title}\n${site.url}` });
   const icon = el('span', 'site-icon', { 'aria-hidden': 'true' });
   const monogram = el('span', 'site-monogram');
   monogram.textContent = [...site.title.replace(/[^\p{L}\p{N}]/gu, '')].slice(0, 2).join('').toUpperCase() || '?';
   icon.append(monogram);
-  const src = faviconUrl(api, site.url);
+  const src = faviconUrl(api, site.url, retryIcons);
   if (src) {
-    const img = el('img', '', { alt: '', width: '28', height: '28', decoding: 'async' });
-    img.addEventListener('load', () => icon.classList.add('has-icon'));
-    img.addEventListener('error', () => img.remove());
-    img.src = src;
+    const img = el('img', '', { alt: '', width: '28', height: '28', decoding: 'sync' });
+    let cached = favicons?.get(site.url);
+    img.addEventListener('load', () => {
+      icon.classList.add('has-icon');
+      if (!cached) void favicons?.save(site.url, img);
+    }, { once: true });
+    img.addEventListener('error', () => {
+      if (cached) { cached = null; img.src = src; }
+      else img.remove();
+    });
+    img.src = cached || src;
+    if (img.complete && img.naturalWidth) icon.classList.add('has-icon');
     icon.append(img);
   }
   const name = el('span', 'site-name');
@@ -230,9 +313,9 @@ function siteTile(api, site) {
   return item;
 }
 
-export function renderSites(api, root, sites) {
+export function renderSites(api, root, sites, favicons, retryIcons) {
   const list = root.getElementById('sites');
-  list.replaceChildren(...sites.map((site) => siteTile(api, site)));
+  list.replaceChildren(...sites.map(site => siteTile(api, site, favicons, retryIcons)));
   const add = el('li', 'site site-add');
   const button = el('button', 'site-link site-add-button', { type: 'button', popovertarget: 'shortcut-add', 'aria-haspopup': 'dialog' });
   const icon = el('span', 'site-icon', { 'aria-hidden': 'true' }); icon.textContent = '+';
@@ -414,16 +497,20 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let off = !HAS_NATIVE_HELPER, organatoDay;
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
+  const favicons = createFaviconCache(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
-  let allSites = [], siteRevision = 0, undoKey;
-  const updateSites = async () => {
+  let allSites = null, visibleSites = null, paintedSites = null, siteRevision = 0, undoKey;
+  const filterSites = async (reload = false) => {
     if (disposed) return;
     const revision = ++siteRevision;
-    await shortcuts.load();
+    if (reload) await shortcuts.load();
     if (disposed) return;
-    const sites = await shortcuts.filter(allSites, MAX_SITES);
-    if (disposed || revision !== siteRevision || !view) return;
-    view.topSites = normalizeView({ topSites: sites }).topSites;
+    const [sites] = await Promise.all([shortcuts.filter(allSites, MAX_SITES), favicons.ready]);
+    if (disposed || revision !== siteRevision || !allSites) return;
+    visibleSites = normalizeView({ topSites: sites }).topSites;
+  };
+  const updateSites = async () => {
+    await filterSites(true);
     paint({ sitesOnly: true });
   };
   installShortcutAdder({ api, root, preferences: shortcuts, update: updateSites });
@@ -469,15 +556,21 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   };
   globalThis.addEventListener?.('pagehide', dispose);
 
-  const paint = ({ sitesOnly = false } = {}) => {
+  const paint = ({ sitesOnly = false, retryIcons = false } = {}) => {
     if (disposed) return;
     const at = now();
     refreshButton.disabled = pending || off || organatoState(view?.organato) === 'setup';
     refreshButton.hidden = refreshButton.disabled;
     renderToday(root, at);
-    if (view) {
-      renderSites(api, root, view.topSites);
-      if (!view.topSites.length && shortcuts.hidden.size) root.getElementById('sites-empty').textContent = 'No visible shortcuts. Restore shortcuts or visit more sites.';
+    if (visibleSites && (retryIcons || paintedSites?.length !== visibleSites.length ||
+        visibleSites.some((site, index) => site.url !== paintedSites[index].url || site.title !== paintedSites[index].title))) {
+      renderSites(api, root, visibleSites, favicons, retryIcons);
+      paintedSites = visibleSites;
+    }
+    if (visibleSites?.length === 0) {
+      root.getElementById('sites-empty').textContent = shortcuts.hidden.size
+        ? 'No visible shortcuts. Restore shortcuts or visit more sites.'
+        : 'Sites you visit often will appear here.';
     }
     reset.hidden = shortcuts.hidden.size === 0;
     const calendarDay = midnight(at);
@@ -497,33 +590,43 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     refreshButton.disabled = true;
     refreshButton.hidden = true;
     refreshButton.setAttribute('aria-busy', 'true');
+    const acceptSites = async sites => {
+      if (disposed) return;
+      allSites = Array.isArray(sites) ? sites : [];
+      await filterSites();
+    };
     const accept = async result => {
       if (disposed) return;
       if (result.dashboardEnabled === false) {
         globalThis.location.replace('chrome://new-tab-page/');
         return;
       }
-      allSites = result.topSites || [];
-      const revision = ++siteRevision;
-      const sites = await shortcuts.filter(allSites, MAX_SITES);
+      await acceptSites(result.topSites);
       if (disposed) return;
-      const stale = revision !== siteRevision;
-      view = normalizeView({ ...result, topSites: stale ? view?.topSites || [] : sites });
-      if (stale) await updateSites();
+      view = normalizeView({ organato: result.organato });
       problem = null;
     };
     try {
       const preferences = shortcuts.load();
-      const [result] = await Promise.all([requestView(api, { refresh, onUpdate: async cached => {
-        await preferences;
-        await accept(cached);
-        paint();
-      } }), preferences]);
+      const [result] = await Promise.all([requestView(api, {
+        refresh,
+        onSites: async sites => {
+          await preferences;
+          await acceptSites(sites);
+          paint({ sitesOnly: true });
+        },
+        onUpdate: async cached => {
+          await preferences;
+          await accept(cached);
+          paint();
+        },
+      }), preferences]);
       await accept(result);
     } catch (error) {
       if (disposed) return;
       problem = text(error?.message, 160) || null;
-      if (!view) view = { topSites: [], organato: null };
+      if (!view) view = { organato: null };
+      if (!visibleSites) await acceptSites([]);
     } finally {
       pending = false;
       if (!disposed) {
@@ -532,7 +635,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       }
     }
     if (disposed) return;
-    paint();
+    paint({ retryIcons: refresh });
     root.documentElement.dataset.loaded = 'true';
     // A switch flipped on while an answer was in flight asks once more.
     if (again) { again = false; if (!off) await load(false); }

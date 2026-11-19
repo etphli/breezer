@@ -237,12 +237,16 @@ def check_numbered_tabs(tree, host):
             'Commands must use only the originating browser\'s available custom sidebar')
     dispatch = host.split('bool BreezerWorkspaceView::SelectNumberedTab(', 1)[1].split(
         'void BreezerWorkspaceView::OnNumberedTabResult(', 1)[0]
-    for token in ('index < 0 || index > 7', 'IsRenderFrameLive()', 'url.SchemeIs("chrome-extension")',
-                  'url.GetHost() != breezer_workspace::kExtensionId', 'url.GetPath() != "/workspace.html"',
+    for token in ('index < 0 || index > 7', 'GetSidebarFrame()', 'if (!frame)',
                   'ExecuteJavaScriptInIsolatedWorld(', 'breezer-select-numbered-tab',
                   'cancelable:true', 'ISOLATED_WORLD_ID_CHROME_INTERNAL',
                   'weak_factory_.GetWeakPtr(), index, gesture'):
         require(token in dispatch, f'Missing bounded native shortcut dispatch: {token}')
+    frame = host.split('BreezerWorkspaceView::GetSidebarFrame()', 1)[1].split(
+        'void BreezerWorkspaceView::UpdateToolbarBackground()', 1)[0]
+    for token in ('if (!is_available())', 'IsRenderFrameLive()', 'url.SchemeIs("chrome-extension")',
+                  'url.GetHost() != breezer_workspace::kExtensionId', 'url.GetPath() != "/workspace.html"'):
+        require(token in frame, f'Missing native sidebar document check: {token}')
     fallback = host.split('void BreezerWorkspaceView::OnNumberedTabResult(', 1)[1].split(
         'views::View* BreezerWorkspaceView::GetFocusableView()', 1)[0]
     require('!browser_->IsDeleteScheduled()' in fallback and

@@ -81,16 +81,20 @@ const ITEMS = { items: [{ id: 'x', title: 'Cached exam', kind: 'work', classific
 test('new-tab site lookup overlaps the pending Organato view', async () => {
   const { fake } = bridge(() => ({}));
   let sitesStarted = false, finishSites;
+  let earlySites;
   fake.api.topSites.get = () => {
     sitesStarted = true;
     return new Promise(resolve => { finishSites = resolve; });
   };
   fake.native.postMessage = message => { fake.native.sent.push(message); };
-  const view = requestView(fake.api, { timeoutMs: 1000 });
+  const view = requestView(fake.api, { timeoutMs: 1000, onSites: sites => { earlySites = sites; } });
   try {
     await new Promise(resolve => setImmediate(resolve));
     assert.equal(fake.native.sent[0].type, 'organato-view');
     assert.equal(sitesStarted, true, 'sites must start before Organato replies');
+    finishSites([{ title: 'Canvas', url: 'https://canvas.example/' }, { title: 'Internal', url: 'chrome://settings/' }]);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(earlySites, [{ title: 'Canvas', url: 'https://canvas.example/' }]);
   } finally {
     fake.native.onMessage.emit({ id: fake.native.sent[0].id, ok: true, value: { ...ON, connected: false } });
     await new Promise(resolve => setImmediate(resolve));

@@ -53,11 +53,10 @@
   color-scheme: dark;
 }
 
-/* The tone tokens above stay as they are (the native frame shares the light --air).
-   Surfaces are derived from them here, on every toned element, because a space sets
-   its own tone on .sidebar. */
+/* The native host supplies the same canvas color as the toolbar. Standalone
+   workspace documents derive their canvas from the active tone. */
 [data-tone] {
-  --canvas: color-mix(in oklab, var(--air) 38%, var(--neutral));
+  --canvas: var(--native-toolbar-background, color-mix(in oklab, var(--air) 38%, var(--neutral)));
   --raised: color-mix(in oklab, var(--card) 40%, var(--neutral-raised));
 }
 

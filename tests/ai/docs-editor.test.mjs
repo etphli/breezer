@@ -1,8 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { installBackground } from '../../features/ai/extension/background.js';
 import { BrowserTools } from '../../features/ai/extension/browser-tools.js';
 import { allowedTools, browserTools, validateTool } from '../../features/ai/host/protocol.mjs';
-import { fakeChrome } from './browser-api-fixture.mjs';
+import { fakeChrome, panel, tick } from './browser-api-fixture.mjs';
+
+test('worker reports the browser control startup error for a consented Docs request', async () => {
+  const fake = fakeChrome();
+  fake.setTab({ url: 'https://docs.google.com/document/d/disposable-fixture/edit' });
+  const reason = 'This tab already has an attached debugger.';
+  fake.api.debugger.attach = async () => { throw new Error(reason); };
+  const worker = installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init', windowId: 3 });
+  port.onMessage.emit({ type: 'chat', id: 'docs', provider: 'codex', model: 'fixture', message: 'Edit this document', control: true });
+  try {
+    await tick();
+    assert.deepEqual(port.sent.filter(message => message.type === 'error'), [{ type: 'error', id: 'docs', source: 'browser-control', error: reason }]);
+    assert.ok(!fake.native.sent.some(message => message.type === 'chat'));
+    assert.equal(worker.tools.session, null);
+  } finally { await worker.cancel(); }
+});
 
 test('editor insertion is schema-bounded and unavailable to research or read-only requests', () => {
   const args = { elementId: 'editor', text: 'Hello, Docs!', mode: 'insert' };

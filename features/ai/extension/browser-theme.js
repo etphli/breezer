@@ -236,15 +236,15 @@ export function artworkDocument(safeHtml) {
 
 // The person's image, shown as-is: an extension-page <img> of a validated raster
 // data: URL loads nothing and runs nothing.
-function createThemeImage(doc, image, { className = 'theme-image' } = {}) {
+function createThemeImage(doc, image, { className = 'theme-image', decoding = 'async' } = {}) {
   const node = doc.createElement('img');
   node.className = className;
   node.alt = '';
-  node.decoding = 'async';
+  node.decoding = decoding;
   node.draggable = false;
   node.referrerPolicy = 'no-referrer';
   node.setAttribute('aria-hidden', 'true');
-  node.src = normalizeThemeImage(image);
+  node.src = image;
   return node;
 }
 
@@ -298,15 +298,22 @@ async function readKeys(area, keys) {
   return values && typeof values === 'object' ? values : {};
 }
 
-const themeState = (value) => ({ theme: value?.theme, colorMode: value?.colorMode });
-const sameThemeState = (a, b) => Boolean(a && b) && a.theme === b.theme && a.colorMode === b.colorMode;
+function themeState(value) {
+  const { theme, colorMode, nativeDefaultTheme } = value ?? {};
+  return { theme, colorMode, ...(nativeDefaultTheme === undefined ? {} : { nativeDefaultTheme }) };
+}
+
+const sameThemeState = (a, b) => Boolean(a && b) && a.theme === b.theme
+  && a.colorMode === b.colorMode && a.nativeDefaultTheme === b.nativeDefaultTheme;
 
 // Writes a seed and mode only if the browser still shows `expected`: the native
 // side compares and refuses, so a look someone picked meanwhile is never
 // overwritten. Resolves with the normalized result and the raw theme state the
 // browser reports, which is what a later compare must name.
 async function writeAppearance(api, patch, expected) {
-  const request = { ...validateAppearancePatch(patch), expectedThemeState: themeState(expected) };
+  const { nativeDefaultTheme, ...themePatch } = patch;
+  const request = { ...validateAppearancePatch(themePatch), expectedThemeState: themeState(expected) };
+  if (nativeDefaultTheme !== undefined) request.nativeDefaultTheme = nativeDefaultTheme;
   let result = await callBridge(api, 'setAppearance', request);
   if (!result || typeof result !== 'object') result = await callBridge(api, 'getAppearance');
   return { appearance: normalizeAppearance(result), actual: themeState(result) };
@@ -315,7 +322,7 @@ async function writeAppearance(api, patch, expected) {
 async function readRestorableAppearance(api) {
   const current = await callBridge(api, 'getAppearance');
   if (current?.themeCanRestore !== true) {
-    throw new Error('Choose a Breezer theme in Appearance settings first. Breezer can only restore its own themes.');
+    throw new Error('Choose a Breezer theme in Appearance settings first so your previous look can be restored.');
   }
   return themeState(current);
 }
@@ -577,32 +584,40 @@ export function startThemeArtwork({ api = globalThis.chrome, doc = globalThis.do
   const show = (record) => {
     const html = record?.html ?? '';
     const image = record?.image ?? '';
-    if (html !== shownHtml) {
-      shownHtml = html;
-      frame?.remove();
-      frame = null;
-      // The frame goes first, then the image before it, so the art paints over the image.
-      try { if (html) { frame = createArtworkFrame(doc, html); doc.body.prepend(frame); } } catch { frame = null; }
-    }
     if (image !== shownImage) {
       shownImage = image;
       picture?.remove();
       picture = null;
       try {
         if (image) {
-          const node = createThemeImage(doc, image);
+          const node = createThemeImage(doc, image, { decoding: 'sync' });
           node.addEventListener('error', () => { if (picture === node) { node.remove(); picture = null; mark(); } }, { once: true });
           picture = node;
         }
       } catch { picture = null; }
     }
     if (picture && doc.body.firstElementChild !== picture) doc.body.prepend(picture);
+    if (html !== shownHtml) {
+      shownHtml = html;
+      frame?.remove();
+      frame = null;
+      try {
+        if (html) {
+          frame = createArtworkFrame(doc, html);
+          if (picture) picture.after(frame);
+          else doc.body.prepend(frame);
+        }
+      } catch { frame = null; }
+    }
     mark();
   };
   const refresh = async () => {
     const id = ++request;
     let applied = null;
-    try { ({ applied } = await readThemeState({ api })); } catch { return; }
+    try {
+      const values = await readKeys(storageArea(api), [ARTWORK_KEY]);
+      applied = readArtworkRecord(values[ARTWORK_KEY]);
+    } catch { return; }
     if (id === request) show(applied);
   };
   localStorageChanges(api)?.addListener((changes) => {

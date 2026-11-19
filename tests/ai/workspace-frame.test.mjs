@@ -101,7 +101,44 @@ const metrics = (frame) => frame.evaluate(() => {
   };
 });
 
-test('sidebar text follows sidebarFontSize and content clears the title bar band', { skip }, async () => {
+async function checkToolbarColors(page) {
+  const colors = await page.evaluate(async () => {
+    const { applyAppearance } = await import('/workspace.js');
+    const appearance = await chrome.breezerPrivate.getAppearance();
+    const root = document.documentElement;
+    const sidebar = document.querySelector('.sidebar');
+    const palette = () => ({
+      body: getComputedStyle(document.body).backgroundColor,
+      sidebar: getComputedStyle(sidebar).backgroundColor,
+      accent: getComputedStyle(sidebar).getPropertyValue('--accent'),
+    });
+    const fallback = palette();
+    root.style.setProperty('--native-toolbar-background', 'rgb(36, 39, 45)');
+    const dark = palette();
+    sidebar.dataset.tone = sidebar.dataset.tone === 'rose' ? 'dusk' : 'rose';
+    const anotherSpace = palette();
+    applyAppearance({ ...appearance, colorMode: 'light' });
+    root.style.setProperty('--native-toolbar-background', 'rgb(244, 247, 253)');
+    const light = palette();
+    root.style.setProperty('--native-toolbar-background', '');
+    const lightFallback = palette();
+    root.style.setProperty('--native-toolbar-background', 'rgb(244, 247, 253)');
+    return { fallback, dark, anotherSpace, light, lightFallback, restored: palette() };
+  });
+  for (const palette of [colors.dark, colors.anotherSpace]) {
+    assert.equal(palette.sidebar, 'rgb(36, 39, 45)');
+    assert.equal(palette.body, palette.sidebar);
+  }
+  assert.equal(colors.light.sidebar, 'rgb(244, 247, 253)');
+  assert.equal(colors.light.body, colors.light.sidebar);
+  assert.equal(colors.dark.accent, colors.fallback.accent);
+  assert.notEqual(colors.anotherSpace.accent, colors.dark.accent);
+  assert.notEqual(colors.fallback.sidebar, colors.dark.sidebar);
+  assert.notEqual(colors.lightFallback.sidebar, colors.light.sidebar);
+  assert.deepEqual(colors.restored, colors.light);
+}
+
+test('sidebar font size, title bar clearance, and native toolbar color', { skip }, async () => {
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -166,6 +203,7 @@ test('sidebar text follows sidebarFontSize and content clears the title bar band
     });
     await windowPage.screenshot({ path: `${evidence}/sidebar-frame-window-18px.png` });
 
+    await checkToolbarColors(page);
     assert.deepEqual(errors, []);
   } finally {
     try { await browser?.close(); } finally {
