@@ -43,6 +43,6 @@ The editor browser check asserts capture, hit-layer clicks outside the gutter, t
 
 ## Required release acceptance
 
-No verified disposable compiled Breezer app or authenticated disposable Docs profile was available for this work. The coordinator has kept prepared source and build outputs frozen. No native build, app installation, personal-profile use or real provider inference was performed.
+The 1.3.1 investigation reran the intercepted editor fixture with the Breezer 1.2.6 executable and a temporary profile. Trusted typing, selection and follow-up editing passed. The fixture supplies a test debugger adapter. The available browser profile reached the Google sign-in screen, so the authenticated editor, native assistant controls and live providers still need a real-document check.
 
 Before describing this as an accepted Google Docs fix, use the combined compiled build in a disposable profile and a new disposable document. Verify both providers can focus the real document, insert ordinary text, navigate/select and perform a second editing request with existing tab consent. Confirm the site saves the changes. Exercise sidebar/page Stop, frame Escape, switching tabs/windows, reconnect/follow-up lifecycle and navigation cancellation. Capture only synthetic document contents and redacted stage errors. Verify ordinary controls and selected-tab research remain separate. Today's Docs markup and whether it consumes `Input.insertText` remain unverified until that check passes.

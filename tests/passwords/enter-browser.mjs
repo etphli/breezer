@@ -36,6 +36,14 @@ try {
       await page.screenshot({ path: `${process.env.BREEZER_ENTER_EVIDENCE}/login-enter.png` });
     }
   });
+  await check('sectioned login with a passkey hint submits once on password Enter', async () => {
+    await page.evaluate(() => {
+      username.autocomplete = '  SECTION-SIGNIN\tUSERNAME webauthn  ';
+      password.autocomplete = 'section-signin current-password';
+    });
+    await page.locator('#password').press('Enter');
+    assert.equal(await count(), baseline ? 0 : 1);
+  });
   await check('native submit-button form submits once', async () => {
     await page.evaluate(() => login.insertAdjacentHTML('beforeend', '<button>Sign in</button>'));
     await page.locator('#password').press('Enter'); assert.equal(await count(), 1);
@@ -111,8 +119,21 @@ try {
   ]) await check(name, async () => {
     await page.evaluate(edit);
     await page.locator('#username').press('Enter');
-    assert.equal(await focused(), 'username'); assert.equal(await count(), 0);
+    assert.equal(await focused(), 'username');
+    assert.equal(await count(), 0);
   });
+  for (const annotation of [
+    'unknown current-password',
+    'CURRENT-PASSWORD current-password',
+    'section-signin billing current-password',
+    'section-signup new-password',
+  ]) {
+    await check(`password Enter ignores ${annotation}`, async () => {
+      await page.evaluate(value => password.autocomplete = value, annotation);
+      await page.locator('#password').press('Enter');
+      assert.equal(await count(), 0);
+    });
+  }
   await check('site custom validity is preserved', async () => {
     await page.evaluate(() => password.setCustomValidity('Dummy site validation'));
     await page.locator('#password').press('Enter'); assert.equal(await count(), 0);
