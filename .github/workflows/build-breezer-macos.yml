@@ -29,6 +29,12 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          sparse-checkout: |
+            assets/branding
+            docs/upstream-originals
+            features
+            script
+            upstream
       - name: Fingerprint source before tests create generated files
         id: inputs
         env:

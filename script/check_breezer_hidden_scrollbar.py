@@ -7,6 +7,7 @@ production payload. Generated C++ and compiler/run logs can be retained.
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 from pathlib import Path
 import shutil
@@ -146,8 +147,9 @@ def failure_controls(output):
         ('global-stop', source.replace(bounds + opacity, '    animator->StopAnimating();\n', 1),
          'hidden-bounds-opacity'),
     )
-    results = []
-    for name, content, case in mutations:
+
+    def run_control(mutation):
+        name, content, case = mutation
         directory = output / name
         directory.mkdir(parents=True, exist_ok=True)
         mutant = directory / 'rounded_scroll_bar.cc'
@@ -158,7 +160,10 @@ def failure_controls(output):
             raise AssertionError('Failure control incorrectly passed: ' + name)
         if name == 'missing-retain' and 'heap-use-after-free' not in log:
             raise AssertionError('Missing retain control did not detect use-after-free')
-        results.append(f'PASS {name}: targeted regression rejected, exit {status}')
+        return f'PASS {name}: targeted regression rejected, exit {status}'
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        results = list(executor.map(run_control, mutations))
     (output / 'controls.log').write_text('\n'.join(results) + '\n')
     print('\n'.join(results))
 
