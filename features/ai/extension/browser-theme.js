@@ -298,15 +298,22 @@ async function readKeys(area, keys) {
   return values && typeof values === 'object' ? values : {};
 }
 
-const themeState = (value) => ({ theme: value?.theme, colorMode: value?.colorMode });
-const sameThemeState = (a, b) => Boolean(a && b) && a.theme === b.theme && a.colorMode === b.colorMode;
+function themeState(value) {
+  const { theme, colorMode, nativeDefaultTheme } = value ?? {};
+  return { theme, colorMode, ...(nativeDefaultTheme === undefined ? {} : { nativeDefaultTheme }) };
+}
+
+const sameThemeState = (a, b) => Boolean(a && b) && a.theme === b.theme
+  && a.colorMode === b.colorMode && a.nativeDefaultTheme === b.nativeDefaultTheme;
 
 // Writes a seed and mode only if the browser still shows `expected`: the native
 // side compares and refuses, so a look someone picked meanwhile is never
 // overwritten. Resolves with the normalized result and the raw theme state the
 // browser reports, which is what a later compare must name.
 async function writeAppearance(api, patch, expected) {
-  const request = { ...validateAppearancePatch(patch), expectedThemeState: themeState(expected) };
+  const { nativeDefaultTheme, ...themePatch } = patch;
+  const request = { ...validateAppearancePatch(themePatch), expectedThemeState: themeState(expected) };
+  if (nativeDefaultTheme !== undefined) request.nativeDefaultTheme = nativeDefaultTheme;
   let result = await callBridge(api, 'setAppearance', request);
   if (!result || typeof result !== 'object') result = await callBridge(api, 'getAppearance');
   return { appearance: normalizeAppearance(result), actual: themeState(result) };
@@ -315,7 +322,7 @@ async function writeAppearance(api, patch, expected) {
 async function readRestorableAppearance(api) {
   const current = await callBridge(api, 'getAppearance');
   if (current?.themeCanRestore !== true) {
-    throw new Error('Choose a Breezer theme in Appearance settings first. Breezer can only restore its own themes.');
+    throw new Error('Choose a Breezer theme in Appearance settings first so your previous look can be restored.');
   }
   return themeState(current);
 }
