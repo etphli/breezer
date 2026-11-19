@@ -184,10 +184,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 /* -------------------------------------------------------------------- sheet */
 
 .sheet {
+  --sheet-width: min(1120px, calc(100% - 32px));
   flex: 1;
-  width: min(1120px, 100vw);
+  width: var(--sheet-width);
   margin: 0 auto;
-  padding: 28px max(24px, calc((min(1120px, 100vw) - var(--column)) / 2)) 64px;
+  padding: 28px max(16px, calc((var(--sheet-width) - var(--column)) / 2)) 64px;
   border-radius: 16px 16px 0 0;
   background: var(--sheet);
   box-shadow: 0 0 0 0.5px var(--line), 0 -1px 3px rgb(0 0 0 / 0.04);
@@ -433,7 +434,7 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
    own resolution with no filter, so it stays sharp. A veil of the page colour
    keeps the date and sites readable over both; the sheet stays opaque. */
 .theme-image { position: fixed; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; -webkit-user-drag: none; }
-.theme-artwork { position: fixed; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; border: 0; pointer-events: none; background: transparent; }
+.theme-artwork, .theme-first-frame { position: fixed; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; border: 0; pointer-events: none; background: transparent; }
 :root[data-artwork="on"] { background: var(--canvas); }
 :root[data-artwork="on"] body { background: transparent; }
 :root[data-artwork="on"] body::before {
@@ -447,4 +448,4 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 :root[data-artwork="on"] :is(.sky, .sheet) { position: relative; z-index: 2; }
 :root[data-artwork="on"] .settings-link { z-index: 3; }
 :root[data-artwork="on"] .today { text-shadow: 0 1px 14px color-mix(in srgb, var(--canvas) 80%, transparent); }
-@media (forced-colors: active) { .theme-image, .theme-artwork, :root[data-artwork="on"] body::before { display: none; } }
+@media (forced-colors: active) { .theme-image, .theme-artwork, .theme-first-frame, :root[data-artwork="on"] body::before { display: none; } }

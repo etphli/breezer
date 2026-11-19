@@ -126,6 +126,36 @@ test('parallel New Tabs merge icons and refresh retries a shortcut that used Chr
   }
 });
 
+test('Organato leaves room for the New Tab background beside the AI sidebar', { skip }, async () => {
+  await mkdir(evidence, { recursive: true });
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    await withPage(browser, base, {
+      view: CONNECTED,
+      colorScheme: 'dark',
+      viewport: { width: 1056, height: 824 },
+    }, async (page) => {
+      await page.waitForSelector('#organato[data-state="ready"]');
+      await page.screenshot({ path: `${evidence}/newtab-organato-sidebar-width.png` });
+      for (const width of [1056, 420, 1440]) {
+        await page.setViewportSize({ width, height: 824 });
+        const { left, right, overflow } = await page.locator('.sheet').evaluate(sheet => {
+          const rect = sheet.getBoundingClientRect();
+          const { clientWidth, scrollWidth } = document.documentElement;
+          return { left: rect.left, right: clientWidth - rect.right, overflow: scrollWidth > clientWidth };
+        });
+        assert.ok(left >= 16 && right >= 16 && left === right, `${width}px viewport has gutters of ${left}px and ${right}px`);
+        assert.equal(overflow, false, `${width}px viewport has horizontal overflow`);
+      }
+    });
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 test('new tab renders sites and Organato lanes across states', { skip }, async () => {
   await mkdir(evidence, { recursive: true });
   const server = await startServer();
