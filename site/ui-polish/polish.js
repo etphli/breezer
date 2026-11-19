@@ -66,7 +66,7 @@ function showChange(reset) {
   const change = changes[Number(surface.value)];
   if (reset) {
     comparison.replaceChildren();
-    addOption(comparison, 'before', 'Previous review');
+    addOption(comparison, 'before', 'Before this follow-up');
     if (change.original) addOption(comparison, 'original', 'Starting point');
   }
   const original = comparison.value === 'original';

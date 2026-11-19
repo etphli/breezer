@@ -952,7 +952,6 @@ html { scroll-padding-top: 64px; }
 .verification-group .feature-details[open] > summary { margin-bottom: 10px; }
 
 .page-index a[aria-current="location"] { color: var(--ink); text-decoration-thickness: 2px; text-decoration-color: var(--accent); }
-.page-index + .patch-notes { margin-top: 0; padding-top: 14px; border-top: 0; padding-bottom: 36px; border-bottom: 1px solid var(--plate-edge); }
 
 .feature-details h4 { margin: 22px 0 8px; color: var(--ink); font: 600 15px/1.4 var(--sans); }
 .feature-details > h4:first-of-type { margin-top: 18px; }

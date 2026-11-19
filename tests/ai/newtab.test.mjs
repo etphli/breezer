@@ -236,8 +236,9 @@ test('main site rendering keeps two-character monograms and hostname labels', ()
   const [mail, news, add] = h.node('sites').children;
   assert.equal(mail.children[0].children[0].children[0].textContent, 'MA');
   assert.equal(news.children[0].children[0].children[0].textContent, 'NE');
-  assert.equal(news.children[0].children[1].textContent, 'news.example');
-  assert.equal(news.children[0].children[1].classList.contains('hostname'), true);
+  const name = news.children[0].children[1].children[0];
+  assert.equal(name.textContent, 'news.example');
+  assert.equal(name.classList.contains('hostname'), true);
   assert.equal(add.children[0].children[1].textContent, 'Add shortcut');
 });
 

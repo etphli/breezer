@@ -305,8 +305,17 @@ function siteTile(api, site, favicons, retryIcons) {
   }
   const name = el('span', 'site-name');
   name.textContent = site.title;
-  if (site.title.toLowerCase().replace(/^www\./, '') === new URL(site.url).hostname.replace(/^www\./, '')) name.classList.add('hostname');
-  link.append(icon, name);
+  const host = new URL(site.url).hostname.replace(/^www\./, '');
+  const isHost = site.title.toLowerCase().replace(/^www\./, '') === host;
+  if (isHost) name.classList.add('hostname');
+  const caption = el('span', 'site-caption');
+  caption.append(name);
+  if (!isHost && site.title.length >= 36) {
+    const domain = el('span', 'site-host', { 'aria-hidden': 'true' });
+    domain.textContent = host;
+    caption.append(domain);
+  }
+  link.append(icon, caption);
   const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
   remove.textContent = '×';
   item.append(link, remove);
@@ -636,13 +645,20 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       allSites = Array.isArray(sites) ? sites : [];
       await filterSites();
     };
+    const recoverSites = async () => {
+      if (allSites?.length) return;
+      let sites;
+      try { sites = await api.topSites?.get(); } catch { /* Visits may be unavailable. */ }
+      await acceptSites(sites);
+    };
     const accept = async result => {
       if (disposed) return;
       if (result.dashboardEnabled === false) {
         globalThis.location.replace('chrome://new-tab-page/');
         return;
       }
-      await acceptSites(result.topSites);
+      if (result.organato?.error && !result.topSites?.length) await recoverSites();
+      else await acceptSites(result.topSites);
       if (disposed) return;
       view = normalizeView({ organato: result.organato });
       problem = null;
@@ -667,7 +683,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       if (disposed) return;
       problem = text(error?.message, 160) || null;
       if (!view) view = { organato: null };
-      if (!visibleSites) await acceptSites([]);
+      if (!visibleSites) await recoverSites();
     } finally {
       pending = false;
       if (!disposed) {

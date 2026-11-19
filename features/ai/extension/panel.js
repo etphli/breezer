@@ -228,6 +228,7 @@ function renderWelcomeStatus(selected) {
   $('welcome-account-steps').hidden = !showAccounts;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
+  $('draft-toggle').hidden = !action;
   document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending || state.pageKnown && !state.page && !research.size;
   document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
@@ -736,7 +737,7 @@ function providerFailureSummary(reason) {
   if (/unauthori[sz]ed|authentication|not signed in|sign[ -]in|\b401\b/i.test(reason)) return 'The provider could not verify your account. Check its sign-in, then try again.';
   if (/timed? out|timeout|deadline exceeded/i.test(reason)) return 'The provider took too long to reply. Try again.';
   if (/ECONNREFUSED|ENETUNREACH|network error|connection (?:failed|closed|refused)|fetch failed/i.test(reason)) return 'The connection to your provider failed. Check your connection, then try again.';
-  return 'The assistant could not complete this response.';
+  return 'The assistant could not complete this response. You can edit your message and try again.';
 }
 
 function revealPanel() {
@@ -809,6 +810,7 @@ async function send() {
     try {
       sources = await capture;
       if (state.running?.id !== id) return;
+      research.markUnavailable(sources);
       const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
       userMessage.contextTitle = summary;
       userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
@@ -1120,6 +1122,12 @@ $('model-menu').addEventListener('keydown', (event) => {
 });
 $('model-menu').addEventListener('focusout', (event) => {
   if (event.relatedTarget && !$('model-menu').contains(event.relatedTarget) && event.relatedTarget !== $('model-button')) setModelMenu(false);
+});
+$('draft-toggle').addEventListener('click', () => {
+  const open = document.querySelector('.panel').toggleAttribute('data-drafting');
+  $('draft-toggle').textContent = open ? 'Hide draft' : 'Write a draft';
+  $('draft-toggle').setAttribute('aria-expanded', String(open));
+  if (open) $('prompt').focus();
 });
 $('welcome-action').addEventListener('click', () => {
   if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);

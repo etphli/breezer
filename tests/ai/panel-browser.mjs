@@ -587,6 +587,7 @@ try {
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
   assert.match(await page.locator('#welcome-status').innerText(), /Sign in to Codex or Claude/);
   assert.equal(await page.locator('#model-label').innerText(), 'Accounts');
+  await page.getByRole('button', { name: 'Write a draft', exact: true }).click();
   await page.getByLabel('Message Breezer').fill('Hello');
   await page.getByLabel('Message Breezer').press('Enter');
   assert.equal(await page.locator('#notice').isVisible(), false);
@@ -594,6 +595,7 @@ try {
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Hello');
   assert.equal(await page.locator('#model-menu').isVisible(), true);
   await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Hide draft', exact: true }).click();
   await page.setViewportSize({ width: 320, height: 640 });
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   const signInGap = await page.evaluate(() => document.querySelector('#welcome-status').getBoundingClientRect().top - document.querySelector('#welcome h1').getBoundingClientRect().bottom);
@@ -605,6 +607,7 @@ try {
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), false, 'commands are secondary to the sign-in explanation');
   await page.getByRole('button', { name: 'Set up an account', exact: true }).click();
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), true, 'sign-in instructions remain available');
+  assert.equal(await page.locator('#prompt').isVisible(), false, 'the draft stays collapsed while signing in');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-instructions-narrow.png` });
   await page.getByRole('button', { name: 'Copy Codex sign-in command' }).click();
   await page.waitForFunction(() => window.copiedCommand === 'codex login');

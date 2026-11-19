@@ -610,7 +610,10 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 }
 
 @media (max-width: 560px) {
-  .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .swatches { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .swatch .preview { aspect-ratio: 2.4; }
+  .swatch .p-side { gap: 3px; }
+  .swatch .p-row { height: 4px; }
   .setting-group > .setting-row > input:is([type="password"], [type="text"], [type="url"]) { width: 100%; }
   .setting-row { flex-wrap: wrap; gap: 10px 16px; }
   .setting-row:has(> .toggle, > .switch) { flex-wrap: nowrap; }

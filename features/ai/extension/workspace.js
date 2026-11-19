@@ -1359,8 +1359,8 @@ function openItemMenu(found, rect) {
       { label: 'Copy link', run: () => copyLink(entry.url) },
       ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, entry.id, { spaceId })).catch(() => {})),
       '-',
-      ...(tab ? [{ label: 'Close tab', run: () => closeTabs([tab.id]) }] : []),
-      { label: 'Unpin', danger: true, run: () => unpinEntry(entry, tab) },
+      ...(tab ? [{ label: 'Close tab', danger: true, run: () => closeTabs([tab.id]) }] : []),
+      { label: 'Unpin', run: () => unpinEntry(entry, tab) },
     ];
   } else if (item.type === 'favorite') {
     const { entry, tab } = item;
@@ -1855,10 +1855,10 @@ async function initSidebar(route) {
     : (active && spaceOfTab(store, state.records, active.id)) || store.spaces[0].id;
   saveWindowState();
   bindSidebar();
-  draw();
-  $('sidebar').hidden = false;
   // Re-read after subscribing: tabs can open while initial reconciliation awaits.
   await refreshTabs();
+  draw();
+  $('sidebar').hidden = false;
   if (orphanPinned.length) void adoptPinned(orphanPinned);
 }
 

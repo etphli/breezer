@@ -40,6 +40,7 @@ button:disabled { opacity: .5; cursor: default; }
 .primary:not(:disabled) { background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
 :root[data-scheme="dark"] .primary { color: var(--air); }
 :root[data-scheme="dark"] .primary:not(:disabled) { background: var(--accent); }
+:root[data-scheme="dark"][data-tone="graphite"] .primary:not(:disabled) { background: var(--ink); }
 .primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 76%, var(--ink)); }
 :root[data-scheme="dark"] .primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
 :root .primary:disabled { background: transparent; color: var(--muted); border-color: var(--line); opacity: 1; }

@@ -114,7 +114,7 @@ test('Windows settings, setup and new tab expose the supported features', { skip
   assert.equal(await page.locator('#wl-stage-count').innerText(), 'Step 1 of 8');
   const next = page.locator('#wl-next');
   for (const step of ['you', 'layout', 'theme', 'import', 'organato', 'tour']) {
-    await next.click();
+    await (step === 'tour' ? page.locator('#wl-organato-later') : next).click();
     await page.locator(`.wl-step[data-step="${step}"]`).waitFor();
   }
   for (const shortcut of ['Ctrl+T', 'Ctrl+Shift+1–4', 'Alt+F', 'Ctrl+Shift+K', 'esc']) {

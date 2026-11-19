@@ -13,7 +13,7 @@
       <div class="brand"><img src="icon128.png" width="22" height="22" alt=""><span>Breezer AI</span></div>
       <div class="toolbar-actions">
         <button id="new-chat" class="icon-button" title="New conversation" aria-label="New conversation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>New chat</span></button>
-        <button id="open-profile" class="profile-button" title="Your context" aria-label="Edit your personal context"><span id="profile-initial" aria-hidden="true">Y</span><span>Context</span></button>
+        <button id="open-profile" class="profile-button" title="What the assistant remembers about you" aria-label="Edit your personal context"><span id="profile-initial" aria-hidden="true">Y</span><span>Profile</span></button>
         <button id="close-panel" class="icon-button" title="Close assistant · ⌘K" aria-label="Close assistant"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
       </div>
     </header>
@@ -31,6 +31,7 @@
             <p data-account-shell-hint>Run it in Terminal, then refresh.</p>
           </details>
           <button type="button" id="welcome-action" class="welcome-action" hidden></button>
+          <button type="button" id="draft-toggle" class="draft-toggle" aria-controls="prompt" aria-expanded="false" hidden>Write a draft</button>
         </div>
         <div class="suggestions">
           <button type="button" data-page="true" data-prompt="Summarize this page. What should I take away from it?"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h8"/></svg><span>Summarize this page</span></button>

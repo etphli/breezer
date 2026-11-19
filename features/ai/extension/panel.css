@@ -148,6 +148,7 @@ button:hover {
   justify-content: space-between;
   flex-shrink: 0;
   padding: 12px 14px 8px 20px;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .brand {
@@ -224,7 +225,7 @@ button:hover {
 
 .panel:has(#welcome:not([hidden])) .toolbar { margin-bottom: auto; }
 .panel:has(#welcome:not([hidden])) .conversation { flex: 0 1 auto; }
-.panel:has(#welcome:not([hidden])) .compose-area { margin-bottom: clamp(0px, 8dvh - 28px, 56px); }
+.panel:has(#welcome:not([hidden])) .compose-area { margin-bottom: auto; }
 .panel:has(~ dialog[open]) .welcome { visibility: hidden; }
 
 .welcome {
@@ -268,6 +269,7 @@ h1 {
 .suggestions button:hover:not(:disabled) {
   background: var(--hover);
 }
+.suggestions [data-control="true"] { background: transparent; border-color: transparent; color: var(--muted); }
 
 .suggestions svg {
   color: var(--muted);
@@ -298,10 +300,12 @@ h1 {
   margin-top: 10px;
   padding: 7px 12px;
   border-radius: 7px;
-  background: var(--accent);
+  background: var(--primary-fill);
   color: var(--on-accent);
   font-weight: 600;
 }
+.welcome-action:hover { background: color-mix(in srgb, var(--primary-fill) 90%, var(--ink)); color: var(--on-accent); }
+.draft-toggle { display: inline-block; margin-top: 6px; padding: 6px 8px; color: var(--muted); font-size: 13px; text-decoration: underline; text-underline-offset: 2px; }
 
 .messages {
   flex: none;
@@ -850,6 +854,8 @@ h1 {
 .panel[data-running="true"] .model-button { opacity: .65; }
 .panel[data-account-state="signed-out"] :is(.context-row, .research-chips, .source-tools, .control-toggle) { display: none; }
 .panel[data-account-state="signed-out"] .composer { background: transparent; box-shadow: none; }
+.panel[data-account-state="signed-out"]:not([data-drafting]) .composer::before,
+.panel[data-account-state="signed-out"]:not([data-drafting]) :is(#prompt, #send) { display: none; }
 .panel[data-account-state="signed-out"] .model-button { flex: 0 1 auto; }
 .panel[data-page-state="loading"] .context-row > :not(.context-hint) { display: none; }
 
@@ -1186,6 +1192,7 @@ dialog .privacy-note {
 .research-chips { display:flex; flex-wrap:wrap; gap:6px; margin:0 4px 8px; }
 .research-chips:empty { display:none; }
 .research-chip { max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:0; border-radius:7px; padding:4px 8px; background:var(--tint); color:inherit; font:inherit; font-size:12px; cursor:pointer; }
+.research-chip[data-unavailable] { color:var(--danger); background:var(--danger-surface); }
 .research-options { display:flex; flex-direction:column; gap:4px; min-height:64px; max-height:480px; padding-block:4px; border-block:1px solid var(--hairline); overflow:auto; scrollbar-width:thin; scrollbar-gutter:stable; scrollbar-color:var(--muted) var(--tint); }
 .research-option { display:flex; flex:none; align-items:center; gap:10px; margin:0; padding:8px; border-radius:8px; cursor:pointer; }
 .research-option:has(input:checked) { background:var(--tint); }
@@ -1202,9 +1209,11 @@ dialog .privacy-note {
 #research-dialog .research-scroll { flex:none; margin-bottom:0; font-size:12px; }
 .review-sources { margin-top:8px; padding:5px 8px; border-radius:6px; border:1px solid var(--line); color:var(--accent-ink); }
 .review-sources:hover { background:var(--hover); }
+.panel[data-running="true"] .review-sources { display:none; }
 .research-sharing { font-size:12px; color:var(--muted); margin:12px 0; }
 .research-sharing summary { cursor:pointer; }
 .context-row:has(#context-toggle[hidden]) .context-hint { max-width:none; margin-left:0; text-align:left; }
+.context-row:has(#context-toggle[hidden]) { padding: 5px 8px; }
 .panel:has(#context-toggle[hidden]) .control-toggle { display:none; }
 .source-details { margin-top:8px; text-align:left; }
 .source-details summary { cursor:pointer; font-weight:500; }

@@ -12,6 +12,7 @@ async function newtab({ duringInitialFilter } = {}) {
   const counters = { loads: 0, filters: 0, sites: 0, organato: 0, limits: [], failLoad: false };
   const node = id => {
     if (!nodes.has(id)) nodes.set(id, { hidden: false, dataset: {}, textContent: '', handlers: {},
+      querySelectorAll: () => [],
       addEventListener(name, fn) { this.handlers[name] = fn; }, setAttribute() {}, removeAttribute() {}, focus() {} });
     return nodes.get(id);
   };

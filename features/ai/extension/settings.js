@@ -135,7 +135,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   addEventListener('pagehide', () => onboarding.dispose(), { once: true });
   if (!HAS_NATIVE_HELPER) {
     const assistantGroup = $('nav-group-ai');
-    const newTab = assistantGroup.nextElementSibling.querySelector('[data-category="newtab"]');
+    const newTab = document.querySelector('#settings-categories [data-category="newtab"]');
     newTab.querySelector('span').textContent = 'New tab';
     $('settings-categories').querySelector('[aria-label="Breezer"]').append(newTab.closest('li'));
     assistantGroup.nextElementSibling.remove();
@@ -208,8 +208,10 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     preview.dataset.topBar = !appearance.frameless || appearance.alwaysShowTopBar ? 'visible' : 'autoHide';
     preview.dataset.address = appearance.centeredAddressBar ? 'center' : 'left';
     preview.dataset.url = appearance.minimalUrl ? 'minimal' : 'full';
+    const sidebarNames = { expanded: 'Expanded sidebar', compact: 'Compact sidebar', autoHide: 'Sidebar on hover' };
     const tabs = appearance.layout === 'top' ? 'Tabs across the top'
-      : ({ expanded: 'Expanded sidebar', compact: 'Compact sidebar', autoHide: 'Sidebar on hover' })[preview.dataset.sidebar];
+      : appearance.frameless && preview.dataset.sidebar === 'autoHide' && appearance.sidebarMode !== 'autoHide'
+        ? `${sidebarNames[appearance.sidebarMode]} on hover in frameless mode` : sidebarNames[preview.dataset.sidebar];
     $('layout-preview-summary').textContent = `${tabs}. ${preview.dataset.topBar === 'autoHide' ? 'Top bar on hover.' : 'Top bar visible.'}`;
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
