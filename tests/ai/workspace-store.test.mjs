@@ -5,6 +5,7 @@ import {
   addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, findEntriesByUrl, findNode, moveIndex, moveNode, moveSpace,
   normalizeAppearance, normalizeMembers, normalizeStore, parseRoute, reconcileWindowTabs, removeNode, removeSpace,
   renameNode, rollSession, spaceOfTab, validateAppearancePatch, visibleTabs,
+  FOLDER_COLOR_MODES, normalizeFolderColor, setFolderColor, setPrefs,
 } from '../../features/ai/extension/workspace-store.js';
 
 // chrome.storage-like area backed by a Map; values are deep-copied like the real API.
@@ -427,4 +428,49 @@ test('restoring a large session parses each saved URL once instead of rescanning
     assert.ok(parses <= size * 3, `${parses} URL parses for ${size} tabs`);
     assert.equal(Object.keys(members.tabs).length, size, 'path matches consume each old record exactly once');
   } finally { globalThis.URL = OriginalURL; }
+});
+
+test('folder colors: tones and custom hex persist, reset removes the field, and the mode defaults off', () => {
+  const store = normalizeStore({ version: 1, spaces: [{ id: 's1', name: 'Work', tone: 'mint', pinned: [
+    { kind: 'folder', id: 'f1', name: 'Design', color: '#3A7BD5', children: [] },
+    { kind: 'folder', id: 'f2', name: 'Bad', color: 'red', children: [] },
+    { kind: 'folder', id: 'f3', name: 'Tone', color: 'rose', children: [] },
+  ] }], prefs: { folderColors: 'neon' } });
+  const [custom, invalid, tone] = store.spaces[0].pinned;
+  assert.equal(custom.color, '#3a7bd5', 'custom hex is stored lowercase');
+  assert.equal('color' in invalid, false, 'unknown colors are dropped');
+  assert.equal(tone.color, 'rose');
+  assert.equal(store.prefs.folderColors, 'off');
+  assert.deepEqual(FOLDER_COLOR_MODES, ['off', 'icon', 'row']);
+  assert.equal(normalizeStore({ version: 1 }).prefs.folderColors, 'off');
+
+  assert.equal(setFolderColor(store, 'f2', 'tide'), 'tide');
+  assert.equal(setFolderColor(store, 'f3', '#ABCDEF'), '#abcdef');
+  assert.equal(setFolderColor(store, 'f1', null), null);
+  assert.equal('color' in findNode(store, 'f1').node, false);
+  setFolderColor(store, 'f3', '');
+  assert.equal('color' in findNode(store, 'f3').node, false);
+  assert.throws(() => setFolderColor(store, 'f2', '#12345'), /Unknown color/);
+  assert.throws(() => setFolderColor(store, 'f2', 'url(x)'), /Unknown color/);
+  assert.equal(findNode(store, 'f2').node.color, 'tide', 'a rejected color keeps the saved one');
+  assert.throws(() => setFolderColor(store, 'missing', 'mint'), /no longer exists/);
+  assert.equal(normalizeFolderColor('#abc'), null, 'shorthand is expanded by the UI, not stored');
+
+  setPrefs(store, { folderColors: 'row' });
+  assert.equal(store.prefs.folderColors, 'row');
+  assert.throws(() => setPrefs(store, { folderColors: 'loud' }), /Invalid folder color setting/);
+  const reloaded = normalizeStore(JSON.parse(JSON.stringify(store)));
+  assert.equal(reloaded.prefs.folderColors, 'row');
+  assert.equal(findNode(reloaded, 'f2').node.color, 'tide');
+});
+
+test('removing a colored folder and moving it between spaces keep the color with the folder', () => {
+  const store = normalizeStore({ version: 1, spaces: [
+    { id: 's1', name: 'Work', tone: 'mint', pinned: [{ kind: 'folder', id: 'f1', name: 'Design', color: 'dusk', children: [] }] },
+    { id: 's2', name: 'Home', tone: 'rose', pinned: [] },
+  ] });
+  moveNode(store, 'f1', { spaceId: 's2' });
+  assert.equal(store.spaces[1].pinned[0].color, 'dusk');
+  removeNode(store, 'f1');
+  assert.equal(findNode(store, 'f1'), null);
 });

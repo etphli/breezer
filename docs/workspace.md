@@ -26,6 +26,7 @@ The full-page settings screen provides:
 - System, light, or dark appearance.
 - Bookmark bar visibility and sidebar width.
 - Sidebar font size from 12 to 20 pixels.
+- Sidebar folder colors. Choose **Off**, **Icon only**, or **Whole row** under **Layout**. Colors are off by default.
 - Centered address bar, minimal URL, and loading progress.
 - Frameless mode, with separate switches to keep the sidebar and top bar visible.
 - Space names, colors, and order.
@@ -33,11 +34,13 @@ The full-page settings screen provides:
 
 ## Horizontal tab groups and folder drops
 
-With top tabs, **New group** in the tab strip opens a new tab in a group and opens its editor. Right-click a group header to rename it, choose a stock colour, or use the **Custom colour** controls. The Red, Green and Blue sliders work with the pointer and arrow keys. The hex field accepts any six-digit RGB colour, with or without `#`. **Apply colour** commits the preview. Choosing a stock swatch removes the custom override.
+With top tabs, right-click a tab and choose **Add tab to new group**. Right-click a group header to rename it, choose a stock colour, or use the **Custom colour** controls. The Red, Green and Blue sliders work with the pointer and arrow keys. The hex field accepts any six-digit RGB colour, with or without `#`. **Apply colour** commits the preview. Choosing a stock swatch removes the custom override.
 
 Custom colours are local to the profile. They follow the group into another window, survive session ID relabeling on restore, and use the saved group's identity when it is reopened. Chromium's standard palette ID remains available to sync and other clients; the custom RGB value is not synced. Group text keeps Chromium's contrasting foreground selection for readability.
 
-In the sidebar, dragging a tab, favorite or saved page over a folder highlights its header and shows **Move into folder**. All but the outer four pixels of the header accept pages; those edges insert before or after the folder. Dropping into a closed folder opens it. Folder drags reorder folders at the root rather than nesting them. Escape or a canceled pointer capture leaves membership unchanged.
+With folder colors enabled, right-click or two-finger click a sidebar folder to change or clear its color. **Whole row** adds a tint behind the folder name. Switching colors off hides saved colors until you enable them again. Folder colors and the display mode are saved on this device.
+
+Dragging a tab, favorite or saved page over a folder highlights its header and shows **Move into folder**. All but the outer four pixels of the header accept pages; those edges insert before or after the folder. Dropping into a closed folder opens it. Folder drags reorder folders at the root rather than nesting them. Escape or a canceled pointer capture leaves membership unchanged.
 
 The headless workspace browser test covers folder drops, cancellation, persistence and reordering against the real sidebar document. Native group controls and RGB persistence have source-overlay checks and `BreezerTabGroupColorBrowserTest.*` cases staged for `browser_tests`. Native compilation, physical input, colour contrast and restore/reopen acceptance still require the combined app build before release.
 

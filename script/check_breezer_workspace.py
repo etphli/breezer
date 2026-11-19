@@ -12,6 +12,13 @@ import apply_breezer_workspace as workspace
 import check_ai_overlay as source_fixture
 
 
+TAB_GROUP_UPSTREAM_FILES = (
+    'chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc',
+    'chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h',
+    'chrome/browser/ui/tabs/tab_strip_model.cc',
+)
+
+
 def file_hashes(tree):
     return {
         path.relative_to(tree).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -43,6 +50,7 @@ def check_overlay(tree, originals):
     require(workspace.apply(tree) == 0, "Second apply was not idempotent")
     require(file_hashes(tree) == applied, "Idempotent apply changed source files")
     require(workspace.apply(tree, check=True) == 0, "Applied overlay failed check mode")
+    check_tab_groups(tree, originals)
     window_features = (tree / workspace.WINDOW_FEATURES).read_text()
     controller_creation = 'CreateInstance<HeliumLayoutStateController>'
     require(window_features.count(controller_creation) == 1,
@@ -179,6 +187,28 @@ def check_overlay(tree, originals):
             "Workspace fingerprint is not lowercase SHA-256")
 
 
+def check_tab_groups(tree, originals):
+    for name in TAB_GROUP_UPSTREAM_FILES:
+        require((tree / name).read_bytes() == originals[name],
+                f'Tab grouping must keep the upstream horizontal strip and tab model: {name}')
+
+    color_hooks = {
+        'chrome/browser/ui/views/tabs/groups/tab_group_editor_bubble_view.cc': (
+            'std::make_unique<BreezerGroupColorView>',
+            'breezer_tab_groups::SetColor(self->browser_->GetProfile(), self->group_, color)',
+            'breezer_tab_groups::SetColor(self->browser_->GetProfile(), self->group_, std::nullopt)',
+        ),
+        'chrome/browser/ui/views/tabs/tab.cc': ('breezer_tab_groups::GetColor(',),
+        'chrome/browser/ui/views/tabs/tab_group_header.cc': ('breezer_tab_groups::GetColor(',),
+        'chrome/browser/ui/views/tabs/tab_group_views.cc': ('breezer_tab_groups::GetColor(',),
+        'chrome/browser/sessions/session_restore.cc': ('breezer_tab_groups::RestoreColor(',),
+    }
+    for name, hooks in color_hooks.items():
+        source = (tree / name).read_text()
+        for hook in hooks:
+            require(hook in source, f'Missing native custom group colour hook in {name}: {hook}')
+
+
 def check_numbered_tabs(tree, host):
     """Native dispatch contract only; physical key acceptance needs a build."""
     controller = (tree / 'chrome/browser/ui/browser_command_controller.cc').read_text()
@@ -298,8 +328,8 @@ def main():
             source_fixture.CACHE = temporary / "pristine"
         originals = source_fixture.prepare(
             tree, offline=args.offline,
-            wanted_paths=tuple(name for name in workspace.replacements()
-                               if name not in (workspace.HIDDEN_SCROLLBAR, workspace.HIDDEN_SCROLLBAR_HEADER))
+            wanted_paths=(set(workspace.replacements()) | set(TAB_GROUP_UPSTREAM_FILES))
+                         - {workspace.HIDDEN_SCROLLBAR, workspace.HIDDEN_SCROLLBAR_HEADER},
         )
         # This target uses the exact licensed non-diagnostic PC donor, retained
         # in the checkout so clean-checkout regression replay needs no download.
@@ -322,7 +352,9 @@ def main():
         f"source fixture ({len(originals)} upstream targets), checks idempotently, "
         "converges after interruption, rejects anchor drift without partial writes, "
         "and exposes the bounded appearance, collapse, activeTab, and Peek source APIs "
-        "with the favourite-tab Peek hooks in place."
+        "with the favourite-tab Peek hooks in place. "
+        "The horizontal strip and tab grouping model match upstream, "
+        "and native custom group colour hooks are present."
     )
     print("Native compilation and real window/extension-host behavior still require the full macOS browser build.")
 

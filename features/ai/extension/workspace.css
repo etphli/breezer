@@ -342,6 +342,36 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .folder.drop-into > .folder-row > .count { display: none; }
 .folder.drop-into > .folder-row > .folder-drop-hint { display: block; }
 
+/* Folder colors. The tone values are the space accents, so a folder can match its
+   space. A custom hex is clamped in lightness so the icon keeps 3:1 against the
+   sidebar in either scheme; titles keep --ink, and row tints stay light enough
+   that text contrast is unchanged in practice. */
+:root {
+  --folder-mint: #23866b; --folder-tide: #2f6db8; --folder-dusk: #6c4fb5;
+  --folder-rose: #b4475e; --folder-pollen: #6c7a12; --folder-graphite: #555e6a;
+  --folder-tint: 13%;
+}
+:root[data-scheme="dark"] {
+  --folder-mint: #5ccca9; --folder-tide: #74a8ef; --folder-dusk: #ab8ff0;
+  --folder-rose: #ef879c; --folder-pollen: #c3d55c; --folder-graphite: #a4adb9;
+  --folder-tint: 17%;
+}
+[data-color="mint"] { --folder-color: var(--folder-mint); }
+[data-color="tide"] { --folder-color: var(--folder-tide); }
+[data-color="dusk"] { --folder-color: var(--folder-dusk); }
+[data-color="rose"] { --folder-color: var(--folder-rose); }
+[data-color="pollen"] { --folder-color: var(--folder-pollen); }
+[data-color="graphite"] { --folder-color: var(--folder-graphite); }
+[data-color="custom"] { --folder-color: oklch(from var(--folder-custom, var(--accent)) clamp(0.42, l, 0.6) min(c, 0.2) h); }
+:root[data-scheme="dark"] [data-color="custom"] { --folder-color: oklch(from var(--folder-custom, var(--accent)) clamp(0.7, l, 0.86) min(c, 0.16) h); }
+
+.sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph { color: var(--folder-color); }
+.sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph path { fill: color-mix(in srgb, var(--folder-color) 24%, transparent); }
+.sidebar[data-folder-colors="row"] .folder[data-color]:not(.drop-into) > .folder-row { background: color-mix(in srgb, var(--folder-color) var(--folder-tint), transparent); }
+.sidebar[data-folder-colors="row"]:not(.dragging) .folder[data-color]:not(.drop-into) > .folder-row:hover { background: color-mix(in srgb, var(--folder-color) calc(var(--folder-tint) + 6%), transparent); }
+.sidebar[data-folder-colors="row"] .folder[data-color]:not(.drop-into) > .folder-row:active,
+.sidebar[data-folder-colors="row"] .folder[data-color]:not(.drop-into) > .folder-row.contains-active { background: color-mix(in srgb, var(--folder-color) calc(var(--folder-tint) + 10%), transparent); }
+
 .divider-row {
   display: flex;
   align-items: center;
@@ -488,6 +518,37 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   width: 10px; height: 10px; flex: none; border-radius: 50%;
   background: var(--accent);
 }
+.menu-swatches { display: grid; grid-template-columns: repeat(7, minmax(0, 28px)); padding: 2px 2px 4px; }
+.menu-chip { height: 28px; display: grid; place-items: center; border-radius: 6px; }
+.menu-chip::before {
+  content: ""; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--folder-color);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--ink) 20%, transparent);
+}
+/* Without a saved custom color, the custom swatch shows the hue range on offer. */
+.menu-chip[data-color="custom"]:not(.has-custom)::before {
+  background: conic-gradient(#e5484d, #e8a33a, #9bbb2e, #2fa57d, #3b82d6, #7c5bd2, #d4508f, #e5484d);
+}
+.menu-chip:hover { background: var(--hover); }
+.menu-chip:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--focus); }
+.menu-chip[aria-checked="true"]::before { box-shadow: 0 0 0 2px var(--raised), 0 0 0 3.5px var(--folder-color); }
+.menu-chip[data-color="custom"][aria-expanded="true"] { background: var(--hover); }
+.menu-custom { display: flex; align-items: center; gap: 6px; padding: 2px 4px 6px; }
+.menu-well {
+  width: 28px; height: 28px; flex: none; padding: 0; border: 0; border-radius: 6px;
+  background: none; cursor: pointer;
+}
+.menu-well::-webkit-color-swatch-wrapper { padding: 0; }
+.menu-well::-webkit-color-swatch { border: 0; border-radius: 6px; box-shadow: inset 0 0 0 0.5px var(--line); }
+.menu-hex {
+  flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 0; border-radius: 6px;
+  background: var(--hover); font-variant-numeric: tabular-nums; text-transform: lowercase;
+}
+.menu-hex::placeholder { color: var(--muted); }
+.menu-hex[aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px var(--danger); }
+.menu-apply { height: 28px; flex: none; padding: 0 10px; border-radius: 6px; background: var(--hover); font-weight: 500; }
+.menu-apply:hover { background: var(--press); }
+.menu-well:focus-visible, .menu-hex:focus-visible, .menu-apply:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 
 /* Toast */
 .toast {

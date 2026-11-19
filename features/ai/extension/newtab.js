@@ -8,6 +8,8 @@ import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY, CUSTOM_S
 // Everything received is untrusted: text goes in with textContent and only
 // http(s) URLs become links.
 import { startPanelTheme } from './panel-theme.js';
+// Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
+import { startThemeArtwork } from './browser-theme.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -556,5 +558,6 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
 
 if (typeof document !== 'undefined' && document.getElementById('organato')) {
   void startPanelTheme();
+  void startThemeArtwork();
   void startNewTab();
 }

@@ -648,6 +648,20 @@ function folderNode() {
   return folder;
 }
 
+// Tone names map to CSS tokens; a custom hex is carried in --folder-custom.
+function paintFolderColor(node, color) {
+  const kind = !color ? '' : color.startsWith('#') ? 'custom' : color;
+  if ((node.dataset.color || '') !== kind) {
+    if (kind) node.dataset.color = kind;
+    else delete node.dataset.color;
+  }
+  const custom = kind === 'custom' ? color : '';
+  if ((node.dataset.custom || '') !== custom) {
+    if (custom) { node.dataset.custom = custom; node.style.setProperty('--folder-custom', custom); }
+    else { delete node.dataset.custom; node.style.removeProperty('--folder-custom'); }
+  }
+}
+
 function drawTree(container, items) {
   reconcile(container, items);
 }
@@ -699,6 +713,7 @@ function draw() {
   const sidebar = $('sidebar');
   sidebar.dataset.tone = /^#[0-9a-fA-F]{6}$/.test(state.appearance.theme) ? 'custom' : model.space.tone;
   sidebar.dataset.close = model.prefs.closeButton;
+  if (sidebar.dataset.folderColors !== model.prefs.folderColors) sidebar.dataset.folderColors = model.prefs.folderColors;
   if (state.renaming?.kind !== 'space') $('space-name').textContent = model.space.name;
   $('space-glyph').textContent = (model.space.name[0] || '·').toUpperCase();
 
@@ -750,6 +765,7 @@ function draw() {
         folder.setAttribute('aria-expanded', String(open));
         folder.setAttribute('aria-label', `${node.folder.name}, folder, ${node.children.length} ${node.children.length === 1 ? 'tab' : 'tabs'}`);
         folder.setAttribute('aria-selected', 'false');
+        paintFolderColor(folder, node.folder.color);
         const title = head.querySelector('.title');
         if (state.renaming?.key !== key && title.textContent !== node.folder.name) title.textContent = node.folder.name;
         head.querySelector('.count').textContent = open || !node.children.length ? '' : String(node.children.length);

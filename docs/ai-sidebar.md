@@ -14,9 +14,9 @@ Enter sends and Shift+Enter adds a line. The hint beside the page chip says what
 
 ## File review
 
-Use **Attach files** beside Browser control, or drop files onto the composer. Attach up to four files, remove any chip before sending, and add a question or send files alone for a review. Text, source code, Markdown, CSV and other UTF-8 text formats are supported, along with PNG, JPEG and WebP images. PDF and Word files must be exported as text first.
+Use **Attach files**, drop files onto the composer, or paste an image into the message box. Attach up to four files, remove any chip before sending, and add a question or send files alone for a review. Text, source code, Markdown, CSV and other UTF-8 text formats are supported, along with PNG, JPEG and WebP images. Export PDF and Word files as text first.
 
-Text files are limited to 24,000 characters and 96 KB each; images to 512 KB each. The recent conversation plus draft can contain at most 2 MB of attachment content. Oversized, unreadable and unsupported files show an error without discarding accepted files. Files are never silently truncated.
+Text files are limited to 24,000 characters and 96 KB each. Images have a 512 KB attachment limit, and Breezer resizes larger pasted images when possible. The recent conversation plus draft can contain at most 2 MB of attachment content. Oversized, unreadable and unsupported files show an error without discarding accepted files. Files are never silently truncated.
 
 File contents are sent to the selected provider only when you send, independently of the page chip. Recent messages include their attachments for follow-up questions. Sent files remain in per-window browser session history, with the same lifetime as messages. New conversation clears them; Edit and resend restores a failed message's files. Attaching a file grants no filesystem or browser-control access.
 
@@ -25,6 +25,12 @@ File contents are sent to the selected provider only when you send, independentl
 Choose **Sources** to select up to six HTTP(S) pages in this window for a comparison, summary or synthesis. The source chips show what the next message shares. Research sends text only, with labeled source references, truncation and individual errors. It does not share screenshots or authorize browser actions. Use **Clear all** inside the picker to return to the ordinary current-page mode or enable Browser control.
 
 See [Selected-tab research](ai-research.md) for the native document-read boundary, cancellation rules and verification limits.
+
+## Browser stats and theme design
+
+Ask a question like “How many tabs are open?” or “What’s using the most RAM?” The composer shows **Browser stats** before you send. You can also open **Browser tools** beside **Attach files** and choose **Ask about tabs and memory**. Breezer samples tabs and memory when the model asks for them during that reply. The model receives tab counts across your regular windows, tab titles from the current window, and available browser and system memory figures. Shared renderer memory is shown once per process, so it may be associated with multiple tabs. Tabs and processes without a measurement are reported as unavailable. The request shares no page content or screenshots.
+
+Describe a theme in the message box, or choose **Design a theme** in **Browser tools**. Paste a picture and ask Breezer to build a palette from it, use it as the New Tab background, or do both. The reply can include a live proposal. **Apply theme** changes the browser color and appearance mode and saves any picture or artwork to New Tab. Original artwork can use HTML, SVG, and CSS animation and respects your reduced-motion setting. Choose a Breezer theme in **Appearance** first if you use a theme from Chromium or an extension. Choose **Restore previous look** on the proposal or in **Browser tools** to restore the look you had before applying an AI theme.
 
 ## Browser control
 

@@ -10,7 +10,44 @@ export const zeroWidthMotionGuard = `/* Native auto-hide can keep the document v
 
 `;
 
+// Folder colors postdate the pinned main oracle. Remove exactly their two
+// blocks, and only if every rule inside them is a folder-color rule.
+const folderColorBlocks = [
+  ['\n/* Folder colors.', '.folder-row.contains-active { background: color-mix(in srgb, var(--folder-color)'],
+  ['.menu-swatches {', '.menu-well:focus-visible, .menu-hex:focus-visible, .menu-apply:focus-visible'],
+];
+const folderColorSelector = /^(?::root(?:\[data-scheme="dark"\])?|\[data-color="[a-z]+"\]|:root\[data-scheme="dark"\] \[data-color="custom"\]|\.sidebar[^{]*\.folder\[data-color\][^{]*|\.menu-(?:swatches|chip|custom|well|hex|apply)[^{]*)$/;
+
+export function stripFolderColorStyles(shared) {
+  for (const [start, last] of folderColorBlocks) {
+    assert.equal(shared.split(start).length - 1, 1, `one folder color block at ${start.trim()}`);
+    const from = shared.indexOf(start), lastAt = shared.indexOf(last, from);
+    assert.ok(lastAt > from && shared.split(last).length - 1 === 1, `folder color block end for ${start.trim()}`);
+    const to = shared.indexOf('\n', lastAt) + 1;
+    const block = shared.slice(from, to).replace(/\/\*[\s\S]*?\*\//g, '');
+    for (const [, selectors] of block.matchAll(/([^{}]+)\{[^{}]*\}/g)) {
+      for (const selector of selectors.split(/,(?![^(]*\))/)) assert.match(selector.trim(), folderColorSelector, 'folder color blocks hold only folder color rules');
+    }
+    shared = shared.slice(0, from) + shared.slice(to);
+  }
+  return shared;
+}
+
+// The two folder-color paint calls in draw, removed exactly once each.
+export const folderColorDrawLines = [
+  '  if (sidebar.dataset.folderColors !== model.prefs.folderColors) sidebar.dataset.folderColors = model.prefs.folderColors;\n',
+  '        if (!folderPreview || folderPreview.id !== node.folder.id) paintFolderColor(folder, node.folder.color);\n',
+];
+export function stripFolderColorDraw(source) {
+  for (const line of folderColorDrawLines) {
+    assert.equal(source.split(line).length - 1, 1, `one folder color draw line: ${line.trim()}`);
+    source = source.replace(line, '');
+  }
+  return source;
+}
+
 export function restoreMainStyles(shared, settings) {
+  shared = stripFolderColorStyles(shared);
   assert.equal(shared.split(zeroWidthMotionGuard).length - 1, 1, 'one zero-width guard');
   shared = shared.replace(zeroWidthMotionGuard, '');
   const placeholder = 'input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }\n';

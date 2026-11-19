@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultStore, addSpace, addFolder, addEntry, addFavorite, renameSpace, renameNode, removeNode, removeSpace, setFolderOpen, moveNode } from '../../features/ai/extension/workspace-store.js';
+import { defaultStore, addSpace, addFolder, addEntry, addFavorite, renameSpace, renameNode, removeNode, removeSpace, setFolderOpen, moveNode, setFolderColor, setPrefs } from '../../features/ai/extension/workspace-store.js';
 import { emptySyncModel, projectWorkspace, recordWorkspaceChanges, mergeSyncModels, materializeWorkspace, validateSyncModel } from '../../features/ai/extension/workspace-sync-model.js';
 
 const initial = () => {
@@ -170,4 +170,31 @@ test('incomplete or conflicting cross-kind identities reject instead of dropping
   const entry = Object.values(collision.records).find(record => record.url);
   collision.records['entry/space-default'] = structuredClone(entry);
   assert.throws(() => validateSyncModel(collision), /Conflicting synced identities/);
+});
+
+test('folder colors and their display mode stay device-local and survive a remote rename and move', () => {
+  const { store, model, folder, second } = initial();
+  const plain = projectWorkspace(store);
+  setFolderColor(store, folder.id, '#3a7bd5');
+  setPrefs(store, { folderColors: 'row' });
+  const projection = projectWorkspace(store);
+  assert.deepEqual(projection, plain, 'color and mode add nothing to the synced projection');
+  assert.deepEqual(Object.keys(projection.preferences).sort(), ['closeButton', 'newTabPosition']);
+  // The model a 1.2.6 client reads keeps exactly the fields its validator allows.
+  const local = recordWorkspaceChanges(model, plain, projection, 'client_alpha');
+  assert.doesNotMatch(JSON.stringify(validateSyncModel(local)), /folderColors|"color"|3a7bd5/);
+  // Another client renames and moves the folder; this device keeps its color and mode.
+  const remote = edit(model, materializeWorkspace(model).store, 'client_beta1', s => {
+    renameNode(s, folder.id, 'Renamed');
+    moveNode(s, folder.id, { spaceId: second.id });
+  });
+  const restored = materializeWorkspace(mergeSyncModels(local, remote), store).store;
+  const moved = restored.spaces.find(s => s.id === second.id).pinned.find(n => n.id === folder.id);
+  assert.equal(moved.name, 'Renamed');
+  assert.equal(moved.color, '#3a7bd5');
+  assert.equal(restored.prefs.folderColors, 'row');
+  // A device that never colored the folder materializes it uncolored with the default mode.
+  const other = materializeWorkspace(remote).store;
+  assert.equal('color' in other.spaces.flatMap(s => s.pinned).find(n => n.id === folder.id), false);
+  assert.equal(other.prefs.folderColors, 'off');
 });

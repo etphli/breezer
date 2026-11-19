@@ -1,50 +1,12 @@
-"""Native tab-group usability anchors for the pinned Chromium source."""
+"""Native custom tab-group colour anchors for the pinned Chromium source."""
 
 EDITOR = 'chrome/browser/ui/views/tabs/groups/tab_group_editor_bubble_view.cc'
-REGION = 'chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.cc'
-REGION_HEADER = 'chrome/browser/ui/views/frame/horizontal_tab_strip_region_view.h'
 COLOR_HEADER = 'chrome/browser/ui/tabs/breezer_tab_group_color.h'
 
 
 def replacements():
     color_include = f'#include "{COLOR_HEADER}"\n'
-    button = '''  if (browser && browser->GetType() == BrowserWindowInterface::Type::TYPE_NORMAL &&
-      browser->GetTabStripModel()->SupportsTabGroups()) {
-    new_group_button_ = AddChildView(std::make_unique<views::MdTextButton>(
-        base::BindRepeating(&chrome::CreateNewTabGroup, base::Unretained(browser)),
-        u"New group"));
-    new_group_button_->SetTooltipText(u"Create a new tab group");
-    new_group_button_->SetProperty(views::kCrossAxisAlignmentKey,
-                                  views::LayoutAlignment::kCenter);
-  }
-
-'''
-    region = [
-        ('#include "ui/views/border.h"\n', '#include "ui/views/border.h"\n#include "ui/views/controls/button/md_text_button.h"\n'),
-        ('  if (base::FeatureList::IsEnabled(features::kTabGroupsFocusing)) {\n', button + '  if (base::FeatureList::IsEnabled(features::kTabGroupsFocusing)) {\n'),
-        ('  if (browser && ShouldShowNewTabButton(browser)) {\n', button + '  if (browser && ShouldShowNewTabButton(browser)) {\n'),
-    ]
-    for kind in ('Old', 'New'):
-        caption = f'''bool HorizontalTabStripRegionView{kind}::IsPositionInWindowCaption(
-    const gfx::Point& point) {{
-'''
-        region.append((caption, caption + '''  if (new_group_button_ && IsHitInView(new_group_button_, point)) {
-    return false;
-  }
-'''))
-        order = f'''views::View::Views HorizontalTabStripRegionView{kind}::GetChildrenInZOrder() {{
-  views::View::Views children;
-'''
-        region.append((order, order + '''  if (new_group_button_) children.emplace_back(new_group_button_.get());
-'''))
     return {
-        REGION: region,
-        REGION_HEADER: [
-            ('  raw_ptr<TabStripControlButton> unfocus_button_ = nullptr;\n',
-             '  raw_ptr<views::Button> new_group_button_ = nullptr;\n  raw_ptr<TabStripControlButton> unfocus_button_ = nullptr;\n'),
-            ('  raw_ptr<views::Button> new_tab_button_ = nullptr;\n\n  std::unique_ptr<views::ActionViewController> action_view_controller_;\n',
-             '  raw_ptr<views::Button> new_tab_button_ = nullptr;\n  raw_ptr<views::Button> new_group_button_ = nullptr;\n\n  std::unique_ptr<views::ActionViewController> action_view_controller_;\n'),
-        ],
         EDITOR: [
             ('#include "chrome/browser/ui/views/tabs/groups/color_picker_view.h"\n',
              color_include + '#include "chrome/browser/ui/views/tabs/groups/breezer_group_color_view.h"\n#include "chrome/browser/ui/views/tabs/groups/color_picker_view.h"\n'),

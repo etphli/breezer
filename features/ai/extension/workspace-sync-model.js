@@ -31,7 +31,10 @@ export function projectWorkspace(rawStore, rawAppearance) {
     space.pinned.forEach((item, at) => node(item, key, at));
   });
   store.favorites.forEach((item, at) => node(item, 'favorites', at));
-  entities.preferences = { ...store.prefs };
+  // Folder colors and their display mode stay device-local, like folder
+  // expansion: clients up to 1.2.6 reject any unknown synced field, so adding
+  // one would stop sync for every older device sharing the vault.
+  entities.preferences = { newTabPosition: store.prefs.newTabPosition, closeButton: store.prefs.closeButton };
   if (rawAppearance) {
     for (const [key, value] of Object.entries(normalizeAppearance(rawAppearance))) {
       // showBookmarks is a compatibility alias of bookmarkBarMode.
@@ -158,13 +161,13 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   if (!spaces.length) spaces.push(recoveredSpace(model));
   const bySpace = new Map(spaces.map(s => [`space/${s.id}`, s]));
   const orderedFolders = ordered('folder/');
-  const localExpansion = new Map();
+  const localFolders = new Map();
   if (orderedFolders.length) {
     const folderIds = orderedFolders.map(([key]) => key.slice(7));
     for (const space of localStore.spaces) {
       const remaining = new Set(folderIds);
       for (const node of space.pinned) {
-        if (node.kind === 'folder' && remaining.delete(node.id)) localExpansion.set(node.id, node.open);
+        if (node.kind === 'folder' && remaining.delete(node.id)) localFolders.set(node.id, node);
         if (!remaining.size) break;
       }
     }
@@ -172,8 +175,12 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   const folders = new Map();
   for (const [key, folder] of orderedFolders) {
     const node = { kind: 'folder', id: key.slice(7), name: folder.name || 'Folder', open: true, children: [] };
-    // Expansion is device-local, even when a folder is renamed remotely.
-    if (localExpansion.has(node.id)) node.open = localExpansion.get(node.id);
+    // Expansion and color are device-local, even when a folder is renamed or moved remotely.
+    const local = localFolders.get(node.id);
+    if (local) {
+      node.open = local.open;
+      if (local.color) node.color = local.color;
+    }
     folders.set(key, node);
     (bySpace.get(folder.parent) || spaces[0]).pinned.push(node);
   }
@@ -195,7 +202,7 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   });
   const appearance = {};
   for (const [key, value] of Object.entries(values)) if (key.startsWith('appearance/')) appearance[key.slice(11)] = value.appearance;
-  return { store: normalizeStore({ version: 1, rev: localStore.rev, spaces, favorites, prefs: values.preferences || localStore.prefs }), appearance };
+  return { store: normalizeStore({ version: 1, rev: localStore.rev, spaces, favorites, prefs: { ...localStore.prefs, ...values.preferences } }), appearance };
 }
 
 // Stable serialization avoids republishing equivalent maps after opposite merge

@@ -11,7 +11,9 @@ export const TONES = ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite'];
 export const TONE_NAMES = { mint: 'Mint', tide: 'Tide', dusk: 'Dusk', rose: 'Rose', pollen: 'Pollen', graphite: 'Graphite' };
 export const MAX_FAVORITES = 12;
 export const MAX_SPACES = 9;
-export const DEFAULT_PREFS = Object.freeze({ newTabPosition: 'bottom', closeButton: 'hover' });
+// Folder colors show as nothing, the folder icon, or a tint across the folder row.
+export const FOLDER_COLOR_MODES = ['off', 'icon', 'row'];
+export const DEFAULT_PREFS = Object.freeze({ newTabPosition: 'bottom', closeButton: 'hover', folderColors: 'off' });
 export const DEFAULT_APPEARANCE = Object.freeze({
   layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system',
   showBookmarks: true, bookmarkBarMode: 'newTab', sidebarWidth: 240, sidebarFontSize: 15,
@@ -42,6 +44,12 @@ const APPEARANCE_FIELDS = {
 
 const text = (value, max = 200) => (typeof value === 'string' ? value.slice(0, max) : '');
 const isTone = (value) => TONES.includes(value);
+
+// A folder color is a space tone name or a custom #rrggbb, stored lowercase.
+export function normalizeFolderColor(value) {
+  if (isTone(value)) return value;
+  return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value) ? value.toLowerCase() : null;
+}
 
 // Short session-scoped tombstones keep a quarantined URL from falling through
 // to a different path match when another window restores later. Hash collisions
@@ -135,13 +143,16 @@ function normalizeEntry(raw) {
 
 function normalizeNode(raw) {
   if (raw?.kind === 'folder') {
-    return {
+    const folder = {
       kind: 'folder',
       id: text(raw.id, 64) || uid('f'),
       name: text(raw.name, 80).trim() || 'Folder',
       open: raw.open !== false,
       children: (Array.isArray(raw.children) ? raw.children : []).map(normalizeEntry).filter(Boolean),
     };
+    const color = normalizeFolderColor(raw.color);
+    if (color) folder.color = color;
+    return folder;
   }
   return normalizeEntry(raw);
 }
@@ -173,6 +184,7 @@ export function normalizeStore(raw) {
   store.prefs = {
     newTabPosition: prefs.newTabPosition === 'top' ? 'top' : 'bottom',
     closeButton: prefs.closeButton === 'always' ? 'always' : 'hover',
+    folderColors: FOLDER_COLOR_MODES.includes(prefs.folderColors) ? prefs.folderColors : 'off',
   };
   return store;
 }
@@ -326,6 +338,17 @@ export function renameNode(store, id, name) {
   else delete found.node.customTitle;
 }
 
+// A null or empty color resets the folder to the uncolored default.
+export function setFolderColor(store, id, color) {
+  const found = findNode(store, id);
+  if (found?.node.kind !== 'folder') throw new Error('That folder no longer exists.');
+  if (color === null || color === undefined || color === '') { delete found.node.color; return null; }
+  const clean = normalizeFolderColor(color);
+  if (!clean) throw new Error('Unknown color.');
+  found.node.color = clean;
+  return clean;
+}
+
 export function setFolderOpen(store, id, open) {
   const found = findNode(store, id);
   if (found?.node.kind === 'folder') found.node.open = Boolean(open);
@@ -382,6 +405,10 @@ export function setPrefs(store, patch) {
   if (patch.closeButton !== undefined) {
     if (!['hover', 'always'].includes(patch.closeButton)) throw new Error('Invalid close button setting.');
     store.prefs.closeButton = patch.closeButton;
+  }
+  if (patch.folderColors !== undefined) {
+    if (!FOLDER_COLOR_MODES.includes(patch.folderColors)) throw new Error('Invalid folder color setting.');
+    store.prefs.folderColors = patch.folderColors;
   }
 }
 

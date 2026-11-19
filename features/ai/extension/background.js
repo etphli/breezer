@@ -98,6 +98,8 @@ import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
+import { readBrowserStats } from './browser-stats.js';
+import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
 import { installTranslation } from './translation-background.js';
 
@@ -409,7 +411,24 @@ export function installBackground(api) {
           try {
             ensureActive(run);
             if (typeof message.requestId !== 'string' || message.requestId.length > 200) throw new Error('Invalid browser tool request.');
-            if (message.name === 'browser_snapshot' && !run.control && run.includeContext && run.tab) response.result = await tools.snapshot(run.tab, null, true, () => activeRun === run && !run.cancelled);
+            if (message.name === 'browser_stats') {
+              if (run.browserTask !== 'stats') throw new Error('Browser stats are off for this request.');
+              run.stats ||= readBrowserStats(api, panel.windowId);
+              response.result = await run.stats;
+            } else if (message.name === 'browser_propose_theme') {
+              if (run.browserTask !== 'theme') throw new Error('Theme design is off for this request.');
+              const { name, theme, colorMode, html, imageAttachment } = message.args || {};
+              if (typeof name !== 'string' || !name.trim() || name.length > 48 || typeof theme !== 'string' ||
+                  !/^#[0-9a-f]{6}$/i.test(theme) || !['system', 'light', 'dark'].includes(colorMode) ||
+                  (html !== undefined && (typeof html !== 'string' || html.length > 40000))) {
+                throw new Error('Provide a name, hex color, color mode, and optional HTML of up to 40,000 characters.');
+              }
+              if (imageAttachment !== undefined && (!Number.isInteger(imageAttachment) || imageAttachment < 1 || imageAttachment > run.imageCount)) {
+                throw new Error('Choose an image from the latest image attachments.');
+              }
+              run.themeProposal = { name, theme, colorMode, ...(html === undefined ? {} : { html }), ...(imageAttachment === undefined ? {} : { imageAttachment }) };
+              response.result = { staged: true, name, applied: false };
+            } else if (message.name === 'browser_snapshot' && !run.control && run.includeContext && run.tab) response.result = await tools.snapshot(run.tab, null, true, () => activeRun === run && !run.cancelled);
             else {
               if (!run.session || !run.control) throw new Error('Browser control is off. Enable it before sending a request.');
               response.result = await tools.execute(run.session, message.name, message.args);
@@ -419,7 +438,12 @@ export function installBackground(api) {
           if (!run.cancelled && activeRun === run) { try { native.postMessage(response); } catch {} }
         })();
       } else if (['delta', 'complete', 'error'].includes(message.type)) {
-        post(panel.port, message);
+        if (message.type === 'complete') {
+          post(panel.port, {
+            type: 'complete', id: run.id, ...(message.cancelled ? { cancelled: true } : {}),
+            ...(!message.cancelled && run.themeProposal ? { themeProposal: run.themeProposal } : {}),
+          });
+        } else post(panel.port, message);
         if (message.type !== 'delta') {
           activeRun = null;
           run.cancelled = true;
@@ -440,9 +464,13 @@ export function installBackground(api) {
   };
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
+    const browserTask = message.browserTask;
+    if (browserTask !== undefined && (!['stats', 'theme'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('Browser stats and theme design require page access and research to be off.');
     await cancel(activeRun);
     if (panel.closed || !panel.visible) throw new Error('The assistant closed. Reopen it and select sources again.');
-    const run = { id: message.id, panel, control: message.control === true, includeContext: message.includeContext === true || message.control === true, cancelled: false, session: null, tab: null };
+    const run = { id: message.id, panel, browserTask, control: message.control === true, includeContext: message.includeContext === true || message.control === true, cancelled: false, session: null, tab: null };
+    const history = Array.isArray(message.history) ? message.history.slice(-40) : [];
+    if (browserTask === 'theme') run.imageCount = themeReferenceImages(message.attachments, history).length;
     activeRun = run;
     try {
       let context, researchSources;
@@ -474,9 +502,10 @@ export function installBackground(api) {
         type: 'chat', id: run.id, provider: message.provider, model: message.model,
         ...(message.reasoning !== undefined ? { reasoning: message.reasoning } : {}),
         ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
-        message: message.message, attachments: message.attachments, history: Array.isArray(message.history) ? message.history.slice(-40) : [],
+        message: message.message, attachments: message.attachments, history,
         profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
         ...(researchSources ? { researchSources } : {}),
+        ...(browserTask ? { browserTask } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
       });
     } catch (error) {

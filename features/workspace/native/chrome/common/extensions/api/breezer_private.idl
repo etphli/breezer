@@ -1,6 +1,7 @@
 // Copyright 2026 The Breezer Authors
 // This file is governed by the same license as the Breezer project.
 
+// Private APIs used by the bundled Breezer extension.
 namespace breezerPrivate {
   enum Layout {
     sidebar,
@@ -30,6 +31,7 @@ namespace breezerPrivate {
     SidebarMode sidebarMode;
     DOMString theme;
     ColorMode colorMode;
+    boolean themeCanRestore;
     boolean showBookmarks;
     BookmarkBarMode bookmarkBarMode;
     long sidebarWidth;
@@ -41,6 +43,11 @@ namespace breezerPrivate {
     boolean frameless;
     boolean alwaysShowSidebar;
     boolean alwaysShowTopBar;
+  };
+
+  dictionary ThemeState {
+    DOMString theme;
+    ColorMode colorMode;
   };
 
   dictionary AppearancePatch {
@@ -59,6 +66,7 @@ namespace breezerPrivate {
     boolean? frameless;
     boolean? alwaysShowSidebar;
     boolean? alwaysShowTopBar;
+    ThemeState? expectedThemeState;
   };
 
   dictionary ResearchTab {
@@ -75,6 +83,38 @@ namespace breezerPrivate {
   };
   callback ResearchTabsCallback = void(ResearchTab[] tabs);
   callback ResearchTextCallback = void(ResearchText page);
+
+  dictionary SystemMemory {
+    double? totalBytes;
+    double? availableBytes;
+  };
+  dictionary BrowserMemory {
+    double? footprintBytes;
+    double? browserProcessBytes;
+    long measuredProcessCount;
+    boolean sampleComplete;
+  };
+  dictionary BrowserStatsTab {
+    long tabId;
+    DOMString title;
+    long[] rendererProcessIds;
+    boolean? rendererDetailsTruncated;
+  };
+  dictionary RendererMemory {
+    long id;
+    double? footprintBytes;
+    boolean shared;
+  };
+  dictionary BrowserStats {
+    long totalTabCount;
+    long? windowTabCount;
+    SystemMemory systemMemory;
+    BrowserMemory browserMemory;
+    BrowserStatsTab[] tabs;
+    RendererMemory[] rendererProcesses;
+    boolean detailsTruncated;
+  };
+  callback BrowserStatsCallback = void(BrowserStats stats);
 
   callback AppearanceCallback = void(Appearance appearance);
   callback BooleanCallback = void(boolean allowed);
@@ -121,6 +161,9 @@ namespace breezerPrivate {
                                 DOMString expectedUrl,
                                 ResearchTextCallback callback);
     static void authorizeCurrentPage(BooleanCallback callback);
+    // One sample. Only the requested window in the calling regular profile
+    // contributes tab titles; renderer IDs are local to this response.
+    static void getBrowserStats(long windowId, BrowserStatsCallback callback);
     // Marks the live favourite tabs of the calling sidebar's own window, where
     // links open in a peek. Every other tab in that window is cleared. Unknown
     // or closed tab IDs are ignored.

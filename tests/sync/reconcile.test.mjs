@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WorkspaceSync, SYNC_LOCAL_KEY } from '../../features/ai/extension/workspace-sync.js';
-import { defaultStore, DEFAULT_APPEARANCE, STORE_KEY, MEMBERS_KEY, addSpace, addEntry, renameSpace, removeNode } from '../../features/ai/extension/workspace-store.js';
-import { emptySyncModel, serializeSyncModel } from '../../features/ai/extension/workspace-sync-model.js';
+import { defaultStore, DEFAULT_APPEARANCE, STORE_KEY, MEMBERS_KEY, addSpace, addEntry, addFolder, renameSpace, renameNode, removeNode, setFolderColor, setPrefs } from '../../features/ai/extension/workspace-store.js';
+import { emptySyncModel, serializeSyncModel, validateSyncModel } from '../../features/ai/extension/workspace-sync-model.js';
 
 function fixture(server, id, initial = defaultStore()) {
   const saved = { [STORE_KEY]: structuredClone(initial), [MEMBERS_KEY]: { tabs: { 3: { s: 'space-default', k: 'device-session', u: 'https://private.test/local' } } } };
@@ -229,4 +229,26 @@ test('managed appearance changes do not block valid saved spaces or overwrite th
   assert.match(result.message, /controlled by policy/);
   assert.equal(b.saved[STORE_KEY].spaces[1].name, 'Policy-safe data');
   assert.equal(b.appearance().theme, 'mint');
+});
+
+test('folder colors round-trip through the worker without reaching the shared model', async () => {
+  const remote = server();
+  const a = fixture(remote, 'client_alpha'), b = fixture(remote, 'client_beta1');
+  const folder = addFolder(a.saved[STORE_KEY], 'space-default', 'Design');
+  await cycle(a); await cycle(b);
+  setFolderColor(a.saved[STORE_KEY], folder.id, 'pollen');
+  setPrefs(a.saved[STORE_KEY], { folderColors: 'icon' });
+  const published = remote.calls;
+  await cycle(a);
+  assert.equal(remote.calls, published, 'a color change alone does not republish');
+  renameNode(b.saved[STORE_KEY], folder.id, 'Design review');
+  await cycle(b); await cycle(a);
+  const mine = a.saved[STORE_KEY];
+  assert.equal(mine.spaces[0].pinned[0].name, 'Design review');
+  assert.equal(mine.spaces[0].pinned[0].color, 'pollen');
+  assert.equal(mine.prefs.folderColors, 'icon');
+  assert.equal('color' in b.saved[STORE_KEY].spaces[0].pinned[0], false);
+  assert.equal(b.saved[STORE_KEY].prefs.folderColors ?? 'off', 'off');
+  const shared = validateSyncModel(JSON.parse(remote.state.model));
+  assert.doesNotMatch(JSON.stringify(shared), /folderColors|pollen|"color"/);
 });
