@@ -1,6 +1,62 @@
+--- a/chrome/common/importer/firefox_importer_utils_win.cc
++++ b/chrome/common/importer/firefox_importer_utils_win.cc
+@@ -68,6 +68,28 @@
+   return (result != ERROR_SUCCESS) ? base::FilePath() : base::FilePath(buffer);
+ }
+ 
++base::FilePath GetFirefoxPasswordImportPath() {
++  const base::FilePath registered = GetFirefoxInstallPathFromRegistry();
++  base::FilePath program_files;
++  base::FilePath protected_root;
++  base::FilePath install_path;
++  if (registered.empty() || !registered.IsAbsolute() ||
++      !base::PathService::Get(base::DIR_PROGRAM_FILES6432, &program_files) ||
++      !base::NormalizeFilePath(program_files, &protected_root) ||
++      !base::NormalizeFilePath(registered, &install_path) ||
++      !protected_root.IsParent(install_path)) {
++    return {};
++  }
++
++  const base::FilePath library = install_path.AppendASCII("nss3.dll");
++  base::FilePath resolved_library;
++  if (!base::NormalizeFilePath(library, &resolved_library) ||
++      resolved_library != library) {
++    return {};
++  }
++  return install_path;
++}
++
+ base::FilePath _GetProfilesINI(const char* folder) {
+   base::FilePath ini_file;
+   // The default location of the profile folder containing user data is
+--- a/chrome/common/importer/firefox_importer_utils.h
++++ b/chrome/common/importer/firefox_importer_utils.h
+@@ -24,6 +24,9 @@
+ // Detects where Firefox lives. Returns an empty path if Firefox is not
+ // installed.
+ base::FilePath GetFirefoxInstallPathFromRegistry();
++
++// Returns the registered Firefox runtime under native Program Files, if any.
++base::FilePath GetFirefoxPasswordImportPath();
+ #endif  // BUILDFLAG(IS_WIN)
+ 
+ struct FirefoxDetail {
 --- a/chrome/browser/importer/importer_list.cc
 +++ b/chrome/browser/importer/importer_list.cc
-@@ -255,8 +255,12 @@
+@@ -195,7 +195,11 @@
+     firefox.services_supported = user_data_importer::HISTORY |
+                                  user_data_importer::FAVORITES |
+                                  user_data_importer::AUTOFILL_FORM_DATA;
+-#if !BUILDFLAG(IS_MAC)
++#if BUILDFLAG(IS_WIN)
++    if (!GetFirefoxPasswordImportPath().empty()) {
++      firefox.services_supported |= user_data_importer::PASSWORDS;
++    }
++#elif !BUILDFLAG(IS_MAC)
+     // Passwords are imported by loading the NSS DLLs into the Chromium process.
+     // Restrictive code signing prevents that from ever working again in modern
+     // macOSes, so don't promise an import service that can't be delivered.
+@@ -255,8 +259,12 @@
    }
  
    for (auto& profile : profiles) {
@@ -15,7 +71,7 @@
    }
  
    return profiles;
-@@ -299,10 +303,5 @@
+@@ -299,10 +307,5 @@
  
    source_profiles_.assign(profiles.begin(), profiles.end());
  
@@ -26,6 +82,142 @@
 -
    std::move(profiles_loaded_callback).Run();
  }
+--- a/chrome/utility/importer/firefox_importer.cc
++++ b/chrome/utility/importer/firefox_importer.cc
+@@ -458,10 +458,17 @@
+ void FirefoxImporter::ImportPasswords() {
+   // Initializes NSS3.
+   NSSDecryptor decryptor;
++#if BUILDFLAG(IS_WIN)
++  const base::FilePath install_path = GetFirefoxPasswordImportPath();
++  if (install_path.empty() || !decryptor.Init(install_path, source_path_)) {
++    return;
++  }
++#else
+   if (!decryptor.Init(source_path_, source_path_) &&
+       !decryptor.Init(app_path_, source_path_)) {
+     return;
+   }
++#endif
+ 
+   // Since Firefox 32, passwords are in logins.json.
+   base::FilePath json_file = source_path_.AppendASCII("logins.json");
+--- a/chrome/utility/importer/nss_decryptor_win.h
++++ b/chrome/utility/importer/nss_decryptor_win.h
+@@ -92,7 +92,6 @@
+ 
+ typedef struct PK11SlotInfoStr PK11SlotInfo;
+ 
+-typedef SECStatus (*NSSInitFunc)(const char *configdir);
+ typedef SECStatus (*NSSShutdownFunc)(void);
+ typedef PK11SlotInfo* (*PK11GetInternalKeySlotFunc)(void);
+ typedef void (*PK11FreeSlotFunc)(PK11SlotInfo *slot);
+@@ -157,7 +156,6 @@
+       user_data_importer::ImportedPasswordForm* form);
+ 
+   // Methods in Firefox security components.
+-  NSSInitFunc NSS_Init;
+   NSSShutdownFunc NSS_Shutdown;
+   PK11GetInternalKeySlotFunc PK11_GetInternalKeySlot;
+   PK11FreeSlotFunc PK11_FreeSlot;
+--- a/chrome/utility/importer/nss_decryptor_win.cc
++++ b/chrome/utility/importer/nss_decryptor_win.cc
+@@ -6,18 +6,19 @@
+ 
+ #include <windows.h>
+ 
++#include <stdint.h>
++
+ #include "base/files/file_path.h"
+ #include "base/strings/sys_string_conversions.h"
+ 
+ namespace {
+ 
+-// A helper class whose destructor calls SetDllDirectory(nullptr) to undo the
+-// effects of a previous SetDllDirectory call.
+-class ScopedSetDllDirectoryCaller {
+- public:
+-  ScopedSetDllDirectoryCaller() = default;
+-  ~ScopedSetDllDirectoryCaller() { ::SetDllDirectory(nullptr); }
+-};
++// Keep these values in sync with NSS's nss.h.
++constexpr uint32_t kNSSInitReadOnly = 0x01;
++constexpr uint32_t kNSSInitNoModuleDB = 0x04;
++constexpr uint32_t kNSSInitNoRootInit = 0x10;
++using NSSInitializeFunc =
++    SECStatus (*)(const char*, const char*, const char*, const char*, uint32_t);
+ 
+ }  // namespace
+ 
+@@ -28,15 +29,10 @@
+ 
+ bool NSSDecryptor::Init(const base::FilePath& dll_path,
+                         const base::FilePath& db_path) {
+-  // We call SetDllDirectory to work around a Purify bug (GetModuleHandle
+-  // fails inside Purify under certain conditions).
+-
+-  if (!::SetDllDirectory(dll_path.value().c_str())) {
+-    return false;
+-  }
+-
+-  ScopedSetDllDirectoryCaller caller;
+-  nss3_dll_ = ::LoadLibrary(kNSS3Library);
++  const base::FilePath library = dll_path.Append(kNSS3Library);
++  nss3_dll_ = ::LoadLibraryExW(library.value().c_str(), nullptr,
++                              LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR |
++                                  LOAD_LIBRARY_SEARCH_SYSTEM32);
+   if (!nss3_dll_) {
+     return false;
+   }
+@@ -54,8 +50,7 @@
+ }
+ 
+ NSSDecryptor::NSSDecryptor()
+-    : NSS_Init(NULL),
+-      NSS_Shutdown(NULL),
++    : NSS_Shutdown(NULL),
+       PK11_GetInternalKeySlot(NULL),
+       PK11_FreeSlot(NULL),
+       PK11_Authenticate(NULL),
+@@ -75,8 +70,8 @@
+                            base::NativeLibrary plds4_dll,
+                            base::NativeLibrary nspr4_dll) {
+   // Gets the function address.
+-  NSS_Init = (NSSInitFunc)
+-      base::GetFunctionPointerFromNativeLibrary(nss3_dll_, "NSS_Init");
++  const auto initialize = reinterpret_cast<NSSInitializeFunc>(
++      base::GetFunctionPointerFromNativeLibrary(nss3_dll_, "NSS_Initialize"));
+   NSS_Shutdown = (NSSShutdownFunc)
+       base::GetFunctionPointerFromNativeLibrary(nss3_dll_, "NSS_Shutdown");
+   PK11_GetInternalKeySlot = (PK11GetInternalKeySlotFunc)
+@@ -95,7 +90,7 @@
+   PR_Cleanup = (PRCleanupFunc)
+       base::GetFunctionPointerFromNativeLibrary(nspr4_dll, "PR_Cleanup");
+ 
+-  if (NSS_Init == NULL || NSS_Shutdown == NULL ||
++  if (initialize == nullptr || NSS_Shutdown == NULL ||
+       PK11_GetInternalKeySlot == NULL || PK11_FreeSlot == NULL ||
+       PK11_Authenticate == NULL || PK11SDR_Decrypt == NULL ||
+       SECITEM_FreeItem == NULL || PL_ArenaFinish == NULL ||
+@@ -104,7 +99,9 @@
+     return false;
+   }
+ 
+-  SECStatus result = NSS_Init(base::SysWideToNativeMB(db_path.value()).c_str());
++  const SECStatus result = initialize(
++      base::SysWideToNativeMB(db_path.value()).c_str(), "", "", "secmod.db",
++      kNSSInitReadOnly | kNSSInitNoModuleDB | kNSSInitNoRootInit);
+   if (result != SECSuccess) {
+     Free();
+     return false;
+@@ -125,7 +122,6 @@
+     base::UnloadNativeLibrary(softokn3_dll_);
+   if (nss3_dll_ != NULL)
+     base::UnloadNativeLibrary(nss3_dll_);
+-  NSS_Init = NULL;
+   NSS_Shutdown = NULL;
+   PK11_GetInternalKeySlot = NULL;
+   PK11_FreeSlot = NULL;
 --- a/chrome/browser/resources/settings/people_page/import_data_dialog.ts
 +++ b/chrome/browser/resources/settings/people_page/import_data_dialog.ts
 @@ -80,6 +80,11 @@

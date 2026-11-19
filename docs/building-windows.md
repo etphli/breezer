@@ -7,8 +7,9 @@ Breezer keeps Windows DPAPI encryption and Chromium's download warning handling.
 
 The Windows candidate includes the workspace sidebar, new tab and browser
 settings. The bundled assistant, Organato integration and in-app updater depend
-on the macOS helper. On Windows, choose **Import browser data** for Firefox
-passwords. Other password sources use the native CSV importer. See
+on the macOS helper. On Windows, **Import browser data** supports direct password
+import from a standard 64-bit Firefox installation in Program Files. Other
+password sources use the native CSV importer. See
 [password import and management](passwords.md).
 
 ## Set up the build machine

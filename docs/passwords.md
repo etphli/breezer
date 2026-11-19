@@ -15,7 +15,7 @@ The component has password actions and a separate passkey section:
 
 Export saved passwords as CSV, then select the file in Breezer. Review conflicts or errors in the native importer. After verifying the imported entries, delete the readable export and remove it from the Trash or Recycle Bin. Password CSVs do not transfer passkeys. [Chrome export instructions](https://support.google.com/chrome/answer/13068232?hl=en), [Edge export instructions](https://support.microsoft.com/en-us/edge/export-passwords-in-microsoft-edge).
 
-On Windows, choose **Import browser data** in Browser tools to import the categories offered for a detected browser profile. **Bookmarks HTML File** accepts an HTML export when the source profile is unavailable. For Firefox, the built-in importer offers **Saved passwords**. Select it explicitly and close Firefox if prompted. Use an authenticated CSV export for Firefox profiles protected by a Primary Password. [Firefox export instructions](https://support.mozilla.org/en-US/kb/export-login-data-firefox).
+On Windows, choose **Import browser data** in Browser tools to import the categories offered for a detected browser profile. **Bookmarks HTML File** accepts an HTML export when the source profile is unavailable. A standard 64-bit Firefox installation in Program Files supports **Saved passwords**. Select it explicitly and close Firefox if prompted. Use Firefox's authenticated CSV export if **Saved passwords** is unavailable or the profile is protected by a Primary Password. [Firefox export instructions](https://support.mozilla.org/en-US/kb/export-login-data-firefox).
 
 ## Settings agent integration
 
@@ -67,7 +67,7 @@ The patch restores only password functionality removed by Helium:
 - Restores Chromium's native password action, so the password page-action controller and save/update bubble have their normal action item. It also restores the password icon in app windows.
 - Restores the native manage-passwords footer in autofill suggestions.
 
-The shared password overlay uses Chromium's native password store, CSV importer and device authentication. The Windows-only [import patch](../features/passwords/native-ui/windows-import.patch) keeps the existing Firefox NSS import capability and leaves **Saved passwords** unchecked each time the import dialog opens. The inherited Helium startup patch disables automatic first-run import.
+The shared password overlay uses Chromium's native password store, CSV importer and device authentication. The Windows-only [import patch](../features/passwords/native-ui/windows-import.patch) uses the registered Firefox NSS runtime in native Program Files. It opens the profile read-only with external NSS modules disabled and leaves **Saved passwords** unchecked each time the import dialog opens. The inherited Helium startup patch disables automatic first-run import.
 
 ## Pinned implementation evidence
 
@@ -76,7 +76,7 @@ The inspected source is Chromium `156.0.8078.47` with Helium `f29a25968e483f8bb8
 - `chrome/browser/ui/webui/chrome_web_ui_configs.cc` registers `PasswordManagerUIConfig`; `chrome/chrome_paks.gni` retains the password-manager resources.
 - `chrome/browser/resources/password_manager/router.ts` defines `/passwords`, `/settings`, and `UrlParam.START_IMPORT = 'import'`. `settings_section.ts` calls `launchImport()` when `?import=true`. The literal query is `import`, not `startImport`.
 - `chrome/browser/resources/settings/route.ts` defines `/importData`. The native handler intersects the selected categories with the source profile's capabilities.
-- `chrome/utility/importer/chrome_importer.cc` implements history and bookmarks for detected Chromium-based browsers. The Windows profile list exposes native Firefox password import only. Its import implementation and Firefox NSS authentication are unchanged.
+- `chrome/utility/importer/chrome_importer.cc` implements history and bookmarks for detected Chromium-based browsers. On Windows, the native Firefox importer uses the existing NSS authentication and a runtime path resolved from the machine installation.
 - `passwords_importer.ts` defaults to `PasswordStoreSet.DEVICE` for non-account users and preserves the native parser, conflict selection, errors, and optional source-file deletion. Breezer's non-Google profile does not activate Google account password storage. Helium's `password_manager_features_util.cc` requires active upload to Google before enabling that store. If Main later adds account storage or password sync providers, re-audit these local-only claims before shipping them.
 - `ProfilePasswordStoreFactory` creates the profile store with `profile->GetPath()` and `g_browser_process->os_crypt_async()`. `LoginDatabase` encrypts password values through that native encryptor and fails writes on encryption failure. This does not claim that all password metadata is encrypted.
 - Branding assigns `Breezer Storage Key` / `Breezer` in `keychain_password_mac.mm`; it does not reuse Chrome's Keychain item. This identity difference does not provide Chrome sync.
@@ -138,6 +138,6 @@ python script/windows/smoke_import.py --browser C:\path\to\chrome.exe --driver C
 
 The smoke test uses a fresh Breezer profile, imports a synthetic bookmarks HTML file and a copy of the committed dummy CSV through the standard Windows file pickers, then checks both saved entries in Chromium's native pages.
 
-To check Firefox direct import, use a disposable Windows account where Firefox has only one profile named `Breezer import smoke`. In Firefox's password manager, add a single synthetic login for `https://breezer-firefox-smoke.example.test/` with username `dummy-firefox@example.test` and any dummy password. Close Firefox and rerun with `--firefox-fixture`. The check confirms **Saved passwords** starts unchecked, enables it and verifies the dummy entry. It requires Firefox and Breezer builds of the same architecture.
+To check Firefox direct import, use a standard 64-bit Firefox installation in Program Files and a disposable Windows account where Firefox has only one profile named `Breezer import smoke`. In Firefox's password manager, add a single synthetic login for `https://breezer-firefox-smoke.example.test/` with username `dummy-firefox@example.test` and any dummy password. Close Firefox and rerun with `--firefox-fixture`. The check confirms **Saved passwords** starts unchecked, enables it and verifies the dummy entry.
 
 Run `python tests/windows_import_test.py` for the Windows patch contract checks. Set `BREEZER_WINDOWS_IMPORT_SOURCE` to the prepared Windows source directory to check the compiled source inputs.
