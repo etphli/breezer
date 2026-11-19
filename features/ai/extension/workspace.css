@@ -364,8 +364,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 [data-color="custom"] { --folder-color: oklch(from var(--folder-custom, var(--accent)) clamp(0.42, l, 0.6) min(c, 0.2) h); }
 :root[data-scheme="dark"] [data-color="custom"] { --folder-color: oklch(from var(--folder-custom, var(--accent)) clamp(0.7, l, 0.86) min(c, 0.16) h); }
 
-.sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph { color: var(--folder-color); }
-.sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph path { fill: color-mix(in srgb, var(--folder-color) 24%, transparent); }
+.sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph,
+.sidebar .folder[data-color][data-color-preview] > .folder-row .folder-glyph { color: var(--folder-color); }
+.sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph path,
+.sidebar .folder[data-color][data-color-preview] > .folder-row .folder-glyph path { fill: color-mix(in srgb, var(--folder-color) 24%, transparent); }
 .sidebar[data-folder-colors="row"] .folder[data-color]:not(.drop-into) > .folder-row { background: color-mix(in srgb, var(--folder-color) var(--folder-tint), transparent); }
 .sidebar[data-folder-colors="row"]:not(.dragging) .folder[data-color]:not(.drop-into) > .folder-row:hover { background: color-mix(in srgb, var(--folder-color) calc(var(--folder-tint) + 6%), transparent); }
 .sidebar[data-folder-colors="row"] .folder[data-color]:not(.drop-into) > .folder-row:active,

@@ -69,11 +69,34 @@ test('folder colors: Settings mode, context menu, keyboard, custom hex, preview 
     await folder.waitFor();
     const stored = () => page.evaluate(() => ({ color: window.fx.local['workspace.v1'].spaces[0].pinned[0].color ?? null, mode: window.fx.local['workspace.v1'].prefs.folderColors }));
 
-    // Off by default: the menu has no color controls.
+    // A fresh display setting still lets the folder menu choose and show a color.
     await page.waitForFunction(() => document.getElementById('sidebar').dataset.folderColors === 'off');
+    const glyph = head.locator('.folder-glyph');
+    const glyphColor = () => glyph.evaluate((node) => getComputedStyle(node).color);
+    const neutral = await glyphColor();
+    const initial = await stored();
     await head.click({ button: 'right' });
-    assert.equal(await page.locator('#menu .menu-swatches').count(), 0);
+    assert.equal(await page.locator('#menu .menu-swatches').count(), 1, 'the default folder menu offers colors');
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/folder-colors-default-menu.png` });
+
+    await page.getByRole('menuitemradio', { name: 'Custom color' }).click();
+    await page.getByRole('textbox', { name: 'Hex color' }).fill('#38f');
+    assert.notEqual(await glyphColor(), neutral);
+    assert.deepEqual(await stored(), initial, 'opening the editor saves neither the color nor the display mode');
     await page.keyboard.press('Escape');
+    assert.equal(await glyphColor(), neutral);
+
+    await page.getByRole('menuitemradio', { name: 'Rose' }).click();
+    await folderPainted(page, 'rose');
+    await page.waitForFunction(() => document.getElementById('sidebar').dataset.folderColors === 'icon');
+    assert.deepEqual(await stored(), { color: 'rose', mode: 'icon' });
+    assert.notEqual(await glyphColor(), neutral);
+    await page.reload();
+    await folderPainted(page, 'rose');
+    assert.notEqual(await glyphColor(), neutral);
+    await head.click({ button: 'right' });
+    await page.getByRole('menuitem', { name: 'Reset color' }).click();
+    await folderPainted(page, null, null);
 
     // Settings > Layout > Sidebar folder colors writes the store; the sidebar follows on reload.
     const settings = await context.newPage();
@@ -81,9 +104,8 @@ test('folder colors: Settings mode, context menu, keyboard, custom hex, preview 
     await settings.goto(`${base}/workspace.html#/settings/layout`);
     const group = settings.locator('[data-pref="folderColors"]');
     await group.waitFor();
-    assert.equal(await group.locator('[data-value="off"]').getAttribute('aria-checked'), 'true');
-    await group.locator('[data-value="off"]').focus();
-    await settings.keyboard.press('ArrowRight');
+    assert.equal(await group.locator('[data-value="icon"]').getAttribute('aria-checked'), 'true');
+    await group.locator('[data-value="icon"]').focus();
     await settings.keyboard.press('ArrowRight');
     await settings.waitForFunction(() => window.fx.local['workspace.v1'].prefs.folderColors === 'row');
     assert.equal(await group.locator('[data-value="row"]').getAttribute('aria-checked'), 'true');
@@ -187,11 +209,21 @@ test('folder colors: Settings mode, context menu, keyboard, custom hex, preview 
       await page.locator('.row:not(.folder-row) .title').first().evaluate((node) => getComputedStyle(node).color));
     await page.screenshot({ animations: 'disabled', path: `${evidence}/folder-colors-icon-light.png` });
 
-    // Reset removes the stored color.
+    // Off hides a saved color while keeping the palette available. Reset can
+    // clear that saved color without enabling the display.
+    await page.evaluate(async () => {
+      const value = structuredClone(window.fx.local['workspace.v1']);
+      value.prefs.folderColors = 'off';
+      await chrome.storage.local.set({ 'workspace.v1': value });
+    });
+    await page.waitForFunction(() => document.getElementById('sidebar').dataset.folderColors === 'off');
+    assert.equal(await glyphColor(), neutral);
+    assert.deepEqual(await stored(), { color: '#1f8a70', mode: 'off' });
     await head.click({ button: 'right' });
     await page.getByRole('menuitem', { name: 'Reset color' }).click();
     await page.waitForFunction(() => !('color' in window.fx.local['workspace.v1'].spaces[0].pinned[0]));
     await folderPainted(page, null, null);
+    assert.deepEqual(await stored(), { color: null, mode: 'off' });
     assert.deepEqual(errors, []);
   } finally {
     try { await browser?.close(); } finally { await new Promise((done) => server.close(done)); }

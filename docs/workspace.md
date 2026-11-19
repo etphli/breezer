@@ -38,7 +38,7 @@ With top tabs, right-click a tab and choose **Add tab to new group**. Right-clic
 
 Custom colours are local to the profile. They follow the group into another window, survive session ID relabeling on restore, and use the saved group's identity when it is reopened. Chromium's standard palette ID remains available to sync and other clients; the custom RGB value is not synced. Group text keeps Chromium's contrasting foreground selection for readability.
 
-With folder colors enabled, right-click or two-finger click a sidebar folder to change or clear its color. **Whole row** adds a tint behind the folder name. Switching colors off hides saved colors until you enable them again. Folder colors and the display mode are saved on this device.
+Right-click or two-finger click a sidebar folder to pick a preset, enter a custom hex color, or reset its color. Picking a color while the display is **Off** switches it to **Icon only**. Choose **Whole row** in Layout to tint the row behind the folder name. **Off** hides saved colors. Folder colors and the display mode are saved on this device.
 
 Dragging a tab, favorite or saved page over a folder highlights its header and shows **Move into folder**. All but the outer four pixels of the header accept pages; those edges insert before or after the folder. Dropping into a closed folder opens it. Folder drags reorder folders at the root rather than nesting them. Escape or a canceled pointer capture leaves membership unchanged.
 

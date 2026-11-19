@@ -4,7 +4,7 @@ import {
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
   findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeStore, parseRoute,
   normalizeFolderColor, removeNode, removeSpace, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
-  setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
+  setPrefs, setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
 } from './workspace-store.js';
 
 const api = globalThis.chrome;
@@ -1217,14 +1217,19 @@ function previewFolderColor(id, color) {
   const node = document.querySelector(`[data-key="${CSS.escape(`f:${id}`)}"]`);
   if (!node) return;
   folderPreview = { id };
+  node.dataset.colorPreview = '';
   paintFolderColor(node, color);
 }
 
 // Repaints a folder from the saved store, dropping any preview.
 function repaintFolder(id) {
+  if (folderPreview?.id === id) return;
   const folder = findNode(state.store, id)?.node;
   const node = document.querySelector(`[data-key="${CSS.escape(`f:${id}`)}"]`);
-  if (folder?.kind === 'folder' && node) paintFolderColor(node, folder.color);
+  if (folder?.kind === 'folder' && node) {
+    delete node.dataset.colorPreview;
+    paintFolderColor(node, folder.color);
+  }
 }
 
 function endFolderPreview() {
@@ -1238,8 +1243,10 @@ function chooseFolderColor(folder, color) {
   // Keep an applied preview on screen until the stored color replaces it.
   if (color && folderPreview?.id === folder.id) folderPreview = null;
   closeMenu();
-  // mutate() reports the failure in a toast; the folder returns to its saved color.
-  void mutate((store) => setFolderColor(store, folder.id, color)).catch(() => repaintFolder(folder.id));
+  void mutate((store) => {
+    setFolderColor(store, folder.id, color);
+    if (color && store.prefs.folderColors === 'off') setPrefs(store, { folderColors: 'icon' });
+  }).catch(() => {}).finally(() => repaintFolder(folder.id));
 }
 
 // Six tone swatches plus a custom swatch that opens a hex field and picker.
@@ -1298,7 +1305,8 @@ function folderColorEntries(folder) {
   });
 
   const reset = { label: 'Reset color', disabled: !folder.color, run: () => chooseFolderColor(folder, null) };
-  return [{ heading: 'Color' }, { node: swatches }, { node: editor }, reset];
+  const heading = state.store.prefs.folderColors === 'off' ? 'Color (enables icon colors)' : 'Color';
+  return [{ heading }, { node: swatches }, { node: editor }, reset];
 }
 
 function collapseColorEditor(editor) {
@@ -1355,7 +1363,7 @@ function openItemMenu(found, rect) {
     entries = [
       { label: folder.open ? 'Collapse' : 'Expand', run: () => mutate((store) => setFolderOpen(store, folder.id, !folder.open)).catch(() => {}) },
       { label: 'Rename', run: () => startRenameFor(found) },
-      ...(state.store.prefs.folderColors !== 'off' ? ['-', ...folderColorEntries(folder)] : []),
+      '-', ...folderColorEntries(folder),
       ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, folder.id, { spaceId })).catch(() => {})),
       '-',
       { label: 'Delete folder', danger: true, run: () => mutate((store) => removeNode(store, folder.id)).then(() => showToast(`Deleted ${folder.name}. Its tabs stay pinned.`)).catch(() => {}) },
