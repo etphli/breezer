@@ -64,33 +64,6 @@ async function withPage(browser, base, options, fn) {
   }
 }
 
-test('New Tab searches from its own tab and keeps the query available after a failure', { skip }, async () => {
-  const server = await startServer();
-  const base = `http://127.0.0.1:${server.address().port}`;
-  let browser;
-  try {
-    browser = await chromium.launch({ executablePath, headless: true });
-    await withPage(browser, base, { view: CONNECTED, viewport: { width: 320, height: 760 } }, async page => {
-      const search = page.getByRole('searchbox', { name: 'Search the web' });
-      await search.fill('  clear blue sky  ');
-      await page.evaluate(() => { window.fx.failSearch = true; });
-      await search.press('Enter');
-      await page.getByText('Couldn’t search. Try again or use the address bar.').waitFor();
-      assert.equal(await search.inputValue(), '  clear blue sky  ');
-      assert.equal(await search.evaluate(input => input === document.activeElement), true);
-      await page.evaluate(() => { window.fx.failSearch = false; });
-      await page.getByRole('button', { name: 'Search', exact: true }).click();
-      assert.deepEqual(await page.evaluate(() => window.fx.searches), [
-        { text: 'clear blue sky', tabId: 42 }, { text: 'clear blue sky', tabId: 42 },
-      ]);
-      assert.equal(await page.locator('#web-search-status').isVisible(), false);
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    });
-  } finally {
-    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
-  }
-});
-
 test('a fresh New Tab shows cached icons while Organato and favicon requests are blocked', { skip }, async () => {
   const server = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -297,15 +270,8 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.textContent('[data-list="todos"] .item:last-child .item-when'), 'No due date');
       await page.screenshot({ path: `${evidence}/newtab-connected-light.png` });
 
-      // Keyboard: Settings, web search, then the sites in order.
-      await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), 'workspace.html#/settings');
-      await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement.id), 'web-query');
-      await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement.closest('form')?.id), 'web-search');
-      await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), 'https://mail.example.com/');
+      assert.equal(await page.getByRole('searchbox').count(), 0);
+      assert.deepEqual(await tabStops(page, 2), ['workspace.html#/settings', 'https://mail.example.com/']);
       await page.screenshot({ path: `${evidence}/newtab-keyboard-focus.png`, clip: { x: 0, y: 0, width: 1440, height: 460 } });
       // Refresh asks exactly once more and never on its own.
       await page.click('#refresh');
@@ -607,8 +573,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
       assert.equal(await page.locator('.item, .item-empty, #organato-action a').count(), 0);
       assert.equal(await page.getByRole('heading', { name: /Organato/ }).count(), 0);
       assert.equal(await page.getByRole('status').filter({ hasText: /Organato/ }).count(), 0);
-      const stops = await tabStops(page, 4);
-      assert.deepEqual(stops, ['workspace.html#/settings', 'web-query', 'web-submit', 'https://mail.example.com/']);
+      assert.deepEqual(await tabStops(page, 2), ['workspace.html#/settings', 'https://mail.example.com/']);
       await page.locator('.site-add-button').focus();
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.closest('.sheet')), null, 'nothing in the hidden sheet takes focus');

@@ -494,41 +494,9 @@ function renderToday(root, now) {
   root.getElementById('today').textContent = longDate.format(now);
 }
 
-function connectSearch(root, api) {
-  const form = root.getElementById('web-search');
-  if (!form) return;
-  if (!api?.search?.query || !api.tabs?.getCurrent) {
-    form.hidden = true;
-    return;
-  }
-  const input = root.getElementById('web-query');
-  const status = root.getElementById('web-search-status');
-  const submit = form.querySelector('button');
-  input.addEventListener('input', () => { status.hidden = true; });
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const query = input.value.trim();
-    if (!query || submit.disabled) return;
-    submit.disabled = true;
-    status.hidden = true;
-    try {
-      const tab = await api.tabs.getCurrent();
-      if (!Number.isInteger(tab?.id)) throw new Error('New tab was closed');
-      await api.search.query({ text: query, tabId: tab.id });
-    } catch {
-      status.textContent = 'Couldn’t search. Try again or use the address bar.';
-      status.hidden = false;
-      input.focus();
-    } finally {
-      submit.disabled = false;
-    }
-  });
-}
-
 // ------------------------------------------------------------------ page
 
 export function startNewTab({ api = globalThis.chrome, root = document, now = () => new Date() } = {}) {
-  connectSearch(root, api);
   const lanes = root.getElementById('organato-lists');
   const laneButtons = lanes.querySelectorAll('.agenda-switch button');
   for (const button of laneButtons) {

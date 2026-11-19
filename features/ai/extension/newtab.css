@@ -100,7 +100,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   --date-size: clamp(23px, 2.6vw, 32px);
   --date-gap: 18px;
   --date-lines: 1;
-  --search-height: 64px;
   --shortcuts-height: 133px;
   width: var(--column);
   margin: 0 auto;
@@ -109,9 +108,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Keep the sheet below the tallest shortcut layout without moving the tiles. */
 .sky:has(+ .sheet:not([hidden])) {
-  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--search-height) + var(--shortcuts-height));
+  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--shortcuts-height));
 }
-.sky:has(.web-search[hidden]) { --search-height: 0px; }
 
 .today {
   margin: 0 0 var(--date-gap);
@@ -121,29 +119,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
-
-.web-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: min(100%, 680px);
-  height: 50px;
-  margin-bottom: 14px;
-  padding: 0 6px 0 14px;
-  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
-  border-radius: 10px;
-  background: var(--raised);
-  color: var(--muted);
-}
-.web-search:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
-.web-search svg { width: 18px; height: 18px; flex: none; }
-.web-search input { min-width: 0; flex: 1; padding: 6px 0; border: 0; background: transparent; color: var(--ink); font: inherit; }
-.web-search input:focus-visible { outline: none; }
-.web-search input::placeholder { color: var(--muted); opacity: 1; }
-.web-search button { display: flex; align-items: center; gap: 6px; min-height: 36px; padding-inline: 11px; border: 0; border-radius: 7px; background: var(--ink); color: var(--canvas); font-size: 13px; font-weight: 600; cursor: pointer; }
-.web-search button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 85%, var(--accent)); }
-.web-search button:disabled { opacity: .65; }
-#web-search-status { margin: -10px 0 12px; color: var(--danger); font-size: 13px; }
 
 .sites-nav { min-height: 107px; }
 

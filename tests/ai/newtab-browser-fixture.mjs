@@ -44,7 +44,7 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
   // fx.view and fx.delay can be changed mid-test to script later answers.
   const topSites = siteCases?.[new URLSearchParams(location.search).get('sites')];
   if (topSites) view = { ...view, topSites };
-  window.fx = { requests: [], searches: [], view, delay };
+  window.fx = { requests: [], view, delay };
   const port = (name) => {
     const listeners = { message: [], disconnect: [] };
     return {
@@ -86,13 +86,8 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
   });
   window.chrome = {
     tabs: {
-      getCurrent: async () => ({ id: 42 }),
       query: async () => [{ id: 5, title: 'Open project', url: 'https://project.example.com/' }, { id: 6, title: 'Internal', url: 'chrome://settings/' }],
     },
-    search: { query: async request => {
-      window.fx.searches.push(request);
-      if (window.fx.failSearch) throw new Error('Fixture search failure');
-    } },
     runtime: {
       connect: ({ name }) => port(name),
       getURL: (path) => `${location.origin}/${String(path).replace(/^\//, '')}`,
