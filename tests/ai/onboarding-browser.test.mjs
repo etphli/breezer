@@ -382,7 +382,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     {
       const { context, page } = await open({ platform: 'windows', width: 390, height: 844, reducedMotion: 'reduce' });
-      for (const step of ['welcome', 'layout', 'theme']) {
+      for (const step of ['welcome', 'you', 'layout', 'theme']) {
         await page.locator(`section[data-step="${step}"]`).waitFor();
         await page.locator('#wl-next').click();
       }

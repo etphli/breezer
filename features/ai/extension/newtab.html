@@ -12,6 +12,12 @@
 
   <header class="sky">
     <h1 id="today" class="today">New tab</h1>
+    <form id="web-search" class="web-search" role="search" aria-label="Search the web">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
+      <input id="web-query" type="search" aria-label="Search the web" placeholder="Search the web" aria-describedby="web-search-status" autocomplete="off" maxlength="2048">
+      <button type="submit" id="web-submit">Search</button>
+    </form>
+    <p id="web-search-status" role="status" hidden></p>
     <nav class="sites-nav" aria-label="Frequently visited sites">
       <ol id="sites" class="sites" aria-busy="true"></ol>
       <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
@@ -34,7 +40,10 @@
     <section id="organato" class="organato" data-state="loading" aria-labelledby="organato-title" aria-busy="true">
       <div class="organato-head">
         <h2 id="organato-title" class="organato-title">Coming up in Organato</h2>
-        <button id="refresh" class="refresh" type="button" hidden title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
+        <div class="agenda-actions">
+          <a class="organato-open" href="https://organato.vercel.app" rel="noreferrer">Open Organato</a>
+          <button id="refresh" class="refresh" type="button" hidden title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
+        </div>
       </div>
 
       <p id="organato-status" class="organato-status" role="status" aria-live="polite">Loading your exams, assignments and to-dos…</p>

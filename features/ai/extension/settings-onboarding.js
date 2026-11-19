@@ -26,7 +26,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   section.hidden = true;
 
   const head = node('div', '', 'onboarding-head');
-  const heading = node('h2', 'Bring your browser data to Breezer');
+  const heading = node('h2', 'Import from another browser');
   heading.id = 'onboarding-heading';
   const hide = node('button', 'Hide', 'button subtle');
   hide.type = 'button';
@@ -34,7 +34,6 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   hide.setAttribute('aria-label', 'Hide getting started');
   head.append(heading, hide);
 
-  const intro = node('p', 'Copy bookmarks, history and passwords from your previous browser.', 'onboarding-intro');
   const details = node('details', '', 'setting-details onboarding-details');
   details.append(node('summary', 'Import details'), node('p', 'Importing makes a one-time copy of the data you choose.'));
 
@@ -54,7 +53,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
     paths.append(item);
   }
 
-  const browserImport = node('button', 'Import browser data', 'button primary');
+  const browserImport = node('button', 'Import browser data', 'button');
   browserImport.type = 'button';
   browserImport.dataset.onboardingAction = 'browserImport';
   controls.push(browserImport);
@@ -104,7 +103,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
 
   const footnote = node('p', 'Imports remain in Passwords and Browser tools.', 'field-note');
   details.append(footnote);
-  section.append(head, intro, paths, status, error, details);
+  section.append(head, paths, status, error, details);
 
   if (!api?.tabs?.create) {
     browserImport.disabled = true;

@@ -85,7 +85,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(category ? `${url}/${category}` : url);
     if (category) await page.locator('#settings-title').waitFor();
-    else await page.getByRole('heading', { name: 'Bring your browser data to Breezer', exact: true }).waitFor();
+    else await page.getByRole('heading', { name: 'Import from another browser', exact: true }).waitFor();
     // Initial helper replies: Organato not connected, no update available.
     await page.evaluate(() => {
       const org = window.fx.ports['breezer-organato-settings'];

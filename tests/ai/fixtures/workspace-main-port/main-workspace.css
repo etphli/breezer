@@ -129,9 +129,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .icon-button:hover { background: var(--hover); color: var(--ink); }
 .icon-button:active { background: var(--press); }
 
-/* Favorites: the Arc-style icon grid shared by every space. Always four
-   columns (arrow keys move by four); tiles get a little taller as the
-   sidebar widens so they stay close to the proportions of a key cap. */
+/* Four columns keep the favorite positions and arrow keys predictable. */
 .favorites {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -140,24 +138,41 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 }
 
 .tile {
-  height: clamp(40px, calc((100cqi - 44px) / 4 * 0.72), 48px);
+  position: relative;
+  min-height: 56px;
   display: grid;
-  place-items: center;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 1px solid transparent;
   border-radius: var(--radius-card);
-  /* Asleep: a faint recess, no outline. Live tabs rise out of it; the active one sits on top. */
-  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
   transition: background-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 }
 .tile:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); }
 .tile:active { transform: scale(0.97); }
-.tile.live { background: color-mix(in srgb, var(--raised) 55%, transparent); }
-.tile.live:hover { background: color-mix(in srgb, var(--raised) 78%, transparent); }
 .tile.active, .tile.active:hover {
-  background: var(--raised);
-  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px var(--shade-near);
+  background: color-mix(in srgb, var(--accent) 11%, var(--raised));
+  border-color: color-mix(in srgb, var(--accent) 72%, transparent);
+}
+.tile-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-size: var(--fs-small); line-height: 1.25; }
+.tile.active .tile-label { font-weight: 600; }
+.tile.live:not(.active)::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--muted);
 }
 .tile:focus-visible { outline-offset: 2px; }
-.tile .favicon { width: 20px; height: 20px; font-size: 12px; border-radius: 0; background: none; }
+.tile .favicon { width: 20px; height: 20px; font-size: 11px; border-radius: 5px; background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--ink); }
+.tile .favicon:has(img) { background: none; }
 .tile .favicon img { width: 20px; height: 20px; }
 /* The tile surface carries the sleeping state; its site identity stays clear. */
 .tile:not(.live) .favicon { opacity: 1; }
@@ -228,7 +243,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: calc(var(--fs) + 1px);
+  font-size: var(--fs);
   line-height: 1.3;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -367,6 +382,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   font-weight: 500;
 }
 .meta-button:hover { background: var(--hover); color: var(--ink); }
+#clear-today { border: 1px solid var(--line); margin-block: 2px; }
 
 .new-tab {
   height: var(--row-h);
@@ -375,7 +391,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   gap: 8px;
   padding: 0 10px;
   border-radius: var(--radius-row);
-  color: var(--muted);
+  color: var(--ink);
   text-align: left;
   margin-bottom: 2px;
 }
@@ -524,7 +540,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .folder.drop-into > .folder-row > .folder-drop-hint { display: none; }
   /* One centred column of square caps rather than full-width slabs. */
   .favorites { grid-template-columns: 1fr; justify-items: center; }
-  .tile { width: min(100%, 44px); height: 40px; }
+  .tile { width: min(100%, 44px); min-height: 40px; grid-template-rows: auto; }
+  .tile-label { display: none; }
   .space-head { justify-content: center; gap: 0; padding: 0; }
   .folder-row { position: relative; }
   .folder-row .chevron { position: absolute; left: calc(50% - var(--favicon) / 2 - 18px); }
@@ -650,7 +667,7 @@ body.route-settings {
 .nav-item span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-item:hover { background: var(--hover); color: var(--ink); }
 .nav-item:focus-visible { outline-offset: -2px; }
-.nav-item[aria-current="page"] { background: var(--set-selected); color: var(--ink); font-weight: 500; }
+.nav-item[aria-current="page"] { background: var(--set-selected); color: var(--ink); font-weight: 650; }
 .nav-item[aria-current="page"] svg { color: var(--accent); }
 .is-searching .nav-item[aria-current="page"] { background: transparent; font-weight: inherit; }
 .is-searching .nav-item[aria-current="page"] svg { color: var(--muted); }
@@ -658,7 +675,7 @@ body.route-settings {
 .nav-error { margin: 8px 10px 0; font-size: 12px; line-height: 16px; }
 
 /* ---- main pane */
-.settings-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.settings-main { --set-gutter: clamp(24px, 4vw, 54px); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .settings-head {
   flex: none;
   display: flex;
@@ -666,17 +683,17 @@ body.route-settings {
   gap: 16px;
   min-height: 80px;
   /* Lines the breadcrumb and link up with the edges of the settings column. */
-  padding: 0 max(40px, calc((100% - 680px) / 2));
+  padding: 0 max(var(--set-gutter), calc(100% - var(--set-gutter) - 680px)) 0 var(--set-gutter);
   border-bottom: 1px solid var(--set-rule);
 }
 .crumbs { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
 .settings-label { font-size: 12px; line-height: 16px; color: var(--muted); }
 .crumbs h1 { margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -.015em; color: var(--ink); }
 .crumb-current { color: var(--ink); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.settings-head .setup-link { margin: 0 -12px 0 auto; text-decoration: none; }
+.settings-head .setup-link { margin-left: auto; border: 1px solid var(--set-edge); text-decoration: none; }
 
 .settings-scroll { flex: 1; min-height: 0; overflow-y: auto; scroll-padding: 24px; }
-.settings-column { max-width: 760px; margin: 0 auto; padding: 24px 40px 96px; }
+.settings-column { max-width: calc(680px + 2 * var(--set-gutter)); padding: 24px var(--set-gutter) 96px; }
 .context-save { align-items: center; padding: 12px 16px; border-top: 1px solid var(--set-rule); margin: 0; }
 .context-save .field-note { margin: 0; }
 .context-settings .setting-group > .setting-details { padding: 12px 16px; margin: 0; border-top: 1px solid var(--set-rule); }
@@ -837,12 +854,7 @@ body.route-settings {
   font-weight: 500;
 }
 .segmented [role="radio"]:hover { color: var(--ink); }
-.segmented [role="radio"][aria-checked="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px var(--shade-near); }
-:root[data-scheme="dark"] .segmented [role="radio"][aria-checked="true"] {
-  background: color-mix(in srgb, var(--ink) 30%, var(--air));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 45%, transparent), 0 1px 2px var(--shade-near);
-  font-weight: 600;
-}
+.segmented [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--set-group); font-weight: 650; }
 [role="radio"][aria-disabled="true"], .switch[aria-disabled="true"] { opacity: 0.5; }
 
 .switch {
@@ -945,6 +957,7 @@ body.route-settings {
 /* Live status text. A spinner appears while the matching request keeps controls disabled. */
 .status-line { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; color: var(--muted); line-height: 19px; max-width: 64ch; }
 .status-line:empty { margin: 0; }
+.update-status { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); }
 #organato-settings:has(#organato-connect:disabled) #organato-status::before,
 #update-settings:has(#update-check:disabled) #update-status::before {
   content: "";
@@ -977,12 +990,10 @@ body.route-settings {
 .onboarding:not([hidden]) { animation: onboarding-in 160ms ease-out both; }
 @keyframes onboarding-in { from { transform: translateY(3px); } }
 .onboarding-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.onboarding h2 { margin: 0; font-size: 17px; line-height: 24px; font-weight: 600; letter-spacing: -0.012em; }
-.onboarding-head .button { margin: -4px -10px 0 0; }
-.onboarding-intro { margin: 6px 0 20px; color: var(--muted); line-height: 19px; max-width: 60ch; }
-.onboarding-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.onboarding h2 { margin: 0; font-size: 14px; line-height: 23px; font-weight: 650; }
+.onboarding-head .button { min-height: 26px; padding-inline: 8px; border: 1px solid var(--set-edge); }
+.onboarding-paths { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .onboarding-path { display: flex; flex-direction: column; align-items: flex-start; }
-.onboarding-path > .button { width: 100%; }
 .onboarding-details { margin-top: 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .onboarding-details h3 { margin: 16px 0 4px; color: var(--ink); font-size: 13px; font-weight: 600; }
 .onboarding-details p { margin: 8px 0; }
@@ -1134,7 +1145,8 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .nav-item { width: 100%; gap: 7px; padding: 0 8px; min-height: 32px; }
   .nav-item span { white-space: normal; }
   .settings-main { display: block; }
-  .settings-head { padding: 0 16px; }
+  .settings-head { min-height: 55px; padding: 0 16px; }
+  .settings-label { display: none; }
   .settings-scroll { overflow: visible; }
   .settings-column { padding: 20px 16px 64px; }
 }
@@ -1155,7 +1167,6 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .space-item .tone-select { grid-column: 2; grid-row: 2; }
   .space-item .space-actions { grid-column: 3; grid-row: 2; }
   .onboarding { padding: 18px 14px 14px; }
-  .onboarding-paths { grid-template-columns: 1fr; }
   .key-row, .update-row { flex-wrap: wrap; }
   .key-row .text-input { flex-basis: 100%; }
   .result-meta { display: none; }

@@ -808,12 +808,15 @@ function paintSidebar() {
       create: () => {
         const tile = el('button', 'tile', { type: 'button', tabindex: '-1' });
         tile.append(el('span', 'favicon', { 'aria-hidden': 'true' }));
+        tile.append(el('span', 'tile-label', { 'aria-hidden': 'true' }));
         return tile;
       },
       update: (tile) => {
         // A favourite keeps its saved identity while its live tab browses.
         const title = favoriteTitle(item.entry);
-        updateFavicon(tile.firstChild, null, item.entry.url, title);
+        const [icon, label] = tile.children;
+        updateFavicon(icon, null, item.entry.url, title);
+        if (label.textContent !== title) label.textContent = title;
         tile.title = title;
         tile.setAttribute('aria-label', `${title}${item.tab ? '' : ', asleep'}`);
         tile.setAttribute('aria-pressed', String(Boolean(item.tab?.active)));
@@ -1876,6 +1879,9 @@ function bindSidebar() {
     const { appearance } = await loadAppearance();
     state.appearance = appearance;
     applyAppearance(appearance);
+    if (state.model) {
+      $('sidebar').dataset.tone = document.documentElement.dataset.tone === 'custom' ? 'custom' : state.model.space.tone;
+    }
   };
   localStorageChanges(api).addListener((changes) => {
     if (changes[STORE_KEY]) {

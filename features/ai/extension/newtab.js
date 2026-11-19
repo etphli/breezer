@@ -340,18 +340,18 @@ const monthDay = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'sh
 const clock = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const longDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
-function itemRow(item, now) {
+function itemRow(item, now, list) {
   const days = item.due ? daysUntil(item.due, now) : null;
   const row = el('li', 'item', { 'data-urgency': urgency(days) });
 
   const stub = el('span', 'stub', { 'aria-hidden': 'true' });
-  const day = el('span', 'stub-day');
-  const week = el('span', 'stub-week');
-  if (item.due) {
+  if (list === 'upcoming' && item.due) {
+    const day = el('span', 'stub-day');
+    const week = el('span', 'stub-week');
     day.textContent = String(item.due.getDate());
     week.textContent = weekday.format(item.due);
+    stub.append(day, week);
   }
-  stub.append(day, week);
 
   const body = el('span', 'item-body');
   const title = item.url ? el('a', 'item-title', { href: item.url }) : el('span', 'item-title');
@@ -443,7 +443,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     const items = organato[list];
     const target = lanes.querySelector(`[data-list="${list}"]`);
     const limit = MAX_ITEMS[list];
-    const shown = items.slice(0, limit).map((item) => itemRow(item, now));
+    const shown = items.slice(0, limit).map((item) => itemRow(item, now, list));
     if (!items.length) {
       const empty = el('li', 'item-empty');
       empty.textContent = EMPTY[list];
@@ -484,9 +484,41 @@ function renderToday(root, now) {
   root.getElementById('today').textContent = longDate.format(now);
 }
 
+function connectSearch(root, api) {
+  const form = root.getElementById('web-search');
+  if (!form) return;
+  if (!api?.search?.query || !api.tabs?.getCurrent) {
+    form.hidden = true;
+    return;
+  }
+  const input = root.getElementById('web-query');
+  const status = root.getElementById('web-search-status');
+  const submit = form.querySelector('button');
+  input.addEventListener('input', () => { status.hidden = true; });
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const query = input.value.trim();
+    if (!query || submit.disabled) return;
+    submit.disabled = true;
+    status.hidden = true;
+    try {
+      const tab = await api.tabs.getCurrent();
+      if (!Number.isInteger(tab?.id)) throw new Error('New tab was closed');
+      await api.search.query({ text: query, tabId: tab.id });
+    } catch {
+      status.textContent = 'Couldn’t search. Try again or use the address bar.';
+      status.hidden = false;
+      input.focus();
+    } finally {
+      submit.disabled = false;
+    }
+  });
+}
+
 // ------------------------------------------------------------------ page
 
 export function startNewTab({ api = globalThis.chrome, root = document, now = () => new Date() } = {}) {
+  connectSearch(root, api);
   let view = null;
   let problem = null;
   let pending = false;

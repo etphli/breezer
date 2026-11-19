@@ -96,10 +96,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 /* ---------------------------------------------------------------------- sky */
 
 .sky {
-  --sky-top: clamp(40px, 7vh, 72px);
-  --date-size: clamp(30px, 4.2vw, 44px);
-  --date-gap: 22px;
+  --sky-top: clamp(36px, 5vh, 62px);
+  --date-size: clamp(26px, 3.3vw, 36px);
+  --date-gap: 18px;
   --date-lines: 1;
+  --search-height: 64px;
   --shortcuts-height: 170px;
   width: var(--column);
   margin: 0 auto;
@@ -108,8 +109,9 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Keep the sheet below the tallest shortcut layout without moving the tiles. */
 .sky:has(+ .sheet:not([hidden])) {
-  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--shortcuts-height));
+  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--search-height) + var(--shortcuts-height));
 }
+.sky:has(.web-search[hidden]) { --search-height: 0px; }
 
 .today {
   margin: 0 0 var(--date-gap);
@@ -119,6 +121,29 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   line-height: 1.1;
   letter-spacing: -0.01em;
 }
+
+.web-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, 580px);
+  height: 50px;
+  margin-bottom: 14px;
+  padding: 0 6px 0 14px;
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  border-radius: 10px;
+  background: var(--raised);
+  color: var(--muted);
+}
+.web-search:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.web-search svg { width: 18px; height: 18px; flex: none; }
+.web-search input { min-width: 0; flex: 1; padding: 6px 0; border: 0; background: transparent; color: var(--ink); font: inherit; }
+.web-search input:focus-visible { outline: none; }
+.web-search input::placeholder { color: var(--muted); opacity: 1; }
+.web-search button { display: flex; align-items: center; gap: 6px; min-height: 36px; padding-inline: 11px; border: 0; border-radius: 7px; background: var(--ink); color: var(--canvas); font-size: 13px; font-weight: 600; cursor: pointer; }
+.web-search button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 85%, var(--accent)); }
+.web-search button:disabled { opacity: .65; }
+#web-search-status { margin: -10px 0 12px; color: var(--danger); font-size: 13px; }
 
 .sites-nav { min-height: 107px; }
 
@@ -151,11 +176,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   height: 52px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  background: var(--raised);
-  box-shadow: 0 0 0 0.5px var(--line), 0 1px 2px rgb(0 0 0 / 0.07);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--raised) 64%, var(--canvas));
 }
-.site-icon img { position: absolute; width: 26px; height: 26px; opacity: 0; }
+.site-icon img { position: absolute; width: 30px; height: 30px; opacity: 0; }
 .site-icon.has-icon img { opacity: 1; }
 .site-icon.has-icon .site-monogram { visibility: hidden; }
 
@@ -175,8 +199,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   white-space: normal;
   text-align: center;
   overflow-wrap: anywhere;
-  font-size: 12.5px;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--ink);
 }
 .site-name.hostname { display: block; white-space: nowrap; text-overflow: ellipsis; }
 .site-add .site-name { max-width: none; overflow: visible; white-space: nowrap; text-align: center; font-size: 12px; }
@@ -196,14 +220,13 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   flex: 1;
   width: var(--sheet-width);
   margin: 0 auto;
-  padding: 28px max(16px, calc((var(--sheet-width) - var(--column)) / 2)) 64px;
+  padding: 28px max(16px, calc((var(--sheet-width) - var(--column)) / 2));
   border-radius: 16px 16px 0 0;
   background: var(--sheet);
   box-shadow: 0 0 0 0.5px var(--line), 0 -1px 3px rgb(0 0 0 / 0.04);
 }
 .sheet:has(.organato:not([data-state="ready"])) {
   flex: none;
-  padding-bottom: 28px;
   border-radius: 16px;
 }
 .sheet:has(.organato[data-state="loading"]) { flex: 1; min-height: 360px; border-radius: 16px 16px 0 0; }
@@ -231,6 +254,10 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   font-weight: 400;
   line-height: 1.2;
 }
+
+.agenda-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.organato-open { color: var(--ink); font-size: 13px; font-weight: 600; text-underline-offset: 3px; }
+.organato:not([data-state="ready"]) .organato-open { display: none; }
 
 .refresh {
   display: inline-flex;
@@ -322,12 +349,13 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .item[data-urgency="today"] .stub { color: var(--accent); }
 .item[data-urgency="today"] .stub-day { font-weight: 600; }
 .item[data-urgency="overdue"] .stub { color: var(--danger); }
-.item[data-urgency="none"] .stub::before {
+.lane-todos .item { grid-template-columns: 8px minmax(0, 1fr); gap: 10px; }
+.stub:empty::before {
   content: "";
-  width: 14px;
-  height: 14px;
-  margin-top: 4px;
-  border: 1.5px solid currentColor;
+  width: 5px;
+  height: 5px;
+  margin-top: 7px;
+  background: var(--muted);
   border-radius: 50%;
 }
 
@@ -342,12 +370,12 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
+a.item-title { width: fit-content; font-weight: 650; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--ink) 50%, transparent); text-underline-offset: 3px; }
+a.item-title:hover { text-decoration-color: currentColor; }
 
-.item-meta { display: flex; flex-wrap: wrap; gap: 3px 12px; font-size: 14px; color: var(--ink); }
+.item-meta { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 13px; color: var(--muted); }
 .item-subject { color: var(--muted); }
-/* Exams share the Upcoming list, so a quiet word marks them instead of a heading. */
-.item-kind { font-weight: 600; color: var(--ink); }
+.item-kind { padding: 0 5px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 20%, var(--sheet)); font-size: .9em; font-weight: 650; color: var(--ink); }
 .item[data-urgency="overdue"] .item-when { color: var(--danger); }
 
 .item-empty, .item-more { font-size: 14px; color: var(--muted); }

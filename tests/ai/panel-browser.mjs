@@ -198,6 +198,7 @@ try {
   assert.equal(await page.locator('#account-instructions code').textContent(), 'claude auth login');
   for (const scheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: scheme });
+    await page.waitForFunction(scheme => document.documentElement.dataset.scheme === scheme, scheme);
     for (const width of [400, 320]) {
       await page.setViewportSize({ width, height: width === 320 ? 640 : 850 });
       const file = `sidebar-account-dialog-${scheme}${width === 320 ? '-narrow' : ''}.png`;

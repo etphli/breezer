@@ -188,6 +188,9 @@ button:hover {
   background: var(--hover);
 }
 
+#new-chat { display: flex; gap: 4px; width: auto; padding-inline: 6px; font-size: 12px; white-space: nowrap; }
+#new-chat svg { flex: none; }
+
 .profile-button {
   border-radius: 50%;
   width: 24px;
@@ -215,29 +218,18 @@ button:hover {
   outline: none;
 }
 
+.panel:has(#welcome:not([hidden])) .toolbar { margin-bottom: auto; }
+.panel:has(#welcome:not([hidden])) .conversation { flex: 0 1 auto; }
+.panel:has(#welcome:not([hidden])) .compose-area { margin-bottom: auto; }
+
 .welcome {
-  flex: none;
-  margin-block: auto;
-  padding: 24px;
-}
-
-.welcome-mark {
-  width: 32px;
-  height: 32px;
-  margin: 0 0 18px -3px;
-}
-
-.welcome-mark svg {
-  fill: none;
-  stroke: var(--accent-ink);
-  stroke-width: 3;
-  stroke-linecap: round;
-  width: 32px;
-  height: 32px;
+  width: min(100%, 460px);
+  align-self: center;
+  padding: 20px 16px 10px;
 }
 
 h1 {
-  font-size: 23px;
+  font-size: 21px;
   line-height: 1.26;
   font-weight: 600;
   letter-spacing: -.018em;
@@ -249,8 +241,8 @@ h1 {
 .suggestions {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  margin: 22px -10px 0;
+  gap: 6px;
+  margin: 14px 0 0;
 }
 
 .suggestions button {
@@ -258,9 +250,12 @@ h1 {
   align-items: center;
   gap: 11px;
   width: 100%;
-  padding: 9px 10px;
+  min-height: 38px;
+  padding: 8px 10px;
   text-align: left;
+  border: 1px solid var(--hairline);
   border-radius: 8px;
+  background: var(--raised);
   font-size: 13.5px;
   color: var(--ink);
 }
@@ -273,20 +268,6 @@ h1 {
   color: var(--muted);
   width: 16px;
   height: 16px;
-}
-
-/* The arrow only answers attention: three at rest read as noise. */
-.suggestion-arrow {
-  margin-left: auto;
-  color: var(--muted);
-  font-size: 14px;
-  opacity: 0;
-  transition: opacity .12s;
-}
-
-.suggestions button:hover:not(:disabled) .suggestion-arrow,
-.suggestions button:focus-visible .suggestion-arrow {
-  opacity: 1;
 }
 
 .suggestions button:disabled {
@@ -611,7 +592,9 @@ h1 {
 
 .compose-area {
   flex-shrink: 0;
-  padding: 8px 14px 10px;
+  width: min(100%, 460px);
+  align-self: center;
+  padding: 8px 14px 12px;
   position: relative;
 }
 .compose-area::before { content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px; background: linear-gradient(transparent, var(--canvas)); pointer-events: none; }
@@ -625,7 +608,8 @@ h1 {
   gap: 6px;
   min-width: 0;
   margin-bottom: 8px;
-  padding: 0 4px;
+  padding: 0 4px 3px;
+  box-shadow: inset 0 -1px var(--hairline);
 }
 
 .context-chip {
@@ -640,9 +624,9 @@ h1 {
   padding: 6px 4px;
   border-radius: 7px;
   color: var(--ink);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.3;
-  font-weight: 500;
+  font-weight: 400;
 }
 .context-chip::before {
   content: "";
@@ -753,14 +737,14 @@ h1 {
   gap: 6px;
   padding: 0 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
-.control-toggle svg {
-  width: 14px;
-  height: 14px;
-}
+.control-state { flex: none; width: 23px; height: 14px; padding: 2px; border: 1px solid var(--muted); border-radius: 20px; }
+.control-state::before { content: ""; display: block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.control-toggle[aria-pressed=true] .control-state { border-color: var(--accent); background: var(--accent); }
+.control-toggle[aria-pressed=true] .control-state::before { margin-left: auto; background: var(--on-accent); }
 
 .control-toggle[aria-pressed=true] {
   background: var(--tint);
@@ -777,8 +761,8 @@ h1 {
   height: 28px;
   padding: 0;
   border-radius: 9px;
-  background: var(--ink);
-  color: var(--canvas);
+  background: var(--accent);
+  color: var(--on-accent);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -790,7 +774,7 @@ h1 {
 }
 
 .send-button:hover {
-  color: var(--canvas);
+  color: var(--on-accent);
   opacity: .85;
 }
 
@@ -845,8 +829,8 @@ h1 {
   flex: 1;
   border-radius: 6px;
 }
-.source-tools { display: flex; align-items: center; gap: 2px; }
-.source-tools .source-button { display: flex; align-items: center; gap: 5px; width: auto; padding: 4px 6px; border-radius: 6px; color: var(--muted); font-size: 14px; white-space: nowrap; }
+.source-tools { display: flex; align-items: center; gap: 1px; padding: 0 2px; border: 1px solid var(--hairline); border-radius: 8px; }
+.source-tools .source-button { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 30px; width: auto; padding: 4px 5px; border-radius: 6px; color: var(--muted); font-size: 12px; white-space: nowrap; }
 .source-button svg { flex: none; }
 .source-tools .source-button[data-active=true] { color: var(--accent-ink); background: var(--tint); }
 #research-title { margin-right: auto; }
@@ -1149,7 +1133,7 @@ dialog .privacy-note {
     padding-right: 10px;
   }
   .welcome {
-    padding: 24px 20px 16px;
+    padding-inline: 12px;
   }
   h1 {
     font-size: 21px;
@@ -1171,9 +1155,6 @@ dialog .privacy-note {
 @media(max-height:650px) {
   .welcome {
     padding-top: 20px;
-  }
-  .welcome-mark {
-    margin-bottom: 12px;
   }
   .suggestions button {
     padding-top: 7px;
@@ -1243,7 +1224,6 @@ dialog .privacy-note {
   .account-options > div { grid-template-columns: minmax(0, 1fr) 62px; }
   .account-options > div > span { grid-column: 1 / -1; }
 }
-.welcome:has(#welcome-account-steps:not([hidden])) .welcome-mark { display: none; }
 .account-options [data-copy-command] { width: 62px; min-height: 32px; padding: 4px 6px; border: 1px solid var(--hairline); border-radius: 5px; color: var(--accent-ink); font-size: 12px; }
 .account-options [data-copy-command]:hover { background: var(--hover); }
 .copy-feedback { grid-column: 1 / -1; color: var(--muted); font-size: 12px; line-height: 1.5; }
@@ -1257,18 +1237,24 @@ dialog .privacy-note {
   .context-hint { max-width: none; margin-left: 0; text-align: left; }
 }
 
+@media (max-width: 350px) {
+  .source-tools .source-button svg { display: none; }
+}
+
+@media (max-width: 270px) {
+  #new-chat span { display: none; }
+}
+
 .attachment-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .attachment-list:not(:empty) { padding: 10px 10px 0; }
 .attachment-chip { display: flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 8px; background: var(--accent-soft); border-radius: 8px; color: var(--accent-ink); }
 .attachment-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .attachment-remove { background: none; border: 0; color: inherit; cursor: pointer; font-size: 18px; }
-.attachment-hint { margin: 6px 2px; color: var(--muted); font-size: 10px; line-height: 1.4; }
 
 .attachment-list { grid-column: 1 / -1; grid-row: 1; min-width: 0; }
 .attachment-list:empty { display: none; }
 .composer:has(.attachment-chip)::before, .composer:has(.attachment-chip) textarea, .composer:has(.attachment-chip) .send-button { grid-row: 2; }
 .composer:has(.attachment-chip) :is(.model-button, .source-tools) { grid-row: 3; }
-.attachment-hint { font-size: 12px; }
 
 /* ----------------------------------------------------------- theme proposals */
 /* A proposal card: the artwork is the picture, with a sketch of the new tab's

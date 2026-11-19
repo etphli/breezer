@@ -420,8 +420,8 @@ p { text-wrap: pretty; }
   transition: opacity 400ms ease, transform 600ms var(--ease-out);
   pointer-events: none;
 }
-.ring-sites { left: 12.5%; top: 26.5%; width: 69%; height: 13%; }
-.ring-organato { left: 11%; top: 51%; width: 78%; height: 47%; }
+.ring-sites { left: 12.5%; top: 18.5%; width: 68%; height: 12%; }
+.ring-organato { left: 11%; top: 38%; width: 78%; height: 60%; }
 .story[data-active="0"] .ring-sites,
 .story[data-active="1"] .ring-organato { opacity: 1; transform: none; }
 

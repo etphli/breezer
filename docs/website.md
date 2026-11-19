@@ -6,7 +6,8 @@ The canonical public site is https://breezer-browser.vercel.app. Vercel builds
 The homepage and download page show Windows availability only when the latest
 GitHub release has a nonempty Windows installer or ZIP, its matching checksum
 file, and a SHA-256 digest for the package. The pages share a session cache.
-The Mac download and checksum are maintained in the release HTML.
+The same lookup updates the Mac download and checksum when both Mac assets are
+published. The download HTML contains the verified Mac fallback for 1.3.1.
 
 ## Pages and visual direction
 

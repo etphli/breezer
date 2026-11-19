@@ -54,7 +54,9 @@ class Node {
   contains(n) { return n === this || this.children.some(c => c.contains(n)); }
   snapshot() { return { tag: this.tag, classes: [...this.classes].sort(), dataset: this.dataset, attrs: this.attrs,
     text: this.text, hidden: this.hidden, tabIndex: this.tabIndex, title: this.title, src: this.src,
-    children: this.children.map(n => n.snapshot()) }; }
+    // Favorite names are verified in the browser fixture. Keep this comparison
+    // focused on the DOM that the pinned pre-polish workspace also rendered.
+    children: this.children.filter(n => !n.classList.contains('tile-label')).map(n => n.snapshot()) }; }
 }
 const plain = value => JSON.parse(JSON.stringify(value));
 export const sourcePath = new URL('../../features/ai/extension/workspace.js', import.meta.url);

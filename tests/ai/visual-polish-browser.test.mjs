@@ -164,7 +164,9 @@ const tileGeometry = (page) => page.evaluate(() => {
   const tiles = [...document.querySelectorAll('#favorites .tile')].map((tile) => {
     const box = tile.getBoundingClientRect();
     const glyph = tile.querySelector('.favicon').getBoundingClientRect();
-    return { left: box.left, right: box.right, top: box.top, width: box.width, height: box.height, cx: box.left + box.width / 2, cy: box.top + box.height / 2, gx: glyph.left + glyph.width / 2, gy: glyph.top + glyph.height / 2, glyph: glyph.width };
+    const label = tile.querySelector('.tile-label');
+    const name = label.getBoundingClientRect();
+    return { left: box.left, right: box.right, top: box.top, width: box.width, height: box.height, cx: box.left + box.width / 2, cy: box.top + box.height / 2, gx: glyph.left + glyph.width / 2, gy: glyph.top + glyph.height / 2, glyph: glyph.width, label: name.width ? { center: name.left + name.width / 2, top: name.top, bottom: name.bottom, text: label.textContent } : null };
   });
   return { grid: { left: grid.left, right: grid.right }, tiles, scroll: document.documentElement.scrollWidth, view: innerWidth };
 });
@@ -176,7 +178,13 @@ function assertTileGrid(geometry, label) {
   assert.ok(spread(tiles.map((t) => t.height)) < 0.5, `${label}: equal tile heights`);
   for (const tile of tiles) {
     assert.ok(tile.left >= grid.left - 0.5 && tile.right <= grid.right + 0.5, `${label}: tile inside the grid`);
-    assert.ok(Math.abs(tile.gx - tile.cx) < 0.75 && Math.abs(tile.gy - tile.cy) < 0.75, `${label}: favicon centred in its tile`);
+    assert.ok(Math.abs(tile.gx - tile.cx) < 0.75, `${label}: favicon centred horizontally`);
+    if (tile.label) {
+      assert.ok(Math.abs(tile.label.center - tile.cx) < 0.75, `${label}: title centred under the favicon`);
+      assert.ok(tile.label.text && tile.label.top > tile.gy && tile.label.bottom <= tile.top + tile.height, `${label}: title fits under the favicon`);
+    } else {
+      assert.ok(Math.abs(tile.gy - tile.cy) < 0.75, `${label}: compact favicon centred vertically`);
+    }
   }
   const rows = new Map();
   for (const tile of tiles) rows.set(Math.round(tile.top), [...(rows.get(Math.round(tile.top)) || []), tile.cx]);
@@ -219,7 +227,11 @@ test('favourite tiles stay even, centred and usable across sidebar widths and th
       const active = await fill('#favorites .tile.active');
       const live = await fill('#favorites .tile.live:not(.active)');
       const asleep = await fill('#favorites .tile:not(.live)');
-      assert.equal(new Set([active, live, asleep]).size, 3, `active/live/asleep fills differ: ${[active, live, asleep]}`);
+      assert.notEqual(active, asleep, 'the active tile has the selected fill');
+      assert.equal(live, asleep, 'the resting tiles use one fill');
+      const marker = selector => page.$eval(selector, node => getComputedStyle(node, '::after').content);
+      assert.notEqual(await marker('#favorites .tile.live:not(.active)'), 'none', 'an open favorite has a marker');
+      assert.equal(await marker('#favorites .tile:not(.live)'), 'none', 'an unopened favorite has no marker');
       await page.hover('#favorites .tile:not(.live)');
       assert.notEqual(await fill('#favorites .tile:not(.live):hover'), asleep, 'hover changes the asleep tile');
       assert.equal(await page.$eval('#favorites .tile:not(.live)', (node) => getComputedStyle(node).transitionDuration), '0s', 'reduced motion drops tile transitions');

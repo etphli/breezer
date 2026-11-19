@@ -42,7 +42,7 @@ test('first run shows the card only after the saved choice is read', async () =>
   assert.equal(f.section().hidden, true, 'hidden until storage answers');
   await settle();
   assert.equal(f.section().hidden, false);
-  assert.match(f.section().textContent, /Bring your browser data to Breezer/);
+  assert.match(f.section().textContent, /Import from another browser/);
   assert.match(f.section().textContent, /one-time copy/);
   assert.match(f.section().textContent, /bookmarks HTML file/);
   assert.match(f.section().textContent, /CSV export from Chrome, Edge or another password manager/);

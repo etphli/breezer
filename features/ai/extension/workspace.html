@@ -23,7 +23,7 @@
       <div class="divider-row">
         <span class="section-label">Today</span>
         <span class="rule" aria-hidden="true"></span>
-        <button id="clear-today" class="meta-button" title="Close every unpinned tab in this space">Clear</button>
+        <button id="clear-today" class="meta-button" title="Close every unpinned tab in this space">Close today’s tabs</button>
       </div>
 
       <button id="new-tab" class="new-tab" title="New tab (⌘T)"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span>New tab</span></button>
@@ -97,7 +97,6 @@
           <div id="settings-results" class="search-results" role="listbox" aria-label="Search results" hidden></div>
 
           <section class="settings-page" data-page="general" aria-label="General">
-            <div id="settings-onboarding"></div>
             <section class="settings-section" aria-labelledby="tabs-heading">
               <h2 id="tabs-heading">Tabs</h2>
               <div class="setting-group">
@@ -120,10 +119,12 @@
             </section>
             <section id="update-settings" class="settings-section" aria-labelledby="update-heading" data-native-helper data-search-terms="update upgrade version release restart github">
               <h2 id="update-heading">Breezer updates</h2>
-              <p id="update-status" class="status-line" role="status" aria-live="polite">Ready to check for updates.</p>
               <div class="setting-group">
                 <div class="setting-row update-row">
-                  <div class="setting-label"><small>Checks stable releases on GitHub. Updating restarts Breezer and keeps your profile and passwords.</small></div>
+                  <div class="setting-label">
+                    <span id="update-status" class="status-line update-status" role="status" aria-live="polite">Ready to check for updates.</span>
+                    <small>Updating restarts Breezer and keeps your profile and passwords.</small>
+                  </div>
                   <div class="update-actions">
                     <button id="update-check" class="button" type="button">Check for updates</button>
                     <button id="update-install" class="button primary" type="button" hidden>Update and restart</button>
@@ -131,6 +132,7 @@
                 </div>
               </div>
             </section>
+            <div id="settings-onboarding"></div>
           </section>
 
           <section class="settings-page" data-page="appearance" aria-label="Appearance" hidden>

@@ -21,7 +21,7 @@ test('zero-viewport motion guard stays confined to the unseen sidebar controls',
   assert.doesNotMatch(match[1], /(?:^|\n)\s*\*/);
 });
 
-test('route split reconstructs the exact current-main stylesheet with only the intended row fade removal', () => {
+test('route split reconstructs the reviewed Breezer stylesheet exactly', () => {
   const shared = read('workspace.css'), settings = read('settings.css');
   assert.doesNotMatch(shared, /\.settings|\.setting-row|\.context-settings|#custom-theme-color/);
   assert.match(shared, /:root\[data-scheme="dark"\]\[data-tone="custom"\]/);
@@ -207,6 +207,8 @@ test('main draw, compact identities and activation-before-reveal remain the curr
     const end = source.indexOf(next[name] ? `function ${next[name]}(` : 'export const favoriteTitle', start);
     const slice = source.slice(start, end);
     const actual = (name === 'draw' ? stripFolderColorDraw(slice) : slice).replace('  pendingRows = null;\n', '')
+      .replace("        tile.append(el('span', 'tile-label', { 'aria-hidden': 'true' }));\n", '')
+      .replace('        const [icon, label] = tile.children;\n        updateFavicon(icon, null, item.entry.url, title);\n        if (label.textContent !== title) label.textContent = title;\n', '        updateFavicon(tile.firstChild, null, item.entry.url, title);\n')
       .replace('function paintSidebar() {', 'function draw() {')
       .replace("      const modifier = PLATFORM === 'windows' ? 'Ctrl+Shift+' : '⌃';\n", '')
       .replace(/\(\$\{modifier\}/, '(⌃')
