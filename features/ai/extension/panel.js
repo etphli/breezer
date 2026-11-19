@@ -153,8 +153,8 @@ function saveSettings() {
 function draftBrowserTask() {
   if (research.size) return '';
   return state.browserTask ?? detectBrowserTask($('prompt').value, {
-    hasImage: state.attachments.some(file => Boolean(file.image)),
-    hasTheme: Boolean(state.messages.findLast(message => message.role === 'assistant')?.themeProposal),
+    get hasImage() { return themeReferenceImages(state.attachments, recentRequestMessages()).length > 0; },
+    get hasTheme() { return Boolean(state.messages.findLast(message => message.role === 'assistant')?.themeProposal); },
   });
 }
 
@@ -486,10 +486,14 @@ function recentMessages(limit) {
   return messages.reverse();
 }
 
+function recentRequestMessages() {
+  return recentMessages(30).filter(message => !message.superseded && message !== state.retryMessage);
+}
+
 // Retried files are included once, with their most recent message.
 function requestHistory() {
   const seen = new Set(state.attachments.map(file => JSON.stringify(file)));
-  return recentMessages(30).filter(message => !message.superseded && message !== state.retryMessage).reverse().map(({ role, text: content, attachments }) => {
+  return recentRequestMessages().reverse().map(({ role, text: content, attachments }) => {
     const files = (attachments || []).filter(file => {
       const key = JSON.stringify(file);
       if (seen.has(key)) return false;

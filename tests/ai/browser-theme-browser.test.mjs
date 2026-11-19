@@ -30,6 +30,8 @@ export const AURORA = `
 </style>
 <div class="sky"></div><div class="band one"></div><div class="band two"></div>
 <svg viewBox="0 0 1200 400" preserveAspectRatio="none" style="position:absolute;bottom:0;width:100%;height:34%">
+  <style>.svg-star { fill: #ebefff; animation: sway 14s infinite alternate; }</style>
+  <circle class="svg-star" cx="750" cy="95" r="8"/>
   <defs><linearGradient id="ridge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b2545"/><stop offset="1" stop-color="#13315c"/></linearGradient></defs>
   <path d="M0 260 L160 170 L300 240 L470 120 L640 230 L820 150 L1000 250 L1200 180 L1200 400 L0 400 Z" fill="url(#ridge)"/>
 </svg>`;
@@ -43,7 +45,7 @@ const hostile = (base) => `
 <style>@import url(${base}/leak/import); .x { background: url(${base}/leak/css); } @font-face { font-family: z; src: url(${base}/leak/font); } .t::before { content: "Enter your password"; }</style>
 <a href="${base}/leak/nav">Click to continue</a>
 <form action="${base}/leak/form"><input name="password"><button>Sign in</button></form>
-<svg onload="alert(1)"><image href="${base}/leak/svg-image"/><use href="${base}/leak/use#x"/><foreignObject><div>Fake button</div></foreignObject>
+<svg onload="alert(1)"><style>@import url(${base}/leak/svg-style);</style><image href="${base}/leak/svg-image"/><use href="${base}/leak/use#x"/><foreignObject><div>Fake button</div></foreignObject>
   <animate attributeName="href" to="javascript:alert(1)"/><circle cx="5" cy="5" r="4" fill="#123456" style="fill:url(${base}/leak/fill)"/></svg>
 <div class="x t" style="background-image:url(${base}/leak/inline)">Untrusted words</div>`;
 
@@ -115,6 +117,11 @@ test('theme proposal cards apply, restore and paint sandboxed artwork on the new
     assert.match(probe, /<circle cx="5" cy="5" r="4" fill="#123456"/, 'harmless graphics survive');
     assert.match(frames[0].srcdoc, /@keyframes sway/);
     assert.match(frames[0].srcdoc, /fill="url\(#ridge\)"/);
+    const svgStar = card.frameLocator('iframe.theme-proposal-art').first().locator('.svg-star');
+    assert.deepEqual(await svgStar.evaluate(node => {
+      const { fill, animationName } = getComputedStyle(node);
+      return { fill, animationName };
+    }), { fill: 'rgb(235, 239, 255)', animationName: 'sway' });
 
     const first = card.locator('.theme-proposal').first();
     assert.equal(await card.locator('.theme-restore-button').isHidden(), true, 'nothing to restore yet');

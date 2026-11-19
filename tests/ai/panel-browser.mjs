@@ -642,6 +642,19 @@ try {
   assert.equal(retried.browserTask, 'theme');
   assert.equal(retried.researchSources, undefined);
   assert.equal(await studio.evaluate(() => window.readSource), undefined);
+  await studio.evaluate(id => {
+    window.emit({ type: 'delta', id, text: 'The image has a cool palette.' });
+    window.emit({ type: 'complete', id });
+  }, retried.id);
+  await studio.getByLabel('Message Breezer').fill('Use this as my background.');
+  assert.equal(await studio.locator('#browser-task-clear').isVisible(), true);
+  assert.equal(await studio.locator('#context-toggle').isHidden(), true);
+  await studio.getByRole('button', { name: 'Send message', exact: true }).click();
+  const wallpaper = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
+  assert.equal(wallpaper.browserTask, 'theme');
+  assert.equal(wallpaper.includeContext, false);
+  assert.equal(wallpaper.attachments.length, 0);
+  assert.ok(wallpaper.history.some(message => message.attachments?.some(file => file.image === themeChat.attachments[0].image)));
   await studio.getByRole('button', { name: 'New conversation' }).click();
   await studio.getByRole('button', { name: 'Browser tools' }).click();
   await studio.getByRole('dialog', { name: 'Browser tools' }).getByRole('button', { name: 'Restore previous look' }).click();

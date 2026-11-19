@@ -202,7 +202,7 @@ function sanitizeArtwork(html, { doc = globalThis.document } = {}) {
     if (node.nodeType !== 1 || depth > 32 || count >= MAX_ARTWORK_ELEMENTS) return;
     const svg = node.namespaceURI === SVG_NS;
     const name = node.localName;
-    if (node.namespaceURI === HTML_NS && name === 'style') { styles.push(node.textContent); return; }
+    if (name === 'style' && (svg || node.namespaceURI === HTML_NS)) { styles.push(node.textContent); return; }
     if (!(svg ? SVG_ELEMENTS.has(name) : node.namespaceURI === HTML_NS && HTML_ELEMENTS.has(name))) return;
     count += 1;
     const clean = svg ? inert.createElementNS(SVG_NS, name) : inert.createElement(name);

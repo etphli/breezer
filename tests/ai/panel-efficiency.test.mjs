@@ -6,6 +6,7 @@ import { attachmentParts } from '../../features/ai/host/attachments.mjs';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
 import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
 import { detectBrowserTask } from '../../features/ai/extension/browser-task-intent.js';
+import { themeReferenceImages } from '../../features/ai/extension/theme-references.js';
 
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
 // A current-main negative control: undo only the transcript scan/cache changes.
@@ -62,6 +63,7 @@ function harness(code, initial = [], ids = []) {
   };
   const context = vm.createContext({ document, chrome, crypto: { randomUUID: () => ids[sequence++] || `run-${sequence}` },
     detectBrowserTask,
+    themeReferenceImages,
     ResearchSources: class { size = 0; selected = new Map(); clear() {} },
     requestAnimationFrame(fn) { counts.frames++; frames.push(fn); },
     renderMessage(body, text) { renders.push(text); body.textContent = text; },

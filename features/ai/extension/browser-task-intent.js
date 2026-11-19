@@ -53,7 +53,7 @@ const IMAGE_DESIGN = new RegExp(
 );
 const THEME_REVISION = /^(?:make it (?:a (?:little|bit) |slightly )?(?:darker|lighter|brighter|warmer|cooler)|(?:change|set) (?:the )?(?:background(?: colou?r)?|wallpaper|theme colou?r) to (?!.*\b(?:in|for|on) (?:my|our|the|this|a|an) ).+)$/;
 
-export function detectBrowserTask(text, { hasImage = false, hasTheme = false } = {}) {
+export function detectBrowserTask(text, context = {}) {
   if (typeof text !== 'string' || /[`{}]/.test(text)) return '';
   const request = text.trim().toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ')
     .replace(/^(?:(?:please|(?:can|could|would|will) you) )+/, '')
@@ -62,6 +62,6 @@ export function detectBrowserTask(text, { hasImage = false, hasTheme = false } =
   if (asksForStats(request)) return 'stats';
   if (PROJECT_DESIGN.test(request)) return '';
   if (SHORT_THEME.test(request) || BROWSER_DESIGN.test(request) || GIVE_BROWSER_DESIGN.test(request) ||
-      (hasImage && IMAGE_DESIGN.test(request)) || (hasTheme && THEME_REVISION.test(request))) return 'theme';
+      (IMAGE_DESIGN.test(request) && context.hasImage) || (THEME_REVISION.test(request) && context.hasTheme)) return 'theme';
   return '';
 }
