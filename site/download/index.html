@@ -39,8 +39,8 @@
         <img src="/icon.png" alt="" width="512" height="512">
       </div>
       <div class="get-copy">
-        <p class="release reveal"><span>Version 1.3.0</span></p>
-        <h1 id="get-title" class="title split"><span>Breezer</span> <span>for Mac</span></h1>
+        <p class="release reveal"><span id="get-version">Version 1.3.0</span></p>
+        <h1 id="get-title" class="title split"><span>Breezer</span> <span id="get-platform">for Mac</span></h1>
         <svg class="breeze" viewBox="0 0 640 120" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
           <defs>
             <linearGradient id="breeze-ink" x1="0" x2="1" y1="0" y2="0">
@@ -61,7 +61,9 @@
           <div class="actions">
             <a class="button primary" id="windows-primary" href="#">Download for Windows</a>
             <a class="button secondary" id="windows-zip" href="#" hidden>Download zip</a>
+            <a class="button secondary" id="windows-release-notes" href="https://github.com/etphli/breezer/releases">Windows release notes</a>
           </div>
+          <p>Import bookmarks and history from Settings. Import saved passwords directly from an installed 64-bit Firefox, or use a password CSV exported from Chrome, Edge, or another browser.</p>
           <p class="windows-check">Compare these SHA-256 checksums with the output of <code>Get-FileHash</code> in PowerShell.</p>
           <dl class="windows-sums">
             <div><dt id="windows-sha-name"></dt><dd class="checksum"><code id="windows-sha"></code><button class="button secondary small" type="button" data-copy="windows-sha">Copy</button></dd></div>
@@ -129,8 +131,8 @@
       <ul class="ticks">
         <li id="platform-support">Intel Macs, Windows and Linux aren't supported yet.</li>
         <li>Breezer keeps its own profile. Chrome stays exactly as it is.</li>
-        <li>After this, updates install from Breezer's Settings.</li>
-        <li>The assistant uses your own signed-in Codex or Claude command-line tool.</li>
+        <li>On Mac, updates install from Breezer's Settings.</li>
+        <li>On Mac, the assistant uses your own signed-in Codex or Claude command-line tool.</li>
       </ul>
     </section>
   </main>

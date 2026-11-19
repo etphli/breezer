@@ -6,7 +6,6 @@ import { resolve, extname } from 'node:path';
 import { chromium } from '../../tests/ai/node_modules/playwright/index.mjs';
 import { dashboardPage } from '../lib/dashboard-page.js';
 import { aggregateUsage } from '../lib/metrics.js';
-import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
 
 test('homepage films, privacy, dashboard, responsive layout, errors, and the actual usage switch', { timeout: 60_000 }, async () => {
   const root = resolve(new URL('../../', import.meta.url).pathname);
@@ -49,11 +48,14 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   try {
+    await page.route('https://api.github.com/repos/etphli/breezer/releases/latest', route =>
+      route.fulfill({ json: { assets: [] } }));
     const mediaRequests = [];
     page.on('request', request => { if (request.url().endsWith('.mp4')) mediaRequests.push(request.url()); });
     await page.goto(origin);
-    assert.equal(await page.title(), 'Breezer: a calmer browser for Mac');
-    assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${RELEASE_VERSION.replaceAll('.', '\\.')} for Mac`));
+    assert.equal(await page.title(), 'Breezer: a calmer browser');
+    const macRelease = /^Breezer (\d+\.\d+\.\d+) for Mac$/.exec(await page.locator('#home-version').innerText());
+    assert.ok(macRelease, 'Homepage names the published Mac version');
     const videos = page.locator('#videos video');
     const originals = (await readdir(resolve(root, 'advertising'))).filter(file => file.endsWith('.mp4')).sort();
     assert.deepEqual(await videos.locator('source').evaluateAll(sources => sources.map(source => source.getAttribute('src').split('/').at(-1)).sort()), originals);
@@ -87,8 +89,9 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     await page.screenshot({ path: `${evidence}/videos-mobile.png` });
     await page.setViewportSize({ width: 1440, height: 1050 });
     await page.goto(`${origin}/download`);
-    const tag = `v${RELEASE_VERSION}`;
-    assert.equal(await page.locator('.release').innerText(), `Version ${RELEASE_VERSION}`);
+    const [, macVersion] = macRelease;
+    const tag = `v${macVersion}`;
+    assert.equal(await page.locator('.release').innerText(), `Version ${macVersion}`);
     assert.equal(await page.getByRole('link', { name: 'Download Breezer', exact: true }).getAttribute('href'),
       `https://github.com/etphli/breezer/releases/download/${tag}/Breezer-${tag}-arm64.dmg`);
     assert.equal(await page.getByRole('link', { name: 'Release notes', exact: true }).getAttribute('href'),

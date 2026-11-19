@@ -266,11 +266,12 @@ async function latestRelease() {
 }
 
 const windowsPanel = document.getElementById('windows');
-if (windowsPanel) {
+const homeDownload = document.getElementById('home-download');
+if (windowsPanel || homeDownload) {
   const onWindows = navigator.userAgentData?.platform === 'Windows' || /Windows NT/.test(navigator.userAgent);
   // When GitHub can't be reached, don't claim that no Windows build exists.
   const showUnavailable = (known) => {
-    if (!onWindows) return;
+    if (!onWindows || !windowsPanel) return;
     const note = document.getElementById('windows-unavailable');
     note.querySelector('[data-reason]').hidden = !known;
     note.hidden = false;
@@ -278,6 +279,16 @@ if (windowsPanel) {
   latestRelease().then((release) => {
     const files = windowsDownloads(release);
     if (!files.length) { showUnavailable(true); return; }
+    const version = String(release.tag_name).replace(/^v/, '');
+    if (homeDownload) {
+      document.getElementById('home-platforms').textContent = 'Free for Apple Silicon Macs and Windows x64. Built on Chromium 156.';
+      document.getElementById('home-download-platforms').textContent = 'Available for Apple Silicon Macs and Windows x64.';
+      if (onWindows) {
+        homeDownload.textContent = 'Download for Windows';
+        document.getElementById('home-version').textContent = `Breezer ${version} for Windows`;
+      }
+      return;
+    }
     const [primary, zip] = files;
     const button = document.getElementById('windows-primary');
     button.href = primary.url;
@@ -289,10 +300,14 @@ if (windowsPanel) {
       document.getElementById('windows-zip-sha').textContent = zip.sha;
       document.getElementById('windows-zip-row').hidden = false;
     }
-    document.getElementById('windows-version').textContent = `Version ${String(release.tag_name).replace(/^v/, '')}`;
+    document.getElementById('windows-version').textContent = `Version ${version}`;
+    document.getElementById('windows-release-notes').href = `https://github.com/etphli/breezer/releases/tag/${encodeURIComponent(release.tag_name)}`;
     document.getElementById('platform-support').textContent = "Intel Macs and Linux aren't supported yet.";
     // Windows visitors see their download first; everyone else sees it below the Mac one.
     if (onWindows) {
+      document.getElementById('get-platform').textContent = 'for Windows';
+      document.getElementById('get-title').setAttribute('aria-label', 'Breezer for Windows');
+      document.getElementById('get-version').textContent = `Version ${version}`;
       const mac = document.querySelector('.get-copy .actions');
       mac?.before(windowsPanel);
       const macButton = mac?.querySelector('[data-download]');

@@ -10,10 +10,10 @@ const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 const WINDOWS_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 const MAC_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 
-const asset = (name, digest = `sha256:${'a'.repeat(64)}`) => ({ name, digest, state: 'uploaded', size: 100, browser_download_url: `https://github.com/etphli/breezer/releases/download/v1.3.0/${name}` });
+const asset = (name, digest = `sha256:${'a'.repeat(64)}`) => ({ name, digest, state: 'uploaded', size: 100, browser_download_url: `https://github.com/etphli/breezer/releases/download/v1.3.1/${name}` });
 const macOnly = { tag_name: 'v1.2.6', assets: [asset('Breezer-v1.2.6-arm64.dmg'), asset('Breezer-v1.2.6-arm64.dmg.sha256')] };
-const withWindows = { tag_name: 'v1.3.0', assets: [
-  asset('Breezer-v1.3.0-arm64.dmg'), asset('Breezer-v1.3.0-arm64.dmg.sha256'),
+const withWindows = { tag_name: 'v1.3.1', assets: [
+  asset('Breezer-v1.3.1-arm64.dmg'), asset('Breezer-v1.3.1-arm64.dmg.sha256'),
   asset('Breezer-Windows-x64-Setup.exe', `sha256:${'b'.repeat(64)}`), asset('Breezer-Windows-x64-Setup.exe.sha256'),
   asset('Breezer-Windows-x64.zip', `sha256:${'c'.repeat(64)}`), asset('Breezer-Windows-x64.zip.sha256'),
 ] };
@@ -36,7 +36,7 @@ test('download page offers Windows only when a verified Windows build is publish
   const server = createServer(async (req, res) => {
     try {
       const path = new URL(req.url, 'http://localhost').pathname;
-      const file = resolve(site, path === '/download' ? 'download/index.html' : path.slice(1));
+      const file = resolve(site, path === '/download' ? 'download/index.html' : path === '/' ? 'index.html' : path.slice(1));
       if (!file.startsWith(site + '/')) { res.writeHead(404).end(); return; }
       res.setHeader('Content-Type', types[extname(file)] || 'application/octet-stream');
       res.end(await readFile(file));
@@ -47,7 +47,7 @@ test('download page offers Windows only when a verified Windows build is publish
   const executablePath = process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined);
   const browser = await chromium.launch({ executablePath, headless: true });
 
-  const open = async ({ userAgent, release, status = 200, viewport = { width: 1440, height: 1050 } }) => {
+  const open = async ({ userAgent, release, path = '/download', status = 200, viewport = { width: 1440, height: 1050 } }) => {
     const context = await browser.newContext({ userAgent, viewport, reducedMotion: 'reduce' });
     const page = await context.newPage();
     const errors = []; page.on('pageerror', error => errors.push(error.message));
@@ -57,7 +57,7 @@ test('download page offers Windows only when a verified Windows build is publish
       route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(status === 200 ? release : { message: 'API rate limit exceeded' }) });
     });
     const done = page.waitForResponse(r => r.url().startsWith('https://api.github.com/'));
-    await page.goto(`${origin}/download`);
+    await page.goto(`${origin}${path}`);
     await done;
     await page.waitForTimeout(100);
     return { page, context, errors, calls: () => calls };
@@ -116,7 +116,9 @@ test('download page offers Windows only when a verified Windows build is publish
     assert.equal(await s.page.getByRole('link', { name: 'Download zip', exact: true }).getAttribute('href'), withWindows.assets[4].browser_download_url);
     assert.equal(await s.page.locator('#windows-sha').innerText(), 'b'.repeat(64));
     assert.equal(await s.page.locator('#windows-zip-sha').innerText(), 'c'.repeat(64));
-    assert.equal(await s.page.locator('#windows-version').innerText(), 'Version 1.3.0');
+    assert.equal(await s.page.locator('#windows-version').innerText(), 'Version 1.3.1');
+    assert.equal(await s.page.getByRole('heading', { name: 'Breezer for Windows', exact: true, level: 1 }).count(), 1);
+    assert.equal(await s.page.getByRole('link', { name: 'Windows release notes' }).getAttribute('href'), 'https://github.com/etphli/breezer/releases/tag/v1.3.1');
     assert.equal(await s.page.locator('.get-copy > :is(#windows, .actions)').evaluateAll(els => els.map(el => el.id || 'mac')).then(ids => ids.join()), 'windows,mac');
     assert.equal(await s.page.locator('[data-download]').innerText(), 'Download for Mac');
     assert.equal(await macHref(s.page), originalMacHref);
@@ -138,5 +140,22 @@ test('download page offers Windows only when a verified Windows build is publish
     assert.equal(await s.page.locator('[data-download]').innerText(), 'Download Breezer');
     await s.page.screenshot({ path: `${evidence}/download-mac-with-windows.png` });
     await s.context.close();
+
+    // Home and Download share release evidence in the same browser session.
+    s = await open({ userAgent: WINDOWS_UA, release: withWindows, path: '/' });
+    assert.equal(await s.page.locator('#home-version').innerText(), 'Breezer 1.3.1 for Windows');
+    assert.match(await s.page.locator('#home-platforms').innerText(), /Windows x64/);
+    await s.page.getByRole('link', { name: 'Download for Windows' }).click();
+    await s.page.locator('#windows').waitFor();
+    assert.equal(s.calls(), 1);
+    assert.deepEqual(s.errors, []);
+    await s.context.close();
+
+    for (const release of [macOnly, missingChecksum]) {
+      s = await open({ userAgent: WINDOWS_UA, release, path: '/' });
+      assert.equal(await s.page.locator('#home-download').innerText(), 'Download for Mac');
+      assert.doesNotMatch(await s.page.locator('#home-platforms').innerText(), /Windows/);
+      await s.context.close();
+    }
   } finally { await browser.close(); await new Promise(done => server.close(done)); }
 });
