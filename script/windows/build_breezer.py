@@ -72,7 +72,7 @@ def platform_checkout(build_dir, lock):
             run("git", "clone", "--depth=1", "--branch", lock["release"],
                 "-c", "core.autocrlf=false", pins["repository"], clone)
             if git(clone, "rev-parse", "HEAD") != pins["commit"]:
-                raise ValueError("The Helium Windows release tag does not match upstream.lock.json.")
+                raise ValueError("The Helium Windows release tag does not match upstream.windows.lock.json.")
             clone.rename(platform)
     if git(platform, "rev-parse", "HEAD") != pins["commit"]:
         raise ValueError(f"Unexpected Helium Windows Git revision at {platform}.")
@@ -92,6 +92,12 @@ def prepared_inputs(lock):
     }
 
 
+def load_lock():
+    lock = json.loads((ROOT / "upstream.lock.json").read_text(encoding="utf-8"))
+    lock["helium_windows"] = json.loads((ROOT / "upstream.windows.lock.json").read_text(encoding="utf-8"))
+    return lock
+
+
 def fetch_sources(build_dir, core, platform, expected):
     import downloads
 
@@ -104,7 +110,7 @@ def fetch_sources(build_dir, core, platform, expected):
     for archive, checksum in expected["source_sha256"].items():
         sidecar = cache / f"{archive}.hashes"
         if sidecar.read_text(encoding="utf-8").split() != ["sha256", checksum, archive]:
-            raise ValueError(f"Archive checksum metadata differs from upstream.lock.json at {sidecar}.")
+            raise ValueError(f"Archive checksum metadata differs from upstream.windows.lock.json at {sidecar}.")
     try:
         downloads.check_downloads(info, cache, components)
     except downloads.HashMismatchError as error:
@@ -321,7 +327,7 @@ def main():
     if args.command == "build" and args.jobs is not None and args.jobs < 1:
         parser.error("--jobs must be at least one")
 
-    lock = json.loads((ROOT / "upstream.lock.json").read_text(encoding="utf-8"))
+    lock = load_lock()
     core = ROOT / lock["helium"]["path"]
     sys.path.insert(0, str(core / "utils"))
     build_dir = args.build_dir.resolve()

@@ -1,7 +1,7 @@
 # Build Breezer for Windows x64
 
-The native Windows build uses the Helium Windows and shared Chromium revisions in
-[`upstream.lock.json`](../upstream.lock.json). It applies the shared Helium
+The native Windows build uses the pinned [Helium Windows](../upstream.windows.lock.json)
+and [shared Chromium](../upstream.lock.json) revisions. It applies the shared Helium
 patches, the Windows patch series, and the Breezer overlays before compiling.
 Breezer keeps Windows DPAPI encryption and Chromium's download warning handling.
 

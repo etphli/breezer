@@ -1,5 +1,4 @@
 import hashlib
-import json
 from pathlib import Path
 import struct
 import subprocess
@@ -34,7 +33,7 @@ class WindowsPackageTest(unittest.TestCase):
         self.output.mkdir(parents=True)
         self.artifacts = self.stage / "artifacts"
 
-        lock = json.loads((ROOT / "upstream.lock.json").read_text(encoding="utf-8"))
+        lock = build_breezer.load_lock()
         build_breezer.write_marker(self.output / build_breezer.BUILD_MARKER,
                                    build_breezer.prepared_inputs(lock))
         self.portable = ("chrome.exe", "chrome.dll", "chrome_elf.dll", "chrome_100_percent.pak", "chrome_200_percent.pak",
