@@ -24,7 +24,8 @@ export function fixture(source, constructorOverride) {
   child.stdout = new PassThrough(); child.stderr = new PassThrough(); child.exitCode = null;
   child.stdin = new Writable({ write(chunk, _encoding, callback) { writes.push(JSON.parse(String(chunk))); callback(); } });
   child.kill = signal => { kills.push(signal); return true; };
-  const context = vm.createContext({ EventEmitter, counts,
+  const context = vm.createContext({ EventEmitter, counts, windows: false,
+    spawnCli(spawn, binary, args) { return spawn(binary, args); },
     setTimeout(callback, delay) { const timer = { id: ++timerId, callback, delay, unref() {} }; timers.set(timer.id, timer); return timer; },
     clearTimeout(timer) { if (timer) timers.delete(timer.id); },
   });

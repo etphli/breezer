@@ -54,3 +54,10 @@ test('GitHub download metrics count installers, exclude draft releases, and pagi
   assert.equal(calls, 2); assert.equal(data.length, 99); assert.equal(data.reduce((sum, row) => sum + row.downloads, 0), 198);
   await assert.rejects(releaseDownloads(async () => ({ ok: false })));
 });
+
+test('GitHub download metrics count Windows installers but not their checksums', async () => {
+  const assets = ['Breezer-Windows-x64-Setup.exe', 'Breezer-Windows-x64.zip', 'Breezer-Windows-x64-Setup.exe.sha256', 'Breezer-Windows-x64.zip.sha256', 'build-info.json'].map(name => ({ name, download_count: 3 }));
+  let calls = 0;
+  const data = await releaseDownloads(async () => ({ ok: true, json: async () => ++calls === 1 ? [{ draft: false, tag_name: 'v1.3.0', assets }] : [] }));
+  assert.deepEqual(data, [{ version: 'v1.3.0', downloads: 6 }]);
+});

@@ -1,4 +1,5 @@
 import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
+import { HAS_NATIVE_HELPER } from '../../features/ai/extension/platform.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -22,7 +23,7 @@ test('a pre-response shortcut filter cannot overwrite the loaded sites', async (
     if (key === 'newtab.customSites.v1') return { [key]: [{ url: 'https://hidden.example/', title: 'Hidden' }] };
     return {};
   } } } };
-  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, TextEncoder, root, api, observed, innerWidth: 1000,
+  const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, TextEncoder, root, api, observed, innerWidth: 1000,
     crypto: { subtle: { async digest(_algorithm, bytes) {
       if (++digests === 1) { digestReady(); await new Promise(resolve => { releaseDigest = resolve; }); }
       return new Uint8Array(32).fill(new TextDecoder().decode(bytes).includes('hidden.example') ? 0 : 1).buffer;
@@ -71,7 +72,7 @@ for (const dashboardEnabled of [false, true]) test(`disposed new-tab ignores lat
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
   const api = { storage: { local: { onChanged: { addListener() {}, removeListener() {} }, async get() { return {}; } }, onChanged: { addListener() {}, removeListener() {} } } };
-  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, TextEncoder, root, api, innerWidth: 1000,
+  const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, TextEncoder, root, api, innerWidth: 1000,
     installShortcutAdder() {},
     location: { replace() { navigations++; } },
     async viewReply() { started(); return new Promise(resolve => { reply = resolve; }); },
@@ -123,7 +124,7 @@ test('refresh stays hidden during loading, setup and off with only local storage
       } },
       onChanged: { addListener() { assert.fail('general storage listener subscribed'); } },
     } };
-    const context = vm.createContext({ localStorageChanges, URL, Intl, Date, TextEncoder, root, api,
+    const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, TextEncoder, root, api,
       installShortcutAdder() {}, setTimeout: () => 1, clearTimeout() {},
       addEventListener(name, fn) { callbacks.set(name, fn); }, removeEventListener(name) { callbacks.delete(name); },
       async viewReply() { started(); return new Promise(resolve => { release = resolve; }); },

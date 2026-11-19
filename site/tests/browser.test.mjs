@@ -6,7 +6,6 @@ import { resolve, extname } from 'node:path';
 import { chromium } from '../../tests/ai/node_modules/playwright/index.mjs';
 import { dashboardPage } from '../lib/dashboard-page.js';
 import { aggregateUsage } from '../lib/metrics.js';
-import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
 
 test('homepage films, privacy, dashboard, responsive layout, errors, and the actual usage switch', { timeout: 60_000 }, async () => {
   const root = resolve(new URL('../../', import.meta.url).pathname);
@@ -49,7 +48,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   try {
-    const tag = `v${RELEASE_VERSION}`;
+    const version = '1.3.99';
+    const tag = `v${version}`;
     const filename = `Breezer-${tag}-arm64.dmg`;
     const sha = 'b'.repeat(64);
     const apiURL = 'https://api.github.com/repos/etphli/breezer/releases/latest';
@@ -64,9 +64,9 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     const mediaRequests = [];
     page.on('request', request => { if (request.url().endsWith('.mp4')) mediaRequests.push(request.url()); });
     await page.goto(origin);
-    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, RELEASE_VERSION);
-    assert.equal(await page.title(), 'Breezer: a calmer browser for Mac');
-    assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${RELEASE_VERSION.replaceAll('.', '\\.')} for Mac`));
+    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, version);
+    assert.equal(await page.title(), 'Breezer: a calmer browser');
+    assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${version.replaceAll('.', '\\.')} for Mac`));
     const videos = page.locator('#videos video');
     const originals = (await readdir(resolve(root, 'advertising'))).filter(file => file.endsWith('.mp4')).sort();
     assert.deepEqual(await videos.locator('source').evaluateAll(sources => sources.map(source => source.getAttribute('src').split('/').at(-1)).sort()), originals);
@@ -100,8 +100,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     await page.screenshot({ path: `${evidence}/videos-mobile.png` });
     await page.setViewportSize({ width: 1440, height: 1050 });
     await page.goto(`${origin}/download`);
-    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, RELEASE_VERSION);
-    assert.equal(await page.locator('.release').innerText(), `Version ${RELEASE_VERSION}`);
+    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, version);
+    assert.equal(await page.locator('.release').innerText(), `Version ${version}`);
     assert.equal(await page.getByRole('link', { name: 'Download Breezer', exact: true }).getAttribute('href'),
       `https://github.com/etphli/breezer/releases/download/${tag}/Breezer-${tag}-arm64.dmg`);
     assert.equal(await page.getByRole('link', { name: 'Release notes', exact: true }).getAttribute('href'),
@@ -117,8 +117,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     await fallback.goto(`${origin}/download`);
     await incomplete;
     await fallback.waitForLoadState('networkidle');
-    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.0\//);
-    assert.equal(await fallback.locator('#sha').textContent(), '3df187d85bac15868b073858fe83f08bd2a5e23eff62bdc8eb75e7bd5f1b5ccc');
+    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.1\//);
+    assert.equal(await fallback.locator('#sha').textContent(), 'd4cea26348d3ad2c388b21511bb726ed1de5adc28bd30050ceda4da29af1b4e7');
     await fallback.close();
     await page.getByRole('link', { name: 'Privacy policy', exact: true }).click();
     await page.getByRole('heading', { name: 'Your browsing. Your business.' }).waitFor();

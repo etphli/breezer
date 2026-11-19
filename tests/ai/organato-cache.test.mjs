@@ -39,8 +39,10 @@ test('cache saves only dashboard fields, uses private permissions and replaces a
   const saved = await readFile(path, 'utf8');
   assert.ok(!saved.includes(key));
   assert.ok(!saved.includes('Private notes'));
-  assert.equal((await stat(path)).mode & 0o777, 0o600);
-  assert.equal((await stat(directory)).mode & 0o777, 0o700);
+  if (process.platform !== 'win32') {
+    assert.equal((await stat(path)).mode & 0o777, 0o600);
+    assert.equal((await stat(directory)).mode & 0o777, 0o700);
+  }
   service.fetcher = async () => Response.json({ items: [] });
   await service.list();
   let cached;

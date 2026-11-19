@@ -17,7 +17,7 @@ async function until(fn) {
 }
 async function fixture(t) {
  const directory=await mkdtemp(join(tmpdir(),'organato-combined-'));
- for(const [from,to] of [['host/main.mjs','main.mjs'],['host/protocol.mjs','protocol.mjs'],['host/attachments.mjs','attachments.mjs'],['host/updater.mjs','updater.mjs'],['host/organato.mjs','actual-organato.mjs'],['organato-cache-fake-host.mjs','organato.mjs']]) await copyFile(new URL(from.startsWith('host/')?'../../features/ai/'+from:from,import.meta.url),join(directory,to));
+ for(const [from,to] of [['host/main.mjs','main.mjs'],['host/protocol.mjs','protocol.mjs'],['host/attachments.mjs','attachments.mjs'],['host/updater.mjs','updater.mjs'],['host/organato.mjs','actual-organato.mjs'],['host/organato-windows.mjs','organato-windows.mjs'],['organato-cache-fake-host.mjs','organato.mjs']]) await copyFile(new URL(from.startsWith('host/')?'../../features/ai/'+from:from,import.meta.url),join(directory,to));
  const child=fork(join(directory,'main.mjs'),['chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/'],{silent:true,env:{...process.env,REVIEW_CONFIG:directory}});
  let ready=false,serial=0,stderr='';const controls=new Map(),routes=new Map(),fetches=[],replies=[],ports=[];
  const decoder=new NativeDecoder();

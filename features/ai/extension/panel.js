@@ -7,6 +7,7 @@ import { normalizeThemeProposal, readThemeState, renderThemeProposal, restorePre
 import { detectBrowserTask } from './browser-task-intent.js';
 import { preparePastedImage } from './clipboard-image.js';
 import { themeReferenceImages } from './theme-references.js';
+import { PLATFORM } from './platform.js';
 
 const BROWSER_TASKS = {
   stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
@@ -242,6 +243,14 @@ function providerLabel(id) {
 }
 
 function renderModels() {
+  if (PLATFORM === 'windows') {
+    const codex = state.providers.find((provider) => provider.id === 'codex');
+    const steps = $('welcome-account-steps');
+    const instructions = steps.querySelector('[data-provider="codex"]');
+    instructions.hidden = typeof codex?.setup !== 'string';
+    instructions.querySelector('code').textContent = codex?.setup || '';
+    steps.querySelector('[data-account-shell-hint]').textContent = 'Run it in PowerShell, then refresh.';
+  }
   $('model-options').replaceChildren();
   if (!state.providers.length) {
     const note = document.createElement('p');
@@ -291,7 +300,7 @@ function renderModels() {
       const error = document.createElement('p');
       error.className = 'provider-error';
       error.textContent = provider.available && provider.authenticated ? provider.error
-        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is not available on this Mac.`;
+        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is unavailable on this device.`;
       group.append(error);
       if (!provider.available || !provider.authenticated) {
         const connect = document.createElement('button');
@@ -302,9 +311,10 @@ function renderModels() {
           setModelMenu(false);
           $('account-title').textContent = `Connect ${providerLabel(provider.id)}`;
           $('account-instructions').replaceChildren(...[...$('welcome-account-steps').children]
-            .filter(node => node.tagName !== 'SUMMARY' && (!node.dataset.provider || node.dataset.provider === provider.id))
+            .filter(node => node.tagName !== 'SUMMARY' && !node.hidden && (!node.dataset.provider || node.dataset.provider === provider.id))
             .map(node => node.cloneNode(true)));
-          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
+          if (!provider.available) $('account-instructions').querySelector('p').textContent = PLATFORM === 'windows' && provider.error
+            ? provider.error : `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
           $('account-dialog').showModal();
         });
         group.replaceChildren(connect);

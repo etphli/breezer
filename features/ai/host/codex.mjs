@@ -1,7 +1,7 @@
 import { attachmentParts } from './attachments.mjs';
-import { mkdtemp, writeFile, symlink, rm } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, realpath, rename, writeFile, symlink, rm } from 'node:fs/promises';
 import { homedir, tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { createServer } from 'node:http';
 import { JsonLineProcess, cliEnvironment, findCli, runCli } from './cli.mjs';
 import { allowedTools, researchParts, contextParts, promptText, systemPrompt, selectedReasoning } from './protocol.mjs';
@@ -56,6 +56,67 @@ function parseCatalogResult(result) {
   } catch { return null; }
 }
 
+const restrictedConfig = [
+  'approval_policy = "never"',
+  'sandbox_mode = "read-only"',
+  'web_search = "disabled"',
+  'agents.enabled = false',
+  '[tools.update_plan]',
+  'enabled = false',
+  '[tools.experimental_request_user_input]',
+  'enabled = false',
+].join('\n') + '\n';
+const windowsConfig = 'cli_auth_credentials_store = "file"\n' + restrictedConfig;
+
+function windowsSetup(binary) {
+  const quotedBinary = "'" + binary.replaceAll("'", "''") + "'";
+  return [
+    '& {',
+    '  $previousCodexHome = $env:CODEX_HOME',
+    "  try { $env:CODEX_HOME = Join-Path $env:LOCALAPPDATA 'Breezer\\Codex'; & " + quotedBinary + ' login }',
+    '  finally { $env:CODEX_HOME = $previousCodexHome }',
+    '}',
+  ].join('\n');
+}
+
+async function fileMetadata(path) {
+  return lstat(path).catch((error) => {
+    if (error.code !== 'ENOENT') throw error;
+  });
+}
+
+async function windowsCodexHome(localAppData) {
+  if (!localAppData || !isAbsolute(localAppData)) throw new Error('Breezer could not find the Windows local app data folder.');
+  const directory = join(localAppData, 'Breezer', 'Codex');
+  await mkdir(directory, { recursive: true });
+  const localPath = await realpath(localAppData);
+  if ((await realpath(directory)).toLowerCase() !== join(localPath, 'Breezer', 'Codex').toLowerCase()) {
+    throw new Error('Breezer could not use its Codex profile because the folder redirects to another location.');
+  }
+  const auth = await fileMetadata(join(directory, 'auth.json'));
+  if (auth && (!auth.isFile() || auth.nlink !== 1)) {
+    throw new Error('Breezer could not use its Windows Codex login because the auth.json file redirects to another file.');
+  }
+  const config = join(directory, 'config.toml');
+  const existing = await fileMetadata(config);
+  if (existing) {
+    if (!existing.isFile() || existing.nlink !== 1 || existing.size !== Buffer.byteLength(windowsConfig) ||
+        await readFile(config, 'utf8') !== windowsConfig) {
+      throw new Error('Breezer detected changes to the config.toml in its Windows Codex profile. Restore the Breezer configuration to reconnect.');
+    }
+  } else {
+    const staging = await mkdtemp(join(directory, '.breezer-config-'));
+    try {
+      const file = join(staging, 'config.toml');
+      await writeFile(file, windowsConfig, { mode: 0o600 });
+      await rename(file, config);
+    } finally {
+      await rm(staging, { recursive: true, force: true });
+    }
+  }
+  return directory;
+}
+
 export function selectCodexCatalog(refreshedResult, bundledResult) {
   for (const [source, result] of [['refreshed', refreshedResult], ['bundled', bundledResult]]) {
     const catalog = parseCatalogResult(result);
@@ -93,21 +154,32 @@ function cancellationScope(signal) {
 
 export class CodexProvider {
   id = 'codex';
-  constructor({ find = findCli, run = runCli, createProcess = (...args) => new JsonLineProcess(...args) } = {}) {
+  constructor({ find = findCli, run = runCli, createProcess = (...args) => new JsonLineProcess(...args), platform = process.platform, environment = cliEnvironment } = {}) {
     this.find = find; this.run = run; this.createProcess = createProcess;
+    this.windows = platform === 'win32'; this.environment = environment;
   }
   async discover() {
+    let discoveryDirectory, setup;
+    this.authenticated = false;
     try {
       this.binary = await this.find('codex');
+      let discoveryOptions;
+      if (this.windows) {
+        setup = windowsSetup(this.binary);
+        const codexHome = await windowsCodexHome(this.environment().LOCALAPPDATA);
+        discoveryDirectory = await mkdtemp(join(tmpdir(), 'breezer-codex-discovery-'));
+        discoveryOptions = { cwd: discoveryDirectory, env: this.environment({ CODEX_HOME: codexHome }) };
+      }
+      const run = (args) => this.run(this.binary, args, discoveryOptions);
       const [version, features, refreshed] = await Promise.all([
-        this.run(this.binary, ['--version']), this.run(this.binary, ['features', 'list']), this.run(this.binary, ['debug', 'models']).catch(() => null),
+        run(['--version']), run(['features', 'list']), run(['debug', 'models']).catch(() => null),
       ]);
       if (version.code || features.code) throw new Error('Codex CLI discovery failed.');
       this.version = version.stdout.trim();
       let selectedCatalog;
       try { selectedCatalog = selectCodexCatalog(refreshed); }
       catch {
-        const bundled = await this.run(this.binary, ['debug', 'models', '--bundled']);
+        const bundled = await run(['debug', 'models', '--bundled']);
         selectedCatalog = selectCodexCatalog(refreshed, bundled);
       }
       this.catalog = selectedCatalog.catalog;
@@ -142,29 +214,49 @@ export class CodexProvider {
             for (const model of this.models.filter((entry) => entry.fastMode.serviceTier)) model.fastMode.reason = 'The installed Codex CLI could not request Fast mode. Choose Standard, or update Codex and refresh models.';
           } finally { await fastIsolation?.cleanup(); }
         }
-        this.status = { id: this.id, available: true, authenticated: this.authenticated, models: this.models, defaultModel: this.defaultModel, version: this.version, isolation: 'verified-browser-tools', ...(this.defaultModel !== 'gpt-6.1-sol' ? { notice: 'GPT-6.1 Sol was not reported by this CLI. Showing its available models.' } : {}) };
+        this.status = { id: this.id, available: true, authenticated: this.authenticated, models: this.models, defaultModel: this.defaultModel, version: this.version, isolation: 'verified-browser-tools', ...(setup && !this.authenticated ? { setup } : {}), ...(this.defaultModel !== 'gpt-6.1-sol' ? { notice: 'GPT-6.1 Sol was not reported by this CLI. Showing its available models.' } : {}) };
       } finally { await rpc?.close(); await isolation.cleanup(); }
     } catch (error) {
-      this.status = { id: this.id, available: false, authenticated: this.authenticated ?? false, models: this.models ?? [], error: error.message };
+      this.status = { id: this.id, available: false, authenticated: this.authenticated, models: this.models ?? [], error: error.message, ...(setup && !this.authenticated ? { setup } : {}) };
+    } finally {
+      if (discoveryDirectory) await rm(discoveryDirectory, { recursive: true, force: true });
     }
     return this.status;
   }
   async isolate({ fast = false } = {}) {
     const directory = await mkdtemp(join(tmpdir(), 'breezer-codex-'));
+    const cleanup = () => rm(directory, { recursive: true, force: true });
     const codexHome = join(directory, 'config');
-    const { mkdir } = await import('node:fs/promises');
-    await mkdir(codexHome, { mode: 0o700 });
-    const authSource = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'auth.json');
-    await symlink(authSource, join(codexHome, 'auth.json'));
-    const catalogPath = join(directory, 'models.json');
-    await writeFile(catalogPath, JSON.stringify(this.catalog), { mode: 0o600 });
-    const config = `model_catalog_json = ${JSON.stringify(catalogPath)}\napproval_policy = "never"\nsandbox_mode = "read-only"\nweb_search = "disabled"\nagents.enabled = false\n[tools.update_plan]\nenabled = false\n[tools.experimental_request_user_input]\nenabled = false\n[features]\n${this.features.map((name) => `${JSON.stringify(name)} = ${name === 'fast_mode' && fast}`).join('\n')}\n`;
-    await writeFile(join(codexHome, 'config.toml'), config, { mode: 0o600 });
-    return { directory, env: cliEnvironment({ CODEX_HOME: codexHome }), cleanup: () => rm(directory, { recursive: true, force: true }) };
+    try {
+      await mkdir(codexHome, { mode: 0o700 });
+      const catalogPath = join(directory, 'models.json');
+      await writeFile(catalogPath, JSON.stringify(this.catalog), { mode: 0o600 });
+      const featureValues = this.features.map((name) => `${JSON.stringify(name)} = ${name === 'fast_mode' && fast}`);
+      const config = `model_catalog_json = ${JSON.stringify(catalogPath)}\n${this.windows ? windowsConfig : restrictedConfig}[features]\n${featureValues.join('\n')}\n`;
+      await writeFile(join(codexHome, 'config.toml'), config, { mode: 0o600 });
+      const isolation = { directory, env: this.environment({ CODEX_HOME: codexHome }), cleanup };
+      if (this.windows) {
+        const home = await windowsCodexHome(isolation.env.LOCALAPPDATA);
+        // The CLI manages its Breezer login in a stable home. Each turn gets its
+        // own model and feature overrides; the loopback probe has no login.
+        return {
+          ...isolation,
+          env: this.environment({ CODEX_HOME: home }),
+          args: ['-c', `model_catalog_json=${JSON.stringify(catalogPath)}`, '-c', `features={${featureValues.join(', ')}}`],
+          probe: isolation,
+        };
+      }
+      const authSource = join(process.env.CODEX_HOME || join(homedir(), '.codex'), 'auth.json');
+      await symlink(authSource, join(codexHome, 'auth.json'));
+      return isolation;
+    } catch (error) {
+      await cleanup();
+      throw error;
+    }
   }
   async start(isolation, args = [], scope) {
     scope?.check();
-    const rpc = this.createProcess(this.binary, ['app-server', '--strict-config', ...args], { cwd: isolation.directory, env: isolation.env });
+    const rpc = this.createProcess(this.binary, ['app-server', '--strict-config', ...(isolation.args ?? []), ...args], { cwd: isolation.directory, env: isolation.env });
     try {
       scope?.own(rpc);
       await rpc.request('initialize', { clientInfo: { name: 'breezer', title: 'Breezer', version: '1.0.0' }, capabilities: { experimentalApi: true } });
@@ -221,7 +313,7 @@ export class CodexProvider {
       await listening;
       scope.check();
       const address = server.address();
-      rpc = await this.start(isolation, ['-c', 'model_provider="breezer_probe"', '-c', `model_providers.breezer_probe={name="Breezer isolation probe",base_url="http://127.0.0.1:${address.port}/v1",wire_api="responses",requires_openai_auth=false}`], scope);
+      rpc = await this.start(isolation.probe ?? isolation, ['-c', 'model_provider="breezer_probe"', '-c', `model_providers.breezer_probe={name="Breezer isolation probe",base_url="http://127.0.0.1:${address.port}/v1",wire_api="responses",requires_openai_auth=false}`], scope);
       scope.own(rpc);
       const started = await rpc.request('thread/start', { ...this.threadParams(model, tools), modelProvider: 'breezer_probe' });
       scope.check();
@@ -237,7 +329,9 @@ export class CodexProvider {
   }
   async chat(chat, { signal, emit, callTool }) {
     const model = chat.model || this.defaultModel;
-    if (!this.status?.available || !this.authenticated) throw new Error('Codex is unavailable. Sign in with codex login, then reconnect.');
+    if (!this.status?.available || !this.authenticated) {
+      throw new Error(this.status?.setup ? `Sign in to Breezer's Codex profile in PowerShell, then refresh.\n${this.status.setup}` : 'Codex is unavailable. Sign in with codex login, then reconnect.');
+    }
     const selected = this.models.find((entry) => entry.id === model);
     if (!selected) throw new Error('This model was not reported by Codex model/list.');
     const options = codexTurnOptions(chat, selected);

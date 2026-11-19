@@ -1,0 +1,9 @@
+assert(is_win)
+
+executable("breezer_ai_host") {
+  output_dir = "$root_out_dir/breezer_ai"
+  sources = [
+    "host_identity.h",
+    "host_launcher.cc",
+  ]
+}
