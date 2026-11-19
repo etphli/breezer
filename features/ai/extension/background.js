@@ -595,7 +595,10 @@ export function installBackground(api) {
       });
       run.submitted = true;
     } catch (error) {
-      if (current(run)) await cancel(run, error.message);
+      if (current(run)) {
+        releaseNative(panel);
+        await cancel(run, error.message);
+      }
     }
   };
   const restoreTurn = async panel => {
@@ -652,7 +655,7 @@ export function installBackground(api) {
         else if (message.type === 'cancel') {
           if (panel.researchDraft) panel.researchDraft.invalidated = true;
           const run = runFor(panel);
-          if (run?.reader === panel && run.id === message.id) await cancel(run);
+          if (run?.reader === panel && (!message.id || run.id === message.id)) await cancel(run);
         } else if (message.type === 'turn-saved' || message.type === 'clear-turn') {
           await panel.ready;
           await writeReply(panel.windowId, async key => {
