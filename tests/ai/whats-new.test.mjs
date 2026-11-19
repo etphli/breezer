@@ -24,7 +24,8 @@ test('loads nothing remote', () => {
   assert.deepEqual([...css.matchAll(/url\(([^)]*)\)/g)].map((m) => m[1]), ['#breeze-ink']);
   for (const [, target] of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
     if (target.startsWith('#')) assert.ok(html.includes(`id="${target.slice(1)}"`), target);
-    else assert.ok(['efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings'].includes(target), target);
+    else assert.ok(['efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings'].includes(target) ||
+      /^whats-new\.css\?v=\d+\.\d+\.\d+$/.test(target), target);
   }
 });
 

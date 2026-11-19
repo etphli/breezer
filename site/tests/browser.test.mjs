@@ -49,9 +49,22 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   try {
+    const tag = `v${RELEASE_VERSION}`;
+    const filename = `Breezer-${tag}-arm64.dmg`;
+    const sha = 'b'.repeat(64);
+    const apiURL = 'https://api.github.com/repos/etphli/breezer/releases/latest';
+    let requests = 0;
+    await page.route(apiURL, route => {
+      requests++;
+      return route.fulfill({ json: { tag_name: tag, assets: [
+        { name: filename, state: 'uploaded', size: 2026, digest: `sha256:${sha}` },
+        { name: `${filename}.sha256`, state: 'uploaded', size: 91 },
+      ] } });
+    });
     const mediaRequests = [];
     page.on('request', request => { if (request.url().endsWith('.mp4')) mediaRequests.push(request.url()); });
     await page.goto(origin);
+    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, RELEASE_VERSION);
     assert.equal(await page.title(), 'Breezer: a calmer browser for Mac');
     assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${RELEASE_VERSION.replaceAll('.', '\\.')} for Mac`));
     const videos = page.locator('#videos video');
@@ -87,12 +100,26 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     await page.screenshot({ path: `${evidence}/videos-mobile.png` });
     await page.setViewportSize({ width: 1440, height: 1050 });
     await page.goto(`${origin}/download`);
-    const tag = `v${RELEASE_VERSION}`;
+    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, RELEASE_VERSION);
     assert.equal(await page.locator('.release').innerText(), `Version ${RELEASE_VERSION}`);
     assert.equal(await page.getByRole('link', { name: 'Download Breezer', exact: true }).getAttribute('href'),
       `https://github.com/etphli/breezer/releases/download/${tag}/Breezer-${tag}-arm64.dmg`);
     assert.equal(await page.getByRole('link', { name: 'Release notes', exact: true }).getAttribute('href'),
       `https://github.com/etphli/breezer/releases/tag/${tag}`);
+    assert.equal(await page.locator('#sha').textContent(), sha);
+    assert.equal(requests, 1, 'homepage and download reuse the same validated release');
+    const fallback = await browser.newPage();
+    await fallback.route(apiURL, route => route.fulfill({ json: { tag_name: 'v2.0.0', assets: [
+      { name: 'Breezer-v2.0.0-arm64.dmg', state: 'uploaded', size: 2026, digest: `sha256:${sha}` },
+      { name: 'Breezer-v2.0.0-arm64.dmg.sha256', state: 'starter', size: 0 },
+    ] } }));
+    const incomplete = fallback.waitForResponse(apiURL);
+    await fallback.goto(`${origin}/download`);
+    await incomplete;
+    await fallback.waitForLoadState('networkidle');
+    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.0\//);
+    assert.equal(await fallback.locator('#sha').textContent(), '3df187d85bac15868b073858fe83f08bd2a5e23eff62bdc8eb75e7bd5f1b5ccc');
+    await fallback.close();
     await page.getByRole('link', { name: 'Privacy policy', exact: true }).click();
     await page.getByRole('heading', { name: 'Your browsing. Your business.' }).waitFor();
     assert.equal(await page.locator('article section').count(), 9);

@@ -233,6 +233,44 @@ for (const link of document.querySelectorAll('[data-download]')) {
   });
 }
 
+async function latestMacRelease() {
+  const key = 'breezer.mac-release';
+  const tagPattern = /^v\d+\.\d+\.\d+$/;
+  const shaPattern = /^[a-f0-9]{64}$/;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(key));
+    if (cached?.expires > Date.now() && tagPattern.test(cached.tag) && shaPattern.test(cached.sha)) return cached;
+  } catch {}
+  const response = await fetch('https://api.github.com/repos/etphli/breezer/releases/latest', {
+    credentials: 'omit', signal: AbortSignal.timeout(5000),
+  });
+  if (!response.ok) return;
+  const { tag_name: tag, assets } = await response.json();
+  if (!tagPattern.test(tag) || !Array.isArray(assets)) return;
+  const name = 'Breezer-' + tag + '-arm64.dmg';
+  const uploaded = (asset) => asset.state === 'uploaded' && Number.isSafeInteger(asset.size) && asset.size > 0;
+  const dmg = assets.find(asset => asset.name === name && uploaded(asset));
+  const sha = /^sha256:([a-f0-9]{64})$/.exec(dmg?.digest || '')?.[1];
+  if (!sha || !assets.some(asset => asset.name === name + '.sha256' && uploaded(asset))) return;
+  const release = { tag, sha, expires: Date.now() + 10 * 60_000 };
+  try { sessionStorage.setItem(key, JSON.stringify(release)); } catch {}
+  return release;
+}
+
+const macVersions = document.querySelectorAll('[data-mac-version]');
+if (macVersions.length) latestMacRelease().then((release) => {
+  if (!release) return;
+  const { tag, sha } = release;
+  for (const version of macVersions) version.textContent = tag.slice(1);
+  const notes = document.querySelector('[data-mac-release-notes]');
+  if (notes) {
+    const releases = 'https://github.com/etphli/breezer/releases';
+    document.querySelector('[data-download]').href = releases + '/download/' + tag + '/Breezer-' + tag + '-arm64.dmg';
+    notes.href = releases + '/tag/' + tag;
+    document.getElementById('sha').textContent = sha;
+  }
+}).catch(() => {});
+
 // Keep sound from different films from overlapping.
 const films = [...document.querySelectorAll('.film video')];
 for (const film of films) {
