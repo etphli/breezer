@@ -9,6 +9,7 @@ source_set("breezer_private") {
   sources = [
     "breezer_private_api.cc",
     "breezer_private_api.h",
+    "browser_stats_api.cc",
     "research_text.h",
     "workspace_sync_api.cc",
   ]
@@ -34,6 +35,7 @@ source_set("breezer_private") {
     "//content/public/browser",
     "//extensions/common",
     "//extensions/common:mojom",
+    "//services/resource_coordinator/public/cpp/memory_instrumentation",
     "//skia",
     "//ui/base/mojom",
     "//url",

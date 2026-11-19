@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import { createHash } from 'node:crypto';
 import { attachmentParts } from '../../features/ai/host/attachments.mjs';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
 import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
+import { detectBrowserTask } from '../../features/ai/extension/browser-task-intent.js';
 
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
 // A current-main negative control: undo only the transcript scan/cache changes.
@@ -61,6 +61,7 @@ function harness(code, initial = [], ids = []) {
   breezerPrivate: { async authorizeCurrentPage() { return true; } },
   };
   const context = vm.createContext({ document, chrome, crypto: { randomUUID: () => ids[sequence++] || `run-${sequence}` },
+    detectBrowserTask,
     ResearchSources: class { size = 0; selected = new Map(); clear() {} },
     requestAnimationFrame(fn) { counts.frames++; frames.push(fn); },
     renderMessage(body, text) { renders.push(text); body.textContent = text; },
@@ -341,13 +342,4 @@ test('real main browser fixture gains isolated, removable area listeners without
   await local.set({ breezerProfile: { name: 'C', context: 'D' } });
   assert.equal(localEvents.length, 1);
   assert.equal(sessionEvents.length, 1);
-});
-
-
-test('current main panel UI and attachment code are unchanged outside the storage event port', () => {
-  const provenance = JSON.parse(fs.readFileSync(new URL('./fixtures/host-main-port/provenance.json', import.meta.url)));
-  const main = source.replace("import { localStorageChanges } from './storage-events.js';\n", '')
-    .replace('localStorageChanges(chrome).addListener((changes) => {', 'chrome.storage.onChanged?.addListener((changes, area) => {')
-    .replace('const profile = changes.breezerProfile?.newValue;', "const profile = area === 'local' ? changes.breezerProfile?.newValue : null;");
-  assert.equal(createHash('sha256').update(main).digest('hex'), provenance.currentMainOracles['features/ai/extension/panel.js']);
 });

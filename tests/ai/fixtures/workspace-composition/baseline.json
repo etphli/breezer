@@ -10,6 +10,10 @@
       "base": "55b86e3b9338804dbfb1a4deb39930c9cba09155",
       "path": "features/ai/extension/workspace.js",
       "scope": "folderNode, drop target/commit, pointer drag/cancellation only"
+    },
+    {
+      "path": "features/ai/extension/workspace.js",
+      "scope": "folder colors: paintFolderColor plus its two draw calls (sidebar data-folder-colors and per-folder data-color) only, so both sides render the same folder-color DOM; the preview guard and menu stay candidate-only"
     }
   ]
 }

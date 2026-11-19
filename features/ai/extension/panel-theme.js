@@ -6,6 +6,10 @@ import { localStorageChanges } from './storage-events.js';
 import { APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, normalizeAppearance } from './workspace-store.js';
 
 export const APPEARANCE_TIMEOUT_MS = 1500;
+// Sent (as a runtime message, and as a window event in the sending page) when
+// the browser appearance changed but appearance.rev could not be written, such
+// as after a theme rollback with storage unavailable.
+export const THEME_REFRESH_MESSAGE = 'breezer.theme.refresh';
 
 export function resolveTheme(appearance, systemDark) {
   const { theme, colorMode } = normalizeAppearance(appearance);
@@ -61,5 +65,9 @@ export function startPanelTheme({ api = globalThis.chrome, root = document.docum
   localStorageChanges(api)?.addListener((changes) => {
     if (changes?.[APPEARANCE_REV_KEY]) void refresh();
   });
+  api?.runtime?.onMessage?.addListener?.((message) => {
+    if (message?.type === THEME_REFRESH_MESSAGE) void refresh();
+  });
+  root.ownerDocument?.defaultView?.addEventListener?.(THEME_REFRESH_MESSAGE, () => void refresh());
   return refresh();
 }

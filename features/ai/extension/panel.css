@@ -585,6 +585,15 @@ h1 {
   font-weight: 700;
 }
 .context-chip:hover:not(:disabled) { background: var(--hover); }
+#browser-task-clear {
+  justify-self: start;
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: var(--tint);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 500;
+}
 .context-hint {
   grid-column: 1 / -1;
   font-size: 13px;
@@ -1168,3 +1177,62 @@ dialog .privacy-note {
 .composer:has(.attachment-chip)::before, .composer:has(.attachment-chip) textarea, .composer:has(.attachment-chip) .send-button { grid-row: 2; }
 .composer:has(.attachment-chip) :is(.model-button, .source-tools) { grid-row: 3; }
 .attachment-hint { font-size: 12px; }
+
+/* ----------------------------------------------------------- theme proposals */
+/* A proposal card: the artwork is the picture, with a sketch of the new tab's
+   sheet in its seed colour on top, then the name, swatch and two actions. */
+.theme-proposal {
+  --proposal-sheet: color-mix(in oklab, var(--proposal-seed) 10%, white);
+  --proposal-line: color-mix(in oklab, var(--proposal-seed) 38%, white);
+  margin: 10px 0 4px;
+  border-radius: 13px;
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--hairline);
+  overflow: hidden;
+}
+.theme-proposal[data-mode="dark"] {
+  --proposal-sheet: color-mix(in oklab, var(--proposal-seed) 16%, #1d1f24);
+  --proposal-line: color-mix(in oklab, var(--proposal-seed) 45%, #2c2f36);
+}
+.theme-proposal-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: color-mix(in oklab, var(--proposal-seed) 22%, var(--canvas));
+  overflow: hidden;
+}
+.theme-proposal-stage-plain {
+  background: radial-gradient(120% 90% at 20% 10%, color-mix(in oklab, var(--proposal-seed) 55%, white), color-mix(in oklab, var(--proposal-seed) 85%, black));
+}
+.theme-proposal-art { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; pointer-events: none; }
+.theme-proposal-sketch {
+  position: absolute;
+  inset: auto 12% 0;
+  height: 38%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: 6px 10px;
+  padding: 10px 12px;
+  border-radius: 8px 8px 0 0;
+  background: var(--proposal-sheet);
+  box-shadow: 0 -1px 8px rgb(0 0 0 / .12);
+}
+.theme-proposal-sketch i { height: 5px; border-radius: 3px; background: var(--proposal-line); }
+.theme-proposal-sketch i:first-child { grid-column: 1 / -1; width: 42%; height: 7px; background: var(--proposal-seed); }
+.theme-proposal-body { padding: 10px 12px 12px; }
+.theme-proposal-name { margin: 0; font-size: 14px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+.theme-proposal-meta { display: flex; align-items: center; gap: 6px; margin: 3px 0 0; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.theme-proposal-swatch { width: 11px; height: 11px; flex: none; border-radius: 50%; background: var(--proposal-seed); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .18); }
+.theme-proposal-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.theme-proposal-apply, .theme-proposal-restore { min-height: 28px; padding: 4px 12px; border-radius: 7px; font-size: 12px; font-weight: 500; }
+.theme-proposal-apply { color: var(--on-accent); background: var(--accent); }
+.theme-proposal-apply:hover { color: var(--on-accent); background: color-mix(in srgb, var(--accent) 86%, var(--ink)); }
+.theme-proposal-apply:disabled { color: var(--accent-ink); background: var(--accent-soft); }
+.theme-proposal-restore { background: var(--tint); }
+.theme-proposal-restore:hover { background: var(--hover); }
+.theme-proposal-restore:disabled { opacity: .6; }
+.theme-proposal-status { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.4; }
+.theme-proposal-status:empty { display: none; }
+.theme-proposal-status[data-tone="error"] { color: var(--danger); }
+.theme-proposal[aria-busy="true"] .theme-proposal-actions { cursor: progress; }
+@media (forced-colors: active) { .theme-proposal { border: 1px solid CanvasText; } .theme-proposal-sketch { display: none; } }

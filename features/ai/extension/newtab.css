@@ -426,3 +426,25 @@ a.item-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 /* ------------------------------------------------------------ Organato off */
 
 /* The date keeps its position when the optional agenda is turned off. */
+
+/* ---------------------------------------------------------- theme artwork */
+/* Applied AI artwork sits behind everything in an inert, sandboxed frame, over
+   the person's own image when the theme has one. The image is drawn at its
+   own resolution with no filter, so it stays sharp. A veil of the page colour
+   keeps the date and sites readable over both; the sheet stays opaque. */
+.theme-image { position: fixed; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.theme-artwork { position: fixed; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; border: 0; pointer-events: none; background: transparent; }
+:root[data-artwork="on"] { background: var(--canvas); }
+:root[data-artwork="on"] body { background: transparent; }
+:root[data-artwork="on"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--canvas) 62%, transparent), color-mix(in srgb, var(--canvas) 34%, transparent) 42%, color-mix(in srgb, var(--canvas) 18%, transparent));
+}
+:root[data-artwork="on"] :is(.sky, .sheet) { position: relative; z-index: 2; }
+:root[data-artwork="on"] .settings-link { z-index: 3; }
+:root[data-artwork="on"] .today { text-shadow: 0 1px 14px color-mix(in srgb, var(--canvas) 80%, transparent); }
+@media (forced-colors: active) { .theme-image, .theme-artwork, :root[data-artwork="on"] body::before { display: none; } }

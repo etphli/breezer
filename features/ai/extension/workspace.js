@@ -3,8 +3,8 @@ import {
   APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
   findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeStore, parseRoute,
-  removeNode, removeSpace, renameNode, renameSpace, resolveSpaceId, setFolderOpen, setSpaceTone, spaceOfTab,
-  visibleTabs, windowStateKey,
+  normalizeFolderColor, removeNode, removeSpace, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
+  setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
 } from './workspace-store.js';
 
 const api = globalThis.chrome;
@@ -717,6 +717,20 @@ function folderNode() {
   return folder;
 }
 
+// Tone names map to CSS tokens; a custom hex is carried in --folder-custom.
+function paintFolderColor(node, color) {
+  const kind = !color ? '' : color.startsWith('#') ? 'custom' : color;
+  if ((node.dataset.color || '') !== kind) {
+    if (kind) node.dataset.color = kind;
+    else delete node.dataset.color;
+  }
+  const custom = kind === 'custom' ? color : '';
+  if ((node.dataset.custom || '') !== custom) {
+    if (custom) { node.dataset.custom = custom; node.style.setProperty('--folder-custom', custom); }
+    else { delete node.dataset.custom; node.style.removeProperty('--folder-custom'); }
+  }
+}
+
 function drawTree(container, items) {
   reconcile(container, items);
 }
@@ -779,6 +793,7 @@ function paintSidebar() {
   const sidebar = $('sidebar');
   sidebar.dataset.tone = /^#[0-9a-fA-F]{6}$/.test(state.appearance.theme) ? 'custom' : model.space.tone;
   sidebar.dataset.close = model.prefs.closeButton;
+  if (sidebar.dataset.folderColors !== model.prefs.folderColors) sidebar.dataset.folderColors = model.prefs.folderColors;
   if (state.renaming?.kind !== 'space') $('space-name').textContent = model.space.name;
   $('space-glyph').textContent = (model.space.name[0] || '·').toUpperCase();
 
@@ -830,6 +845,7 @@ function paintSidebar() {
         folder.setAttribute('aria-expanded', String(open));
         folder.setAttribute('aria-label', `${node.folder.name}, folder, ${node.children.length} ${node.children.length === 1 ? 'tab' : 'tabs'}`);
         folder.setAttribute('aria-selected', 'false');
+        if (!folderPreview || folderPreview.id !== node.folder.id) paintFolderColor(folder, node.folder.color);
         const title = head.querySelector('.title');
         if (state.renaming?.key !== key && title.textContent !== node.folder.name) title.textContent = node.folder.name;
         head.querySelector('.count').textContent = open || !node.children.length ? '' : String(node.children.length);
@@ -1102,6 +1118,9 @@ function startRename(target) {
 // ---------------------------------------------------------------- menu
 
 let menuReturn = null;
+let menuRect = null;
+// A custom folder color shown before it is applied. Closing the menu reverts it.
+let folderPreview = null;
 
 function openMenu(entries, rect, returnFocus) {
   const menu = $('menu');
@@ -1110,6 +1129,7 @@ function openMenu(entries, rect, returnFocus) {
   menu.replaceChildren();
   for (const entry of entries) {
     if (entry === '-') { menu.append(el('div', 'menu-separator', { role: 'separator' })); continue; }
+    if (entry.node) { menu.append(entry.node); continue; }
     if (entry.heading) { menu.append(el('div', 'menu-heading', { role: 'presentation' })); menu.lastChild.textContent = entry.heading; continue; }
     const button = el('button', `menu-item${entry.danger ? ' danger' : ''}`, { role: 'menuitem', type: 'button', tabindex: '-1' });
     if (entry.tone) { const swatch = el('span', 'menu-swatch', { 'aria-hidden': 'true' }); swatch.dataset.tone = entry.tone; button.append(swatch); }
@@ -1127,6 +1147,15 @@ function openMenu(entries, rect, returnFocus) {
     menu.append(button);
   }
   menu.hidden = false;
+  menuRect = rect;
+  placeMenu();
+  nodes[0]?.focus();
+}
+
+// Also re-run when the menu grows, so an expanded section stays on screen.
+function placeMenu() {
+  const menu = $('menu');
+  const rect = menuRect;
   const bounds = $('sidebar').getBoundingClientRect();
   const height = menu.offsetHeight;
   const width = menu.offsetWidth;
@@ -1134,12 +1163,12 @@ function openMenu(entries, rect, returnFocus) {
   const left = Math.min(Math.max(8, rect.left + 8), bounds.width - width - 8);
   menu.style.top = `${top < rect.bottom && rect.top - height - 4 > 8 ? rect.top - height - 4 : top}px`;
   menu.style.left = `${Math.max(4, left)}px`;
-  nodes[0]?.focus();
 }
 
 function closeMenu(restore = true) {
   const menu = $('menu');
   if (menu.hidden) return;
+  endFolderPreview();
   menu.hidden = true;
   menu.replaceChildren();
   if (restore && menuReturn?.isConnected) menuReturn.focus();
@@ -1154,6 +1183,131 @@ function spaceTargets(exclude, run) {
 
 function copyLink(url) {
   navigator.clipboard?.writeText(url).then(() => showToast('Link copied.'), () => showToast('Couldn’t copy the link.'));
+}
+
+// ---------------------------------------------------------------- folder colors
+
+const HEX_INPUT = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+// Accepts "3a7bd5", "#3A7BD5" or "#38f"; returns "#rrggbb" or null.
+export function parseHexInput(value) {
+  const match = HEX_INPUT.exec(String(value || '').trim());
+  if (!match) return null;
+  const digits = match[1].length === 3 ? [...match[1]].map((digit) => digit + digit).join('') : match[1];
+  return normalizeFolderColor(`#${digits}`);
+}
+
+// Resolves a color custom property on `host` (including a custom theme's
+// relative oklch() accent) to #rrggbb for the color input.
+function colorPropertyHex(host, property) {
+  const probe = el('span', '', { 'aria-hidden': 'true' });
+  probe.style.color = `var(${property})`;
+  host.append(probe);
+  const resolved = getComputedStyle(probe).color;
+  probe.remove();
+  const context = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  if (!context || !resolved) return null;
+  context.fillStyle = resolved;
+  context.fillRect(0, 0, 1, 1);
+  const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+  return `#${[r, g, b].map((value) => value.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function previewFolderColor(id, color) {
+  const node = document.querySelector(`[data-key="${CSS.escape(`f:${id}`)}"]`);
+  if (!node) return;
+  folderPreview = { id };
+  paintFolderColor(node, color);
+}
+
+// Repaints a folder from the saved store, dropping any preview.
+function repaintFolder(id) {
+  const folder = findNode(state.store, id)?.node;
+  const node = document.querySelector(`[data-key="${CSS.escape(`f:${id}`)}"]`);
+  if (folder?.kind === 'folder' && node) paintFolderColor(node, folder.color);
+}
+
+function endFolderPreview() {
+  if (!folderPreview) return;
+  const { id } = folderPreview;
+  folderPreview = null;
+  repaintFolder(id);
+}
+
+function chooseFolderColor(folder, color) {
+  // Keep an applied preview on screen until the stored color replaces it.
+  if (color && folderPreview?.id === folder.id) folderPreview = null;
+  closeMenu();
+  // mutate() reports the failure in a toast; the folder returns to its saved color.
+  void mutate((store) => setFolderColor(store, folder.id, color)).catch(() => repaintFolder(folder.id));
+}
+
+// Six tone swatches plus a custom swatch that opens a hex field and picker.
+// The swatches are one stop for Up/Down; Left/Right move between them.
+function folderColorEntries(folder) {
+  const custom = folder.color?.startsWith('#') ? folder.color : '';
+  const swatches = el('div', 'menu-swatches', { role: 'group', 'aria-label': 'Folder color' });
+  for (const tone of TONES) {
+    const chip = el('button', 'menu-chip', { type: 'button', role: 'menuitemradio', tabindex: '-1', 'aria-checked': String(folder.color === tone), 'aria-label': TONE_NAMES[tone], title: TONE_NAMES[tone] });
+    chip.dataset.color = tone;
+    chip.addEventListener('click', () => chooseFolderColor(folder, tone));
+    swatches.append(chip);
+  }
+  const more = el('button', 'menu-chip', { type: 'button', role: 'menuitemradio', tabindex: '-1', 'aria-checked': String(Boolean(custom)), 'aria-label': custom ? `Custom color ${custom}` : 'Custom color', title: custom ? `Custom color ${custom}` : 'Custom color', 'aria-expanded': 'false', 'aria-controls': 'menu-custom-color' });
+  more.dataset.color = 'custom';
+  if (custom) { more.style.setProperty('--folder-custom', custom); more.classList.add('has-custom'); }
+  swatches.append(more);
+
+  const editor = el('div', 'menu-custom', { id: 'menu-custom-color', role: 'group', 'aria-label': 'Custom folder color' });
+  editor.hidden = true;
+  const well = el('input', 'menu-well', { type: 'color', 'aria-label': 'Pick a color' });
+  const field = el('input', 'menu-hex', { type: 'text', inputmode: 'text', maxlength: '7', spellcheck: 'false', autocomplete: 'off', 'aria-label': 'Hex color', placeholder: '#rrggbb' });
+  const apply = el('button', 'menu-apply', { type: 'button' });
+  apply.textContent = 'Apply';
+  editor.append(well, field, apply);
+
+  const preview = (hex) => {
+    field.removeAttribute('aria-invalid');
+    previewFolderColor(folder.id, hex);
+  };
+  well.addEventListener('input', () => { field.value = well.value; preview(well.value); });
+  field.addEventListener('input', () => {
+    const hex = parseHexInput(field.value);
+    if (hex) { well.value = hex; preview(hex); }
+  });
+  const commit = () => {
+    const hex = parseHexInput(field.value);
+    if (!hex) { field.setAttribute('aria-invalid', 'true'); field.focus(); return; }
+    chooseFolderColor(folder, hex);
+  };
+  well.addEventListener('change', () => { field.value = well.value; commit(); });
+  field.addEventListener('keydown', (event) => { if (event.key === 'Enter') { event.preventDefault(); commit(); } });
+  apply.addEventListener('click', commit);
+  more.addEventListener('click', () => {
+    if (!editor.hidden) { field.focus(); field.select(); return; }
+    // Start from the folder's current color, or the space accent when it has none.
+    const checked = swatches.querySelector('[aria-checked="true"]');
+    const source = custom || colorPropertyHex(checked || $('menu'), checked ? '--folder-color' : '--accent') || '#23866b';
+    well.value = source;
+    field.value = source;
+    editor.hidden = false;
+    more.setAttribute('aria-expanded', 'true');
+    placeMenu();
+    field.focus();
+    field.select();
+  });
+
+  const reset = { label: 'Reset color', disabled: !folder.color, run: () => chooseFolderColor(folder, null) };
+  return [{ heading: 'Color' }, { node: swatches }, { node: editor }, reset];
+}
+
+function collapseColorEditor(editor) {
+  editor.hidden = true;
+  endFolderPreview();
+  const more = $('menu').querySelector('[aria-controls="menu-custom-color"]');
+  more?.setAttribute('aria-expanded', 'false');
+  placeMenu();
+  more?.focus();
 }
 
 function openItemMenu(found, rect) {
@@ -1201,6 +1355,7 @@ function openItemMenu(found, rect) {
     entries = [
       { label: folder.open ? 'Collapse' : 'Expand', run: () => mutate((store) => setFolderOpen(store, folder.id, !folder.open)).catch(() => {}) },
       { label: 'Rename', run: () => startRenameFor(found) },
+      ...(state.store.prefs.folderColors !== 'off' ? ['-', ...folderColorEntries(folder)] : []),
       ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, folder.id, { spaceId })).catch(() => {})),
       '-',
       { label: 'Delete folder', danger: true, run: () => mutate((store) => removeNode(store, folder.id)).then(() => showToast(`Deleted ${folder.name}. Its tabs stay pinned.`)).catch(() => {}) },
@@ -1226,8 +1381,40 @@ function openSpaceMenu() {
   ], $('space-menu').getBoundingClientRect(), $('space-menu'));
 }
 
+// Each swatch row counts as one stop: the focused, checked or first swatch.
+function menuStops() {
+  return [...$('menu').children].flatMap((child) => {
+    if (child.hidden || child.classList.contains('menu-custom')) return [];
+    if (child.classList.contains('menu-swatches')) {
+      const chips = [...child.children];
+      return [chips.find((chip) => chip === document.activeElement) || chips.find((chip) => chip.getAttribute('aria-checked') === 'true') || chips[0]];
+    }
+    return child.matches('[role^="menuitem"]') ? [child] : [];
+  });
+}
+
 function onMenuKey(event) {
-  const items = [...$('menu').querySelectorAll('[role^="menuitem"]')];
+  const editor = event.target.closest?.('.menu-custom');
+  if (editor) {
+    // Text editing keeps its own keys. Tab cycles the editor; Escape returns to the swatches.
+    if (event.key === 'Escape') collapseColorEditor(editor);
+    else if (event.key === 'Tab') {
+      const controls = [...editor.querySelectorAll('input, button')];
+      const at = controls.indexOf(event.target);
+      controls[(at + (event.shiftKey ? -1 : 1) + controls.length) % controls.length].focus();
+    } else return;
+    event.preventDefault();
+    return;
+  }
+  const row = event.target.closest?.('.menu-swatches');
+  if (row && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+    const chips = [...row.children];
+    const at = chips.indexOf(event.target);
+    chips[(at + (event.key === 'ArrowRight' ? 1 : -1) + chips.length) % chips.length].focus();
+    event.preventDefault();
+    return;
+  }
+  const items = menuStops();
   const at = items.indexOf(document.activeElement);
   const go = (index) => items[(index + items.length) % items.length]?.focus();
   if (event.key === 'ArrowDown') go(at + 1);
@@ -1675,17 +1862,21 @@ function bindSidebar() {
   api.tabs.onAttached.addListener(onAttached);
   api.tabs.onDetached.addListener(onDetached);
   api.tabs.onReplaced?.addListener(onReplaced);
+  const refreshAppearance = async () => {
+    const { appearance } = await loadAppearance();
+    state.appearance = appearance;
+    applyAppearance(appearance);
+  };
   localStorageChanges(api).addListener((changes) => {
     if (changes[STORE_KEY]) {
       state.store = normalizeStore(changes[STORE_KEY].newValue);
       render();
     }
-    if (changes[APPEARANCE_REV_KEY]) {
-      void loadAppearance().then(({ appearance }) => { state.appearance = appearance; applyAppearance(appearance); });
-    }
+    if (changes[APPEARANCE_REV_KEY]) void refreshAppearance();
   });
   // Native ⌃1–⌃4 commands are forwarded by the background worker.
   api.runtime.onMessage.addListener((message) => {
+    if (message?.type === 'breezer.theme.refresh') { void refreshAppearance(); return; }
     if (message?.type !== 'breezer.workspace.space' || message.windowId !== state.windowId) return;
     const space = state.store.spaces[message.index];
     if (space) switchSpace(space.id);

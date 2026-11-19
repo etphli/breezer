@@ -1,4 +1,4 @@
-import { restoreMainStyles } from './workspace-integration-inverse.mjs';
+import { restoreMainStyles, stripFolderColorDraw, folderColorDrawLines } from './workspace-integration-inverse.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -45,6 +45,26 @@ test('CSS negative controls reject palette, motion, settings-order and custom-co
   ]) {
     assert.ok(badShared !== shared || badSettings !== settings, 'negative control changed actual bytes');
     assert.throws(() => assertStyles(badShared, badSettings));
+  }
+});
+
+test('folder color inverse removes only its own rules and paint calls', () => {
+  const shared = read('workspace.css'), settings = read('settings.css');
+  for (const bad of [
+    // An unrelated rule hidden inside a folder color block must not be stripped.
+    shared.replace('[data-color="mint"] { --folder-color: var(--folder-mint); }', '[data-color="mint"] { --folder-color: var(--folder-mint); }\n.row { color: red; }'),
+    shared.replace('.menu-chip:hover { background: var(--hover); }', '.menu-chip:hover { background: var(--hover); }\n.tile { display: none; }'),
+    // A missing or duplicated block is rejected rather than half-removed.
+    shared.replace('\n/* Folder colors.', '\n/* Colours.'),
+    shared + '\n.menu-swatches { display: block; }\n',
+  ]) {
+    assert.notEqual(bad, shared, 'negative control changed actual bytes');
+    assert.throws(() => assertStyles(bad, settings));
+  }
+  const draw = source.slice(source.indexOf('function paintSidebar('), source.indexOf('function syncRovingFocus('));
+  for (const line of folderColorDrawLines) {
+    assert.throws(() => stripFolderColorDraw(draw.replace(line, '')), /one folder color draw line/);
+    assert.throws(() => stripFolderColorDraw(draw.replace(line, line + line)), /one folder color draw line/);
   }
 });
 
@@ -185,7 +205,8 @@ test('main draw, compact identities and activation-before-reveal remain the curr
   for (const [name, expected] of Object.entries(mainFunctions)) {
     const start = source.indexOf(`function ${name === 'draw' ? 'paintSidebar' : name}(`);
     const end = source.indexOf(next[name] ? `function ${next[name]}(` : 'export const favoriteTitle', start);
-    const actual = source.slice(start, end).replace('  pendingRows = null;\n', '')
+    const slice = source.slice(start, end);
+    const actual = (name === 'draw' ? stripFolderColorDraw(slice) : slice).replace('  pendingRows = null;\n', '')
       .replace('function paintSidebar() {', 'function draw() {')
       .replace('  queryDrawDirty = false;\n', '');
     assert.equal(actual.trim(), expected.trim(), name);

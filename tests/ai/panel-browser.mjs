@@ -542,6 +542,111 @@ try {
   assert.equal(await loading.locator('.context-row').isVisible(), true);
   assert.equal(await loading.locator('#context-hint').innerText(), 'Page + screenshot');
   await loading.close();
+  const studio = await browser.newPage({ viewport: { width: 320, height: 720 }, reducedMotion: 'reduce' });
+  await studio.addInitScript({ content: `(${installPanelFixture.toString()})(); (${installPanelAreaEvents.toString()})();` });
+  await studio.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
+  await studio.evaluate(() => {
+    chrome.breezerPrivate.authorizeCurrentPage = async () => { throw new Error('Browser tasks must not authorize a page'); };
+    chrome.breezerPrivate.getResearchTabs = async () => [{ tabId: 11, documentId: 'source', title: 'A research source', url: 'https://example.com/source', loading: false }];
+    chrome.breezerPrivate.readResearchTab = async () => { window.readSource = true; throw new Error('Browser tasks must not capture research sources'); };
+    window.testAppearance = { theme: 'mint', colorMode: 'system', themeCanRestore: true };
+    chrome.breezerPrivate.getAppearance = async () => window.testAppearance;
+    chrome.breezerPrivate.setAppearance = async ({ expectedThemeState, ...patch }) => {
+      if (expectedThemeState?.theme !== window.testAppearance.theme || expectedThemeState?.colorMode !== window.testAppearance.colorMode) {
+        throw new Error('Browser appearance changed. Try again.');
+      }
+      return (window.testAppearance = { ...window.testAppearance, ...patch });
+    };
+  });
+  await studio.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  await studio.getByRole('button', { name: 'Browser tools' }).click();
+  await studio.screenshot({ path: `${evidence}/sidebar-browser-tools.png` });
+  await studio.getByRole('button', { name: 'Close browser tools' }).click();
+  await studio.getByLabel('Message Breezer').fill('How many tabs are open and how much RAM are they using?');
+  await studio.getByRole('button', { name: 'Clear Browser stats' }).waitFor();
+  await studio.getByRole('button', { name: 'Clear Browser stats' }).click();
+  assert.equal(await studio.locator('#context-toggle').isVisible(), true, 'dismissing inferred stats restores the ordinary composer');
+  await studio.getByLabel('Message Breezer').fill('');
+  await studio.getByLabel('Message Breezer').fill('How many tabs are open and how much RAM are they using?');
+  await studio.getByRole('button', { name: 'Clear Browser stats' }).waitFor();
+  await studio.getByRole('button', { name: 'Send message', exact: true }).click();
+  const statsChat = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
+  assert.equal(statsChat.browserTask, 'stats');
+  assert.equal(statsChat.includeContext, false);
+  assert.equal(statsChat.control, false);
+  await studio.evaluate(id => {
+    window.emit({ type: 'delta', id, text: 'There are 4 tabs. The 3 loaded tabs use two renderer processes.' });
+    window.emit({ type: 'complete', id });
+  }, statsChat.id);
+  await studio.getByText('There are 4 tabs.', { exact: false }).waitFor();
+  const ordinaryPaste = await studio.evaluate(async () => {
+    const prompt = document.getElementById('prompt');
+    const text = new DataTransfer();
+    text.setData('text/plain', 'Ordinary pasted text');
+    const ordinary = prompt.dispatchEvent(new ClipboardEvent('paste', { clipboardData: text, bubbles: true, cancelable: true }));
+    const canvas = document.createElement('canvas');
+    canvas.width = 160;
+    canvas.height = 96;
+    const drawing = canvas.getContext('2d');
+    drawing.fillStyle = '#273e66';
+    drawing.fillRect(0, 0, 160, 96);
+    drawing.fillStyle = '#ecf1df';
+    drawing.beginPath();
+    drawing.arc(116, 31, 9, 0, Math.PI * 2);
+    drawing.fill();
+    const blob = await new Promise(resolve => canvas.toBlob(resolve));
+    const clipboard = new DataTransfer();
+    clipboard.items.add(new File([blob], 'Night sky.png', { type: 'image/png' }));
+    prompt.dispatchEvent(new ClipboardEvent('paste', { clipboardData: clipboard, bubbles: true, cancelable: true }));
+    return ordinary;
+  });
+  assert.equal(ordinaryPaste, true, 'plain text paste keeps normal textarea behavior');
+  await studio.getByRole('button', { name: 'Remove Night sky.png' }).waitFor();
+  await studio.getByLabel('Message Breezer').fill('Use this image as my New Tab background and make a theme from it.');
+  await studio.getByRole('button', { name: 'Clear Theme design' }).waitFor();
+  await studio.getByRole('button', { name: 'Send message', exact: true }).click();
+  const themeChat = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
+  assert.equal(themeChat.browserTask, 'theme');
+  assert.equal(themeChat.includeContext, false);
+  assert.equal(themeChat.control, false);
+  assert.match(themeChat.attachments[0].image, /^data:image\/png;base64,/);
+  await studio.evaluate(id => {
+    window.emit({ type: 'complete', id, themeProposal: {
+      name: 'Moonlit sky', theme: '#273e66', colorMode: 'dark',
+      imageAttachment: 1,
+      html: '<div style="height:100vh;background:radial-gradient(circle at 30% 25%,#ecf1df 0 1px,transparent 2px)"></div>',
+    } });
+  }, themeChat.id);
+  await studio.getByText('Moonlit sky', { exact: true }).waitFor();
+  assert.equal(await studio.locator('.assistant iframe').count(), 1, 'the completed theme appears as a live preview');
+  assert.equal(await studio.locator('.assistant iframe').getAttribute('sandbox'), '');
+  assert.equal(await studio.locator('.assistant img[src^="data:image/png;"]').count(), 1, 'the completed theme previews the attached photo');
+  await studio.screenshot({ path: `${evidence}/sidebar-theme-preview.png` });
+  assert.equal(await studio.evaluate(() => window.testAppearance.theme), 'mint', 'preview leaves the active theme alone');
+  await studio.getByRole('button', { name: 'Apply theme', exact: true }).click();
+  await studio.waitForFunction(() => window.testAppearance.theme === '#273e66');
+  await studio.getByLabel('Message Breezer').fill('Make it a little darker.');
+  await studio.getByRole('button', { name: 'Clear Theme design' }).waitFor();
+  await studio.getByRole('button', { name: 'Send message', exact: true }).click();
+  const revision = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
+  assert.match(revision.history.at(-1).content, /Previous theme proposal[^\n]*\nMoonlit sky/);
+  await studio.evaluate(id => window.emit({ type: 'error', id, error: 'Fixture failure' }), revision.id);
+  await studio.getByRole('button', { name: 'Choose source tabs' }).click();
+  await studio.getByRole('checkbox', { name: /A research source/ }).check();
+  await studio.getByRole('button', { name: 'Done', exact: true }).click();
+  assert.equal(await studio.locator('#research-chips button').count(), 1);
+  await studio.getByRole('button', { name: 'Edit and resend' }).click();
+  assert.equal(await studio.locator('#research-chips button').count(), 0, 'browser task retry clears research sources');
+  await studio.getByRole('button', { name: 'Send message', exact: true }).click();
+  const retried = await studio.evaluate(() => window.sent.findLast(message => message.type === 'chat'));
+  assert.equal(retried.browserTask, 'theme');
+  assert.equal(retried.researchSources, undefined);
+  assert.equal(await studio.evaluate(() => window.readSource), undefined);
+  await studio.getByRole('button', { name: 'New conversation' }).click();
+  await studio.getByRole('button', { name: 'Browser tools' }).click();
+  await studio.getByRole('dialog', { name: 'Browser tools' }).getByRole('button', { name: 'Restore previous look' }).click();
+  await studio.waitForFunction(() => window.testAppearance.theme === 'mint');
+  await studio.close();
   console.log('PASS: file picker, drop, removal, unsupported/oversize errors, image decoding, attachment-only send, retry restoration and follow-up history; real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {

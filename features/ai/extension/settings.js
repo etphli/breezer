@@ -170,6 +170,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     [rowOf('[data-field="sidebarMode"]'), () => appearance.layout === 'top'],
     [width.closest('.setting-row'), () => appearance.layout === 'top'],
     [rowOf('[data-field="sidebarFontSize"]'), () => appearance.layout === 'top'],
+    [rowOf('[data-pref="folderColors"]'), () => appearance.layout === 'top'],
     [rowOf('[data-field="alwaysShowSidebar"]'), () => !appearance.frameless],
     [rowOf('[data-field="alwaysShowTopBar"]'), () => !appearance.frameless],
   ];
@@ -281,6 +282,9 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   };
   darkQuery.addEventListener('change', () => applyAppearance(appearance));
   addEventListener('focus', () => void refreshAppearance());
+  api.runtime?.onMessage?.addListener(message => {
+    if (message?.type === 'breezer.theme.refresh') void refreshAppearance();
+  });
 
   // ------------------------------------------------------------ spaces
 
@@ -397,14 +401,15 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   // ------------------------------------------------------------ tab behavior
 
   for (const group of document.querySelectorAll('.segmented[data-pref]')) {
+    const errorId = group.dataset.error || 'tabs-error';
     wireRadioGroup(group, async (value) => {
-      showError('tabs-error', '');
+      showError(errorId, '');
       try {
         await workspace.update((draft) => setPrefs(draft, { [group.dataset.pref]: value }));
         store = (await workspace.read()).store;
         setRadioValue(group, store.prefs[group.dataset.pref]);
       } catch (failure) {
-        showError('tabs-error', `Couldn’t save that change. ${errorText(failure)}`);
+        showError(errorId, `Couldn’t save that change. ${errorText(failure)}`);
       }
     });
   }

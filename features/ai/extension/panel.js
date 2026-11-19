@@ -3,12 +3,21 @@ import { ResearchSources, maskSecrets } from './research-sources.js';
 import { renderMessage, createMessageStream } from './render-message.js';
 import { latestModels } from './model-catalog.js';
 import { startPanelTheme } from './panel-theme.js';
+import { normalizeThemeProposal, readThemeState, renderThemeProposal, restorePreviousLook } from './browser-theme.js';
+import { detectBrowserTask } from './browser-task-intent.js';
+import { preparePastedImage } from './clipboard-image.js';
+import { themeReferenceImages } from './theme-references.js';
+
+const BROWSER_TASKS = {
+  stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
+  theme: { label: 'Theme design', placeholder: 'Describe a theme, background, or animation…', prompt: '', sharing: 'Page sharing off' },
+};
 
 const MAX_ATTACHMENT_TOTAL = 2 * 1024 * 1024;
 const attachmentSize = file => (file.text || file.image || '').length;
 const textExtension = /\.(txt|md|markdown|csv|tsv|json|jsonl|xml|html?|css|scss|js|jsx|mjs|cjs|ts|tsx|py|rb|rs|go|java|kt|swift|c|h|cpp|hpp|cs|sh|bash|zsh|sql|ya?ml|toml|ini|cfg|log|svg)$/i;
 
-async function readAttachment(file) {
+async function readAttachment(file, { validatedImage = false } = {}) {
   if (!file.size) throw new Error('This file is empty.');
   if (file.name.length > 255) throw new Error('Use a filename shorter than 256 characters.');
   if (['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
@@ -19,8 +28,10 @@ async function readAttachment(file) {
       reader.onerror = () => reject(new Error('Could not read this image.'));
       reader.readAsDataURL(file);
     });
-    const bitmap = await createImageBitmap(file).catch(() => { throw new Error('This image could not be decoded.'); });
-    bitmap.close();
+    if (!validatedImage) {
+      const bitmap = await createImageBitmap(file).catch(() => { throw new Error('This image could not be decoded.'); });
+      bitmap.close();
+    }
     return { name: file.name, image };
   }
   if (!file.type.startsWith('text/') && !textExtension.test(file.name)) throw new Error('Use text, code, CSV, PNG, JPEG, or WebP. Export PDF and Word documents as text first.');
@@ -48,6 +59,7 @@ const state = {
   includeContext: true,
   control: false,
   controlTabId: null,
+  browserTask: null,
   running: null,
   page: null,
   pageKnown: false,
@@ -56,10 +68,11 @@ const state = {
   windowId: null,
 };
 const research = new ResearchSources({ api: chrome, root: document,
-  onChange: () => { if (research.size) setControl(false); updateControls(); },
+  onChange: () => { if (research.size) { state.browserTask = null; setControl(false); } updateControls(); },
   onRevoke: reason => { if (state.running) stop(); notify(reason); },
 });
 const messageNodes = new Map();
+const themeCards = new Set();
 let lastContextTitle = null;
 let scheduledRender = false;
 
@@ -137,8 +150,17 @@ function saveSettings() {
   updateControls();
 }
 
+function draftBrowserTask() {
+  if (research.size) return '';
+  return state.browserTask ?? detectBrowserTask($('prompt').value, {
+    hasImage: state.attachments.some(file => Boolean(file.image)),
+    hasTheme: Boolean(state.messages.findLast(message => message.role === 'assistant')?.themeProposal),
+  });
+}
+
 function updateControls() {
   const running = Boolean(state.running);
+  const task = BROWSER_TASKS[state.running?.browserTask || draftBrowserTask()];
   document.querySelector('.panel').dataset.running = String(running);
   document.querySelector('.panel').dataset.pageState = state.pageKnown ? 'ready' : 'loading';
   $('send').disabled = !running && (!selectedModel() || (!$('prompt').value.trim() && !state.attachments.length) || state.readingFiles);
@@ -152,18 +174,23 @@ function updateControls() {
   document.querySelectorAll('.attachment-remove').forEach(button => { button.disabled = running || state.readingFiles; });
   research.setBusy(running);
   $('control-toggle').disabled = running || !state.page || research.size > 0;
-  $('context-toggle').hidden = research.size > 0 || !state.page;
+  $('context-toggle').hidden = Boolean(task) || research.size > 0 || !state.page;
   $('context-toggle').disabled = running || !state.page || research.size > 0;
+  $('browser-task-open').disabled = running;
+  $('browser-task-clear').hidden = !task;
+  $('browser-task-clear').disabled = running;
+  $('browser-task-clear').textContent = task ? `${task.label} ×` : '';
+  if (task) $('browser-task-clear').setAttribute('aria-label', `Clear ${task.label}`);
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
   $('sharing-label').textContent = state.control ? 'Page' : 'Page + screenshot';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
-  $('context-hint').textContent = !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('context-hint').textContent = task ? task.sharing : !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
   $('research-label').textContent = research.size ? `${research.size} ${research.size === 1 ? 'source' : 'sources'}` : 'Sources';
   $('research-open').dataset.active = String(research.size > 0);
   $('control-tip').textContent = state.page ? 'Click, type, scroll, and navigate in this tab.' : 'Available on ordinary web pages.';
-  $('prompt').placeholder = research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…';
+  $('prompt').placeholder = task?.placeholder ?? (research.size ? 'Compare, summarize, or ask about your sources…' : state.control ? 'Tell Breezer what to do in this tab…' : state.includeContext ? 'Ask about this page…' : 'Ask anything…');
   const selected = selectedModel();
   if (!selected && !state.discoveryPending) $('prompt').placeholder = 'Draft a message…';
   renderWelcomeStatus(selected);
@@ -380,6 +407,7 @@ function appendMessage(message) {
   } else body.textContent = message.text;
   linkResearchCitations(body, message.citations);
   article.append(body);
+  if (message.themeProposal) themeCards.add(renderThemeProposal(article, message.themeProposal));
   if (message.attachments?.length) {
     const files = document.createElement('div');
     files.className = 'message-meta';
@@ -521,6 +549,8 @@ function offerRetry(run, failed = true) {
     }
     if (state.attachments.length || state.readingFiles) return notify('Send or remove your attached draft files first.');
     state.retryMessage = original;
+    if (run.browserTask) research.clear();
+    state.browserTask = run.browserTask || '';
     state.attachments = [...(original.attachments || [])];
     renderAttachments();
     prompt.value = original.text;
@@ -534,7 +564,7 @@ function offerRetry(run, failed = true) {
 }
 
 function activityLabel(label) {
-  const sharing = state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? 'Page + screenshot' : '';
+  const sharing = BROWSER_TASKS[state.running?.browserTask]?.label ?? (state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? 'Page + screenshot' : '');
   $('activity-label').textContent = sharing ? `${sharing} · ${label}` : label;
 }
 
@@ -548,6 +578,12 @@ function finish(label, keepControl = false) {
       renderMessage(messageNodes.get(message.id), message.text);
     } else if (message) renderMessage(messageNodes.get(message.id), message.text);
     if (message) linkResearchCitations(messageNodes.get(message.id), message.citations);
+    if (message?.themeProposal) {
+      const conversation = $('conversation');
+      const followsReply = conversation.scrollHeight - conversation.scrollTop - conversation.clientHeight < 100;
+      themeCards.add(renderThemeProposal(messageNodes.get(message.id).parentElement, message.themeProposal));
+      if (followsReply) scrollToBottom();
+    }
     state.running.message = null;
   }
   state.running = null;
@@ -607,6 +643,11 @@ function revealPanel() {
 async function send() {
   if (state.running) return stop();
   if (state.readingFiles) return;
+  if (state.browserTask && research.size) {
+    notify('Clear source tabs before sending a browser tools request.');
+    return;
+  }
+  const browserTask = draftBrowserTask();
   const text = $('prompt').value.trim() || (state.attachments.length ? 'Review the attached files.' : '');
   const selected = selectedModel();
   if (text && !selected) {
@@ -625,14 +666,20 @@ async function send() {
   const assistantId = `${id}-reply`;
   if (state.retryMessage) state.retryMessage.superseded = true;
   state.retryMessage = null;
+  state.browserTask = null;
   const history = requestHistory();
-  const userMessage = { id, role: 'user', text, attachments: state.attachments, contextTitle: research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '' };
+  if (browserTask === 'theme') {
+    const previous = state.messages.findLast(message => message.themeProposal)?.themeProposal;
+    if (previous) history.push({ role: 'assistant', content: `Previous theme proposal (design data):\n${previous.name} ${previous.theme} ${previous.colorMode}\n${previous.image ? 'Uses an attached image as the background.\n' : ''}${previous.html || ''}` });
+  }
+  const userMessage = { id, role: 'user', text, attachments: state.attachments, contextTitle: BROWSER_TASKS[browserTask]?.label ?? (research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '') };
   const assistantMessage = { id: assistantId, role: 'assistant', text: '' };
   state.messages.push(userMessage, assistantMessage);
   appendMessage(userMessage);
   appendMessage(assistantMessage);
   state.running = {
-    id, assistantId, control: state.control,
+    id, assistantId, browserTask, control: !browserTask && state.control,
+    ...(browserTask === 'theme' ? { themeImages: themeReferenceImages(state.attachments, history).map(file => file.image) } : {}),
     // Resolve once while messages only append; retain first-match behavior for duplicate IDs.
     message: state.messages.find((item) => item.id === assistantId),
   };
@@ -641,7 +688,7 @@ async function send() {
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
-  activityLabel(state.control ? 'Getting ready to help' : 'Thinking');
+  activityLabel(state.running.control ? 'Getting ready to help' : 'Thinking');
   updateControls();
   scrollToBottom();
   let sources;
@@ -663,7 +710,7 @@ async function send() {
       if (state.running?.id === id) fail(error.message, `Could not read selected sources. ${error.message}`);
       return;
     }
-  } else if (state.includeContext || state.control) {
+  } else if (!browserTask && (state.includeContext || state.control)) {
     try {
       const allowed = await chrome.breezerPrivate.authorizeCurrentPage();
       if (!allowed) throw new Error('Page access is only available on ordinary HTTP or HTTPS web pages.');
@@ -679,10 +726,11 @@ async function send() {
     ...(settings.reasoning ? { reasoning: settings.reasoning } : {}),
     ...(selected.provider.id === 'codex' ? { speed: settings.speed } : {}),
     message: text, attachments: userMessage.attachments, history, profile: state.profile,
-    includeContext: !sources && state.includeContext, control: !sources && state.control,
+    includeContext: !browserTask && !sources && state.includeContext, control: !browserTask && !sources && state.control,
+    ...(browserTask ? { browserTask } : {}),
     ...(sources ? { researchSources: sources } : {}),
   });
-  if (!sent) offerRetry({ id, assistantId, control: false });
+  if (!sent) offerRetry({ id, assistantId, browserTask, control: false });
 }
 
 function receive(message) {
@@ -701,9 +749,22 @@ function receive(message) {
     renderDelta();
   } else if (message.type === 'complete') {
     const run = state.running;
+    if (!run) return;
     const empty = run && !run.message.text;
-    finish(message.cancelled ? 'Stopped.' : 'The provider returned no response.', !message.cancelled);
-    if (empty && !message.cancelled) offerRetry(run);
+    if (!message.cancelled && run.browserTask === 'theme' && message.themeProposal) {
+      try {
+        const { name, theme, colorMode, html, imageAttachment } = message.themeProposal;
+        const image = run.themeImages[imageAttachment - 1];
+        if (imageAttachment !== undefined && (!Number.isInteger(imageAttachment) || !image)) {
+          throw new Error('This theme referred to an image that wasn’t attached.');
+        }
+        run.message.themeProposal = normalizeThemeProposal({ name, theme, colorMode, html, image });
+      }
+      catch (error) { return fail(error.message, 'Breezer could not preview this theme.'); }
+    }
+    const hasPreview = Boolean(run.message?.themeProposal);
+    finish(message.cancelled ? 'Stopped.' : hasPreview ? 'Theme ready to preview.' : 'The provider returned no response.', !message.cancelled);
+    if (empty && !message.cancelled && !hasPreview) offerRetry(run);
   }
   else if (message.type === 'activity' && state.running) {
     $('activity').hidden = !message.active;
@@ -739,7 +800,7 @@ function renderAttachments() {
   }));
 }
 
-async function attachFiles(files) {
+async function attachFiles(files, { pasted = false } = {}) {
   if (state.running || state.readingFiles) return;
   const generation = state.fileGeneration;
   state.readingFiles = true;
@@ -750,7 +811,7 @@ async function attachFiles(files) {
       if (generation !== state.fileGeneration) break;
       try {
         if (state.attachments.length >= 4) throw new Error('Attach up to four files per message.');
-        const attachment = await readAttachment(file);
+        const attachment = await readAttachment(pasted ? await preparePastedImage(file) : file, { validatedImage: pasted });
         if (generation !== state.fileGeneration) break;
         const prior = requestHistory().flatMap(message => message.attachments || []);
         if ([...prior, ...state.attachments, attachment].reduce((sum, item) => sum + attachmentSize(item), 0) > MAX_ATTACHMENT_TOTAL) throw new Error('This conversation has 2 MB of files. Start a new conversation to attach more.');
@@ -779,7 +840,16 @@ $('composer').addEventListener('drop', event => {
 });
 
 $('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
-$('prompt').addEventListener('input', resizePrompt);
+$('prompt').addEventListener('input', () => {
+  if (!$('prompt').value.trim() && state.browserTask === '') state.browserTask = null;
+  resizePrompt();
+});
+$('prompt').addEventListener('paste', event => {
+  const images = Array.from(event.clipboardData?.files || []).filter(file => file.type.startsWith('image/'));
+  if (!images.length) return;
+  event.preventDefault();
+  void attachFiles(images, { pasted: true });
+});
 $('prompt').addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
     event.preventDefault();
@@ -792,6 +862,44 @@ $('close-panel').addEventListener('click', async () => {
   catch (error) { notify(error.message); }
 });
 $('dismiss-notice').addEventListener('click', () => notify(''));
+$('browser-task-open').addEventListener('click', async () => {
+  $('browser-theme-status').hidden = true;
+  $('browser-theme-restore').hidden = true;
+  $('browser-task-dialog').showModal();
+  const theme = await readThemeState().catch(() => null);
+  $('browser-theme-restore').hidden = !theme?.canRestore;
+});
+$('browser-task-close').addEventListener('click', () => $('browser-task-dialog').close());
+$('browser-theme-restore').addEventListener('click', async () => {
+  const button = $('browser-theme-restore');
+  const status = $('browser-theme-status');
+  button.disabled = true;
+  try {
+    const { restored } = await restorePreviousLook();
+    button.hidden = true;
+    status.textContent = restored ? 'Restored your previous look.' : 'There’s no previous look to restore.';
+  } catch (error) {
+    status.textContent = `Couldn’t restore the theme. ${error.message}`;
+  } finally {
+    button.disabled = false;
+    status.hidden = false;
+  }
+});
+$('browser-task-clear').addEventListener('click', () => {
+  state.browserTask = '';
+  updateControls();
+  $('prompt').focus();
+});
+document.querySelectorAll('[data-browser-task]').forEach(button => button.addEventListener('click', () => {
+  research.clear();
+  setControl(false);
+  notify('');
+  state.browserTask = button.dataset.browserTask;
+  $('browser-task-dialog').close();
+  if (!$('prompt').value.trim()) $('prompt').value = BROWSER_TASKS[state.browserTask].prompt;
+  resizePrompt();
+  $('prompt').focus();
+}));
 $('context-toggle').addEventListener('click', () => {
   state.includeContext = !state.includeContext;
   if (!state.includeContext) setControl(false);
@@ -824,6 +932,7 @@ $('control-toggle').addEventListener('keydown', event => {
   if (event.key === 'Escape') $('control-toggle').dataset.tipDismissed = 'true';
 });
 document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => {
+  state.browserTask = null;
   $('prompt').value = button.dataset.prompt;
   if (button.dataset.control && state.page) {
     setControl(true);
@@ -836,12 +945,15 @@ $('new-chat').addEventListener('click', () => {
   stop();
   research.clear();
   state.retryMessage = null;
+  state.browserTask = null;
   state.fileGeneration++;
   state.attachments = [];
   renderAttachments();
   state.messages = [];
   lastContextTitle = null;
   messageNodes.clear();
+  for (const card of themeCards) card.destroy();
+  themeCards.clear();
   $('messages').replaceChildren();
   $('welcome').hidden = false;
   setControl(false);

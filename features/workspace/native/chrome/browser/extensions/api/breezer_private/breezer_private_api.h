@@ -4,16 +4,25 @@
 #ifndef CHROME_BROWSER_EXTENSIONS_API_BREEZER_PRIVATE_BREEZER_PRIVATE_API_H_
 #define CHROME_BROWSER_EXTENSIONS_API_BREEZER_PRIVATE_BREEZER_PRIVATE_API_H_
 
+#include <memory>
 #include <string>
+#include <vector>
 
+#include "base/memory/weak_ptr.h"
+#include "base/process/process_handle.h"
 #include "base/timer/timer.h"
 #include "base/values.h"
 #include "content/public/browser/weak_document_ptr.h"
+#include "content/public/common/child_process_id.h"
 #include "extensions/browser/extension_function.h"
 #include "extensions/browser/extension_function_histogram_value.h"
 
 class BrowserWindowInterface;
 class Profile;
+
+namespace memory_instrumentation {
+class GlobalMemoryDump;
+}
 
 namespace extensions {
 
@@ -75,6 +84,31 @@ class BreezerPrivateGetResearchTabsFunction final : public BreezerPrivateFunctio
  private:
   ~BreezerPrivateGetResearchTabsFunction() override = default;
   ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateGetBrowserStatsFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.getBrowserStats", UNKNOWN)
+
+ private:
+  struct Renderer {
+    base::ProcessId pid;
+    content::ChildProcessId host_id;
+    bool shared = false;
+  };
+
+  ~BreezerPrivateGetBrowserStatsFunction() override = default;
+  ResponseAction RunFunction() override;
+  void OnSystemMemory(base::DictValue system_memory);
+  void Finish(std::unique_ptr<memory_instrumentation::GlobalMemoryDump> dump,
+              bool sample_complete);
+
+  base::DictValue result_;
+  std::vector<Renderer> renderers_;
+  base::OneShotTimer timeout_;
+  base::WeakPtrFactory<BreezerPrivateGetBrowserStatsFunction> weak_factory_{
+      this};
 };
 
 class BreezerPrivateReadResearchTabFunction final : public BreezerPrivateFunction {

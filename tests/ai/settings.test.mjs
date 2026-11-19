@@ -274,8 +274,26 @@ test('tab behavior settings persist in the workspace store', async () => {
   userClick(page.document.querySelector('[data-pref="newTabPosition"] [data-value="top"]'));
   userClick(page.document.querySelector('[data-pref="closeButton"] [data-value="always"]'));
   await settle();
-  assert.deepEqual(page.storage.local.data[STORE_KEY].prefs, { newTabPosition: 'top', closeButton: 'always' });
+  // folderColors keeps its default; normalized prefs always carry it.
+  assert.deepEqual(page.storage.local.data[STORE_KEY].prefs, { newTabPosition: 'top', closeButton: 'always', folderColors: 'off' });
   assert.equal(page.document.querySelector('[data-pref="closeButton"] [data-value="always"]').getAttribute('aria-checked'), 'true');
+});
+
+test('folder colors default to off and save on the Layout page', async () => {
+  const page = await openSettings();
+  const group = page.document.querySelector('[data-pref="folderColors"]');
+  assert.ok(group.closest('[data-page="layout"]'), 'folder colors live on the Layout page');
+  assert.deepEqual([...group.querySelectorAll('[role="radio"]')].map((radio) => radio.textContent), ['Off', 'Icon only', 'Whole row']);
+  assert.equal(group.querySelector('[data-value="off"]').getAttribute('aria-checked'), 'true');
+  const bridgeCalls = page.bridge.calls.length;
+  userClick(group.querySelector('[data-value="row"]'));
+  await settle();
+  assert.equal(page.storage.local.data[STORE_KEY].prefs.folderColors, 'row');
+  assert.equal(group.querySelector('[data-value="row"]').getAttribute('aria-checked'), 'true');
+  assert.equal(page.bridge.calls.length, bridgeCalls, 'folder colors never touch native appearance');
+  userClick(page.radio('layout', 'top'));
+  await settle();
+  assert.equal(group.closest('.setting-row').classList.contains('muted-row'), true, 'no effect with top tabs');
 });
 
 test('spaces: rename, recolor, reorder, add and two-step delete', async () => {
