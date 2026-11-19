@@ -406,7 +406,12 @@ function appendMessage(message) {
     }
   } else body.textContent = message.text;
   linkResearchCitations(body, message.citations);
-  article.append(body);
+  if (message.role === 'user' && message.text) {
+    const prompt = document.createElement('div');
+    prompt.className = 'sent-prompt';
+    prompt.append(body, copyPromptButton(body));
+    article.append(prompt);
+  } else article.append(body);
   if (message.themeProposal) themeCards.add(renderThemeProposal(article, message.themeProposal));
   if (message.attachments?.length) {
     const files = document.createElement('div');
@@ -426,6 +431,46 @@ function appendMessage(message) {
   messageNodes.set(message.id, body);
   $('welcome').hidden = true;
   return body;
+}
+
+function selectText(element) {
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
+function copyPromptButton(body) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'icon-button copy-prompt';
+  button.setAttribute('aria-label', 'Copy prompt');
+  button.title = 'Copy prompt';
+  const namespace = 'http://www.w3.org/2000/svg';
+  const icon = document.createElementNS(namespace, 'svg');
+  const path = document.createElementNS(namespace, 'path');
+  const copy = 'M8 6V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z';
+  icon.setAttribute('viewBox', '0 0 24 24');
+  icon.setAttribute('aria-hidden', 'true');
+  path.setAttribute('d', copy);
+  icon.append(path);
+  button.append(icon);
+  let reset;
+  button.addEventListener('click', async () => {
+    clearTimeout(reset);
+    try {
+      await navigator.clipboard.writeText(body.textContent);
+      path.setAttribute('d', 'm5 12 4 4L19 6');
+      $('announcer').textContent = 'Prompt copied.';
+      reset = setTimeout(() => { path.setAttribute('d', copy); }, 1600);
+    } catch {
+      selectText(body);
+      path.setAttribute('d', copy);
+      notify('Prompt selected. Use your keyboard to copy it.');
+    }
+  });
+  return button;
 }
 
 function linkResearchCitations(body, sources) {
@@ -746,7 +791,7 @@ function receive(message) {
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
     if (!state.running) return notify(reason);
-    fail(reason, providerFailureSummary(reason));
+    fail(reason, message.source === 'browser-control' ? 'Browser control stopped.' : providerFailureSummary(reason));
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
     reply.text += message.text || '';
@@ -1000,11 +1045,7 @@ document.addEventListener('click', async event => {
     if (feedback) feedback.remove();
     $('announcer').textContent = 'Sign-in command copied.';
   } catch {
-    const range = document.createRange();
-    range.selectNodeContents(command);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
+    selectText(command);
     button.textContent = 'Copy';
     let feedback = button.parentElement.querySelector('.copy-feedback');
     if (!feedback) {

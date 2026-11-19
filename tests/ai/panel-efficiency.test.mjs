@@ -40,7 +40,7 @@ function harness(code, initial = [], ids = []) {
     addEventListener(type, fn) { this[type] = fn; },
   });
   const get = id => { if (!elements.has(id)) elements.set(id, node()); return elements.get(id); };
-  const document = { getElementById: get, createElement: node, body: node(), activeElement: null };
+  const document = { getElementById: get, createElement: node, createElementNS: node, body: node(), activeElement: null };
   const instrument = array => new Proxy(array, { get(target, key, receiver) {
     if (/^\d+$/.test(String(key))) counts.reads++;
     if (key === 'find' || key === 'filter') return callback => {

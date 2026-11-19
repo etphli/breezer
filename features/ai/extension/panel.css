@@ -333,6 +333,13 @@ h1 {
   align-items: flex-end;
 }
 
+.sent-prompt {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  max-width: 100%;
+}
+
 .message.user .message-body {
   background: var(--tint);
   border-radius: 13px;
@@ -341,6 +348,22 @@ h1 {
   white-space: pre-wrap;
   font-size: 14px;
   line-height: 1.5;
+}
+
+.sent-prompt .message-body {
+  min-width: 0;
+}
+
+.copy-prompt {
+  order: -1;
+  flex: none;
+  margin-top: 4px;
+}
+
+@media(hover:hover) {
+  .message.user:not(:hover):not(:focus-within) .copy-prompt {
+    opacity: 0;
+  }
 }
 
 .message-meta {
@@ -380,6 +403,38 @@ h1 {
 .message-body p {
   margin: 10px 0;
 }
+
+.message-table {
+  max-width: 100%;
+  margin: 12px 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.message-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.message-table th,.message-table td {
+  min-width: 6rem;
+  padding: 7px 9px;
+  border: solid var(--line);
+  border-width: 0 1px 1px 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.message-table th {
+  background: var(--tint);
+  font-weight: 600;
+}
+
+.message-table tr>:last-child { border-right: 0; }
+.message-table tbody tr:last-child td { border-bottom: 0; }
+.message-table .center { text-align: center; }
+.message-table .right { text-align: right; }
 
 .message-body h2,.message-body h3,.message-body h4 {
   font-weight: 600;

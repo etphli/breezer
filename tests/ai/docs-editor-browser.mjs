@@ -10,9 +10,9 @@ const { chromium } = await import(playwrightModule);
 let browser;
 const url = 'https://docs.google.com/document/d/disposable-fixture/edit';
 const html = `<!doctype html><meta charset="utf-8"><title>Disposable editor fixture</title><style>
-body{margin:0;background:#eef0f3;font:16px system-ui;color:#253247}header{padding:24px;background:white}main{position:relative;margin:35px auto;width:700px;height:500px;background:white;border:1px solid #ccd2db}canvas{width:700px;height:500px}.kix-hit{position:absolute;inset:0}iframe{position:absolute;left:-10000px;width:10px;height:10px}#output{position:absolute;left:50px;top:50px;white-space:pre-wrap;pointer-events:none}</style>
-<header>Disposable canvas editor · synthetic Docs workflow</header><main class="kix-appview-editor" role="textbox" aria-label="Document editor"><canvas width="700" height="500"></canvas><div class="kix-hit"></div><div id="output"></div></main><iframe class="docs-texteventtarget-iframe"></iframe>
-<script>const frame=document.querySelector('iframe');const doc=frame.contentDocument;doc.body.contentEditable='true';doc.body.setAttribute('role','textbox');window.events=[];doc.body.addEventListener('input', e=>{events.push({type:e.type,trusted:e.isTrusted});document.querySelector('#output').textContent=doc.body.innerText});document.querySelector('main').addEventListener('mousedown',event=>{event.preventDefault();doc.body.focus()});</script>`;
+body{margin:0;background:#eef0f3;font:16px system-ui;color:#253247}header{padding:24px;background:white}main{margin:35px auto;width:900px}.kix-page{position:relative;width:420px;height:500px;background:white;border:1px solid #ccd2db}canvas{width:420px;height:500px}.kix-hit{position:absolute;inset:0}iframe{position:absolute;left:-10000px;width:10px;height:10px}#output{position:absolute;left:50px;top:50px;white-space:pre-wrap;pointer-events:none}</style>
+<header>Disposable canvas editor · synthetic Docs workflow</header><main class="kix-appview-editor" role="textbox" aria-label="Document editor"><div class="kix-page"><canvas width="420" height="500"></canvas><div class="kix-hit"></div><div id="output"></div></div></main><iframe class="docs-texteventtarget-iframe"></iframe>
+<script>const frame=document.querySelector('iframe');const doc=frame.contentDocument;doc.body.contentEditable='true';doc.body.setAttribute('role','textbox');window.events=[];doc.body.addEventListener('input', e=>{events.push({type:e.type,trusted:e.isTrusted});document.querySelector('#output').textContent=doc.body.innerText});document.querySelector('.kix-hit').addEventListener('mousedown',event=>{event.preventDefault();doc.body.focus()});</script>`;
 let tools;
 try {
   browser = await chromium.launch({ executablePath: process.env.BREEZER_TEST_BROWSER || (process.platform === 'darwin' ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined), headless: true });
@@ -34,7 +34,7 @@ try {
   assert.ok(snapshot.screenshot, 'authorization and capture succeed before editing');
   let editor = snapshot.elements.find(el => el.label === 'Document editor') || snapshot.elements.find(el => el.tag === 'canvas');
   assert.ok(editor, 'document target is discoverable');
-  // Clicking the painted page must reach the editor through its transparent hit layer.
+  // The wide editor midpoint is in the gutter. Click the painted page through its hit layer.
   snapshot = await tools.execute(session, 'browser_click', { elementId: editor.id });
   assert.equal(await page.evaluate(() => document.activeElement?.tagName), 'IFRAME');
   editor = snapshot.elements.find(el => el.label === 'Document editor') || snapshot.elements.find(el => el.tag === 'canvas');
@@ -47,6 +47,20 @@ try {
   assert.equal(await page.locator('#output').innerText(), 'Hello, Docs?');
   assert.ok((await page.evaluate(() => events)).every(event => event.trusted));
   assert.equal(calls.filter(method => method === 'Input.insertText').length, 2);
+  await tools.stop(session);
+  session = await tools.start('docs-follow-up', tab);
+  const clicksBeforeFollowUp = calls.filter(method => method === 'Input.dispatchMouseEvent').length;
+  snapshot = await tools.execute(session, 'browser_key', { key: 'ArrowLeft', shift: true });
+  editor = snapshot.elements.find(el => el.type === 'canvas-editor');
+  await tools.execute(session, 'browser_type', { elementId: editor.id, text: '.', mode: 'insert' });
+  assert.equal(await page.locator('#output').innerText(), 'Hello, Docs.');
+  assert.equal(calls.filter(method => method === 'Input.dispatchMouseEvent').length, clicksBeforeFollowUp, 'a new request preserves the current selection without clicking');
+  await tools.stop(session);
+  await page.keyboard.press('Shift+ArrowLeft');
+  session = await tools.start('docs-user-selection', tab);
+  editor = (await tools.snapshot(tab, session)).elements.find(el => el.type === 'canvas-editor');
+  await tools.execute(session, 'browser_type', { elementId: editor.id, text: '!', mode: 'insert' });
+  assert.equal(await page.locator('#output').innerText(), 'Hello, Docs!');
   const evidence = process.env.BREEZER_AI_EVIDENCE || '/tmp/breezer-docs-control-evidence';
   await mkdir(evidence, { recursive: true });
   await page.screenshot({ path: `${evidence}/docs-editor-fixture.png` });
@@ -157,7 +171,7 @@ try {
   const cleared = await cdp.send('Runtime.evaluate', { contextId: executionContextId, expression: '!__breezerAIContext.editor', returnByValue: true });
   assert.equal(cleared.result.value, true, 'Stop clears the frame binding and Escape listener');
   console.log('PASS frame restrictions: stale handles, secret fields, detached/navigated/cross-origin frames, site scope, late focus changes, cancellation and frame Escape.');
-  console.log('PASS synthetic Docs workflow: capture, editor hit layer, focused frame typing, selection and follow-up edit. Authenticated Docs/native acceptance NOT tested.');
+  console.log('PASS synthetic Docs workflow: capture, canvas hit layer, trusted input, caret and selection across separate requests. Authenticated Docs/native acceptance NOT tested.');
 } finally {
   try { await tools?.stop(); } finally { await browser?.close(); }
 }

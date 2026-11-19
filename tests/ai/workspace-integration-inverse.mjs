@@ -48,6 +48,17 @@ export function stripFolderColorDraw(source) {
 
 export function restoreMainStyles(shared, settings) {
   shared = stripFolderColorStyles(shared);
+  const nativeCanvas = `/* The native host supplies the same canvas color as the toolbar. Standalone
+   workspace documents derive their canvas from the active tone. */
+[data-tone] {
+  --canvas: var(--native-toolbar-background, color-mix(in oklab, var(--air) 38%, var(--neutral)));`;
+  const originalCanvas = `/* The tone tokens above stay as they are (the native frame shares the light --air).
+   Surfaces are derived from them here, on every toned element, because a space sets
+   its own tone on .sidebar. */
+[data-tone] {
+  --canvas: color-mix(in oklab, var(--air) 38%, var(--neutral));`;
+  assert.equal(shared.split(nativeCanvas).length - 1, 1, 'one native toolbar canvas override');
+  shared = shared.replace(nativeCanvas, originalCanvas);
   assert.equal(shared.split(zeroWidthMotionGuard).length - 1, 1, 'one zero-width guard');
   shared = shared.replace(zeroWidthMotionGuard, '');
   const placeholder = 'input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }\n';

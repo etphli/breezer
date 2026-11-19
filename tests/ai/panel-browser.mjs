@@ -235,6 +235,63 @@ try {
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-settings.png` });
   await page.keyboard.press('Escape');
 
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  const originalPrompt = 'Make this into a table\nKeep the examples.';
+  await page.getByLabel('Message Breezer').fill(originalPrompt);
+  await page.getByLabel('Message Breezer').press('Enter');
+  await page.evaluate(async () => {
+    const id = window.sent.filter(message => message.type === 'chat').at(-1).id;
+    for (const text of [
+      '### Short Story Versus Novel\n\n| Feature | Novel | Short story |\n| ---',
+      ' | :---: | ---: |\n| **Plot** | Often has subplots | One plot |',
+      '\n| Setting | Multiple places | Often one place |\n\nThe scope differs.',
+    ]) {
+      window.emit({ type: 'delta', id, text });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    }
+  });
+  const table = page.getByRole('table');
+  assert.deepEqual(await table.getByRole('columnheader').allTextContents(), ['Feature', 'Novel', 'Short story']);
+  assert.equal(await table.getByRole('row').count(), 3);
+  assert.equal(await table.locator('strong').innerText(), 'Plot');
+  assert.equal(await table.getByRole('cell', { name: 'One plot' }).evaluate(node => getComputedStyle(node).textAlign), 'right');
+  assert.equal(await page.locator('#conversation').evaluate(node => node.scrollWidth <= node.clientWidth), true);
+  await page.evaluate(() => window.emit({ type: 'complete', id: window.sent.filter(message => message.type === 'chat').at(-1).id }));
+  await page.waitForFunction(() => window.testStorage.session['breezer-conversation-7']?.some(message => message.text.endsWith('The scope differs.')));
+  await page.evaluate(() => sessionStorage.setItem('breezer-fixture-session', JSON.stringify(window.testStorage.session)));
+  await page.reload();
+  await table.waitFor();
+  await page.evaluate(() => sessionStorage.removeItem('breezer-fixture-session'));
+  assert.equal(await table.getByRole('row').count(), 3, 'completed tables render again from history');
+  await page.getByLabel('Message Breezer').fill('Unsaved draft');
+  const oldPrompt = page.locator('.message.user').first();
+  const copyPrompt = oldPrompt.getByRole('button', { name: 'Copy prompt' });
+  await copyPrompt.focus();
+  assert.equal(await copyPrompt.innerText(), '');
+  const copyPath = copyPrompt.locator('svg path');
+  const copyGlyph = await copyPath.getAttribute('d');
+  assert.ok(copyGlyph);
+  await page.locator('#conversation').evaluate(node => { node.scrollTop = 0; });
+  await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-table-and-copy.png` });
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(text => window.copiedCommand === text, originalPrompt);
+  assert.notEqual(await copyPath.getAttribute('d'), copyGlyph);
+  assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Unsaved draft');
+  assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'chat').length), 0);
+  const selectedPrompt = await copyPrompt.evaluate(async button => {
+    const writeText = navigator.clipboard.writeText;
+    navigator.clipboard.writeText = async () => { throw new Error('Clipboard access denied'); };
+    button.click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    navigator.clipboard.writeText = writeText;
+    return window.getSelection().toString();
+  });
+  assert.equal(selectedPrompt, originalPrompt);
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.getByLabel('Message Breezer').fill('');
+  await page.setViewportSize({ width: 400, height: 850 });
+
   await page.getByRole('button', { name: 'Summarize this page' }).click();
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const firstChat = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').at(-1));
@@ -356,7 +413,10 @@ try {
   await page.getByLabel('Message Breezer').press('Enter');
   const failedControl = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
   assert.equal(failedControl.control, true);
-  await page.evaluate(id => window.emit({ type: 'error', id, error: 'The page changed before Breezer could click.' }), failedControl.id);
+  await page.evaluate(id => window.emit({ type: 'error', id, source: 'browser-control', error: 'The page changed before Breezer could click.' }), failedControl.id);
+  assert.equal(await page.locator('.assistant .message-body').last().innerText(), 'Browser control stopped.');
+  await page.locator('.error-details summary').last().click();
+  assert.equal(await page.getByText('The page changed before Breezer could click.', { exact: true }).isVisible(), true);
   assert.equal(await page.locator('#control-toggle').getAttribute('aria-pressed'), 'false');
   await page.getByRole('button', { name: 'Edit and resend' }).last().click();
   assert.equal(await page.locator('#control-toggle').getAttribute('aria-pressed'), 'false');

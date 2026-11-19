@@ -352,9 +352,9 @@ export function installBackground(api) {
   const panels = new Set();
   let activeRun = null;
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
-  const tools = new BrowserTools(api, id => {
+  const tools = new BrowserTools(api, (id, reason) => {
     for (const panel of panels) post(panel.port, { type: 'activity', id, active: false, label: '' });
-    if (activeRun?.session?.id === id && !activeRun.cancelled) void cancel(activeRun, 'Browser control stopped.');
+    if (activeRun?.session?.id === id && !activeRun.cancelled) void cancel(activeRun, reason || 'Browser control stopped.', 'browser-control');
   });
   const contextMemory = installContextBackground(api, {
     isPermitted(tab) {
@@ -362,13 +362,13 @@ export function installBackground(api) {
       catch { return false; }
     },
   });
-  const cancel = async (run, reason) => {
+  const cancel = async (run, reason, source) => {
     if (!run || run.cancelled) return;
     run.cancelled = true;
     if (activeRun === run) activeRun = null;
     try { run.panel.native?.postMessage({ type: 'cancel', id: run.id }); } catch { /* Native host already exited. */ }
     await tools.stop(run.session);
-    if (reason) post(run.panel.port, { type: 'error', id: run.id, error: reason });
+    if (reason) post(run.panel.port, { type: 'error', id: run.id, error: reason, ...(source ? { source } : {}) });
   };
   const ensureActive = run => {
     if (run.cancelled || activeRun !== run || run.panel.closed) throw new Error('Request stopped.');
