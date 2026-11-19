@@ -2,7 +2,7 @@ import { attachmentParts } from '../../features/ai/host/attachments.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
-import { resolve, dirname, extname } from 'node:path';
+import { resolve, dirname, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
 import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
@@ -19,7 +19,7 @@ const server = createServer(async (request, response) => {
   try {
     const pathname = new URL(request.url, 'http://localhost').pathname;
     const path = resolve(root, `.${pathname}`);
-    if (!path.startsWith(`${root}/`)) throw new Error('Outside fixture root');
+    if (!path.startsWith(`${root}${sep}`)) throw new Error('Outside fixture root');
     const content = await readFile(path);
     response.setHeader('Content-Type', ({ '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png' })[extname(path)] || 'application/octet-stream');
     response.end(content);
