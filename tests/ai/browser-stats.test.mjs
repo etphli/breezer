@@ -175,3 +175,23 @@ test('reports no memory or window details when native readings are unavailable',
   assert.match(stats.notes.join(' '), /window was unavailable/);
   assert.match(stats.notes.join(' '), /memory sample was unavailable/);
 });
+
+test('retries a system-only sample to recover the browser footprint', async () => {
+  const calls = [];
+  const api = { breezerPrivate: {
+    async getBrowserStats(windowId) {
+      calls.push(windowId);
+      return {
+        totalTabCount: 4, windowTabCount: 2, systemMemory: { totalBytes: 8 * 1024 ** 3 },
+        browserMemory: calls.length === 1 ? {} : { footprintBytes: 256 * 1024 ** 2, sampleComplete: true },
+        tabs: [], rendererProcesses: [],
+      };
+    },
+  } };
+  const stats = await readBrowserStats(api, 7);
+  assert.deepEqual(calls, [7, 7]);
+  assert.equal(stats.browserMemory.footprintBytes, 256 * 1024 ** 2);
+  assert.equal(stats.systemMemory.totalBytes, 8 * 1024 ** 3);
+  assert.equal(stats.totalTabCount, 4);
+  assert.equal(stats.windowTabCount, 2);
+});

@@ -27,7 +27,12 @@ export async function readBrowserStats(api, windowId) {
     };
   }
 
-  const snapshot = await api.breezerPrivate.getBrowserStats(windowId);
+  let snapshot = await api.breezerPrivate.getBrowserStats(windowId);
+  if (!snapshot.browserMemory.footprintBytes) {
+    // A Chromium memory dump can time out. Retry once before reporting a gap.
+    const retry = await api.breezerPrivate.getBrowserStats(windowId).catch(() => null);
+    if (retry?.browserMemory.footprintBytes) snapshot = retry;
+  }
   const totalTabCount = nonnegativeInteger(snapshot.totalTabCount);
   const windowTabCount = nonnegativeInteger(snapshot.windowTabCount);
   const systemMemory = {

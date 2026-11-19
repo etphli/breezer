@@ -24,6 +24,7 @@ function originalSource(current) {
   replace(/    \/\/ Resolve once[^\n]*\n    message: state.messages.find\(\(item\) => item.id === assistantId\),\n/, '');
   replace('    state.running.message = null;\n', '');
   replace('const empty = run && !run.message.text;', 'const empty = run && !state.messages.find((item) => item.id === run.assistantId).text;');
+  replace('Boolean(run.message.stats)', 'Boolean(state.messages.find((item) => item.id === run.assistantId).stats)');
   replace('const reply = state.running.message;', 'const reply = state.messages.find((item) => item.id === state.running.assistantId);');
   return current;
 }

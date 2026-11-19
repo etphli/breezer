@@ -404,6 +404,29 @@ h1 {
   margin: 10px 0;
 }
 
+.browser-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 12px;
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.browser-stats dt {
+  color: var(--muted);
+}
+
+.browser-stats dd {
+  margin: 0;
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
 .message-table {
   max-width: 100%;
   margin: 12px 0;

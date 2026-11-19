@@ -23,16 +23,16 @@ export class ResearchSources {
   }
   get size() { return this.selected.size; }
   setBusy(value) { this.busy = value; this.render(); if (value) this.dialog.close(); }
-  clear(reason) {
+  clear(reason, reportRevocation = true) {
     const revoke = this.busy && this.size > 0;
     this.revision++; this.selected.clear(); this.render(); this.onChange();
-    if (reason || revoke) this.onRevoke(reason || 'Sources cleared. Response stopped.');
+    if (reportRevocation && (reason || revoke)) this.onRevoke(reason || 'Sources cleared. Response stopped.');
   }
-  invalidate(tabId, reason) {
+  invalidate(tabId, reason, reportRevocation) {
     if (!this.size) return;
     if (tabId === undefined || this.selected.has(tabId)) {
       const source = this.selected.get(tabId);
-      this.clear(source ? `${maskSecrets(source.title)}: ${reason}` : reason);
+      this.clear(source ? `${maskSecrets(source.title)}: ${reason}` : reason, reportRevocation);
     }
   }
   render() {

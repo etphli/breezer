@@ -355,11 +355,52 @@ export function installBackground(api) {
     port.onDisconnect.addListener(() => { closed = true; readerController?.abort(); organato.close(port); });
   });
   const panels = new Set();
-  let activeRun = null;
+  const runs = new Map();
+  const replyWrites = new Map();
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
+  const runFor = panel => runs.get(panel.windowId);
+  const controlRun = () => [...runs.values()].find(run => run.control);
+  const current = run => runFor(run.panel) === run;
+  const replyKey = windowId => `breezer-pending-reply-${windowId}`;
+  const writeReply = (windowId, write) => {
+    if (!Number.isInteger(windowId) || !api.storage.session) return;
+    const pending = (replyWrites.get(windowId) || Promise.resolve()).then(() => write(replyKey(windowId))).catch(() => {});
+    replyWrites.set(windowId, pending);
+    void pending.then(() => { if (replyWrites.get(windowId) === pending) replyWrites.delete(windowId); });
+    return pending;
+  };
+  const releaseNative = panel => {
+    const native = panel.native;
+    panel.native = null;
+    try { native?.disconnect(); } catch {}
+    panel.releaseCache?.();
+    panel.releaseCache = null;
+  };
+  const turnState = run => ({
+    type: 'turn-state', id: run.id, user: run.user, text: run.text,
+    browserTask: run.browserTask, stats: run.statsSummary,
+  });
+  const endRun = (run, terminal) => {
+    runs.delete(run.panel.windowId);
+    let saved;
+    if (!run.control) {
+      // Keep a completed turn until the panel confirms its transcript was saved.
+      const index = terminal.themeProposal?.imageAttachment;
+      const value = { ...turnState(run), terminal };
+      if (index) value.themeImage = run.themeImages[index - 1].image;
+      saved = writeReply(run.panel.windowId, key => api.storage.session.set({ [key]: value }));
+      if (index && run.reader !== run.panel) terminal = { ...terminal, themeImage: value.themeImage };
+    }
+    if (run.reader) post(run.reader.port, terminal);
+    if (run.panel.closed) {
+      if (saved) void saved.then(() => releaseNative(run.panel));
+      else releaseNative(run.panel);
+    }
+  };
   const tools = new BrowserTools(api, (id, reason) => {
     for (const panel of panels) post(panel.port, { type: 'activity', id, active: false, label: '' });
-    if (activeRun?.session?.id === id && !activeRun.cancelled) void cancel(activeRun, reason || 'Browser control stopped.', 'browser-control');
+    const run = controlRun();
+    if (run?.session?.id === id) void cancel(run, reason || 'Browser control stopped.', 'browser-control');
   });
   const contextMemory = installContextBackground(api, {
     isPermitted(tab) {
@@ -368,15 +409,15 @@ export function installBackground(api) {
     },
   });
   const cancel = async (run, reason, source) => {
-    if (!run || run.cancelled) return;
-    run.cancelled = true;
-    if (activeRun === run) activeRun = null;
+    if (!run || !current(run)) return;
     try { run.panel.native?.postMessage({ type: 'cancel', id: run.id }); } catch { /* Native host already exited. */ }
+    endRun(run, reason
+      ? { type: 'error', id: run.id, error: reason, ...(source ? { source } : {}) }
+      : { type: 'complete', id: run.id, cancelled: true });
     await tools.stop(run.session);
-    if (reason) post(run.panel.port, { type: 'error', id: run.id, error: reason, ...(source ? { source } : {}) });
   };
   const ensureActive = run => {
-    if (run.cancelled || activeRun !== run || run.panel.closed) throw new Error('Request stopped.');
+    if (!current(run)) throw new Error('Request stopped.');
   };
   const currentPage = async panel => {
     const [tab] = await api.tabs.query({ active: true, ...(panel.windowId === undefined ? { currentWindow: true } : { windowId: panel.windowId }) });
@@ -401,15 +442,16 @@ export function installBackground(api) {
     panel.releaseCache = release;
     panel.native = native;
     native.onMessage.addListener(message => {
-      if (!message || typeof message !== 'object') return;
+      if (panel.native !== native || !message || typeof message !== 'object') return;
       if (message.type === 'status') { post(panel.port, message); return; }
+      const run = runFor(panel);
+      const ownsRun = run?.panel === panel;
       if (message.type === 'error' && !message.id) {
-        post(panel.port, message);
-        if (activeRun?.panel === panel) void cancel(activeRun);
+        if (ownsRun) void cancel(run, message.error);
+        else if (run?.reader !== panel) post(panel.port, message);
         return;
       }
-      const run = activeRun;
-      if (!run || run.panel !== panel || message.id !== run.id || run.cancelled) return;
+      if (!ownsRun || message.id !== run.id) return;
       if (message.type === 'tool') {
         void (async () => {
           const response = { type: 'toolResult', id: run.id, requestId: message.requestId };
@@ -418,8 +460,7 @@ export function installBackground(api) {
             if (typeof message.requestId !== 'string' || message.requestId.length > 200) throw new Error('Invalid browser tool request.');
             if (message.name === 'browser_stats') {
               if (run.browserTask !== 'stats') throw new Error('Browser stats are off for this request.');
-              run.stats ||= readBrowserStats(api, panel.windowId);
-              response.result = await run.stats;
+              response.result = run.stats;
             } else if (message.name === 'browser_propose_theme') {
               if (run.browserTask !== 'theme') throw new Error('Theme design is off for this request.');
               const { name, theme, colorMode, html, imageAttachment } = message.args || {};
@@ -428,32 +469,31 @@ export function installBackground(api) {
                   (html !== undefined && (typeof html !== 'string' || html.length > 40000))) {
                 throw new Error('Provide a name, hex color, color mode, and optional HTML of up to 40,000 characters.');
               }
-              if (imageAttachment !== undefined && (!Number.isInteger(imageAttachment) || imageAttachment < 1 || imageAttachment > run.imageCount)) {
+              if (imageAttachment !== undefined && (!Number.isInteger(imageAttachment) || imageAttachment < 1 || imageAttachment > run.themeImages.length)) {
                 throw new Error('Choose an image from the latest image attachments.');
               }
               run.themeProposal = { name, theme, colorMode, ...(html === undefined ? {} : { html }), ...(imageAttachment === undefined ? {} : { imageAttachment }) };
               response.result = { staged: true, name, applied: false };
-            } else if (message.name === 'browser_snapshot' && !run.control && run.includeContext && run.tab) response.result = await tools.snapshot(run.tab, null, true, () => activeRun === run && !run.cancelled);
+            } else if (message.name === 'browser_snapshot' && !run.control && run.includeContext && run.tab) response.result = await tools.snapshot(run.tab, null, true, () => current(run));
             else {
               if (!run.session || !run.control) throw new Error('Browser control is off. Enable it before sending a request.');
               response.result = await tools.execute(run.session, message.name, message.args);
             }
             ensureActive(run);
           } catch (error) { response.error = error.message; }
-          if (!run.cancelled && activeRun === run) { try { native.postMessage(response); } catch {} }
+          if (current(run)) { try { native.postMessage(response); } catch {} }
         })();
-      } else if (['delta', 'complete', 'error'].includes(message.type)) {
-        if (message.type === 'complete') {
-          post(panel.port, {
-            type: 'complete', id: run.id, ...(message.cancelled ? { cancelled: true } : {}),
-            ...(!message.cancelled && run.themeProposal ? { themeProposal: run.themeProposal } : {}),
-          });
-        } else post(panel.port, message);
-        if (message.type !== 'delta') {
-          activeRun = null;
-          run.cancelled = true;
-          void tools.stop(run.session);
+      } else if (message.type === 'delta' && typeof message.text === 'string') {
+        if (!run.control) run.text += message.text;
+        if (run.reader) post(run.reader.port, message);
+      } else if (message.type === 'complete' || message.type === 'error') {
+        let terminal = message;
+        if (message.type === 'complete' && !message.cancelled) {
+          if (run.themeProposal) terminal = { ...message, themeProposal: run.themeProposal };
+          else if (run.browserTask === 'theme') terminal = { type: 'error', id: run.id, source: 'theme', error: 'The model did not create a theme preview. Try again or choose another model.' };
         }
+        endRun(run, terminal);
+        void tools.stop(run.session);
       }
     });
     native.onDisconnect.addListener(() => {
@@ -462,8 +502,9 @@ export function installBackground(api) {
       panel.releaseCache?.(); panel.releaseCache = null;
       const detail = api.runtime.lastError?.message;
       const error = `Breezer AI could not connect to its local helper. Restart Breezer and reopen the sidebar. If it still cannot connect, reinstall Breezer.${detail ? ` ${detail}` : ''}`;
-      post(panel.port, { type: 'error', error });
-      if (activeRun?.panel === panel) void cancel(activeRun, error);
+      const run = runFor(panel);
+      if (run?.panel === panel) void cancel(run, error);
+      else if (run?.reader !== panel) post(panel.port, { type: 'error', error });
     });
     return native;
   };
@@ -471,14 +512,27 @@ export function installBackground(api) {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
     const browserTask = message.browserTask;
     if (browserTask !== undefined && (!['stats', 'theme'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('Browser stats and theme design require page access and research to be off.');
-    await cancel(activeRun);
+    if (runFor(panel)) await cancel(runFor(panel));
+    if (message.control === true && controlRun()) await cancel(controlRun(), 'Browser control moved to another tab.', 'browser-control');
+    if (runFor(panel) || (message.control === true && controlRun())) throw new Error('A response is already running. Stop it before sending another message.');
     if (panel.closed || !panel.visible) throw new Error('The assistant closed. Reopen it and select sources again.');
-    const run = { id: message.id, panel, browserTask, control: message.control === true, includeContext: message.includeContext === true || message.control === true, cancelled: false, session: null, tab: null };
+    const run = {
+      id: message.id, panel, reader: panel, browserTask, control: message.control === true,
+      includeContext: message.includeContext === true || message.control === true, session: null, tab: null, text: '',
+      user: { id: message.id, role: 'user', text: message.message, attachments: message.attachments, contextTitle: message.contextTitle },
+    };
     const history = Array.isArray(message.history) ? message.history.slice(-40) : [];
-    if (browserTask === 'theme') run.imageCount = themeReferenceImages(message.attachments, history).length;
-    activeRun = run;
+    if (browserTask === 'theme') run.themeImages = themeReferenceImages(message.attachments, history);
+    runs.set(panel.windowId, run);
     try {
       let context, researchSources;
+      if (browserTask === 'stats') {
+        run.stats = await readBrowserStats(api, panel.windowId);
+        ensureActive(run);
+        const { windowTabCount, totalTabCount, browserMemory, systemMemory } = run.stats;
+        run.statsSummary = { windowTabCount, totalTabCount, browserMemory, systemMemory };
+        if (run.reader) post(run.reader.port, { type: 'browser-stats', id: run.id, stats: run.statsSummary });
+      }
       if (message.researchSources !== undefined) {
         if (message.control || message.includeContext) throw new Error('Research sources do not authorize browser control or active-page sharing.');
         const draft = panel.researchDraft;
@@ -488,17 +542,19 @@ export function installBackground(api) {
         ensureActive(run);
         if (draft.invalidated) throw new Error('A source changed during capture. Select sources and send again.');
         if (!researchSources.some(source => source.status === 'available' && source.text)) throw new Error('No source text is available. Select loaded tabs and try again.');
+        run.user.sourceMetadata = researchSources.map(({ text, ...source }) => source);
       }
       if (run.includeContext) {
         const tab = await currentPage(panel);
+        if (Number.isInteger(message.tabId) && tab?.id !== message.tabId) throw new Error('The active page changed before it could be shared. Send again from the page you want to share.');
         run.tab = tab;
         ensureActive(run);
         if (run.control) {
-          run.session = await tools.start(run.id, tab, () => activeRun === run && !run.cancelled && !panel.closed, session => { run.session = session; });
+          run.session = await tools.start(run.id, tab, () => current(run) && !panel.closed, session => { run.session = session; });
           ensureActive(run);
           post(panel.port, { type: 'activity', id: run.id, active: true, label: 'Taking action' });
         }
-        context = await tools.snapshot(tab, run.session, true, () => activeRun === run && !run.cancelled);
+        context = await tools.snapshot(tab, run.session, true, () => current(run));
         ensureActive(run);
       }
       const native = connectNative(panel);
@@ -513,12 +569,31 @@ export function installBackground(api) {
         ...(browserTask ? { browserTask } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
       });
+      run.submitted = true;
     } catch (error) {
-      if (!run.cancelled && activeRun === run) {
-        if (panel.native) { try { panel.native.disconnect(); } catch {} panel.native = null; panel.releaseCache?.(); panel.releaseCache = null; }
-        post(panel.port, { type: 'error', id: run.id, error: error.message }); await cancel(run);
-      }
+      if (current(run)) await cancel(run, error.message);
     }
+  };
+  const restoreTurn = async panel => {
+    const attach = () => {
+      const run = runFor(panel);
+      if (!run || run.control) return false;
+      run.reader = panel;
+      post(panel.port, turnState(run));
+      return true;
+    };
+    if (attach() || !api.storage.session) return;
+    const key = replyKey(panel.windowId);
+    await replyWrites.get(panel.windowId);
+    const saved = (await api.storage.session.get(key).catch(() => ({})))[key];
+    if (!panel.closed && !attach() && !runFor(panel) && saved) post(panel.port, saved);
+  };
+  const hidePanel = (panel, reason) => {
+    panel.metadataRevision++;
+    panel.visible = false;
+    invalidateResearch(panel, undefined, reason);
+    const run = runFor(panel);
+    if (run?.reader === panel && run.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
   };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
@@ -532,12 +607,13 @@ export function installBackground(api) {
           panel.ready = (async () => {
             const [tab] = await api.tabs.query({ active: true, ...(Number.isInteger(message.windowId) ? { windowId: message.windowId } : { currentWindow: true }) });
             if (panel.closed) return;
-            panel.windowId = tab?.windowId;
+            panel.windowId = tab?.windowId ?? message.windowId;
             await tools.verifyGrant(tab);
             void contextMemory.observeGranted(tab);
+            if (!panel.closed) await restoreTurn(panel);
             if (!panel.closed) {
               const native = connectNative(panel);
-              try { native.postMessage({ type: 'init' }); } catch (error) { try { native.disconnect(); } catch {} panel.native = null; panel.releaseCache?.(); panel.releaseCache = null; throw error; }
+              try { native.postMessage({ type: 'init' }); } catch (error) { releaseNative(panel); throw error; }
             }
           })();
           await panel.ready;
@@ -546,14 +622,18 @@ export function installBackground(api) {
           panel.researchDraft = { id: message.id, selection: researchSelection(message.sources), invalidated: false };
         } else if (message.type === 'chat') { await panel.ready; await sendChat(panel, message); }
         else if (message.type === 'visibility') {
-          panel.metadataRevision++;
-          panel.visible = message.visible === true;
-          if (!panel.visible) invalidateResearch(panel, undefined, 'Panel closed. Select sources again.');
-          if (!panel.visible && activeRun?.panel === panel) await cancel(activeRun);
+          if (message.visible === true) { panel.metadataRevision++; panel.visible = true; }
+          else hidePanel(panel, 'Panel closed. Select sources again.');
         }
         else if (message.type === 'cancel') {
           if (panel.researchDraft) panel.researchDraft.invalidated = true;
-          if (activeRun?.panel === panel && (!message.id || activeRun.id === message.id)) await cancel(activeRun);
+          const run = runFor(panel);
+          if (run?.reader === panel && run.id === message.id) await cancel(run);
+        } else if (message.type === 'turn-saved' || message.type === 'clear-turn') {
+          await panel.ready;
+          await writeReply(panel.windowId, async key => {
+            if (message.type === 'clear-turn' || (await api.storage.session.get(key))[key]?.id === message.id) await api.storage.session.remove(key);
+          });
         } else if (message.type === 'context') {
           await panel.ready;
           await publishMetadata(panel.windowId);
@@ -563,9 +643,10 @@ export function installBackground(api) {
     port.onDisconnect.addListener(() => {
       panel.closed = true;
       panels.delete(panel);
-      if (activeRun?.panel === panel) void cancel(activeRun);
-      try { panel.native?.disconnect(); } catch {}
-      panel.native = null; panel.releaseCache?.(); panel.releaseCache = null;
+      hidePanel(panel, 'Panel closed. Select sources again.');
+      const run = runFor(panel);
+      if (run?.reader === panel) run.reader = null;
+      if (run?.panel !== panel) releaseNative(panel);
     });
   });
   const toggle = tab => {
@@ -574,7 +655,8 @@ export function installBackground(api) {
     void contextMemory.observeGranted(tab);
     const panel = [...panels].find(item => item.windowId === tab.windowId && !item.closed && item.visible);
     if (panel && api.sidePanel.close) {
-      if (activeRun?.panel === panel) void cancel(activeRun);
+      const run = runFor(panel);
+      if (run?.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
       void api.sidePanel.close({ windowId: tab.windowId }).catch(error => post(panel.port, { type: 'error', error: error.message }));
     } else {
       // Call open in the user gesture's event stack, before awaiting any work.
@@ -596,18 +678,14 @@ export function installBackground(api) {
   });
   api.action.onClicked.addListener(toggle);
   api.sidePanel.onClosed?.addListener(info => {
-    for (const panel of panels) if (panel.windowId === info.windowId) {
-      panel.metadataRevision++;
-      panel.visible = false;
-      invalidateResearch(panel, undefined, 'Panel closed. Select source tabs again.');
-      if (activeRun?.panel === panel) void cancel(activeRun);
-    }
+    for (const panel of panels) if (panel.windowId === info.windowId) hidePanel(panel, 'Panel closed. Select source tabs again.');
   });
   api.sidePanel.onOpened?.addListener(info => {
     for (const panel of panels) if (panel.windowId === info.windowId) panel.visible = true;
   });
   api.runtime.onMessage.addListener((message, sender) => {
-    if (message?.type === 'stop-control' && activeRun?.session?.id === message.sessionId && sender.tab?.id === activeRun.session.tab.id) void cancel(activeRun, 'Browser control stopped.');
+    const run = controlRun();
+    if (message?.type === 'stop-control' && run?.session?.id === message.sessionId && sender.tab?.id === run.session.tab.id) void cancel(run, 'Browser control stopped.');
   });
   const invalidateResearch = (panel, tabId, reason) => {
     if (tabId !== undefined && !panel.researchDraft?.selection.some(source => source.tabId === tabId)) {
@@ -615,18 +693,20 @@ export function installBackground(api) {
     }
     if (panel.researchDraft) panel.researchDraft.invalidated = true;
     post(panel.port, { type: 'research-invalidated', tabId, reason });
-    if (activeRun?.panel === panel && activeRun.research) void cancel(activeRun, reason);
+    const run = runFor(panel);
+    if (run?.panel === panel && run.research && !run.submitted) void cancel(run, reason);
   };
   api.tabs.onActivated.addListener(info => {
     for (const panel of panels) if (panel.windowId === info.windowId) invalidateResearch(panel, undefined, 'Active tab changed. Select source tabs again.');
-    const run = activeRun;
-    if (run?.session && info.windowId === run.session.tab.windowId && info.tabId !== run.session.tab.id) void cancel(run, 'Browser control stopped because the active tab changed.');
+    const run = runs.get(info.windowId);
+    if (run?.control && info.tabId !== run.tab?.id) void cancel(run, 'Browser control stopped because the active tab changed.', 'browser-control');
     void publishMetadata(info.windowId, info.tabId).catch(() => {});
   });
   api.tabs.onRemoved.addListener(tabId => {
     for (const panel of panels) invalidateResearch(panel, tabId, 'Source closed. Select source tabs again.');
     tools.grants.delete(tabId);
-    if (activeRun?.session?.tab.id === tabId) void cancel(activeRun, 'Browser control stopped because the tab closed.');
+    const run = controlRun();
+    if (run?.tab?.id === tabId) void cancel(run, 'Browser control stopped because the tab closed.');
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
     if (change.url || change.status === 'loading') for (const panel of panels) invalidateResearch(panel, tabId, 'Source navigated or is loading. Select source tabs again.');
@@ -634,7 +714,7 @@ export function installBackground(api) {
     if (change.url && tools.grants.has(tabId)) {
       try { if (tools.grants.get(tabId) !== new URL(change.url).origin) tools.grants.delete(tabId); } catch { tools.grants.delete(tabId); }
     }
-    const run = activeRun;
+    const run = controlRun();
     if (run?.session?.tab.id !== tabId) return;
     if (change.url && !isWebURL(change.url)) {
       void cancel(run, 'Browser control stopped because this is not an http or https page.');
@@ -649,13 +729,19 @@ export function installBackground(api) {
     // tab, so watching from another app does not end control; another Breezer window does.
     if (windowId === (api.windows.WINDOW_ID_NONE ?? -1)) return;
     for (const panel of panels) if (panel.windowId !== windowId) invalidateResearch(panel, undefined, 'Browser window changed. Select source tabs again.');
-    if (activeRun?.session && activeRun.session.tab.windowId !== windowId) void cancel(activeRun, 'Browser control stopped because the active window changed.');
+    const run = controlRun();
+    if (run && run.panel.windowId !== windowId) void cancel(run, 'Browser control stopped because the active window changed.', 'browser-control');
+  });
+  api.windows?.onRemoved?.addListener(windowId => {
+    void cancel(runs.get(windowId));
+    void writeReply(windowId, key => api.storage.session.remove(key));
   });
   api.debugger.onDetach.addListener(source => {
-    if (activeRun?.session?.tab.id === source.tabId) void cancel(activeRun, 'Browser control stopped because the debugger detached.');
+    const run = controlRun();
+    if (run?.session?.tab.id === source.tabId) void cancel(run, 'Browser control stopped because the debugger detached.');
   });
   api.debugger.onEvent.addListener((source, method, params) => tools.debuggerEvent(source, method, params));
-  return { tools, panels, cancel: () => cancel(activeRun) };
+  return { tools, panels, cancel: () => Promise.all([...runs.values()].map(run => cancel(run))) };
 }
 
 if (typeof chrome !== 'undefined' && chrome.runtime?.onConnect) installBackground(chrome);

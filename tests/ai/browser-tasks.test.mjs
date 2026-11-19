@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { installBackground } from '../../features/ai/extension/background.js';
+import { HostController } from '../../features/ai/host/controller.mjs';
 import { allowedTools, promptText, validateChat, validateTool } from '../../features/ai/host/protocol.mjs';
 import { fakeChrome, panel, tick } from './browser-api-fixture.mjs';
 
@@ -21,6 +22,18 @@ test('browser tasks grant only the selected tool and reject page and research ac
   }
   assert.throws(() => validateTool('browser_propose_theme', { ...proposal, theme: 'red' }, allowedTools({ browserTask: 'theme' })), /hex color/);
   assert.throws(() => validateTool('browser_propose_theme', { ...proposal, image: 'https://example.test/photo.png' }, allowedTools({ browserTask: 'theme' })), /Invalid browser tool arguments/);
+});
+
+test('native browser tools run without loading the unrelated Organato account', async () => {
+  const received = [];
+  const provider = {
+    id: 'codex',
+    async discover() { return { id: 'codex', available: true, authenticated: true }; },
+    async chat(request) { received.push(request); },
+  };
+  const host = new HostController([provider], () => {}, { prepareChat() { assert.fail('Organato is not a browser-task dependency'); } });
+  for (const browserTask of ['stats', 'theme']) await host.receive({ ...chat, browserTask });
+  assert.deepEqual(received.map(request => [request.browserTask, request.organato]), [['stats', false], ['theme', false]]);
 });
 
 test('the worker forwards theme proposals only after a successful opted-in turn', async () => {
@@ -58,6 +71,11 @@ test('the worker forwards theme proposals only after a successful opted-in turn'
   await requestTheme('cancelled');
   fake.native.onMessage.emit({ type: 'complete', id: 'cancelled', cancelled: true });
   assert.equal(port.sent.at(-1).themeProposal, undefined);
+
+  await start('missing', { browserTask: 'theme' });
+  fake.native.onMessage.emit({ type: 'complete', id: 'missing' });
+  assert.equal(port.sent.at(-1).source, 'theme');
+  assert.match(port.sent.at(-1).error, /did not create a theme preview/);
   assert.equal(fake.calls.some(([call]) => call === 'capture' || call === 'attach'), false);
 });
 
@@ -86,7 +104,7 @@ test('theme wallpaper refers to an image the user attached, without returning pi
   assert.deepEqual(port.sent.at(-1).themeProposal, { ...proposal, imageAttachment: 1 });
 });
 
-test('the worker measures browser stats on demand and reuses the snapshot for one turn', async () => {
+test('the worker sends measured browser stats to the panel and gives the provider the same snapshot', async () => {
   const fake = fakeChrome();
   fake.setTab({ incognito: false });
   installBackground(fake.api);
@@ -97,7 +115,7 @@ test('the worker measures browser stats on demand and reuses the snapshot for on
   const callsBefore = fake.calls.length;
   port.onMessage.emit({ ...chat, browserTask: 'stats' });
   await tick();
-  assert.equal(fake.calls.length, callsBefore, 'sending the mode alone does not collect stats');
+  assert.equal(fake.calls.length, callsBefore + 1, 'sending a stats request samples once');
   const request = { type: 'tool', id: chat.id, name: 'browser_stats', args: {} };
   fake.native.onMessage.emit({ ...request, requestId: 'first' });
   await tick();
@@ -105,6 +123,11 @@ test('the worker measures browser stats on demand and reuses the snapshot for on
   const callsAfter = fake.calls.length;
   assert.equal(first.error, undefined);
   assert.ok(first.result);
+  const { stats } = port.sent.find(message => message.type === 'browser-stats');
+  assert.equal(stats.totalTabCount, first.result.totalTabCount);
+  assert.equal(stats.windowTabCount, first.result.windowTabCount);
+  assert.deepEqual(stats.browserMemory, first.result.browserMemory);
+  assert.deepEqual(stats.systemMemory, first.result.systemMemory);
   assert.doesNotMatch(JSON.stringify(first.result), /example\.test/);
   fake.native.onMessage.emit({ ...request, requestId: 'second' });
   await tick();

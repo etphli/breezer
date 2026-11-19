@@ -48,7 +48,8 @@ export class HostController {
       };
       this.#active = run;
       try {
-        message = { ...message, organato: this.prepareChat ? await this.prepareChat() : false };
+        const useOrganato = !message.browserTask && !message.researchSources && this.prepareChat;
+        message = { ...message, organato: useOrganato ? await this.prepareChat() : false };
         if (run.controller.signal.aborted) return;
         run.tools = allowedTools(message);
         await this.discover();
