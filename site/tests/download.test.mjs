@@ -7,7 +7,6 @@ import { chromium } from '../../tests/ai/node_modules/playwright/index.mjs';
 
 const site = resolve(new URL('../', import.meta.url).pathname);
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
-const MAC_DMG = 'https://github.com/etphli/breezer/releases/download/v1.2.5/Breezer-v1.2.5-arm64.dmg';
 const WINDOWS_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 const MAC_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 
@@ -67,12 +66,18 @@ test('download page offers Windows only when a verified Windows build is publish
   const macHref = page => page.locator('[data-download]').getAttribute('href');
 
   try {
+    const staticPage = await browser.newPage({ javaScriptEnabled: false });
+    await staticPage.goto(`${origin}/download`);
+    const originalMacHref = await macHref(staticPage);
+    assert.match(originalMacHref, /^https:\/\/github\.com\/etphli\/breezer\/releases\/download\/(v\d+\.\d+\.\d+)\/Breezer-\1-arm64\.dmg$/);
+    await staticPage.close();
+
     // Today's releases: Mac visitors see the unchanged Mac page.
     let s = await open({ userAgent: MAC_UA, release: macOnly });
     assert.equal(s.calls(), 1);
     assert.equal(await visible(s.page, '#windows'), false);
     assert.equal(await visible(s.page, '#windows-unavailable'), false);
-    assert.equal(await macHref(s.page), MAC_DMG);
+    assert.equal(await macHref(s.page), originalMacHref);
     assert.equal(await s.page.locator('[data-download]').innerText(), 'Download Breezer');
     assert.equal(await s.page.locator('#platform-support').innerText(), "Intel Macs, Windows and Linux aren't supported yet.");
     assert.equal(await s.page.locator('a[href*="Windows"]').count(), 0, 'no link to a Windows file that does not exist');
@@ -99,7 +104,7 @@ test('download page offers Windows only when a verified Windows build is publish
     s = await open({ userAgent: WINDOWS_UA, status: 403 });
     assert.equal(await visible(s.page, '#windows'), false);
     assert.equal(await s.page.locator('#windows-unavailable').innerText(), 'This download needs a Mac with Apple Silicon. New versions appear on the releases page.');
-    assert.equal(await macHref(s.page), MAC_DMG);
+    assert.equal(await macHref(s.page), originalMacHref);
     assert.deepEqual(s.errors, []);
     await s.context.close();
 
@@ -114,7 +119,7 @@ test('download page offers Windows only when a verified Windows build is publish
     assert.equal(await s.page.locator('#windows-version').innerText(), 'Version 1.3.0');
     assert.equal(await s.page.locator('.get-copy > :is(#windows, .actions)').evaluateAll(els => els.map(el => el.id || 'mac')).then(ids => ids.join()), 'windows,mac');
     assert.equal(await s.page.locator('[data-download]').innerText(), 'Download for Mac');
-    assert.equal(await macHref(s.page), MAC_DMG);
+    assert.equal(await macHref(s.page), originalMacHref);
     assert.equal(await s.page.locator('#platform-support').innerText(), "Intel Macs and Linux aren't supported yet.");
     await s.page.screenshot({ path: `${evidence}/download-windows-available.png` });
     await s.page.setViewportSize({ width: 390, height: 844 });
