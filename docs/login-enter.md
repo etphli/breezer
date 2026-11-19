@@ -15,15 +15,17 @@ The password overlay adds a fallback after those native paths. A trusted,
 unmodified, non-repeating Enter from the focused input can advance from username
 to password, or request native form submission from the password. The form must
 use POST, retain validation, and contain exactly one focusable, editable text or
-email input with `autocomplete="username"` and one password input with
-`autocomplete="current-password"`. Hidden inputs such as CSRF tokens are allowed.
+email input annotated as `username` and one password input annotated as
+`current-password`. Blink validates the autocomplete tokens, so grouping tokens
+such as `section-signin`, surrounding whitespace, and a trailing `webauthn` hint
+work with these field names. Hidden inputs such as CSRF tokens are allowed.
 Both login values must be nonempty before submission. Constraint validation,
 custom validity, cancelable submit handlers, sandbox/CSP and navigation remain
 in Blink's existing submission pipeline.
 
 Any other associated control prevents the fallback, including a disabled submit
 button, a custom Next button, MFA field, checkbox, textarea or form-associated
-custom element. Unannotated forms, compound autocomplete tokens, registration,
+custom element. Unannotated forms, invalid autocomplete lists, registration,
 GET, dialog and novalidate forms keep their previous behavior. The fallback uses
 native form ownership, including `form=` associations, and never searches another
 form, document or frame for buttons or credentials. Native submit buttons and
@@ -113,8 +115,9 @@ Before accepting the native feature:
    `--gtest_filter=HTMLFormElementTest.BreezerLoginEnter*` in an authorized isolated
    build. This gate also checks the patch's native API compatibility.
 2. Run `BREEZER_TEST_BROWSER=/path/to/disposable/Breezer node
-   tests/passwords/enter-browser.mjs` without `--baseline`. All 32 scenarios must
-   pass. Capture a new screenshot showing exactly one submission.
+   tests/passwords/enter-browser.mjs` without `--baseline` on the release
+   candidate. Run the entire suite, including grouped and malformed autocomplete
+   cases. Capture a new screenshot showing exactly one submission.
 3. In a disposable profile with only dummy credentials, open the native saved
    password picker and confirm first Enter selects/fills without submitting.
    Confirm second Enter works after the picker closes. Test IME commit and Return
@@ -124,6 +127,6 @@ Before accepting the native feature:
    conservative. Test any reported real site separately without recording real
    credentials. No Microsoft acceptance result currently exists.
 
-The 32-scenario runtime gate has passed. The native unit, physical input,
-password-picker and IME gates remain pending; universal sign-in support is not
-claimed.
+The 32-scenario pass above applies to the 1.2.0 browser. Verify the expanded
+suite on the new release candidate, along with native unit tests, physical input,
+the password picker and IME.
