@@ -40,8 +40,10 @@ export const CONNECTED = {
   },
 };
 
-export function installFixture({ view, appearance, delay = 0, hang = false, switches, cachedView }) {
+export function installFixture({ view, appearance, delay = 0, hang = false, switches, cachedView, siteCases }) {
   // fx.view and fx.delay can be changed mid-test to script later answers.
+  const topSites = siteCases?.[new URLSearchParams(location.search).get('sites')];
+  if (topSites) view = { ...view, topSites };
   window.fx = { requests: [], view, delay };
   const port = (name) => {
     const listeners = { message: [], disconnect: [] };
@@ -51,6 +53,10 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
       onDisconnect: { addListener: (fn) => listeners.disconnect.push(fn) },
       postMessage(message) {
         window.fx.requests.push({ name, ...message });
+        if (message.earlySites && window.fx.view.dashboardEnabled !== false) {
+          const topSites = structuredClone(window.fx.view.topSites);
+          setTimeout(() => listeners.message.forEach(fn => fn({ type: 'sites', id: message.id, topSites })), 0);
+        }
         if (cachedView) setTimeout(() => listeners.message.forEach((fn) => fn({ type: 'view', id: message.id, ...structuredClone(cachedView), pending: true })), 0);
         if (hang) return;
         const answer = structuredClone(window.fx.view);
@@ -88,5 +94,11 @@ export function installFixture({ view, appearance, delay = 0, hang = false, swit
     },
     storage: { local: { onChanged: { addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { const index=storageListeners.indexOf(fn); if(index>=0) storageListeners.splice(index,1); } }, async get(keys) { return Object.fromEntries([keys].flat().map((key) => [key, structuredClone(preferences[key])])); }, async set(values) { Object.assign(preferences, structuredClone(values)); localStorage.setItem('shortcut-fixture', JSON.stringify(preferences)); for (const fn of storageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }]))); for (const fn of generalStorageListeners) fn(Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: value }])), 'local'); } }, onChanged: { addListener(fn) { generalStorageListeners.push(fn); }, removeListener(fn) { const index=generalStorageListeners.indexOf(fn); if(index>=0) generalStorageListeners.splice(index,1); } } },
     ...(appearance ? { breezerPrivate: { getAppearance: async () => appearance } } : {}),
+  };
+  window.chrome.storage.session = {
+    async get(key) { return { [key]: JSON.parse(localStorage.getItem(key) || 'null') }; },
+    async set(values) {
+      for (const [key, value] of Object.entries(values)) localStorage.setItem(key, JSON.stringify(value));
+    },
   };
 }

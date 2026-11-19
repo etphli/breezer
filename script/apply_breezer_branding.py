@@ -19,21 +19,30 @@ LOCK = json.loads((ROOT / "upstream.lock.json").read_text())
 CORE = ROOT / LOCK["helium"]["path"]
 BUNDLE_ID = "io.github.etphli.breezer"
 
-# Silhouette of the ribbon in breezer-logo.png, simplified for small UI icons.
+# Slipstream's two strokes, traced on a 48px canvas for native UI icons.
 BREEZER_MARK = (
-    ("MOVE_TO", 9, 4),
-    ("CUBIC_TO", 14, 4, 23, 7, 25, 13),
-    ("CUBIC_TO", 26, 16, 25, 19, 25, 22),
-    ("CUBIC_TO", 35, 17, 42, 21, 44, 29),
-    ("CUBIC_TO", 47, 38, 40, 45, 30, 45),
-    ("CUBIC_TO", 20, 45, 12, 41, 10, 33),
-    ("CUBIC_TO", 8, 26, 13, 18, 12, 12),
-    ("CUBIC_TO", 12, 9, 11, 6, 9, 4),
+    ("MOVE_TO", 9.5, 24.9),
+    ("LINE_TO", 11.1, 21.5),
+    ("LINE_TO", 32.4, 21.5),
+    ("CUBIC_TO", 33.5, 21.5, 34.45, 20.6, 34.45, 19.5),
+    ("CUBIC_TO", 34.45, 18.4, 33.55, 17.5, 32.4, 17.5),
+    ("CUBIC_TO", 31.48, 17.5, 31.01, 18.23, 30.56, 18.23),
+    ("LINE_TO", 27.8, 18.23),
+    ("CUBIC_TO", 27.39, 18.23, 27.16, 17.86, 27.35, 17.44),
+    ("CUBIC_TO", 28.2, 15.45, 30.13, 14.1, 32.4, 14.1),
+    ("CUBIC_TO", 35.42, 14.1, 37.85, 16.49, 37.85, 19.5),
+    ("CUBIC_TO", 37.85, 22.51, 35.42, 24.9, 32.4, 24.9),
     ("CLOSE",),
-    ("MOVE_TO", 25, 30),
-    ("CUBIC_TO", 25, 35, 27, 39, 32, 39),
-    ("CUBIC_TO", 36, 39, 39, 36, 38, 32),
-    ("CUBIC_TO", 37, 28, 30, 26, 25, 30),
+    ("MOVE_TO", 12.45, 30.45),
+    ("LINE_TO", 13.9, 27.1),
+    ("LINE_TO", 28.65, 27.1),
+    ("CUBIC_TO", 31.42, 27.1, 33.3, 29.11, 33.3, 31.52),
+    ("CUBIC_TO", 33.3, 34.16, 31.14, 36.2, 28.35, 36.2),
+    ("CUBIC_TO", 26.63, 36.2, 25.1, 35.24, 24.37, 33.69),
+    ("CUBIC_TO", 24.18, 33.28, 24.42, 32.96, 24.78, 32.96),
+    ("LINE_TO", 28.7, 32.96),
+    ("CUBIC_TO", 29.52, 32.96, 30.05, 32.4, 30.05, 31.69),
+    ("CUBIC_TO", 30.05, 30.97, 29.46, 30.39, 28.68, 30.39),
     ("CLOSE",),
 )
 
@@ -251,12 +260,18 @@ def brand_strings(tree):
         return original_message(message)
 
     def replace_translation(message, fingerprints):
-        if message.get("id") in protected_fingerprints:
+        identifier = message.get("id")
+        if identifier in protected_fingerprints:
             return False
-        return original_translation(message, fingerprints)
+        changed = original_translation(message, fingerprints)
+        if identifier in fingerprints:
+            message.set("id", fingerprints[identifier])
+            return True
+        return changed
 
     try:
         utility.REPLACEMENT_REGEXES = [
+            (re.compile(r"(?<![A-Za-z0-9+.-])helium://"), "breezer://"),
             (re.compile(r"\bHelium\b(?!\s+(?:servers|Authors|[Pp]artners?)\b)"), "Breezer"),
         ]
         utility.replace_grit_message = replace_message
@@ -394,18 +409,18 @@ def brand_vector_icons(tree):
     mono = f"CANVAS_DIMENSIONS, 48,\n{native_mark.removesuffix(',')}\n"
     color = (
         "CANVAS_DIMENSIONS, 48,\n"
-        "PATH_COLOR_ARGB, 0xFF, 0x08, 0x2E, 0x3D,\n"
-        "ROUND_RECT, 0, 0, 48, 48, 12,\n"
+        "PATH_COLOR_ARGB, 0xFF, 0x2B, 0x31, 0xCF,\n"
+        "ROUND_RECT, 3.3, 3.7, 41.2, 40.8, 9.5,\n"
         "NEW_PATH,\n"
-        "PATH_COLOR_ARGB, 0xFF, 0x7A, 0xF4, 0xDB,\n"
+        "PATH_COLOR_ARGB, 0xFF, 0xFF, 0xFF, 0xFF,\n"
         f"{native_mark.removesuffix(',')}\n"
     )
-    verbs = {"MOVE_TO": "M", "CUBIC_TO": "C", "CLOSE": "Z"}
+    verbs = {"MOVE_TO": "M", "LINE_TO": "L", "CUBIC_TO": "C", "CLOSE": "Z"}
     path = " ".join(" ".join([verbs[verb], *map(str, points)]) for verb, *points in BREEZER_MARK)
     svg = (
         '<svg width="256" height="256" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">\n'
-        '  <rect width="48" height="48" rx="12" fill="#082e3d"/>\n'
-        f'  <path fill="#7af4db" fill-rule="evenodd" d="{path}"/>\n'
+        '  <rect x="3.3" y="3.7" width="41.2" height="40.8" rx="9.5" fill="#2b31cf"/>\n'
+        f'  <path fill="#fff" d="{path}"/>\n'
         '</svg>\n'
     )
     resources = {"product_logo.icon": mono, "product_logo_color.icon": color, "product_logo.svg": svg}

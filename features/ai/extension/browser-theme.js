@@ -236,15 +236,15 @@ export function artworkDocument(safeHtml) {
 
 // The person's image, shown as-is: an extension-page <img> of a validated raster
 // data: URL loads nothing and runs nothing.
-function createThemeImage(doc, image, { className = 'theme-image' } = {}) {
+function createThemeImage(doc, image, { className = 'theme-image', decoding = 'async' } = {}) {
   const node = doc.createElement('img');
   node.className = className;
   node.alt = '';
-  node.decoding = 'async';
+  node.decoding = decoding;
   node.draggable = false;
   node.referrerPolicy = 'no-referrer';
   node.setAttribute('aria-hidden', 'true');
-  node.src = normalizeThemeImage(image);
+  node.src = image;
   return node;
 }
 
@@ -577,32 +577,40 @@ export function startThemeArtwork({ api = globalThis.chrome, doc = globalThis.do
   const show = (record) => {
     const html = record?.html ?? '';
     const image = record?.image ?? '';
-    if (html !== shownHtml) {
-      shownHtml = html;
-      frame?.remove();
-      frame = null;
-      // The frame goes first, then the image before it, so the art paints over the image.
-      try { if (html) { frame = createArtworkFrame(doc, html); doc.body.prepend(frame); } } catch { frame = null; }
-    }
     if (image !== shownImage) {
       shownImage = image;
       picture?.remove();
       picture = null;
       try {
         if (image) {
-          const node = createThemeImage(doc, image);
+          const node = createThemeImage(doc, image, { decoding: 'sync' });
           node.addEventListener('error', () => { if (picture === node) { node.remove(); picture = null; mark(); } }, { once: true });
           picture = node;
         }
       } catch { picture = null; }
     }
     if (picture && doc.body.firstElementChild !== picture) doc.body.prepend(picture);
+    if (html !== shownHtml) {
+      shownHtml = html;
+      frame?.remove();
+      frame = null;
+      try {
+        if (html) {
+          frame = createArtworkFrame(doc, html);
+          if (picture) picture.after(frame);
+          else doc.body.prepend(frame);
+        }
+      } catch { frame = null; }
+    }
     mark();
   };
   const refresh = async () => {
     const id = ++request;
     let applied = null;
-    try { ({ applied } = await readThemeState({ api })); } catch { return; }
+    try {
+      const values = await readKeys(storageArea(api), [ARTWORK_KEY]);
+      applied = readArtworkRecord(values[ARTWORK_KEY]);
+    } catch { return; }
     if (id === request) show(applied);
   };
   localStorageChanges(api)?.addListener((changes) => {

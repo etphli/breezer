@@ -93,11 +93,14 @@ def main():
           <message name="IDS_TEST_WELCOME">Meet Helium</message>
           <message name="IDS_TEST_PARTNER_TOOLTIP">This supports the development of Helium.</message>
           <message name="IDS_TEST_SERVICES">Helium services</message>
+          <message name="IDS_TEST_INTERNAL_URL">Open helium://settings</message>
+          <message name="IDS_TEST_INTERNAL_URL_WITH_LABEL">Open helium://downloads</message>
         </grit-part>''')
         ids = [str(utility.compute_fp(message)) for message in source]
         (tree / "messages.grdp").write_text(xml.tostring(source, encoding="unicode"))
         translations = xml.Element("translationbundle", {"lang": "de"})
-        texts = ["Hallo Helium", "Dies unterstützt die Entwicklung von Helium.", "Helium services"]
+        texts = ["Hallo Helium", "Dies unterstützt die Entwicklung von Helium.",
+                 "Helium services", "設定helium://settingsを開く", "Downloads öffnen"]
         for identifier, text in zip(ids, texts):
             xml.SubElement(translations, "translation", {"id": identifier}).text = text
         (tree / "messages.xtb").write_text(xml.tostring(translations, encoding="unicode"))
@@ -115,6 +118,11 @@ def main():
         assert translated[1].get("id") == ids[1]
         assert translated[2].text == "Breezer services"
         assert translated[2].get("id") == str(utility.compute_fp(messages[2]))
+        assert messages[3].text == "Open breezer://settings"
+        assert translated[3].text == "設定breezer://settingsを開く"
+        assert translated[3].get("id") == str(utility.compute_fp(messages[3]))
+        assert translated[4].text == texts[4]
+        assert translated[4].get("id") == str(utility.compute_fp(messages[4]))
 
         before = {name: (tree / name).read_bytes() for name in ("messages.grdp", "messages.xtb")}
         branding.brand_strings(tree)

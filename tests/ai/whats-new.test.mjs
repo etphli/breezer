@@ -9,13 +9,12 @@ import { continueBrowsing, releaseName } from '../../features/ai/extension/whats
 // Static contract for the What's new page: local-only, no HTML injection, no
 // tracking, honest copy, and the exact hooks Main integrates with.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../features/ai/extension');
-const [html, css, js] = await Promise.all(['whats-new.html', 'whats-new.css', 'whats-new.js'].map((name) => readFile(resolve(root, name), 'utf8')));
+const [html, css, js, archive] = await Promise.all(['whats-new.html', 'whats-new.css', 'whats-new.js', 'efficiency.html'].map((name) => readFile(resolve(root, name), 'utf8')));
 const toText = (source) => source.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
 const text = toText(html);
 // Measured results live in one section; everywhere else describes behavior only.
-const resultsHtml = html.match(/<section class="results"[\s\S]*?<\/section>/)?.[0] ?? '';
+const resultsHtml = archive.match(/<section class="results"[\s\S]*?<\/section>/)?.[0] ?? '';
 const resultsText = toText(resultsHtml);
-const featureText = toText(html.replace(resultsHtml, ''));
 
 test('loads nothing remote', () => {
   for (const [name, source] of Object.entries({ html, css, js })) {
@@ -23,8 +22,10 @@ test('loads nothing remote', () => {
     assert.doesNotMatch(source, /@import|@font-face/, `${name} pulls in extra resources`);
   }
   assert.deepEqual([...css.matchAll(/url\(([^)]*)\)/g)].map((m) => m[1]), ['#breeze-ink']);
-  assert.deepEqual([...html.matchAll(/\b(?:src|href)="([^"]+)"/g)].map((m) => m[1]).sort(),
-    ['#features-title', '#patch-125-title', '#patch-126-title', '#results-table', '#results-title', '#verification-title', 'efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings', 'workspace.html#/settings', 'workspace.html#/welcome']);
+  for (const [, target] of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
+    if (target.startsWith('#')) assert.ok(html.includes(`id="${target.slice(1)}"`), target);
+    else assert.ok(['efficiency.html', 'icon128.png', 'whats-new.css', 'whats-new.js', 'workspace.html#/settings'].includes(target), target);
+  }
 });
 
 test('is CSP-safe and never injects HTML', () => {
@@ -66,69 +67,18 @@ test('Continue browsing closes this tab, else the window', async () => {
   assert.equal(closed, 4);
 });
 
-test('describes the 1.2 edition honestly, without carrying 1.1 patches', () => {
-  // A new minor edition replaces the previous one's features and patches.
-  assert.doesNotMatch(text, /Update 1\.1\.\d|Organato on your new tab|Your own theme color/);
-  assert.equal([...html.matchAll(/class="patch-notes"/g)].length, 3);
-  assert.match(text, /Update 1\.2\.6/);
-  assert.match(text, /Use New group in the horizontal tab strip/);
-  assert.match(text, /you can still see saved tasks offline/);
-  assert.match(text, /Update 1\.2\.1/);
-  assert.match(text, /Whole-browser RAM and CPU savings have not yet been measured/);
-  assert.match(text, /New profiles open this guide/);
-  assert.match(text, /Skip any step, or reopen the guide in Settings/);
-  assert.match(html, /<a class="button secondary" href="workspace\.html#\/welcome">Open the setup guide<\/a>/);
-  assert.match(text, /enter an address or select an open tab/);
-  assert.match(text, /stay in this profile on your Mac/);
-  assert.match(text, /Assignments link to their own Organato page/);
-  assert.match(text, /ignores lists older than what it already shows/);
-  assert.match(text, /start when needed and close when idle/);
-  assert.match(text, /interrupted changes are never resent automatically/);
-  assert.match(text, /checksum, identity, signature and rollback checks are unchanged/);
-  assert.match(text, /Custom filters, list updates and your blocking settings work as before/);
-  assert.match(text, /A copy a running Breezer still holds is never touched/);
-  // Outside the measured-results section, performance is described as
-  // behavior, never as numbers or comparisons.
-  assert.doesNotMatch(featureText, /\d+(?:\.\d+)?\s*(?:%|ms|MB|MiB|GB|x faster|times)|faster than|Chrome uses|less (?:RAM|memory)/i);
-  // Password suggestions: the Microsoft step is stated as unconfirmed, never fixed.
-  assert.match(text, /hasn't yet been confirmed to fix pressing Enter on Microsoft's password step/);
-  assert.doesNotMatch(text, /Microsoft (?:sign-in|password step) (?:is |now )?(?:fixed|works)/i);
-  // Touch ID is listed as not done, never as fixed or available.
-  assert.match(text, /Known limitations/);
-  assert.match(text, /Touch ID passkeys are unavailable/);
-  assert.match(text, /Website passkey sign-in with Touch ID still needs Apple-approved signing entitlements/);
-  assert.match(text, /The Passwords page explains storage and opens the local page to check passkey availability/);
-  assert.match(text, /Website passkeys still need Apple-approved signing entitlements/);
-  assert.match(text, /Choose source tabs in the assistant to compare and summarize up to six pages, with source references and clear text-only sharing/);
-  assert.match(text, /Research sources never enable browser control/);
-  assert.match(text, /Review the selected pages before sharing their text/);
-  assert.match(text, /Right-click a page and choose Translate page/);
-  assert.match(text, /Use a running LibreTranslate server on your Mac, or your own LibreTranslate\.com key/);
-  assert.match(text, /Breezer does not bundle translation models or use your AI account/);
-  assert.match(text, /Search also includes Chromium\x27s settings/);
-  assert.match(text, /Press \/ to start/);
-  assert.match(text, /All settings opens the full browser settings/);
-  assert.match(text, /Matching saved tabs and preparing the sidebar no longer repeatedly scan the whole saved workspace/);
-  assert.match(text, /Keyboard focus stays on the existing row/);
-  assert.match(text, /Organato requests from Settings and new tabs share a helper/);
-  assert.match(text, /closing one page does not cancel another page's work/);
-  assert.match(text, /If a prepared list has changed or cannot be used, Breezer processes it normally instead/);
-  assert.match(text, /Source labels, URLs, captured lengths, truncation and individual page errors stay visible/);
-  assert.match(text, /Back and Forward move between categories/);
-  assert.match(text, /Command-number opens one saved favorite or pin, including asleep pages/);
-  assert.match(text, /and reuses it on repeat/);
-  assert.match(text, /Top tabs, private windows and Command\+9 keep their usual behavior/);
-  assert.match(text, /choose Don't use Organato to keep it off/);
-  assert.match(text, /Turn Organato off for a new tab with only the date and shortcuts/);
-  assert.match(text, /Those tabs stop starting its helper and requesting its data/);
-  assert.doesNotMatch(text, /Touch ID (?:now|is now|works|is fixed|support)/i);
-  assert.doesNotMatch(text, /notarized (?:by Apple )?(?:now|and)|no (?:more|longer) (?:Gatekeeper|macOS) (?:warnings|prompts)/i);
-  assert.match(text, /Added a bounded Google Docs editor input path; real-document verification pending/);
-  assert.match(text, /saved changes still need checks in the compiled browser with both AI providers/);
-  assert.doesNotMatch(text, /Google Docs (?:now works|is fixed|works correctly)|AI browser control can focus Google Docs/i);
-  assert.equal([...html.matchAll(/class="pending"/g)].length, 4);
-  assert.match(text, /Encrypted sync/);
-  assert.match(text, /Encrypted two-profile and password-sync checks remain pending/);
+test('the new edition shows 1.3 features and their verification limits', () => {
+  assert.doesNotMatch(text, /Update 1\.[12]\.\d|New group in the horizontal tab strip|\d+(?:\.\d+)?\s*(?:%|ms|MiB|x faster)|faster than Chrome/);
+  assert.match(text, /Slipstream/);
+  assert.match(text, /breezer:\/\/settings/i);
+  assert.match(text, /folder/i);
+  assert.match(text, /tables/i);
+  assert.match(text, /memory/i);
+  assert.match(text, /Apply theme/i);
+  assert.match(text, /Restore previous look/i);
+  assert.match(text, /shortcut/i);
+  assert.match(text, /Google Docs/i);
+  assert.doesNotMatch(text, /Google Docs (?:now works|is fixed|works correctly)|Touch ID (?:now|is now|works|is fixed|support)/i);
   assert.equal([...html.matchAll(/data-action="continue"/g)].length, 2);
   assert.equal([...html.matchAll(/>Open Settings</g)].length, 2);
 });
@@ -152,10 +102,8 @@ const measured = [
 const shown = (value, unit) => `${value.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 
 test('leads with selected measured wins, each naming its comparator and workload', () => {
-  // Feature changes lead; the complete measurements precede the patch notes.
-  assert.ok(html.indexOf('</header>') < html.indexOf('<section class="results"'));
-  assert.ok(html.indexOf('<section class="features"') < html.indexOf('<section class="results"'));
-  assert.ok(html.indexOf('<section class="results"') < html.indexOf('<section class="patch-notes"'));
+  assert.match(archive, /The efficiency work in Breezer 1\.2\.0/);
+  assert.doesNotMatch(html, /<section class="results"/);
   const highlights = resultsHtml.slice(0, resultsHtml.indexOf('<details class="full-results">'));
   const hero = toText(highlights);
   const headings = [...highlights.matchAll(/<h[34][^>]*>([^<]+)<\/h[34]>/g)].map((m) => m[1].replace(/ /g, ' '));
@@ -190,7 +138,7 @@ test('leads with selected measured wins, each naming its comparator and workload
   // Losing metrics are not in the hero, and the full results are named up front.
   assert.doesNotMatch(hero, /RSS|footprint|2,756|48\.9|blank tab/i);
   assert.match(hero, /See the full results , including slower and unavailable measurements/);
-  assert.match(resultsHtml, /<a class="button secondary" href="efficiency\.html">Read about the efficiency work in 1\.2<\/a>/);
+  assert.match(resultsHtml, /<a class="button secondary" href="#benchmark-story-title">Read about the efficiency work in 1\.2<\/a>/);
 });
 
 test('keeps every measurement, range and limit in the full results', () => {
@@ -237,29 +185,15 @@ test('makes no claim the measurements do not support', () => {
   assert.doesNotMatch(resultsText, /new in 1\.2[^.]*(?:new tab|relaunch)|1\.2 (?:makes|made) new tabs/i);
 });
 
-test('illustrates primary features and keeps technical notes compact', () => {
+test('illustrates each highlight and uses unique heading IDs', () => {
   const features = [...html.matchAll(/<article class="feature[^"]*" aria-labelledby="([^"]+)">([\s\S]*?)<\/article>/g)];
-  assert.deepEqual(features.map((m) => m[1]), ['f-setup', 'f-shortcuts', 'f-tasks', 'f-sidebar', 'f-helpers', 'f-storage', 'f-passkeys', 'f-research', 'f-translation', 'f-settings']);
+  assert.equal(features.length, 5);
   for (const [, id, body] of features) {
-    if (['f-sidebar', 'f-helpers', 'f-storage'].includes(id)) {
-      assert.doesNotMatch(body, /<figure/, id);
-      assert.match(body, /<details class="feature-details">/, id);
-    } else {
-      assert.match(body, /<figure class="plate plate-art" aria-hidden="true">\s*<svg class="art" viewBox="[\d ]+" focusable="false">/, id);
-    }
+    assert.match(body, /<figure[^>]*aria-hidden="true"/, id);
     assert.match(body, new RegExp(`<h3 id="${id}">[^<]+</h3>`));
   }
-  // Heading IDs are unique across the page.
-  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length);
-  // Pure vector art: no images, references or embedded links inside it.
-  assert.doesNotMatch(html, /<(?:image|use|foreignObject)\b|xlink:|xmlns=/);
-});
-
-test('setup artwork shows the guide\'s steps in order', () => {
-  const plate = html.match(/<article class="feature feature-lead"[\s\S]*?<\/figure>/)[0];
-  const steps = [...plate.matchAll(/<text(?: class="(?:label|quiet)")? x="40" y="[\d.]+">([^<]+)</g)].map((m) => m[1]);
-  assert.deepEqual(steps, ['Start', 'Name', 'Tabs', 'Color', 'Import', 'Organato', 'Tour', 'Done']);
 });
 
 test('stays light and honours reduced motion', () => {

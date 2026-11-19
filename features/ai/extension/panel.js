@@ -752,7 +752,7 @@ async function send() {
       userMessage.contextTitle = summary;
       userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
       assistantMessage.citations = userMessage.sourceMetadata;
-      const meta = messageNodes.get(id)?.parentElement.querySelector('.context-meta');
+      const meta = messageNodes.get(id)?.closest('.message').querySelector('.context-meta');
       if (meta) renderSourceMetadata(meta, userMessage.sourceMetadata);
       if (!sources.some(source => source.status === 'available' && source.text)) throw new Error('No selected source text is available. Select loaded tabs and try again.');
     } catch (error) {

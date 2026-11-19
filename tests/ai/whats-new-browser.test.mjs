@@ -59,7 +59,7 @@ function installFixture({ tabs }) {
 }
 
 async function withPage(browser, base, options, fn) {
-  const { viewport = { width: 1440, height: 900 }, reducedMotion = 'reduce', tabs = 'current', deviceScaleFactor = viewport.width < 720 ? 1 : 2, forcedColors = 'none' } = options;
+  const { viewport = { width: 1440, height: 900 }, reducedMotion = 'reduce', tabs = 'current', deviceScaleFactor = viewport.width < 720 ? 1 : 2, forcedColors = 'none', path = 'whats-new.html' } = options;
   const context = await browser.newContext({ viewport, reducedMotion, colorScheme: 'dark', locale: 'en-US', deviceScaleFactor, forcedColors });
   await context.addInitScript(installFixture, { tabs });
   const page = await context.newPage();
@@ -69,8 +69,8 @@ async function withPage(browser, base, options, fn) {
   page.on('console', (message) => { if (message.type() === 'error' && !/release-info\.js|404/.test(message.text())) errors.push(message.text()); });
   page.on('request', (request) => { if (!request.url().startsWith(base)) foreign.push(request.url()); });
   try {
-    await page.goto(`${base}/whats-new.html`);
-    await page.waitForSelector('html[data-ready="true"]');
+    await page.goto(`${base}/${path}`);
+    if (path === 'whats-new.html') await page.waitForSelector('html[data-ready="true"]');
     await fn(page);
     assert.deepEqual(errors, []);
     assert.deepEqual(foreign, [], 'no requests leave the extension');
@@ -102,17 +102,6 @@ async function captureLongPage(page, name) {
   await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 }
 
-async function captureFeatureDetails(page, size) {
-  for (const [name, selector] of [
-    ['patch', 'section[aria-labelledby="patch-121-title"]'],
-    ['patch-126', 'section[aria-labelledby="patch-126-title"]'],
-    ['ui-update', 'section[aria-labelledby="patch-125-title"]'],
-    ['passkeys', 'article[aria-labelledby="f-passkeys"]'],
-    ['shortcuts', 'article[aria-labelledby="f-shortcuts"]'],
-  ]) await page.locator(selector).screenshot({ path: `${evidence}/whats-new-${name}-${size}.png`, animations: 'disabled' });
-  await page.evaluate(() => scrollTo(0, 0));
-}
-
 // WCAG relative-luminance contrast between an element's text and the paper.
 const contrast = (page, selector) => page.$eval(selector, (node) => {
   // color-mix() computes to color(srgb r g b) with 0-1 channels.
@@ -134,12 +123,12 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
     await withPage(browser, base, {}, async (page) => {
       assert.equal(await page.textContent('#release-name'), `Breezer ${RELEASE_VERSION}`);
       assert.equal(await page.title(), `What's new in Breezer ${RELEASE_VERSION}`);
-      assert.equal(await page.textContent('h1'), 'Yours from the first tab');
-      assert.deepEqual(await page.$$eval('.feature h3', (nodes) => nodes.map((node) => node.textContent)),
-        ['A setup guide for new profiles', 'Shortcuts you choose', 'Tasks open where they live', 'No more ghost tabs', 'Helpers that rest when idle', 'Less work at startup, less left on disk', 'Clearer passkey settings', 'Research across tabs you choose', 'Translate a page, keep the original', 'Find settings by category or search']);
+      assert.equal(await page.getByRole('heading', { level: 1 }).count(), 1);
+      assert.equal(await page.locator('.feature h3').count(), 5);
+      assert.equal(await page.locator('.release img').evaluate(node => node.complete && node.naturalWidth > 0), true);
       // Cream, even though the OS asks for dark.
       assert.equal(await page.$eval('body', (body) => getComputedStyle(body).backgroundColor), 'rgb(243, 235, 218)');
-      for (const selector of ['h1', '.lede', '.feature-copy p', '.notes li', '.pending p', '.button.primary', '.button.secondary', '.feature-copy .button']) {
+      for (const selector of ['h1', '.lede', '.feature-copy p', '.pending p', '.button.primary', '.button.secondary']) {
         const ratio = await contrast(page, selector);
         assert.ok(ratio >= 4.5, `${selector} contrast ${ratio.toFixed(2)}`);
       }
@@ -150,7 +139,7 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       assert.deepEqual(await page.$$eval('.feature', (rows) => rows.map((row) => {
         const plate = row.querySelector('.plate')?.getBoundingClientRect(), copy = row.querySelector('.feature-copy').getBoundingClientRect();
         return !plate ? 'compact' : plate.left < copy.left ? 'left' : 'right';
-      })), ['left', 'right', 'left', 'compact', 'compact', 'compact', 'left', 'right', 'left', 'right']);
+      })), ['left', 'right', 'left', 'right', 'left']);
       // Every drawing renders inside its plate.
       assert.equal(await page.$$eval('.plate .art', (arts) => arts.every((art) => {
         const box = art.getBoundingClientRect();
@@ -160,7 +149,6 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       })), true);
       await page.screenshot({ path: `${evidence}/whats-new-desktop.png` });
       await captureLongPage(page, 'whats-new-desktop');
-      await captureFeatureDetails(page, 'desktop');
 
       // Keyboard: Continue browsing first, then Settings, with a visible ring.
       await page.keyboard.press('Tab');
@@ -178,34 +166,9 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
     });
 
     await withPage(browser, base, {}, async page => {
-      const patch = page.locator('section[aria-labelledby="patch-126-title"]');
-      assert.equal(await patch.locator('xpath=following-sibling::*[1]').getAttribute('aria-labelledby'), 'verification-title');
-      await page.locator('.page-index a[href="#patch-126-title"]').click();
-      await page.waitForFunction(() => document.querySelector('.page-index [aria-current="location"]')?.hash === '#patch-126-title');
-    });
-
-    // Technical explanations and extra measurements remain available on demand.
-    await withPage(browser, base, {}, async page => {
-      await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-default.png`, animations: 'disabled' });
-      await page.locator('.measurement-details > summary').click();
-      await page.locator('.results-more > summary').click();
-      const explanations = await page.locator('.feature-details > summary').all();
-      for (const summary of explanations) {
-        const position = () => summary.evaluate(node => {
-          const row = node.closest('.feature');
-          return row?.classList.contains('feature-secondary') ? {
-            headingWidth: row.querySelector('h3').getBoundingClientRect().width,
-            summaryTop: node.getBoundingClientRect().top + scrollY,
-          } : null;
-        });
-        const before = await position();
-        await summary.click();
-        if (before) assert.deepEqual(await position(), before, 'technical notes open without rewrapping their heading or moving the disclosure');
-      }
-      assert.equal(await page.locator('.feature-details[open]').count(), explanations.length);
-      assert.equal(await page.locator('.feature-secondary > .plate').count(), 0, 'technical notes do not add a second illustration hierarchy');
-      await captureLongPage(page, 'whats-new-expanded-desktop');
-      await page.locator('article[aria-labelledby="f-storage"]').screenshot({ path: `${evidence}/whats-new-feature-expanded.png`, animations: 'disabled' });
+      await page.locator('.page-index a[href="#verification-title"]').click();
+      await page.waitForURL(url => url.hash === '#verification-title');
+      await page.getByRole('heading', { name: 'Known limitations' }).waitFor();
     });
 
     // Settings opens in the same tab.
@@ -215,14 +178,8 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
       assert.equal(page.context().pages().length, pages);
     });
 
-    // The setup guide link opens the welcome route in the same tab.
-    await withPage(browser, base, {}, async (page) => {
-      await Promise.all([page.waitForURL(`${base}/workspace.html#/welcome`), page.click('a[href="workspace.html#/welcome"]')]);
-    });
-
-    // Measured results: selected wins first, the full results closed until
-    // asked for, and bars drawn to scale from zero.
-    await withPage(browser, base, {}, async (page) => {
+    // The historical benchmark keeps its disclosure, figures and scale.
+    await withPage(browser, base, { path: 'efficiency.html' }, async (page) => {
       assert.equal(await page.$eval('.full-results', (details) => details.open), false);
       assert.equal(await page.$eval('.measurement-details', details => details.open), false);
       await page.screenshot({ path: `${evidence}/whats-new-results-collapsed.png`, clip: await page.$eval('.results', node => ({ x: 0, y: node.getBoundingClientRect().top + scrollY, width: 1440, height: node.getBoundingClientRect().height })), fullPage: true });
@@ -261,7 +218,9 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
     });
 
     // Forced colors: bars switch to system colors instead of brand fills.
-    await withPage(browser, base, { forcedColors: 'active' }, async (page) => {
+    await withPage(browser, base, { forcedColors: 'active', path: 'efficiency.html' }, async (page) => {
+      await page.locator('.measurement-details > summary').click();
+      await page.locator('.results-more > summary').click();
       assert.notEqual(await page.$eval('.bar.chrome rect', (rect) => getComputedStyle(rect).fill), 'rgb(184, 131, 76)');
       assert.notEqual(await page.$eval('.bar.candidate rect', (rect) => getComputedStyle(rect).fill), 'rgb(29, 84, 88)');
     });
@@ -278,26 +237,12 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
 
     await withPage(browser, base, { viewport: { width: 390, height: 844 } }, async (page) => {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true);
-      const stacked = await page.$$eval('.feature:not(.feature-secondary)', (rows) => rows.map((row) => row.querySelector('.feature-copy').getBoundingClientRect().top > row.querySelector('.plate').getBoundingClientRect().bottom));
-      assert.deepEqual(stacked, [true, true, true, true, true, true, true], 'every primary feature stacks plate above text');
-      assert.equal(await page.$$eval('.plate, .pending, .feature-copy .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
-      // Every comparison remains visible in the narrow card layout.
-      await page.locator('.measurement-details > summary').click();
-      await page.click('.full-results summary');
-      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true, 'open full results stay within 390px');
-      assert.equal(await page.$$eval('.reading, .full-results, .component-table, .results-article .button', (nodes) => nodes.every((node) => node.getBoundingClientRect().right <= 390)), true);
-      assert.equal(await page.$eval('.table-scroll', (region) => region.scrollWidth <= region.clientWidth), true, 'all comparison columns fit without sideways scrolling');
-      assert.equal(await page.$$eval('.results-table tbody td', cells => cells.every(cell => { const box = cell.getBoundingClientRect(); return box.left >= 0 && box.right <= innerWidth && cell.scrollWidth <= cell.clientWidth; })), true, 'all values and ranges are readable inside the window');
-      const tableCrop = await page.evaluate(() => ({ offsetY: Math.round(document.querySelector('.full-results').getBoundingClientRect().top - document.querySelector('.results').getBoundingClientRect().top), width: 390, height: 900 }));
-      await writeFile(`${evidence}/whats-new-table-crop.json`, JSON.stringify(tableCrop));
-      await page.screenshot({ path: `${evidence}/whats-new-table-narrow.png`, clip: await page.$eval('.full-results', node => ({ x: 0, y: node.getBoundingClientRect().top + scrollY, width: 390, height: 900 })), fullPage: true });
-      await page.screenshot({ path: `${evidence}/whats-new-results-narrow.png`, clip: await page.$eval('.results', (node) => { const box = node.getBoundingClientRect(); return { x: 0, y: box.top + scrollY, width: 390, height: box.height }; }), fullPage: true });
-      await page.click('.full-results summary');
-      await page.locator('.measurement-details > summary').click();
-      await page.evaluate(() => scrollTo(0, 0));
+      const stacked = await page.$$eval('.feature', rows => rows.map(row =>
+        row.querySelector('.feature-copy').getBoundingClientRect().top >= row.querySelector('.plate').getBoundingClientRect().bottom));
+      assert.deepEqual(stacked, [true, true, true, true, true]);
+      assert.equal(await page.$$eval('.plate, .pending', nodes => nodes.every(node => node.getBoundingClientRect().right <= 390)), true);
       await page.screenshot({ path: `${evidence}/whats-new-narrow.png` });
       await captureLongPage(page, 'whats-new-narrow');
-      await captureFeatureDetails(page, 'narrow');
       const limits = await page.evaluate(() => {
         const group = document.querySelector('.verification-group');
         const rows = [...document.querySelectorAll('.pending')];
@@ -341,9 +286,14 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
           }
         }
         await page.getByRole('link', { name: 'Full benchmark results', exact: true }).click();
-        await page.locator('.results-table').first().waitFor();
+        await page.locator('#results-table').waitFor();
         assert.equal(await page.locator('.measurement-details').evaluate(node => node.open), true);
         assert.equal(await page.locator('.full-results').evaluate(node => node.open), true);
+        assert.equal(await page.$eval('.table-scroll', region => region.scrollWidth <= region.clientWidth), true);
+        assert.equal(await page.$$eval('.results-table tbody td', cells => cells.every(cell => {
+          const box = cell.getBoundingClientRect();
+          return box.left >= 0 && box.right <= innerWidth && cell.scrollWidth <= cell.clientWidth;
+        })), true, `${name} benchmark values remain readable`);
       });
     }
 

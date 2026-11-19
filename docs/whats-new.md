@@ -36,6 +36,12 @@ Each patch has a `.patch-lead` row for its main illustration and related notes, 
 
 A patch may add a second `.patch-pair` and end with a `.patch-limit` block that states what keeps its normal behavior or what the change cannot promise.
 
+## 1.3 edition
+
+The 1.3 page covers Slipstream, browser chrome and folder colors, assistant tools, AI themes and New Tab icons. The previous edition is in the 1.2 release tags. Its complete benchmark tables and methodology live in `efficiency.html`, linked from the new edition.
+
+## 1.2 edition history
+
 The 1.2.0 draft has seven illustrated primary rows and three compact technical notes. Its first six entries cover the setup guide, custom shortcuts, Organato task links, sidebar snapshot ordering, idle helpers and storage cleanup. Additional rows come from accepted merged features:
 
 - PR #7 adds limited native passkey-management guidance and retains the Apple signing limitation. It does not announce Touch ID, Apple Passwords or complete platform enrollment.
