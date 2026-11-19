@@ -265,17 +265,22 @@ export function installBackground(api) {
           // Saved master-off always skips the helper; dashboard-off does so except on refresh.
           // Settings and setup own the saved copy; a new tab only fills it in once
           // (profiles from before it existed), so a slow read never overwrites a newer choice.
-          const sites = Promise.resolve().then(() => api.topSites.get());
+          const sites = Promise.resolve().then(() => api.topSites.get()).then(raw => raw.slice(0, 32).filter(site => /^https?:\/\//.test(site.url)));
           // Observe an early failure while retaining the existing config-first error order.
           void sites.catch(() => {});
           const saved = await loadOrganatoSwitches(api);
+          if (message.earlySites === true && saved?.dashboardEnabled !== false) {
+            void sites.then(topSites => {
+              if (!closed && revision === requestRevision) port.postMessage({ type: 'sites', id: message.id, topSites });
+            }).catch(() => {});
+          }
           let config;
           const refresh = message.refresh === true || message.type === 'refresh';
           const getConfig = () => saved?.enabled === false || (!refresh && saved?.dashboardEnabled === false)
             ? Promise.resolve(saved) : ask('organato-view', { dashboardCache: 1 });
           try { config = await getConfig(); } catch (error) {
             dashboardCache.invalidate();
-            const topSites = (await sites.catch(() => [])).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
+            const topSites = await sites.catch(() => []);
             if (!closed) port.postMessage({ type: 'view', id: message.id, topSites, organato: { error: error.message } });
             return;
           }
@@ -295,11 +300,11 @@ export function installBackground(api) {
           const progress = result => {
             savedResult = result;
             const currentFence = valid;
-            void sites.then(rawSites => {
+            void sites.then(topSites => {
               if (!currentFence() || !active() || savedResult !== result || result.fingerprint !== config.fingerprint) return;
               const dashboard = { ...config, exams: [], assignments: [], todos: [] };
               applyList(dashboard, result, true);
-              port.postMessage({ type: 'view', id: message.id, pending: true, topSites: rawSites.slice(0, 32).filter(site => /^https?:\/\//.test(site.url)), organato: dashboard, dashboardEnabled: config.dashboardEnabled });
+              port.postMessage({ type: 'view', id: message.id, pending: true, topSites, organato: dashboard, dashboardEnabled: config.dashboardEnabled });
             }).catch(() => {});
           };
           const loadList = async () => {
@@ -329,7 +334,7 @@ export function installBackground(api) {
           if (!list) { dashboardCache.invalidate(); valid = dashboardCache.fence(); }
           // Sites errors retain priority, even if the concurrent list fails first.
           void list?.catch(() => {});
-          const topSites = (await sites).slice(0, 32).filter(site => /^https?:\/\//.test(site.url));
+          const topSites = await sites;
           // Off carries no account state or items, so nothing stale can be drawn.
           const dashboard = config.enabled === false ? { enabled: false } : { ...config, exams: [], assignments: [], todos: [] };
           if (list) {
@@ -352,9 +357,9 @@ export function installBackground(api) {
   const panels = new Set();
   let activeRun = null;
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
-  const tools = new BrowserTools(api, id => {
+  const tools = new BrowserTools(api, (id, reason) => {
     for (const panel of panels) post(panel.port, { type: 'activity', id, active: false, label: '' });
-    if (activeRun?.session?.id === id && !activeRun.cancelled) void cancel(activeRun, 'Browser control stopped.');
+    if (activeRun?.session?.id === id && !activeRun.cancelled) void cancel(activeRun, reason || 'Browser control stopped.', 'browser-control');
   });
   const contextMemory = installContextBackground(api, {
     isPermitted(tab) {
@@ -362,13 +367,13 @@ export function installBackground(api) {
       catch { return false; }
     },
   });
-  const cancel = async (run, reason) => {
+  const cancel = async (run, reason, source) => {
     if (!run || run.cancelled) return;
     run.cancelled = true;
     if (activeRun === run) activeRun = null;
     try { run.panel.native?.postMessage({ type: 'cancel', id: run.id }); } catch { /* Native host already exited. */ }
     await tools.stop(run.session);
-    if (reason) post(run.panel.port, { type: 'error', id: run.id, error: reason });
+    if (reason) post(run.panel.port, { type: 'error', id: run.id, error: reason, ...(source ? { source } : {}) });
   };
   const ensureActive = run => {
     if (run.cancelled || activeRun !== run || run.panel.closed) throw new Error('Request stopped.');

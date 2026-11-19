@@ -15,6 +15,7 @@ export function renderMessage(container, text) {
   }
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index];
+    let columns;
     if (/^\s*```/.test(line)) {
       flush();
       const code = document.createElement('code');
@@ -46,12 +47,79 @@ export function renderMessage(container, text) {
       container.append(quote);
     } else if (!line.trim()) {
       flush();
+    } else if (!paragraph.length && (columns = tableColumns(line, lines[index + 1]))) {
+      flush();
+      index = appendTable(container, lines, index, columns);
     } else {
       list = null;
       paragraph.push(line);
     }
   }
   flush();
+}
+
+function tableCells(line) {
+  const text = line.trim();
+  const cells = [];
+  let start = 0;
+  for (const match of text.matchAll(/\\[\\|]|\|/g)) {
+    if (match[0] !== '|') continue;
+    if (match.index) cells.push(text.slice(start, match.index).trim());
+    start = match.index + 1;
+  }
+  if (!start) return [];
+  if (start < text.length) cells.push(text.slice(start).trim());
+  return cells.map(cell => cell.replace(/\\\|/g, '|'));
+}
+
+function tableColumns(header, separator) {
+  if (!separator?.includes('|')) return null;
+  const markers = tableCells(separator);
+  if (!markers.length || !markers.every(marker => /^:?-+:?$/.test(marker))) return null;
+  const labels = tableCells(header);
+  if (labels.length !== markers.length) return null;
+  return labels.map((label, index) => {
+    const marker = markers[index];
+    const align = marker.endsWith(':') ? (marker.startsWith(':') ? 'center' : 'right') : 'left';
+    return { label, align };
+  });
+}
+
+function appendTable(container, lines, index, columns) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'message-table';
+  const table = document.createElement('table');
+  const head = document.createElement('thead');
+  const headings = document.createElement('tr');
+  for (const { label, align } of columns) {
+    const cell = document.createElement('th');
+    cell.scope = 'col';
+    cell.className = align;
+    inline(cell, label);
+    headings.append(cell);
+  }
+  head.append(headings);
+  const body = document.createElement('tbody');
+  index += 2;
+  while (index < lines.length) {
+    const line = lines[index];
+    if (/^\s*```|^#{1,4}\s|^\s*(?:[-*]|\d+\.)\s|^>/.test(line)) break;
+    const values = tableCells(line);
+    if (!values.length) break;
+    const row = document.createElement('tr');
+    columns.forEach(({ align }, column) => {
+      const cell = document.createElement('td');
+      cell.className = align;
+      inline(cell, values[column] ?? '');
+      row.append(cell);
+    });
+    body.append(row);
+    index++;
+  }
+  table.append(head, body);
+  wrapper.append(table);
+  container.append(wrapper);
+  return index - 1;
 }
 
 function inline(parent, text) {

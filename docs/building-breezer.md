@@ -55,7 +55,7 @@ The address-bar suggestion overlay runs after AI preparation and before GN. Its 
 
 The hosted cache groups checkpoints by native preparation and omnibox inputs so extension updates can resume earlier compilation. To migrate a checkpoint saved by the previous cache format, provide its exact key in the workflow's optional `checkpoint_cache_key` input. The wrapper still verifies that checkpoint before reusing it. The cache path list stays unchanged so pre-omnibox compilation checkpoints remain compatible; the omnibox marker travels inside the cached source directory.
 
-The output is `build/helium-macos/build/src/out/Default/Breezer.app`. The upstream source and tests in the repository stay intact. Helium services and upstream attribution keep their real names.
+The output is `build/helium-macos/build/src/out/Default/Breezer.app`. Internal pages display `breezer://` and still accept existing `helium://` links. Settings and onboarding label the feature Breezer services. Upstream service endpoints and credits retain their original names.
 
 Before signing, the build packages the AI host and a checksum-pinned Node runtime, including its licence, inside the framework resources. The resulting app does not need a system Node installation. Using AI requires an installed, signed-in Codex or Claude CLI. Provider credentials remain with those CLIs. See the [sidebar guide](ai-sidebar.md) for configuration and verification.
 

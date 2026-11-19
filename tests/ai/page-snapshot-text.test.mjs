@@ -5,11 +5,11 @@ import vm from 'node:vm';
 import { createHash } from 'node:crypto';
 
 const source = await readFile(process.env.PAGE_SNAPSHOT_TEXT_SOURCE || new URL('../../features/ai/extension/page-context.js', import.meta.url), 'utf8');
-// Rebuild the current-main oracle from its narrowly copied text-walk loop.
-// All other behavior stays in the real source, including target validation.
+// Use the historical text walk with today's source around it, including target validation.
 const mainLoop = await readFile(new URL('./fixtures/host-main-port/page-snapshot-main-loop.txt', import.meta.url), 'utf8');
 const provenance = JSON.parse(await readFile(new URL('./fixtures/host-main-port/provenance.json', import.meta.url), 'utf8'));
-assert.equal(createHash('sha256').update(mainLoop).digest('hex'), provenance.fixtures.find(entry => entry.path === 'page-snapshot-main-loop.txt').sha256);
+const mainLoopHash = provenance.fixtures.find(entry => entry.path === 'page-snapshot-main-loop.txt').sha256;
+assert.equal(createHash('sha256').update(mainLoop).digest('hex'), mainLoopHash);
 const loopStart = source.indexOf('    let lastParent;');
 const loopEnd = source.indexOf('    return { url: location.href, title: document.title, text:', loopStart);
 assert.ok(loopStart >= 0 && loopEnd > loopStart, 'optimized snapshot loop must be present');
@@ -371,6 +371,13 @@ test('queued DOM mutations run after the synchronous snapshot and are rechecked 
 });
 
 
-test('the text-walk inverse reconstructs pinned current main without replacing the full UI source', () => {
-  assert.equal(createHash('sha256').update(baseline).digest('hex'), provenance.currentMainOracles['features/ai/extension/page-context.js']);
+test('the text-walk inverse uses the pinned loop with the current page controls', () => {
+  if (process.env.PAGE_SNAPSHOT_TEXT_BASELINE) {
+    assert.equal(createHash('sha256').update(baseline).digest('hex'), provenance.currentMainOracles['features/ai/extension/page-context.js']);
+    return;
+  }
+  const historicalLoopEnd = loopStart + mainLoop.length;
+  assert.equal(createHash('sha256').update(baseline.slice(loopStart, historicalLoopEnd)).digest('hex'), mainLoopHash);
+  assert.equal(baseline.slice(0, loopStart), source.slice(0, loopStart));
+  assert.equal(baseline.slice(historicalLoopEnd), source.slice(loopEnd));
 });

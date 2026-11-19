@@ -20,6 +20,8 @@ A recognized `.kix-appview-editor` containing a canvas becomes one snapshot targ
 
 `browser_type` with `mode: "insert"` validates the latest target ID and the exact URL/editor/frame/document/focused element before using [DevTools Input.insertText](https://chromedevtools.github.io/devtools-protocol/tot/Input/#method-insertText). It preserves the caret and selection. Replacement typing remains the default for ordinary fields. Shift is limited to navigation-key presses; no general modifier shortcuts, scripts, selectors, frame IDs or cross-origin sessions are exposed to the provider.
 
+The expanded fixture exposed two later failures. The editor's midpoint can lie in the gutter, and a separate request starts without the previous focus binding. An editor click now targets a visible document canvas. In a new authorized request, typing and selection can bind the already focused same-origin editor without clicking and moving the cursor. Browser control errors that end a session keep their original reason, and the assistant can provide copyable content when it cannot confirm an edit.
+
 The focus binding is checked again before input. Secret-field recognition applies to the input and its ancestors. Escape is attached to the bound input document and removed on Stop. Detached frames, replacement documents, cross-origin frames and URL/focus changes refuse input. Visible embedded frames are covered during screenshot capture rather than exposing fields the top-document redactor cannot inspect.
 
 Native authorization, per-request/tab/window consent, provider isolation, cancellation and research's text-only/no-control permission path are unchanged. Both provider adapters exercise the new arguments through the existing host/worker action loop using transport fixtures.
@@ -33,7 +35,7 @@ node tests/ai/docs-editor-browser.mjs
 node tests/ai/browser-page.mjs
 ```
 
-The editor browser check asserts capture, hit-layer clicks, `Hello, Docs!` insertion, Shift-arrow selection, follow-up replacement to `Hello, Docs?`, trusted input, stale handle rejection, secrets, detached/navigated/cross-origin frames, site scoping, a late focus change, cancellation and frame Escape cleanup. CI runs it and uploads the fixture image.
+The editor browser check asserts capture, hit-layer clicks outside the gutter, trusted insertion, Shift-arrow selection within and across requests, preservation of a user's existing selection, stale handle rejection, secrets, detached/navigated/cross-origin frames, site scoping, a late focus change, cancellation and frame Escape cleanup. CI runs it and uploads the fixture image.
 
 ![Synthetic editor after follow-up editing, not Google Docs acceptance](evidence/docs-control/docs-editor-fixture.png)
 

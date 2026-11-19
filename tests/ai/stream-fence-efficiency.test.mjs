@@ -7,9 +7,17 @@ import { fixture, tree, rendererPath, beforePath, hash } from '../../script/veri
 const source = fs.readFileSync(rendererPath, 'utf8');
 const oracleSource = fs.readFileSync(beforePath, 'utf8');
 
+const sourceWithoutTables = source
+  .replace('    let columns;\n', '')
+  .replace(`    } else if (!paragraph.length && (columns = tableColumns(line, lines[index + 1]))) {
+      flush();
+      index = appendTable(container, lines, index, columns);
+`, '')
+  .replace(/function tableCells\(line\) \{[\s\S]*?(?=function inline\()/, '');
+
 // Undo only this port's code Text reuse to reconstruct the real main stream.
 const provenance = JSON.parse(fs.readFileSync(new URL('./fixtures/host-main-port/provenance.json', import.meta.url)));
-const mainStreamSource = source
+const mainStreamSource = sourceWithoutTables
   .replace('  let codeText = null;\n', '')
   .replaceAll('      codeText = null;\n', '')
   .replace(`      // The opener is complete and the current code line has no backticks.
@@ -77,9 +85,9 @@ function split(text, sizes) {
   return chunks;
 }
 
-test('full renderer and safe inline handling remain byte-identical to the pinned oracle', () => {
+test('full renderer outside table handling remains byte-identical to the pinned oracle', () => {
   assert.equal(hash(oracleSource), '9c756d4893099f0c9f2066422a9ff1b8db0bbba7b19136578e5b94aadd467830');
-  assert.equal(source.slice(0, oracleSource.length), oracleSource);
+  assert.equal(sourceWithoutTables.slice(0, oracleSource.length), oracleSource);
 });
 
 test('every UTF-16 prefix matches full rendering for fence, newline and literal-content edges', () => {

@@ -21,7 +21,7 @@ const COLORS = ['#1a73e8', '#c2410c', '#0f766e', '#7c3aed', '#be123c', '#15803d'
 function favicon(pageUrl) {
   const host = new URL(pageUrl).hostname;
   const color = COLORS[[...host].reduce((sum, c) => sum + c.charCodeAt(0), 0) % COLORS.length];
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${color}"/><text x="16" y="22" font-family="Helvetica" font-size="17" font-weight="700" text-anchor="middle" fill="#fff">${host[0].toUpperCase()}</text></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${color}"/><text x="16" y="22" font-family="Helvetica" font-size="17" font-weight="700" text-anchor="middle" fill="#fff">${host[0]?.toUpperCase() || '?'}</text></svg>`;
 }
 
 async function startServer() {
@@ -63,6 +63,68 @@ async function withPage(browser, base, options, fn) {
     await context.close();
   }
 }
+
+test('a fresh New Tab shows cached icons while Organato and favicon requests are blocked', { skip }, async () => {
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    await withPage(browser, base, { view: CONNECTED, hang: true }, async (page, context) => {
+      await page.locator('.site-icon.has-icon').first().waitFor({ timeout: 4000 });
+      await page.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length === 8);
+      assert.equal(await page.locator('#organato').getAttribute('data-state'), 'loading');
+      let iconRequests = 0;
+      await context.route('**/_favicon/**', route => { iconRequests++; return route.abort(); });
+      const next = await context.newPage();
+      await next.clock.setFixedTime(NOW);
+      await next.goto(`${base}/newtab.html`);
+      await next.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon img[src^="data:image/png;base64,"]').length === 8);
+      assert.equal(await next.locator('#organato').getAttribute('data-state'), 'loading');
+      assert.equal(iconRequests, 0);
+      assert.equal(await next.getByRole('link', { name: 'Mail', exact: true }).getAttribute('href'), SITES[0].url);
+    });
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
+test('parallel New Tabs merge icons and refresh retries a shortcut that used Chromium’s default', { skip }, async () => {
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    const context = await browser.newContext();
+    const missing = { title: 'New site', url: 'https://new-site.example/' };
+    await context.addInitScript(installFixture, {
+      view: CONNECTED, siteCases: { first: [SITES[0], missing], second: [SITES[1]] },
+    });
+    let ready, started = 0, known = false;
+    const bothPages = new Promise(resolve => { ready = resolve; });
+    await context.route('**/_favicon/**', async route => {
+      const url = new URL(route.request().url()).searchParams.get('pageUrl');
+      if ([SITES[0].url, SITES[1].url].includes(url)) {
+        if (++started === 2) ready();
+        await bothPages;
+      }
+      const useDefault = url === 'about:blank' || (url === missing.url && !known);
+      await route.fulfill({ contentType: 'image/svg+xml', body: favicon(useDefault ? 'https://default.invalid/' : url) });
+    });
+    const first = await context.newPage();
+    const second = await context.newPage();
+    await Promise.all([first.goto(`${base}/newtab.html?sites=first`), second.goto(`${base}/newtab.html?sites=second`)]);
+    const cachedUrls = page => page.evaluate(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.map(entry => entry.url));
+    await first.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length >= 2);
+    assert.deepEqual((await cachedUrls(first)).sort(), [SITES[0].url, SITES[1].url].sort());
+    known = true;
+    await first.getByRole('button', { name: 'Refresh', exact: false }).click();
+    await first.waitForFunction(url => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.some(entry => entry.url === url), missing.url);
+    assert.deepEqual((await cachedUrls(first)).sort(), [SITES[0].url, SITES[1].url, missing.url].sort());
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
 
 test('new tab renders sites and Organato lanes across states', { skip }, async () => {
   await mkdir(evidence, { recursive: true });
@@ -262,7 +324,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
     // Loading, then a bounded wait when the background never answers.
     await withPage(browser, base, { view: CONNECTED, hang: true }, async (page) => {
       assert.equal(await page.getAttribute('#organato', 'aria-busy'), 'true');
-      assert.equal(await page.$$eval('.site.placeholder', (items) => items.length), 8);
+      await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 8);
       await page.screenshot({ path: `${evidence}/newtab-loading.png` });
       await page.clock.fastForward(65000);
       await page.waitForSelector('html[data-loaded="true"]');
@@ -456,7 +518,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
     await withPage(browser, base, { view: CONNECTED, hang: true, switches: OFF_SWITCHES }, async (page) => {
       await page.waitForFunction(() => document.documentElement.dataset.organato === 'off');
       assert.equal((await organatoGone(page)).hidden, true);
-      assert.equal(await page.$$eval('.site.placeholder', (items) => items.length), 8);
+      await page.waitForFunction(() => document.querySelectorAll('.site-icon.has-icon').length === 8);
     });
 
     // A saved "off" beats a late or mismatched answer that still says on, and survives reload.

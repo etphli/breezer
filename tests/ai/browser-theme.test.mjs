@@ -13,7 +13,7 @@ const JPEG = `data:image/jpeg;base64,${Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 0
 const WEBP = `data:image/webp;base64,${Buffer.from('RIFF\x1a\x00\x00\x00WEBPVP8L', 'latin1').toString('base64')}`;
 
 // setAppearance follows the native contract: expectedThemeState must match the
-// browser's current Breezer theme exactly, or nothing changes.
+// browser's current restorable theme exactly, or nothing changes.
 function fakeApi({ appearance = { theme: 'tide', colorMode: 'light', themeCanRestore: true }, bridge = true, rejectSet = false } = {}) {
   const store = {};
   const calls = [];
@@ -36,7 +36,8 @@ function fakeApi({ appearance = { theme: 'tide', colorMode: 'light', themeCanRes
         calls.push(patch);
         if (rejectSet) throw new Error('Nope');
         const { expectedThemeState: expected, ...change } = patch;
-        if (expected && (!current.themeCanRestore || expected.theme !== current.theme || expected.colorMode !== current.colorMode)) throw new Error('Browser appearance changed. Try again.');
+        if (expected && (!current.themeCanRestore || expected.theme !== current.theme || expected.colorMode !== current.colorMode || expected.nativeDefaultTheme !== current.nativeDefaultTheme)) throw new Error('Browser appearance changed. Try again.');
+        if (Object.hasOwn(change, 'theme')) delete current.nativeDefaultTheme;
         current = { ...current, ...change };
         return { ...current };
       },
@@ -111,6 +112,38 @@ test('apply sets the native seed and mode, keeps the earlier look once, and rest
 test('a rejected native change stores nothing and leaves nothing to restore', async () => {
   const api = fakeApi({ rejectSet: true });
   await assert.rejects(applyThemeProposal({ name: 'Ember', theme: '#c2410c', colorMode: 'dark' }, { api }), /Nope/);
+  assert.deepEqual(api.store, {});
+});
+
+test('apply and restore preserve a native default theme and its visible palette', async () => {
+  for (const nativeDefaultTheme of ['grayscale', 'baseline']) {
+    const previous = { theme: 'mint', colorMode: 'system', nativeDefaultTheme };
+    const api = fakeApi({ appearance: { ...previous, themeCanRestore: true } });
+    const proposal = { name: 'Ember', theme: '#c2410c', colorMode: 'dark' };
+    await applyThemeProposal(proposal, { api });
+    assert.deepEqual(api.calls[0].expectedThemeState, previous);
+    assert.deepEqual(api.store[PREVIOUS_LOOK_KEY].appearance, previous);
+    assert.equal(api.current.nativeDefaultTheme, undefined);
+
+    assert.equal((await restorePreviousLook({ api })).restored, true);
+    assert.deepEqual(api.calls.at(-1), {
+      ...previous,
+      expectedThemeState: { theme: proposal.theme, colorMode: proposal.colorMode },
+    });
+    assert.deepEqual(api.current, { ...previous, themeCanRestore: true });
+  }
+});
+
+test('selecting seeded Mint while a native default is read prevents the proposal from replacing it', async () => {
+  const api = fakeApi({ appearance: { theme: 'mint', colorMode: 'system', nativeDefaultTheme: 'grayscale', themeCanRestore: true } });
+  const get = api.breezerPrivate.getAppearance;
+  api.breezerPrivate.getAppearance = async () => {
+    const value = await get();
+    api.current = { nativeDefaultTheme: undefined };
+    return value;
+  };
+  await assert.rejects(applyThemeProposal({ name: 'Ember', theme: '#c2410c', colorMode: 'dark' }, { api }), /appearance changed/);
+  assert.deepEqual(api.current, { theme: 'mint', colorMode: 'system', nativeDefaultTheme: undefined, themeCanRestore: true });
   assert.deepEqual(api.store, {});
 });
 

@@ -26,12 +26,19 @@ namespace breezerPrivate {
     dark
   };
 
+  enum NativeDefaultTheme {
+    baseline,
+    grayscale
+  };
+
   dictionary Appearance {
     Layout layout;
     SidebarMode sidebarMode;
     DOMString theme;
     ColorMode colorMode;
     boolean themeCanRestore;
+    // The unseeded browser theme can differ from the visible Breezer palette.
+    NativeDefaultTheme? nativeDefaultTheme;
     boolean showBookmarks;
     BookmarkBarMode bookmarkBarMode;
     long sidebarWidth;
@@ -48,6 +55,7 @@ namespace breezerPrivate {
   dictionary ThemeState {
     DOMString theme;
     ColorMode colorMode;
+    NativeDefaultTheme? nativeDefaultTheme;
   };
 
   dictionary AppearancePatch {
@@ -66,6 +74,7 @@ namespace breezerPrivate {
     boolean? frameless;
     boolean? alwaysShowSidebar;
     boolean? alwaysShowTopBar;
+    NativeDefaultTheme? nativeDefaultTheme;
     ThemeState? expectedThemeState;
   };
 

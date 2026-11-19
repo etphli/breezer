@@ -25,6 +25,20 @@ export function pageContext(operation, args = {}) {
     if (!binding.target.isContentEditable && !binding.target.matches('textarea:not([readonly]):not([disabled]),input:not([readonly]):not([disabled])')) throw new Error('Choose an editable field.');
     return { focusId: binding.id };
   };
+  const bindFocusedEditor = root => {
+    const frame = document.activeElement;
+    // Bind only the focused, same-origin input for the recognized document editor.
+    if (!frame?.matches('iframe.docs-texteventtarget-iframe')) return null;
+    const doc = frame.contentDocument;
+    const target = doc?.activeElement;
+    if (!target) return null;
+    state.editor = { id: token(), url: location.href, root, frame, document: doc, target };
+    try {
+      const result = editorFocus();
+      doc.addEventListener('keydown', state.escape, true);
+      return result;
+    } catch (error) { clearEditor(); throw error; }
+  };
   const removeOverlay = () => {
     clearEditor();
     state.overlay?.remove();
@@ -135,22 +149,15 @@ export function pageContext(operation, args = {}) {
   if (operation === 'bind-editor') {
     const el = args.elementId ? state.targets.get(args.elementId)?.deref() : document.elementFromPoint(args.x, args.y)?.closest('.kix-appview-editor');
     clearEditor();
-    if (!docsEditor(el)) return { ok: true };
-    const frame = document.activeElement;
-    // Access stays within Chromium's same-origin DOM boundary. No frame IDs,
-    // cross-origin debugger sessions or model-provided selectors are accepted.
-    if (!frame?.matches('iframe.docs-texteventtarget-iframe') || !frame.contentDocument) throw new Error('Click the document editor to focus its same-origin text input.');
-    const doc = frame.contentDocument;
-    state.editor = { id: token(), url: location.href, root: el, frame, document: doc, target: doc.activeElement };
-    try {
-      const result = editorFocus();
-      doc.addEventListener('keydown', state.escape, true);
-      return result;
-    } catch (error) { clearEditor(); throw error; }
+    if (docsEditor(el)) bindFocusedEditor(el);
+    return { ok: true };
   }
   if (operation === 'editor-focus') {
-    if (state.targets.get(args.elementId)?.deref() !== state.editor?.root) throw new Error('Click the document editor from a new snapshot before inserting text.');
-    return editorFocus();
+    const editor = state.targets.get(args.elementId)?.deref();
+    if (!docsEditor(editor) || (state.editor && editor !== state.editor.root)) throw new Error('Choose the document editor from the latest snapshot.');
+    const focus = state.editor ? editorFocus() : bindFocusedEditor(editor);
+    if (!focus) throw new Error('Click the document editor to place the cursor before inserting text.');
+    return focus;
   }
   if (operation === 'resolve-point') {
     const { x, y } = args;
@@ -209,6 +216,22 @@ export function pageContext(operation, args = {}) {
     if (sensitive(el)) throw new Error('Breezer cannot enter passwords or secret fields.');
     if (args.typing && !(el.matches('input:not([readonly]):not([disabled]),textarea:not([readonly]):not([disabled]),[contenteditable="true"]'))) throw new Error('Choose an editable field.');
     const rect = el.getBoundingClientRect();
+    if (docsEditor(el)) {
+      // The editor root also covers the gutter. Position clicks on a visible page.
+      for (const canvas of el.querySelectorAll('canvas')) {
+        const page = canvas.getBoundingClientRect();
+        const left = Math.max(0, rect.left, page.left);
+        const top = Math.max(0, rect.top, page.top);
+        const right = Math.min(innerWidth, rect.right, page.right);
+        const bottom = Math.min(innerHeight, rect.bottom, page.bottom);
+        if (right <= left || bottom <= top || !visible(canvas)) continue;
+        const x = (left + right) / 2;
+        const y = (top + bottom) / 2;
+        const hit = document.elementFromPoint(x, y);
+        if (hit && el.contains(hit) && !hit.closest('[data-breezer-ai],input,textarea,select,button,[contenteditable],[role="button"],[role="menuitem"]') && !sensitive(hit)) return { x, y };
+      }
+      throw new Error('No document page is visible to click. Scroll to the page or place the cursor yourself.');
+    }
     const x = Math.max(0, Math.min(innerWidth - 1, rect.left + rect.width / 2));
     const y = Math.max(0, Math.min(innerHeight - 1, rect.top + rect.height / 2));
     const hit = document.elementFromPoint(x, y);
@@ -216,7 +239,13 @@ export function pageContext(operation, args = {}) {
     return { x, y };
   }
   if (operation === 'check-focus' || operation === 'select-content') {
-    if (state.editor || args.focusId || document.activeElement?.matches('iframe,frame')) {
+    const frameFocused = document.activeElement?.matches('iframe,frame');
+    if (frameFocused && !state.editor && !args.focusId && !args.elementId && operation === 'check-focus' && docsPage) {
+      const editor = document.querySelector('.kix-appview-editor');
+      const focus = docsEditor(editor) && bindFocusedEditor(editor);
+      if (focus) return focus;
+    }
+    if (state.editor || args.focusId || frameFocused) {
       const result = editorFocus();
       if (args.focusId && args.focusId !== result.focusId) throw new Error('The document editor changed. Take a new snapshot.');
       return result;

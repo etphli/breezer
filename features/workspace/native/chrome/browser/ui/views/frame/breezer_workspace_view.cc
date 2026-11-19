@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "base/functional/bind.h"
+#include "base/functional/callback_helpers.h"
 #include "base/location.h"
 #include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
@@ -17,8 +18,11 @@
 #include "chrome/browser/extensions/extension_view_host.h"
 #include "chrome/browser/extensions/extension_view_host_factory.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/themes/theme_service.h"
+#include "chrome/browser/themes/theme_service_factory.h"
 #include "chrome/browser/ui/browser_commands.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
+#include "chrome/browser/ui/color/chrome_color_id.h"
 #include "chrome/browser/ui/helium/breezer_workspace_prefs.h"
 #include "chrome/browser/ui/views/frame/browser_view.h"
 #include "chrome/common/chrome_isolated_world_ids.h"
@@ -28,6 +32,8 @@
 #include "extensions/browser/unloaded_extension_reason.h"
 #include "extensions/common/extension.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
+#include "ui/color/color_provider.h"
+#include "ui/gfx/color_utils.h"
 #include "ui/gfx/geometry/point.h"
 #include "ui/gfx/geometry/rect.h"
 #include "ui/views/controls/native/native_view_host.h"
@@ -91,14 +97,11 @@ BreezerWorkspaceView* BreezerWorkspaceView::FromBrowser(
 bool BreezerWorkspaceView::SelectNumberedTab(
     int index,
     TabStripUserGestureDetails gesture) {
-  if (!is_available() || index < 0 || index > 7) {
+  if (index < 0 || index > 7) {
     return false;
   }
-  auto* frame = extension_host_->host_contents()->GetPrimaryMainFrame();
-  const GURL& url = frame->GetLastCommittedURL();
-  if (!frame->IsRenderFrameLive() || !url.SchemeIs("chrome-extension") ||
-      url.GetHost() != breezer_workspace::kExtensionId ||
-      url.GetPath() != "/workspace.html") {
+  auto* frame = GetSidebarFrame();
+  if (!frame) {
     return false;
   }
   // Only this browser's sidebar receives the command. No page focus, synthetic
@@ -161,6 +164,46 @@ void BreezerWorkspaceView::OnBoundsChanged(const gfx::Rect& previous_bounds) {
   }
 }
 
+void BreezerWorkspaceView::OnThemeChanged() {
+  views::View::OnThemeChanged();
+  UpdateToolbarBackground();
+}
+
+content::RenderFrameHost* BreezerWorkspaceView::GetSidebarFrame() const {
+  if (!is_available()) {
+    return nullptr;
+  }
+  auto* frame = extension_host_->host_contents()->GetPrimaryMainFrame();
+  const GURL& url = frame->GetLastCommittedURL();
+  if (!frame->IsRenderFrameLive() || !url.SchemeIs("chrome-extension") ||
+      url.GetHost() != breezer_workspace::kExtensionId ||
+      url.GetPath() != "/workspace.html") {
+    return nullptr;
+  }
+  return frame;
+}
+
+void BreezerWorkspaceView::UpdateToolbarBackground() {
+  auto* frame = GetSidebarFrame();
+  const auto* colors = GetColorProvider();
+  if (!frame || !colors) {
+    return;
+  }
+  const auto* theme_service =
+      ThemeServiceFactory::GetForProfile(browser_->GetProfile());
+  // Extension themes can set toolbar colors independently of the color
+  // scheme. Clear the override so the workspace keeps its readable palette.
+  std::string color;
+  if (!theme_service || !theme_service->UsingExtensionTheme()) {
+    color = color_utils::SkColorToRgbaString(colors->GetColor(kColorToolbar));
+  }
+  frame->ExecuteJavaScriptInIsolatedWorld(
+      base::UTF8ToUTF16(base::StrCat({
+          "document.documentElement?.style.setProperty('",
+          "--native-toolbar-background', '", color, "')"})),
+      base::NullCallback(), ISOLATED_WORLD_ID_CHROME_INTERNAL);
+}
+
 void BreezerWorkspaceView::UpdateTitlebarArea() {
   if (!extension_host_ || !extension_host_->host_contents()) {
     return;
@@ -219,6 +262,7 @@ void BreezerWorkspaceView::CreateExtensionContent() {
   extension_host_->SetCloseHandler(
       base::BindOnce(&BreezerWorkspaceView::HandleCloseExtensionHost,
                      weak_factory_.GetWeakPtr()));
+  Observe(extension_host_->host_contents());
 
   auto extension_view =
       std::make_unique<ExtensionViewViews>(profile, extension_host_.get());
@@ -231,6 +275,7 @@ void BreezerWorkspaceView::CreateExtensionContent() {
 }
 
 void BreezerWorkspaceView::ResetExtensionContent() {
+  Observe(nullptr);
   view_observation_.Reset();
   if (extension_view_) {
     RemoveChildViewT(std::exchange(extension_view_, nullptr));
@@ -239,6 +284,7 @@ void BreezerWorkspaceView::ResetExtensionContent() {
 }
 
 void BreezerWorkspaceView::DetachExtensionContentSoon() {
+  Observe(nullptr);
   view_observation_.Reset();
   std::unique_ptr<ExtensionViewViews> view;
   if (extension_view_) {
@@ -289,6 +335,10 @@ void BreezerWorkspaceView::OnViewDestroying() {
   extension_view_ = nullptr;
   DetachExtensionContentSoon();
   UpdateAvailability();
+}
+
+void BreezerWorkspaceView::PrimaryMainDocumentElementAvailable() {
+  UpdateToolbarBackground();
 }
 
 void BreezerWorkspaceView::OnExtensionHostRenderProcessGone(
