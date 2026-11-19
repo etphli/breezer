@@ -102,6 +102,17 @@ class WindowsPackageTest(unittest.TestCase):
 
 
 class WindowsOverlayTest(unittest.TestCase):
+    def test_branding_preserves_lf_anchors_for_later_overlays(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "delegate.cc"
+            source.write_bytes(b'#include "contents_web_view.h"\r\nconst auto scheme = helium;\r\n')
+            replace = apply_breezer_windows.branding.replace_file
+            replace(source, {"= helium;": "= breezer;"})
+            expected = b'#include "contents_web_view.h"\nconst auto scheme = breezer;\n'
+            self.assertEqual(source.read_bytes(), expected)
+            replace(source, {"= helium;": "= breezer;"})
+            self.assertEqual(source.read_bytes(), expected)
+
     def test_import_patch_with_windows_line_endings_applies_and_reapplies(self):
         with tempfile.TemporaryDirectory() as temporary:
             repo = Path(temporary)

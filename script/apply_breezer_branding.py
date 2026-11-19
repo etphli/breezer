@@ -48,12 +48,12 @@ BREEZER_MARK = (
 
 
 def replace_file(path, replacements):
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     for before, after in replacements.items():
         if before not in text and after not in text:
             raise ValueError(f"Branding input changed in {path}: {before!r}")
         text = text.replace(before, after)
-    path.write_text(text)
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def brand_internal_urls(tree):
