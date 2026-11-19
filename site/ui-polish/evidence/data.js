@@ -536,6 +536,11 @@ window.breezerPolish = {
         9.0,
         8.3,
         8.1
+      ],
+      [
+        8.8,
+        8.5,
+        8.3
       ]
     ],
     "references": {
@@ -550,389 +555,390 @@ window.breezerPolish = {
         8.9
       ]
     },
+    "coverageNote": "Opus reported partial coverage in round 9. Its score is included with that qualification.",
     "categories": [
       [
         [
           "Hierarchy",
-          "9.1",
-          "The assistant’s lower controls give model choice, Tools, Attach, and Sources similar emphasis. Important sharing context competes with secondary actions."
+          "9.0",
+          "Assistant starter actions sit far above the composer. The large gap separates two closely related ways to begin."
         ],
         [
           "Typography",
           "8.8",
-          "Main text is readable, but narrow model controls combine small labels, explanatory text, and a still smaller footer. The scale becomes compressed where decisions are most technical."
+          "Assistant footer labels and New Tab metadata are noticeably small beside the main content, especially at narrow widths."
         ],
         [
           "Alignment",
-          "9.1",
-          "In the setup completion summary, “Sam” sits near the middle of its row while the other summary values align at the right. This breaks an otherwise clear comparison column."
+          "9.3",
+          "New Tab’s search field, shortcut grid, and Organato card end at different horizontal positions, weakening the otherwise orderly alignment."
         ],
         [
           "Spacing",
-          "9.0",
-          "The assistant welcome view leaves substantial space above the prompt group while packing several controls immediately below the composer. A little more room around those controls would help."
+          "8.6",
+          "The narrow source picker devotes substantial space to explanations above its list, leaving relatively little room to inspect tabs."
         ],
         [
           "Rhythm/density",
-          "8.8",
-          "The partial research failure repeats source identity in expanded cards and composer chips, alongside separate failure notices. The repeated information makes recovery visually busy."
+          "8.3",
+          "Assistant welcome screens have extensive empty space, while research failures crowd source details, warnings, recovery actions, and composition controls together."
         ],
         [
           "Consistency",
-          "9.2",
-          "The same System/Light/Dark choice is called “Appearance” in onboarding and “Color mode” in Settings. “Your own color” also becomes “Custom color.” These are small, avoidable vocabulary changes."
+          "8.8",
+          "Action fills and focus-outline weights vary visibly between Settings, New Tab, assistant dialogs, and favorites."
         ],
         [
           "Craft/polish",
-          "8.9",
-          "The custom shortcut grid contains several truncated titles and domains. Containment works, but users may still struggle to distinguish similarly named destinations."
+          "8.8",
+          "Long shortcut names combine wrapping, ellipses, and sometimes a second truncated domain line. Tile captions become uneven and difficult to identify."
         ],
         [
           "Color across modes",
-          "9.4",
-          "The palette system holds together well. In the light palette matrix, actual page backgrounds are much more subtly differentiated than the preview cards suggest. Tide, custom blue, and Graphite are particularly close in their large neutral areas."
+          "9.2",
+          "Dark palette previews compress several choices into similar muted panels. Their differences are less immediately apparent than in light mode."
         ],
         [
           "Contrast",
-          "9.0",
-          "Primary text and actions are clear. Secondary links and explanations in dark translation are visibly quieter and require more effort to scan. This is a visual judgment, not a measured accessibility failure."
+          "8.8",
+          "Secondary descriptions, small icons, and dividers in dark Settings and translation views recede considerably beside primary text. This is a visual assessment, not a measured accessibility finding."
         ],
         [
           "Navigation",
-          "8.7",
-          "Settings navigation offers individual categories, Browser tools, and All browser settings. The overlapping routes make users learn which settings live inside Breezer and which open elsewhere."
+          "8.6",
+          "Workspace footer utilities are small, unlabeled icons. Their purpose is less discoverable than the clearly labeled Settings navigation."
         ],
         [
           "Sidebar",
-          "8.8",
-          "The compact sidebar sacrifices names and relies heavily on small icons, including the bottom utilities. It saves space but demands familiarity. Expanded folders and drop targets are much clearer."
+          "8.7",
+          "Expanded tabs truncate long titles; compact mode reduces favorites and spaces to initials or icons that can resemble one another."
         ],
         [
           "Settings/controls",
           "9.0",
-          "Layout Settings asks users to distinguish sidebar behavior from frameless mode’s “Always show the sidebar” option. The controls are orderly, but their interacting scopes need more explanation."
+          "Layout settings become a long sequence of stacked rows on narrow screens. Comparing related choices requires substantial scrolling."
         ],
         [
           "Assistant",
-          "8.5",
-          "Signed-out instructions require copying a command into Terminal and then refreshing. The page does not explain how an unfamiliar user reaches Terminal or what successful sign-in looks like."
+          "8.4",
+          "Selected sources, sharing status, input, and model/tool actions compete at the bottom. The partial-failure example repeats unavailable-source information in several places."
         ],
         [
           "New tab",
-          "9.1",
-          "The connected desktop view is readable, but the task card dominates the page and leaves a large empty area beneath a short to-do list. Its visual weight exceeds the information shown."
+          "8.8",
+          "Long shortcut labels lose identifying words. In connected desktop views, the large Organato card also leaves considerable unused space beneath the shorter to-do column."
         ],
         [
           "Responsive layouts",
-          "9.0",
-          "Narrow Settings uses separate rows for search, category selection, and the page title. They fit cleanly but consume considerable vertical space before the first setting."
+          "8.8",
+          "Narrow onboarding retains a sizable illustration between the form and footer, increasing the distance to navigation. Narrow Settings also spends substantial height on search, category selection, and the page heading."
         ],
         [
           "Custom UI motion",
-          "9.2",
-          "In the normal onboarding samples, form changes accompany substantial reshaping of the browser illustration. That competes with reading the new question. Reduced-motion samples are restrained."
+          "8.7",
+          "During the sampled space transition, the incoming tab and trailing controls approach or cross the right edge before settling. The tooltip also shifts the welcome content vertically."
         ],
         [
           "Empty/error states",
           "9.0",
-          "Most states give useful direction. The assistant fallback error primarily offers “Edit and resend,” which implies that changing the message is necessary. A straightforward retry would better cover failures unrelated to the wording."
+          "Recovery directions are generally clear. Research failure is the exception: multiple source warnings and separate recovery buttons make the next action harder to scan."
         ],
         [
           "Keyboard/focus appearance",
-          "9.4",
-          "Focus is conspicuous and distinguishable from selection. The favorite focus outline is substantially heavier and darker than input and model-picker outlines. Standardizing thickness and offset would improve consistency."
+          "9.2",
+          "Focus is conspicuous, but its weight varies substantially. The heavy favorite outline dominates its tile more than focus indicators elsewhere."
         ],
         [
           "Onboarding",
-          "8.8",
-          "The tour explains opening and using the assistant without preparing users for its account-sign-in prerequisite. Eight setup stages plus five tour tips also make a lengthy sequence, although skipping is clearly available."
+          "8.6",
+          "Import and Organato stages are much denser than welcome/name stages. Connection, deferral, opt-out, and continuation choices divide attention."
         ],
         [
           "What’s New",
-          "8.8",
-          "The 1.3.5 section arrives after extensive earlier-release material. Jump links help, but ordinary scrolling reaches current changes very late."
+          "8.5",
+          "The actual 1.3.5 section appears deep below highlights and 1.3.1 material. Anchors help, but ordinary scrolling takes a long time, particularly in narrow views."
         ],
         [
           "Linked efficiency reference article",
-          "8.8",
-          "The article introduction says the 1.2 candidate is “not yet released.” When reached from 1.3.5, that wording needs an explicit historical date or archive notice. Qualifications are candid; technical terms such as RSS and PGO still burden general readers."
+          "8.7",
+          "Qualifications are readable and prominent. The narrow results table separates long metric labels from three numeric columns, making comparisons harder to track down the page."
         ],
         [
           "Translation window",
-          "9.2",
-          "Consent, language selection, and retry states are clear. The running state reports translated sections without indicating how much remains or clearly separating initial translation from watching for new text."
+          "9.0",
+          "At 320px, stacked language fields and several sharing explanations push the primary Translate action near the bottom of the viewport."
         ],
         [
           "Native top tabs, reference",
-          "8.7",
-          "At 540px window width, three tabs already fade out substantial title text. Inactive tab boundaries and close affordances are also quieter than the selected tab."
+          "8.6",
+          "At the narrow reference width, all three titles fade after relatively few words, reducing differentiation between tabs."
         ],
         [
           "Native toolbar/window controls, reference",
-          "9.0",
-          "The centered address layout leaves large gaps between navigation, address, and extension controls. It looks orderly, but related browser actions feel detached from one another."
+          "8.8",
+          "The centered-address layout introduces large gaps around the address field while keeping several similarly weighted utility icons clustered on the right."
         ],
         [
           "Observed native UI motion, reference",
-          "9.1",
-          "The recorded address-bar change relocates the site-information and bookmark controls along with the field. Users must reacquire those targets. The sampled before/after states remain understandable."
+          "8.6",
+          "Closing a tab briefly leaves a compressed favicon/title remnant while the plus button shifts. The sampled sequence has some visual churn."
         ]
       ],
       [
         [
           "Hierarchy",
-          "8.3",
-          "The assistant’s two bordered suggestions draw the eye first. “Help me do something” looks like secondary text, and the Browser control switch is easy to pass over next to the checked Page + screenshot control."
+          "8.6",
+          "In the Organato setup step, Connect and Connect later both use the strongest button style. The two paths read as co-primary even though they lead to different outcomes."
         ],
         [
           "Typography",
-          "8.4",
-          "The serif dates on New Tab and the sans-serif controls have clear roles. In the narrow source picker, the URL and “Loading, try again when ready” share a small line that wraps, making the status harder to pick out."
+          "8.8",
+          "New Tab’s serif date and section headings are easy to pick out. The small weekday and course labels are harder to scan alongside assignment titles, especially in the narrow agenda."
         ],
         [
           "Alignment",
-          "8.6",
-          "Settings aligns labels and controls well. At the sidebar-width New Tab capture, the date and search start at one left edge while the Organato heading and list start slightly farther right. The sections feel a little disconnected."
+          "9.0",
+          "In desktop What’s New, the 1.3.1 cards pair illustrations of different heights. The text headings start at different levels, making adjacent cards harder to compare in one pass."
         ],
         [
           "Spacing",
-          "8.2",
-          "The assistant welcome screen leaves large gaps above and below its controls. In conversation, the composer moves to the bottom, so the input changes position between two common states."
+          "8.3",
+          "The Assistant welcome screen leaves a large gap between the suggestions and the composer. The suggestions feel detached from the input they lead into."
         ],
         [
-          "Rhythm/density",
-          "8.1",
-          "Desktop Organato gives To-dos a full-height column even when it contains two short entries. The empty area under that column makes the card feel oversized next to the tightly spaced Upcoming list."
+          "Rhythm and density",
+          "8.5",
+          "Desktop New Tab reserves a wide column for two to-dos beside seven upcoming items. The blank space below the to-dos makes the card feel lopsided."
         ],
         [
           "Consistency",
-          "8.5",
-          "Selected Settings segments use a solid fill and bold text. In dark narrow New Tab, the selected Organato segment uses a faint inset and bold text, so the same kind of control is harder to read at a glance."
+          "8.8",
+          "General puts Tabs and Breezer updates above their cards, then puts Import from another browser inside its card. The eye has to switch where it looks for the next section title."
         ],
         [
-          "Craft/polish",
-          "8.4",
-          "The pinned-tab menu has a clean outline in light and dark. Its divider groups the red “Close tab” action with “Unpin,” making two different outcomes look like one action group."
+          "Craft and polish",
+          "8.6",
+          "In the narrow source picker, the footer cuts through the final visible row. Scroll for more tabs explains the overflow, but the partial checkbox and text make the boundary look unfinished."
         ],
         [
           "Color across modes",
-          "8.8",
-          "The live captures show the Rose workspace retaining its color with both presets and taking on purple with the custom color. In the two Rose workspace views, the Work and Personal dots look nearly identical, leaving labels and the selected pill to do the distinguishing."
+          "9.1",
+          "The live theme captures preserve the Rose workspace through the Mint and Tide presets, and purple carries across all four views after applying the custom color. In dark Rose New Tab, ordinary upcoming dates use pink close to the overdue coral, so the urgency depends more on the accompanying label."
         ],
         [
           "Contrast",
           "8.1",
-          "Primary text and buttons generally stand out. In the dark narrow shortcut grid, the Add shortcut tile border measures about 1.25:1 against its immediate background in the PNG. The plus and label carry almost all of the affordance. Dark shortcut grid"
+          "The count beside Upcoming is faint on the pale selected segment in the narrow Mint, Rose, and custom dark New Tab captures. The label is easy to read and the count nearly disappears beside it."
         ],
         [
           "Navigation",
-          "8.3",
-          "Settings search gives a direct result for “dark mode” and offers a browser-settings fallback. In the rail, “Browser tools” and “All browser settings” sit together, and their labels give little guidance on which to try first for a browser setting."
+          "8.5",
+          "Narrow Settings shows the current section in the dropdown and immediately repeats it as the page heading. Other destinations disappear into a control that reads like the current location."
         ],
         [
           "Sidebar",
-          "8.4",
-          "The expanded sidebar makes folders and drop targets clear. The compact rail removes tab names and leaves small icons or initials, making pages with similar icons harder to tell apart."
+          "8.7",
+          "The expanded view separates favorites, folders, and today’s tabs clearly. The compact rail compresses favorites and tabs to icons or initials, which makes similar entries harder to distinguish."
         ],
         [
-          "Settings/controls",
-          "8.6",
-          "Layout’s window preview describes the combined state clearly. In Appearance, presets show an outline and a checkmark, while the applied custom color uses a ring and explanatory copy beside a button still labeled “Apply color.” Applied versus ready to apply takes an extra read."
+          "Settings and controls",
+          "8.8",
+          "Layout groups its switches and segments well, but the window preview is too schematic to show much difference between a compact rail and an expanded sidebar that opens on hover. The caption does most of the explanatory work."
         ],
         [
           "Assistant",
-          "8.1",
-          "The model picker clearly distinguishes the checked model from the focused row. At 320 px, account setup spreads across Accounts, Set up an account, and expandable Terminal instructions. Getting started takes more effort to understand than choosing a model once connected."
+          "8.4",
+          "At 320 px, Page + screenshot and Browser control share one dense strip. A checkbox, switch, and Off label sit close together even though they govern different permissions."
         ],
         [
-          "New tab",
-          "8.2",
-          "Search stays prominent with Organato on or off. The long-title fixture can reduce several shortcuts to the same “A longer...” label and truncate the domains underneath, leaving users to identify destinations from small secondary text and icons."
+          "New Tab",
+          "8.5",
+          "The Add shortcut popover gives the matching open tab little visual emphasis. The green Add button is easier to spot than the candidate it will add."
         ],
         [
           "Responsive layouts",
           "8.3",
-          "Settings stacks its controls and Organato switches to tabs. At 390 px with cached data, three shortcut rows and a wrapped status banner push the first Upcoming item to around 700 px down the page."
+          "Settings controls and translation fields stack cleanly. In the narrow shortcut grid, entries such as A very long… also truncate their domain, leaving two lines with little identifying information."
         ],
         [
           "Custom UI motion",
           "8.2",
-          "Normal samples show the workspace list sliding in and the onboarding illustration changing independently of the form. The assistant’s loading strip and ready controls have different heights, so the composer visibly changes position in the Reduce motion samples too."
+          "The normal workspace switch briefly carries the selected row flush to the sidebar edge. The browser-control tooltip shifts the welcome heading and suggestions upward in both sampled modes, even though the explanation belongs to the bottom control strip."
         ],
         [
-          "Empty/error states",
-          "8.2",
-          "New Tab’s rejected-key state points directly to Settings, and translation shows a retry countdown. In the assistant’s partial research failure, “Review source tabs” and “Edit and resend” are both visible, with little guidance about which action to take first."
+          "Empty and error states",
+          "8.7",
+          "New Tab gives a rejected key a clear route back to Settings. In the Assistant error state, Edit and resend is a muted chip below the details disclosure and reads like a secondary action."
         ],
         [
-          "Keyboard/focus appearance",
-          "8.8",
-          "Settings search, the model picker, and What’s New show clear outlines. On a focused New Tab shortcut, the remove button overlaps the tile’s outline, making two separate controls visually touch."
+          "Keyboard and focus appearance",
+          "9.0",
+          "Focus is visible on favorites, shortcut removal, and model options. The favorites capture shows an outlined active tile beside an outlined focused tile. The thicker outer focus ring helps, but the two states still use similar cues."
         ],
         [
           "Onboarding",
-          "8.5",
-          "The layout and theme previews explain the choices, and the final summary shows what was selected. At Organato, the usual footer Continue and header Skip setup disappear. Users have to recognize “Connect later” and “Don’t use Organato” as ways to move forward."
+          "8.6",
+          "The progress indicator is consistent. On the Organato step, how to advance moves from choices inside the form to the lower-right Continue after connection, interrupting the navigation pattern established by earlier steps."
         ],
         [
           "What’s New",
-          "8.6",
-          "The sticky section links and the direct 1.3.5 jump help. In the main reading order, the actual 1.3.5 section follows a long Highlights and 1.3.1 sequence. A reader who scrolls past the hero reaches the current changes late. Narrow 1.3.5 section"
+          "8.8",
+          "The masthead, version links, and section typography work well. The actual 1.3.5 section follows a long run of highlights and 1.3.1 notes, so readers who scroll past the jump link encounter the latest changes late."
         ],
         [
           "Linked efficiency reference article",
-          "8.5",
-          "The article identifies the pre-release candidate, the single M1 test machine, and the slower results. At 320 px, the browser table fits, but all three numbers have equal visual weight. Readers have to inspect each row to see where the candidate improved or regressed."
+          "8.9",
+          "The article puts regressions and measurement qualifications beside the historical results. At 320 px, all three numeric columns carry equal visual weight, so it takes extra effort to track the 1.2 candidate down the table."
         ],
         [
           "Translation window",
           "8.7",
-          "Consent, the disabled Translate action, and the reason it’s disabled all fit at 320 px. “Reload languages” gets a prominent standalone line between language selection and consent, interrupting the main sequence with a maintenance action."
+          "The consent checkbox, disabled action, and rate-limit countdown are clear. During translation, Stop and Restore original look equally prominent and give little visual indication of which action keeps the translated text."
         ],
         [
           "Native top tabs",
-          "8.2",
-          "macOS 1.3.1 reference. The active tab reads clearly. At the narrow width, three tabs already fade their title endings, including the active tab, leaving fewer characters to distinguish similar pages."
+          "8.5",
+          "In the 540 px reference headers, all three tab titles fade at the end. In dark Pollen, the active fill is subtle enough that the close glyph does much of the work of identifying the active tab."
         ],
         [
-          "Native toolbar/window controls",
-          "8.3",
-          "macOS 1.3.1 reference. In centered minimal mode, the site-information icon stays at the far left of the field while the address sits in the middle. The two pieces of site identity feel detached."
+          "Native toolbar and window controls",
+          "8.6",
+          "In centered minimal mode on desktop, the site-information icon sits at the far left of a wide address field while the origin sits in the middle. The visual gap weakens the connection between them."
         ],
         [
           "Observed native UI motion",
-          "8.0",
-          "macOS 1.3.1 reference. One normal close sample leaves a thin favicon-and-letter remnant beside New Tab. Both recordings show the address moving a substantial distance into the center while the neighboring toolbar controls stay fixed. These deductions concern the visible frames."
+          "8.4",
+          "The normal tab-close sample briefly compresses the disappearing tab to an icon and a sliver of title. The reduced-motion samples show a clean two-tab state after closure."
         ]
       ],
       [
         [
           "Hierarchy",
-          "8.4",
-          "Page titles, section labels and grouped cards read clearly. Deductions: In General, \"Breezer is up to date.\" is bold with its description pushed far below it, so it reads like a heading rather than a status. The \"Import from another browser\" card has no section label, unlike the cards above it. On New Tab, the To-dos column is sparse next to the dense Upcoming list, which leaves the right half of the card mostly empty."
+          "8.5",
+          "Settings and New Tab read clearly. Onboarding step 6 has three competing actions, and both Connect and Connect later are filled, so the main choice is unclear. On the New Tab error, the red banner and the green button say the same thing (\"review in Settings\")."
         ],
         [
           "Typography",
-          "8.2",
-          "The serif display type (dates, What's New, the article) paired with a sans-serif UI face works well. Deductions: Translation body text is about 11–12px at a 1200px window, which is small for a whole utility page. The same \"What's New\" page mixes serif headings with sans-serif body text and sans-serif sub-headings (\"Saved tabs\", \"Still to do\"), so the levels feel uneven. Native tab titles truncate early (\"Today · Bree…\")."
+          "8.8",
+          "The serif display type (New Tab date, What's New, Organato heading) pairs well with the sans UI type. The text inside What's New illustrations and Organato rows is very small at narrow width. The narrow translation captures shrink below comfortable reading size."
         ],
         [
           "Alignment",
-          "8.3",
-          "Content columns line up throughout. Deductions: The Translation status line (\"An API key is saved on this device.\") is centered while everything else on the page is left-aligned. In the assistant table, the text column \"Short story\" is right-aligned like numbers while \"Novel\" is centered. In the 320px efficiency tables, the \"New code\" header and its values touch the right edge."
+          "8.5",
+          "Settings cards and labels line up well. In the workspace tab menu, a white row sticks out past the menu's right edge. On the New Tab error, \"Sites you visit often will appear here\" sits under the Add button and almost touches the card below."
         ],
         [
           "Spacing",
-          "8.0",
-          "Deductions: The assistant's \"Page + screenshot\" strip has about 30–40px of empty space under its row in every resting state. The motion samples show this space is reserved for the Browser control tooltip, but at rest it looks like a mistake. On the New Tab error state, \"Sites you visit often will appear here.\" sits almost on top of the Organato card. On a tall desktop, onboarding content fills only the top half of the screen."
+          "8.2",
+          "The assistant welcome screen and the model menu leave about 60% of the panel empty above the content. Narrow General has a large unexplained gap before the Import card. The 1200px translation window floats small in an empty field."
         ],
         [
           "Rhythm/density",
-          "8.0",
-          "Settings rows have an even rhythm. Deductions: The assistant welcome floats in the middle of the panel, leaving large empty bands above and below. The 1200px translation page is a narrow column surrounded by empty space. In What's New's 1.3.1 section, some rows stand alone (\"Breezer Settings in the address bar\"), leaving holes in the two-column layout."
+          "8.3",
+          "Settings rows keep an even rhythm. Browser tools is a long uniform list of chevron rows that is hard to scan. The 1.3.5 section of What's New is sparse after the dense 1.3.1 section."
         ],
         [
           "Consistency",
-          "7.9",
-          "Deductions: On the assistant welcome, \"Help me do something\" has no card while the other two suggestions do. It is shown that way in dark as well, yet still has a card in one dark file capture. Settings search results use a chevron plus \"Opens in a new tab\", while Browser tools uses an ↗ arrow for the same kind of link. The Breezer AI mark stays indigo in every palette. Onboarding step 6 has no Continue button, unlike every other step. Compact rails show favorites as two-letter text badges (\"CA\", \"TO\") rather than icons."
+          "8.7",
+          "All 35 screens per palette share the same parts. Error banners are inconsistent: some have a recovery button below (New Tab, translation) and some only have expandable details (assistant). Toggle styling also varies: the Graphite and onboarding toggles look different from the others."
         ],
         [
           "Craft/polish",
-          "7.8",
-          "Deductions: In the light sidebar, a white row edge shows to the right of the open tab context menu. The source-tabs sheet and the dark Connect Claude dialog partly cover the composer, leaving a cut-off strip with a visible focus ring. In What's New, body text scrolls up into the sticky jump-link bar and appears with letters cut off. The dark sidebar's \"New Tab\" row uses an empty square favicon that looks like an unchecked checkbox. Native captures show black wedges in the window corners."
+          "8.4",
+          "Shadows, corner radii and selected cards are clean. Visible flaws: the menu overlap in the tab menu, the remove × crowding the corner of a focused shortcut, and New Tab shortcuts whose identical monogram tiles (MA for both Mail and Maps; M for both Mail and Music) can't be told apart at a glance."
         ],
         [
           "Color across modes",
           "8.3",
-          "All six palettes plus the custom color hold together in light and dark mode, and the live theme change keeps the four open surfaces in sync. Deductions: In Rose, overdue red and the rose accent dates (28 vs 29/30) are almost the same color, so \"overdue\" is not distinct. In custom-purple dark mode, the expanded sidebar stays near-neutral gray, so the custom color barely shows apart from the Work chip. Native light headers are tinted so faintly that Tide, Dusk and Custom look almost identical."
+          "Each palette tints the backgrounds well in both light and dark. In Graphite dark, an \"on\" switch is a pale gray track, which reads as disabled. Graphite's translate button is near-white in dark mode and looks disabled. In Tide dark, the default Custom color swatch is still mint green, which suggests the wrong theme is selected."
         ],
         [
           "Contrast",
-          "7.9",
-          "Deductions: The disabled \"Save translation settings\" button in dark mode, and the disabled \"Translate page\" button before sharing, nearly disappear. Gray secondary text in dark settings and dark translation (e.g. \"Private text you can read may be included.\") is faint. The Custom color hint is set in accent blue and reads like a link. The translation manifest reports action contrast ≥5.2, but other text was not measured."
+          "8.0",
+          "Body text passes comfortably. Secondary text in dark sidebars (folder rows like \"Sidebar spec\", timestamps) and in the dark Organato rows is faint. It's hard to tell on from off for Graphite switches. The disabled \"Extra article 4\" row in the research picker looks no different from an ordinary unchecked row."
         ],
         [
           "Navigation",
-          "8.4",
-          "Grouped settings navigation with search and a narrow dropdown works well, and What's New has jump links. Deductions: Searching \"dark mode\" returns Color mode as a link row, so the user has to go to another page to change it instead of changing it in place. The What's New jump links list 1.3.1 before 1.3.5, so the current release reads as secondary."
+          "8.7",
+          "The Settings sidebar has clear groups with icons, and narrow width collapses it to a dropdown. Search with no results offers a useful fallback. The What's New table of contents puts 1.3.5 after 1.3.1, which is backwards for a changelog."
         ],
         [
           "Sidebar",
-          "8.1",
-          "Clear selected tab, folder tree, Today divider and space switcher. Deductions: In compact mode, the folder shows only an icon and favorites show only letter badges (\"CA\"), so items are hard to tell apart. The compact space switcher (\"• W\", \"• P\") looks rough. \"Close today's tabs\" is a bordered pill that competes with the tabs themselves. The selected state in the dark workspace sidebar is weak."
+          "8.6",
+          "Expanded, compact and auto-hide all hold up, and a theme change keeps the Personal space's own color. In compact mode the bottom space switcher shrinks to \"W/P\" letters with tiny dots that are hard to read. Folder child rows lose too much contrast in dark mode."
         ],
         [
           "Settings/controls",
-          "8.5",
-          "Segmented controls, toggles, sliders and grouped cards are consistent across all 14 variants. Deductions: The \"on\" toggle uses a dark knob on a pastel track (Rose and Pollen dark), which is less conventional and slightly ambiguous. Theme cards show the selection as a small ✓ next to the label (e.g. \"Mint ✓\"), with no ring or fill in some states. Before a custom color has been chosen, the Custom color swatch already shows a teal color, which suggests one is active."
+          "8.6",
+          "Segmented controls, sliders and cards are cohesive. The Graphite switch problem above. On narrow width, segmented controls drop below their labels, which works but uses a lot of height. \"Apply color\" next to an already-selected swatch is ambiguous: has it been applied yet?"
         ],
         [
           "Assistant",
-          "7.9",
-          "Error, partial-failure, sign-in and copy-fallback states are honest and actionable. Deductions: The context strip has the dead space described under Spacing. The welcome floats mid-panel. Model options repeat themselves: the \"Your models\" header sits above \"Back to models\". In the working state, the stop and send buttons look the same size and only color separates them, and the model selector greys out without saying why. Overlays sit on top of the composer."
+          "8.4",
+          "The conversation and error screens are clean, and the composer chip shows browser control state clearly. In the welcome and model menu screens the content floats low. The model sheet shows a strong focus ring and the selected row at the same time, which makes the menu look busy. At narrow width the error screen hides the Tools/Attach/Sources icons, which is fine."
         ],
         [
           "New tab",
-          "8.2",
-          "Strong date and search header, and good loading skeletons, cached/offline notice and error state. Deductions: Rose overdue vs accent color (see Color). Accent-colored dates for the next three days vs gray for later days has no explained meaning. The sparse To-dos column. The cramped empty-shortcuts hint."
+          "8.6",
+          "The date, search bar, shortcuts and Organato card make a calm composition. Weaknesses: the empty-shortcuts message is placed poorly, the error state repeats itself, and the Organato card is cut off at the bottom of the viewport with no visible end."
         ],
         [
           "Responsive layouts",
-          "8.4",
-          "Narrow settings, New Tab tabs, onboarding with the illustration moved below, and research pickers all adapt well. Deductions: The 320px efficiency tables clip at the edge. At 320px the assistant drops the toolbar icons, so \"Tools / Attach / Sources\" become bare words. Translation at 1200px wastes the extra width."
+          "8.2",
+          "Narrow Settings, onboarding, the assistant and What's New all reflow correctly. The 320px efficiency table stacks columns well. The translation window has no proper desktop layout. On the narrow onboarding error, the illustration is pushed below the error message and the Continue button disappears."
         ],
         [
           "Custom UI motion",
-          "7.5",
-          "Onboarding shows a visible crossfade and slide-in. Reduce motion visibly makes space switching instant. Deductions: The space switch shows no intermediate frame at the 50ms sampling, so it is indistinguishable from a hard cut. The New Tab card switches from skeleton to content with no visible transition. In Settings, normal and Reduce motion look identical in the samples. In the source sheet, the composer stays visible and the sheet shifts by about 1px after appearing (between 250 and 400ms)."
+          "7.8",
+          "Onboarding's illustration animates sensibly, and Reduce motion produces static frames. Space switching is a hard cut between the 100ms and 150ms samples. The control tooltip shows as a static caption band with no pointer, so it looks like part of the layout. Smoothness and timing are not verifiable from samples."
         ],
         [
           "Empty/error states",
-          "8.4",
-          "Clear and actionable throughout: no-results, sync unavailable, Organato rejected and cached, rate limit with countdown, partial research failure, opt-out failure. Deductions: Error styles differ: a pink box in the assistant, a pink bar in Translation, a gray left-bordered banner for cached data, and plain purple text for \"Organato is connected\". The New Tab \"off\" state just ends, with no hint."
+          "8.2",
+          "The translation rate-limit error with a countdown retry button is strong, and so is the no-results search screen. The New Tab error repeats itself. The assistant error's main action (\"Edit and resend\") is a low-emphasis gray button. The research picker's limit and disabled states are weak."
         ],
         [
           "Keyboard/focus appearance",
-          "8.0",
-          "Visible accent rings appear on settings search, New Tab shortcuts, the model list, \"Back to models\" and the What's New buttons. Deductions: What's New's \"Open Settings\" shows a doubled ring (border plus outline) that looks heavy. The search-result highlight is a gray fill with no ring, so it is unclear whether it means focus or hover. Focus on sidebar tabs and favorites was not in what I opened."
+          "8.6",
+          "Focus rings are clear on shortcuts, the model menu and the search field. On a focused shortcut, the × overlaps the ring's corner. I only inspected a few focus examples."
         ],
         [
           "Onboarding",
           "8.3",
-          "Progress, the live preview illustration, the theme step and the summary page are well done. Deductions: Step 6 has no Continue button. Tour tips show \"Tip 1 of 5\" but no progress bar, unlike the setup steps. \"Skip setup\" is very small gray text in the corner. The connected confirmation is plain purple text in a white box and reads weakly as a success."
+          "Big clear questions, a live preview and a step indicator. The double filled buttons and buried error on step 6 are the main flaws. The empty space between the content and the footer is too large on desktop."
         ],
         [
           "What's New",
           "8.2",
-          "Beautiful editorial hero, clear sticky navigation, and a good Known limitations section. Deductions: The actual 1.3.5 section (\"Search, tabs, and settings\", 3 items) comes after the long 1.3.1 content, so the release the hero names is buried. Text scrolls under the sticky bar and appears clipped. The two-column layout leaves gaps."
+          "The editorial page is handsome, with a good hero, illustrations and a known-limitations section. The current 1.3.5 section is short, comes after 1.3.1, and has one small illustration. Illustration labels are unreadably small in the narrow tiles."
         ],
         [
           "Linked efficiency reference article",
           "8.4",
-          "Candid qualifications (regressions stated, \"no CPU or battery claim\", \"not overall browser speed\"), clear methodology, and readable tables. Deductions: The tables do not mark which number is better or worse beyond the caption \"lower is better\". The 320px tables clip. There are three entry points to the same full results: an inline link, a disclosure and a card. The serif/sans heading mix."
+          "Measurements are clearly qualified (\"lower is better\", method notes) and the narrow table reflows well. The desktop body text is small and dense, and the tables have no visual highlight for the key comparisons."
         ],
         [
           "Translation window",
           "7.9",
-          "All seven palettes plus dark mode are consistent, and the consent and error copy is clear. Deductions: Small type and a lot of unused space at 1200px. The column is left of center in captures but centered in the controls fixture. \"Stop\" is the filled primary button and \"Restore original\" the secondary, which reverses the likely intent. Disabled buttons are nearly invisible in dark mode. The centered status line."
+          "It follows the palette, with a clear consent checkbox and a good error with retry. At 1200px it is a small card stuck in the top-left of a large empty field. Graphite's primary button looks disabled. Section labels are faint in dark mode."
         ],
         [
           "Native top tabs (1.3.1 reference)",
-          "7.0",
-          "It works, but it is essentially stock Chromium. Deductions: The light palette tints are barely visible. Titles truncate early when narrow. Generic globe favicons. Black corner artifacts."
+          "7.5",
+          "This is Chromium's stock tab strip with only a slight theme tint. At narrow width, tab titles cut off mid-word (\"Breez\", \"Bre\"). Third-party extension icons interrupt the theme. It looks borrowed rather than designed."
         ],
         [
-          "Native toolbar/window controls (1.3.1)",
-          "7.0",
-          "Deductions: Frameless auto and pinned look identical in still captures. The centered-minimal URL field floats between the navigation buttons and the extension icons without anchoring to either. A third-party extension icon (red shield) breaks up the toolbar. Corner wedges. Traffic lights and layout are otherwise clean."
+          "Native toolbar/window controls (1.3.1 reference)",
+          "7.6",
+          "Window controls and toolbar are correct and tidy, and the centered address bar variant works. Captures show black triangles at the window corners (likely a capture artifact). The dark chrome sits against a light page with little blending."
         ],
         [
-          "Observed native UI motion (1.3.1)",
-          "6.8, low confidence",
-          "Samples about every 215ms show only before and after states; tab switches and closes appear as cuts. Normal and Reduce motion samples look the same, so the evidence cannot show any motion design or that Reduce motion is honored."
+          "Observed native UI motion (1.3.1 reference)",
+          "7.0",
+          "The samples show tab switching, closing and centered-address transitions as discrete states. I see no visible difference between Reduce motion and normal. Smoothness can't be judged from these samples."
         ]
       ]
     ],
-    "categoryRound": 8
+    "categoryRound": 9
   }
 };

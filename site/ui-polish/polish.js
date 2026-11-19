@@ -166,6 +166,11 @@ function scoreTable(table, description, rows) {
 }
 scoreTable(byId('score-table'), 'Round', scores.rounds.map((scores, index) => [String(index + 1), scores]));
 scoreTable(byId('reference-table'), 'Browser', Object.entries(scores.references));
+if (scores.coverageNote) {
+  const coverage = byId('review-coverage');
+  coverage.textContent = scores.coverageNote;
+  coverage.hidden = false;
+}
 
 if (scores.categories) {
   const reviewer = byId('reviewer');
