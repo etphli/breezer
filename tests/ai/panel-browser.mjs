@@ -101,6 +101,30 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6.1 Sol');
 
+  const closeModelPicker = page.getByRole('button', { name: 'Close model picker' });
+  const modelMenu = page.locator('#model-menu');
+  await page.setViewportSize({ width: 320, height: 400 });
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.locator('#model-button').click();
+  assert.equal(await closeModelPicker.isVisible(), true, 'the model list has a visible close button');
+  await modelMenu.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-menu-close.png` });
+  await page.setViewportSize({ width: 320, height: 340 });
+  assert.ok(await modelMenu.evaluate(node => {
+    node.scrollTop = node.scrollHeight;
+    return node.scrollTop;
+  }), 'the model list scrolls in a short panel');
+  assert.equal(await closeModelPicker.evaluate(button => {
+    const { x, y, width, height } = button.getBoundingClientRect();
+    return button.contains(document.elementFromPoint(x + width / 2, y + height / 2));
+  }), true, 'the close button stays reachable after scrolling');
+  await closeModelPicker.click();
+  assert.equal(await modelMenu.isHidden(), true);
+  assert.equal(await page.locator('#model-button').getAttribute('aria-expanded'), 'false');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
+  assert.equal(await page.locator('#model-label').innerText(), 'GPT-6.1 Sol');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.setViewportSize({ width: 400, height: 850 });
+
   // Enter sends; Shift+Enter keeps writing.
   const chatsBefore = await page.evaluate(() => window.sent.filter((message) => message.type === 'chat').length);
   await page.getByLabel('Message Breezer').fill('First line');
@@ -153,8 +177,11 @@ try {
   await page.setViewportSize({ width: 400, height: 850 });
   assert.match(await page.locator('#speed-note').innerText(), /more Codex allowance/);
   assert.equal(await page.locator('#notice').isVisible(), false, 'Speed guidance stays beside its setting');
-  await page.keyboard.press('Escape');
+  await closeModelPicker.press('Enter');
+  assert.equal(await modelMenu.isHidden(), true, 'the close button also dismisses model settings');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
   await page.locator('#model-button').click();
+  assert.equal(await page.locator('#inference-options').evaluate(node => node.open), false, 'reopening starts in the model list');
   await page.getByRole('button', { name: 'GPT-6 Luna', exact: true }).click();
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6 Luna');
   assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');

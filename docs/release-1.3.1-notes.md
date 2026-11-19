@@ -23,3 +23,7 @@ Before publishing, verify the signed release build with the [password Enter chec
 ## Google Docs editing
 
 The editor fixture passes typing, selection, and follow-up editing in Breezer. The expanded fixture from the 1.3.0 work also passed caret and selection checks across separate assistant requests. Signed-in editing and saving remain unverified. Use a disposable document to [check focus, follow-up editing, and saved changes with Codex and Claude](ai-docs-control.md#required-release-acceptance) before marking this limitation resolved.
+
+## Assistant model picker
+
+Click × in the model picker's top-right corner to return to chat. The button is also available while adjusting reasoning or speed.
