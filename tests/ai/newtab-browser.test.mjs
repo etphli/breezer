@@ -50,7 +50,8 @@ async function withPage(browser, base, options, fn) {
   const context = await browser.newContext({ viewport, colorScheme, reducedMotion, locale: 'en-US' });
   await context.addInitScript(installFixture, fixture);
   const page = await context.newPage();
-  await page.clock.setFixedTime(NOW);
+  if (fixture.hang) await page.clock.install({ time: NOW });
+  else await page.clock.setFixedTime(NOW);
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(`${message.text()} ${message.location().url}`); });
@@ -263,7 +264,8 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.getAttribute('#organato', 'aria-busy'), 'true');
       assert.equal(await page.$$eval('.site.placeholder', (items) => items.length), 8);
       await page.screenshot({ path: `${evidence}/newtab-loading.png` });
-      await page.waitForSelector('html[data-loaded="true"]', { timeout: 70000 });
+      await page.clock.fastForward(65000);
+      await page.waitForSelector('html[data-loaded="true"]');
       assert.equal(await page.getAttribute('#organato', 'data-state'), 'unavailable');
       assert.match(await page.textContent('#organato-status'), /too long.*Refresh/);
     });

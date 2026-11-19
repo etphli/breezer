@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: breezer-checks-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   upstream-and-tests:
     runs-on: ubuntu-latest
@@ -17,6 +21,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/advertising/
+            !/site/videos/
+            !/docs/evidence/*
+            /docs/evidence/memory-20261102/native-transport-final-*.json
       - uses: actions/setup-python@v6
         with:
           python-version-file: upstream/helium-macos/helium-chromium/.python-version
@@ -71,12 +82,39 @@ jobs:
           python tests/passwords_native_test.py
       - name: Run all imported tests and configuration checks
         run: python script/check_helium.py
+
+  browser-tests:
+    name: Browser tests (${{ matrix.suite }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [interface, translation-and-website]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/docs/evidence/
+            ${{ matrix.suite == 'interface' && '!/advertising/' || '' }}
+            ${{ matrix.suite == 'interface' && '!/site/videos/' || '' }}
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24.22.1'
       - name: Install browser verification dependencies
         working-directory: tests/ai
+        env:
+          BROWSER_INSTALL_OPTION: ${{ matrix.suite == 'interface' && '--only-shell' || '' }}
         run: |
           npm ci --ignore-scripts
-          npx playwright install --with-deps chromium
+          npx playwright install chromium ${BROWSER_INSTALL_OPTION:+"$BROWSER_INSTALL_OPTION"}
+          if ! node --input-type=module -e "import { chromium } from 'playwright'; await (await chromium.launch()).close();"; then
+            npx playwright install-deps chromium
+          fi
       - name: Verify sidebar and visible browser control
+        if: matrix.suite == 'interface'
         env:
           BREEZER_AI_EVIDENCE: ${{ runner.temp }}/breezer-ai-evidence
         run: |
@@ -85,26 +123,34 @@ jobs:
           node tests/ai/research-browser.mjs
           node --test tests/ai/workspace-browser.test.mjs tests/ai/workspace-folder-colors-browser.test.mjs
           node --test --test-concurrency=2 tests/ai/ui-polish-browser.test.mjs tests/ai/settings-redesign-browser.test.mjs tests/ai/newtab-browser.test.mjs tests/ai/workspace-frame.test.mjs
-          node --test tests/ai/translation.test.mjs tests/ai/translation-browser.test.mjs
           node --test tests/sync/setup-browser.test.mjs
           node tests/ai/browser-page.mjs
           node tests/ai/docs-editor-browser.mjs
       - name: Verify passkey component and virtual WebAuthn protocol
+        if: matrix.suite == 'interface'
         env:
           BREEZER_PASSKEY_EVIDENCE: ${{ runner.temp }}/breezer-passkey-evidence
         run: |
           node tests/passkeys/component.mjs
           node tests/passkeys/virtual.mjs
       - name: Verify login Enter stock-browser baseline (not native Breezer acceptance)
+        if: matrix.suite == 'interface'
         run: node tests/passwords/enter-browser.mjs --baseline
-      - name: Verify website, usage calculations, and dashboard access boundaries
+      - name: Verify page translation, website, usage calculations, and dashboard access boundaries
+        if: matrix.suite == 'translation-and-website'
         env:
+          BREEZER_AI_EVIDENCE: ${{ runner.temp }}/breezer-ai-evidence
           BREEZER_SITE_EVIDENCE: ${{ runner.temp }}/breezer-site-evidence
         run: |
-          npm ci --ignore-scripts --prefix site
-          npm test --prefix site
+          # Run the website checks while the translation test waits for Chromium's idle deadline.
+          node --test tests/ai/translation.test.mjs tests/ai/translation-browser.test.mjs &
+          translation_pid=$!
+          website_status=0
+          (npm ci --ignore-scripts --prefix site && npm test --prefix site) || website_status=$?
+          wait "$translation_pid"
+          exit "$website_status"
       - name: Upload website verification screenshots
-        if: always()
+        if: ${{ !cancelled() && matrix.suite == 'translation-and-website' }}
         uses: actions/upload-artifact@v4
         with:
           name: breezer-website-verification
@@ -112,15 +158,15 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload AI verification screenshots
-        if: always()
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: breezer-ai-ui-verification
+          name: breezer-ai-ui-verification-${{ matrix.suite }}
           path: ${{ runner.temp }}/breezer-ai-evidence/*.png
           if-no-files-found: ignore
           retention-days: 7
       - name: Upload passkey fixture evidence
-        if: always()
+        if: ${{ !cancelled() && matrix.suite == 'interface' }}
         uses: actions/upload-artifact@v4
         with:
           name: breezer-passkey-fixtures-not-native-acceptance

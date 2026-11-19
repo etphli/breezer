@@ -29,7 +29,11 @@ test('real disposable Chromium extension: provider path, DOM identity, restore, 
     const data = JSON.parse(body); requests.push(data); onRequest?.(); onRequest = null;
     if (delay) await new Promise(resolve => setTimeout(resolve, delay));
     res.setHeader('Content-Type', 'application/json');
-    if (fail) { res.statusCode = 429; res.end('{"error":"private error"}'); return; }
+    if (fail) {
+      res.writeHead(429, { 'Retry-After': '5' });
+      res.end('{"error":"private error"}');
+      return;
+    }
     res.end(JSON.stringify({ translatedText: data.q.map(text => text === 'Inyección' ? '<img src=x onerror=alert(1)>' : 'English: ' + text) }));
   });
   const server = createServer((req, res) => { res.setHeader('Content-Type', req.url === '/plain' ? 'text/plain' : 'text/html'); res.end(req.url === '/plain' ? 'Hola mundo' : fixture); });
