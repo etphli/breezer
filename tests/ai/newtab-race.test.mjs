@@ -10,7 +10,7 @@ test('a pre-response shortcut filter cannot overwrite the loaded sites', async (
   const preferences = await readFile(new URL('../../features/ai/extension/top-sites.js', import.meta.url), 'utf8');
   const callbacks = new Map(), nodes = new Map(), observed = { shown: 0, filters: 0 };
   const node = id => {
-    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {} });
+    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {}, querySelectorAll: () => [] });
     return nodes.get(id);
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
@@ -67,7 +67,7 @@ for (const dashboardEnabled of [false, true]) test(`disposed new-tab ignores lat
   let paints = 0, navigations = 0, reply, started;
   const ready = new Promise(resolve => { started = resolve; });
   const node = id => {
-    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {} });
+    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {}, querySelectorAll: () => [] });
     return nodes.get(id);
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
@@ -113,6 +113,7 @@ test('refresh stays hidden during loading, setup and off with only local storage
     const ready = new Promise(resolve => { started = resolve; });
     const node = id => {
       if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, attributes: new Map(),
+        querySelectorAll: () => [],
         addEventListener() {}, setAttribute(name, value) { this.attributes.set(name, value); }, removeAttribute(name) { this.attributes.delete(name); } });
       return nodes.get(id);
     };

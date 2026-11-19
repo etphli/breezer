@@ -217,7 +217,8 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     // Organato: optional; a key goes to the background helper, never into storage.
     assert.equal(await heading(), 'Connect Organato?');
-    assert.equal(await next.innerText(), 'Connect later');
+    assert.equal(await page.locator('#wl-organato-later').isVisible(), true);
+    assert.equal(await next.isVisible(), false);
     await pause(700);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
     assert.match(await page.locator('#wl-organato-status').innerText(), /Paste your API key/);
@@ -268,7 +269,8 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     // Skipping the tour keeps the completed setup choices and opens their summary.
     {
       const { context, page } = await open({ reducedMotion: 'reduce', layout: 'top' });
-      for (let at = 0; at < 6; at += 1) await page.locator('#wl-next').click();
+      for (let at = 0; at < 5; at += 1) await page.locator('#wl-next').click();
+      await page.locator('#wl-organato-later').click();
       assert.equal(await page.locator('#wl-h-tour').innerText(), 'Your tabs stay across the top');
       assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tip 1 of 3');
       assert.equal(await page.locator('.wl-step:not([hidden])').evaluate((node) => getComputedStyle(node).animationName), 'none');
@@ -292,9 +294,10 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       assert.equal(await optOut.getAttribute('aria-describedby'), 'wl-organato-off-note');
       await shot(page, '6-organato-optout');
       // Keyboard: the opt-out is reachable and works with Enter.
-      // Key field, Connect, the Organato Settings link, then the opt-out.
       await page.locator('#wl-organato-key').focus();
       for (let at = 0; at < 3; at += 1) await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-later');
+      await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-off');
       await page.keyboard.press('Enter');
       // Nothing moves on, and nothing claims "off", until the helper confirms.
@@ -329,14 +332,14 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       await page.locator('#wl-organato-status', { hasText: 'Couldn’t turn Organato off.' }).waitFor();
       assert.equal(await page.locator('.wl-step:not([hidden]) h1').innerText(), 'Connect Organato?');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-off');
-      assert.equal(await page.locator('#wl-next').isDisabled(), false);
+      assert.equal(await page.locator('#wl-organato-later').isDisabled(), false);
       assert.equal(await page.evaluate(() => fx.organato.enabled), true);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
       for (const width of [320, 390]) {
         await page.setViewportSize({ width, height: 844 });
-        const footer = await page.evaluate(() => Object.fromEntries(['wl-back', 'wl-progress', 'wl-next'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
+        const footer = await page.evaluate(() => Object.fromEntries(['wl-back', 'wl-progress'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
         assert.ok(footer['wl-back'].right + 8 <= footer['wl-progress'].left, 'Back leaves room for progress');
-        assert.ok(footer['wl-progress'].right + 8 <= footer['wl-next'].left, 'Progress leaves room for Connect later');
+        assert.equal(await page.locator('#wl-organato-later').isVisible(), true);
       }
       assert.equal(await page.locator('#wl-organato-status').evaluate(node => node.parentElement.id), 'wl-organato-off-status', 'Failure is adjacent to the opt-out action');
       await shot(page, '6-organato-optout-failed-narrow');
@@ -351,7 +354,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     // Continue alone is not an opt-out, and a profile's earlier "off" is shown, not reset.
     {
       const { context, page } = await open({ reducedMotion: 'reduce', local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
-      await page.locator('#wl-next').click();
+      await page.locator('#wl-organato-later').click();
       assert.equal(await page.evaluate(() => fx.organato.enabled), true);
       assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type }) => type)), ['view']);
       await context.close();

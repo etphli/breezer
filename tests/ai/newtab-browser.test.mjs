@@ -204,6 +204,7 @@ test('parallel New Tabs merge icons and refresh retries a shortcut that used Chr
     const cachedUrls = page => page.evaluate(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.map(entry => entry.url));
     await first.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length >= 2);
     assert.deepEqual((await cachedUrls(first)).sort(), [SITES[0].url, SITES[1].url].sort());
+    assert.equal(await first.getByRole('link', { name: 'New site', exact: true }).locator('.site-monogram').isVisible(), true);
     known = true;
     await first.getByRole('button', { name: 'Refresh', exact: false }).click();
     await first.waitForFunction(url => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.some(entry => entry.url === url), missing.url);
@@ -369,12 +370,15 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(visible.length, 9, 'all eight shortcuts and Add remain available at narrow widths');
       assert.equal(new Set(visible).size, 3, 'shortcuts form complete rows without clipped tiles');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 420), true);
-      const lanes = await page.$$eval('.lane', (nodes) => nodes.map((node) => node.getBoundingClientRect().top));
-      assert.ok(lanes[1] > lanes[0], 'lanes stack on narrow windows');
+      const todos = page.getByRole('button', { name: /^To-dos/ });
+      assert.equal(await page.locator('#upcoming-lane').isVisible(), true);
+      assert.equal(await page.locator('#todos-lane').isVisible(), false);
       await page.screenshot({ path: `${evidence}/newtab-narrow.png`, fullPage: true });
-      await page.getByRole('link', { name: 'To-dos', exact: true }).click();
-      assert.equal(await page.evaluate(() => document.activeElement.id), 'lane-todos');
-      assert.ok((await page.locator('#lane-todos').boundingBox()).y >= 0, 'To-dos jump brings its heading into view');
+      await todos.click();
+      assert.equal(await todos.getAttribute('aria-pressed'), 'true');
+      assert.equal(await page.locator('#todos-lane').isVisible(), true);
+      assert.equal(await page.locator('#upcoming-lane').isVisible(), false);
+      await page.screenshot({ path: `${evidence}/newtab-narrow-todos.png` });
       await page.evaluate(() => { history.replaceState(null, '', location.pathname); scrollTo(0, 0); });
       const lastSite = page.locator('.site:not(.site-add) a').last();
       await lastSite.focus();

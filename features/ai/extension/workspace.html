@@ -68,10 +68,10 @@
         <h2 id="nav-group-ai" class="nav-group">Breezer AI</h2>
         <ul class="nav-list" aria-labelledby="nav-group-ai">
           <li><a class="nav-item" href="#/settings/assistant" data-category="assistant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2.5 8.2 6 11.5 7.2 8.2 8.4 7 12 5.8 8.4 2.5 7.2 5.8 6 7 2.5ZM12 10.5l.6 1.4 1.4.6-1.4.6L12 14.5l-.6-1.4-1.4-.6 1.4-.6.6-1.4Z"/></svg><span>Assistant</span></a></li>
-          <li><a class="nav-item" href="#/settings/newtab" data-category="newtab"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 9.5l1.3 1.3 2.7-2.6"/></svg><span>New tab and Organato</span></a></li>
         </ul>
         <h2 id="nav-group-browser" class="nav-group">Browser</h2>
         <ul class="nav-list" aria-labelledby="nav-group-browser">
+          <li><a class="nav-item" href="#/settings/newtab" data-category="newtab"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 9.5l1.3 1.3 2.7-2.6"/></svg><span>New tab and Organato</span></a></li>
           <li><a class="nav-item" href="#/settings/languages" data-category="languages"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M2.5 8h11M8 2.5c1.6 1.6 2.3 3.4 2.3 5.5S9.6 11.9 8 13.5M8 2.5C6.4 4.1 5.7 5.9 5.7 8s.7 3.9 2.3 5.5"/></svg><span>Translation</span></a></li>
           <li><a class="nav-item" href="#/settings/browser" data-category="browser"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span>Browser tools</span></a></li>
           <li><button id="open-native-settings" class="nav-item" type="button" aria-describedby="native-settings-hint"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 8 8"/><path d="M11.5 9.5v2.5a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12V6A1.5 1.5 0 0 1 4 4.5h2.5"/></svg><span>All browser settings</span></button></li>
@@ -175,6 +175,10 @@
           </section>
 
           <section class="settings-page" data-page="layout" aria-label="Layout" hidden>
+            <figure id="layout-preview" class="layout-preview">
+              <div class="layout-preview-window" aria-hidden="true"><i class="layout-preview-toolbar"></i><i class="layout-preview-tabs"></i><i class="layout-preview-content"></i></div>
+              <figcaption><strong>Window preview</strong><span id="layout-preview-summary"></span></figcaption>
+            </figure>
             <section class="settings-section" aria-labelledby="layout-heading">
               <h2 id="layout-heading">Tabs and sidebar</h2>
               <div class="setting-group">
@@ -417,7 +421,7 @@
           <div id="wl-swatches" class="wl-swatches" role="radiogroup" aria-labelledby="wl-h-theme" data-field="theme"></div>
           <div class="setting-row wl-row">
             <label class="setting-label" for="wl-custom-color">Your own color<small>Breezer builds a matching light and dark theme.</small></label>
-            <span class="wl-custom"><input id="wl-custom-color" type="color" value="#23866b"><button id="wl-custom-apply" class="button" type="button">Use this color</button></span>
+            <span class="wl-custom"><input id="wl-custom-color" type="color" value="#23866b"><button id="wl-custom-apply" class="button" type="button">Apply color</button></span>
           </div>
           <div class="setting-row wl-row">
             <div class="setting-label"><span id="wl-mode-label">Appearance</span><small>Choose light, dark, or match your device.</small></div>
@@ -455,7 +459,7 @@
 
         <section class="wl-step" data-step="organato" aria-labelledby="wl-h-organato" hidden>
           <h1 id="wl-h-organato" tabindex="-1">Connect Organato?</h1>
-          <p class="wl-lede">See Organato tasks on new tabs. Breezer AI can update them when you ask. <span id="wl-tour-preview"></span></p>
+          <p class="wl-lede">See Organato tasks on new tabs. Breezer AI can update them when you ask.</p>
           <div class="key-field wl-key">
             <label for="wl-organato-key">Organato API key</label>
             <div class="key-row">
@@ -466,8 +470,14 @@
           </div>
           <div id="wl-organato-connect-status"><p id="wl-organato-status" class="status-line" role="status" aria-live="polite"></p></div>
           <div class="wl-optout">
-            <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
-            <p id="wl-organato-off-note" class="field-note">Turns Organato off on new tabs and in Breezer AI. Change this later in Settings.</p>
+            <div id="wl-organato-later-choice">
+              <button id="wl-organato-later" class="button" type="button" aria-describedby="wl-organato-later-note">Connect later</button>
+              <p id="wl-organato-later-note" class="field-note">Keep Organato available in Settings.</p>
+            </div>
+            <div id="wl-organato-off-choice">
+              <button id="wl-organato-off" class="button" type="button" aria-describedby="wl-organato-off-note">Don’t use Organato</button>
+              <p id="wl-organato-off-note" class="field-note">Turn it off on New Tab and in Breezer AI.</p>
+            </div>
             <div id="wl-organato-off-status"></div>
           </div>
         </section>

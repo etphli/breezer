@@ -97,11 +97,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 .sky {
   --sky-top: clamp(36px, 5vh, 62px);
-  --date-size: clamp(26px, 3.3vw, 36px);
+  --date-size: clamp(23px, 2.6vw, 32px);
   --date-gap: 18px;
   --date-lines: 1;
   --search-height: 64px;
-  --shortcuts-height: 170px;
+  --shortcuts-height: 133px;
   width: var(--column);
   margin: 0 auto;
   padding-top: var(--sky-top);
@@ -126,7 +126,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   display: flex;
   align-items: center;
   gap: 10px;
-  width: min(100%, 580px);
+  width: min(100%, 680px);
   height: 50px;
   margin-bottom: 14px;
   padding: 0 6px 0 14px;
@@ -169,6 +169,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   text-decoration: none;
 }
 .site-link:hover { background: var(--hover); }
+.site:has(.site-remove:focus-visible) .site-link { background: var(--hover); box-shadow: inset 0 0 0 1px var(--focus); }
 
 .site-icon {
   position: relative;
@@ -315,9 +316,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   font-size: 13px;
   font-weight: 600;
 }
-.lane-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
-.lane-heading .lane-title { margin: 0; padding: 0; border: 0; }
-.todos-jump { display: none; color: var(--accent); font-size: 13px; text-underline-offset: 3px; }
+.agenda-switch { display: none; }
 #lane-todos { scroll-margin-top: 16px; }
 #lane-todos:focus { outline: none; }
 .lane-count { margin-left: 4px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -344,7 +343,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   line-height: 1;
   font-variant-numeric: lining-nums tabular-nums;
 }
-.stub-week { margin-top: 2px; font-size: 11.5px; line-height: 1.1; }
+.stub-week { margin-top: 3px; font-size: 12px; font-weight: 550; line-height: 1.1; }
 .item[data-urgency="soon"] .stub { color: var(--accent); }
 .item[data-urgency="today"] .stub { color: var(--accent); }
 .item[data-urgency="today"] .stub-day { font-weight: 600; }
@@ -374,6 +373,7 @@ a.item-title { width: fit-content; font-weight: 650; text-decoration: underline;
 a.item-title:hover { text-decoration-color: currentColor; }
 
 .item-meta { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 13px; color: var(--muted); }
+.item-when { color: var(--ink); font-weight: 550; }
 .item-subject { color: var(--muted); }
 .item-kind { padding: 0 5px; border-radius: 4px; background: color-mix(in srgb, var(--accent) 20%, var(--sheet)); font-size: .9em; font-weight: 650; color: var(--ink); }
 .item[data-urgency="overdue"] .item-when { color: var(--danger); }
@@ -386,10 +386,12 @@ a.item-title:hover { text-decoration-color: currentColor; }
 @keyframes settle { from { transform: translateY(2px); } }
 
 @media (max-width: 860px) {
-  .lanes { grid-template-columns: minmax(0, 1fr); gap: 30px; }
-  .lane-title, .lane-heading { margin-bottom: 12px; }
-  .lane-heading .lane-title { margin-bottom: 0; }
-  .lanes:has([data-list="todos"] .item) .todos-jump { display: inline; }
+  .lanes { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .agenda-switch { display: flex; gap: 5px; padding: 4px; border-radius: 8px; background: var(--hover); }
+  .agenda-switch button { flex: 1; min-height: 36px; border: 0; border-radius: 6px; padding: 4px 8px; background: none; color: var(--muted); font-size: 13px; cursor: pointer; }
+  .agenda-switch button[aria-pressed="true"] { color: var(--ink); background: var(--raised); box-shadow: inset 0 0 0 1px var(--line); font-weight: 650; }
+  .lanes:not([data-lane="todos"]) .lane-todos, .lanes[data-lane="todos"] .lane-upcoming { display: none; }
+  .lanes .lane-title { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 }
 
 @media (max-width: 560px) {
@@ -414,6 +416,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
 .site:hover .site-remove, .site:focus-within .site-remove { opacity: 1; }
 .site-remove:focus-visible, .shortcut-feedback button:focus-visible, .shortcut-menu button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .shortcut-feedback { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; min-height: 36px; margin-top: 4px; font-size: 12px; color: var(--muted); }
+.shortcut-feedback:has(#shortcut-status:empty):not(:has(button:not([hidden]))) { min-height: 0; margin: 0; }
 #shortcut-status { min-width: 0; }
 .shortcut-feedback button { border: 0; padding: 4px 7px; color: var(--accent); background: transparent; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .shortcut-menu { position: fixed; z-index: 100; padding: 5px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--raised); box-shadow: 0 5px 25px #0002; }
@@ -447,16 +450,16 @@ a.item-title:hover { text-decoration-color: currentColor; }
   .site { width: 100%; }
 }
 /* Below 872px the nine tiles need a second row (48px margins, 88px tracks and 4px gaps). */
-@media (560px < width < 872px) { .sky { --shortcuts-height: 282px; } }
+@media (560px < width < 872px) { .sky { --shortcuts-height: 231px; } }
 @media (max-width: 560px) {
   .sites { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .sites { row-gap: 4px; }
-  .site { min-height: 66px; }
+  .sites { grid-auto-rows: 76px; row-gap: 4px; }
+  .site { min-height: 0; }
   .site-icon { width: 36px; height: 36px; border-radius: 10px; }
-  .site-link { gap: 4px; padding-block: 5px 3px; }
+  .site-link { gap: 4px; padding-block: 3px 1px; }
   .today { text-align: center; }
   .sites > .site-add:only-child { grid-column: 1 / -1; justify-self: center; }
-  .sky { --sky-top: 56px; --date-gap: 16px; --date-lines: 2; --shortcuts-height: 302px; }
+  .sky { --sky-top: 56px; --date-gap: 14px; --date-lines: 2; --shortcuts-height: 236px; }
   .organato-head { flex-direction: column; align-items: flex-start; gap: 6px; }
   .agenda-actions .refresh { padding-left: 0; }
 }

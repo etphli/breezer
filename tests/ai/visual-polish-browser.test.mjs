@@ -215,7 +215,9 @@ test('favourite tiles stay even, centred and usable across sidebar widths and th
         if (item.name === 'compact-rail') {
           assert.equal(new Set(geometry.tiles.map((t) => Math.round(t.cx))).size, 1, 'compact rail stacks tiles in one column');
         } else {
-          assert.equal(new Set(geometry.tiles.slice(0, 4).map((t) => Math.round(t.top))).size, 1, 'four tiles per row (arrow up/down move by four)');
+          const columns = item.width <= 320 ? 3 : 4;
+          assert.equal(new Set(geometry.tiles.slice(0, columns).map((t) => Math.round(t.top))).size, 1, 'favorites use wider columns on narrow sidebars');
+          if (geometry.tiles.length > columns) assert.ok(geometry.tiles[columns].top > geometry.tiles[0].top);
         }
         await page.screenshot({ path: `${evidence}/favorites-${item.name}.png`, clip: { x: 0, y: 0, width: item.width, height: 240 } });
       });
@@ -266,10 +268,12 @@ test('favourite tiles stay even, centred and usable across sidebar widths and th
         favorites.hidden = false;
         favorites.classList.add('empty');
         const box = favorites.getBoundingClientRect();
-        return { position: getComputedStyle(favorites).position, height: box.height, width: box.width };
+        const firstRow = document.querySelector('.space-pane .row').getBoundingClientRect();
+        return { position: getComputedStyle(favorites).position, height: box.height, width: box.width, gap: firstRow.top - box.bottom };
       });
       assert.equal(target.position, 'absolute');
-      assert.ok(target.height >= 40 && target.width > 180, `drop target ${target.width}x${target.height}`);
+      assert.ok(target.height >= 30 && target.width > 180, `drop target ${target.width}x${target.height}`);
+      assert.ok(target.gap >= 4, 'The drop target clears the first tab row');
       assert.equal(await page.$eval('#space-pane', (node) => node.getBoundingClientRect().top), before, 'tab rows stay put');
       await page.screenshot({ path: `${evidence}/favorites-empty-drop-target.png`, clip: { x: 0, y: 0, width: 240, height: 160 } });
     });

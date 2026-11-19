@@ -246,7 +246,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       $(kind === 'off' ? 'wl-organato-off-status' : 'wl-organato-connect-status').append(status);
     };
     const busy = (value) => {
-      for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
+      for (const id of ['wl-organato-connect', 'wl-organato-key', 'wl-organato-off', 'wl-organato-later', 'wl-next', 'wl-back', 'wl-skip']) $(id).disabled = value;
       root.classList.toggle('wl-connecting', value);
     };
     const finish = (text, error = false) => {
@@ -267,6 +267,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
       button.textContent = organatoConnected ? 'Update connection' : 'Connect';
       button.classList.toggle('primary', !organatoConnected);
       off.hidden = !organatoEnabled;
+      $('wl-organato-off-choice').hidden = !organatoEnabled;
       updateNavigation();
     };
     const connect = () => {
@@ -323,7 +324,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
     $('wl-organato-connect').addEventListener('click', () => {
       placeStatus('connect');
       const key = $('wl-organato-key').value.trim();
-      if (!key) { status.textContent = 'Paste your API key first, or choose Continue to skip.'; $('wl-organato-key').focus(); return; }
+      if (!key) { status.textContent = 'Paste your API key first, or choose Connect later.'; $('wl-organato-key').focus(); return; }
       $('wl-organato-key').value = '';
       status.textContent = 'Connecting to Organato…';
       request('configure', { key });
@@ -407,9 +408,10 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   function updateNavigation() {
     const step = steps[index];
     const lastTip = slide === tourSlides(appearance.layout).length - 1;
-    $('wl-tour-preview').textContent = `Next: ${tourSlides(appearance.layout).length} optional tips.`;
-    $('wl-next').textContent = step === 'organato' && !organatoConnected && organatoEnabled ? 'Connect later'
-      : step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
+    const connectLater = step === 'organato' && !organatoConnected && organatoEnabled;
+    $('wl-organato-later-choice').hidden = !connectLater;
+    $('wl-next').hidden = connectLater;
+    $('wl-next').textContent = step === 'tour' ? lastTip ? 'Finish tour' : 'Next tip' : NEXT_LABELS[step] ?? 'Continue';
     $('wl-skip').textContent = step === 'tour' ? 'Skip tour' : 'Skip setup';
   }
 
@@ -482,6 +484,7 @@ export async function mountWelcome({ api, callBridge, loadAppearance, applyAppea
   }
 
   $('wl-next').addEventListener('click', () => void next());
+  $('wl-organato-later').addEventListener('click', () => void next());
   $('wl-back').addEventListener('click', back);
   $('wl-skip').addEventListener('click', () => {
     if (steps[index] === 'tour') { index = steps.indexOf('done'); render(1); }

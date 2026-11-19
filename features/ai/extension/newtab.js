@@ -263,19 +263,19 @@ function createFaviconCache(api) {
       const icon = icons.get(url);
       return icon?.expires > Date.now() ? icon.png : null;
     },
-    async save(url, img) {
-      if (!storage?.set || url.length > 4096) return;
+    async accept(url, img) {
       try {
         const png = rasterize(img);
-        if (png.length > FAVICON_MAX_LENGTH) return;
-        defaultPng ??= readDefault(img.ownerDocument);
-        if (png === await defaultPng) return;
-        const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
-        remember(icons, entry);
-        remember(dirty, entry);
-      } catch { return; }
-      if (saveTimer) return;
-      saveTimer = setTimeout(() => void flush().catch(() => {}), 30);
+        defaultPng ??= readDefault(img.ownerDocument).catch(() => null);
+        if (png === await defaultPng) return false;
+        if (storage?.set && url.length <= 4096 && png.length <= FAVICON_MAX_LENGTH) {
+          const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
+          remember(icons, entry);
+          remember(dirty, entry);
+          saveTimer ??= setTimeout(() => void flush().catch(() => {}), 30);
+        }
+      } catch { /* A usable image can still be shown when it can't be cached. */ }
+      return true;
     },
   };
 }
@@ -291,16 +291,16 @@ function siteTile(api, site, favicons, retryIcons) {
   if (src) {
     const img = el('img', '', { alt: '', width: '28', height: '28', decoding: 'sync' });
     let cached = favicons?.get(site.url);
-    img.addEventListener('load', () => {
-      icon.classList.add('has-icon');
-      if (!cached) void favicons?.save(site.url, img);
+    img.addEventListener('load', async () => {
+      if (cached || !favicons || await favicons.accept(site.url, img)) icon.classList.add('has-icon');
+      else img.remove();
     }, { once: true });
     img.addEventListener('error', () => {
       if (cached) { cached = null; img.src = src; }
       else img.remove();
     });
     img.src = cached || src;
-    if (img.complete && img.naturalWidth) icon.classList.add('has-icon');
+    if (cached && img.complete && img.naturalWidth) icon.classList.add('has-icon');
     icon.append(img);
   }
   const name = el('span', 'site-name');
@@ -455,6 +455,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     }
     target.replaceChildren(...shown);
     lanes.querySelector(`[data-count="${list}"]`).textContent = items.length ? String(items.length) : '';
+    lanes.querySelector(`button[data-lane="${list}"] .lane-count`).textContent = String(items.length);
   }
 }
 
@@ -519,6 +520,14 @@ function connectSearch(root, api) {
 
 export function startNewTab({ api = globalThis.chrome, root = document, now = () => new Date() } = {}) {
   connectSearch(root, api);
+  const lanes = root.getElementById('organato-lists');
+  const laneButtons = lanes.querySelectorAll('.agenda-switch button');
+  for (const button of laneButtons) {
+    button.addEventListener('click', () => {
+      lanes.dataset.lane = button.dataset.lane;
+      for (const choice of laneButtons) choice.setAttribute('aria-pressed', String(choice === button));
+    });
+  }
   let view = null;
   let problem = null;
   let pending = false;

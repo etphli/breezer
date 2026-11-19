@@ -78,9 +78,9 @@ try {
     const writing = await page.locator('#prompt').boundingBox();
     assert.ok(tip.y + tip.height <= writing.y, 'Control explanation leaves the writing area uncovered');
     const trigger = await page.locator('#control-toggle').boundingBox();
-    assert.ok(Math.abs(trigger.y - tip.y - tip.height - 8) < 1, 'Tooltip is anchored directly above Browser control');
-    const pointer = await page.locator('#control-tip').evaluate(node => parseFloat(node.style.getPropertyValue('--tip-pointer')));
-    assert.ok(Math.abs(tip.x + pointer - trigger.x - trigger.width / 2) < 1, 'Tooltip pointer follows the browser-control trigger');
+    assert.ok(tip.y >= trigger.y + trigger.height - 4, 'Control explanation sits below the permission controls');
+    const suggestion = await page.locator('[data-control="true"]').boundingBox();
+    assert.ok(tip.y >= suggestion.y + suggestion.height, 'Control explanation leaves the suggestion uncovered');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
     await page.mouse.move(1, 1);
   }

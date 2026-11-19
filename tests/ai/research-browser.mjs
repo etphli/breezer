@@ -191,7 +191,7 @@ try {
   await checkboxes.nth(0).check();
   assert.equal(await checkboxes.nth(7).isDisabled(), true);
   assert.equal(await checkboxes.nth(7).isChecked(), false);
-  assert.match(await page.locator('#research-limit').innerText(), /6 of 6 selected/);
+  assert.match(await page.locator('#research-limit').innerText(), /6 selected · Limit 6/);
   assert.equal(await page.locator('#research-chips button').count(), 6);
   await capturePicker(page, 'research-picker.png');
   await page.setViewportSize({ width: 320, height: 640 });

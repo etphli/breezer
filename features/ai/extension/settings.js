@@ -201,10 +201,20 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   function renderAppearance() {
     applyAppearance(appearance);
+    const preview = $('layout-preview');
+    preview.dataset.tabs = appearance.layout;
+    preview.dataset.sidebar = !appearance.alwaysShowSidebar && appearance.frameless
+      ? 'autoHide' : appearance.sidebarMode;
+    preview.dataset.topBar = !appearance.frameless || appearance.alwaysShowTopBar ? 'visible' : 'autoHide';
+    preview.dataset.address = appearance.centeredAddressBar ? 'center' : 'left';
+    preview.dataset.url = appearance.minimalUrl ? 'minimal' : 'full';
+    const tabs = appearance.layout === 'top' ? 'Tabs across the top'
+      : ({ expanded: 'Expanded sidebar', compact: 'Compact sidebar', autoHide: 'Sidebar on hover' })[preview.dataset.sidebar];
+    $('layout-preview-summary').textContent = `${tabs}. ${preview.dataset.topBar === 'autoHide' ? 'Top bar on hover.' : 'Top bar visible.'}`;
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
     const customSelected = /^#[0-9a-fA-F]{6}$/.test(appearance.theme);
-    $('custom-theme-note').textContent = customSelected ? 'Custom color selected' : 'Create a theme for the browser and sidebar.';
+    $('custom-theme-note').textContent = customSelected ? 'Custom color overrides the sidebar’s space color while selected.' : 'Use one color across the browser and sidebar.';
     $('custom-theme-apply').setAttribute('aria-pressed', String(customSelected));
     if (/^#[0-9a-fA-F]{6}$/.test(appearance.theme) && document.activeElement !== $('custom-theme-color')) $('custom-theme-color').value = appearance.theme;
     for (const range of ranges) {

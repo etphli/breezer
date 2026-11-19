@@ -13,7 +13,7 @@
       <div class="brand"><img src="icon128.png" width="22" height="22" alt=""><span>Breezer AI</span></div>
       <div class="toolbar-actions">
         <button id="new-chat" class="icon-button" title="New conversation" aria-label="New conversation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>New chat</span></button>
-        <button id="open-profile" class="profile-button" title="Your context" aria-label="Edit your personal context">Y</button>
+        <button id="open-profile" class="profile-button" title="Your context" aria-label="Edit your personal context"><span id="profile-initial" aria-hidden="true">Y</span><span>Context</span></button>
         <button id="close-panel" class="icon-button" title="Close assistant · ⌘K" aria-label="Close assistant"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
       </div>
     </header>
@@ -52,8 +52,9 @@
         <button type="button" id="context-toggle" class="context-chip" aria-pressed="true" aria-describedby="context-title context-hint" title="Include the current page and a screenshot with your message">
           <span id="sharing-label">Page + screenshot</span><span id="context-title" class="sr-only">Current page</span>
         </button>
-        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><span>Browser control</span><span class="control-state" aria-hidden="true"></span><span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span></button>
+        <button type="button" id="control-toggle" class="control-toggle icon-button" aria-label="Browser control" aria-pressed="false" aria-describedby="context-hint control-tip"><span>Browser control</span><span class="control-state" aria-hidden="true"></span></button>
         <span id="context-hint" class="context-hint" data-state="shared">Page + screenshot</span>
+        <span id="control-tip" class="control-tip" role="tooltip">Click, type, scroll, and navigate in this tab.</span>
       </div>
       <form id="composer" class="composer">
         <div id="attachment-list" class="attachment-list" aria-label="Attached files"></div>
@@ -131,8 +132,9 @@
     <div class="dialog-heading"><h2 id="research-title">Source tabs</h2><button type="button" id="research-clear" class="text-button" aria-label="Clear sources" hidden>Clear all</button><button type="button" id="research-close" class="save-button">Done</button></div>
     <p>Send text from up to six tabs to your selected provider. Screenshots and browser control are off.</p>
     <details class="research-sharing"><summary>Sharing details</summary><p>Sources are read only when you send. Navigation clears the selection. Form fields, frames and recognizable secrets are excluded.</p></details>
-    <p id="research-limit" role="status">0 of 6 selected</p>
-    <div id="research-options" class="research-options"></div>
+    <p id="research-limit" role="status">0 selected · Limit 6</p>
+    <div id="research-options" class="research-options" tabindex="0" role="group" aria-label="Open tabs"></div>
+    <p id="research-scroll" class="research-scroll" hidden>Scroll for more tabs</p>
   </dialog>
   <script type="module" src="panel.js"></script>
 </body>

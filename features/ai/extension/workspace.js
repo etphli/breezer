@@ -1054,7 +1054,9 @@ function onFavoritesKey(event) {
     tile.focus();
   };
   const handlers = {
-    ArrowRight: () => go(at + 1), ArrowLeft: () => go(at - 1), ArrowDown: () => go(at + 4), ArrowUp: () => go(at - 4),
+    ArrowRight: () => go(at + 1), ArrowLeft: () => go(at - 1),
+    ArrowDown: () => go(at + Number(getComputedStyle($('favorites')).getPropertyValue('--favorite-columns'))),
+    ArrowUp: () => go(at - Number(getComputedStyle($('favorites')).getPropertyValue('--favorite-columns'))),
     Home: () => go(0), End: () => go(tiles.length - 1), Delete: () => closeItem(found), Backspace: () => closeItem(found),
     ContextMenu: () => openItemMenu(found, tiles[at].getBoundingClientRect()),
   };
@@ -1162,11 +1164,16 @@ function placeMenu() {
   const menu = $('menu');
   const rect = menuRect;
   const bounds = $('sidebar').getBoundingClientRect();
+  const below = bounds.bottom - rect.bottom - 12;
+  const above = rect.top - bounds.top - 12;
+  const fitsBelow = menu.scrollHeight <= below;
+  const openAbove = !fitsBelow && above > below;
+  menu.style.maxHeight = `${Math.max(0, openAbove ? above : below)}px`;
   const height = menu.offsetHeight;
   const width = menu.offsetWidth;
-  const top = Math.min(Math.max(8, rect.bottom + 4), bounds.height - height - 8);
+  const top = (openAbove ? rect.top - height - 4 : rect.bottom + 4) - bounds.top;
   const left = Math.min(Math.max(8, rect.left + 8), bounds.width - width - 8);
-  menu.style.top = `${top < rect.bottom && rect.top - height - 4 > 8 ? rect.top - height - 4 : top}px`;
+  menu.style.top = `${Math.max(8, top)}px`;
   menu.style.left = `${Math.max(4, left)}px`;
 }
 
@@ -1821,11 +1828,11 @@ async function adoptPinned(tabIds) {
 // ---------------------------------------------------------------- sidebar boot
 
 async function initSidebar(route) {
-  $('sidebar').hidden = false;
   document.body.classList.add('route-sidebar');
   try {
     state.windowId = route.windowId ?? (await api.windows.getCurrent()).id;
   } catch {
+    $('sidebar').hidden = false;
     showToast('Couldn’t find this window.');
     return;
   }
@@ -1848,9 +1855,10 @@ async function initSidebar(route) {
     : (active && spaceOfTab(store, state.records, active.id)) || store.spaces[0].id;
   saveWindowState();
   bindSidebar();
+  draw();
+  $('sidebar').hidden = false;
   // Re-read after subscribing: tabs can open while initial reconciliation awaits.
   await refreshTabs();
-  draw();
   if (orphanPinned.length) void adoptPinned(orphanPinned);
 }
 
@@ -1935,7 +1943,7 @@ function bindSidebar() {
     const found = itemFromNode(event.target);
     if (event.target.closest('input')) return;
     event.preventDefault();
-    if (found?.item) openItemMenu(found, { left: event.clientX - 8, right: event.clientX, top: event.clientY, bottom: event.clientY });
+    if (found?.item) openItemMenu(found, found.node.getBoundingClientRect());
     else if (event.target.closest('.space-head, #empty-hit, .space-pane')) openSpaceMenu();
   });
   sidebar.addEventListener('pointerdown', onPointerDown);

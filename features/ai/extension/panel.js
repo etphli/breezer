@@ -389,7 +389,7 @@ function setControl(on) {
 function applyProfile() {
   const name = state.profile.name.trim();
   $('greeting-name').textContent = name ? `, ${name}` : '';
-  $('open-profile').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
+  $('profile-initial').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
 }
 
 function appendMessage(message) {
@@ -566,7 +566,16 @@ function renderSourceMetadata(meta, sources) {
       : `Unavailable · ${source.error}`;
     row.append(title, status); list.append(row);
   }
-  details.append(list); meta.replaceChildren(details);
+  details.append(list);
+  if (unavailable) {
+    const review = document.createElement('button');
+    review.type = 'button';
+    review.className = 'review-sources';
+    review.textContent = 'Review source tabs';
+    review.addEventListener('click', () => void research.open());
+    details.append(review);
+  }
+  meta.replaceChildren(details);
 }
 
 function recentMessages(limit) {
@@ -1059,18 +1068,6 @@ $('control-toggle').addEventListener('click', () => {
   notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
 });
-function positionControlTip() {
-  const trigger = $('control-toggle').getBoundingClientRect();
-  const footer = document.querySelector('.context-row').getBoundingClientRect();
-  const tip = $('control-tip');
-  const center = trigger.left + trigger.width / 2 - footer.left;
-  const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));
-  tip.style.left = `${left}px`;
-  tip.style.bottom = `${footer.bottom - trigger.top + 8}px`;
-  tip.style.setProperty('--tip-pointer', `${center - left}px`);
-}
-for (const type of ['pointerenter', 'focus']) $('control-toggle').addEventListener(type, positionControlTip);
-addEventListener('resize', positionControlTip);
 const resetControlTip = () => {
   if (!$('control-toggle').matches(':hover, :focus-visible')) delete $('control-toggle').dataset.tipDismissed;
 };
