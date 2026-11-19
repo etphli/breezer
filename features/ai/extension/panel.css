@@ -823,7 +823,7 @@ h1 {
 .model-preferences[open] > summary { justify-content: flex-start; }
 .model-preferences[open] > summary::after { order: -1; transform: rotate(135deg); margin: 0 3px; }
 .model-preferences > summary:focus-visible { outline-offset: -2px; }
-.model-menu:has(.model-preferences[open]) :is(.menu-heading, #model-options) { display: none; }
+.model-menu:has(.model-preferences[open]) :is(#refresh-models, #model-options) { display: none; }
 .model-menu:has(.model-preferences[open] #speed-note:not([hidden])) .menu-note { display: none; }
 .panel:has(.model-menu:not([hidden])) .suggestions { visibility: hidden; }
 .inference-model { grid-column: 1 / -1; margin: 0 0 2px; color: var(--ink); font-size: 15px; line-height: 1.4; font-weight: 600; }
@@ -945,16 +945,30 @@ h1 {
   border-radius: 12px;
   max-height: min(480px,70dvh);
   overflow: auto;
+  scroll-padding-top: 34px;
   z-index: 3;
 }
 
 .menu-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+  background: var(--raised);
   font-size: 13px;
   font-weight: 600;
-  margin: 0 5px 12px;
+  margin-bottom: 8px;
+  padding-left: 5px;
+}
+
+.menu-heading > span {
+  margin-right: auto;
+}
+
+.menu-heading .icon-button:focus-visible {
+  outline-offset: -2px;
 }
 
 .text-button {

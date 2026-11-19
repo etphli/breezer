@@ -74,7 +74,11 @@
       </form>
       <p class="attachment-hint">Paste images or drop files here. Attachments are shared when you send.</p>
       <section id="model-menu" class="model-menu" role="dialog" aria-label="Choose a model" hidden>
-        <div class="menu-heading"><span>Your models</span><button type="button" id="refresh-models" class="text-button">Refresh</button></div>
+        <div class="menu-heading">
+          <span>Your models</span>
+          <button type="button" id="refresh-models" class="text-button">Refresh</button>
+          <button type="button" id="close-model-menu" class="icon-button" aria-label="Close model picker" title="Close model picker"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+        </div>
         <div id="model-options"></div>
         <details id="inference-options" class="model-preferences">
           <summary><span id="model-settings-label" class="model-options-label">Reasoning and speed</span><span class="model-back-label">Back to models</span></summary>
