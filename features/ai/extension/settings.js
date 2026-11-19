@@ -11,6 +11,8 @@ import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
 import { mountSettingsNav } from './settings-nav.js';
+import { HAS_NATIVE_HELPER } from './platform.js';
+import { DASHBOARD_ENABLED_KEY, readDashboardPreference } from './dashboard-preference.js';
 
 // Settings owned by feature modules. Each entry names an empty container in workspace.html
 // and loads a function called as mount({ container, api }). It may be async and may return
@@ -131,7 +133,19 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   const passwordSteps = { showImport() { nav?.open('passwords'); passwords.showImport(); } };
   const onboarding = mountOnboarding({ container: $('settings-onboarding'), api, passwords: passwordSteps });
   addEventListener('pagehide', () => onboarding.dispose(), { once: true });
-  if (typeof api.runtime?.connect === 'function') {
+  if (!HAS_NATIVE_HELPER) {
+    const assistantGroup = $('nav-group-ai');
+    const newTab = assistantGroup.nextElementSibling.querySelector('[data-category="newtab"]');
+    newTab.querySelector('span').textContent = 'New tab';
+    $('settings-categories').querySelector('[aria-label="Breezer"]').append(newTab.closest('li'));
+    assistantGroup.nextElementSibling.remove();
+    assistantGroup.remove();
+    $('organato-heading').textContent = 'New tab';
+    $('organato-settings').dataset.searchTerms = 'dashboard shortcuts';
+    $('organato-settings').closest('[data-page]').setAttribute('aria-label', 'New tab');
+    for (const element of document.querySelectorAll('[data-native-helper]')) element.remove();
+    void mountDashboardPreference(api);
+  } else if (typeof api.runtime?.connect === 'function') {
     mountUpdates(api);
     mountOrganato(api);
     const contextSettings = mountContextSettings({ container: $('context-settings'), api });
@@ -503,6 +517,37 @@ export function mountUpdates(api) {
   window.addEventListener('pagehide', dispose, { once: true });
   request('update-check');
   return { dispose };
+}
+
+async function mountDashboardPreference(api) {
+  const input = $('dashboard-enabled');
+  input.disabled = true;
+  try {
+    input.checked = await readDashboardPreference(api);
+  } catch {
+    showError('dashboard-error', 'Could not load your dashboard setting. Reload Settings to try again.');
+    return;
+  }
+  input.disabled = false;
+  input.addEventListener('change', async () => {
+    const enabled = input.checked;
+    input.disabled = true;
+    showError('dashboard-error', '');
+    try {
+      await api.storage.local.set({ [DASHBOARD_ENABLED_KEY]: enabled });
+    } catch {
+      input.checked = !enabled;
+      showError('dashboard-error', 'Could not save your dashboard setting. Try again.');
+    } finally {
+      input.disabled = false;
+    }
+  });
+  const onChanged = (changes) => {
+    if (changes[DASHBOARD_ENABLED_KEY]) input.checked = changes[DASHBOARD_ENABLED_KEY].newValue !== false;
+  };
+  const events = localStorageChanges(api);
+  events?.addListener(onChanged);
+  window.addEventListener('pagehide', () => events?.removeListener(onChanged), { once: true });
 }
 
 export function mountOrganato(api, { timeoutMs = 85000 } = {}) {

@@ -233,6 +233,91 @@ for (const link of document.querySelectorAll('[data-download]')) {
   });
 }
 
+// The Mac download is static. A Windows download appears only when the latest
+// GitHub release publishes the Windows file, its .sha256 file and a SHA-256
+// digest, so the page never links to a build that doesn't exist.
+const WINDOWS_FILES = ['Breezer-Windows-x64-Setup.exe', 'Breezer-Windows-x64.zip'];
+
+function windowsDownloads(release) {
+  const assets = new Map((release?.assets || []).map(a => [a.name, a]));
+  const uploaded = asset => asset?.state === 'uploaded' && Number.isSafeInteger(asset.size) && asset.size > 0;
+  return WINDOWS_FILES.map((name) => {
+    const asset = assets.get(name);
+    const sha = /^sha256:([0-9a-f]{64})$/.exec(asset?.digest || '')?.[1];
+    if (!sha || !uploaded(asset) || !uploaded(assets.get(`${name}.sha256`)) ||
+        !/^https:\/\/github\.com\//.test(asset.browser_download_url)) return null;
+    return { name, url: asset.browser_download_url, sha };
+  }).filter(Boolean);
+}
+
+async function latestRelease() {
+  const key = 'breezer.latest-release';
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(key));
+    if (cached && Date.now() - cached.at < 10 * 60_000) return cached.release;
+  } catch {}
+  const response = await fetch('https://api.github.com/repos/etphli/breezer/releases/latest', { headers: { Accept: 'application/vnd.github+json' } });
+  if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+  const { tag_name, assets } = await response.json();
+  const release = { tag_name, assets: (assets || []).map(({ name, digest, browser_download_url, state, size }) =>
+    ({ name, digest, browser_download_url, state, size })) };
+  try { sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), release })); } catch {}
+  return release;
+}
+
+const windowsPanel = document.getElementById('windows');
+const homeDownload = document.getElementById('home-download');
+if (windowsPanel || homeDownload) {
+  const onWindows = navigator.userAgentData?.platform === 'Windows' || /Windows NT/.test(navigator.userAgent);
+  // When GitHub can't be reached, don't claim that no Windows build exists.
+  const showUnavailable = (known) => {
+    if (!onWindows || !windowsPanel) return;
+    const note = document.getElementById('windows-unavailable');
+    note.querySelector('[data-reason]').hidden = !known;
+    note.hidden = false;
+  };
+  latestRelease().then((release) => {
+    const files = windowsDownloads(release);
+    if (!files.length) { showUnavailable(true); return; }
+    const version = String(release.tag_name).replace(/^v/, '');
+    if (homeDownload) {
+      document.getElementById('home-platforms').textContent = 'Free for Apple Silicon Macs and Windows x64. Built on Chromium 156.';
+      document.getElementById('home-download-platforms').textContent = 'Available for Apple Silicon Macs and Windows x64.';
+      if (onWindows) {
+        homeDownload.textContent = 'Download for Windows';
+        document.getElementById('home-version').textContent = `Breezer ${version} for Windows`;
+      }
+      return;
+    }
+    const [primary, zip] = files;
+    const button = document.getElementById('windows-primary');
+    button.href = primary.url;
+    if (primary.name.endsWith('.zip')) button.textContent = 'Download zip for Windows';
+    document.getElementById('windows-sha-name').textContent = primary.name;
+    document.getElementById('windows-sha').textContent = primary.sha;
+    if (zip) {
+      Object.assign(document.getElementById('windows-zip'), { href: zip.url, hidden: false });
+      document.getElementById('windows-zip-sha').textContent = zip.sha;
+      document.getElementById('windows-zip-row').hidden = false;
+    }
+    document.getElementById('windows-version').textContent = `Version ${version}`;
+    document.getElementById('windows-release-notes').href = `https://github.com/etphli/breezer/releases/tag/${encodeURIComponent(release.tag_name)}`;
+    document.getElementById('platform-support').textContent = "Intel Macs and Linux aren't supported yet.";
+    // Windows visitors see their download first; everyone else sees it below the Mac one.
+    if (onWindows) {
+      document.getElementById('get-platform').textContent = 'for Windows';
+      document.getElementById('get-title').setAttribute('aria-label', 'Breezer for Windows');
+      document.getElementById('get-version').textContent = `Version ${version}`;
+      const mac = document.querySelector('.get-copy .actions');
+      mac?.before(windowsPanel);
+      const macButton = mac?.querySelector('[data-download]');
+      if (macButton) { macButton.className = 'button secondary'; macButton.textContent = 'Download for Mac'; }
+    }
+    windowsPanel.classList.toggle('first', onWindows);
+    windowsPanel.hidden = false;
+  }).catch(() => showUnavailable(false));
+}
+
 // Keep sound from different films from overlapping.
 const films = [...document.querySelectorAll('.film video')];
 for (const film of films) {

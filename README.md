@@ -20,7 +20,7 @@ The browser foundation, logo, and first AI sidebar implementation are in place. 
 
 The custom [workspace and appearance settings](docs/workspace.md) provide left tabs, spaces, folders, and theme choices. The assistant occupies the right side of the window. Native component loading and the bundled AI host have been verified in a locally compiled app; the Command K shortcut still needs a native keyboard check.
 
-Source builds can run on a Mac with full Xcode or through the configured GitHub-hosted Mac workflow. No compiled Breezer release is available yet.
+Apple Silicon builds are available on the [Breezer releases page](https://github.com/etphli/breezer/releases). The repository also has a native Windows x64 build path.
 
 ## Source and tests
 
@@ -49,6 +49,8 @@ Chromium itself is downloaded during a browser build. Its compiled browser tests
 ## Build Breezer
 
 Follow the [Breezer macOS build guide](docs/building-breezer.md). Full Xcode 26 and the build dependencies are required.
+
+On Windows, the [native Windows build guide](docs/building-windows.md) covers the x64 installer, portable ZIP, and browser import checks.
 
 ## Branding
 

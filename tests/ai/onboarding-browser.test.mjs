@@ -100,13 +100,19 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
   const errors = [];
   // A tester pauses to read; automated runs only wait for animations to settle.
   const pause = (ms) => new Promise((done) => setTimeout(done, videoDir ? ms : 60));
-  const open = async ({ width = 1280, height = 800, reducedMotion = 'no-preference', bridge = true, record = false, layout = 'sidebar', local, organato } = {}) => {
+  const open = async ({ width = 1280, height = 800, reducedMotion = 'no-preference', bridge = true, record = false, layout = 'sidebar', local, organato, platform = 'mac' } = {}) => {
     const context = await browser.newContext({
       viewport: { width, height }, deviceScaleFactor: record ? 1 : 2, colorScheme: 'light', reducedMotion,
       ...(record ? { recordVideo: { dir: videoDir, size: { width, height } } } : {}),
     });
     await context.addInitScript(installFixture, { bridge, layout, local, organato });
     const page = await context.newPage();
+    if (platform === 'windows') {
+      await page.route('**/platform.js', async route => route.fulfill({
+        contentType: 'application/javascript',
+        body: (await readFile(join(root, 'platform.js'), 'utf8')).replace("PLATFORM = 'mac'", "PLATFORM = 'windows'"),
+      }));
+    }
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !/404/.test(message.text())) errors.push(message.text()); });
     await page.goto(base);
@@ -187,10 +193,12 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     await next.click();
 
     // Import: opens the native routes and never claims an import happened.
-    assert.equal(await heading(), 'Bring your things from Chrome');
+    assert.equal(await heading(), 'Bring your browser data');
     await pause(900);
-    await page.getByRole('button', { name: 'Open import dialog' }).click();
-    await page.getByRole('button', { name: 'Import passwords' }).click();
+    assert.match(await page.locator('section[data-step="import"]').innerText(), /Bookmarks HTML File/);
+    assert.equal(await page.locator('#wl-import-firefox').isHidden(), true);
+    await page.getByRole('button', { name: 'Import browser data' }).click();
+    await page.getByRole('button', { name: 'Import password CSV' }).click();
     assert.deepEqual(await page.evaluate(() => fx.opened.map((tab) => tab.url)), ['chrome://settings/importData', 'chrome://password-manager/settings?import=true']);
     assert.doesNotMatch(await page.locator('#wl-import-status').innerText(), /imported|success|complete/i);
     await pause(1200);
@@ -369,6 +377,22 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       const nextBounds = await page.locator('#wl-next').boundingBox();
       assert.ok(nextBounds.y + nextBounds.height <= 844, 'Continue stays available while setup content scrolls');
       await shot(page, 'narrow-no-bridge');
+      await context.close();
+    }
+
+    {
+      const { context, page } = await open({ platform: 'windows', width: 390, height: 844, reducedMotion: 'reduce' });
+      for (const step of ['welcome', 'layout', 'theme']) {
+        await page.locator(`section[data-step="${step}"]`).waitFor();
+        await page.locator('#wl-next').click();
+      }
+      assert.match(await page.locator('#wl-import-firefox').innerText(), /Choose Firefox and check Saved passwords/);
+      await shot(page, 'windows-import');
+      await page.getByRole('button', { name: 'Import browser data' }).click();
+      await page.getByRole('button', { name: 'Import password CSV' }).click();
+      assert.deepEqual(await page.evaluate(() => fx.opened.map(tab => tab.url)), [
+        'chrome://settings/importData', 'chrome://password-manager/settings?import=true',
+      ]);
       await context.close();
     }
 

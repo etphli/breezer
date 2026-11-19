@@ -102,6 +102,8 @@ import { readBrowserStats } from './browser-stats.js';
 import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
 import { installTranslation } from './translation-background.js';
+import { HAS_NATIVE_HELPER } from './platform.js';
+import { readDashboardPreference } from './dashboard-preference.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
 // Extension-local copy of the helper's Organato switches. The helper's file stays
@@ -179,6 +181,22 @@ function createOrganatoTransport(api) {
   return { ask, close };
 }
 
+function installCommands(api, toggleAssistant) {
+  api.commands.onCommand.addListener((command, tab) => {
+    if (command === 'toggle-breezer-ai') { toggleAssistant?.(tab); return; }
+    const space = /^space-([1-4])$/.exec(command);
+    if (!space) return;
+    void (async () => {
+      const current = tab?.windowId !== undefined ? tab
+        : (await api.tabs.query({ active: true, currentWindow: true }))[0];
+      if (current?.windowId === undefined) return;
+      await api.runtime.sendMessage({
+        type: 'breezer.workspace.space', windowId: current.windowId, index: Number(space[1]) - 1,
+      });
+    })().catch(() => {});
+  });
+}
+
 export function installBackground(api) {
   installTranslation(api);
   installWorkspaceSync(api);
@@ -187,7 +205,7 @@ export function installBackground(api) {
   const dashboardCache = createDashboardCache();
   const cacheOwner = {};
   installReleaseNotes(api);
-  api.runtime.onConnect.addListener(port => {
+  if (HAS_NATIVE_HELPER) api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
     let url;
@@ -243,6 +261,7 @@ export function installBackground(api) {
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
     let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
     const settings = port.name === 'breezer-organato-settings';
+    if (settings && !HAS_NATIVE_HELPER) return;
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
     let closed = false, revision = 0, readerController;
     const ask = (type, values = {}, progress) => closed
@@ -268,7 +287,8 @@ export function installBackground(api) {
           const sites = Promise.resolve().then(() => api.topSites.get()).then(raw => raw.slice(0, 32).filter(site => /^https?:\/\//.test(site.url)));
           // Observe an early failure while retaining the existing config-first error order.
           void sites.catch(() => {});
-          const saved = await loadOrganatoSwitches(api);
+          const saved = HAS_NATIVE_HELPER ? await loadOrganatoSwitches(api)
+            : { enabled: false, dashboardEnabled: await readDashboardPreference(api) };
           if (message.earlySites === true && saved?.dashboardEnabled !== false) {
             void sites.then(topSites => {
               if (!closed && revision === requestRevision) port.postMessage({ type: 'sites', id: message.id, topSites });
@@ -354,6 +374,10 @@ export function installBackground(api) {
     });
     port.onDisconnect.addListener(() => { closed = true; readerController?.abort(); organato.close(port); });
   });
+  if (!HAS_NATIVE_HELPER) {
+    installCommands(api);
+    return;
+  }
   const panels = new Set();
   const runs = new Map();
   const replyWrites = new Map();
@@ -666,19 +690,7 @@ export function installBackground(api) {
       void api.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
     }
   };
-  api.commands.onCommand.addListener((command, tab) => {
-    if (command === 'toggle-breezer-ai') { toggle(tab); return; }
-    const space = /^space-([1-4])$/.exec(command);
-    if (!space) return;
-    void (async () => {
-      const current = tab?.windowId !== undefined ? tab
-        : (await api.tabs.query({ active: true, currentWindow: true }))[0];
-      if (current?.windowId === undefined) return;
-      await api.runtime.sendMessage({
-        type: 'breezer.workspace.space', windowId: current.windowId, index: Number(space[1]) - 1,
-      });
-    })().catch(() => {});
-  });
+  installCommands(api, toggle);
   api.action.onClicked.addListener(toggle);
   api.sidePanel.onClosed?.addListener(info => {
     for (const panel of panels) if (panel.windowId === info.windowId) hidePanel(panel, 'Panel closed. Select source tabs again.');

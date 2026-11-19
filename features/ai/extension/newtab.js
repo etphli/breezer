@@ -10,6 +10,7 @@ import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY, CUSTOM_S
 import { startPanelTheme } from './panel-theme.js';
 // Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
 import { startThemeArtwork } from './browser-theme.js';
+import { HAS_NATIVE_HELPER } from './platform.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -493,7 +494,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let disposed = false, midnightTimer;
   // The saved switch wins over any answer: turning Organato off hides it at
   // once, including over an answer still on its way.
-  let off = false, organatoDay;
+  let off = !HAS_NATIVE_HELPER, organatoDay;
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const favicons = createFaviconCache(api);
@@ -528,7 +529,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   });
   const changed = (changes) => {
     if (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Reload this tab to try again.'; });
-    if (changes[ORGANATO_SWITCHES_KEY]) {
+    if (HAS_NATIVE_HELPER && changes[ORGANATO_SWITCHES_KEY]) {
       const nowOff = switchedOff(changes[ORGANATO_SWITCHES_KEY].newValue);
       if (nowOff === off) return;
       off = nowOff;
@@ -653,10 +654,13 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   refreshButton.addEventListener('click', () => void load(true));
   scheduleMidnight();
   // A saved "off" hides the sheet before the first answer, so it never flashes.
-  const saved = Promise.resolve(api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
-    if (!disposed && switchedOff(value?.[ORGANATO_SWITCHES_KEY])) { off = true; showOrganato(root, false); }
+  const saved = Promise.resolve(HAS_NATIVE_HELPER && api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
+    if (switchedOff(value?.[ORGANATO_SWITCHES_KEY])) off = true;
   }, () => {});
-  return saved.then(() => load(false));
+  return saved.then(() => {
+    if (!disposed) showOrganato(root, !off);
+    return load(false);
+  });
 }
 
 if (typeof document !== 'undefined' && document.getElementById('organato')) {
