@@ -5,7 +5,6 @@ import { existsSync } from 'node:fs';
 import { mkdir, readFile } from 'node:fs/promises';
 import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
 import { NOW, CONNECTED, installFixture } from './newtab-browser-fixture.mjs';
 
 // Drives AI theme proposal cards and the new-tab artwork in a real browser.
@@ -257,8 +256,7 @@ const MIST = `
 <div class="mist one"></div><div class="mist two"></div>`;
 
 // Mean luminance step between neighbouring rows of a screenshot region.
-function rowContrast(png, { x0, x1, y0, y1 }) {
-  const { data, width } = PNG.sync.read(png);
+function rowContrast({ data, width }, { x0, x1, y0, y1 }) {
   const lum = (x, y) => { const i = (y * width + x) * 4; return 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]; };
   let sum = 0;
   let count = 0;
@@ -285,6 +283,7 @@ async function openPages(browser, base, proposals, appearance = { theme: '#3b6e8
 }
 
 test('a pasted image paints crisply behind the artwork in the preview and the new tab', { skip }, async () => {
+  const { PNG } = await import('pngjs');
   await mkdir(evidence, { recursive: true });
   const { server, leaks } = await startServer();
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -341,7 +340,7 @@ test('a pasted image paints crisply behind the artwork in the preview and the ne
     await tab.waitForTimeout(400);
     const shot = await tab.screenshot({ path: `${evidence}/theme-newtab-image.png` });
     // The 1px ripple rows on the water, beside the sheet, still alternate light and dark on screen.
-    const contrast = rowContrast(shot, { x0: 1212, x1: 1272, y0: 560, y1: 780 });
+    const contrast = rowContrast(PNG.sync.read(shot), { x0: 1212, x1: 1272, y0: 560, y1: 780 });
     assert.ok(contrast > 25, `reflection rows kept ${contrast.toFixed(1)} levels of contrast`);
 
     // Persisted across reloads.
