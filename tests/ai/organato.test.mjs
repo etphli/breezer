@@ -38,14 +38,14 @@ test('invalid paths, fields and dates cannot become API mutations', () => {
   assert.throws(() => validateTool('organato_update_item', { id: 'a', version: 1, password: key }, tools));
 });
 
-test('Connect reports validation/save stages and avoids an unnecessary second Keychain read', () => fixture(async service => {
+test('Connect reports validation/save stages and avoids an unnecessary second credential read', () => fixture(async service => {
   const stages=[]; let reads=0;
   const get=service.secrets.get; service.secrets.get=async()=>{ reads++;return get(); };
   const result=await service.configure({key},stage=>stages.push(stage));
   assert.equal(result.connected,true);assert.equal(reads,0);
-  assert.match(stages[0],/Checking/);assert.match(stages[1],/Keychain/);
+  assert.match(stages[0],/Checking/);assert.match(stages[1],process.platform==='win32'?/Windows account/:/Keychain/);
 }));
-test('invalid or expired credentials fail before any Keychain write', () => fixture(async service => {
+test('invalid or expired credentials fail before any credential write', () => fixture(async service => {
   let writes=0;service.secrets.set=async()=>writes++;
   service.fetcher=async()=>new Response('{}',{status:401});
   await assert.rejects(service.configure({key}),/invalid or expired/);

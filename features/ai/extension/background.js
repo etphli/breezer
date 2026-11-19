@@ -102,7 +102,7 @@ import { readBrowserStats } from './browser-stats.js';
 import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
 import { installTranslation } from './translation-background.js';
-import { HAS_NATIVE_HELPER } from './platform.js';
+import { HAS_APP_UPDATER, HAS_NATIVE_HELPER } from './platform.js';
 import { readDashboardPreference } from './dashboard-preference.js';
 
 export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
@@ -205,7 +205,7 @@ export function installBackground(api) {
   const dashboardCache = createDashboardCache();
   const cacheOwner = {};
   installReleaseNotes(api);
-  if (HAS_NATIVE_HELPER) api.runtime.onConnect.addListener(port => {
+  if (HAS_APP_UPDATER) api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
     let url;

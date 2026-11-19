@@ -160,7 +160,7 @@ def run(binary, driver, temporary, firefox_fixture):
 
         command("POST", "/url", {"url": WELCOME})
         welcome = command("GET", "/window")
-        for step in ("welcome", "layout", "theme"):
+        for step in ("welcome", "you", "layout", "theme"):
             wait_for(step, lambda: script(
                 "return document.querySelector('section[data-step=' + arguments[0] + ']:not([hidden])')?.checkVisibility()",
                 step,

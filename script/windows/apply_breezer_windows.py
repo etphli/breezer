@@ -14,6 +14,7 @@ from PIL import Image, ImageDraw, ImageOps
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import apply_breezer_branding as branding
 from breezer_release import release_version
+from stage_breezer_ai import configure_installer
 
 
 ROOT = branding.ROOT
@@ -137,6 +138,7 @@ def apply(tree):
     env = {**os.environ, "PATH": str(patch_dir) + os.pathsep + os.environ["PATH"], "PYTHONUTF8": "1"}
     for script, options in (
         ("script/apply_breezer_ai.py", ("--platform", "windows")),
+        ("script/apply_breezer_ai_windows_host.py", ()),
         ("script/apply_breezer_omnibox.py", ("--allow-missing-upstream-test",)),
         ("script/apply_breezer_workspace.py", ()),
         ("script/apply_breezer_ai_ui.py", ()),
@@ -145,6 +147,7 @@ def apply(tree):
     ):
         subprocess.run([sys.executable, ROOT / script, *options, tree], env=env, check=True)
     apply_import_patch(tree)
+    configure_installer(tree)
 
 
 if __name__ == "__main__":

@@ -30,12 +30,17 @@ const WINDOWS_TOUR_KEYS = {
   '⌘ W': ['Ctrl+W', 'Close tab'],
   '⌃ 1–4': ['Ctrl+Shift+1–4', 'Switch space'],
   '⌘ ,': ['Alt+F', 'Open browser menu'],
+  '⌘ K': ['Ctrl+Shift+K', 'Open or close Breezer AI'],
 };
 
 export function tourSlides(layout) {
   const slides = layout === 'top' ? TOP_SLIDES : SIDEBAR_SLIDES;
   if (PLATFORM === 'windows') {
-    return slides.map((slide) => ({ ...slide, keys: slide.keys.map(([keys]) => WINDOWS_TOUR_KEYS[keys]) }));
+    return [...slides, ...AI_SLIDES].map((slide) => ({
+      ...slide,
+      body: slide.body.replace('⌘K', 'Ctrl+Shift+K'),
+      keys: slide.keys.map(([keys, action]) => WINDOWS_TOUR_KEYS[keys] || [keys, action]),
+    }));
   }
   return [...slides, ...AI_SLIDES];
 }

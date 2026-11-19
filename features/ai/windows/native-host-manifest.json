@@ -1,0 +1,9 @@
+{
+  "name": "io.github.etphli.breezer.ai",
+  "description": "Breezer local AI assistant",
+  "path": "breezer_ai_host.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://namgcidocfgliiedlkdafcmifpdfiakj/"
+  ]
+}

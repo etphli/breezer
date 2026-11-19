@@ -1,13 +1,17 @@
 import { mkdir, open, readFile, writeFile, rename, rm, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { isAbsolute, join } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID, createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { types } from 'node:util';
+import { keyPattern, windowsSecrets, withWindowsCacheLock } from './organato-windows.mjs';
 const BASE = 'https://organato.etphli.workers.dev/api/v1';
 const SERVICE = 'io.github.etphli.breezer.organato';
-const CONFIG = join(homedir(), 'Library/Application Support/io.github.etphli.breezer-integrations');
-const keyPattern = /^org_[A-Za-z0-9_-]{43}$/;
+const WINDOWS = process.platform === 'win32';
+const localAppData = process.env.LOCALAPPDATA;
+const CONFIG = join(WINDOWS
+  ? (localAppData && isAbsolute(localAppData) ? localAppData : join(homedir(), 'AppData', 'Local'))
+  : join(homedir(), 'Library', 'Application Support'), 'io.github.etphli.breezer-integrations');
 const accountId = key => createHash('sha256').update(key).digest('hex');
 const CACHE_LIMIT = 8_000_000;
 const cacheFields = new Set(['id', 'url', 'version', 'title', 'kind', 'classification', 'dueAt', 'dueDateLocal', 'workingStatus', 'subjectId']);
@@ -17,6 +21,7 @@ const cacheItem = item => Object.fromEntries(Object.entries(item).filter(([name,
 async function withCacheLock(directory, action) {
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const path = join(directory, 'organato-cache.lock');
+  if (WINDOWS) return withWindowsCacheLock(path, action);
   await (await open(path, 'a', 0o600)).close();
   const mac = process.platform === 'darwin';
   const child = spawn(mac ? '/usr/bin/lockf' : '/usr/bin/flock', [
@@ -104,7 +109,7 @@ export function validateItem(input, update = false) {
   return input;
 }
 export class Organato {
-  constructor({ fetcher = fetch, secrets = keychain, configDirectory = CONFIG } = {}) { this.fetcher = fetcher; this.secrets = secrets; this.directory = configDirectory; this.listSequence = 0; this.savedSequence = 0; this.cacheGeneration = 0; this.cacheHolds = 0; this.cacheQueue = Promise.resolve(); }
+  constructor({ fetcher = fetch, configDirectory = CONFIG, secrets = WINDOWS ? windowsSecrets(configDirectory) : keychain } = {}) { this.fetcher = fetcher; this.secrets = secrets; this.directory = configDirectory; this.listSequence = 0; this.savedSequence = 0; this.cacheGeneration = 0; this.cacheHolds = 0; this.cacheQueue = Promise.resolve(); }
   cacheOperation(fn) {
     const operation = this.cacheQueue.then(fn);
     this.cacheQueue = operation.catch(() => {});
@@ -228,11 +233,11 @@ export class Organato {
     }
     if (['enabled', 'dashboardEnabled', 'allowAI'].some(name => input[name] !== undefined)) await this.clearCache();
     if (input.key !== undefined) {
-      if (!keyPattern.test(input.key)) throw new Error('Enter a valid Organato API key.');
+      if (typeof input.key !== 'string' || !keyPattern.test(input.key)) throw new Error('Enter a valid Organato API key.');
       progress('Checking your Organato key…');
       await this.request('/items?limit=1', 'GET', undefined, undefined, input.key);
       await this.clearCache();
-      progress('Saving your key in macOS Keychain. Approve a system prompt if shown.');
+      progress(WINDOWS ? 'Saving your key for your Windows account…' : 'Saving your key in macOS Keychain. Approve a system prompt if shown.');
       await this.secrets.set(input.key);
       connected = true;
     }

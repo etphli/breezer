@@ -28,25 +28,24 @@ before(async () => {
 });
 after(async () => { if (directory) await rm(directory, { recursive: true, force: true }); });
 
-test('Windows component starts without the native helper and keeps dashboard and space commands', async () => {
+test('Windows keeps the first-party assistant and sends Organato requests to the native helper', async () => {
   const manifest = JSON.parse(await readFile(join(assets, 'manifest.json'), 'utf8'));
   const source = JSON.parse(await readFile(new URL('../../features/ai/extension/manifest.json', import.meta.url), 'utf8'));
   assert.equal(manifest.key, source.key);
   assert.equal(manifest.chrome_url_overrides.newtab, 'newtab.html');
-  assert.equal(manifest.action, undefined);
-  assert.equal(manifest.side_panel, undefined);
-  assert.equal(manifest.commands['toggle-breezer-ai'], undefined);
+  assert.deepEqual(manifest.action, source.action);
+  assert.deepEqual(manifest.side_panel, source.side_panel);
+  assert.deepEqual(manifest.commands['toggle-breezer-ai'], source.commands['toggle-breezer-ai']);
   assert.equal(manifest.commands['space-1'].suggested_key.default, 'Ctrl+Shift+1');
   for (const permission of ['nativeMessaging', 'debugger', 'sidePanel']) {
-    assert.equal(manifest.permissions.includes(permission), false);
+    assert.equal(manifest.permissions.includes(permission), true);
   }
-  assert.equal(existsSync(join(assets, 'panel.html')), false);
+  assert.equal(existsSync(join(assets, 'panel.html')), true);
 
-  const { api, tab } = fakeChrome();
-  delete api.action;
-  delete api.sidePanel;
-  delete api.debugger;
-  delete api.runtime.connectNative;
+  const { api, tab, native, calls } = fakeChrome();
+  native.postMessage = (message) => queueMicrotask(() => native.onMessage.emit({
+    id: message.id, ok: true, value: { enabled: true, dashboardEnabled: true, connected: false },
+  }));
   api.topSites = { get: async () => [{ title: 'Canvas', url: 'https://canvas.example/' }] };
   const messages = [];
   api.runtime.sendMessage = async (message) => { messages.push(message); };
@@ -66,9 +65,11 @@ test('Windows component starts without the native helper and keeps dashboard and
   installBackground(api);
   const view = await requestView(api, { timeoutMs: 1000 });
   assert.deepEqual(view.topSites, await api.topSites.get());
-  assert.deepEqual(view.organato, { enabled: false });
+  assert.equal(view.organato.enabled, true);
+  assert.equal(view.organato.connected, false);
   assert.equal(view.dashboardEnabled, true);
-  await api.storage.local.set({ 'breezer.dashboard.enabled': false });
+  assert.ok(calls.some(call => call[0] === 'native' && call[1] === 'io.github.etphli.breezer.ai'));
+  await api.storage.local.set({ 'organato.switches.v1': { enabled: false, dashboardEnabled: false } });
   assert.equal((await requestView(api, { timeoutMs: 1000 })).dashboardEnabled, false);
   api.commands.onCommand.emit('space-2', tab);
   await tick();
@@ -103,30 +104,26 @@ test('Windows settings, setup and new tab expose the supported features', { skip
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(`${base}/workspace.html#/settings/newtab`);
   await page.locator('[data-category="newtab"][aria-current="page"]').waitFor();
-  assert.equal(await page.locator('[data-category="newtab"]').innerText(), 'New tab');
-  assert.equal(await page.locator('[data-category="assistant"], #update-check, #organato-key').count(), 0);
-  await page.locator('#dashboard-enabled').uncheck();
-  await page.waitForFunction(() => window.fx.local['breezer.dashboard.enabled'] === false);
-  await page.reload();
-  await page.waitForFunction(() => !document.getElementById('dashboard-enabled').disabled &&
-    !document.querySelector('[data-page="newtab"]').hidden);
-  assert.equal(await page.locator('#dashboard-enabled').isChecked(), false);
+  assert.equal(await page.locator('[data-category="assistant"]').count(), 1);
+  assert.equal(await page.locator('#update-check').count(), 0);
+  assert.equal(await page.locator('#organato-key').isVisible(), true);
+  await page.waitForFunction(() => Boolean(window.fx.ports['breezer-organato-settings']));
 
   await page.goto(`${base}/workspace.html#/welcome`);
   await page.locator('#welcome[data-ready="true"]').waitFor();
-  assert.equal(await page.locator('#wl-stage-count').innerText(), 'Step 1 of 6');
+  assert.equal(await page.locator('#wl-stage-count').innerText(), 'Step 1 of 8');
   const next = page.locator('#wl-next');
-  for (const step of ['layout', 'theme', 'import', 'tour']) {
+  for (const step of ['you', 'layout', 'theme', 'import', 'organato', 'tour']) {
     await next.click();
     await page.locator(`.wl-step[data-step="${step}"]`).waitFor();
   }
-  for (const shortcut of ['Ctrl+T', 'Ctrl+Shift+1–4', 'Alt+F']) {
+  for (const shortcut of ['Ctrl+T', 'Ctrl+Shift+1–4', 'Alt+F', 'Ctrl+Shift+K', 'esc']) {
     assert.ok((await page.locator('#wl-tour-keys').innerText()).includes(shortcut));
     await next.click();
   }
   await page.locator('.wl-step[data-step="done"]').waitFor();
-  assert.doesNotMatch(await page.locator('#wl-summary').innerText(), /Organato|Breezer AI/);
-  assert.deepEqual(await page.evaluate(() => Object.keys(window.fx.ports).filter(name => /context|organato|updates/.test(name))), []);
+  assert.match(await page.locator('#wl-summary').innerText(), /Breezer AI/);
+  assert.equal(await page.evaluate(() => Boolean(window.fx.ports['breezer-updates'])), false);
 
   const newtab = await browser.newContext({ reducedMotion: 'reduce' });
   await newtab.addInitScript(installNewtab, { view: CONNECTED });
@@ -135,6 +132,7 @@ test('Windows settings, setup and new tab expose the supported features', { skip
   await newPage.goto(`${base}/newtab.html`);
   await newPage.waitForSelector('html[data-loaded="true"]');
   assert.ok(await newPage.locator('.site-name').count() > 0);
-  assert.equal(await newPage.locator('#organato').isVisible(), false);
+  assert.equal(await newPage.locator('#organato').isVisible(), true);
+  assert.equal(await newPage.locator('#organato').getAttribute('data-state'), 'ready');
   assert.deepEqual(errors, []);
 });

@@ -73,6 +73,7 @@ jobs:
       - name: Verify Windows packaging and password import contracts
         run: |
           python tests/windows/build_breezer_test.py
+          python tests/windows/ai_native_host_test.py
           python tests/windows_import_test.py
       - name: Verify omnibox source overlay
         run: python script/check_breezer_omnibox.py

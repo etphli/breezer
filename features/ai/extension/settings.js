@@ -11,7 +11,7 @@ import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
 import { mountSettingsNav } from './settings-nav.js';
-import { HAS_NATIVE_HELPER } from './platform.js';
+import { HAS_APP_UPDATER, HAS_NATIVE_HELPER } from './platform.js';
 import { DASHBOARD_ENABLED_KEY, readDashboardPreference } from './dashboard-preference.js';
 
 // Settings owned by feature modules. Each entry names an empty container in workspace.html
@@ -146,7 +146,8 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     for (const element of document.querySelectorAll('[data-native-helper]')) element.remove();
     void mountDashboardPreference(api);
   } else if (typeof api.runtime?.connect === 'function') {
-    mountUpdates(api);
+    if (HAS_APP_UPDATER) mountUpdates(api);
+    else $('update-settings').remove();
     mountOrganato(api);
     const contextSettings = mountContextSettings({ container: $('context-settings'), api });
     groupSection($('context-settings'));

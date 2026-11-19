@@ -15,6 +15,7 @@ import sys
 import tempfile
 from zipfile import ZipFile
 
+import stage_breezer_ai
 
 ROOT = Path(__file__).resolve().parents[2]
 PATCH_EXCLUSIONS = {"windows-disable-encryption.patch", "windows-disable-download-warning-prompt.patch"}
@@ -251,12 +252,15 @@ def build_browser(build_dir, core, platform, expected, jobs, gen_only):
         f"--script-executable={sys.executable}", cwd=source, env=env)
     if gen_only:
         return
+    stage_breezer_ai.stage(output, build_dir / "cache/breezer-ai-runtime")
     env["SISO_PATH"] = str(source / "third_party/siso/cipd/siso.exe")
     ninja_args = ("-j", str(jobs)) if jobs else ()
     run(sys.executable, source / "third_party/depot_tools/autoninja.py", *ninja_args,
         "-C", "out/Default", "chrome", "chromedriver", "setup", "mini_installer", cwd=source, env=env)
     for name in ("chrome.exe", "chrome.dll", "setup.exe", "mini_installer.exe"):
         require_x64_pe(output / name)
+    require_x64_pe(output / stage_breezer_ai.LAUNCHER)
+    require_x64_pe(output / stage_breezer_ai.NODE)
     write_marker(output / BUILD_MARKER, expected)
 
 
@@ -278,6 +282,8 @@ def package_browser(build_dir, destination, expected):
         raise FileExistsError(f"Choose a new output directory: {destination}")
     for name in ("chrome.exe", "chrome.dll", "mini_installer.exe"):
         require_x64_pe(output / name)
+    require_x64_pe(output / stage_breezer_ai.LAUNCHER)
+    require_x64_pe(output / stage_breezer_ai.NODE)
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="packaging-", dir=destination.parent) as temporary:
         stage = Path(temporary) / "artifacts"
@@ -289,12 +295,17 @@ def package_browser(build_dir, destination, expected):
                                                 output, "64bit", PORTABLE_EXCLUSIONS))
         files.update(path.relative_to(output) for path in (output / "locales").glob("*.pak")
                      if path.is_file())
+        ai_files = stage_breezer_ai.package_files()
+        if missing := {path for path in ai_files if not (output / path).is_file()}:
+            raise ValueError(f"Missing Windows AI payload: {', '.join(path.as_posix() for path in sorted(missing))}")
+        files.update(ai_files)
         filescfg.create_archive(sorted(files), (), output, portable)
         with ZipFile(portable) as archive:
             required = {f"{portable.stem}/{name}" for name in (
                 "chrome.exe", "chrome.dll", "chrome_elf.dll", "chrome_100_percent.pak", "chrome_200_percent.pak",
                 "icudtl.dat", "resources.pak", "locales/en-US.pak", "v8_context_snapshot.bin",
             )}
+            required.update(f"{portable.stem}/{file.as_posix()}" for file in ai_files)
             if missing := required.difference(entry.filename for entry in archive.infolist()
                                               if entry.file_size > 0):
                 raise ValueError(f"Missing portable files: {', '.join(sorted(missing))}")

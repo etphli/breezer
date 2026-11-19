@@ -14,6 +14,7 @@ SCRIPT = ROOT / "script/windows/build_breezer.py"
 sys.path.insert(0, str(SCRIPT.parent))
 import build_breezer
 import apply_breezer_windows
+import stage_breezer_ai
 
 
 def executable(path, machine=0x8664):
@@ -36,14 +37,17 @@ class WindowsPackageTest(unittest.TestCase):
         lock = build_breezer.load_lock()
         build_breezer.write_marker(self.output / build_breezer.BUILD_MARKER,
                                    build_breezer.prepared_inputs(lock))
-        self.portable = ("chrome.exe", "chrome.dll", "chrome_elf.dll", "chrome_100_percent.pak", "chrome_200_percent.pak",
+        base_portable = ("chrome.exe", "chrome.dll", "chrome_elf.dll", "chrome_100_percent.pak", "chrome_200_percent.pak",
                          "icudtl.dat", "resources.pak", "locales/en-US.pak", "v8_context_snapshot.bin")
+        self.portable = (*base_portable, *(path.as_posix() for path in sorted(stage_breezer_ai.package_files())))
         (self.output / "locales").mkdir()
         for name in (*self.portable, "mini_installer.exe", "setup.exe", "chrome.pdb"):
-            executable(self.output / name)
+            file = self.output / name
+            file.parent.mkdir(parents=True, exist_ok=True)
+            executable(file)
         config = self.stage / "src/chrome/tools/build/win/FILES.cfg"
         config.parent.mkdir(parents=True)
-        files = [dict(filename=name, buildtype=["official"]) for name in (*self.portable,
+        files = [dict(filename=name, buildtype=["official"]) for name in (*base_portable,
                  "mini_installer.exe", "setup.exe", "chrome.pdb", "*.exe")]
         config.write_text(f"FILES = {files!r}", encoding="utf-8")
 
@@ -92,6 +96,13 @@ class WindowsPackageTest(unittest.TestCase):
         portable = self.artifacts / build_breezer.PORTABLE
         with ZipFile(portable) as archive:
             self.assertIn(f"{portable.stem}/{locale}", archive.namelist())
+
+    def test_missing_native_host_module_leaves_no_artifacts(self):
+        (self.output / stage_breezer_ai.PAYLOAD / "host/main.mjs").unlink()
+        result = self.package()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Missing Windows AI payload: breezer_ai/host/main.mjs", result.stderr)
+        self.assertFalse(self.artifacts.exists())
 
     def test_unfinished_build_cannot_package_previous_outputs(self):
         (self.output / build_breezer.BUILD_MARKER).unlink()
