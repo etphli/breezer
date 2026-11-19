@@ -417,9 +417,13 @@ body.route-welcome { overflow: auto; background: var(--air); }
   .wl-step h1 { font-size: 30px; line-height: 36px; }
 }
 @media (max-width: 560px) {
-  .mini { width: 200px; max-width: 70%; max-height: none; }
+  .mini { order: 0; width: 180px; max-width: 65%; max-height: none; }
+  .wl-stage:has(.wl-step[data-step="welcome"]:not([hidden])) .mini { order: -1; }
   .mini-frame { width: 220%; height: 220%; scale: .454545; transform-origin: top left; }
-  .wl-stage { gap: 16px; padding: 12px 4px; align-content: start; align-items: start; }
+  .wl-stage { gap: 14px; padding: 14px 4px 24px; align-content: start; align-items: start; }
+  .wl-copy { padding-top: 0; }
+  .wl-lede { margin-bottom: 18px; }
+  .wl-choice-art { aspect-ratio: 2; }
   .wl-choices, .wl-swatches { grid-template-columns: 1fr 1fr; }
   .wl-nav { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
   .wl-nav .wl-progress { justify-self: center; gap: 3px; }

@@ -132,8 +132,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .favorites {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 10px 10px 6px;
+  gap: 6px;
+  padding: 10px 8px 6px;
 }
 
 .tile {
@@ -145,7 +145,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   align-content: center;
   gap: 4px;
   min-width: 0;
-  padding: 6px 4px;
+  padding: 6px 2px;
   border: 1px solid transparent;
   border-radius: var(--radius-card);
   background: color-mix(in srgb, var(--ink) 4%, transparent);
@@ -169,7 +169,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   border-radius: 50%;
   background: var(--muted);
 }
-.tile:focus-visible { outline-offset: 2px; }
+.tile:focus-visible { outline-color: var(--ink); outline-offset: 2px; }
 .tile .favicon { width: 20px; height: 20px; font-size: 11px; border-radius: 5px; background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--ink); }
 .tile .favicon:has(img) { background: none; }
 .tile .favicon img { width: 20px; height: 20px; }

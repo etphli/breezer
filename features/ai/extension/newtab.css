@@ -451,12 +451,14 @@ a.item-title:hover { text-decoration-color: currentColor; }
 @media (max-width: 560px) {
   .sites { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sites { row-gap: 4px; }
-  .site { min-height: 72px; }
-  .site-icon { width: 40px; height: 40px; border-radius: 11px; }
-  .site-link { gap: 4px; padding-block: 6px 4px; }
+  .site { min-height: 66px; }
+  .site-icon { width: 36px; height: 36px; border-radius: 10px; }
+  .site-link { gap: 4px; padding-block: 5px 3px; }
   .today { text-align: center; }
   .sites > .site-add:only-child { grid-column: 1 / -1; justify-self: center; }
-  .sky { --sky-top: clamp(32px, 6vh, 48px); --date-gap: 16px; --date-lines: 2; --shortcuts-height: 320px; }
+  .sky { --sky-top: 56px; --date-gap: 16px; --date-lines: 2; --shortcuts-height: 302px; }
+  .organato-head { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .agenda-actions .refresh { padding-left: 0; }
 }
 #refresh:disabled { opacity: .5; cursor: default; }
 
@@ -484,4 +486,6 @@ a.item-title:hover { text-decoration-color: currentColor; }
 :root[data-artwork="on"] :is(.sky, .sheet) { position: relative; z-index: 2; }
 :root[data-artwork="on"] .settings-link { z-index: 3; }
 :root[data-artwork="on"] .today { text-shadow: 0 1px 14px color-mix(in srgb, var(--canvas) 80%, transparent); }
+:root[data-artwork="on"] .site:not(.placeholder) .site-name { padding-inline: 4px; border-radius: 4px; background: var(--raised); }
+:root[data-artwork="on"] .site-add .site-icon { background: var(--raised); }
 @media (forced-colors: active) { .theme-image, .theme-artwork, .theme-first-frame, :root[data-artwork="on"] body::before { display: none; } }

@@ -124,6 +124,14 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState !== 'running' || animation.effect.getTiming().iterations === Infinity));
     await page.screenshot({ path: join(evidence, `onboarding-${name}.png`), fullPage: true });
   };
+  const checkSelectedLabel = async control => {
+    assert.equal(await control.getAttribute('aria-checked'), 'true');
+    const { color, backgroundColor } = await control.evaluate(node => {
+      const style = getComputedStyle(node);
+      return { color: style.color, backgroundColor: style.backgroundColor };
+    });
+    assert.notEqual(color, backgroundColor, 'selected control text stays visible against its fill');
+  };
 
   try {
     browser = await chromium.launch({ executablePath, headless: true });
@@ -169,6 +177,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     await pause(1600);
     await page.getByRole('radio', { name: 'Expanded' }).click();
     await page.waitForFunction(() => fx.appearance.sidebarMode === 'expanded');
+    await checkSelectedLabel(page.getByRole('radio', { name: 'Expanded', exact: true }));
     await pause(600);
     await shot(page, '3-layout');
     await next.click();
@@ -184,6 +193,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.equal(await page.evaluate(() => document.documentElement.dataset.tone), 'dusk');
     await page.getByRole('radio', { name: 'Dark' }).click();
     await page.waitForFunction(() => document.documentElement.dataset.scheme === 'dark');
+    await checkSelectedLabel(page.getByRole('radio', { name: 'Dark', exact: true }));
     await pause(1200);
     await shot(page, '4-theme-dark');
     await page.getByRole('radio', { name: 'Light' }).click();

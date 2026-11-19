@@ -5,6 +5,7 @@ export function installShortcutAdder({ api, root, preferences, update }) {
   const input = root.getElementById('shortcut-add-input');
   const list = root.getElementById('shortcut-add-tabs');
   const error = root.getElementById('shortcut-add-error');
+  const status = root.getElementById('shortcut-status');
   const submit = form.querySelector('[type=submit]');
   let tabs = [], shown = [], active = -1, saving = false, revision = 0;
   const focusTile = () => root.querySelector('.site-add-button')?.focus();
@@ -37,7 +38,7 @@ export function installShortcutAdder({ api, root, preferences, update }) {
       await preferences.add({ url, title: site?.title });
       await update();
       form.hidePopover(); focusTile();
-      root.getElementById('shortcut-status').textContent = 'Shortcut added.';
+      status.textContent = 'Shortcut added.';
     } catch (problem) {
       error.textContent = problem.message || 'Could not add shortcut. Try again.';
       error.hidden = false; input.setAttribute('aria-invalid', 'true'); input.focus();
@@ -45,6 +46,7 @@ export function installShortcutAdder({ api, root, preferences, update }) {
   };
   form.addEventListener('beforetoggle', event => {
     if (event.newState !== 'open') return;
+    if (status.textContent === 'Shortcut added.') status.textContent = '';
     input.value = ''; error.hidden = true; input.removeAttribute('aria-invalid');
     tabs = []; paint();
   });

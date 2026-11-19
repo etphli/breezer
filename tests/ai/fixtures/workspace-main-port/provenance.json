@@ -4,7 +4,7 @@
   "files": {
     "main-workspace.css": {
       "originalPath": "features/ai/extension/workspace.css",
-      "sha256": "d7bdd2bf84841c6e4c88272f423d062083ee1119b2359c835aab8e85ecc6f9bc",
+      "sha256": "c805e8aeafa7fb78c33f58f2bc5183ecfd6813048f263d0cabd314c8cb6c70ed",
       "purpose": "Reviewed cascade after route split and the scoped visual polish changes. The inverse checks all remaining rules.",
       "originalSha256": "2d8db5cd5feaf4828351cb7af380312174dceacc987858b82ea6c890c5a83a2d",
       "appliedSourceDeltas": [

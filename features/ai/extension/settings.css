@@ -194,7 +194,7 @@ body.route-settings {
 .empty-state { margin: 0; padding: 18px 0; color: var(--muted); }
 .context-settings .setting-row { flex-wrap: nowrap; }
 .setting-group .setting-label > span, .setting-group .setting-label > label,
-.setting-group label.setting-label { font-weight: 500; }
+.setting-group label.setting-label { font-weight: 600; }
 .setting-group .setting-label small { margin-top: 2px; max-width: 62ch; }
 /* Loose content from older components, padded as one block. */
 .setting-group.panel { padding: 6px 16px 14px; }
@@ -269,7 +269,7 @@ body.route-settings {
 .setting-row + .setting-row { border-top: 1px solid var(--line); }
 .setting-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .setting-label > :first-child { font-weight: 500; }
-.setting-label small { color: var(--muted); font-size: 14px; line-height: 21px; }
+.setting-label small { color: var(--muted); font-size: 13px; line-height: 19px; }
 .muted-row { opacity: 0.55; }
 
 .segmented {
@@ -290,7 +290,7 @@ body.route-settings {
   font-weight: 500;
 }
 .segmented [role="radio"]:hover { color: var(--ink); }
-.segmented [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--set-group); font-weight: 650; }
+.segmented [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--set-group, var(--canvas)); font-weight: 650; }
 [role="radio"][aria-disabled="true"], .switch[aria-disabled="true"] { opacity: 0.5; }
 
 .switch {
@@ -394,6 +394,7 @@ body.route-settings {
 .status-line { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; color: var(--muted); line-height: 19px; max-width: 64ch; }
 .status-line:empty { margin: 0; }
 .update-status { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); }
+.update-row:has(.update-status[data-state="error"]) small { display: none; }
 #organato-settings:has(#organato-connect:disabled) #organato-status::before,
 #update-settings:has(#update-check:disabled) #update-status::before {
   content: "";

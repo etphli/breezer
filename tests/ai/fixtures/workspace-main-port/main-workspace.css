@@ -133,8 +133,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .favorites {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 10px 10px 6px;
+  gap: 6px;
+  padding: 10px 8px 6px;
 }
 
 .tile {
@@ -146,7 +146,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   align-content: center;
   gap: 4px;
   min-width: 0;
-  padding: 6px 4px;
+  padding: 6px 2px;
   border: 1px solid transparent;
   border-radius: var(--radius-card);
   background: color-mix(in srgb, var(--ink) 4%, transparent);
@@ -170,7 +170,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   border-radius: 50%;
   background: var(--muted);
 }
-.tile:focus-visible { outline-offset: 2px; }
+.tile:focus-visible { outline-color: var(--ink); outline-offset: 2px; }
 .tile .favicon { width: 20px; height: 20px; font-size: 11px; border-radius: 5px; background: color-mix(in srgb, var(--accent) 13%, transparent); color: var(--ink); }
 .tile .favicon:has(img) { background: none; }
 .tile .favicon img { width: 20px; height: 20px; }
@@ -758,7 +758,7 @@ body.route-settings {
 .empty-state { margin: 0; padding: 18px 0; color: var(--muted); }
 .context-settings .setting-row { flex-wrap: nowrap; }
 .setting-group .setting-label > span, .setting-group .setting-label > label,
-.setting-group label.setting-label { font-weight: 500; }
+.setting-group label.setting-label { font-weight: 600; }
 .setting-group .setting-label small { margin-top: 2px; max-width: 62ch; }
 /* Loose content from older components, padded as one block. */
 .setting-group.panel { padding: 6px 16px 14px; }
@@ -833,7 +833,7 @@ body.route-settings {
 .setting-row + .setting-row { border-top: 1px solid var(--line); }
 .setting-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .setting-label > :first-child { font-weight: 500; }
-.setting-label small { color: var(--muted); font-size: 14px; line-height: 21px; }
+.setting-label small { color: var(--muted); font-size: 13px; line-height: 19px; }
 .muted-row { opacity: 0.55; }
 
 .segmented {
@@ -854,7 +854,7 @@ body.route-settings {
   font-weight: 500;
 }
 .segmented [role="radio"]:hover { color: var(--ink); }
-.segmented [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--set-group); font-weight: 650; }
+.segmented [role="radio"][aria-checked="true"] { background: var(--ink); color: var(--set-group, var(--canvas)); font-weight: 650; }
 [role="radio"][aria-disabled="true"], .switch[aria-disabled="true"] { opacity: 0.5; }
 
 .switch {
@@ -958,6 +958,7 @@ body.route-settings {
 .status-line { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; color: var(--muted); line-height: 19px; max-width: 64ch; }
 .status-line:empty { margin: 0; }
 .update-status { margin: 0; font-size: 13px; font-weight: 650; color: var(--ink); }
+.update-row:has(.update-status[data-state="error"]) small { display: none; }
 #organato-settings:has(#organato-connect:disabled) #organato-status::before,
 #update-settings:has(#update-check:disabled) #update-status::before {
   content: "";
