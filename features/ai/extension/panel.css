@@ -1483,3 +1483,82 @@ dialog .privacy-note {
   :root[data-look] body { background: Canvas; }
   :root[data-look] body::before, :root[data-look] body::after { display: none; }
 }
+
+/* Model replies use the current sidebar palette, including custom looks. */
+.panel[data-running="true"] .assistant:last-child .reply-widget-source { display: none; }
+.message-body .reply-widget {
+  margin: 12px 0;
+  padding: 12px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--raised);
+  overflow-wrap: anywhere;
+}
+.reply-widget figcaption {
+  margin-block-end: 10px;
+  color: var(--ink);
+  font-weight: 650;
+}
+.reply-widget :is(p, ul) { margin: 6px 0; }
+.reply-widget p { font-size: 12.5px; color: var(--muted); }
+.reply-widget details {
+  border-block-start: 1px solid var(--line);
+  margin-block-start: 8px;
+  padding-block-start: 8px;
+}
+.reply-widget summary { font-size: 12px; cursor: pointer; color: var(--accent-ink); }
+.reply-widget details details { padding-inline-start: 8px; }
+.reply-flow { display: block; width: 100%; max-width: 400px; margin: 0 auto; overflow: visible; }
+.reply-flow-node { fill: var(--accent-soft); stroke: var(--line); }
+.reply-flow-edge { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linejoin: round; }
+.reply-flow-arrow { fill: var(--accent); }
+.reply-flow-label { fill: var(--ink); font: 600 12px system-ui, sans-serif; }
+.reply-widget .reply-chart { display: grid; gap: 9px; padding-inline-start: 0; list-style: none; }
+.reply-chart li { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; font-size: 12px; }
+.reply-chart li b { color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.reply-chart-rail {
+  position: relative;
+  grid-column: 1 / -1;
+  height: 7px;
+  margin-top: 4px;
+  border-radius: 8px;
+  background: var(--tint);
+}
+.reply-chart-bar { position: absolute; height: 100%; border-radius: inherit; background: var(--accent); }
+.reply-map-actions { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; font-size: 12px; }
+.reply-widget .reply-widget-button {
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  cursor: pointer;
+}
+.reply-widget iframe { width: 100%; height: 240px; margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; }
+@media (forced-colors: active) {
+  .reply-flow-node { stroke: ButtonText; fill: Canvas; }
+  .reply-flow-edge { stroke: ButtonText; }
+  .reply-flow-arrow, .reply-flow-label { fill: ButtonText; }
+  .reply-chart-rail { border: 1px solid ButtonText; }
+  .reply-chart-bar { background: Highlight; forced-color-adjust: none; }
+}
+.reply-image img { display: block; width: 100%; height: auto; border-radius: 7px; }
+.reply-image figcaption { margin: 8px 0 0; font-size: 12px; }
+#browser-task-image { margin-block-start: 10px; }
+
+:root[data-full-chat] {
+  --chat-width: 720px;
+}
+:root[data-full-chat] :is(.messages, .compose-area, .welcome) { width: min(100%, var(--chat-width)); }
+:root[data-full-chat] .messages { margin-inline: auto; }
+:root[data-full-chat] .toolbar { padding-inline: clamp(14px, 4vw, 38px); }
+:root[data-full-chat] .welcome { padding-inline: 20px; }
+:root[data-full-chat] .welcome h1 { max-width: 36ch; }
+:root[data-full-chat] .compose-area { padding: 8px 16px 20px; }
+:root[data-full-chat] :is(#close-panel, #control-toggle, #context-toggle, #research-open, #research-chips, .suggestions) { display: none; }
+:root[data-full-chat] .context-row:not(:has(#browser-task-clear:not([hidden]))) { display: none; }
+@media (max-width: 330px) {
+  .toolbar { padding-inline: 12px; }
+  .toolbar-actions { gap: 2px; }
+}

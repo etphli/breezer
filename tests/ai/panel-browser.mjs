@@ -923,6 +923,99 @@ try {
   }
   await opening.close();
 
+  const visuals = await browser.newPage({ viewport: { width: 320, height: 750 } });
+  await visuals.addInitScript({ content: '(' + installPanelFixture + ')(); (' + installPanelAreaEvents + ')();' });
+  let mapRequests = 0;
+  await visuals.route('https://www.openstreetmap.org/**', route => {
+    mapRequests++;
+    assert.equal(new URL(route.request().url()).searchParams.get('marker'), '38.6916,-9.216');
+    return route.fulfill({ body: '<p>Map fixture</p>', contentType: 'text/html' });
+  });
+  const fixtureOrigin = new URL(page.url()).origin;
+  await visuals.goto(fixtureOrigin + '/panel.html');
+  await visuals.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  await visuals.getByLabel('Message Breezer').fill('Create an image of a blue pear');
+  await visuals.getByRole('button', { name: 'Send message', exact: true }).click();
+  const imageTask = await visuals.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(imageTask.browserTask, 'image');
+  assert.equal(imageTask.includeContext, false);
+  assert.deepEqual(imageTask.history, []);
+  const imageSample = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+  await visuals.evaluate(({ id, image }) => emit({ type: 'complete', id, generatedImage: image }), { id: imageTask.id, image: imageSample });
+  await visuals.getByRole('link', { name: 'Save image' }).waitFor();
+  assert.equal(await visuals.getByRole('link', { name: 'Save image' }).getAttribute('download'), 'breezer-image.webp');
+  await visuals.waitForFunction(() => testStorage.session['breezer-conversation-7']?.some(message => message.generatedImage));
+  await visuals.getByLabel('Message Breezer').fill('Show the trip as a flow, chart, map, and cards.');
+  await visuals.getByRole('button', { name: 'Send message', exact: true }).click();
+  const visualId = await visuals.evaluate(() => sent.filter(message => message.type === 'chat').at(-1).id);
+  const widgets = [
+    { type: 'flow', title: 'Weekend plan', nodes: [{id:'a', label:'Pack'}, {id:'b', label:'Train'}, {id:'c', label:'Bus'}],
+      edges: [{from:'a',to:'b',label:'Quickest'}, {from:'a',to:'c'}, {from:'c',to:'a',label:'Return'}] },
+    { type: 'chart', title: 'Travel time', unit: 'min', items: [{ label:'Train', value:25 },{label:'Bus',value:40}] },
+    { type: 'map', title: 'Belém Tower', lat:38.6916, lon:-9.216, zoom:15 },
+    { type: 'cards', title: 'Travel tips', items: [{label:'Pack light',detail:'Bring water.'}] },
+    { type: 'map', title: 'Invalid coordinates', lat:120, lon:180 },
+  ];
+  const fence = String.fromCharCode(96).repeat(3);
+  const blocks = widgets.map(widget => fence + 'breezer\n' + JSON.stringify(widget) + '\n' + fence).join('\n\n');
+  await visuals.evaluate(({ id, blocks }) => emit({ type: 'delta', id, text: 'A short trip.\n\n' + blocks }), { id: visualId, blocks });
+  await visuals.getByText('A short trip.').waitFor();
+  assert.equal(await visuals.locator('.reply-widget figcaption').getByText('Weekend plan').count(), 0, 'render validated widgets only after the reply completes');
+  await visuals.evaluate(id => emit({ type: 'complete', id }), visualId);
+  await visuals.locator('.reply-flow').waitFor();
+  assert.equal(await visuals.locator('.reply-flow-node').count(), 3);
+  assert.equal(await visuals.locator('.reply-flow-edge').count(), 3);
+  const fills = await visuals.evaluate(() => {
+    const node = document.querySelector('.reply-flow-node');
+    const old = getComputedStyle(node).fill;
+    document.documentElement.dataset.tone = 'rose';
+    document.documentElement.dataset.scheme = 'dark';
+    return [old, getComputedStyle(node).fill];
+  });
+  assert.notEqual(...fills, 'diagram nodes follow live theme changes');
+  assert.equal(await visuals.locator('.reply-chart-bar').count(), 2);
+  assert.equal(await visuals.locator('.reply-widget iframe').count(), 0);
+  assert.equal(mapRequests, 0, 'generated maps never contact the provider before opening');
+  await visuals.getByRole('button', { name: 'Load interactive map' }).click();
+  await visuals.frameLocator('.reply-widget iframe').getByText('Map fixture').waitFor();
+  assert.equal(mapRequests, 1);
+  await visuals.getByRole('button', { name: 'Hide map' }).click();
+  assert.equal(await visuals.locator('.reply-widget iframe').count(), 0);
+  await visuals.locator('summary').getByText('Pack light', { exact: true }).click();
+  assert.equal(await visuals.getByText('Bring water.', { exact:true }).isVisible(), true);
+  assert.equal(await visuals.locator('.reply-widget figcaption').getByText('Invalid coordinates').count(), 0);
+  assert.equal(await visuals.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await visuals.locator('.reply-flow').scrollIntoViewIfNeeded();
+  await visuals.screenshot({ animations: 'disabled', path: evidence + '/sidebar-visual-replies.png' });
+  await visuals.close();
+
+  const full = await browser.newPage({ viewport: { width: 1050, height: 800 } });
+  await full.addInitScript({ content: '(' + installPanelFixture + ')(); (' + installPanelAreaEvents + ')();' });
+  await full.addInitScript(() => {
+    testProviders[1].authenticated = true;
+    testProviders[1].models = [{id:'claude-opus-5-5', label:'Claude Opus 5.5', reasoningEfforts:['medium']}];
+    testStorage.local.breezerModel = { provider: 'claude', model: 'claude-opus-5-5' };
+  });
+  await full.goto(fixtureOrigin + '/panel.html?view=chat');
+  await full.locator('#model-button').getByText('Claude Opus 5.5', { exact: true }).waitFor();
+  assert.equal(await full.locator('#research-open').isVisible(), false);
+  await full.getByLabel('Message Breezer').fill('Compare the options');
+  await full.getByRole('button', { name: 'Send message', exact: true }).click();
+  await full.locator('#activity-label').getByText('Finding a tailwind…').waitFor();
+  const fullRequest = await full.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(fullRequest.provider, 'claude');
+  assert.equal(fullRequest.includeContext, false);
+  await full.evaluate(({ id, blocks }) => emit({ type: 'delta', id, text: blocks }), { id: fullRequest.id, blocks });
+  await full.locator('#activity-label').getByText('Writing…').waitFor();
+  await full.evaluate(id => emit({ type: 'complete', id }), fullRequest.id);
+  assert.equal(await full.locator('.reply-flow-node').count(), 3);
+  const [conversation, composer] = await Promise.all([full.locator('#messages').boundingBox(), full.locator('.compose-area').boundingBox()]);
+  assert.ok(Math.abs((conversation.x + conversation.width / 2) - (composer.x + composer.width / 2)) < 3, 'conversation and composer align');
+  await full.waitForFunction(() => testStorage.session['breezer-full-conversation-7']?.length === 2);
+  await full.locator('.reply-flow').scrollIntoViewIfNeeded();
+  await full.screenshot({ animations: 'disabled', path: evidence + '/full-chat-visual-replies.png' });
+  await full.close();
+
   console.log('PASS: file picker, drop, removal, unsupported/oversize errors, image decoding, attachment-only send, retry restoration and follow-up history; real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {

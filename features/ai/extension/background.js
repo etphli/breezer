@@ -94,6 +94,7 @@ function createDashboardCache({ now = Date.now, maximumBytes = 1024 * 1024 } = {
 return createDashboardCache;
 })();
 import { prepareResearch, researchSelection } from './research-policy.js';
+import { validGeneratedImage } from './reply-widgets.js';
 import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
@@ -383,12 +384,14 @@ export function installBackground(api) {
   const runs = new Map();
   const replyWrites = new Map();
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
-  const runFor = panel => runs.get(panel.windowId);
+  const fullChatKey = windowId => 'chat-' + windowId;
+  const runKey = panel => panel.fullChat && Number.isInteger(panel.windowId) ? fullChatKey(panel.windowId) : panel.windowId;
+  const runFor = panel => runs.get(runKey(panel));
   const controlRun = () => [...runs.values()].find(run => run.control);
   const current = run => runFor(run.panel) === run;
   const replyKey = windowId => `breezer-pending-reply-${windowId}`;
   const writeReply = (windowId, write) => {
-    if (!Number.isInteger(windowId) || !api.storage.session) return;
+    if (windowId === undefined || !api.storage.session) return;
     const pending = (replyWrites.get(windowId) || Promise.resolve()).then(() => write(replyKey(windowId))).catch(() => {});
     replyWrites.set(windowId, pending);
     void pending.then(() => { if (replyWrites.get(windowId) === pending) replyWrites.delete(windowId); });
@@ -406,14 +409,14 @@ export function installBackground(api) {
     browserTask: run.browserTask, stats: run.statsSummary,
   });
   const endRun = (run, terminal) => {
-    runs.delete(run.panel.windowId);
+    runs.delete(runKey(run.panel));
     let saved;
     if (!run.control) {
       // Keep a completed turn until the panel confirms its transcript was saved.
       const index = terminal.themeProposal?.imageAttachment;
       const value = { ...turnState(run), terminal };
       if (index) value.themeImage = run.themeImages[index - 1].image;
-      saved = writeReply(run.panel.windowId, key => api.storage.session.set({ [key]: value }));
+      saved = writeReply(runKey(run.panel), key => api.storage.session.set({ [key]: value }));
       if (index && run.reader !== run.panel) terminal = { ...terminal, themeImage: value.themeImage };
     }
     if (run.reader) post(run.reader.port, terminal);
@@ -452,7 +455,7 @@ export function installBackground(api) {
   };
   const publishMetadata = async (windowId, expectedTabId) => {
     for (const panel of panels) {
-      if (panel.closed || !panel.visible || panel.windowId === undefined || (windowId !== undefined && panel.windowId !== windowId)) continue;
+      if (panel.fullChat || panel.closed || !panel.visible || panel.windowId === undefined || (windowId !== undefined && panel.windowId !== windowId)) continue;
       const revision = ++panel.metadataRevision;
       const [tab] = await api.tabs.query({ active: true, windowId: panel.windowId });
       if (!tab || panel.closed || !panel.visible || panel.metadataRevision !== revision || (expectedTabId !== undefined && tab.id !== expectedTabId)) continue;
@@ -513,6 +516,10 @@ export function installBackground(api) {
         if (run.reader) post(run.reader.port, message);
       } else if (message.type === 'complete' || message.type === 'error') {
         let terminal = message;
+        if (message.generatedImage !== undefined && (run.browserTask !== 'image' || !validGeneratedImage(message.generatedImage))) {
+          const { generatedImage, ...ordinaryResponse } = message;
+          terminal = ordinaryResponse;
+        }
         if (message.type === 'complete' && !message.cancelled) {
           if (run.themeProposal) terminal = { ...message, themeProposal: run.themeProposal };
           else if (run.browserTask === 'theme') terminal = { type: 'error', id: run.id, source: 'theme', error: 'The model did not create a theme preview. Try again or choose another model.' };
@@ -535,6 +542,10 @@ export function installBackground(api) {
   };
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
+    if (!Number.isInteger(panel.windowId)) throw new Error('Open the assistant before sending a message.');
+    if (panel.fullChat && (message.control || message.includeContext || message.researchSources !== undefined || message.pdfView !== undefined)) {
+      throw new Error('Page sharing and browser control are available from the sidebar.');
+    }
     const browserTask = message.browserTask;
     const pdfView = message.pdfView;
     if (pdfView !== undefined && (typeof pdfView !== 'string' || pdfView.length > 2 * 1024 * 1024
@@ -543,7 +554,11 @@ export function installBackground(api) {
         || browserTask !== undefined || message.researchSources !== undefined)) {
       throw new Error('Invalid PDF viewport. Open the PDF and send again.');
     }
-    if (browserTask !== undefined && (!['stats', 'theme'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('Browser stats and theme design require page access and research to be off.');
+    if (browserTask !== undefined && (!['stats', 'theme', 'image'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('This request requires page access and research to be off.');
+    if (browserTask === 'image' && (message.provider !== 'codex' || !/^gpt-/i.test(message.model)
+        || message.message.length > 4_000 || message.attachments?.length || message.history?.length)) {
+      throw new Error('Image generation requires a GPT model and a text prompt of up to 4,000 characters.');
+    }
     if (runFor(panel)) await cancel(runFor(panel));
     if (message.control === true && controlRun()) await cancel(controlRun(), 'Browser control moved to another tab.', 'browser-control');
     if (runFor(panel) || (message.control === true && controlRun())) throw new Error('A response is already running. Stop it before sending another message.');
@@ -555,7 +570,7 @@ export function installBackground(api) {
     };
     const history = Array.isArray(message.history) ? message.history.slice(-40) : [];
     if (browserTask === 'theme') run.themeImages = themeReferenceImages(message.attachments, history);
-    runs.set(panel.windowId, run);
+    runs.set(runKey(panel), run);
     try {
       let context, researchSources;
       if (browserTask === 'stats') {
@@ -631,8 +646,8 @@ export function installBackground(api) {
       return true;
     };
     if (attach() || !api.storage.session) return;
-    const key = replyKey(panel.windowId);
-    await replyWrites.get(panel.windowId);
+    const key = replyKey(runKey(panel));
+    await replyWrites.get(runKey(panel));
     const saved = (await api.storage.session.get(key).catch(() => ({})))[key];
     if (!panel.closed && !attach() && !runFor(panel) && saved) post(panel.port, saved);
   };
@@ -651,14 +666,23 @@ export function installBackground(api) {
   };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
-    if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito || port.sender?.url !== api.runtime.getURL('panel.html')) return;
-    const panel = { port, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
+    const sender = port.sender;
+    if (sender?.id !== api.runtime.id || sender?.tab?.incognito) return;
+    const fullChat = sender.url === api.runtime.getURL('panel.html?view=chat')
+      && Number.isInteger(sender.tab?.id) && Number.isInteger(sender.tab.windowId) && sender.frameId === 0;
+    if (!fullChat && sender.url !== api.runtime.getURL('panel.html')) return;
+    const panel = { port, fullChat, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
     panels.add(panel);
     port.onMessage.addListener(message => {
       void (async () => {
         if (!message || typeof message !== 'object' || panel.closed) return;
         if (message.type === 'init') {
           panel.ready = (async () => {
+            if (fullChat) {
+              panel.windowId = sender.tab.windowId;
+              await restoreTurn(panel);
+              return;
+            }
             const [tab] = await api.tabs.query({ active: true, ...(Number.isInteger(message.windowId) ? { windowId: message.windowId } : { currentWindow: true }) });
             if (panel.closed) return;
             panel.windowId = tab?.windowId ?? message.windowId;
@@ -672,6 +696,7 @@ export function installBackground(api) {
           await panel.ready;
           if (Number.isInteger(panel.windowId)) requestModelCatalog(panel);
         } else if (message.type === 'research-begin') {
+          if (fullChat) return;
           await panel.ready;
           panel.researchDraft = { id: message.id, selection: researchSelection(message.sources), invalidated: false };
         } else if (message.type === 'chat') { await panel.ready; await sendChat(panel, message); }
@@ -685,7 +710,7 @@ export function installBackground(api) {
           if (run?.reader === panel && (!message.id || run.id === message.id)) await cancel(run);
         } else if (message.type === 'turn-saved' || message.type === 'clear-turn') {
           await panel.ready;
-          await writeReply(panel.windowId, async key => {
+          await writeReply(runKey(panel), async key => {
             if (message.type === 'clear-turn' || (await api.storage.session.get(key))[key]?.id === message.id) await api.storage.session.remove(key);
           });
         } else if (message.type === 'context') {
@@ -707,7 +732,7 @@ export function installBackground(api) {
     if (!tab?.id) return;
     tools.authorize(tab);
     void contextMemory.observeGranted(tab);
-    const panel = [...panels].find(item => item.windowId === tab.windowId && !item.closed && item.visible);
+    const panel = [...panels].find(item => !item.fullChat && item.windowId === tab.windowId && !item.closed && item.visible);
     if (panel && api.sidePanel.close) {
       const run = runFor(panel);
       if (run?.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
@@ -720,10 +745,10 @@ export function installBackground(api) {
   installCommands(api, toggle);
   api.action.onClicked.addListener(toggle);
   api.sidePanel.onClosed?.addListener(info => {
-    for (const panel of panels) if (panel.windowId === info.windowId) hidePanel(panel, 'Panel closed. Select source tabs again.');
+    for (const panel of panels) if (!panel.fullChat && panel.windowId === info.windowId) hidePanel(panel, 'Panel closed. Select source tabs again.');
   });
   api.sidePanel.onOpened?.addListener(info => {
-    for (const panel of panels) if (panel.windowId === info.windowId) panel.visible = true;
+    for (const panel of panels) if (!panel.fullChat && panel.windowId === info.windowId) panel.visible = true;
   });
   api.runtime.onMessage.addListener((message, sender) => {
     const run = controlRun();
@@ -775,8 +800,10 @@ export function installBackground(api) {
     if (run && run.panel.windowId !== windowId) void cancel(run, 'Browser control stopped because the active window changed.', 'browser-control');
   });
   api.windows?.onRemoved?.addListener(windowId => {
-    void cancel(runs.get(windowId));
-    void writeReply(windowId, key => api.storage.session.remove(key));
+    for (const key of [windowId, fullChatKey(windowId)]) {
+      void cancel(runs.get(key));
+      void writeReply(key, storageKey => api.storage.session.remove(storageKey));
+    }
   });
   api.debugger.onDetach.addListener(source => {
     const run = controlRun();

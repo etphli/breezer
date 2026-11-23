@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { allowedTools, validateChat, validateTool, MAX_MESSAGE_BYTES, MAX_OUTPUT_BYTES, messageWithinLimit } from './protocol.mjs';
 import { JsonLineProcess } from './cli.mjs';
+import { generateOpenAiImage } from './image-generation.mjs';
 
 // Only these parser messages synchronously emit ordinary text. In particular,
 // terminal/result messages must flush before the provider resolves its promise.
@@ -12,8 +13,8 @@ export class HostController {
   #discovering = false;
   #active;
   #pending = new Map();
-  constructor(providers, send, { toolTimeout = 60_000, integrationTool, prepareChat } = {}) {
-    this.providers = providers; this.send = send; this.toolTimeout = toolTimeout; this.integrationTool = integrationTool; this.prepareChat = prepareChat;
+  constructor(providers, send, { toolTimeout = 60_000, integrationTool, prepareChat, generateImage = generateOpenAiImage } = {}) {
+    this.providers = providers; this.send = send; this.toolTimeout = toolTimeout; this.integrationTool = integrationTool; this.prepareChat = prepareChat; this.generateImage = generateImage;
   }
   async discover(refresh = false) {
     if (refresh && !this.#active && !this.#discovering) this.#discovery = undefined;
@@ -48,6 +49,11 @@ export class HostController {
       };
       this.#active = run;
       try {
+        if (message.browserTask === 'image') {
+          const generatedImage = await this.generateImage(message.message, run.controller.signal);
+          if (this.#active === run) this.send({ type: 'complete', id: run.id, generatedImage });
+          return;
+        }
         const useOrganato = !message.browserTask && !message.researchSources && message.context?.kind !== 'pdf-view' && this.prepareChat;
         message = { ...message, organato: useOrganato ? await this.prepareChat() : false };
         if (run.controller.signal.aborted) return;
@@ -64,7 +70,7 @@ export class HostController {
         if (this.#active === run) this.send({ type: 'complete', id: run.id });
       } catch (error) {
         run.flush();
-        if (this.#active === run && !run.controller.signal.aborted) this.send({ type: 'error', id: run.id, error: error.message.slice(0, 1500) });
+        if (this.#active === run && !run.controller.signal.aborted) this.send({ type: 'error', id: run.id, error: error.message.slice(0, 1500), ...(message.browserTask === 'image' ? { source: 'image' } : {}) });
       } finally {
         run.turn?.flushers.delete(run.flush);
         run.turn = undefined;

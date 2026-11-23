@@ -144,6 +144,26 @@ Earlier live host checks passed with GPT-6.1 Sol and Claude Opus 5.5. The frozen
 
 Xcode is available; licence acceptance is no longer a compilation blocker. Main owns the pending native compile and release verification. The corrected consent persistence, wave, pointer, and installed-control target lookup still need validation in the newly compiled app, including the `--follow-up` check. No build, install, or live inference is performed as part of this source-only handoff.
 
+## Visual replies and images
+
+Ask either provider to explain a process in a flow diagram, compare figures in a
+chart, mark a known location on a map, or group details into expandable cards.
+Breezer renders these from bounded JSON in the sidebar and in **Open chat in a
+tab**. The chat tab has its own conversation for the current window. The sidebar
+provides page sharing and browser control.
+
+Diagrams and charts follow the current Breezer appearance. Maps contact
+OpenStreetMap after you choose **Load interactive map** or **Open in
+OpenStreetMap**.
+
+With a GPT model selected, use **Tools → Create an image** or ask for an image
+directly. The local helper sends only the image prompt to the OpenAI Images API
+and shows the result with **Save image**. The helper uses
+`BREEZER_OPENAI_IMAGE_API_KEY` or `OPENAI_API_KEY` from Breezer's environment.
+Start Breezer with the variable set in that environment. The API key needs
+access to GPT Image 2.5 Flare and API usage is billed through the API account.
+The usual Codex and Claude logins continue to handle chat.
+
 ## References
 
 - [Codex app-server protocol](https://learn.chatgpt.com/docs/app-server)

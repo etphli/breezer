@@ -72,6 +72,7 @@ function harness(code, initial = [], ids = []) {
     requestAnimationFrame(fn) { counts.frames++; frames.push(fn); },
     renderMessage(body, text) { renders.push(text); body.textContent = text; },
     createMessageStream(body) { const stream = { disposed: false, append(text) { assert.equal(this.disposed, false); body.textContent = (body.textContent || '') + text; }, dispose() { this.disposed = true; } }; streams.push(stream); return stream; },
+    renderReplyWidget: () => null,
     instrument, counts,
   });
   const prefix = code.replace(/^import .*;\n/gm, '').split("$('composer').addEventListener")[0];

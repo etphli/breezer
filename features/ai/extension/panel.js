@@ -1,6 +1,7 @@
 import { localStorageChanges } from './storage-events.js';
 import { ResearchSources, maskSecrets } from './research-sources.js';
 import { renderMessage, createMessageStream } from './render-message.js';
+import { appendGeneratedImage, renderReplyWidget, validGeneratedImage } from './reply-widgets.js';
 import { MODEL_KEY, connectedModel, modelProviders, preferredModel, providerLabel, selectModel } from './model-catalog.js';
 import { startPanelTheme } from './panel-theme.js';
 import { normalizeThemeProposal, readThemeState, renderThemeProposal, restorePreviousLook } from './browser-theme.js';
@@ -13,6 +14,7 @@ import { HANDOFF_TTL_MS, handoffKey, readExperiments, startPersonalityLook } fro
 const BROWSER_TASKS = {
   stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
   theme: { label: 'Theme design', placeholder: 'Describe a theme, background, or animation…', prompt: '', sharing: 'Page sharing off' },
+  image: { label: 'Image generation', placeholder: 'Describe the image you want…', prompt: '', sharing: 'Only the prompt is sent to OpenAI' },
   restore: { label: 'Restore previous look', sharing: 'Changes appearance on this device' },
 };
 
@@ -48,6 +50,7 @@ async function readAttachment(file, { validatedImage = false } = {}) {
 }
 
 const $ = (id) => document.getElementById(id);
+const fullChat = globalThis.location?.search === '?view=chat';
 const state = {
   profile: { name: '', context: '' },
   providers: [],
@@ -63,13 +66,13 @@ const state = {
   readingFiles: false,
   retryMessage: null,
   fileGeneration: 0,
-  includeContext: true,
+  includeContext: !fullChat,
   control: false,
   controlTabId: null,
   browserTask: null,
   running: null,
   page: null,
-  pageKnown: false,
+  pageKnown: fullChat,
   pageRevision: 0,
   restoringLook: false,
   newTabDraft: null,
@@ -87,6 +90,7 @@ const themeCards = new Set();
 let lastContextTitle = null;
 let scheduledRender = false;
 let modelChangeObserved = false;
+let workingTimer;
 
 function notify(text) {
   $('notice-text').textContent = text;
@@ -196,9 +200,15 @@ function saveSettings() {
   updateControls();
 }
 
+function supportsImageGeneration(selected = selectedModel()) {
+  return selected?.provider.id === 'codex' && /^gpt-/i.test(selected.model.id);
+}
+
 function draftBrowserTask() {
   if (research.size) return '';
+  if (state.browserTask === 'image' && !supportsImageGeneration()) return '';
   return state.browserTask ?? detectBrowserTask($('prompt').value, {
+    get allowImage() { return supportsImageGeneration(); },
     get hasImage() { return themeReferenceImages(state.attachments, recentRequestMessages()).length > 0; },
     get hasTheme() { return Boolean(state.messages.findLast(message => message.role === 'assistant')?.themeProposal); },
   });
@@ -223,6 +233,8 @@ function updateControls() {
   $('context-toggle').hidden = Boolean(task) || research.size > 0 || !state.page;
   $('context-toggle').disabled = running || !state.page || research.size > 0;
   $('browser-task-open').disabled = running;
+  $('open-chat-tab').hidden = fullChat || !chrome.tabs?.create;
+  $('browser-task-image').hidden = !supportsImageGeneration();
   $('browser-task-clear').hidden = !task;
   $('browser-task-clear').disabled = running;
   $('browser-task-clear').textContent = task ? `${task.label} ×` : '';
@@ -530,7 +542,7 @@ function appendMessage(message) {
     label.textContent = 'Breezer';
     heading.append(logo, label);
     article.append(heading);
-    if (message.text) renderMessage(body, message.text);
+    if (message.text) renderMessage(body, message.text, renderReplyWidget);
     else {
       const thinking = document.createElement('div');
       thinking.className = 'thinking';
@@ -547,6 +559,7 @@ function appendMessage(message) {
     article.append(prompt);
   } else article.append(body);
   if (message.themeProposal) themeCards.add(renderThemeProposal(article, message.themeProposal));
+  if (message.generatedImage) appendGeneratedImage(body, message.generatedImage);
   if (message.stats) renderStats(body, message.stats);
   if (message.attachments?.length) {
     const files = document.createElement('div');
@@ -726,6 +739,15 @@ function requestHistory() {
 
 function saveConversation(completedId) {
   const messages = recentMessages(60);
+  let imageBytes = 0;
+  for (let index = messages.length - 1; index >= 0; index--) {
+    if (!messages[index].generatedImage) continue;
+    imageBytes += messages[index].generatedImage.length;
+    if (imageBytes > 2_500_000) {
+      const { generatedImage, ...message } = messages[index];
+      messages[index] = message;
+    }
+  }
   if (messages.length) messages.at(-1).lastActivity = Date.now();
   return chrome.storage.session.set({ [state.sessionKey]: messages }).then(() => {
     if (completedId && state.port) post({ type: 'turn-saved', id: completedId });
@@ -792,19 +814,44 @@ function offerRetry(run, failed = true) {
 
 function activityLabel(label) {
   const sharing = BROWSER_TASKS[state.running?.browserTask]?.label ?? (state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? state.page?.pdf ? 'PDF view' : 'Page + screenshot' : '');
-  $('activity-label').textContent = sharing ? `${sharing} · ${label}` : label;
+  const activity = $('activity-label');
+  activity.textContent = sharing ? `${sharing} · ${label}` : label;
+  if (fullChat && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    activity.animate([{ opacity: .4, transform: 'translateY(2px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 200, easing: 'ease-out' });
+  }
+}
+
+function stopWorkingStatus() {
+  if (workingTimer !== undefined) clearInterval(workingTimer);
+  workingTimer = undefined;
+}
+
+function startWorkingStatus(run) {
+  if (!fullChat || run.browserTask || run.message.text) return;
+  const phrases = ['Finding a tailwind…', 'Sorting the pieces…', 'Putting it together…'];
+  let next = 0;
+  const show = () => {
+    if (state.running !== run || run.message.text) { stopWorkingStatus(); return; }
+    if (next < phrases.length) activityLabel(phrases[next++]);
+    else stopWorkingStatus();
+  };
+  show();
+  workingTimer = setInterval(show, 2700);
 }
 
 function finish(label, keepControl = false, completedId) {
+  stopWorkingStatus();
   if (state.running) {
     state.running.renderer?.dispose();
     state.running.renderer = null;
     const message = state.messages.find((item) => item.id === state.running.assistantId);
     if (message && !message.text) {
       message.text = label || 'Response stopped.';
-      renderMessage(messageNodes.get(message.id), message.text);
-    } else if (message) renderMessage(messageNodes.get(message.id), message.text);
+      renderMessage(messageNodes.get(message.id), message.text, renderReplyWidget);
+    } else if (message) renderMessage(messageNodes.get(message.id), message.text, renderReplyWidget);
     if (message) linkResearchCitations(messageNodes.get(message.id), message.citations);
+    if (message?.generatedImage) appendGeneratedImage(messageNodes.get(message.id), message.generatedImage);
     if (message?.themeProposal) {
       const conversation = $('conversation');
       const followsReply = conversation.scrollHeight - conversation.scrollTop - conversation.clientHeight < 100;
@@ -888,8 +935,8 @@ async function send() {
     return;
   }
   const fromNewTab = state.newTabDraft?.prompt === $('prompt').value.trim();
-  const includeContext = !fromNewTab && !browserTask && !research.size && state.includeContext;
-  const control = !fromNewTab && !browserTask && !research.size && state.control;
+  const includeContext = !fullChat && !fromNewTab && !browserTask && !research.size && state.includeContext;
+  const control = !fullChat && !fromNewTab && !browserTask && !research.size && state.control;
   const tabId = state.page?.tabId;
   const text = $('prompt').value.trim() || (state.attachments.length ? 'Review the attached files.' : '');
   const selected = selectedModel();
@@ -901,6 +948,10 @@ async function send() {
     return;
   }
   if (!text) return;
+  if (browserTask === 'image' && (!$('prompt').value.trim() || state.attachments.length || text.length > 4_000)) {
+    notify('Enter an image prompt of up to 4,000 characters and remove any attachments.');
+    return;
+  }
   const settings = selectedSettings(selected);
   setModelMenu(false);
   notify('');
@@ -911,7 +962,7 @@ async function send() {
   state.retryMessage = null;
   state.browserTask = null;
   state.newTabDraft = null;
-  const history = requestHistory();
+  const history = browserTask === 'image' ? [] : requestHistory();
   if (browserTask === 'theme') {
     const previous = state.messages.findLast(message => message.themeProposal)?.themeProposal;
     if (previous) history.push({ role: 'assistant', content: `Previous theme proposal (design data):\n${previous.name} ${previous.theme} ${previous.colorMode}\n${previous.image ? 'Uses an attached image as the background.\n' : ''}${previous.html || ''}` });
@@ -932,7 +983,8 @@ async function send() {
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
-  activityLabel(state.running.control ? 'Getting ready to help' : 'Thinking');
+  activityLabel(browserTask === 'image' ? 'Creating your image' : state.running.control ? 'Getting ready to help' : 'Thinking');
+  startWorkingStatus(state.running);
   updateControls();
   scrollToBottom();
   let sources, pdfView;
@@ -1017,7 +1069,8 @@ function restoreTurn({ id, user, text, browserTask, terminal, themeImage, stats 
     setControl(false);
     state.running = { id, assistantId, browserTask, control: false, submitted: true, message };
     $('activity').hidden = false;
-    activityLabel('Thinking');
+    activityLabel(browserTask === 'image' ? 'Creating your image' : 'Thinking');
+    startWorkingStatus(state.running);
     updateControls();
     if (text && !terminal) renderDelta();
     scrollToBottom();
@@ -1052,11 +1105,14 @@ function receive(message) {
     if (message.source === 'theme') {
       state.running.message.text = '';
       fail(reason, reason, completedId);
+    } else if (message.source === 'image') {
+      fail(reason, reason, completedId);
     } else {
       fail(reason, message.source === 'browser-control' ? 'Browser control stopped.' : providerFailureSummary(reason), completedId);
     }
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
+    if (fullChat && !reply.text && message.text) { stopWorkingStatus(); activityLabel('Writing…'); }
     reply.text += message.text || '';
     renderDelta();
   } else if (message.type === 'complete') {
@@ -1075,8 +1131,13 @@ function receive(message) {
       }
       catch (error) { return fail(error.message, 'Breezer could not preview this theme.', completedId); }
     }
+    const hasImage = !message.cancelled && run.browserTask === 'image' && validGeneratedImage(message.generatedImage);
+    if (hasImage) {
+      run.message.generatedImage = message.generatedImage;
+      run.message.text ||= 'Image created.';
+    }
     const hasPreview = Boolean(run.message?.themeProposal);
-    const hasResult = hasPreview || Boolean(run.message.stats);
+    const hasResult = hasImage || hasPreview || Boolean(run.message.stats);
     finish(message.cancelled ? 'Stopped.' : hasPreview ? 'Theme ready to preview.' : hasResult ? 'Browser stats measured.' : 'The provider returned no response.', !message.cancelled, completedId);
     if (empty && !message.cancelled && !hasResult) offerRetry(run);
   }
@@ -1169,6 +1230,16 @@ $('prompt').addEventListener('keydown', (event) => {
     event.preventDefault();
     if (!state.running) send();
   }
+});
+$('open-chat-tab').addEventListener('click', async () => {
+  const url = chrome.runtime.getURL('panel.html?view=chat');
+  try {
+    const tabs = await chrome.tabs.query({ windowId: state.windowId });
+    const existing = tabs.find(tab => tab.url === url && !tab.incognito);
+    if (existing) await chrome.tabs.update(existing.id, { active: true });
+    else await chrome.tabs.create({ url, windowId: state.windowId });
+    await chrome.sidePanel.close?.({ windowId: state.windowId });
+  } catch (error) { notify(error.message); }
 });
 $('close-panel').addEventListener('click', async () => {
   if (state.running?.control) stop();
@@ -1453,7 +1524,7 @@ async function initialize() {
     if (!modelChangeObserved) state.preferredModel = preferredModel(saved[MODEL_KEY]);
     if (saved.breezerModelPreferences && typeof saved.breezerModelPreferences === 'object' && !Array.isArray(saved.breezerModelPreferences)) state.preferences = saved.breezerModelPreferences;
     state.windowId = currentWindow.id;
-    state.sessionKey = `breezer-conversation-${currentWindow.id}`;
+    state.sessionKey = (fullChat ? 'breezer-full-conversation-' : 'breezer-conversation-') + currentWindow.id;
     const session = await chrome.storage.session.get(state.sessionKey);
     if (Array.isArray(session[state.sessionKey])) {
       state.messages = session[state.sessionKey].filter((item) => ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-60);
@@ -1469,8 +1540,10 @@ async function initialize() {
     });
     post({ type: 'init', windowId: state.windowId });
     post({ type: 'visibility', visible: !document.hidden });
-    post({ type: 'context' });
-    listenForNewTabAsk();
+    if (!fullChat) {
+      post({ type: 'context' });
+      listenForNewTabAsk();
+    }
     updateControls();
     scrollToBottom();
     revealPanel();
@@ -1480,7 +1553,9 @@ async function initialize() {
   }
 }
 
+if (fullChat) document.documentElement.dataset.fullChat = 'true';
 void startPanelTheme();
 const stopPersonalityLook = startPersonalityLook();
 addEventListener('pagehide', stopPersonalityLook, { once: true });
+addEventListener('pagehide', stopWorkingStatus, { once: true });
 initialize();

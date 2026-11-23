@@ -73,7 +73,7 @@
   },
   "incognito": "not_allowed",
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https://breezer-browser.vercel.app http://localhost:5000 https://libretranslate.com"
+    "extension_pages": "script-src 'self'; object-src 'none'; connect-src https://breezer-browser.vercel.app http://localhost:5000 https://libretranslate.com; frame-src https://www.openstreetmap.org"
   },
   "chrome_url_overrides": {
     "newtab": "newtab.html"
