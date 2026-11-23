@@ -19,6 +19,7 @@
 #include "base/base64.h"
 #include "base/functional/bind.h"
 #include "base/location.h"
+#include "base/memory/scoped_refptr.h"
 #include "base/task/bind_post_task.h"
 #include "base/time/time.h"
 #include "components/pdf/browser/pdf_document_helper.h"
@@ -142,8 +143,12 @@ BreezerPrivateCaptureCurrentPdfContextFunction::RunFunction() {
     gfx::Size output = gfx::ScaleToFlooredSize(source_rect.size(), scale);
     output.SetToMax(gfx::Size(1, 1));
 
-    timeout_.Start(FROM_HERE, kCopyTimeout + base::Seconds(1), this,
-                   &BreezerPrivateCaptureCurrentPdfContextFunction::OnTimeout);
+    // Keep the extension request alive until the copy responds or times out.
+    timeout_.Start(
+        FROM_HERE, kCopyTimeout + base::Seconds(1),
+        base::BindOnce(
+            &BreezerPrivateCaptureCurrentPdfContextFunction::OnTimeout,
+            base::RetainedRef(this)));
     view->CopyFromSurface(
         source_rect, output, kCopyTimeout,
         base::BindPostTaskToCurrentDefault(base::BindOnce(
@@ -180,6 +185,9 @@ void BreezerPrivateCaptureCurrentPdfContextFunction::OnCopied(
   if (did_respond()) {
     return;
   }
+  // Stopping the timer releases its reference to the request.
+  const scoped_refptr<BreezerPrivateCaptureCurrentPdfContextFunction>
+      keep_alive(this);
   timeout_.Stop();
   content::WebContents* const contents = GetActiveTab(GetCallerBrowser(), tab_id);
   content::RenderFrameHost* const frame = pdf_document.AsRenderFrameHostIfValid();

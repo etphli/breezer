@@ -352,6 +352,11 @@ def check_peek(tree, added, idl, api):
             "tab_document.AsRenderFrameHostIfValid()" in pdf_context and
             "pdf_document.AsRenderFrameHostIfValid()" in pdf_context,
             "PDF context must copy the trusted child viewport and revalidate both documents before returning")
+    timer_start = pdf_capture.split("timeout_.Start(", 1)[1].split("view->CopyFromSurface(", 1)[0]
+    on_copied = pdf_context.split("BreezerPrivateCaptureCurrentPdfContextFunction::OnCopied(", 1)[1].split("\n}", 1)[0]
+    require("base::RetainedRef(this)" in timer_start and
+            "keep_alive(this)" in on_copied.split("timeout_.Stop();", 1)[0],
+            "PDF capture must retain the request through the timeout and through cancellation of that timer")
 
 
 def main():
