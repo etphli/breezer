@@ -542,7 +542,7 @@ export function installBackground(api) {
   };
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
-    if (!Number.isInteger(panel.windowId)) throw new Error('Open the assistant before sending a message.');
+    if (panel.fullChat && !Number.isInteger(panel.windowId)) throw new Error('Open the chat tab before sending a message.');
     if (panel.fullChat && (message.control || message.includeContext || message.researchSources !== undefined || message.pdfView !== undefined)) {
       throw new Error('Page sharing and browser control are available from the sidebar.');
     }
