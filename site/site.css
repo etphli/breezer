@@ -547,18 +547,6 @@ p { text-wrap: pretty; }
   box-shadow: 0 0 0 1px var(--plate-edge);
 }
 
-/* ------------------------------------------------------------- films */
-
-.films { scroll-margin-top: 100px; }
-.films-intro { max-width: 50ch; margin: 20px 0 36px; font-size: 1.125rem; color: var(--muted); }
-.film-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 28px; }
-.film { min-width: 0; margin: 0; }
-.film video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 14px; background: var(--ink); }
-.film video:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
-.film h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 14px 0 4px; font-family: var(--serif); font-size: 1.75rem; font-weight: 500; }
-.film h3 span { color: var(--muted); font: 0.875rem var(--sans); font-variant-numeric: tabular-nums; }
-.film p { margin: 0; color: var(--muted); }
-
 /* ------------------------------------------------------------ finale */
 
 .finale {
@@ -856,7 +844,7 @@ p { text-wrap: pretty; }
 /* ---------------------------------------------------------- narrow */
 
 @media (max-width: 860px) {
-  .film-grid { grid-template-columns: 1fr; }
+  .home main { overflow-x: clip; }
   .nav nav { display: none; }
   .nav .button { margin-left: auto; }
   .download-page .nav { padding: 8px 16px; }
@@ -868,7 +856,7 @@ p { text-wrap: pretty; }
   .get-icon { width: 180px; }
   .install-steps { grid-template-columns: 1fr; }
   .float-chip { display: none; }
-  .float-assistant { width: 34%; right: -2%; }
+  .float-assistant { width: 34%; right: 0; transform: translateY(calc((1 - var(--p)) * 32px)); }
   .fan { height: 92vw; max-height: 560px; }
   .fan-card { height: 100%; }
 }
