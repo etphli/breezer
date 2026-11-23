@@ -11,6 +11,7 @@ export const TONES = ['mint', 'tide', 'dusk', 'rose', 'pollen', 'graphite'];
 export const TONE_NAMES = { mint: 'Mint', tide: 'Tide', dusk: 'Dusk', rose: 'Rose', pollen: 'Pollen', graphite: 'Graphite' };
 export const MAX_FAVORITES = 12;
 export const MAX_SPACES = 9;
+export const SPACE_ICONS = ['space', 'briefcase', 'home', 'book', 'sparkle', 'code', 'leaf', 'globe'];
 // Folder colors show as nothing, the folder icon, or a tint across the folder row.
 export const FOLDER_COLOR_MODES = ['off', 'icon', 'row'];
 export const DEFAULT_PREFS = Object.freeze({ newTabPosition: 'bottom', closeButton: 'hover', folderColors: 'off' });
@@ -152,6 +153,7 @@ function normalizeNode(raw) {
     };
     const color = normalizeFolderColor(raw.color);
     if (color) folder.color = color;
+    if (raw.section === 'today') folder.section = 'today';
     return folder;
   }
   return normalizeEntry(raw);
@@ -176,6 +178,7 @@ export function normalizeStore(raw) {
     id: text(space?.id, 64) || uid('s'),
     name: text(space?.name, 60).trim() || 'Space',
     tone: isTone(space?.tone) ? space.tone : 'mint',
+    ...(SPACE_ICONS.includes(space?.icon) ? { icon: space.icon } : {}),
     pinned: (Array.isArray(space?.pinned) ? space.pinned : []).map(normalizeNode).filter(unique),
   })).filter((space) => (seen.has(space.id) ? false : seen.add(space.id)));
   if (spaces.length) store.spaces = spaces;
@@ -270,9 +273,10 @@ function requireSpace(store, id) {
   return space;
 }
 
-export function addSpace(store, { name, tone } = {}) {
+export function addSpace(store, { name, tone, icon } = {}) {
   if (store.spaces.length >= MAX_SPACES) throw new Error(`You can have up to ${MAX_SPACES} spaces.`);
   const space = { id: uid('s'), name: text(name, 60).trim() || `Space ${store.spaces.length + 1}`, tone: isTone(tone) ? tone : 'mint', pinned: [] };
+  if (SPACE_ICONS.includes(icon)) space.icon = icon;
   store.spaces.push(space);
   return space;
 }
@@ -286,6 +290,11 @@ export function renameSpace(store, id, name) {
 export function setSpaceTone(store, id, tone) {
   if (!isTone(tone)) throw new Error('Unknown color.');
   requireSpace(store, id).tone = tone;
+}
+
+export function setSpaceIcon(store, id, icon) {
+  if (!SPACE_ICONS.includes(icon)) throw new Error('Unknown space icon.');
+  requireSpace(store, id).icon = icon;
 }
 
 export function moveSpace(store, id, delta) {
@@ -363,7 +372,7 @@ export function removeNode(store, id) {
   return found.node;
 }
 
-// Move an entry or folder. Targets: { favorites:true, index } or { spaceId, folderId?, index }.
+// Root folder moves may also select a local display section.
 export function moveNode(store, id, target) {
   const found = findNode(store, id);
   if (!found) throw new Error('That item no longer exists.');
@@ -381,10 +390,15 @@ export function moveNode(store, id, target) {
       list = folder.children;
     }
   }
-  let index = target.index === undefined ? list.length : target.index;
+  const changeSection = found.node.kind === 'folder' && (target.section === 'today' || target.section === 'pinned');
+  let index = target.index ?? (changeSection && list === found.list ? found.index : list.length);
   if (list === found.list && found.index < index) index -= 1;
   found.list.splice(found.index, 1);
   list.splice(Math.max(0, Math.min(index, list.length)), 0, found.node);
+  if (changeSection) {
+    if (target.section === 'today') found.node.section = 'today';
+    else delete found.node.section;
+  }
   return found.node;
 }
 

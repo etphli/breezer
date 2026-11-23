@@ -18,12 +18,15 @@
 // The image is never model output: the panel resolves the model's attachment
 // index to the person's own attachment. It is still re-validated as a raster
 // data: URL (never a URL or SVG) on every read and shown in a plain <img>.
-import { THEME_REFRESH_MESSAGE } from './panel-theme.js';
+import { ARTWORK_KEY, THEME_LOOKS, THEME_REFRESH_MESSAGE, activeLook } from './panel-theme.js';
 import { localStorageChanges } from './storage-events.js';
 import { APPEARANCE_REV_KEY, normalizeAppearance, validateAppearancePatch } from './workspace-store.js';
 
-export const ARTWORK_KEY = 'theme.artwork.v1';
+export { ARTWORK_KEY, THEME_LOOKS };
 export const PREVIOUS_LOOK_KEY = 'theme.previous.v1';
+// What Cancel returns to after a Breezer look: the browser theme, artwork and
+// saved previous look from just before the first look was chosen.
+export const LOOK_UNDO_KEY = 'theme.lookUndo.v1';
 const FIRST_FRAME_KEY = 'theme.firstFrame.v1';
 const MAX_NAME_LENGTH = 48;
 const MAX_ARTWORK_LENGTH = 40000;
@@ -65,6 +68,11 @@ export function normalizeThemeProposal(raw, maxArtworkLength = MAX_ARTWORK_LENGT
   if (typeof raw.theme !== 'string' || !/^#[0-9a-f]{6}$/i.test(raw.theme)) throw new TypeError('A theme colour must be a #rrggbb hex value.');
   if (!COLOR_MODES.includes(raw.colorMode)) throw new TypeError('A theme colour mode must be system, light or dark.');
   const proposal = { name, theme: raw.theme.toLowerCase(), colorMode: raw.colorMode };
+  if (raw.preset !== undefined && raw.preset !== null) {
+    // A look's record always carries that look's own seed.
+    if (!Object.hasOwn(THEME_LOOKS, raw.preset) || THEME_LOOKS[raw.preset].seed !== proposal.theme) throw new TypeError('Choose a listed Breezer look.');
+    proposal.preset = raw.preset;
+  }
   if (raw.html !== undefined && raw.html !== null) {
     if (typeof raw.html !== 'string') throw new TypeError('Theme artwork must be a string of HTML.');
     if (raw.html.length > maxArtworkLength) throw new RangeError(`Theme artwork can be at most ${maxArtworkLength} characters.`);
@@ -75,10 +83,10 @@ export function normalizeThemeProposal(raw, maxArtworkLength = MAX_ARTWORK_LENGT
 }
 
 // A short stable id so cards can tell whether their proposal is the one applied.
-function proposalFingerprint({ name, theme, colorMode, html = '', image = '' }) {
+function proposalFingerprint({ name, theme, colorMode, html = '', image = '', preset = '' }) {
   let hash = 0x811c9dc5;
-  // Without an image the text, and so the id, is unchanged from earlier builds.
-  for (const char of `${name}\u0000${theme}\u0000${colorMode}\u0000${html}${image ? `\u0000${image}` : ''}`) {
+  // Without an image or look the text, and so the id, is unchanged from earlier builds.
+  for (const char of `${name}\u0000${theme}\u0000${colorMode}\u0000${html}${image ? `\u0000${image}` : ''}${preset ? `\u0001${preset}` : ''}`) {
     hash ^= char.codePointAt(0);
     hash = Math.imul(hash, 0x01000193) >>> 0;
   }
@@ -415,7 +423,7 @@ async function applyLocked(api, area, proposal, html, now) {
   const previous = values[PREVIOUS_LOOK_KEY] || { appearance: current, artwork: readArtworkRecord(values[ARTWORK_KEY]) };
   const record = {
     name: proposal.name, theme: proposal.theme, colorMode: proposal.colorMode,
-    ...(html ? { html } : {}), ...(proposal.image ? { image: proposal.image } : {}), fingerprint: proposalFingerprint(proposal),
+    ...(html ? { html } : {}), ...(proposal.image ? { image: proposal.image } : {}), ...(proposal.preset ? { preset: proposal.preset } : {}), fingerprint: proposalFingerprint(proposal),
   };
   const next = native ? { theme: proposal.theme, colorMode: proposal.colorMode } : null;
   const appearance = await saveLook(api, area, current, next, {
@@ -423,6 +431,103 @@ async function applyLocked(api, area, proposal, html, now) {
   }, now);
   const kept = appearance && (appearance.theme.toLowerCase() !== proposal.theme || appearance.colorMode !== proposal.colorMode);
   return { applied: record, native, appearance, kept: Boolean(kept) };
+}
+
+// ---------------------------------------------------------------------- looks
+
+// Choosing a plain color ends a built-in look even if the color is its seed.
+// Keep user artwork and the normal Restore history separate from look Cancel.
+export async function applyThemeColor(theme, { api = globalThis.chrome, now = Date.now } = {}) {
+  const patch = validateAppearancePatch({ theme });
+  const area = storageArea(api);
+  return exclusive(async () => {
+    const values = await readKeys(area, [ARTWORK_KEY, LOOK_UNDO_KEY]);
+    const preset = readArtworkRecord(values[ARTWORK_KEY])?.preset;
+    if (preset || values[LOOK_UNDO_KEY]) {
+      const current = themeState(await callBridge(api, 'getAppearance'));
+      return saveLook(api, area, current, patch, {
+        ...(preset ? { [ARTWORK_KEY]: null, [FIRST_FRAME_KEY]: null } : {}),
+        [LOOK_UNDO_KEY]: null,
+        [APPEARANCE_REV_KEY]: now(),
+      }, now);
+    }
+    let appearance = await callBridge(api, 'setAppearance', patch);
+    if (!appearance || typeof appearance !== 'object') appearance = await callBridge(api, 'getAppearance');
+    await signalAppearanceRefresh(api, area, now);
+    return normalizeAppearance(appearance);
+  });
+}
+
+// Applies a Breezer look: its seed goes to the browser through the custom-colour
+// bridge (the person's colour mode is kept) and its record tells pages which art
+// to draw. The look from before the first one is kept for Cancel, also across
+// restarts; switching between looks keeps that same starting point.
+export async function applyThemeLook(id, { api = globalThis.chrome, now = Date.now } = {}) {
+  if (!Object.hasOwn(THEME_LOOKS, id)) throw new TypeError('Choose a listed Breezer look.');
+  const area = storageArea(api);
+  return exclusive(() => applyLookLocked(api, area, id, now));
+}
+
+async function applyLookLocked(api, area, id, now) {
+  const look = THEME_LOOKS[id];
+  const values = await readKeys(area, [ARTWORK_KEY, PREVIOUS_LOOK_KEY, LOOK_UNDO_KEY]);
+  const native = hasBridge(api);
+  const raw = native ? await callBridge(api, 'getAppearance') : null;
+  if (native && raw?.themeCanRestore !== true) {
+    throw new Error('Choose a Breezer theme in Appearance settings first so your previous look can be restored.');
+  }
+  const current = native ? themeState(raw) : null;
+  const currentRecord = readArtworkRecord(values[ARTWORK_KEY]);
+  const continuing = activeLook(currentRecord, native ? raw.theme : null) && values[LOOK_UNDO_KEY];
+  const undo = continuing ? values[LOOK_UNDO_KEY] : { appearance: current, artwork: currentRecord, previous: values[PREVIOUS_LOOK_KEY] ?? null };
+  const colorMode = native ? normalizeAppearance(raw).colorMode : 'system';
+  const proposal = { name: look.name, theme: look.seed, colorMode, preset: id };
+  const record = { ...proposal, fingerprint: proposalFingerprint(proposal) };
+  const previous = values[PREVIOUS_LOOK_KEY] || { appearance: current, artwork: currentRecord };
+  const appearance = await saveLook(api, area, current, native ? { theme: look.seed } : null, {
+    [ARTWORK_KEY]: record, [FIRST_FRAME_KEY]: null, [PREVIOUS_LOOK_KEY]: previous, [LOOK_UNDO_KEY]: undo, [APPEARANCE_REV_KEY]: now(),
+  }, now);
+  const kept = Boolean(appearance && appearance.theme.toLowerCase() !== look.seed);
+  return { look: id, native, appearance, kept };
+}
+
+// The look pages should draw and whether Cancel has somewhere to go back to.
+// theme is the browser's current theme, or null when there is no bridge.
+export async function readThemeLook({ api = globalThis.chrome, theme = null } = {}) {
+  const values = await readKeys(storageArea(api), [ARTWORK_KEY, LOOK_UNDO_KEY]);
+  const look = activeLook(readArtworkRecord(values[ARTWORK_KEY]), theme);
+  return { look, canCancel: Boolean(look && values[LOOK_UNDO_KEY]) };
+}
+
+// Puts back the theme, artwork and saved previous look from before the first
+// look. The colour mode stays as it is now. Does nothing once another theme
+// has replaced the look.
+export async function cancelThemeLook({ api = globalThis.chrome, now = Date.now } = {}) {
+  const area = storageArea(api);
+  return exclusive(() => cancelLookLocked(api, area, now));
+}
+
+async function cancelLookLocked(api, area, now) {
+  const values = await readKeys(area, [ARTWORK_KEY, LOOK_UNDO_KEY]);
+  const undo = values[LOOK_UNDO_KEY];
+  if (!undo || typeof undo !== 'object') return { cancelled: false };
+  const native = hasBridge(api);
+  const raw = native ? await callBridge(api, 'getAppearance') : null;
+  if (!activeLook(readArtworkRecord(values[ARTWORK_KEY]), native ? raw?.theme : null)) {
+    await area.set({ [LOOK_UNDO_KEY]: null });
+    return { cancelled: false };
+  }
+  const current = native ? themeState(raw) : null;
+  const before = undo.appearance;
+  const target = native && before?.theme ? {
+    theme: before.theme, colorMode: current.colorMode,
+    ...(before.nativeDefaultTheme === undefined ? {} : { nativeDefaultTheme: before.nativeDefaultTheme }),
+  } : null;
+  const artwork = readArtworkRecord(undo.artwork);
+  const appearance = await saveLook(api, area, current, target, {
+    [ARTWORK_KEY]: artwork, [FIRST_FRAME_KEY]: null, [PREVIOUS_LOOK_KEY]: undo.previous ?? null, [LOOK_UNDO_KEY]: null, [APPEARANCE_REV_KEY]: now(),
+  }, now);
+  return { cancelled: true, appearance, artwork };
 }
 
 export async function restorePreviousLook({ api = globalThis.chrome, now = Date.now } = {}) {

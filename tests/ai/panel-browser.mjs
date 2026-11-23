@@ -33,13 +33,12 @@ try {
     headless: true,
   });
   const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
+  // Reasoning and speed share the model picker's surface, so opening it is enough.
   const openModelOptions = async () => {
     if (await page.locator('#model-menu').isHidden()) await page.locator('#model-button').click();
-    if (!await page.locator('#inference-options').evaluate(node => node.open)) {
-      await page.locator('#inference-options > summary').focus();
-      await page.keyboard.press('Enter');
-    }
   };
+  const checked = name => page.evaluate(name => document.querySelector(`input[name="${name}"]:checked`)?.value ?? '', name);
+  const choose = (group, label) => page.locator(group).getByRole('radio', { name: label, exact: true }).check();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
@@ -64,8 +63,9 @@ try {
   assert.equal(await page.locator('#greeting-name').innerText(), '');
   assert.equal(await page.locator('#context-title').innerText(), 'Designing a calmer browser');
   assert.equal(await page.locator('#send').isDisabled(), true);
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
+  assert.equal(await checked('reasoning'), 'high');
+  assert.equal(await checked('speed'), 'standard');
+  assert.equal(await page.locator('#model-effort').innerText(), 'High', 'the composer names the linked reasoning level');
   assert.equal(await page.locator('#welcome-status').isVisible(), false);
   assert.equal(await page.locator('#context-hint').innerText(), 'Page + screenshot');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-welcome.png` });
@@ -124,6 +124,53 @@ try {
   assert.equal(await page.locator('#model-button').getAttribute('aria-expanded'), 'false');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6.1 Sol');
+
+  // Search, provider filter and layout at the narrowest and a roomy sidebar width.
+  const visibleModels = () => page.locator('#model-options .model-option').evaluateAll(nodes => nodes.map(node => node.firstChild.textContent));
+  for (const width of [280, 450]) {
+    await page.setViewportSize({ width, height: 640 });
+    await page.locator('#model-button').focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.modelKey), 'codex:gpt-6.1-sol', 'opening focuses the current model');
+    const menuBox = await modelMenu.boundingBox();
+    assert.ok(menuBox.x >= 0 && menuBox.x + menuBox.width <= width, `the picker fits a ${width}px sidebar`);
+    assert.equal(await modelMenu.evaluate(node => node.scrollWidth <= node.clientWidth), true, 'no sideways scrolling');
+    const list = await page.locator('#model-options').boundingBox();
+    const tuning = await page.locator('#inference-options').boundingBox();
+    if (width === 450) assert.ok(tuning.x >= list.x + list.width - 1 && tuning.y < list.y + list.height, 'reasoning sits beside the models when there is room');
+    else assert.ok(tuning.y >= list.y + list.height - 1, 'reasoning stacks below the models in a narrow sidebar');
+    const attach = page.getByRole('button', { name: 'Attach files', exact: true });
+    const plus = await attach.locator('svg').boundingBox();
+    assert.ok(plus && plus.width >= 14 && plus.x + plus.width <= width, 'the attach plus stays visible');
+    assert.equal(await attach.innerText(), '', 'the attach button has no visible caption');
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-picker-${width}.png` });
+    // Typing on a model moves into search.
+    await page.keyboard.type('lu');
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'model-search');
+    assert.equal(await page.locator('#model-search').inputValue(), 'lu');
+    assert.deepEqual(await visibleModels(), ['GPT-6 Luna']);
+    assert.equal(await page.locator('#model-results').textContent(), '1 model');
+    await page.keyboard.press('ArrowDown');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.modelKey), 'codex:gpt-6-luna', 'ArrowDown moves from search into results');
+    await page.locator('#model-search').fill('nothing like this');
+    assert.match(await page.locator('.model-empty').innerText(), /No models match/);
+    await page.locator('#model-search').press('Escape');
+    assert.equal(await modelMenu.isVisible(), true, 'the first Escape clears the search');
+    assert.deepEqual(await visibleModels(), ['GPT-6.1 Sol', 'GPT-6 Luna']);
+    await page.getByRole('button', { name: 'Claude', exact: true }).click();
+    assert.equal(await page.locator('#provider-filter [aria-pressed="true"]').innerText(), 'Claude');
+    assert.deepEqual(await visibleModels(), [], 'the filter shows only Claude');
+    assert.equal(await page.getByRole('button', { name: 'Connect Claude', exact: true }).isVisible(), true, 'a disconnected provider offers a way to connect');
+    await page.getByRole('button', { name: 'All', exact: true }).click();
+    assert.deepEqual(await visibleModels(), ['GPT-6.1 Sol', 'GPT-6 Luna']);
+    await page.keyboard.press('Escape');
+    assert.equal(await modelMenu.isHidden(), true);
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
+  }
+  await page.locator('#model-button').click();
+  assert.equal(await page.locator('#model-search').inputValue(), '', 'reopening starts from the full list');
+  assert.equal(await page.locator('#provider-filter [aria-pressed="true"]').innerText(), 'All');
+  await closeModelPicker.click();
   await page.emulateMedia({ colorScheme: 'light' });
   await page.setViewportSize({ width: 400, height: 850 });
 
@@ -161,15 +208,13 @@ try {
   assert.equal(await page.evaluate(() => window.testStorage.local.breezerProfile.context), 'I build thoughtful software. Keep explanations clear and concise.');
 
   await openModelOptions();
-  await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
-  await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
-  assert.equal(await page.locator('#model-options').isVisible(), false, 'tuning has its own view');
+  await choose('#reasoning-setting', 'Medium');
+  await choose('#speed-setting', 'Fast');
+  assert.equal(await page.locator('#model-menu').isVisible(), true, 'changing reasoning or speed keeps the picker open');
+  assert.equal(await page.locator('#model-options').getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).isVisible(), true, 'models and tuning share one surface');
   assert.equal(await page.locator('#inference-model').innerText(), 'GPT-6.1 Sol');
-  assert.equal(await page.locator('.menu-note').isVisible(), false, 'Fast guidance replaces the generic allowance note');
+  assert.equal(await page.locator('#model-effort').innerText(), 'Medium, Fast');
   assert.equal(await page.locator('.suggestions').isVisible(), false, 'no clipped starter text behind the menu');
-  await page.getByText('Back to models', { exact: true }).click();
-  assert.equal(await page.locator('#model-options').getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).isVisible(), true);
-  await openModelOptions();
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -183,12 +228,12 @@ try {
   assert.equal(await modelMenu.isHidden(), true, 'the close button also dismisses model settings');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
   await page.locator('#model-button').click();
-  assert.equal(await page.locator('#inference-options').evaluate(node => node.open), false, 'reopening starts in the model list');
   await page.getByRole('button', { name: 'GPT-6 Luna', exact: true }).click();
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6 Luna');
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
-  assert.equal(await page.locator('#speed-select option[value="fast"]').evaluate(option => option.disabled), true);
+  assert.equal(await checked('reasoning'), 'low');
+  assert.equal(await checked('speed'), 'standard');
+  assert.equal(await page.locator('input[name="speed"][value="fast"]').isDisabled(), true);
+  assert.deepEqual(await page.locator('#reasoning-options input').evaluateAll(inputs => inputs.map(input => input.value)), ['low', 'medium'], 'reasoning lists only the levels the selected model reports');
   await page.locator('#model-button').click();
   assert.match(await page.locator('#model-menu').innerText(), /Connect Claude/);
   assert.doesNotMatch(await page.locator('#model-menu').innerText(), /claude auth login/);
@@ -214,13 +259,43 @@ try {
   assert.equal(await page.locator('#account-dialog').isVisible(), false);
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.equal(await checked('reasoning'), 'medium');
+  assert.equal(await checked('speed'), 'fast');
   await page.reload();
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.equal(await checked('reasoning'), 'medium');
+  assert.equal(await checked('speed'), 'fast');
   assert.deepEqual(await page.evaluate(() => window.testStorage.local.breezerModelPreferences['codex:gpt-6.1-sol']), { reasoning: 'medium', speed: 'fast' });
+  await page.evaluate(() => chrome.storage.local.set({ breezerModel: { provider: 'codex', model: 'gpt-6-luna' } }));
+  await page.locator('#model-button').getByText('GPT-6 Luna', { exact: true }).waitFor();
+  await page.evaluate(() => chrome.storage.local.set({ breezerModel: null }));
+  await page.locator('#model-button').getByText('GPT-6.1 Sol', { exact: true }).waitFor();
+
+  await page.getByLabel('Message Breezer').fill('Keep this reply running');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const modelRefreshes = () => page.evaluate(() => window.sent.filter(({ type }) => type === 'refresh-models').length);
+  const initialDiscoveryCount = await modelRefreshes();
+  await page.evaluate(async () => {
+    window.testProviders[0].models.push({ id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra' });
+    await chrome.storage.local.set({ breezerModel: { provider: 'codex', model: 'gpt-6.1-terra' } });
+  });
+  assert.equal(await modelRefreshes(), initialDiscoveryCount);
+  await page.getByRole('button', { name: 'Stop response', exact: true }).click();
+  await page.locator('#model-button').getByText('GPT-6.1 Terra', { exact: true }).waitFor();
+  assert.equal(await modelRefreshes(), initialDiscoveryCount + 1);
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.evaluate(() => {
+    window.testProviders[0].models.pop();
+    return chrome.storage.local.set({ breezerModel: null });
+  });
+  await page.locator('#model-button').getByText('GPT-6.1 Sol', { exact: true }).waitFor();
+  await openModelOptions();
+  await page.evaluate(() => { window.testProviders[0].models[0].defaultReasoningEffort = 'high'; });
+  await page.getByRole('button', { name: 'Refresh models', exact: true }).click();
+  const defaultReasoning = page.locator('#reasoning-options label:has(small) input');
+  await page.waitForFunction(() => document.querySelector('#reasoning-options label:has(small) input')?.value === 'high');
+  assert.equal(await defaultReasoning.inputValue(), 'high');
+  await page.getByRole('button', { name: 'Close model picker', exact: true }).click();
 
   await page.evaluate(() => {
     window.testProviders[1] = { id: 'claude', available: true, authenticated: true, models: [
@@ -233,8 +308,8 @@ try {
   await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
   await openModelOptions();
   assert.equal(await page.locator('#speed-setting').isVisible(), false);
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
-  await page.locator('#reasoning-select').selectOption('low');
+  assert.equal(await checked('reasoning'), 'high');
+  await choose('#reasoning-setting', 'Low');
   await page.getByLabel('Message Breezer').fill('A Claude settings check');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const claudeChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
@@ -244,8 +319,9 @@ try {
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'Claude Haiku', exact: true }).click();
-  assert.equal(await page.locator('#reasoning-select').isDisabled(), true);
-  assert.equal(await page.locator('#reasoning-select').inputValue(), '');
+  assert.equal(await page.locator('#reasoning-setting').evaluate(node => node.disabled), true);
+  assert.equal(await page.locator('#reasoning-options').innerText(), 'Set by the model');
+  assert.equal(await checked('reasoning'), '');
   await page.getByLabel('Message Breezer').fill('Use the CLI default');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const defaultChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
@@ -255,13 +331,13 @@ try {
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
+  assert.equal(await checked('reasoning'), 'low');
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
   await openModelOptions();
   assert.equal(await page.locator('#speed-setting').isVisible(), true);
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
-  await page.locator('#reasoning-select').selectOption('xhigh');
+  assert.equal(await checked('speed'), 'fast');
+  await choose('#reasoning-setting', 'Extra high');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-settings.png` });
   await page.keyboard.press('Escape');
 
@@ -332,7 +408,7 @@ try {
   assert.equal(firstChat.profile.name, 'Ethan');
   assert.equal(firstChat.reasoning, 'xhigh');
   assert.equal(firstChat.speed, 'fast');
-  for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), true);
+  for (const id of ['model-button', 'reasoning-setting', 'speed-setting']) assert.equal(await page.locator(`#${id}`).evaluate(node => node.disabled), true);
   await page.evaluate((id) => {
     window.emit({ type: 'delta', id, text: 'The page makes a simple point: **a browser should give you room to think**.\n\n- Keep the page at the centre.\n- Make useful actions easy to find.\n- Let people stay in control.\n\nThe strongest idea is to show the assistant only when you need a hand.' });
     window.emit({ type: 'complete', id });
@@ -340,7 +416,7 @@ try {
   await page.locator('.assistant .message-body strong').waitFor();
   assert.equal(await page.locator('.assistant .message-body li').count(), 3);
   assert.equal(await page.getByRole('button', { name: 'Send message', exact: true }).isVisible(), true);
-  for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), false);
+  for (const id of ['model-button', 'reasoning-setting', 'speed-setting']) assert.equal(await page.locator(`#${id}`).evaluate(node => node.disabled), false);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-conversation.png` });
 
   const controlToggle = page.getByRole('button', { name: 'Browser control', exact: true });
@@ -461,13 +537,13 @@ try {
   await page.setViewportSize({ width: 400, height: 850 });
   await page.reload();
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'xhigh');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.equal(await checked('reasoning'), 'xhigh');
+  assert.equal(await checked('speed'), 'fast');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-dark.png` });
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'New tab', url: 'chrome://newtab/' } }));
   assert.equal(await page.locator('#context-toggle').isDisabled(), true);
   assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Ask anything…');
-  assert.equal(await page.locator('#context-hint').innerText(), 'Only web pages can be shared');
+  assert.equal(await page.locator('#context-hint').innerText(), 'Chat without sharing this tab');
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.match(await page.locator('#welcome-status').innerText(), /Open a web page/);
   assert.equal(await page.locator('.suggestions').isHidden(), true, 'non-web pages omit unavailable page actions');
@@ -619,9 +695,9 @@ try {
   assert.match(await page.locator('.copy-feedback').innerText(), /keyboard to copy/);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-command-copy-fallback-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-  const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
+  const sentRefreshes = await modelRefreshes();
   await page.getByRole('button', { name: 'Refresh accounts' }).click();
-  assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'init').length), sentInits + 1);
+  assert.equal(await modelRefreshes(), sentRefreshes + 1);
   assert.deepEqual(errors, []);
   await writeFile(`${evidence}/panel-capture-geometry.json`, JSON.stringify(captureChecks, null, 2));
   const loading = await browser.newPage({ viewport: { width: 320, height: 640 } });
@@ -785,6 +861,68 @@ try {
   await studio.getByText('Blackberry', { exact: true }).waitFor();
   await studio.waitForFunction(id => window.sent.some(message => message.type === 'turn-saved' && message.id === id), resumed.id);
   await studio.close();
+  const draft = await browser.newPage({ viewport: { width: 380, height: 680 }, colorScheme: 'dark' });
+  await draft.addInitScript({ content: `
+    (${installPanelFixture})(); (${installPanelAreaEvents})();
+    Object.assign(testStorage.local, { breezerExperiments: { newTabComposer: true, personality: 'warm' } });
+    Object.assign(testStorage.session, { 'breezer-handoff-7': { source: 'newtab', prompt: 'What should I read next?', tabId: 11, createdAt: Date.now() } });
+    chrome.tabs = { query: async () => [{ id: 11, incognito: false }] };
+    chrome.storage.session.remove = async key => { delete testStorage.session[key]; };
+  ` });
+  await draft.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
+  await draft.waitForFunction(() => sent.some(message => message.type === 'chat'));
+  const handedOff = await draft.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(handedOff.message, 'What should I read next?');
+  assert.equal(handedOff.includeContext, false);
+  assert.equal(handedOff.control, false);
+  assert.equal(await draft.evaluate(() => 'breezer-handoff-7' in testStorage.session), false);
+  assert.equal(await draft.locator('.context-row').isHidden(), true);
+  assert.equal(await draft.locator('.welcome').isHidden(), true);
+  await draft.evaluate(id => {
+    emit({ type: 'delta', id, text: 'Start with a short story tonight. Pick a book you can finish in one sitting.' });
+    emit({ type: 'complete', id });
+  }, handedOff.id);
+  await draft.getByText('Start with a short story tonight.', { exact: false }).waitFor();
+  await draft.screenshot({ animations: 'disabled', path: `${evidence}/experimental-ask-chat.png` });
+  await draft.close();
+
+  const pdf = await browser.newPage({ viewport: { width: 360, height: 650 } });
+  await pdf.addInitScript({ content: `
+    (${installPanelFixture})(); (${installPanelAreaEvents})();
+    chrome.breezerPrivate.isCurrentPdf = async tabId => tabId === 11;
+    chrome.breezerPrivate.captureCurrentPdfContext = async () => ({isPdf:true,imageDataUrl:'data:image/jpeg;base64,AA=='});
+  ` });
+  await pdf.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
+  await pdf.getByRole('button', { name: 'PDF view', exact: false }).waitFor();
+  assert.equal(await pdf.locator('#control-toggle').isDisabled(), true);
+  await pdf.getByLabel('Message Breezer').fill('What is stated on the visible PDF page?');
+  await pdf.getByRole('button', { name: 'Send message', exact: true }).click();
+  await pdf.waitForFunction(() => sent.some(message => message.type === 'chat'));
+  const pdfRequest = await pdf.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(pdfRequest.pdfView, 'data:image/jpeg;base64,AA==');
+  assert.equal(pdfRequest.contextTitle, 'Current PDF');
+  assert.equal(pdfRequest.control, false);
+  assert.equal(pdfRequest.includeContext, true);
+  await pdf.close();
+  const opening = await browser.newPage();
+  await opening.addInitScript({ content: `
+    (${installPanelFixture})();
+    (${installPanelAreaEvents})();
+    const next = new URLSearchParams(location.search).get('choice');
+    window.testStorage.local.breezerModel = { provider: 'codex', model: next ? 'gpt-6.1-sol' : 'gpt-6-luna' };
+    chrome.windows.getCurrent = () => new Promise(resolve => { window.finishOpening = () => resolve({ id: 7 }); });
+  ` });
+  for (const [choice, expected] of [['gpt-6-luna', 'GPT-6 Luna'], ['', 'GPT-6.1 Sol']]) {
+    await opening.goto(`http://127.0.0.1:${server.address().port}/panel.html?choice=${choice}`);
+    await opening.waitForFunction(() => typeof window.finishOpening === 'function');
+    await opening.evaluate(async choice => {
+      await chrome.storage.local.set({ breezerModel: choice ? { provider: 'codex', model: choice } : null });
+      window.finishOpening();
+    }, choice);
+    await opening.locator('#model-button').getByText(expected, { exact: true }).waitFor();
+  }
+  await opening.close();
+
   console.log('PASS: file picker, drop, removal, unsupported/oversize errors, image decoding, attachment-only send, retry restoration and follow-up history; real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {

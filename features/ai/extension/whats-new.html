@@ -548,6 +548,81 @@
     <section class="patch-notes" id="patch-135" aria-labelledby="patch-135-title">
       <p class="release">Update 1.3.5</p>
       <h2 id="patch-135-title">Favorites, tabs, and settings</h2>
+      <!-- Hero: one Breezer window in the Lune look. Named favorites with the
+           active one outlined, a split pair of tabs, a PDF whose visible area
+           is bracketed, and the assistant's composer holding that view. -->
+      <figure class="patch-hero" aria-hidden="true">
+          <svg class="hero-wide" viewBox="0 0 960 460" focusable="false">
+            <defs><radialGradient id="hw-moon" cx=".36" cy=".34" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e9e8e3"/><stop offset="1" stop-color="#a3a5b0"/></radialGradient><radialGradient id="hw-halo"><stop offset=".5" stop-color="#c9d2e8" stop-opacity=".16"/><stop offset="1" stop-color="#c9d2e8" stop-opacity="0"/></radialGradient><pattern id="hw-stipple" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(18)"><circle cx="1.6" cy="1.6" r="0.75" fill="#10121a" opacity=".85"/></pattern><clipPath id="hw-clip-a"><circle cx="880" cy="120" r="34"/></clipPath><clipPath id="hw-pdf"><rect x="466" y="62" width="226" height="380" rx="10"/></clipPath></defs>
+            <rect width="960" height="460" rx="22" fill="#10121a"/>
+            <g fill="#c9d2e8" opacity=".5"><circle cx="772" cy="88" r="1"/><circle cx="930" cy="196" r=".9"/><circle cx="820" cy="174" r=".8"/><circle cx="742" cy="140" r=".7"/></g>
+            <rect x="226" y="20" width="234" height="28" rx="9" fill="#232838"/>
+            <rect x="238" y="29" width="7" height="10" rx="2" fill="#c9d2e8"/><rect x="247" y="29" width="7" height="10" rx="2" fill="#c9d2e8"/>
+            <rect x="266" y="31" width="70" height="6" rx="3" fill="#e9ebf2" opacity=".8"/><rect x="352" y="31" width="58" height="6" rx="3" fill="#e9ebf2" opacity=".55"/>
+            <rect x="472" y="31" width="64" height="6" rx="3" fill="#a3a8b8" opacity=".4"/><rect x="560" y="31" width="52" height="6" rx="3" fill="#a3a8b8" opacity=".4"/>
+            <rect x="16" y="60" width="188" height="384" rx="14" fill="#191c26"/>
+            <rect x="30" y="74" width="76" height="60" rx="11" fill="#232838" stroke="#c9d2e8" stroke-width="2"/><rect x="58" y="84" width="20" height="20" rx="6" fill="#8fd5c4"/><text class="hero-name" x="68" y="122" text-anchor="middle">Inbox</text><rect x="114" y="74" width="76" height="60" rx="11" fill="#232838"/><rect x="142" y="84" width="20" height="20" rx="6" fill="#e2c27a"/><text class="hero-name" x="152" y="122" text-anchor="middle">Notes</text><rect x="30" y="144" width="76" height="60" rx="11" fill="#232838"/><rect x="58" y="154" width="20" height="20" rx="6" fill="#7d93c9"/><text class="hero-name" x="68" y="192" text-anchor="middle">Maps</text><rect x="114" y="144" width="76" height="60" rx="11" fill="#232838"/><rect x="142" y="154" width="20" height="20" rx="6" fill="#c8a2b4"/><text class="hero-name" x="152" y="192" text-anchor="middle">Music</text>
+            <rect x="30" y="218" width="160" height="1" fill="#272b38"/>
+            <rect x="38" y="235" width="14" height="14" rx="4" fill="#3a3f50"/><rect x="62" y="239" width="84" height="6" rx="3" fill="#a3a8b8" opacity=".45"/><rect x="28" y="262" width="164" height="28" rx="8" fill="#232838"/><rect x="38" y="269" width="6" height="14" rx="2" fill="#c9d2e8"/><rect x="46" y="269" width="6" height="14" rx="2" fill="#c9d2e8"/><rect x="62" y="273" width="96" height="6" rx="3" fill="#e9ebf2" opacity=".85"/><rect x="38" y="303" width="14" height="14" rx="4" fill="#3a3f50"/><rect x="62" y="307" width="104" height="6" rx="3" fill="#a3a8b8" opacity=".45"/><rect x="38" y="337" width="14" height="14" rx="4" fill="#3a3f50"/><rect x="62" y="341" width="70" height="6" rx="3" fill="#a3a8b8" opacity=".45"/><rect x="38" y="371" width="14" height="14" rx="4" fill="#3a3f50"/><rect x="62" y="375" width="92" height="6" rx="3" fill="#a3a8b8" opacity=".45"/>
+            <rect x="220" y="62" width="236" height="380" rx="10" fill="#fcfdfe"/>
+            <rect x="240" y="84" width="128" height="10" rx="5" fill="#161a24" opacity=".75"/>
+            <rect x="240" y="104" width="160" height="6" rx="3" fill="#161a24" opacity=".3"/>
+            <rect x="240" y="126" width="196" height="108" rx="8" fill="#e1e6ef"/>
+            <path d="M240 234 L300 176 L338 212 L370 186 L436 234 Z" fill="#3b4a6b" opacity=".35"/>
+            <circle cx="404" cy="158" r="12" fill="#fcfdfe" opacity=".9"/>
+            <rect x="240" y="254" width="188" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="266" width="176" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="278" width="192" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="290" width="140" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="314" width="186" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="326" width="170" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="338" width="190" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="350" width="120" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="374" width="184" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="240" y="386" width="160" height="5" rx="2.5" fill="#161a24" opacity=".2"/>
+            <rect x="458" y="226" width="4" height="52" rx="2" fill="#a3a8b8" opacity=".7"/>
+            <g clip-path="url(#hw-pdf)">
+              <rect x="466" y="62" width="226" height="380" fill="#272b38"/>
+              <rect x="482" y="78" width="194" height="252" rx="3" fill="#fcfdfe"/>
+              <rect x="496" y="98" width="96" height="9" rx="4.5" fill="#161a24" opacity=".75"/>
+              <rect x="496" y="116" width="66" height="5" rx="2.5" fill="#161a24" opacity=".35"/>
+              <rect x="496" y="150" width="150" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="162" width="138" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="174" width="156" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="186" width="120" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="214" width="150" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="226" width="144" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="238" width="96" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="266" width="152" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="278" width="130" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="290" width="148" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="496" y="302" width="88" height="5" rx="2.5" fill="#161a24" opacity=".22"/>
+              <rect x="482" y="342" width="194" height="140" rx="3" fill="#fcfdfe" opacity=".92"/>
+              <rect x="496" y="362" width="150" height="5" rx="2.5" fill="#161a24" opacity=".2"/><rect x="496" y="374" width="128" height="5" rx="2.5" fill="#161a24" opacity=".2"/>
+            </g>
+            <path class="hero-view" d="M466 84 V62 H488 M670 62 H692 V84 M692 420 V442 H670 M488 442 H466 V420"/>
+            <rect x="708" y="60" width="236" height="384" rx="14" fill="#191c26"/>
+            <circle cx="880" cy="120" r="64.6" fill="url(#hw-halo)"/><circle cx="880" cy="120" r="34" fill="url(#hw-moon)"/><g clip-path="url(#hw-clip-a)"><circle cx="901.1" cy="124.1" r="34.7" fill="url(#hw-stipple)"/><circle cx="911.3" cy="126.1" r="33.3" fill="#10121a" opacity=".55"/></g>
+            <rect x="790" y="186" width="138" height="34" rx="12" fill="#2b3142"/>
+            <rect x="804" y="197" width="96" height="5" rx="2.5" fill="#e9ebf2" opacity=".85"/><rect x="804" y="207" width="62" height="5" rx="2.5" fill="#e9ebf2" opacity=".55"/>
+            <rect x="724" y="238" width="176" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/>
+            <rect x="724" y="250" width="190" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/>
+            <rect x="724" y="262" width="150" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/>
+            <rect x="724" y="280" width="168" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/>
+            <rect x="724" y="292" width="110" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/>
+            <rect x="720" y="336" width="212" height="96" rx="14" fill="#232838" stroke="#3a3f50"/>
+            <rect x="732" y="348" width="96" height="30" rx="8" fill="#191c26" stroke="#3a3f50"/>
+            <rect x="738" y="353" width="16" height="20" rx="2" fill="#fcfdfe"/><path d="M741 358h10M741 362h10M741 366h7" stroke="#161a24" stroke-opacity=".35" stroke-width="1.4"/>
+            <text class="hero-chip" x="762" y="368">PDF view</text>
+            <rect x="732" y="392" width="120" height="6" rx="3" fill="#a3a8b8" opacity=".45"/>
+            <rect x="732" y="410" width="58" height="12" rx="6" fill="#2b3142"/><circle cx="742" cy="416" r="3" fill="#8fd5c4"/><rect x="750" y="414" width="32" height="4" rx="2" fill="#e9ebf2" opacity=".6"/>
+            <circle cx="910" cy="410" r="13" fill="#e9ebf2"/><path d="M910 416v-12m-5 5 5-5 5 5" fill="none" stroke="#10121a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <svg class="hero-narrow" viewBox="0 0 360 420" focusable="false">
+            <defs><radialGradient id="hn-moon" cx=".36" cy=".34" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e9e8e3"/><stop offset="1" stop-color="#a3a5b0"/></radialGradient><radialGradient id="hn-halo"><stop offset=".5" stop-color="#c9d2e8" stop-opacity=".16"/><stop offset="1" stop-color="#c9d2e8" stop-opacity="0"/></radialGradient><pattern id="hn-stipple" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(18)"><circle cx="1.6" cy="1.6" r="0.75" fill="#10121a" opacity=".85"/></pattern><clipPath id="hn-clip-a"><circle cx="290" cy="76" r="30"/></clipPath><clipPath id="hn-pdf"><rect x="14" y="14" width="150" height="392" rx="10"/></clipPath></defs>
+            <rect width="360" height="420" rx="20" fill="#10121a"/>
+            <g clip-path="url(#hn-pdf)">
+              <rect x="14" y="14" width="150" height="392" fill="#272b38"/>
+              <rect x="26" y="30" width="126" height="250" rx="3" fill="#fcfdfe"/>
+              <rect x="36" y="46" width="70" height="8" rx="4" fill="#161a24" opacity=".75"/>
+              <rect x="36" y="70" width="104" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="82" width="92" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="94" width="100" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="106" width="70" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="128" width="104" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="140" width="96" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="152" width="60" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="174" width="100" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="186" width="84" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="198" width="98" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="220" width="104" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="232" width="76" height="5" rx="2.5" fill="#161a24" opacity=".22"/><rect x="36" y="254" width="90" height="5" rx="2.5" fill="#161a24" opacity=".22"/>
+              <rect x="26" y="292" width="126" height="140" rx="3" fill="#fcfdfe" opacity=".92"/>
+            </g>
+            <path class="hero-view" d="M14 34 V14 H34 M144 14 H164 V34 M164 386 V406 H144 M34 406 H14 V386"/>
+            <rect x="176" y="14" width="170" height="392" rx="14" fill="#191c26"/>
+            <circle cx="290" cy="76" r="57.0" fill="url(#hn-halo)"/><circle cx="290" cy="76" r="30" fill="url(#hn-moon)"/><g clip-path="url(#hn-clip-a)"><circle cx="308.6" cy="79.6" r="30.6" fill="url(#hn-stipple)"/><circle cx="317.6" cy="81.4" r="29.4" fill="#10121a" opacity=".55"/></g>
+            <rect x="222" y="132" width="112" height="30" rx="11" fill="#2b3142"/>
+            <rect x="234" y="142" width="80" height="5" rx="2.5" fill="#e9ebf2" opacity=".85"/><rect x="234" y="151" width="50" height="5" rx="2.5" fill="#e9ebf2" opacity=".55"/>
+            <rect x="190" y="180" width="130" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/><rect x="190" y="192" width="142" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/><rect x="190" y="204" width="110" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/><rect x="190" y="222" width="124" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/><rect x="190" y="234" width="84" height="5" rx="2.5" fill="#a3a8b8" opacity=".6"/>
+            <rect x="186" y="300" width="150" height="94" rx="14" fill="#232838" stroke="#3a3f50"/>
+            <rect x="196" y="310" width="96" height="30" rx="8" fill="#191c26" stroke="#3a3f50"/>
+            <rect x="202" y="315" width="16" height="20" rx="2" fill="#fcfdfe"/>
+            <text class="hero-chip" x="226" y="330">PDF view</text>
+            <rect x="196" y="354" width="90" height="6" rx="3" fill="#a3a8b8" opacity=".45"/>
+            <circle cx="314" cy="372" r="13" fill="#e9ebf2"/><path d="M314 378v-12m-5 5 5-5 5 5" fill="none" stroke="#10121a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+      </figure>
       <div class="patch-lead">
         <figure class="plate patch-plate" aria-hidden="true">
           <svg class="art" viewBox="0 0 320 192" focusable="false">
@@ -582,6 +657,149 @@
           <h3>Find everyday settings first</h3>
           <p>General opens with tab preferences and update controls. Browser import is grouped below them.</p>
         </div>
+      </div>
+
+      <div class="patch-pair">
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 224" focusable="false">
+            <defs><radialGradient id="tl-moon" cx=".36" cy=".34" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e9e8e3"/><stop offset="1" stop-color="#a3a5b0"/></radialGradient><radialGradient id="tl-halo"><stop offset=".5" stop-color="#c9d2e8" stop-opacity=".16"/><stop offset="1" stop-color="#c9d2e8" stop-opacity="0"/></radialGradient><pattern id="tl-stipple" width="1.9" height="1.9" patternUnits="userSpaceOnUse" patternTransform="rotate(18)"><circle cx="1.0" cy="1.0" r="0.45" fill="#10121a" opacity=".85"/></pattern><clipPath id="tl-clip-lune"><circle cx="212" cy="140" r="12"/></clipPath></defs>
+                          <g clip-path="url(#tl-charcoal)"><rect x="12" y="12" width="68" height="92" rx="10" fill="#2e2f33"/><path d="M12 52h68" stroke="#ecebe6" stroke-opacity=".5" stroke-dasharray="1 4" stroke-linecap="round"/><circle cx="28" cy="46" r="1.3" fill="#e2c27a"/><circle cx="58" cy="48" r="1" fill="#e2c27a"/></g>
+              <clipPath id="tl-charcoal"><rect x="12" y="12" width="68" height="92" rx="10"/></clipPath>
+              <rect x="20" y="66" width="34" height="6" rx="3" fill="#ecebe6" opacity=".5"/>
+              <text class="look-name" x="20" y="92">Charcoal</text>
+              <g clip-path="url(#tl-plum)"><rect x="88" y="12" width="68" height="92" rx="10" fill="#5b3a6e"/><circle cx="94" cy="24" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="101" cy="35" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="108" cy="46" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="115" cy="57" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="122" cy="34" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="129" cy="45" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="136" cy="56" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="143" cy="33" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="150" cy="44" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="95" cy="55" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="102" cy="32" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="109" cy="43" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="116" cy="54" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="123" cy="31" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="130" cy="42" r=".9" fill="#f3eaf6" opacity=".45"/><circle cx="137" cy="53" r=".9" fill="#f3eaf6" opacity=".45"/></g>
+              <clipPath id="tl-plum"><rect x="88" y="12" width="68" height="92" rx="10"/></clipPath>
+              <rect x="96" y="66" width="34" height="6" rx="3" fill="#f3eaf6" opacity=".5"/>
+              <text class="look-name" x="96" y="92">Plum</text>
+              <g clip-path="url(#tl-sage)"><rect x="164" y="12" width="68" height="92" rx="10" fill="#7b9384"/><rect x="172" y="22" width="24" height="34" rx="4" fill="#f6faf7" opacity=".18"/><rect x="200" y="22" width="24" height="34" rx="4" fill="#f6faf7" opacity=".18"/></g>
+              <clipPath id="tl-sage"><rect x="164" y="12" width="68" height="92" rx="10"/></clipPath>
+              <rect x="172" y="66" width="34" height="6" rx="3" fill="#f6faf7" opacity=".5"/>
+              <text class="look-name" x="172" y="92">Sage</text>
+              <g clip-path="url(#tl-umber)"><rect x="240" y="12" width="68" height="92" rx="10" fill="#8a5034"/><rect x="240" y="42" width="68" height="20" fill="#d9925a" opacity=".35"/><circle cx="288" cy="42" r="7" fill="#e9b07a" opacity=".7"/></g>
+              <clipPath id="tl-umber"><rect x="240" y="12" width="68" height="92" rx="10"/></clipPath>
+              <rect x="248" y="66" width="34" height="6" rx="3" fill="#fbefe6" opacity=".5"/>
+              <text class="look-name" x="248" y="92">Umber</text>
+              <g clip-path="url(#tl-fathom)"><rect x="12" y="118" width="68" height="92" rx="10" fill="#1f3b5a"/><path d="M12 134 q17 -6 34 0 t34 0" fill="none" stroke="#e6eef7" stroke-opacity=".32" stroke-width="1"/><path d="M12 142 q17 -6 34 0 t34 0" fill="none" stroke="#e6eef7" stroke-opacity=".32" stroke-width="1"/><path d="M12 150 q17 -6 34 0 t34 0" fill="none" stroke="#e6eef7" stroke-opacity=".32" stroke-width="1"/><path d="M12 158 q17 -6 34 0 t34 0" fill="none" stroke="#e6eef7" stroke-opacity=".32" stroke-width="1"/></g>
+              <clipPath id="tl-fathom"><rect x="12" y="118" width="68" height="92" rx="10"/></clipPath>
+              <rect x="20" y="172" width="34" height="6" rx="3" fill="#e6eef7" opacity=".5"/>
+              <text class="look-name" x="20" y="198">Fathom</text>
+              <g clip-path="url(#tl-linen)"><rect x="88" y="118" width="68" height="92" rx="10" fill="#d8cbb1"/><path d="M88 128h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 132h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 136h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 140h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 144h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 148h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 152h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 156h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 160h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M88 164h68" stroke="#2f3c58" stroke-opacity=".08"/><path d="M108 118 L144 168" stroke="#fffdf8" stroke-opacity=".6" stroke-width="5"/></g>
+              <clipPath id="tl-linen"><rect x="88" y="118" width="68" height="92" rx="10"/></clipPath>
+              <rect x="96" y="172" width="34" height="6" rx="3" fill="#2f3c58" opacity=".5"/>
+              <text class="look-name ink" x="96" y="198">Linen</text>
+              <g clip-path="url(#tl-lune)"><rect x="164" y="118" width="68" height="92" rx="10" fill="#2b2f3d"/><circle cx="212" cy="140" r="22.8" fill="url(#tl-halo)"/><circle cx="212" cy="140" r="12" fill="url(#tl-moon)"/><g clip-path="url(#tl-clip-lune)"><circle cx="219.4" cy="141.4" r="12.2" fill="url(#tl-stipple)"/><circle cx="223.0" cy="142.2" r="11.8" fill="#10121a" opacity=".55"/></g></g>
+              <clipPath id="tl-lune"><rect x="164" y="118" width="68" height="92" rx="10"/></clipPath>
+              <rect x="172" y="172" width="34" height="6" rx="3" fill="#e9ebf2" opacity=".5"/>
+              <text class="look-name" x="172" y="198">Lune</text><rect class="look-ring" x="160.5" y="114.5" width="75" height="99" rx="13"/>
+              <g clip-path="url(#tl-vesper)"><rect x="240" y="118" width="68" height="92" rx="10" fill="#8d3550"/><path d="M230 168 L254 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M240 168 L264 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M250 168 L274 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M260 168 L284 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M270 168 L294 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M280 168 L304 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M290 168 L314 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/><path d="M300 168 L324 118" stroke="#f7c3c8" stroke-opacity=".28" stroke-width="4"/></g>
+              <clipPath id="tl-vesper"><rect x="240" y="118" width="68" height="92" rx="10"/></clipPath>
+              <rect x="248" y="172" width="34" height="6" rx="3" fill="#fbeef2" opacity=".5"/>
+              <text class="look-name" x="248" y="198">Vesper</text>
+          </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>Eight looks</h3>
+            <p>Charcoal, Plum, Sage, Umber, Fathom, Linen, Lune and Vesper. Lune keeps a quiet stippled moon.</p>
+          </div>
+        </div>
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 210" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="209" rx="14"/>
+            <rect class="well" x="14" y="12" width="116" height="24" rx="8"/>
+            <rect class="accent" x="22" y="19" width="5" height="10" rx="1.5"/><rect class="accent" x="29" y="19" width="5" height="10" rx="1.5"/>
+            <rect class="bar strong" x="42" y="21" width="34" height="5" rx="2.5"/><rect class="bar" x="84" y="21" width="34" height="5" rx="2.5"/>
+            <rect class="bar" x="142" y="21" width="40" height="5" rx="2.5"/>
+            <rect class="paper" x="14.5" y="46.5" width="141" height="150" rx="9"/>
+            <rect class="paper" x="164.5" y="46.5" width="141" height="150" rx="9"/>
+            <rect class="split-ring" x="163" y="45" width="144" height="153" rx="10"/>
+            <rect class="accent" x="158" y="104" width="4" height="34" rx="2"/>
+            <rect class="bar strong" x="26" y="60" width="78" height="7" rx="3.5"/>
+            <rect class="mint-soft" x="26" y="76" width="118" height="46" rx="6"/>
+            <path class="line" d="M26 136h110M26 148h96M26 160h104M26 172h70"/>
+            <rect class="bar strong" x="176" y="60" width="62" height="7" rx="3.5"/>
+            <path class="line" d="M176 82h112M176 94h100M176 106h108M176 118h80"/>
+            <rect class="well" x="176" y="134" width="118" height="50" rx="6"/>
+            <g class="menu-shadow"><rect class="card" x="86" y="30" width="124" height="58" rx="9"/></g>
+            <rect class="bar" x="98" y="42" width="60" height="5" rx="2.5"/>
+            <rect class="mint-soft" x="92" y="54" width="112" height="24" rx="6"/>
+            <path class="stroke-accent" d="M101 60.5h8a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5h-8a1.5 1.5 0 0 1-1.5-1.5v-8a1.5 1.5 0 0 1 1.5-1.5ZM105 60.5v11"/>
+            <text x="118" y="70">Split View</text>
+          </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>Split View</h3>
+            <p>Open two tabs side by side from a tab's menu. Choose Exit Split View to return to one page.</p>
+          </div>
+        </div>
+      </div>
+      <div class="patch-pair">
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 210" focusable="false">
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="209" rx="14"/>
+            <rect class="well" x="12" y="12" width="86" height="118" rx="9"/>
+            <rect class="bar" x="22" y="26" width="50" height="5" rx="2.5"/><rect class="bar" x="22" y="42" width="42" height="5" rx="2.5"/>
+            <rect class="accent" x="18" y="56" width="74" height="22" rx="7"/>
+            <text class="on-accent" x="26" y="71">Assistant</text>
+            <rect class="bar" x="22" y="90" width="46" height="5" rx="2.5"/><rect class="bar" x="22" y="106" width="38" height="5" rx="2.5"/>
+            <text x="112" y="34">Default model</text>
+            <rect class="bar" x="112" y="42" width="84" height="4" rx="2"/>
+            <rect class="box" x="206.5" y="22.5" width="100" height="26" rx="8"/>
+            <circle class="mint" cx="220" cy="35.5" r="4.5"/><rect class="bar strong" x="230" y="33" width="46" height="5" rx="2.5"/>
+            <path class="stroke-ink" d="M288 33l4 4 4-4"/>
+            <rect class="hairline" x="112" y="62" width="194" height="0.5"/>
+            <path class="guide" d="M232 50 V 96 H 74 V 140 M232 96 H 246 V 140"/>
+            <rect class="box" x="16.5" y="142.5" width="138" height="54" rx="11"/>
+            <text class="quiet" x="28" y="162">Breezer AI</text>
+            <rect x="28" y="174" width="58" height="14" rx="7" fill="#e4f1ec"/><circle class="mint" cx="37" cy="181" r="3.5"/><rect class="bar strong" x="44" y="179" width="34" height="4" rx="2"/>
+            <rect class="box" x="166.5" y="142.5" width="138" height="54" rx="11"/>
+            <text class="quiet" x="178" y="162">Ask on New Tab</text>
+            <rect x="178" y="174" width="58" height="14" rx="7" fill="#e4f1ec"/><circle class="mint" cx="187" cy="181" r="3.5"/><rect class="bar strong" x="194" y="179" width="34" height="4" rx="2"/>
+          </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>One default model</h3>
+            <p>Settings &gt; Assistant sets the model Breezer AI and Ask on New Tab start with.</p>
+          </div>
+        </div>
+        <div class="patch-group">
+          <figure class="plate patch-plate" aria-hidden="true">
+            <svg class="art" viewBox="0 0 320 210" focusable="false">
+            <defs><clipPath id="pdf-pane"><rect x="14" y="14" width="150" height="182" rx="9"/></clipPath></defs>
+            <rect class="card lift" x="0.5" y="0.5" width="319" height="209" rx="14"/>
+            <g clip-path="url(#pdf-pane)">
+              <rect x="14" y="-40" width="150" height="300" fill="#3a3f50"/>
+              <rect class="paper" x="28" y="-20" width="122" height="170" rx="2"/>
+              <path class="line" d="M40 30h80M40 42h96M40 54h88M40 66h60M40 86h96M40 98h84M40 110h92M40 122h50"/>
+              <rect class="bar strong" x="40" y="12" width="64" height="7" rx="3.5"/>
+              <rect class="paper" x="28" y="160" width="122" height="90" rx="2"/>
+              <path class="line" d="M40 176h92M40 188h70"/>
+            </g>
+            <path class="view-corners" d="M14 32 V14 H32 M146 14 H164 V32 M164 178 V196 H146 M32 196 H14 V178"/>
+            <path class="guide" d="M168 106 C 196 106, 196 150, 214 150"/>
+            <rect class="box" x="180.5" y="110.5" width="128" height="86" rx="12"/>
+            <rect class="well" x="190" y="120" width="88" height="34" rx="7"/>
+            <g class="pdf-shot">
+              <rect x="196" y="125" width="18" height="24" rx="2" fill="#fffdf8" stroke="#c9c1ad"/>
+              <path d="M199 132h12M199 136h12M199 140h8" stroke="#1e2a2a" stroke-opacity=".35" stroke-width="1.3"/>
+            </g>
+            <text x="220" y="141">PDF view</text>
+            <rect class="bar" x="190" y="166" width="70" height="5" rx="2.5"/>
+            <circle class="accent" cx="290" cy="178" r="11"/>
+            <path class="tick" d="M290 183v-10m-4.5 4.5 4.5-4.5 4.5 4.5" stroke-width="1.8"/>
+          </svg>
+          </figure>
+          <div class="patch-copy">
+            <h3>Ask about the PDF you see</h3>
+            <p>Breezer AI can receive the part of a PDF visible on screen, shared only when you press Send.</p>
+          </div>
+        </div>
+      </div>
+      <div class="patch-limit">
+        <h3>Still off by default</h3>
+        <p>The Home composer and other experiments stay off until you turn them on in Settings.</p>
       </div>
     </section>
 

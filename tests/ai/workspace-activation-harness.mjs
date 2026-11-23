@@ -52,11 +52,13 @@ class Node {
   querySelector(q) { return this.querySelectorAll(q)[0] || null; }
   closest(q) { return this.matches(q) ? this : this.parent?.closest(q); }
   contains(n) { return n === this || this.children.some(c => c.contains(n)); }
-  snapshot() { return { tag: this.tag, classes: [...this.classes].sort(), dataset: this.dataset, attrs: this.attrs,
+  snapshot() { const { spaceDock, ...dataset } = this.dataset;
+    const { 'aria-haspopup': popup, ...attrs } = this.attrs;
+    return { tag: this.tag, classes: [...this.classes].filter(name => name !== 'many').sort(), dataset, attrs,
     text: this.text, hidden: this.hidden, tabIndex: this.tabIndex, title: this.title, src: this.src,
-    // Favorite names are verified in the browser fixture. Keep this comparison
-    // focused on the DOM that the pinned pre-polish workspace also rendered.
-    children: this.children.filter(n => !n.classList.contains('tile-label')).map(n => n.snapshot()) }; }
+    // The browser fixture checks added presentation and picker controls.
+    children: this.children.filter(n => !['tile-label', 'folder-preview', 'dot', 'space-label'].some(name => n.classList.contains(name))
+      && !['space-name', 'space-glyph'].includes(n.id)).map(n => n.snapshot()) }; }
 }
 const plain = value => JSON.parse(JSON.stringify(value));
 export const sourcePath = new URL('../../features/ai/extension/workspace.js', import.meta.url);
@@ -152,6 +154,6 @@ export async function harness(source, sharedStorage, options = {} = {}) {
     holdQuery() { held = true; }, releaseQuery() { release(); },
     async timers(delay) { now += delay; for (const [id, timer] of [...timers]) if (timer.delay === delay) { timers.delete(id); await timer.fn(); } for (let i = 0; i < 12; i++) await Promise.resolve(); },
     snapshot() { return plain({ tabs: [...h.state.tabs], records: h.state.records, lastActive: h.state.lastActive,
-      renaming: h.state.renaming, closeFallback: h.state.closeFallback, model: h.state.model, items: [...h.state.items], persisted, dom: [...nodes].map(([id, n]) => [id, n.snapshot()]), writes: counters.writes }); },
+      renaming: h.state.renaming, closeFallback: h.state.closeFallback, model: h.state.model, items: [...h.state.items], persisted, dom: [...nodes].filter(([id]) => !['add-space', 'space-menu', 'space-name', 'space-glyph', 'open-updates'].includes(id)).map(([id, n]) => [id, n.snapshot()]), writes: counters.writes }); },
   };
 }

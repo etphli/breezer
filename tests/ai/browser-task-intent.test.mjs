@@ -142,3 +142,13 @@ test('recognizes conversational requests about this browser', () => {
     'Give Breezer a purple theme with animated stars.',
   ]) assert.equal(detectBrowserTask(prompt), 'theme', prompt);
 });
+
+test('routes browser commands typed into chat without opening Browser tools', () => {
+  assert.equal(detectBrowserTask('Check how much RAM Breezer is using.'), 'stats');
+  assert.equal(detectBrowserTask('Use your browser tools to show my browser stats.'), 'stats');
+  assert.equal(detectBrowserTask('Run browser_stats'), 'stats');
+  assert.equal(detectBrowserTask('Make my browser look like a foggy forest.'), 'theme');
+  assert.equal(detectBrowserTask('Bring back my previous look.'), 'restore');
+  assert.equal(detectBrowserTask('Undo the browser theme change.'), 'restore');
+  assert.equal(detectBrowserTask('Explain how to restore the previous theme in my project.'), '');
+});

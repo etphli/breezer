@@ -6,36 +6,40 @@
   <meta name="color-scheme" content="light dark">
   <title>Breezer</title>
   <link rel="stylesheet" href="workspace.css">
+  <link rel="stylesheet" href="workspace-chrome.css">
 </head>
 <body>
   <div id="sidebar" class="sidebar" hidden>
+    <button id="sidebar-address" class="sidebar-address" aria-label="Open the address bar" type="button" hidden>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4"/><path d="m10 10 3 3"/></svg>
+      <span>Search or type an address</span>
+    </button>
     <div id="favorites" class="favorites" role="toolbar" aria-label="Favorites"></div>
 
     <div id="space-pane" class="space-pane">
-      <div class="space-head">
-        <span id="space-glyph" class="space-glyph" aria-hidden="true"></span>
-        <h1 id="space-name" class="space-name">Space</h1>
-        <button id="space-menu" class="icon-button quiet" aria-label="Space options" aria-haspopup="menu" title="Space options"><svg viewBox="0 0 16 16"><circle cx="3.5" cy="8" r="1.1"/><circle cx="8" cy="8" r="1.1"/><circle cx="12.5" cy="8" r="1.1"/></svg></button>
-      </div>
-
-      <div id="pinned" class="tree pinned" role="tree" aria-label="Pinned tabs"></div>
-
       <div class="divider-row">
         <span class="section-label">Today</span>
         <span class="rule" aria-hidden="true"></span>
-        <button id="clear-today" class="meta-button" title="Close every unpinned tab in this space">Close today’s tabs</button>
+        <button id="clear-today" class="meta-button" aria-label="Close today’s tabs" title="Close every unpinned tab in this space">Clear</button>
+        <button id="collapse" class="icon-button" aria-label="Keep sidebar visible" title="Keep sidebar visible" hidden><svg viewBox="0 0 16 16"><path d="M5 2h6M6 2v4L4 9v1h8V9L10 6V2"/><path d="M8 10v4"/></svg></button>
       </div>
 
       <button id="new-tab" class="new-tab" title="New tab (⌘T)"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg><span>New tab</span></button>
+      <div id="pinned" class="tree pinned" role="tree" aria-label="Pinned tabs"></div>
       <div id="today" class="tree today" role="tree" aria-label="Tabs"></div>
       <div id="empty-hit" class="empty-hit" aria-hidden="true"></div>
     </div>
 
-    <footer class="dock">
-      <button id="collapse" class="icon-button" aria-label="Keep sidebar visible" title="Keep sidebar visible" hidden><svg viewBox="0 0 16 16"><path d="M5 2h6M6 2v4L4 9v1h8V9L10 6V2"/><path d="M8 10v4"/></svg></button>
+    <div id="sidebar-update" class="sidebar-update" hidden>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.5v7m-2.5-2.5L8 9.5 10.5 7M3 11v2h10v-2"/></svg>
+      <span id="sidebar-update-status" class="sidebar-update-status" role="status"></span>
+      <button id="sidebar-update-install" class="sidebar-update-action" type="button" hidden>Restart</button>
+      <button id="sidebar-update-check" class="sidebar-update-action" type="button" hidden>Check again</button>
+      <a id="sidebar-update-download" class="sidebar-update-action" hidden>Download</a>
+    </div>
+    <footer id="space-dock" class="dock">
+      <button id="open-updates" class="icon-button" type="button" aria-label="What’s new in Breezer" title="What’s new in Breezer"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 4.5v.5"/></svg></button>
       <div id="spaces" class="space-dots" role="tablist" aria-label="Spaces"></div>
-      <button id="add-space" class="icon-button" aria-label="New space" title="New space for a separate group of tabs"><svg viewBox="0 0 16 16"><rect x="2" y="4" width="10" height="9" rx="2"/><path d="M5 2h7a2 2 0 0 1 2 2v6M7 6.5v4M5 8.5h4"/></svg></button>
-      <button id="open-updates" class="icon-button" aria-label="What’s new in Breezer" title="What’s new in Breezer"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 4.5v.5"/></svg></button>
       <button id="open-settings" class="icon-button" aria-label="Settings" title="Settings"><svg viewBox="0 0 16 16"><path d="M3 4.5h6M12 4.5h1M3 11.5h1M7 11.5h6"/><circle cx="10.5" cy="4.5" r="1.6"/><circle cx="5.5" cy="11.5" r="1.6"/></svg></button>
     </footer>
 
@@ -284,6 +288,20 @@
           </section>
 
           <section class="settings-page" data-page="assistant" aria-label="Assistant" data-optional hidden>
+            <section id="model-settings" class="settings-section" aria-labelledby="model-settings-heading" hidden>
+              <h2 id="model-settings-heading">Model</h2>
+              <div class="setting-group">
+                <div class="setting-row" data-search-terms="AI assistant default model Codex Claude Sol Terra Luna">
+                  <label class="setting-label" for="default-ai-model">Default model<small>Used in Breezer AI and Ask on New Tab.</small></label>
+                  <select id="default-ai-model" aria-describedby="model-settings-status" disabled></select>
+                </div>
+                <div class="setting-actions">
+                  <button id="refresh-ai-models" class="button" type="button">Refresh models</button>
+                  <p id="model-settings-status" class="field-note" role="status"></p>
+                </div>
+              </div>
+              <p id="model-settings-error" class="field-error" role="alert"></p>
+            </section>
             <div id="context-settings" data-search-terms="ai assistant context habits memory activity sites suggestions summary luna openai"></div>
           </section>
 
@@ -536,5 +554,6 @@
     </footer>
   </main>
   <script type="module" src="workspace.js"></script>
+  <script type="module" src="workspace-chrome.js"></script>
 </body>
 </html>

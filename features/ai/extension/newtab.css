@@ -474,3 +474,692 @@ a.item-title:hover { text-decoration-color: currentColor; }
 :root[data-artwork="on"] .site:not(.placeholder) .site-name { padding-inline: 4px; border-radius: 4px; background: var(--raised); }
 :root[data-artwork="on"] .site-add .site-icon { background: var(--raised); }
 @media (forced-colors: active) { .theme-image, .theme-artwork, .theme-first-frame, :root[data-artwork="on"] body::before { display: none; } }
+
+/* ---------------------------------------------------------------- experiments
+   Everything below applies only when Settings > Experiments turns it on: the
+   page sets data-composer / data-glass on <html> after reading that record.
+
+   The experimental Home is one object on a quiet field: the box you type in.
+   The date steps aside, settings shrink to an icon, shortcuts and recent chats
+   sit underneath at a whisper. The only artwork is a set of faint isobars —
+   the pressure lines of a weather map — curving up from the lower edge. */
+
+:root[data-composer="on"] {
+  /* Paper-white with a breath of the tone in light; a deep, tone-tinted night in dark. */
+  --canvas: color-mix(in oklab, var(--air) 34%, #f7f7f6);
+  --raised: #fff;
+  --line: color-mix(in srgb, var(--ink) 11%, transparent);
+  --hover: color-mix(in srgb, var(--ink) 6%, transparent);
+  --isobar: color-mix(in srgb, var(--ink) 10%, transparent);
+  --lift: 0 1px 1px color-mix(in srgb, var(--ink) 6%, transparent), 0 22px 44px -26px color-mix(in srgb, var(--ink) 38%, transparent);
+}
+:root[data-composer="on"][data-scheme="dark"] {
+  --canvas: color-mix(in oklab, var(--air) 32%, #060708);
+  --raised: color-mix(in oklab, var(--air-deep) 26%, #131416);
+  --line: color-mix(in srgb, var(--ink) 10%, transparent);
+  --hover: color-mix(in srgb, var(--ink) 7%, transparent);
+  --isobar: color-mix(in srgb, var(--accent) 22%, transparent);
+  --lift: inset 0 1px 0 rgb(255 255 255 / 0.04), 0 0 0 1px rgb(0 0 0 / 0.5), 0 28px 56px -28px rgb(0 0 0 / 0.9);
+}
+
+/* The isobars: fine concentric contours around a low-pressure centre below
+   the fold, faded so they only show as a band across the lower third. */
+:root[data-composer="on"]:not([data-artwork="on"]) body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-radial-gradient(ellipse 125% 72% at 34% 130%, transparent 0 25.5px, var(--isobar) 26.5px 27.5px, transparent 28.5px);
+  -webkit-mask-image: radial-gradient(ellipse 95% 66% at 38% 100%, #000 25%, transparent 78%);
+  mask-image: radial-gradient(ellipse 95% 66% at 38% 100%, #000 25%, transparent 78%);
+}
+:root[data-composer="on"] :is(.sky, .sheet) { position: relative; z-index: 1; }
+:root[data-composer="on"] .settings-link { z-index: 3; }
+
+:root[data-composer="on"] .sky {
+  min-height: 0;
+  padding-top: clamp(72px, 31vh, 320px);
+  padding-bottom: clamp(32px, 6vh, 64px);
+  text-align: center;
+}
+:root[data-composer="on"] .sky:has(+ .sheet:not([hidden])) { min-height: 0; }
+:root[data-composer="on"] .sites-nav { display: none; }
+
+/* The date stays the page's heading for assistive tech but leaves the view. */
+:root[data-composer="on"] .today {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Settings: a quiet icon in the corner instead of a labelled chip. */
+:root[data-composer="on"] .settings-link {
+  width: 34px;
+  padding: 0;
+  justify-content: center;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+:root[data-composer="on"] .settings-link span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:root[data-composer="on"] .settings-link:hover { color: var(--ink); background: var(--hover); }
+
+.composer { width: min(620px, 100%); margin: 0 auto; text-align: left; }
+
+.composer-box {
+  --mode-accent: var(--ink);
+  display: grid;
+  gap: 10px;
+  padding: 15px 10px 10px 16px;
+  border-radius: 16px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  box-shadow: var(--lift);
+  transition: border-color 160ms ease;
+}
+.composer-box[data-mode="ask"] { --mode-accent: var(--accent); }
+.composer-box:focus-within { border-color: color-mix(in srgb, var(--mode-accent) 40%, var(--line)); }
+
+.composer-input {
+  width: 100%;
+  min-height: 24px;
+  max-height: 180px;
+  margin: 0;
+  padding: 0 6px 0 0;
+  border: 0;
+  resize: none;
+  overflow-y: auto;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 24px;
+}
+.composer-input::placeholder { color: var(--muted); opacity: 0.8; }
+.composer-input:focus-visible { outline: none; }
+
+.composer-bar { display: flex; align-items: center; gap: 8px; }
+
+/* Two choices on one track. The thumb slides to the chosen one, so the
+   change of what Enter does is visible without reading the label. */
+.composer-modes {
+  --thumb-x: 0px;
+  --thumb-w: 0px;
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  margin-left: -6px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.composer-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  width: var(--thumb-w);
+  transform: translateX(var(--thumb-x));
+  border-radius: 7px;
+  background: var(--raised);
+  box-shadow: 0 0 0 1px var(--line), 0 1px 2px color-mix(in srgb, var(--ink) 14%, transparent);
+  transition: transform 220ms cubic-bezier(.3, .7, .2, 1), width 220ms cubic-bezier(.3, .7, .2, 1);
+}
+:root[data-scheme="dark"] .composer-thumb { background: color-mix(in srgb, var(--ink) 13%, var(--raised)); box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.05); }
+.composer-box[data-mode="ask"] .composer-thumb { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+.composer-modes:not([data-ready]) .composer-thumb { transition: none; }
+.composer-modes button {
+  position: relative;
+  height: 26px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 550;
+  cursor: pointer;
+}
+.composer-modes button:hover { color: var(--ink); }
+.composer-modes button[aria-checked="true"] { color: var(--ink); }
+.composer-modes button[data-mode="ask"][aria-checked="true"] { color: var(--accent); }
+.composer-modes button:focus-visible { outline-offset: 1px; border-radius: 7px; }
+
+.composer-style {
+  margin-left: auto;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+}
+.composer-style:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+.composer-send {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  background: var(--mode-accent);
+  color: var(--raised);
+  cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+:root[data-scheme="dark"] .composer-send { color: var(--canvas); }
+.composer-style:not([hidden]) + .composer-send { margin-left: 0; }
+.composer-send:hover { background: color-mix(in srgb, var(--mode-accent) 86%, var(--canvas)); }
+.composer-send svg { width: 16px; height: 16px; stroke-width: 1.9; }
+.composer-send:active { transform: scale(0.94); }
+.composer-send:disabled { opacity: 0.45; cursor: default; }
+.composer-box[data-mode="search"] .send-ask,
+.composer-box[data-mode="ask"] .send-search { display: none; }
+
+.composer-status { min-height: 20px; margin: 8px 6px 0; color: var(--muted); font-size: 12.5px; text-align: center; }
+.composer-status[data-state="error"] { color: var(--danger); }
+.composer-status:empty { visibility: hidden; }
+
+/* Shortcuts: small, unboxed glyphs under the input. */
+.composer-sites {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.composer-site {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  text-decoration: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+}
+.composer-site:hover { color: var(--ink); background: var(--hover); }
+.composer-site:focus-visible { outline-offset: 1px; border-radius: 9px; }
+.composer-site img { width: 18px; height: 18px; border-radius: 4px; }
+
+/* Recent chats: one quiet line each, title then a muted trace of the reply. */
+.recent-chats { width: min(440px, 100%); margin: 0 auto 14px; }
+.recent-chats-title { margin: 0 0 4px; padding-inline: 10px; color: var(--muted); font-size: 12px; font-weight: 500; text-align: left; }
+.recent-chats-list { margin: 0; padding: 0; list-style: none; }
+.recent-chat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: color-mix(in srgb, var(--ink) 86%, transparent);
+  font-size: 13px;
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+}
+.recent-chat:hover { background: var(--hover); }
+.recent-chat:focus-visible { outline-offset: 0; border-radius: 8px; }
+.recent-chat-title { flex: 0 1 auto; min-width: 0; max-width: 62%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 450; }
+.recent-chat-preview { flex: 1 1 0; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--muted); opacity: .75; font-size: 12.5px; }
+.recent-chat-where { flex: none; margin-left: auto; color: var(--muted); font-size: 11.5px; }
+
+/* Glass: translucent surfaces over a softly lit field. Fullscreen, Reduce
+   transparency and forced colors get data-glass="solid", the usual look. */
+:root[data-glass="glass"] body {
+  background:
+    radial-gradient(90% 60% at 50% -12%, color-mix(in oklab, var(--accent) 13%, transparent), transparent 70%),
+    var(--canvas);
+  background-attachment: fixed;
+}
+:root[data-glass="glass"] :is(.composer-box, .settings-link, .sheet) {
+  background: color-mix(in srgb, var(--raised) 66%, transparent);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+}
+:root[data-glass="glass"] .composer-box { border-color: color-mix(in srgb, var(--ink) 12%, transparent); }
+:root[data-glass="glass"][data-composer="on"] .settings-link { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+
+@media (max-width: 560px) {
+  :root[data-composer="on"] .sky { width: calc(100vw - 32px); padding-top: clamp(64px, 24vh, 200px); }
+  .composer-box { padding: 13px 8px 8px 14px; border-radius: 14px; }
+  .composer-modes button { padding: 0 9px; }
+  .composer-style { display: none; }
+  .recent-chat-preview { display: none; }
+  .recent-chat-title { max-width: none; flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .composer-thumb, .composer-box, .composer-send { transition: none; }
+}
+@media (forced-colors: active) {
+  :root[data-composer="on"] body::after { display: none; }
+  .composer-thumb { background: Highlight; }
+  .composer-modes button[aria-checked="true"] { color: HighlightText; }
+  .composer-box { border: 1px solid CanvasText; }
+}
+
+/* Personality looks. Each preset changes the shape and type of the box; the
+   field stays the same quiet night (or paper) so the input remains the focus. */
+:root[data-personality="concise"] .composer-box { border-radius: 8px; }
+:root[data-personality="concise"] .composer-modes,
+:root[data-personality="concise"] .composer-thumb,
+:root[data-personality="concise"] .composer-modes button { border-radius: 5px; }
+:root[data-personality="concise"] .composer-send { border-radius: 6px; }
+:root[data-personality="concise"] .composer-input { font-size: 15px; letter-spacing: -0.01em; }
+:root[data-personality="concise"] .today { font-family: var(--sans); font-weight: 600; letter-spacing: -0.02em; }
+
+:root[data-personality="warm"] .composer-box { border-radius: 26px; padding-inline: 20px 10px; }
+:root[data-personality="warm"] :is(.composer-modes, .composer-thumb, .composer-modes button, .composer-send) { border-radius: 999px; }
+:root[data-personality="warm"] :is(.composer-input, .today, .recent-chat) { font-family: ui-rounded, "SF Pro Rounded", var(--sans); }
+:root[data-personality="warm"] .today { font-weight: 500; }
+
+:root[data-personality="tutor"] .composer-box { border-radius: 4px 16px 16px 16px; border-left: 3px solid var(--accent); }
+:root[data-personality="tutor"] .composer-input {
+  font-family: var(--serif);
+  font-size: 17px;
+  background-image: linear-gradient(to bottom, transparent 23px, color-mix(in srgb, var(--accent) 22%, transparent) 23px 24px);
+  background-size: 100% 24px;
+  background-attachment: local;
+}
+
+:root[data-personality="direct"] .composer-box { border-radius: 3px; border: 1.5px solid var(--ink); box-shadow: 5px 5px 0 color-mix(in srgb, var(--accent) 55%, transparent); }
+:root[data-personality="direct"] .composer-box:focus-within { box-shadow: 5px 5px 0 var(--accent); }
+:root[data-personality="direct"] :is(.composer-modes, .composer-thumb, .composer-modes button, .composer-send) { border-radius: 2px; }
+:root[data-personality="direct"] .composer-input { font-weight: 600; }
+:root[data-personality="direct"] .today { font-family: var(--sans); font-weight: 800; letter-spacing: -0.03em; }
+
+/* Without the experimental Home, a personality still marks the page behind
+   the default layout, as before. */
+:root:not([data-composer="on"])[data-personality="concise"] body {
+  background-image: linear-gradient(to bottom, transparent calc(100% - 1px), color-mix(in srgb, var(--ink) 6%, transparent) 0);
+  background-size: 100% 12px;
+}
+:root:not([data-composer="on"])[data-personality="warm"] body {
+  background-image: radial-gradient(70% 55% at 50% 110%, color-mix(in oklab, var(--accent) 26%, transparent), transparent 70%);
+  background-attachment: fixed;
+}
+:root:not([data-composer="on"])[data-personality="tutor"] body {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+:root:not([data-composer="on"])[data-personality="direct"] body {
+  background-image: linear-gradient(115deg, transparent 58%, color-mix(in oklab, var(--accent) 12%, transparent) 58% 74%, transparent 74%);
+  background-attachment: fixed;
+}
+
+/* Theme artwork keeps the page background to itself. */
+:root[data-artwork="on"][data-personality] body { background-image: none; }
+@media (forced-colors: active) {
+  :root[data-personality] body, :root[data-personality] .composer-input { background-image: none; }
+
+  :root[data-personality="direct"] .composer-box { box-shadow: none; }
+}
+
+.composer-box:has(.composer-input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (forced-colors: active) {
+  .composer-box:has(.composer-input:focus-visible) { outline-color: Highlight; }
+}
+
+/* ------------------------------------------------------------- Breezer looks
+   Chosen in Settings > Appearance > Theme. panel-theme.js marks
+   <html data-look="…"> while the browser shows the look's seed colour. Every
+   look is drawn here in CSS: no images, fonts or other resources.
+
+     charcoal  near-black; a pale horizon of fine dots low on the page, a few far lights
+     plum      plum twilight; a dot field drifting across in two soft bands
+     sage      muted green behind frosted panes; glossier with the Glass experiment
+     umber     clay and umber; a low sun behind two hills
+     fathom    deep water drawn as a sea chart; depth contours ripple out from two corners
+     linen     ivory cloth; a fine weave, one soft fold, ink-blue type
+     lune      a quiet night; a softly shaded moon whose shadow edge dissolves into a fine stipple
+     vesper    rose evening; light falling through slatted blinds
+
+   Each has a light and a dark variant and keeps the person's colour mode. */
+
+:root[data-look="charcoal"][data-scheme="dark"] {
+  --air: #141416; --air-deep: #1c1c1f; --card: #1d1d20; --ink: #ecebe7; --muted: #9b9a96; --accent: #e7e3d8;
+  --canvas: #0e0e0f; --raised: #18181a; --sheet: #161618;
+  --look-field: linear-gradient(180deg, #0b0b0c, #111112 60%, #0d0d0e);
+  --look-dot: rgb(236 232 220 / .82); --look-glow: rgb(236 232 220 / .2); --look-star: rgb(240 238 230 / .7);
+}
+:root[data-look="charcoal"][data-scheme="light"] {
+  --air: #e9e9e7; --air-deep: #dcdcd9; --card: #fbfbfa; --ink: #19191b; --muted: #5d5d61; --accent: #26262a;
+  --canvas: #ececea; --raised: #fbfbfa; --sheet: #fbfbfa;
+  --look-field: linear-gradient(180deg, #f1f1ef, #e8e8e6 62%, #e2e2df);
+  --look-dot: rgb(28 28 31 / .62); --look-glow: rgb(255 255 255 / .75); --look-star: rgb(28 28 31 / .35);
+}
+:root[data-look="plum"][data-scheme="dark"] {
+  --air: #1f1427; --air-deep: #2b1d35; --card: #2d2036; --ink: #f1e8f4; --muted: #baa8c2; --accent: #dcb8ec;
+  --canvas: #170f1d; --raised: #251a2d; --sheet: #22182a;
+  --look-field: linear-gradient(180deg, #120b18 0%, #1b1123 48%, #2a1731 100%);
+  --look-dot: rgb(222 180 240 / .3); --look-glow: rgb(160 92 170 / .22); --look-star: rgb(246 232 250 / .65);
+}
+:root[data-look="plum"][data-scheme="light"] {
+  --air: #ece2ee; --air-deep: #dfd0e3; --card: #fcf9fc; --ink: #2b1832; --muted: #6c5673; --accent: #6d3d85;
+  --canvas: #efe7f0; --raised: #fcf9fc; --sheet: #fcf9fc;
+  --look-field: linear-gradient(180deg, #f5f0f6 0%, #ece2ee 55%, #e2d2e6 100%);
+  --look-dot: rgb(91 58 110 / .26); --look-glow: rgb(170 120 190 / .18); --look-star: rgb(91 58 110 / .3);
+}
+:root[data-look="sage"][data-scheme="dark"] {
+  --air: #1a221e; --air-deep: #243029; --card: #26312b; --ink: #e5ece7; --muted: #a2b2a8; --accent: #dce6df;
+  --canvas: #161d19; --raised: rgb(38 49 43 / .62); --sheet: rgb(34 44 39 / .7);
+  --look-field: radial-gradient(42% 52% at 16% 20%, #2c3b33, transparent 72%), radial-gradient(48% 56% at 84% 80%, #33453b, transparent 72%), radial-gradient(30% 36% at 72% 14%, #24302a, transparent 72%);
+  --look-dot: rgb(220 232 224 / .05); --look-pane-edge: rgb(255 255 255 / .08); --look-gloss: rgb(255 255 255 / .1);
+}
+:root[data-look="sage"][data-scheme="light"] {
+  --air: #d3dcd6; --air-deep: #c2cec6; --card: #f6f8f6; --ink: #1b2420; --muted: #52605a; --accent: #1d2622;
+  --canvas: #c8d3cc; --raised: rgb(250 252 250 / .6); --sheet: rgb(250 252 250 / .68);
+  --look-field: radial-gradient(42% 52% at 16% 20%, #a7b9ad, transparent 72%), radial-gradient(48% 56% at 84% 80%, #afc0b5, transparent 72%), radial-gradient(30% 36% at 72% 14%, #e2e9e4, transparent 72%);
+  --look-dot: rgb(27 36 32 / .05); --look-pane-edge: rgb(255 255 255 / .7); --look-gloss: rgb(255 255 255 / .7);
+}
+:root[data-look="umber"][data-scheme="dark"] {
+  --air: #1f150f; --air-deep: #2b1d15; --card: #2c1e16; --ink: #f3e7dd; --muted: #c4aa99; --accent: #e3a37d;
+  --canvas: #170f0b; --raised: #261a13; --sheet: #231811;
+  --look-field: linear-gradient(180deg, #110b08 0%, #1a110c 46%, #2c170e 100%);
+  --look-dot: rgb(255 222 196 / .03); --look-glow: rgb(222 124 72 / .42); --look-hill: #120b08; --look-hill-far: #1d120c;
+}
+:root[data-look="umber"][data-scheme="light"] {
+  --air: #ecdccf; --air-deep: #e0c8b7; --card: #fbf5f0; --ink: #2f1c13; --muted: #6f5344; --accent: #8a4a2c;
+  --canvas: #eddfd3; --raised: #fbf5f0; --sheet: #fbf5f0;
+  --look-field: linear-gradient(180deg, #f3e8df 0%, #ecdccf 50%, #e3c6b2 100%);
+  --look-dot: rgb(80 40 20 / .035); --look-glow: rgb(204 112 70 / .34); --look-hill: #d2ad97; --look-hill-far: #dcbda9;
+}
+
+:root[data-look="fathom"][data-scheme="dark"] {
+  --air: #0c1926; --air-deep: #12233a; --card: #13243a; --ink: #e1ebf3; --muted: #9db1c4; --accent: #86bde6;
+  --canvas: #08121c; --raised: #0f1d2c; --sheet: #0d1a28;
+  --look-field: radial-gradient(70% 60% at 96% -10%, #12304d, transparent 70%), linear-gradient(180deg, #07101a, #0a1724 55%, #0c1c2d);
+  --look-line: rgb(134 189 230 / .24); --look-line-far: rgb(134 189 230 / .13);
+}
+:root[data-look="fathom"][data-scheme="light"] {
+  --air: #e3ecf1; --air-deep: #cfdde6; --card: #fbfdfe; --ink: #0f2436; --muted: #46596b; --accent: #1d5a8a;
+  --canvas: #e6eef3; --raised: #fbfdfe; --sheet: #fbfdfe;
+  --look-field: radial-gradient(70% 60% at 96% -10%, #c9dbe7, transparent 70%), linear-gradient(180deg, #eef4f7, #e5edf2 60%, #dbe6ed);
+  --look-line: rgb(29 90 138 / .24); --look-line-far: rgb(29 90 138 / .13);
+}
+:root[data-look="linen"][data-scheme="dark"] {
+  --air: #1d1b17; --air-deep: #29251f; --card: #29261f; --ink: #efe8da; --muted: #b5ab98; --accent: #b9c8de;
+  --canvas: #171512; --raised: #23201b; --sheet: #201d18;
+  --look-field: radial-gradient(120% 90% at 50% 38%, #1f1c17 40%, #12100d 100%);
+  --look-thread: rgb(240 228 200 / .045); --look-thread-cross: rgb(240 228 200 / .03);
+  --look-fold-shade: rgb(0 0 0 / .32); --look-fold-light: rgb(255 245 220 / .055);
+}
+:root[data-look="linen"][data-scheme="light"] {
+  --air: #f1ebdf; --air-deep: #e6dccb; --card: #fffdf8; --ink: #22201c; --muted: #5d564a; --accent: #2c3d58;
+  --canvas: #f2ece0; --raised: #fffdf8; --sheet: #fffdf8;
+  --look-field: radial-gradient(120% 90% at 50% 38%, #f6f1e7 40%, #e6dbc7 100%);
+  --look-thread: rgb(120 100 70 / .075); --look-thread-cross: rgb(120 100 70 / .05);
+  --look-fold-shade: rgb(110 90 60 / .11); --look-fold-light: rgb(255 255 255 / .75);
+}
+:root[data-look="lune"][data-scheme="dark"] {
+  --air: #12141c; --air-deep: #1a1d28; --card: #1b1e29; --ink: #e9ebf2; --muted: #a3a8b8; --accent: #c9d2e8;
+  --canvas: #0d0f15; --raised: #161922; --sheet: #141720;
+  --look-field: radial-gradient(48% 46% at 84% 12%, #1b1f2c, transparent 72%), linear-gradient(180deg, #0b0d12, #0f1118 60%, #13151e);
+  --moon-lit: #e9e8e3; --moon-mid: #a3a5b0; --moon-low: rgb(84 88 104 / .55);
+  --moon-dots-blend: screen; --moon-dots-filter: contrast(18); --moon-dots-opacity: .8;
+}
+:root[data-look="lune"][data-scheme="light"] {
+  --air: #e9ecf2; --air-deep: #d9dee8; --card: #fcfdfe; --ink: #161a24; --muted: #4d5466; --accent: #3b4a6b;
+  --canvas: #eceff4; --raised: #fcfdfe; --sheet: #fcfdfe;
+  --look-field: radial-gradient(48% 46% at 84% 12%, #f8f9fc, transparent 72%), linear-gradient(180deg, #f1f3f7, #e8ebf1 60%, #dfe3eb);
+  --moon-lit: #ffffff; --moon-mid: #e4e8ef; --moon-low: rgb(206 212 226 / .35);
+  --moon-dots-blend: multiply; --moon-dots-filter: contrast(18) invert(1); --moon-dots-opacity: .5;
+}
+:root[data-look="vesper"][data-scheme="dark"] {
+  --air: #1e1015; --air-deep: #2a161d; --card: #2a171e; --ink: #f7e6ea; --muted: #caa5ae; --accent: #f294a6;
+  --canvas: #160b0f; --raised: #22131a; --sheet: #1f1117;
+  --look-field: linear-gradient(180deg, #120709, #190c11 50%, #26111a);
+  --look-slat: rgb(246 146 166 / .085); --look-glow: rgb(200 66 100 / .32);
+}
+:root[data-look="vesper"][data-scheme="light"] {
+  --air: #f6e8ea; --air-deep: #edd5d9; --card: #fffafa; --ink: #331920; --muted: #6a4650; --accent: #a1354f;
+  --canvas: #f5e9ea; --raised: #fffafa; --sheet: #fffafa;
+  --look-field: linear-gradient(180deg, #f9f0f0, #f4e4e6 55%, #edd4d8);
+  --look-slat: rgb(236 120 142 / .2); --look-glow: rgb(238 150 162 / .38);
+}
+
+:root[data-look] body { background: var(--look-field) fixed, var(--canvas); }
+/* The sheet is a pane the art glows through, so a look still reads below it. */
+:root[data-look] .sheet {
+  background: color-mix(in srgb, var(--sheet) 80%, transparent);
+  -webkit-backdrop-filter: blur(6px) saturate(1.1);
+  backdrop-filter: blur(6px) saturate(1.1);
+}
+:root[data-look] :is(.sky, .sheet) { position: relative; z-index: 1; }
+:root[data-look] .settings-link { z-index: 3; }
+
+/* The art: body::before holds far lights, body::after the field. Both replace
+   the experimental Home's isobars while a look is on. */
+:root[data-look]:not([data-artwork="on"]) body::before,
+:root[data-look]:not([data-artwork="on"]) body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
+/* Charcoal: the horizon is a band of fine dots on a wide arc, brightest at its
+   crest, with a faint haze above it. */
+:root[data-look="charcoal"]:not([data-artwork="on"]) body::after {
+  background:
+    radial-gradient(ellipse 30% 8% at 50% 67%, var(--look-glow), transparent 72%),
+    radial-gradient(circle, var(--look-dot) 0 .8px, transparent 1.25px) 0 0 / 4px 4px;
+  -webkit-mask-image: radial-gradient(ellipse 150% 108% at 50% 132%, transparent 56%, #000 60%, rgb(0 0 0 / .4) 63%, transparent 70%), radial-gradient(ellipse 46% 60% at 50% 66%, #000 16%, rgb(0 0 0 / .2) 100%);
+  -webkit-mask-composite: source-in;
+  mask-image: radial-gradient(ellipse 150% 108% at 50% 132%, transparent 56%, #000 60%, rgb(0 0 0 / .4) 63%, transparent 70%), radial-gradient(ellipse 46% 60% at 50% 66%, #000 16%, rgb(0 0 0 / .2) 100%);
+  mask-composite: intersect;
+}
+:root[data-look="charcoal"]:not([data-artwork="on"]) body::before,
+:root[data-look="plum"]:not([data-artwork="on"]) body::before {
+  background:
+    radial-gradient(circle at 8% 14%, var(--look-star) 0 .9px, transparent 1.5px),
+    radial-gradient(circle at 23% 31%, var(--look-star) 0 .6px, transparent 1.2px),
+    radial-gradient(circle at 37% 9%, var(--look-star) 0 .7px, transparent 1.3px),
+    radial-gradient(circle at 61% 21%, var(--look-star) 0 .6px, transparent 1.2px),
+    radial-gradient(circle at 78% 7%, var(--look-star) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 91% 27%, var(--look-star) 0 .6px, transparent 1.2px),
+    radial-gradient(circle at 70% 44%, var(--look-star) 0 .5px, transparent 1.1px),
+    radial-gradient(circle at 14% 52%, var(--look-star) 0 .5px, transparent 1.1px);
+  opacity: .8;
+}
+
+/* Plum: one dot field, shown in two soft bands that cross the page on a slant,
+   over a glow low on the left. */
+:root[data-look="plum"]:not([data-artwork="on"]) body::after {
+  background:
+    radial-gradient(circle, var(--look-dot) 0 .75px, transparent 1.2px) 0 0 / 4px 4px,
+    radial-gradient(ellipse 60% 40% at 18% 96%, var(--look-glow), transparent 72%);
+  -webkit-mask-image: linear-gradient(158deg, transparent 6%, rgb(0 0 0 / .9) 17%, rgb(0 0 0 / .25) 28%, transparent 38%, transparent 55%, rgb(0 0 0 / .55) 68%, #000 80%, rgb(0 0 0 / .4) 92%);
+  mask-image: linear-gradient(158deg, transparent 6%, rgb(0 0 0 / .9) 17%, rgb(0 0 0 / .25) 28%, transparent 38%, transparent 55%, rgb(0 0 0 / .55) 68%, #000 80%, rgb(0 0 0 / .4) 92%);
+}
+:root[data-look="plum"][data-scheme="light"]:not([data-artwork="on"]) body::before { opacity: .4; }
+
+/* Sage: a fine frosted grain over the soft field; the panes carry the look. */
+:root[data-look="sage"]:not([data-artwork="on"]) body::after {
+  background: radial-gradient(circle, var(--look-dot) 0 .6px, transparent 1px) 0 0 / 3px 3px;
+}
+:root[data-look="sage"] :is(.composer-box, .sheet, .site-icon),
+:root[data-look="sage"]:not([data-composer="on"]) .settings-link {
+  background-color: var(--raised);
+  border-color: var(--look-pane-edge);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
+  backdrop-filter: blur(22px) saturate(1.25);
+}
+:root[data-look="sage"] .sheet { border: 1px solid var(--look-pane-edge); }
+/* Gloss: with the Glass experiment the panes catch a light along their top edge. */
+:root[data-look="sage"][data-glass="glass"] :is(.composer-box, .sheet) {
+  background-image: linear-gradient(180deg, var(--look-gloss), transparent 42%);
+  box-shadow: inset 0 1px 0 var(--look-gloss), var(--lift, 0 18px 40px -28px rgb(0 0 0 / .45));
+}
+
+/* Umber: a low sun behind two hills, under a faint grain. */
+:root[data-look="umber"]:not([data-artwork="on"]) body::after {
+  background:
+    radial-gradient(ellipse 70% 15% at 24% 100%, var(--look-hill) 97%, transparent 100%),
+    radial-gradient(ellipse 80% 20% at 82% 104%, var(--look-hill-far) 97%, transparent 100%),
+    radial-gradient(circle, var(--look-dot) 0 .6px, transparent 1px) 0 0 / 3px 3px,
+    radial-gradient(ellipse 54% 34% at 56% 100%, var(--look-glow), transparent 72%),
+    radial-gradient(ellipse 120% 52% at 50% 104%, color-mix(in srgb, var(--look-glow) 45%, transparent), transparent 72%);
+}
+
+/* Fathom: depth contours drawn as on a sea chart, rippling out from a deep
+   off the upper right and, more faintly, from the lower left. */
+:root[data-look="fathom"]:not([data-artwork="on"]) body::after {
+  background: repeating-radial-gradient(ellipse 120% 100% at 98% -16%, transparent 0 25px, var(--look-line) 26px, transparent 27.5px);
+  -webkit-mask-image: radial-gradient(ellipse 62% 74% at 98% -16%, #000 30%, rgb(0 0 0 / .5) 62%, transparent 92%);
+  mask-image: radial-gradient(ellipse 62% 74% at 98% -16%, #000 30%, rgb(0 0 0 / .5) 62%, transparent 92%);
+}
+:root[data-look="fathom"]:not([data-artwork="on"]) body::before {
+  background: repeating-radial-gradient(circle at -4% 112%, transparent 0 33px, var(--look-line-far) 34px, transparent 35.5px);
+  -webkit-mask-image: radial-gradient(circle at -4% 112%, #000 20%, transparent 60%);
+  mask-image: radial-gradient(circle at -4% 112%, #000 20%, transparent 60%);
+}
+
+/* Linen: a fine plain weave over the cloth, with one soft vertical fold. */
+:root[data-look="linen"]:not([data-artwork="on"]) body::after {
+  background:
+    repeating-linear-gradient(0deg, var(--look-thread) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, var(--look-thread-cross) 0 1px, transparent 1px 4px);
+}
+:root[data-look="linen"]:not([data-artwork="on"]) body::before {
+  background: linear-gradient(97deg, transparent 57%, var(--look-fold-shade) 61.6%, var(--look-fold-light) 62%, transparent 66.5%);
+}
+
+/* Lune: a softly shaded moon set into the upper right. body::before is the disc;
+   body::after is a halftone of the same light (a dot screen thresholded by
+   contrast()) masked to the shadow edge, so the terminator dissolves into a
+   fine stipple that thins out toward the dark limb. */
+:root[data-look="lune"] { --moon: 116px; --moon-top: 52px; --moon-right: 120px; }
+:root[data-look="lune"]:not([data-artwork="on"]) body::before,
+:root[data-look="lune"]:not([data-artwork="on"]) body::after {
+  inset: var(--moon-top) var(--moon-right) auto auto;
+  width: var(--moon);
+  height: var(--moon);
+  border-radius: 50%;
+}
+:root[data-look="lune"]:not([data-artwork="on"]) body::before {
+  background:
+    radial-gradient(circle at 44% 46%, rgb(120 122 134 / .1) 0 6%, transparent 11%),
+    radial-gradient(circle at 30% 60%, rgb(120 122 134 / .08) 0 8%, transparent 13%),
+    radial-gradient(circle at 34% 32%, var(--moon-lit) 0, var(--moon-mid) 30%, var(--moon-low) 47%, transparent 63%);
+}
+:root[data-look="lune"]:not([data-artwork="on"]) body::after {
+  background:
+    radial-gradient(closest-side, #6c6c6c, #000) 0 0 / 4px 4px,
+    radial-gradient(closest-side, #fff 84%, #000 100%),
+    radial-gradient(circle at 34% 32%, #fff 0, #c8c8c8 34%, #6a6a6a 52%, #303030 64%, #1c1c1c 72%, #121212 80%, #000 88%);
+  background-blend-mode: screen, multiply, normal;
+  filter: var(--moon-dots-filter);
+  mix-blend-mode: var(--moon-dots-blend);
+  opacity: var(--moon-dots-opacity);
+  -webkit-mask-image: radial-gradient(circle at 34% 32%, transparent 30%, #000 44%);
+  mask-image: radial-gradient(circle at 34% 32%, transparent 30%, #000 44%);
+}
+@media (max-width: 1240px) {
+  :root[data-look="lune"] { --moon: 96px; --moon-top: 48px; --moon-right: 56px; }
+}
+@media (max-width: 760px) {
+  :root[data-look="lune"]:not([data-artwork="on"]) body::before,
+  :root[data-look="lune"]:not([data-artwork="on"]) body::after { display: none; }
+}
+
+/* Vesper: rose evening light falling through slatted blinds onto the upper
+   right of the page, over a low glow. */
+:root[data-look="vesper"]:not([data-artwork="on"]) body::after {
+  background: repeating-linear-gradient(-28deg, transparent 0, var(--look-slat) 7px 22px, transparent 29px 46px);
+  -webkit-mask-image: radial-gradient(ellipse 40% 52% at 76% 26%, #000 10%, rgb(0 0 0 / .45) 55%, transparent 78%);
+  mask-image: radial-gradient(ellipse 40% 52% at 76% 26%, #000 10%, rgb(0 0 0 / .45) 55%, transparent 78%);
+}
+:root[data-look="vesper"]:not([data-artwork="on"]) body::before {
+  background:
+    radial-gradient(ellipse 46% 40% at 78% 24%, color-mix(in srgb, var(--look-glow) 60%, transparent), transparent 72%),
+    radial-gradient(ellipse 90% 34% at 30% 104%, var(--look-glow), transparent 72%);
+}
+
+/* The experimental Home, tuned per look: the box takes the look's surface and
+   the send button turns round. Personality shapes still win over these. */
+:root:where([data-look])[data-composer="on"] .composer-box { border-radius: 20px; }
+:root:where([data-look]) .composer-send { border-radius: 999px; }
+:root:where([data-look]) :is(.composer-modes, .composer-thumb, .composer-modes button) { border-radius: 999px; }
+:root[data-look][data-composer="on"] .composer-box { border-color: color-mix(in srgb, var(--ink) 9%, transparent); }
+:root[data-look] .composer-input::placeholder { opacity: 1; }
+:root[data-look="charcoal"][data-scheme="dark"][data-composer="on"] {
+  --lift: inset 0 1px 0 rgb(255 255 255 / .04), 0 0 0 1px rgb(0 0 0 / .6), 0 30px 60px -30px #000;
+}
+:root[data-look="plum"][data-composer="on"] .composer-box {
+  background: color-mix(in srgb, var(--raised) 82%, transparent);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+:root[data-look="plum"][data-scheme="dark"][data-composer="on"] {
+  --lift: inset 0 1px 0 rgb(255 240 255 / .05), 0 0 0 1px rgb(10 4 14 / .55), 0 30px 60px -30px #07030a;
+}
+:root[data-look="sage"][data-composer="on"] .composer-box { border-radius: 24px; }
+:root[data-look="sage"][data-scheme="light"][data-composer="on"] {
+  --lift: 0 1px 1px rgb(27 36 32 / .05), 0 24px 48px -28px rgb(27 36 32 / .4);
+}
+:root[data-look="umber"][data-scheme="dark"][data-composer="on"] {
+  --lift: inset 0 1px 0 rgb(255 230 210 / .05), 0 0 0 1px rgb(12 6 3 / .55), 0 30px 60px -30px #0a0503;
+}
+:root[data-look="fathom"][data-scheme="dark"][data-composer="on"] {
+  --lift: inset 0 1px 0 rgb(200 230 255 / .05), 0 0 0 1px rgb(2 8 14 / .6), 0 30px 60px -30px #02070c;
+}
+:root[data-look="linen"][data-scheme="light"][data-composer="on"] {
+  --lift: 0 1px 0 rgb(110 90 60 / .08), 0 1px 2px rgb(110 90 60 / .1), 0 22px 40px -28px rgb(80 60 30 / .35);
+}
+/* Lune's box is a quiet glass pill, so the moon keeps the page's attention. */
+:root[data-look="lune"][data-composer="on"] .composer-box {
+  background: color-mix(in srgb, var(--raised) 80%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 12%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+:root:where([data-look="lune"])[data-composer="on"] .composer-box { border-radius: 28px; }
+:root[data-look="lune"][data-scheme="dark"][data-composer="on"] {
+  --lift: inset 0 1px 0 rgb(230 236 255 / .05), 0 0 0 1px rgb(4 5 9 / .6), 0 30px 60px -30px #030407;
+}
+:root[data-look="vesper"][data-scheme="dark"][data-composer="on"] {
+  --lift: inset 0 1px 0 rgb(255 225 232 / .05), 0 0 0 1px rgb(14 4 8 / .6), 0 30px 60px -30px #0b0306;
+}
+:root[data-look][data-composer="on"] .composer-site:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-look="sage"][data-scheme="light"] { --raised: #f2f5f3; --sheet: #f2f5f3; }
+  :root[data-look="sage"][data-scheme="dark"] { --raised: #26312b; --sheet: #222c27; }
+  :root[data-look] :is(.composer-box, .settings-link, .sheet, .site-icon) { -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (forced-colors: active) {
+  :root[data-look] body { background: Canvas; }
+  :root[data-look] body::before, :root[data-look] body::after { display: none; }
+}

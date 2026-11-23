@@ -124,6 +124,15 @@ export function validateChat(message) {
   if (message.history !== undefined && (!Array.isArray(message.history) || message.history.length > 100 || message.history.some((item) => !object(item) || !['user', 'assistant'].includes(item.role) || typeof item.content !== 'string' || item.content.length > 100_000))) throw new Error('Invalid chat history.');
   if (message.profile !== undefined && (!object(message.profile) || typeof message.profile.context !== 'string' || message.profile.context.length > 50_000 || (message.profile.name !== undefined && (typeof message.profile.name !== 'string' || message.profile.name.length > 100)))) throw new Error('Invalid profile.');
   if (message.context !== undefined && !object(message.context)) throw new Error('Invalid page context.');
+  if (message.context?.kind === 'pdf-view') {
+    const { screenshot } = message.context;
+    if (message.includeContext !== true || message.control === true || message.browserTask !== undefined
+        || message.researchSources !== undefined || Object.keys(message.context).length !== 2
+        || typeof screenshot !== 'string' || screenshot.length > 2 * 1024 * 1024
+        || !/^data:image\/jpeg;base64,[a-zA-Z0-9+/]+={0,2}$/.test(screenshot)) {
+      throw new Error('Invalid read-only PDF context.');
+    }
+  }
   if (message.browserTask !== undefined && (!['stats', 'theme'].includes(message.browserTask) || message.control === true || message.includeContext === true || message.context !== undefined || message.researchSources !== undefined)) {
     throw new Error('Browser stats and theme design require page access and research to be off.');
   }
@@ -193,7 +202,7 @@ const browserTasks = {
 };
 
 export function allowedTools(chat) {
-  if (chat.researchSources) return [];
+  if (chat.researchSources || chat.context?.kind === 'pdf-view') return [];
   if (Object.hasOwn(browserTasks, chat.browserTask)) return [browserTasks[chat.browserTask]];
   const tools = chat.control === true ? browserTools : chat.includeContext === true ? browserTools.slice(0, 1) : [];
   return chat.organato === true ? [...tools, ...organatoTools] : tools;
@@ -245,6 +254,7 @@ export function browserAccess(chat) {
     return `The user requested a Breezer theme. Use browser_propose_theme to deliver a finished design as a preview. The theme color and scheme affect browser chrome. Optional artwork appears on New Tab. The user can apply or restore it from the preview card. Share a short description once a preview is staged. You have no page access or browser controls. ${references}`;
   }
   if (chat.researchSources) return 'Browser access: read-only captured text from explicitly selected source tabs. Browser control is off. No browser tools are available. You cannot navigate, refresh, click, type, or act on these sources. Ask the user to clear research sources and enable Browser control in one active tab for actions.';
+  if (chat.context?.kind === 'pdf-view') return 'Browser access: read-only image of the visible part of the current PDF. Answer from that image. If the answer needs more of the document, ask the user to scroll and share another view. You have no browser controls.';
   const limits = 'You cannot see or control other tabs, other apps, the desktop, or the operating system.';
   if (chat.control === true) return `Browser access: Browser control is on for the current tab only. Use the browser tools to snapshot, click, type, scroll, press keys, and navigate in that tab. ${limits}`;
   if (chat.includeContext === true) return `Browser access: read-only. Browser control is off, so you can read the current page but cannot click, type, scroll, or navigate. If the user asks you to act on the page, say that Browser control is off and ask them to turn on the Browser control switch below the message box, then send the request again. ${limits}`;

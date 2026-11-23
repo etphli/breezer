@@ -20,8 +20,8 @@ class WebContents;
 // page card above the browser window instead of replacing the favourite or
 // adding a tab. The card hosts a real WebContents (no iframe), so every site
 // loads with its own security policy. Escape, the close button, or a click on
-// the tinted backdrop destroys the page; Expand moves the same live
-// WebContents into an ordinary foreground tab.
+// the tinted backdrop destroys the page. The toolbar can move the live
+// WebContents into a tab or split it alongside the source tab.
 //
 // Only tabs marked with SetSource() can open a peek. Breezer's sidebar marks
 // the tabs bound to its favourites through breezerPrivate.setPeekSources().

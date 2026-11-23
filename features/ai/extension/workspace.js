@@ -1,11 +1,11 @@
 import { localStorageChanges } from './storage-events.js';
 import { PLATFORM } from './platform.js';
 import {
-  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_SPACES, STORE_KEY, TONES, TONE_NAMES,
+  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
   findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeStore, parseRoute,
   normalizeFolderColor, removeNode, removeSpace, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
-  setPrefs, setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
+  setPrefs, setSpaceIcon, setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
 } from './workspace-store.js';
 
 const api = globalThis.chrome;
@@ -14,6 +14,9 @@ const SVG = 'http://www.w3.org/2000/svg';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 const workspace = new WorkspaceStore({ storage: api.storage });
+const EXPERIMENTS_KEY = 'breezerExperiments';
+const OPEN_SPACE_MESSAGE = 'breezer.workspace.open-space';
+const windowOpenSpaceKey = (windowId) => `workspace.open-space.${windowId}`;
 
 const ICONS = {
   close: 'M4.5 4.5l7 7M11.5 4.5l-7 7',
@@ -22,6 +25,27 @@ const ICONS = {
   muted: 'M3 6.2h2.2L8.4 3.6v8.8L5.2 9.8H3zM10.5 6.3l3 3M13.5 6.3l-3 3',
   chevron: 'M6 4.5L9.5 8 6 11.5',
   folder: 'M2.5 5a1.5 1.5 0 0 1 1.5-1.5h2.6l1.4 1.6H12A1.5 1.5 0 0 1 13.5 6.6V11A1.5 1.5 0 0 1 12 12.5H4A1.5 1.5 0 0 1 2.5 11z',
+  spaces: 'M2.5 5.5 8 2.5l5.5 3L8 8.5l-5.5-3ZM2.5 8.5l5.5 3 5.5-3m-11 3 5.5 3 5.5-3',
+  pin: 'M5 2.5h6m-5 0v4L4 9v1h8V9l-2-2.5v-4M8 10v3.5',
+  star: 'm8 2.2 1.8 3.6 4 .6-2.9 2.8.7 4L8 11.3l-3.6 1.9.7-4-2.9-2.8 4-.6Z',
+  duplicate: 'M10.5 10.5h-7v-8h7v8Zm2-5h1v8h-7v-1',
+  link: 'm6.4 9.6 3.2-3.2M6 5.2l1.6-1.6a2.8 2.8 0 0 1 4 4L10 9.2m0 1.6-1.6 1.6a2.8 2.8 0 0 1-4-4L6 6.8',
+  window: 'M2.5 5h11m-11-1a1.5 1.5 0 0 1 1.5-1.5h8A1.5 1.5 0 0 1 13.5 4v8a1.5 1.5 0 0 1-1.5 1.5H4A1.5 1.5 0 0 1 2.5 12Z',
+  split: 'M8 3v10M4 3h8a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z',
+  edit: 'm4 10-.5 2.5L6 12l6.5-6.5-2-2L4 10Zm5.5-5.5 2 2',
+  plus: 'M8 3.5v9m-4.5-4.5h9',
+  space: 'M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  briefcase: 'M6 5V3.5h4V5M2.5 8h11m-10-3h9a1 1 0 0 1 1 1v5.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z',
+  home: 'm2.5 7 5.5-4.5L13.5 7m-10-.5v6h9v-6M6.5 12.5V9h3v3.5',
+  book: 'M8 5C6 3.6 4 3.6 2.5 4v7.7C4.5 11 6.5 11.4 8 12.5c1.5-1.1 3.5-1.5 5.5-.8V4C12 3.6 10 3.6 8 5Zm0 0v7.4',
+  sparkle: 'M8 2.4 9.5 6.5 13.6 8 9.5 9.5 8 13.6 6.5 9.5 2.4 8 6.5 6.5 8 2.4Z',
+  code: 'm5.5 5-3 3 3 3m5-6 3 3-3 3M9 4l-2 8',
+  leaf: 'M4 12.5c4.5-1.5 8.5-4 8.5-9-5.5 0-9.4 2.5-9 6 .1 1.2.7 1.8 1.7 2m0 .5 4.5-4.5',
+  globe: 'M13.4 8a5.4 5.4 0 1 1-10.8 0 5.4 5.4 0 0 1 10.8 0ZM2.6 8h10.8M8 2.6a8 8 0 0 1 0 10.8 8 8 0 0 1 0-10.8Z',
+};
+const SPACE_ICON_NAMES = {
+  space: 'Circle', briefcase: 'Briefcase', home: 'Home', book: 'Book',
+  sparkle: 'Sparkle', code: 'Code', leaf: 'Leaf', globe: 'Globe',
 };
 
 function icon(name, className = '') {
@@ -132,7 +156,8 @@ const state = {
   drag: null,
   suppressClick: false,
   closeFallback: null,
-  lastWheel: 0,
+  wheel: { at: -Infinity, axis: null, delta: 0, vertical: 0, switched: false },
+  spaceDock: false,
   drawn: false,
   instant: false,
 };
@@ -409,6 +434,28 @@ async function moveTabToSpace(tab, spaceId) {
   showToast(`Moved to ${name}.`, 'Go there', () => switchSpace(spaceId, { focusTab: tab.id }));
 }
 
+async function moveTabToNewWindow(tab) {
+  try {
+    await api.windows.create({ tabId: tab.id });
+  } catch (error) {
+    showToast(`Couldn’t move the tab. ${errorText(error)}`);
+  }
+}
+
+async function openSpaceInNewWindow(spaceId) {
+  try {
+    const opened = await api.windows.create({});
+    if (!Number.isInteger(opened?.id)) throw new Error('The browser did not return the new window.');
+    const tabs = opened.tabs ?? await api.tabs.query({ windowId: opened.id });
+    const starter = tabs.find(tab => tab.active) || tabs[0];
+    await api.storage.session.set({ [windowOpenSpaceKey(opened.id)]: { spaceId, tabId: starter?.id } });
+    // The new sidebar can also pick up the persisted request during startup.
+    void api.runtime.sendMessage({ type: OPEN_SPACE_MESSAGE, windowId: opened.id }).catch(() => {});
+  } catch (error) {
+    showToast(`Couldn’t open the space in a new window. ${errorText(error)}`);
+  }
+}
+
 async function clearToday() {
   const tabs = [...state.model.today];
   if (!tabs.length) return;
@@ -452,6 +499,7 @@ function switchSpace(spaceId, { activateTab = true, focusTab = null } = {}) {
     state.instant = true;
     draw();
     state.instant = false;
+    revealActiveSpace();
   };
   if (!activateTab) { reveal(); return; }
   const visible = visibleTabs(buildSidebarModel({ store: state.store, records: state.records, tabs: [...state.tabs.values()], activeSpaceId: next }));
@@ -464,7 +512,7 @@ function switchSpace(spaceId, { activateTab = true, focusTab = null } = {}) {
       state.lastActive[next] = tab.id;
     }
   }).catch(error => showToast(errorText(error))) : createTab();
-  void activation.finally(reveal);
+  return activation.finally(reveal);
 }
 
 function animateSpace(direction) {
@@ -482,17 +530,47 @@ function stepSpace(delta) {
   if (next) switchSpace(next.id);
 }
 
-async function createSpace() {
+function onSpaceWheel(event) {
+  if (event.ctrlKey || event.metaKey || state.drag || state.renaming || !$('menu').hidden
+      || event.target.closest('input, textarea')) return;
+  const gesture = state.wheel;
+  const now = performance.now();
+  if (now - gesture.at > 180) {
+    gesture.axis = null;
+    gesture.delta = 0;
+    gesture.vertical = 0;
+    gesture.switched = false;
+  }
+  gesture.at = now;
+  const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? $('sidebar').clientWidth : 1;
+  const horizontal = (event.deltaX || (event.shiftKey ? event.deltaY : 0)) * unit;
+  const vertical = (!event.deltaX && event.shiftKey ? 0 : event.deltaY) * unit;
+  if (!gesture.axis) {
+    gesture.delta += horizontal;
+    gesture.vertical += vertical;
+    if (Math.max(Math.abs(gesture.delta), Math.abs(gesture.vertical)) < 6) return;
+    gesture.axis = Math.abs(gesture.delta) > Math.abs(gesture.vertical) * 1.35 ? 'x' : 'y';
+  } else if (gesture.axis === 'x' && !gesture.switched && Math.abs(horizontal) > Math.abs(vertical)) {
+    gesture.delta += horizontal;
+  }
+  if (gesture.axis !== 'x') return;
+  event.preventDefault();
+  if (gesture.switched || Math.abs(gesture.delta) < 42) return;
+  gesture.switched = true;
+  stepSpace(Math.sign(gesture.delta));
+}
+
+async function createSpace(name, glyph) {
   if (state.store.spaces.length >= MAX_SPACES) {
     showToast(`You can have up to ${MAX_SPACES} spaces.`);
     return;
   }
   const used = new Set(state.store.spaces.map((space) => space.tone));
   const tone = TONES.find((item) => !used.has(item)) || TONES[state.store.spaces.length % TONES.length];
-  const space = await mutate((store) => addSpace(store, { tone })).catch(() => null);
+  const space = await mutate((store) => addSpace(store, { name, tone, icon: glyph })).catch(() => null);
   if (!space) return;
-  switchSpace(space.id);
-  startRename({ kind: 'space', id: space.id });
+  await switchSpace(space.id);
+  $('spaces').querySelector('[aria-selected="true"]')?.focus();
 }
 
 async function deleteSpace(spaceId) {
@@ -709,10 +787,11 @@ function folderNode() {
   const glyph = el('span', 'favicon folder-glyph', { 'aria-hidden': 'true' });
   glyph.append(icon('folder'));
   const title = el('span', 'title');
+  const preview = el('span', 'folder-preview', { 'aria-hidden': 'true' });
   const count = el('span', 'count', { 'aria-hidden': 'true' });
   const dropHint = el('span', 'folder-drop-hint', { 'aria-hidden': 'true' });
   dropHint.textContent = 'Move into folder';
-  head.append(chevron, glyph, title, count, dropHint);
+  head.append(chevron, glyph, title, preview, count, dropHint);
   const group = el('div', 'folder-children', { role: 'group' });
   folder.append(head, group);
   return folder;
@@ -730,6 +809,20 @@ function paintFolderColor(node, color) {
     if (custom) { node.dataset.custom = custom; node.style.setProperty('--folder-custom', custom); }
     else { delete node.dataset.custom; node.style.removeProperty('--folder-custom'); }
   }
+}
+
+function paintFolderPreview(head, children, open) {
+  const preview = head.querySelector('.folder-preview');
+  const count = head.querySelector('.count');
+  preview.hidden = open || !children.length;
+  count.textContent = preview.hidden ? '' : String(children.length);
+  if (preview.hidden) return;
+  const visible = children.slice(0, 3);
+  visible.forEach(({ entry, tab }, index) => {
+    if (!preview.children[index]) preview.append(el('span', 'favicon'));
+    updateFavicon(preview.children[index], tab, entry.url, displayTitle(entry, tab));
+  });
+  while (preview.children.length > visible.length) preview.children[preview.children.length - 1].remove();
 }
 
 function drawTree(container, items) {
@@ -794,9 +887,8 @@ function paintSidebar() {
   const sidebar = $('sidebar');
   sidebar.dataset.tone = /^#[0-9a-fA-F]{6}$/.test(state.appearance.theme) ? 'custom' : model.space.tone;
   sidebar.dataset.close = model.prefs.closeButton;
+  sidebar.dataset.spaceDock = state.spaceDock ? 'alternate' : 'default';
   if (sidebar.dataset.folderColors !== model.prefs.folderColors) sidebar.dataset.folderColors = model.prefs.folderColors;
-  if (state.renaming?.kind !== 'space') $('space-name').textContent = model.space.name;
-  $('space-glyph').textContent = (model.space.name[0] || '·').toUpperCase();
 
   // Favorites
   const favoriteItems = model.favorites.map((item) => {
@@ -825,21 +917,25 @@ function paintSidebar() {
       },
     };
   });
-  reconcile($('favorites'), favoriteItems);
+  const favorites = $('favorites');
+  reconcile(favorites, favoriteItems);
   syncPeekSources(model);
-  $('favorites').hidden = !favoriteItems.length && !state.drag;
-  $('favorites').classList.toggle('empty', !favoriteItems.length);
+  favorites.hidden = !favoriteItems.length && !state.drag;
+  favorites.classList.toggle('empty', !favoriteItems.length);
+  favorites.classList.toggle('many', favoriteItems.length > 4);
 
-  // Pinned tree
-  const pinnedItems = model.pinned.map((node) => {
+  const pinnedItems = [];
+  const todayItems = [];
+  for (const node of model.pinned) {
     if (node.kind === 'entry') {
       const key = `e:${node.entry.id}`;
       state.items.set(key, { type: 'entry', entry: node.entry, tab: node.tab, folder: null });
-      return entryRow(node, key);
+      pinnedItems.push(entryRow(node, key));
+      continue;
     }
     const key = `f:${node.folder.id}`;
     state.items.set(key, { type: 'folder', folder: node.folder, children: node.children });
-    return {
+    pinnedItems.push({
       key,
       kind: 'folder',
       create: folderNode,
@@ -852,7 +948,7 @@ function paintSidebar() {
         if (!folderPreview || folderPreview.id !== node.folder.id) paintFolderColor(folder, node.folder.color);
         const title = head.querySelector('.title');
         if (state.renaming?.key !== key && title.textContent !== node.folder.name) title.textContent = node.folder.name;
-        head.querySelector('.count').textContent = open || !node.children.length ? '' : String(node.children.length);
+        paintFolderPreview(head, node.children, open);
         head.classList.toggle('contains-active', !open && node.children.some((child) => child.tab?.active));
         group.hidden = !open;
         reconcile(group, node.children.map((child) => {
@@ -861,47 +957,49 @@ function paintSidebar() {
           return entryRow(child, childKey);
         }));
       },
-    };
-  });
+    });
+  }
   reconcile($('pinned'), pinnedItems);
   $('pinned').classList.toggle('empty', !pinnedItems.length);
 
-  // Today
-  const todayItems = model.today.map((tab) => {
+  for (const tab of model.today) {
     const key = `t:${tab.id}`;
     state.items.set(key, { type: 'tab', tab });
-    return {
+    todayItems.push({
       key,
       kind: 'tab',
       create: rowNode,
       update: (row) => updateRow(row, { title: displayTitle(null, tab), tab, active: tab.active, selected: tab.active, actionLabel: 'Close tab', actionIcon: 'close' }),
-    };
-  });
+    });
+  }
   reconcile($('today'), todayItems);
-  $('clear-today').hidden = !todayItems.length;
+  $('clear-today').hidden = !model.today.length;
 
   // Spaces dock
   reconcile($('spaces'), model.spaces.map((space, index) => ({
     key: `s:${space.id}`,
     kind: 'space',
     create: () => {
-      const dot = el('button', 'space-dot', { type: 'button', role: 'tab' });
+      const dot = el('button', 'space-dot', { type: 'button', role: 'tab', 'aria-haspopup': 'menu' });
       dot.append(el('span', 'dot', { 'aria-hidden': 'true' }));
-      dot.append(el('span', 'space-label', { 'aria-hidden': 'true' }));
       return dot;
     },
     update: (dot) => {
       const selected = space.id === model.space.id;
       dot.dataset.tone = space.tone;
       dot.setAttribute('aria-selected', String(selected));
-      dot.querySelector('.space-label').textContent = space.name;
+      const marker = dot.querySelector('.dot');
+      const glyph = space.icon || 'space';
+      if (marker.dataset.icon !== glyph) {
+        marker.dataset.icon = glyph;
+        marker.replaceChildren(icon(glyph));
+      }
       dot.tabIndex = selected ? 0 : -1;
       dot.setAttribute('aria-label', `${space.name}, ${space.tabCount} ${space.tabCount === 1 ? 'tab' : 'tabs'}`);
       const modifier = PLATFORM === 'windows' ? 'Ctrl+Shift+' : '⌃';
       dot.title = index < 4 ? `${space.name} (${modifier}${index + 1})` : space.name;
     },
   })));
-  $('add-space').hidden = model.spaces.length >= MAX_SPACES;
 
   syncRovingFocus();
   compactLabels();
@@ -1002,11 +1100,16 @@ function onTreeKey(event) {
   switch (event.key) {
     case 'ArrowDown':
       if (event.altKey) void reorderItem(found, 1);
-      else focusItem(items[at + 1] || $(tree.id === 'pinned' ? 'new-tab' : 'today').querySelector('[tabindex="0"]'));
+      else if (items[at + 1]) focusItem(items[at + 1]);
+      else if (tree.id === 'pinned') focusItem(treeItems($('today'))[0]);
       break;
     case 'ArrowUp':
       if (event.altKey) void reorderItem(found, -1);
-      else focusItem(items[at - 1]);
+      else {
+        const previous = items[at - 1] || (tree.id === 'today' && treeItems($('pinned')).at(-1));
+        if (previous) focusItem(previous);
+        else $('new-tab').focus();
+      }
       break;
     case 'Home': focusItem(items[0]); break;
     case 'End': focusItem(items[items.length - 1]); break;
@@ -1058,6 +1161,7 @@ function onFavoritesKey(event) {
     ArrowDown: () => go(at + Number(getComputedStyle($('favorites')).getPropertyValue('--favorite-columns'))),
     ArrowUp: () => go(at - Number(getComputedStyle($('favorites')).getPropertyValue('--favorite-columns'))),
     Home: () => go(0), End: () => go(tiles.length - 1), Delete: () => closeItem(found), Backspace: () => closeItem(found),
+    F2: () => startRenameFor(found),
     ContextMenu: () => openItemMenu(found, tiles[at].getBoundingClientRect()),
   };
   if (event.key === 'F10' && event.shiftKey) handlers.F10 = handlers.ContextMenu;
@@ -1076,23 +1180,31 @@ function startRenameFor(found) {
 function startRename(target) {
   // Flush a pending render so a just-created folder or space has its row.
   if (frame) { cancelAnimationFrame(frame); frame = 0; draw(); }
+  if (target.kind === 'space') {
+    const space = state.store.spaces.find((item) => item.id === target.id);
+    const anchor = spaceButton(target.id);
+    if (space && anchor) openSpaceEditor(anchor, space);
+    return;
+  }
   {
-    let label;
-    let initial;
-    if (target.kind === 'space') {
-      label = $('space-name');
-      initial = state.store.spaces.find((space) => space.id === target.id)?.name || '';
-    } else {
-      const host = document.querySelector(`[data-key="${CSS.escape(target.key)}"]`);
-      label = host?.querySelector('.title');
-      const found = findNode(state.store, target.id);
-      initial = target.kind === 'folder' ? found?.node.name : displayTitle(found?.node, state.items.get(target.key)?.tab);
-    }
-    if (!label) return;
+    const host = document.querySelector(`[data-key="${CSS.escape(target.key)}"]`);
+    if (!host) return;
+    const label = host.querySelector('.title');
+    const found = findNode(state.store, target.id);
+    const initial = target.kind === 'folder' ? found?.node.name
+      : target.key.startsWith('v:') && found ? favoriteTitle(found.node)
+      : displayTitle(found?.node, state.items.get(target.key)?.tab);
+    const popup = !label || globalThis.innerWidth <= 150;
     state.renaming = target;
-    const input = el('input', 'rename', { type: 'text', 'aria-label': target.kind === 'space' ? 'Space name' : 'Name', maxlength: target.kind === 'space' ? '60' : '120', spellcheck: 'false' });
+    const input = el('input', 'rename', { type: 'text', 'aria-label': 'Name', maxlength: '120', spellcheck: 'false' });
     input.value = initial || '';
-    label.replaceChildren(input);
+    if (popup) {
+      const bounds = $('sidebar').getBoundingClientRect();
+      const top = host.getBoundingClientRect().top - bounds.top;
+      input.classList.add('rename-popup');
+      input.style.top = `${Math.max(4, Math.min(top, bounds.height - 34))}px`;
+      $('sidebar').append(input);
+    } else label.replaceChildren(input);
     input.focus();
     input.select();
     let done = false;
@@ -1101,20 +1213,20 @@ function startRename(target) {
       done = true;
       const value = input.value.trim();
       state.renaming = null;
-      label.textContent = initial || '';
+      if (popup) input.remove();
+      else label.textContent = initial || '';
       if (save && value !== initial) {
         await mutate((store) => {
-          if (target.kind === 'space') renameSpace(store, target.id, value);
-          else renameNode(store, target.id, value);
+          renameNode(store, target.id, value);
         }).catch(() => {});
       }
       render();
-      const back = target.kind === 'space' ? $('space-menu') : document.querySelector(`[data-key="${CSS.escape(target.key)}"]`);
+      const back = document.querySelector(`[data-key="${CSS.escape(target.key)}"]`);
       back?.focus();
     };
     input.addEventListener('keydown', (event) => {
       event.stopPropagation();
-      if (event.key === 'Enter') { event.preventDefault(); void finish(true); }
+      if (event.key === 'Enter' && !event.isComposing) { event.preventDefault(); void finish(true); }
       if (event.key === 'Escape') { event.preventDefault(); void finish(false); }
     });
     input.addEventListener('blur', () => void finish(true));
@@ -1126,30 +1238,122 @@ function startRename(target) {
 
 let menuReturn = null;
 let menuRect = null;
+let submenu = null;
+let submenuTimer = 0;
 // A custom folder color shown before it is applied. Closing the menu reverts it.
 let folderPreview = null;
 
+function menuButton(entry) {
+  const hasCheck = Object.hasOwn(entry, 'checked');
+  const button = el('button', `menu-item${entry.danger ? ' danger' : ''}`, { role: hasCheck ? 'menuitemradio' : 'menuitem', type: 'button', tabindex: '-1' });
+  if (entry.tone) {
+    const swatch = el('span', 'menu-swatch', { 'aria-hidden': 'true' });
+    swatch.dataset.tone = entry.tone;
+    button.append(swatch);
+  } else if (entry.icon) button.append(icon(entry.icon, 'menu-icon'));
+  const label = el('span', 'menu-label');
+  label.textContent = entry.label;
+  button.append(label);
+  if (hasCheck) button.setAttribute('aria-checked', String(entry.checked));
+  if (entry.disabled) button.setAttribute('aria-disabled', 'true');
+  if (entry.children) {
+    button.setAttribute('aria-haspopup', 'menu');
+    button.setAttribute('aria-expanded', 'false');
+    button.append(icon('chevron', 'menu-chevron'));
+    button.addEventListener('pointerenter', () => openSubmenu(button, entry.children));
+    button.addEventListener('focus', () => openSubmenu(button, entry.children));
+    button.addEventListener('click', () => openSubmenu(button, entry.children, true));
+    button.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      event.stopPropagation();
+      openSubmenu(button, entry.children, true);
+    });
+  } else {
+    button.addEventListener('pointerenter', () => {
+      if (button.closest('.submenu')) return;
+      clearTimeout(submenuTimer);
+      submenuTimer = setTimeout(closeSubmenu, 180);
+    });
+    button.addEventListener('focus', () => {
+      if (!button.closest('.submenu')) closeSubmenu();
+    });
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      if (entry.disabled) return;
+      closeMenu();
+      entry.run();
+    });
+  }
+  return button;
+}
+
+function openSubmenu(trigger, entries, focus = false) {
+  clearTimeout(submenuTimer);
+  if (submenu?.trigger !== trigger) {
+    closeSubmenu();
+    const panel = el('div', 'menu submenu', { id: 'workspace-submenu', role: 'menu', 'aria-label': trigger.textContent });
+    panel.append(...entries.map(menuButton));
+    panel.addEventListener('pointerenter', () => clearTimeout(submenuTimer));
+    panel.addEventListener('keydown', onMenuKey);
+    $('sidebar').append(panel);
+    submenu = { trigger, panel };
+    trigger.setAttribute('aria-expanded', 'true');
+    trigger.setAttribute('aria-controls', panel.id);
+    placeSubmenu();
+  }
+  if (focus) submenu.panel.firstElementChild?.focus();
+}
+
+function placeSubmenu() {
+  if (!submenu) return;
+  const { panel, trigger } = submenu;
+  const bounds = $('sidebar').getBoundingClientRect();
+  const anchor = trigger.getBoundingClientRect();
+  panel.style.maxHeight = `${Math.max(0, bounds.height - 8)}px`;
+  const width = panel.offsetWidth;
+  const roomAfter = bounds.right - anchor.right - 4;
+  const roomBefore = anchor.left - bounds.left - 4;
+  const right = roomAfter >= width || (roomBefore < width && roomAfter >= roomBefore);
+  const overlaps = (right ? roomAfter : roomBefore) < width;
+  const edge = right ? anchor.right : anchor.left - width;
+  const left = Math.min(Math.max(4, edge - bounds.left), bounds.width - width - 4);
+  let y = anchor.top - 4;
+  if (overlaps) {
+    const above = anchor.top - bounds.top - 6;
+    const below = bounds.bottom - anchor.bottom - 6;
+    const placeBelow = below >= panel.offsetHeight || below >= above;
+    panel.style.maxHeight = `${Math.max(0, placeBelow ? below : above)}px`;
+    y = placeBelow ? anchor.bottom + 2 : anchor.top - panel.offsetHeight - 2;
+  }
+  const height = panel.offsetHeight;
+  panel.style.left = `${Math.max(4, left)}px`;
+  panel.style.top = `${Math.max(4, Math.min(y - bounds.top, bounds.height - height - 4))}px`;
+}
+
+function closeSubmenu() {
+  clearTimeout(submenuTimer);
+  if (!submenu) return;
+  submenu.trigger.setAttribute('aria-expanded', 'false');
+  submenu.trigger.removeAttribute('aria-controls');
+  submenu.panel.remove();
+  submenu = null;
+}
+
 function openMenu(entries, rect, returnFocus) {
   const menu = $('menu');
+  closeMenu(false);
+  menu.removeAttribute('aria-label');
+  menu.setAttribute('role', 'menu');
   menuReturn = returnFocus || document.activeElement;
+  if (menuReturn?.getAttribute('aria-haspopup') === 'menu') menuReturn.setAttribute('aria-expanded', 'true');
   const nodes = [];
   menu.replaceChildren();
   for (const entry of entries) {
     if (entry === '-') { menu.append(el('div', 'menu-separator', { role: 'separator' })); continue; }
     if (entry.node) { menu.append(entry.node); continue; }
     if (entry.heading) { menu.append(el('div', 'menu-heading', { role: 'presentation' })); menu.lastChild.textContent = entry.heading; continue; }
-    const button = el('button', `menu-item${entry.danger ? ' danger' : ''}`, { role: 'menuitem', type: 'button', tabindex: '-1' });
-    if (entry.tone) { const swatch = el('span', 'menu-swatch', { 'aria-hidden': 'true' }); swatch.dataset.tone = entry.tone; button.append(swatch); }
-    const label = el('span');
-    label.textContent = entry.label;
-    button.append(label);
-    if (entry.checked) { button.setAttribute('aria-checked', 'true'); button.setAttribute('role', 'menuitemradio'); }
-    if (entry.disabled) button.setAttribute('aria-disabled', 'true');
-    button.addEventListener('click', () => {
-      if (entry.disabled) return;
-      closeMenu(false);
-      entry.run();
-    });
+    const button = menuButton(entry);
     nodes.push(button);
     menu.append(button);
   }
@@ -1164,33 +1368,38 @@ function placeMenu() {
   const menu = $('menu');
   const rect = menuRect;
   const bounds = $('sidebar').getBoundingClientRect();
-  const below = bounds.bottom - rect.bottom - 12;
-  const above = rect.top - bounds.top - 12;
+  menu.style.maxHeight = `${Math.max(0, bounds.height - 8)}px`;
+  const fullHeight = menu.offsetHeight;
+  const below = bounds.bottom - rect.bottom - 8;
+  const above = rect.top - bounds.top - 8;
   const fitsBelow = menu.scrollHeight <= below;
   const openAbove = !fitsBelow && above > below;
-  menu.style.maxHeight = `${Math.max(0, openAbove ? above : below)}px`;
-  const height = menu.offsetHeight;
   const width = menu.offsetWidth;
-  const top = (openAbove ? rect.top - height - 4 : rect.bottom + 4) - bounds.top;
-  const left = Math.min(Math.max(8, rect.left + 8), bounds.width - width - 8);
-  menu.style.top = `${Math.max(8, top)}px`;
+  const top = (openAbove ? rect.top - fullHeight - 4 : rect.bottom + 4) - bounds.top;
+  const left = Math.min(Math.max(4, rect.left - bounds.left + 4), bounds.width - width - 4);
+  menu.style.top = `${Math.max(4, Math.min(top, bounds.height - fullHeight - 4))}px`;
   menu.style.left = `${Math.max(4, left)}px`;
+  placeSubmenu();
 }
 
 function closeMenu(restore = true) {
   const menu = $('menu');
   if (menu.hidden) return;
+  closeSubmenu();
   endFolderPreview();
+  if (menu.getAttribute('role') === 'dialog') state.renaming = null;
   menu.hidden = true;
   menu.replaceChildren();
+  if (menuReturn?.getAttribute('aria-haspopup') === 'menu') menuReturn.setAttribute('aria-expanded', 'false');
   if (restore && menuReturn?.isConnected) menuReturn.focus();
   menuReturn = null;
 }
 
-function spaceTargets(exclude, run) {
-  const others = state.store.spaces.filter((space) => space.id !== exclude);
-  if (!others.length) return [];
-  return ['-', { heading: 'Move to space' }, ...others.map((space) => ({ label: space.name, tone: space.tone, run: () => run(space.id) }))];
+function spaceTargets(run, tab = null) {
+  const children = state.store.spaces.filter((space) => space.id !== state.activeSpaceId)
+    .map((space) => ({ label: space.name, tone: space.tone, run: () => run(space.id) }));
+  if (tab && typeof api.windows?.create === 'function') children.push({ label: 'New window', icon: 'window', run: () => moveTabToNewWindow(tab) });
+  return children.length ? [{ label: 'Move to space', icon: 'spaces', children }] : [];
 }
 
 function copyLink(url) {
@@ -1337,37 +1546,40 @@ function openItemMenu(found, rect) {
   if (item.type === 'tab') {
     const { tab } = item;
     entries = [
-      { label: 'Pin tab', run: () => pinTab(tab) },
-      { label: 'Add to favorites', disabled: state.store.favorites.length >= 12, run: () => favoriteTab(tab) },
-      { label: 'Duplicate', run: () => api.tabs.duplicate(tab.id).catch((error) => showToast(errorText(error))) },
-      ...(isOpenableUrl(urlOf(tab)) ? [{ label: 'Copy link', run: () => copyLink(urlOf(tab)) }] : []),
-      ...spaceTargets(state.activeSpaceId, (spaceId) => moveTabToSpace(tab, spaceId)),
+      { label: 'Pin tab', icon: 'pin', run: () => pinTab(tab) },
+      { label: 'Add to favorites', icon: 'star', disabled: state.store.favorites.length >= MAX_FAVORITES, run: () => favoriteTab(tab) },
+      { label: 'Duplicate', icon: 'duplicate', run: () => api.tabs.duplicate(tab.id).catch((error) => showToast(errorText(error))) },
+      ...(isOpenableUrl(urlOf(tab)) ? [{ label: 'Copy link', icon: 'link', run: () => copyLink(urlOf(tab)) }] : []),
+      ...spaceTargets((spaceId) => moveTabToSpace(tab, spaceId), tab),
+      ...splitViewEntries(tab),
       '-',
-      { label: 'Close other tabs', disabled: state.model.today.length < 2, run: () => closeTabs(state.model.today.filter((other) => other.id !== tab.id).map((other) => other.id)) },
-      { label: 'Close tab', danger: true, run: () => closeTabs([tab.id]) },
+      { label: 'Close other tabs', icon: 'minus', disabled: state.model.today.length < 2, run: () => closeTabs(state.model.today.filter((other) => other.id !== tab.id).map((other) => other.id)) },
+      { label: 'Close tab', icon: 'close', danger: true, run: () => closeTabs([tab.id]) },
     ];
   } else if (item.type === 'entry') {
     const { entry, tab } = item;
     const folders = state.model.space.pinned.filter((node) => node.kind === 'folder' && node.id !== item.folder?.id);
     entries = [
-      { label: 'Rename', run: () => startRenameFor(found) },
+      { label: 'Rename', icon: 'edit', run: () => startRenameFor(found) },
       ...(entry.customTitle ? [{ label: 'Use page title', run: () => mutate((store) => renameNode(store, entry.id, '')).catch(() => {}) }] : []),
       ...(tab && urlOf(tab) !== entry.url && isOpenableUrl(urlOf(tab)) ? [{ label: 'Pin this page instead', run: () => mutate((store) => { const node = findNode(store, entry.id)?.node; if (node) { node.url = urlOf(tab); node.title = tab.title || node.title; } }).catch(() => {}) }] : []),
-      { label: 'Add to favorites', disabled: state.store.favorites.length >= 12, run: () => mutate((store) => moveNode(store, entry.id, { favorites: true })).catch(() => {}) },
+      { label: 'Add to favorites', icon: 'star', disabled: state.store.favorites.length >= MAX_FAVORITES, run: () => mutate((store) => moveNode(store, entry.id, { favorites: true })).catch(() => {}) },
       ...(item.folder ? [{ label: `Remove from ${item.folder.name}`, run: () => mutate((store) => moveNode(store, entry.id, { spaceId: state.activeSpaceId })).catch(() => {}) }] : []),
       ...folders.map((folder) => ({ label: `Move to ${folder.name}`, run: () => mutate((store) => moveNode(store, entry.id, { spaceId: state.activeSpaceId, folderId: folder.id })).catch(() => {}) })),
-      { label: 'Copy link', run: () => copyLink(entry.url) },
-      ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, entry.id, { spaceId })).catch(() => {})),
-      { label: 'Unpin', run: () => unpinEntry(entry, tab) },
-      ...(tab ? ['-', { label: 'Close tab', danger: true, run: () => closeTabs([tab.id]) }] : []),
+      { label: 'Copy link', icon: 'link', run: () => copyLink(entry.url) },
+      ...spaceTargets((spaceId) => mutate((store) => moveNode(store, entry.id, { spaceId })).catch(() => {}), tab),
+      ...splitViewEntries(tab),
+      { label: 'Unpin', icon: 'pin', run: () => unpinEntry(entry, tab) },
+      ...(tab ? ['-', { label: 'Close tab', icon: 'close', danger: true, run: () => closeTabs([tab.id]) }] : []),
     ];
   } else if (item.type === 'favorite') {
     const { entry, tab } = item;
     entries = [
-      { label: 'Rename', run: () => startRenameFor(found) },
-      { label: 'Copy link', run: () => copyLink(entry.url) },
-      ...(tab ? ['-', { label: 'Close tab', run: () => closeTabs([tab.id]) }] : ['-']),
-      { label: 'Remove from favorites', danger: true, run: () => unpinEntry(entry, tab) },
+      { label: 'Rename', icon: 'edit', run: () => startRenameFor(found) },
+      { label: 'Copy link', icon: 'link', run: () => copyLink(entry.url) },
+      ...splitViewEntries(tab),
+      ...(tab ? ['-', { label: 'Close tab', icon: 'close', run: () => closeTabs([tab.id]) }] : ['-']),
+      { label: 'Remove from favorites', icon: 'star', danger: true, run: () => unpinEntry(entry, tab) },
     ];
   } else if (item.type === 'folder') {
     const { folder } = item;
@@ -1375,7 +1587,8 @@ function openItemMenu(found, rect) {
       { label: folder.open ? 'Collapse' : 'Expand', run: () => mutate((store) => setFolderOpen(store, folder.id, !folder.open)).catch(() => {}) },
       { label: 'Rename', run: () => startRenameFor(found) },
       '-', ...folderColorEntries(folder),
-      ...spaceTargets(state.activeSpaceId, (spaceId) => mutate((store) => moveNode(store, folder.id, { spaceId })).catch(() => {})),
+      '-',
+      ...spaceTargets((spaceId) => mutate((store) => moveNode(store, folder.id, { spaceId })).catch(() => {})),
       '-',
       { label: 'Delete folder', danger: true, run: () => mutate((store) => removeNode(store, folder.id)).then(() => showToast(`Deleted ${folder.name}. Its tabs stay pinned.`)).catch(() => {}) },
     ];
@@ -1383,26 +1596,90 @@ function openItemMenu(found, rect) {
   openMenu(entries, rect, found.node);
 }
 
-function openSpaceMenu() {
-  const space = state.model.space;
+function splitViewEntries(tab) {
+  if (!tab || typeof api.breezerPrivate?.toggleSplitView !== 'function') return [];
+  return [{
+    label: Number.isInteger(tab.splitViewId) && tab.splitViewId >= 0 ? 'Exit Split View' : 'Split View',
+    icon: 'split',
+    run: () => callBridge('toggleSplitView', tab.id).catch((error) => showToast(errorText(error))),
+  }];
+}
+
+function spaceButton(id) {
+  return [...$('spaces').children].find((button) => button.dataset.key === `s:${id}` && !button.classList.contains('leaving'));
+}
+
+function revealActiveSpace() {
+  spaceButton(state.activeSpaceId)?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+}
+
+function openSpaceEditor(anchor, space = null) {
+  closeMenu(false);
+  state.renaming = { kind: 'space', id: space?.id };
+  const menu = $('menu');
+  const title = space ? 'Edit space' : 'New space';
+  menu.setAttribute('role', 'dialog');
+  menu.setAttribute('aria-label', title);
+  menuReturn = anchor;
+  menuRect = anchor.getBoundingClientRect();
+  const form = el('form', 'space-editor');
+  const input = el('input', 'space-editor-name', {
+    'aria-label': 'Space name', type: 'text', maxlength: '60', spellcheck: 'false',
+  });
+  input.value = space?.name || `Space ${state.store.spaces.length + 1}`;
+  const palette = el('div', 'space-icon-palette', { role: 'radiogroup', 'aria-label': 'Space icon' });
+  let glyph = space?.icon || 'space';
+  for (const option of SPACE_ICONS) {
+    const label = el('label', 'space-icon-option', { title: SPACE_ICON_NAMES[option] });
+    const radio = el('input', '', { type: 'radio', name: 'space-icon', 'aria-label': SPACE_ICON_NAMES[option] });
+    radio.checked = glyph === option;
+    radio.addEventListener('change', () => { if (radio.checked) glyph = option; });
+    label.append(radio, icon(option));
+    palette.append(label);
+  }
+  const submit = el('button', 'menu-apply', { type: 'submit' });
+  submit.textContent = space ? 'Save' : 'Create';
+  form.append(input, palette, submit);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = input.value.trim();
+    if (!name) { input.focus(); return; }
+    closeMenu();
+    if (!space) { void createSpace(name, glyph); return; }
+    const rename = name !== space.name;
+    const changeIcon = glyph !== (space.icon || 'space');
+    if (rename || changeIcon) void mutate((store) => {
+      if (rename) renameSpace(store, space.id, name);
+      if (changeIcon) setSpaceIcon(store, space.id, glyph);
+    }).catch(() => {});
+  });
+  menu.replaceChildren(form);
+  menu.hidden = false;
+  placeMenu();
+  input.focus();
+  input.select();
+}
+
+function openSpaceMenu(anchor = spaceButton(state.activeSpaceId), spaceId = state.activeSpaceId) {
+  const space = state.store.spaces.find((item) => item.id === spaceId);
+  if (!space || !anchor) return;
   openMenu([
-    { label: 'Rename space', run: () => startRename({ kind: 'space', id: space.id }) },
-    { label: 'New folder', run: async () => {
+    { label: 'Edit space', icon: 'edit', run: () => openSpaceEditor(anchor, space) },
+    { label: 'New space', icon: 'plus', disabled: state.store.spaces.length >= MAX_SPACES, run: () => openSpaceEditor(anchor) },
+    ...(typeof api.windows?.create === 'function' ? [{ label: 'Open space in new window', icon: 'window', run: () => openSpaceInNewWindow(space.id) }] : []),
+    ...(space.id === state.activeSpaceId ? [{ label: 'New folder', icon: 'folder', run: async () => {
       const folder = await mutate((store) => addFolder(store, space.id)).catch(() => null);
       if (folder) startRename({ kind: 'folder', id: folder.id, key: `f:${folder.id}` });
-    } },
+    } }] : []),
     '-',
-    { heading: 'Color' },
-    ...TONES.map((tone) => ({ label: TONE_NAMES[tone], tone, checked: tone === space.tone, run: () => mutate((store) => setSpaceTone(store, space.id, tone)).catch(() => {}) })),
-    '-',
-    { label: 'Settings', run: openSettings },
+    { label: 'Color', children: TONES.map((tone) => ({ label: TONE_NAMES[tone], tone, checked: tone === space.tone, run: () => mutate((store) => setSpaceTone(store, space.id, tone)).catch(() => {}) })) },
     { label: 'Delete space', danger: true, disabled: state.store.spaces.length <= 1, run: () => deleteSpace(space.id) },
-  ], $('space-menu').getBoundingClientRect(), $('space-menu'));
+  ], anchor.getBoundingClientRect(), anchor);
 }
 
 // Each swatch row counts as one stop: the focused, checked or first swatch.
-function menuStops() {
-  return [...$('menu').children].flatMap((child) => {
+function menuStops(menu) {
+  return [...menu.children].flatMap((child) => {
     if (child.hidden || child.classList.contains('menu-custom')) return [];
     if (child.classList.contains('menu-swatches')) {
       const chips = [...child.children];
@@ -1413,6 +1690,13 @@ function menuStops() {
 }
 
 function onMenuKey(event) {
+  if (event.currentTarget.getAttribute('role') === 'dialog') {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeMenu();
+    }
+    return;
+  }
   const editor = event.target.closest?.('.menu-custom');
   if (editor) {
     // Text editing keeps its own keys. Tab cycles the editor; Escape returns to the swatches.
@@ -1433,13 +1717,18 @@ function onMenuKey(event) {
     event.preventDefault();
     return;
   }
-  const items = menuStops();
+  const menu = event.currentTarget;
+  const items = menuStops(menu);
   const at = items.indexOf(document.activeElement);
   const go = (index) => items[(index + items.length) % items.length]?.focus();
   if (event.key === 'ArrowDown') go(at + 1);
   else if (event.key === 'ArrowUp') go(at - 1);
   else if (event.key === 'Home') go(0);
   else if (event.key === 'End') go(items.length - 1);
+  else if (menu === submenu?.panel && (event.key === 'ArrowLeft' || event.key === 'Escape')) {
+    submenu.trigger.focus();
+    closeSubmenu();
+  } else if (event.key === 'ArrowLeft' && submenu) closeSubmenu();
   else if (event.key === 'Escape' || event.key === 'Tab') closeMenu();
   else return;
   event.preventDefault();
@@ -1485,43 +1774,50 @@ function dropTargetAt(x, y) {
   }
   const tree = hit.closest('#pinned, #today, .divider-row, .new-tab, #empty-hit');
   if (!tree) return null;
-  if (tree.id === 'empty-hit' || tree.id === 'today' || tree.classList.contains('new-tab')) {
-    if (tree.classList.contains('new-tab')) return { zone: 'today', before: state.model.today[0] || null, line: tree, after: true };
-    const row = hit.closest('[data-key^="t:"]');
-    if (!row) return { zone: 'today', before: null, line: $('today').lastElementChild || $('new-tab'), after: true };
-    const rect = row.getBoundingClientRect();
-    const tabs = state.model.today;
-    const at = tabs.findIndex((tab) => `t:${tab.id}` === row.dataset.key);
-    const after = y > rect.top + rect.height / 2;
-    return { zone: 'today', before: tabs[at + (after ? 1 : 0)] || null, line: row, after };
+  const pinned = state.model.space.pinned;
+  const movingFolder = state.drag?.item.type === 'folder';
+  if (tree.classList.contains('divider-row')) {
+    return { zone: 'pinned', index: 0, line: $('pinned').firstElementChild || tree, after: !$('pinned').firstElementChild };
   }
-  if (tree.classList.contains('divider-row')) return { zone: 'pinned', folderId: null, index: state.model.space.pinned.length, line: $('pinned').lastElementChild || $('pinned'), after: true };
   const row = hit.closest('.folder-row, [data-key^="e:"]');
-  if (!row && hit.closest('.folder-children')) {
-    const folder = hit.closest('.folder');
+  const folder = hit.closest('.folder');
+  if (!row && folder && !movingFolder) {
     return { zone: 'pinned', folderId: folder.dataset.key.slice(2), into: folder };
   }
-  if (!row) return { zone: 'pinned', folderId: null, index: state.model.space.pinned.length, line: $('pinned').lastElementChild || $('pinned'), after: true };
-  const rect = row.getBoundingClientRect();
-  const ratio = (y - rect.top) / rect.height;
-  if (row.classList.contains('folder-row')) {
-    const folderNode = row.closest('.folder');
-    const folderId = folderNode.dataset.key.slice(2);
-    const index = state.model.pinned.findIndex((node) => node.kind === 'folder' && node.folder.id === folderId);
+  if (folder && (movingFolder || row?.classList.contains('folder-row'))) {
+    const folderId = folder.dataset.key.slice(2);
+    const head = folder.querySelector('.folder-row');
+    const rect = (movingFolder ? folder : head).getBoundingClientRect();
     // Folder moves reorder at the root. Tabs and saved pages get almost the
     // entire folder header; only the outer four pixels mean before/after.
-    const movingFolder = state.drag?.item.type === 'folder';
     if (!movingFolder && y >= rect.top + 4 && y <= rect.bottom - 4) {
-      return { zone: 'pinned', folderId, into: folderNode };
+      return { zone: 'pinned', folderId, into: folder };
     }
-    const after = ratio > 0.5;
-    return { zone: 'pinned', folderId: null, index: index + (after ? 1 : 0), line: row, after };
+    const index = pinned.findIndex((node) => node.id === folderId);
+    const after = y > rect.top + rect.height / 2;
+    return { zone: 'pinned', index: index + (after ? 1 : 0), line: movingFolder ? folder : head, after };
   }
-  const item = state.items.get(row.dataset.key);
-  const parent = item.folder;
-  const list = parent ? state.model.pinned.find((node) => node.kind === 'folder' && node.folder.id === parent.id).children.map((child) => child.entry.id) : state.model.pinned.map((node) => (node.kind === 'folder' ? node.folder.id : node.entry.id));
-  const after = ratio > 0.5;
-  return { zone: 'pinned', folderId: parent?.id ?? null, index: list.indexOf(item.entry.id) + (after ? 1 : 0), line: row, after };
+  if (row && !row.classList.contains('folder-row')) {
+    const { entry, folder: parent } = state.items.get(row.dataset.key);
+    const rect = row.getBoundingClientRect();
+    const after = y > rect.top + rect.height / 2;
+    return { zone: 'pinned', folderId: parent?.id, index: (parent?.children || pinned).findIndex((node) => node.id === entry.id) + (after ? 1 : 0), line: row, after };
+  }
+  if (tree.id === 'pinned' || movingFolder) {
+    const last = $('pinned').lastElementChild;
+    return { zone: 'pinned', index: pinned.length, line: last || $('new-tab'), after: Boolean(last) };
+  }
+  const tabs = state.model.today;
+  const first = $('today').querySelector('[data-key^="t:"]');
+  const tab = hit.closest('[data-key^="t:"]');
+  if (tab) {
+    const rect = tab.getBoundingClientRect();
+    const at = tabs.findIndex((item) => `t:${item.id}` === tab.dataset.key);
+    const after = y > rect.top + rect.height / 2;
+    return { zone: 'today', before: tabs[at + (after ? 1 : 0)] || null, line: tab, after };
+  }
+  const atTop = tree.classList.contains('new-tab') || Boolean(folder);
+  return { zone: 'today', before: atTop ? tabs[0] : null, line: atTop ? first || $('new-tab') : $('today').lastElementChild || $('new-tab'), after: !atTop || !first };
 }
 
 function showDropTarget(target) {
@@ -1556,7 +1852,9 @@ async function performDrop(source, target) {
     }
     if (target.zone === 'pinned') {
       if (item.type === 'tab') await pinTab(item.tab, { folderId: target.folderId, index: target.index });
-      else await mutate((store) => moveNode(store, entryId, { spaceId: state.activeSpaceId, folderId: target.folderId, index: target.index }));
+      else await mutate((store) => moveNode(store, entryId, {
+        spaceId: state.activeSpaceId, folderId: target.folderId, index: target.index,
+      }));
       if (target.folderId) await mutate((store) => setFolderOpen(store, target.folderId, true));
       return;
     }
@@ -1835,12 +2133,14 @@ async function initSidebar(route) {
     showToast('Couldn’t find this window.');
     return;
   }
-  const [{ appearance }, tabs, saved] = await Promise.all([
+  const [{ appearance }, tabs, saved, experiments] = await Promise.all([
     loadAppearance(),
     api.tabs.query({ windowId: state.windowId }),
     api.storage.session.get(windowStateKey(state.windowId)).catch(() => ({})),
+    api.storage.local.get(EXPERIMENTS_KEY).catch(() => ({})),
   ]);
   state.appearance = appearance;
+  state.spaceDock = experiments[EXPERIMENTS_KEY]?.spaceDock === true;
   applyAppearance(appearance);
   const windowState = saved[windowStateKey(state.windowId)] || {};
   state.lastActive = windowState.lastActive && typeof windowState.lastActive === 'object' ? windowState.lastActive : {};
@@ -1856,9 +2156,29 @@ async function initSidebar(route) {
   bindSidebar();
   // Re-read after subscribing: tabs can open while initial reconciliation awaits.
   await refreshTabs();
+  await readSpaceOpenRequest();
   draw();
   $('sidebar').hidden = false;
+  revealActiveSpace();
   if (orphanPinned.length) void adoptPinned(orphanPinned);
+}
+
+async function readSpaceOpenRequest() {
+  const key = windowOpenSpaceKey(state.windowId);
+  const stored = await api.storage.session.get(key).catch(() => ({}));
+  return receiveSpaceInNewWindow(stored[key]);
+}
+
+let receivingSpace = null;
+function receiveSpaceInNewWindow(request) {
+  if (!request || receivingSpace) return receivingSpace;
+  const key = windowOpenSpaceKey(state.windowId);
+  const space = state.store.spaces.find((item) => item.id === request.spaceId);
+  if (space && state.tabs.has(request.tabId)) setRecord(request.tabId, { s: space.id, e: '' });
+  const activation = space && switchSpace(space.id, { focusTab: request.tabId });
+  receivingSpace = Promise.resolve(activation).then(saveWindowState).then(() => flushRecords()).then(() => api.storage.session.remove(key))
+    .catch((error) => showToast(`Couldn’t finish opening the space. ${errorText(error)}`));
+  return receivingSpace;
 }
 
 function bindSidebar() {
@@ -1895,12 +2215,18 @@ function bindSidebar() {
       state.store = normalizeStore(changes[STORE_KEY].newValue);
       render();
     }
+    if (changes[EXPERIMENTS_KEY]) {
+      state.spaceDock = changes[EXPERIMENTS_KEY].newValue?.spaceDock === true;
+      render();
+    }
     if (changes[APPEARANCE_REV_KEY]) void refreshAppearance();
   });
   // Space commands are forwarded by the background worker.
   api.runtime.onMessage.addListener((message) => {
     if (message?.type === 'breezer.theme.refresh') { void refreshAppearance(); return; }
-    if (message?.type !== 'breezer.workspace.space' || message.windowId !== state.windowId) return;
+    if (message?.windowId !== state.windowId) return;
+    if (message.type === OPEN_SPACE_MESSAGE) { void readSpaceOpenRequest(); return; }
+    if (message.type !== 'breezer.workspace.space') return;
     const space = state.store.spaces[message.index];
     if (space) switchSpace(space.id);
   });
@@ -1910,7 +2236,7 @@ function bindSidebar() {
   const sidebar = $('sidebar');
   sidebar.addEventListener('click', (event) => {
     if (state.suppressClick) return;
-    if (!$('menu').hidden && !event.target.closest('#menu')) { closeMenu(false); return; }
+    if (!$('menu').hidden && !event.target.closest('#menu, .submenu')) { closeMenu(false); return; }
     const action = event.target.closest('.row-action');
     const sound = event.target.closest('.row-sound');
     const found = itemFromNode(event.target);
@@ -1925,6 +2251,7 @@ function bindSidebar() {
       return;
     }
     if (!found || !found.item || event.target.closest('input')) return;
+    if (event.detail === 2 && found.item.type !== 'tab' && event.target.closest('.row, .tile')) return;
     if (found.node.closest('#pinned, #today')) focusItem(found.node);
     if (found.item.type === 'favorite') state.focus.favorites = found.key;
     activateItem(found);
@@ -1936,14 +2263,19 @@ function bindSidebar() {
   });
   sidebar.addEventListener('dblclick', (event) => {
     const found = itemFromNode(event.target);
-    if (found?.item && found.item.type !== 'tab' && event.target.closest('.title')) startRenameFor(found);
+    if (found?.item && found.item.type !== 'tab' && !event.target.closest('button:not(.tile), input')
+        && event.target.closest('.row, .tile')) startRenameFor(found);
   });
   sidebar.addEventListener('contextmenu', (event) => {
     const found = itemFromNode(event.target);
-    if (event.target.closest('input')) return;
+    if (event.target.closest('input, #menu, .submenu')) return;
     event.preventDefault();
     if (found?.item) openItemMenu(found, found.node.getBoundingClientRect());
-    else if (event.target.closest('.space-head, #empty-hit, .space-pane')) openSpaceMenu();
+    else {
+      const dot = event.target.closest('.space-dot');
+      if (dot) openSpaceMenu(dot, dot.dataset.key.slice(2));
+      else if (event.target.closest('#space-dock, .space-pane')) openSpaceMenu();
+    }
   });
   sidebar.addEventListener('pointerdown', onPointerDown);
   sidebar.addEventListener('pointermove', onPointerMove);
@@ -1956,14 +2288,7 @@ function bindSidebar() {
   });
   sidebar.addEventListener('pointercancel', () => endDrag(false));
   sidebar.addEventListener('lostpointercapture', () => endDrag(false));
-  sidebar.addEventListener('wheel', (event) => {
-    // Two-finger horizontal swipe switches spaces.
-    if (Math.abs(event.deltaX) < 30 || Math.abs(event.deltaX) < Math.abs(event.deltaY) * 2) return;
-    const now = Date.now();
-    if (now - state.lastWheel < 600) return;
-    state.lastWheel = now;
-    stepSpace(event.deltaX > 0 ? 1 : -1);
-  }, { passive: true });
+  sidebar.addEventListener('wheel', onSpaceWheel, { passive: false });
 
   for (const name of TREES) $(name).addEventListener('keydown', onTreeKey);
   $('favorites').addEventListener('keydown', onFavoritesKey);
@@ -1971,27 +2296,46 @@ function bindSidebar() {
   if (PLATFORM === 'windows') $('new-tab').title = 'New tab (Ctrl+T)';
   $('new-tab').addEventListener('click', () => void newTab());
   $('new-tab').addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowDown') { event.preventDefault(); focusItem(treeItems($('today'))[0]); }
-    if (event.key === 'ArrowUp') { event.preventDefault(); const items = treeItems($('pinned')); focusItem(items[items.length - 1]); }
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusItem(treeItems($('pinned'))[0] || treeItems($('today'))[0]);
+    }
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      const clear = $('clear-today');
+      (clear.offsetWidth ? clear : $('favorites').querySelector('[tabindex="0"]'))?.focus();
+    }
   });
   $('empty-hit').addEventListener('dblclick', () => void newTab());
   $('clear-today').addEventListener('click', () => void clearToday());
-  $('space-menu').addEventListener('click', (event) => { event.stopPropagation(); if ($('menu').hidden) openSpaceMenu(); else closeMenu(); });
-  $('add-space').addEventListener('click', () => void createSpace());
-  $('open-updates').addEventListener('click', () => void api.tabs.create({ url: api.runtime.getURL('whats-new.html') }));
+  $('open-updates').addEventListener('click', () => void createTab({ url: api.runtime.getURL('whats-new.html') }));
   $('open-settings').addEventListener('click', () => void openSettings());
   $('spaces').addEventListener('click', (event) => {
     const dot = event.target.closest('.space-dot');
     if (dot) switchSpace(dot.dataset.key.slice(2));
   });
   $('spaces').addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+    const { key } = event;
+    if (key === 'ContextMenu' || (key === 'F10' && event.shiftKey) || key === 'F2') {
+      const dot = event.target.closest('.space-dot');
+      if (!dot) return;
       event.preventDefault();
-      stepSpace(event.key === 'ArrowRight' ? 1 : -1);
-      requestAnimationFrame(() => $('spaces').querySelector('[aria-selected="true"]')?.focus());
+      const id = dot.dataset.key.slice(2);
+      if (key === 'F2') startRename({ kind: 'space', id });
+      else openSpaceMenu(dot, id);
+      return;
+    }
+    if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'Home' || key === 'End') {
+      event.preventDefault();
+      const spaces = state.store.spaces;
+      const at = spaces.findIndex((space) => space.id === state.activeSpaceId);
+      const index = key === 'Home' ? 0 : key === 'End' ? spaces.length - 1 : at + (key === 'ArrowRight' ? 1 : -1);
+      const next = spaces[index];
+      if (!next) return;
+      void Promise.resolve(switchSpace(next.id)).then(() => $('spaces').querySelector('[aria-selected="true"]')?.focus());
     }
   });
-  if (typeof api.breezerPrivate?.setAppearance === 'function') {
+  if (typeof api.breezerPrivate?.setAppearance === 'function' && typeof api.breezerPrivate?.focusLocationBar !== 'function') {
     $('collapse').hidden = false;
     $('collapse').addEventListener('click', () => {
       const alwaysShowSidebar = !state.appearance.alwaysShowSidebar;
@@ -2010,7 +2354,11 @@ function bindSidebar() {
     }
   });
   document.addEventListener('pointerdown', (event) => {
-    if (!$('menu').hidden && !event.target.closest('#menu')) closeMenu(false);
+    if (!$('menu').hidden && !event.target.closest('#menu, .submenu') && !menuReturn?.contains(event.target)) closeMenu(false);
+  });
+  addEventListener('resize', () => {
+    revealActiveSpace();
+    if (!$('menu').hidden) placeMenu();
   });
 }
 

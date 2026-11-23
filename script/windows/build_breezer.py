@@ -232,7 +232,7 @@ def require_x64_pe(path):
             raise ValueError(f"Expected an x64 Windows executable: {path}")
 
 
-def build_browser(build_dir, core, platform, expected, jobs, gen_only):
+def build_browser(build_dir, core, platform, expected, jobs, gen_only, *, use_ninja=False):
     source = build_dir / "src"
     require_marker(source / SOURCE_MARKER, expected)
     output = source / "out/Default"
@@ -245,17 +245,26 @@ def build_browser(build_dir, core, platform, expected, jobs, gen_only):
 
     flags = (core / "flags.gn").read_text(encoding="utf-8").rstrip()
     windows_flags = (platform / "flags.windows.gn").read_text(encoding="utf-8").rstrip()
+    if use_ninja:
+        windows_flags = re.sub(r"(?m)^[ \t]*use_siso[ \t]*=.*\n?", "", windows_flags).rstrip()
+        windows_flags += "\nuse_siso=false"
     (output / "args.gn").write_text(
         f"{flags}\n{windows_flags}\nis_official_build=true\n", encoding="utf-8",
     )
+    if not gen_only:
+        stage_breezer_ai.stage(source / stage_breezer_ai.GN_PAYLOAD_DIRECTORY,
+                               build_dir / "cache/breezer-ai-runtime")
     run(source / "buildtools/win/gn.exe", "gen", "out/Default", "--fail-on-unused-args",
         f"--script-executable={sys.executable}", cwd=source, env=env)
     if gen_only:
         return
-    stage_breezer_ai.stage(output, build_dir / "cache/breezer-ai-runtime")
-    env["SISO_PATH"] = str(source / "third_party/siso/cipd/siso.exe")
+    if use_ninja:
+        runner = (source / "third_party/ninja/ninja.exe",)
+    else:
+        env["SISO_PATH"] = str(source / "third_party/siso/cipd/siso.exe")
+        runner = (sys.executable, source / "third_party/depot_tools/autoninja.py")
     ninja_args = ("-j", str(jobs)) if jobs else ()
-    run(sys.executable, source / "third_party/depot_tools/autoninja.py", *ninja_args,
+    run(*runner, *ninja_args,
         "-C", "out/Default", "chrome", "chromedriver", "setup", "mini_installer", cwd=source, env=env)
     for name in ("chrome.exe", "chrome.dll", "setup.exe", "mini_installer.exe"):
         require_x64_pe(output / name)
@@ -330,6 +339,7 @@ def main():
     build = commands.add_parser("build", parents=[common], help="Apply Breezer changes and compile")
     build.add_argument("-j", "--jobs", type=int, help="Limit simultaneous build jobs")
     build.add_argument("--gen-only", action="store_true", help="Generate the build graph and exit")
+    build.add_argument("--ninja", action="store_true", help="Use Chromium's bundled Ninja instead of Siso")
     package = commands.add_parser("package", parents=[common], help="Package a completed Windows build")
     package.add_argument("--output-dir", type=Path, help="New output directory (default: BUILD_DIR/artifacts)")
     args = parser.parse_args()
@@ -355,7 +365,8 @@ def main():
             elif args.command == "prepare":
                 prepare_sources(build_dir, core, platform, expected)
             elif args.command == "build":
-                build_browser(build_dir, core, platform, expected, args.jobs, args.gen_only)
+                build_browser(build_dir, core, platform, expected, args.jobs, args.gen_only,
+                              use_ninja=args.ninja)
     except (ImportError, KeyError, OSError, ValueError, struct.error, subprocess.CalledProcessError) as error:
         parser.exit(1, f"Windows build {args.command} failed: {error}\n")
 

@@ -41,6 +41,7 @@ installShortcutActions=()=>()=>{}; requestView=viewReply;
 const originalFilter=ShortcutPreferences.prototype.filter;
 ShortcutPreferences.prototype.filter=function(...args){observed.filters++;return originalFilter.apply(this,args)};
 renderToday=()=>{}; renderPlaceholders=()=>{}; renderSites=(_api,_root,sites)=>{observed.shown=sites.length}; renderOrganato=()=>{};
+startNewTabExperiments=()=>({ready:Promise.resolve(),setSites(){},dispose(){}});
 globalThis.run=()=>startNewTab({api,root});`;
   vm.runInContext(script, context);
   const loaded = context.run();
@@ -83,6 +84,7 @@ for (const dashboardEnabled of [false, true]) test(`disposed new-tab ignores lat
   vm.runInContext(preferences.replace(/^export /gm, '') + '\n' + source.replace(/^import .*;\n/gm, '').replace(/^export /gm, '') + `
 installShortcutActions=()=>()=>{}; requestView=viewReply;
 renderToday=recordPaint; renderPlaceholders=()=>{}; renderSites=recordPaint; renderOrganato=recordPaint;
+startNewTabExperiments=()=>({ready:Promise.resolve(),setSites(){},dispose(){}});
 globalThis.run=()=>startNewTab({api,root});`, context);
   const loaded = context.run(); await ready;
   const before = paints;
@@ -133,6 +135,7 @@ test('refresh stays hidden during loading, setup and off with only local storage
     vm.runInContext(preferences.replace(/^export /gm, '') + '\n' + source.replace(/^import .*;\n/gm, '').replace(/^export /gm, '') + `
 installShortcutActions=()=>()=>{}; requestView=viewReply;
 renderToday=()=>{}; renderPlaceholders=()=>{}; renderSites=()=>{}; renderOrganato=()=>{};
+startNewTabExperiments=()=>({ready:Promise.resolve(),setSites(){},dispose(){}});
 globalThis.run=()=>startNewTab({api,root});`, context);
     const loaded = context.run(); await ready;
     assert.equal(node('refresh').hidden, true, 'loading hides Refresh');

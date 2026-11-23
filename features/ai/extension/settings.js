@@ -11,8 +11,11 @@ import { mountUsageSettings } from './usage-settings.js';
 import { mountContextSettings } from './context-settings.js';
 import { mountOnboarding } from './settings-onboarding.js';
 import { mountSettingsNav } from './settings-nav.js';
-import { HAS_APP_UPDATER, HAS_NATIVE_HELPER } from './platform.js';
+import { HAS_APP_UPDATER, HAS_NATIVE_HELPER, NATIVE_HOST } from './platform.js';
+import { MODEL_KEY, connectedModel, modelProviders, preferredModel, providerLabel, selectModel } from './model-catalog.js';
 import { DASHBOARD_ENABLED_KEY, readDashboardPreference } from './dashboard-preference.js';
+import { THEME_LOOKS } from './panel-theme.js';
+import { ARTWORK_KEY, LOOK_UNDO_KEY, applyThemeColor, applyThemeLook, cancelThemeLook, readThemeLook } from './browser-theme.js';
 
 // Settings owned by feature modules. Each entry names an empty container in workspace.html
 // and loads a function called as mount({ container, api }). It may be async and may return
@@ -23,7 +26,48 @@ import { DASHBOARD_ENABLED_KEY, readDashboardPreference } from './dashboard-pref
 export const FEATURE_MOUNTS = Object.freeze([
   { container: 'sync-settings', load: () => import('./sync-settings.js').then((m) => m.mountSyncSettings) },
   { container: 'translation-settings', load: () => import('./translation-settings.js').then((m) => m.mountTranslationSettings) },
+  { container: 'experiments-settings', load: () => import('./experiments.js').then((m) => m.mountExperimentSettings) },
 ]);
+
+const EXPERIMENTS_ICON = ['M6.5 2.5h3M7 2.5v4L3.6 12a1 1 0 0 0 .9 1.5h7a1 1 0 0 0 .9-1.5L9 6.5v-4', 'M5 10h6'];
+
+// Adds the Experiments category when workspace.html does not already carry it.
+// Runs before features mount and before navigation reads the pages.
+export function ensureExperimentsPage(doc = document) {
+  if (doc.getElementById('experiments-settings')) return;
+  const browserPage = doc.querySelector('.settings-page[data-page="browser"]');
+  const browserLink = doc.querySelector('#settings-categories a.nav-item[data-category="browser"]');
+  // Minimal test DOMs without node insertion keep the page as authored.
+  if (typeof browserPage?.after !== 'function' || !browserLink) return;
+  const page = doc.createElement('section');
+  page.className = 'settings-page';
+  page.dataset.page = 'experiments';
+  page.setAttribute('aria-label', 'Experiments');
+  page.setAttribute('data-optional', '');
+  page.hidden = true;
+  const container = doc.createElement('div');
+  container.id = 'experiments-settings';
+  page.append(container);
+  browserPage.after(page);
+  const item = doc.createElement('li');
+  const link = doc.createElement('a');
+  link.className = 'nav-item';
+  link.href = '#/settings/experiments';
+  link.dataset.category = 'experiments';
+  const icon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttribute('viewBox', '0 0 16 16');
+  icon.setAttribute('aria-hidden', 'true');
+  for (const d of EXPERIMENTS_ICON) {
+    const path = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    icon.append(path);
+  }
+  const label = doc.createElement('span');
+  label.textContent = 'Experiments';
+  link.append(icon, label);
+  item.append(link);
+  browserLink.closest('li').after(item);
+}
 
 const $ = (id) => document.getElementById(id);
 const FIELD_LABELS = {
@@ -120,9 +164,122 @@ async function mountFeatures(api) {
   }));
 }
 
+function mountModelSettings(api) {
+  const section = $('model-settings');
+  const page = section.closest('.settings-page');
+  const select = $('default-ai-model');
+  const refresh = $('refresh-ai-models');
+  const status = $('model-settings-status');
+  const error = $('model-settings-error');
+  const changes = localStorageChanges(api);
+  const key = value => value ? `${value.provider}:${value.model}` : '';
+  let saved, providers = [], choices = new Map(), loading = false, saving = false, unavailable = false, disposed = false;
+
+  function render() {
+    const automatic = connectedModel(providers, selectModel(providers, null));
+    const option = (value, label) => {
+      const item = el('option');
+      item.value = value;
+      item.textContent = label;
+      return item;
+    };
+    choices = new Map();
+    const groups = [option('', 'Automatic')];
+    for (const provider of providers) {
+      if (!provider.available || !provider.authenticated || !provider.models.length) continue;
+      const group = el('optgroup');
+      group.label = providerLabel(provider.id);
+      for (const model of provider.models) {
+        const value = { provider: provider.id, model: model.id };
+        choices.set(key(value), value);
+        group.append(option(key(value), model.label || model.id));
+      }
+      groups.push(group);
+    }
+    const missing = saved && !choices.has(key(saved));
+    if (missing) {
+      const item = option(key(saved), 'Saved model unavailable');
+      item.disabled = true;
+      groups.push(item);
+    }
+    select.replaceChildren(...groups);
+    select.value = key(saved);
+    select.disabled = saved === undefined || loading || saving || (!choices.size && !saved);
+    refresh.disabled = loading;
+    const label = automatic?.model.label || automatic?.model.id;
+    status.textContent = loading ? 'Checking connected accounts…'
+      : unavailable ? 'Couldn’t load models. Try refreshing.'
+      : !choices.size ? 'Connect a provider in the AI sidebar, then refresh.'
+      : missing ? `Using ${label} until your saved model is available.`
+      : !saved ? `Automatic uses ${label}.` : '';
+  }
+
+  async function discover() {
+    if (loading || disposed) return;
+    loading = true;
+    render();
+    try {
+      const response = await api.runtime.sendNativeMessage(NATIVE_HOST, { type: 'init' });
+      if (response?.type !== 'status' || !Array.isArray(response.providers)) throw new Error('No model catalog');
+      providers = modelProviders(response.providers);
+      unavailable = false;
+    } catch {
+      unavailable = true;
+    } finally {
+      loading = false;
+      if (!disposed) render();
+    }
+  }
+
+  const changed = values => {
+    if (!(MODEL_KEY in values)) return;
+    saved = preferredModel(values[MODEL_KEY].newValue);
+    render();
+  };
+  changes.addListener(changed);
+  void api.storage.local.get(MODEL_KEY).then(values => {
+    if (disposed || saved !== undefined) return;
+    saved = preferredModel(values[MODEL_KEY]);
+    render();
+  }).catch(() => { if (!disposed) error.textContent = 'Couldn’t read your saved model choice.'; });
+  select.addEventListener('change', async () => {
+    const value = choices.get(select.value) ?? null;
+    const previous = saved;
+    saving = true;
+    select.disabled = true;
+    error.textContent = '';
+    try {
+      await api.storage.local.set({ [MODEL_KEY]: value });
+      if (saved === previous) saved = value;
+    } catch {
+      if (!disposed) error.textContent = 'Couldn’t save your model choice. Try again.';
+    } finally {
+      saving = false;
+      if (!disposed) render();
+    }
+  });
+  refresh.addEventListener('click', () => void discover());
+  const observer = new MutationObserver(loadWhenShown);
+  function loadWhenShown() {
+    if (page.hidden) return;
+    observer.disconnect();
+    void discover();
+  }
+  observer.observe(page, { attributes: true, attributeFilter: ['hidden'] });
+  section.hidden = false;
+  render();
+  loadWhenShown();
+  window.addEventListener('pagehide', () => {
+    disposed = true;
+    observer.disconnect();
+    changes.removeListener(changed);
+  }, { once: true });
+}
+
 export async function mountSettings({ api, workspace, callBridge, loadAppearance, applyAppearance, darkQuery }) {
   $('settings').hidden = false;
   document.title = 'Settings';
+  ensureExperimentsPage();
   const featuresReady = mountFeatures(api);
   void mountUsageSettings({ api, container: $('usage-settings') });
   groupSection($('usage-settings'));
@@ -153,6 +310,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     groupSection($('context-settings'));
     window.addEventListener('pagehide', () => contextSettings.dispose(), { once: true });
   }
+  if (HAS_NATIVE_HELPER && typeof api.runtime?.sendNativeMessage === 'function') mountModelSettings(api);
   nav = mountSettingsNav({ api });
   void featuresReady.then(() => nav.refreshAvailability());
   let { appearance, available, error } = await loadAppearance();
@@ -173,12 +331,43 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     swatch.append(preview, name);
     swatches.append(swatch);
   }
+  // Breezer looks share the picker: one choice across tones and looks.
+  const looksNote = el('p', 'looks-note', { id: 'theme-looks-note' });
+  looksNote.textContent = 'Looks also restyle New Tab, the assistant and Command-K.';
+  swatches.append(looksNote);
+  const lookSwatches = Object.entries(THEME_LOOKS).map(([id, look]) => {
+    const swatch = el('button', 'swatch swatch-look', { role: 'radio', type: 'button', 'aria-describedby': `look-${id}-about` });
+    swatch.dataset.value = `look:${id}`;
+    const preview = el('span', 'preview look-preview', { 'aria-hidden': 'true' });
+    preview.dataset.look = id;
+    const side = el('span', 'p-side');
+    side.append(el('span', 'p-row'), el('span', 'p-row active'), el('span', 'p-row'));
+    const compose = el('span', 'p-compose');
+    compose.append(el('i'));
+    preview.append(side, compose);
+    const name = el('span', 'swatch-name');
+    name.textContent = look.name;
+    const about = el('small', 'swatch-about', { id: `look-${id}-about` });
+    about.textContent = look.description;
+    swatch.append(preview, name, about);
+    swatches.append(swatch);
+    return swatch;
+  });
+  const lookStatus = el('div', 'look-status', { role: 'status', 'aria-live': 'polite' });
+  const lookStatusText = el('span');
+  const lookCancel = el('button', 'button look-cancel', { type: 'button' });
+  lookCancel.textContent = 'Cancel';
+  lookStatus.append(lookStatusText, lookCancel);
+  lookStatus.hidden = true;
+  if (typeof swatches.after === 'function') swatches.after(lookStatus); else swatches.parentNode?.append(lookStatus);
+  let lookState = { look: null, canCancel: false };
+  const cancelLook = Symbol('cancel-look');
 
   const groups = [...document.querySelectorAll('.segmented[data-field]')];
   const width = $('sidebar-width');
   const switches = [...document.querySelectorAll('.switch[data-field]')];
   const ranges = [...document.querySelectorAll('input[type="range"][data-field]')];
-  const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, $('custom-theme-color'), $('custom-theme-apply'), ...ranges, ...switches];
+  const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, $('custom-theme-color'), $('custom-theme-apply'), ...ranges, ...switches].filter((control) => !control.matches?.('.looks-note'));
   const rowOf = (selector) => document.querySelector(selector).closest('.setting-row');
   // Rows whose setting is kept but has no visible effect with the current layout or frame.
   const mutedRows = [
@@ -215,8 +404,24 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     $('layout-preview-summary').textContent = `${tabs}. ${preview.dataset.topBar === 'autoHide' ? 'Top bar on hover.' : 'Top bar visible.'}`;
     for (const group of groups) setRadioValue(group, appearance[group.dataset.field]);
     setRadioValue(swatches, appearance.theme);
-    const customSelected = /^#[0-9a-fA-F]{6}$/.test(appearance.theme);
-    $('custom-theme-note').textContent = customSelected ? 'Custom color overrides the sidebar’s space color while selected.' : 'Use one color across the browser and sidebar.';
+    // A look counts only while the browser still shows its seed.
+    const look = lookState.look && THEME_LOOKS[lookState.look]?.seed === String(appearance.theme).toLowerCase() ? lookState.look : null;
+    for (const swatch of lookSwatches) {
+      const checked = swatch.dataset.value === `look:${look}`;
+      swatch.setAttribute('aria-checked', String(checked));
+      swatch.tabIndex = checked ? 0 : -1;
+    }
+    // Keep the group reachable by Tab when a custom color matches no swatch.
+    const radios = [...swatches.querySelectorAll('[role="radio"]')];
+    if (!radios.some((radio) => radio.tabIndex === 0)) radios[0].tabIndex = 0;
+    swatches.setAttribute('aria-busy', String(saving('theme')));
+    lookStatus.hidden = !look;
+    if (look) lookStatusText.textContent = `${THEME_LOOKS[look].name} is on.${lookState.canCancel ? ' Your previous theme is saved.' : ''}`;
+    lookCancel.hidden = !lookState.canCancel;
+    lookCancel.disabled = saving('theme') || !available;
+    lookCancel.setAttribute('aria-label', look ? `Cancel ${THEME_LOOKS[look].name} and return to your previous theme` : 'Cancel');
+    const customSelected = !look && /^#[0-9a-fA-F]{6}$/.test(appearance.theme);
+    $('custom-theme-note').textContent = look ? `Replaces ${THEME_LOOKS[look].name} with one color.` : customSelected ? 'Custom color overrides the sidebar’s space color while selected.' : 'Use one color across the browser and sidebar.';
     $('custom-theme-apply').setAttribute('aria-pressed', String(customSelected));
     if (/^#[0-9a-fA-F]{6}$/.test(appearance.theme) && document.activeElement !== $('custom-theme-color')) $('custom-theme-color').value = appearance.theme;
     for (const range of ranges) {
@@ -245,7 +450,11 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   function request(field, value) {
     if (!available) return;
     queued.delete(field);
-    if (value !== settled(field)) queued.set(field, value);
+    if (field === 'theme' || value !== settled(field)) queued.set(field, value);
+    if (field === 'theme') {
+      swatches.setAttribute('aria-busy', 'true');
+      lookCancel.disabled = true;
+    }
     void drain();
   }
 
@@ -254,7 +463,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     while (queued.size) {
       const [field, value] = queued.entries().next().value;
       queued.delete(field);
-      if (value === appearance[field]) continue;
+      if (field !== 'theme' && value === appearance[field]) continue;
       writing = { field, value };
       await write(field, value);
       writing = null;
@@ -265,25 +474,45 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   // Applies one field through the bridge. The UI only shows the value the browser reports back.
   async function write(field, value) {
     const errorId = FIELD_ERRORS[field];
+    const look = field === 'theme' && typeof value === 'string' && value.startsWith('look:') ? value.slice(5) : null;
     showError(errorId, '');
     try {
-      const patch = validateAppearancePatch({ [field]: value });
-      let result = await callBridge('setAppearance', patch);
-      if (!result || typeof result !== 'object') result = await callBridge('getAppearance');
-      appearance = normalizeAppearance(result);
-      if (appearance[field] !== value) {
+      if (field === 'theme') {
+        if (value === cancelLook || look) {
+          const result = await (look ? applyThemeLook(look, { api }) : cancelThemeLook({ api }));
+          if (result.appearance) appearance = result.appearance;
+        } else {
+          appearance = await applyThemeColor(value, { api });
+        }
+        await refreshLook();
+      } else {
+        const patch = validateAppearancePatch({ [field]: value });
+        let result = await callBridge('setAppearance', patch);
+        if (!result || typeof result !== 'object') result = await callBridge('getAppearance');
+        appearance = normalizeAppearance(result);
+        await api.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
+      }
+      if (value !== cancelLook && appearance[field] !== (look ? THEME_LOOKS[look].seed : value)) {
         showError(errorId, `The browser kept ${FIELD_LABELS[field]} at ${VALUE_LABELS[appearance[field]] ?? appearance[field]}.`);
       }
-      await api.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
     } catch (failure) {
-      showError(errorId, `Couldn’t change the ${FIELD_LABELS[field]}. ${errorText(failure)}`);
+      const message = value === cancelLook ? 'Couldn’t return to your previous theme.' : `Couldn’t change the ${FIELD_LABELS[field]}.`;
+      showError(errorId, `${message} ${errorText(failure)}`);
     } finally {
       renderAppearance();
     }
   }
 
   for (const group of groups) wireRadioGroup(group, (value) => request(group.dataset.field, value));
+  const refreshLook = async () => {
+    try { lookState = await readThemeLook({ api, theme: available ? appearance.theme : null }); } catch { /* keeps the last state */ }
+    renderAppearance();
+  };
   wireRadioGroup(swatches, (value) => request('theme', value));
+  lookCancel.addEventListener('click', () => request('theme', cancelLook));
+  localStorageChanges(api)?.addListener((changes) => {
+    if (changes?.[ARTWORK_KEY] || changes?.[LOOK_UNDO_KEY]) void refreshLook();
+  });
   $('custom-theme-apply').addEventListener('click', () => request('theme', $('custom-theme-color').value));
   for (const control of switches) {
     control.addEventListener('click', () => {
@@ -305,7 +534,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   const refreshAppearance = async () => {
     if (writing || queued.size) return;
     ({ appearance, available, error } = await loadAppearance());
-    renderAppearance();
+    await refreshLook();
   };
   darkQuery.addEventListener('change', () => applyAppearance(appearance));
   addEventListener('focus', () => void refreshAppearance());
@@ -466,19 +695,22 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   });
 
   renderAppearance();
+  void refreshLook();
   renderSpaces();
 }
 
-export function mountUpdates(api) {
-  const container = $('update-settings');
+export function mountUpdates(api, { sidebar = false } = {}) {
+  const prefix = sidebar ? 'sidebar-update' : 'update';
+  const container = $(sidebar ? prefix : 'update-settings');
   if (!container) return;
-  const status = $('update-status'), check = $('update-check'), install = $('update-install');
+  const status = $(prefix + '-status'), check = $(prefix + '-check'), install = $(prefix + '-install');
+  const showCheck = () => { check.hidden = sidebar && container.hidden; };
   let sequence = 0, pending = null, timer, poll, port = null, closed = false, available = false, installing = false;
   const disconnected = () => {
     const needsCheck = pending !== null || available || installing;
     clearTimeout(timer); clearInterval(poll); poll = null; pending = null;
     available = false; installing = false;
-    check.disabled = false; check.hidden = false; install.disabled = true; install.hidden = true;
+    check.disabled = false; showCheck(); install.disabled = true; install.hidden = true;
     if (needsCheck) { status.textContent = 'The update check disconnected. Choose Check for updates to retry.'; status.dataset.state = 'error'; }
   };
   const connect = () => {
@@ -489,12 +721,18 @@ export function mountUpdates(api) {
       if (closed || port !== connection || message.id !== pending) return;
       clearTimeout(timer); pending = null;
       check.disabled = false;
-      if (!message.ok) { check.hidden = false; status.textContent = String(message.error).replace(/Update helper unavailable\.?/i, 'The update check is unavailable.').replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
+      if (!message.ok) { showCheck(); status.textContent = String(message.error).replace(/Update helper unavailable\.?/i, 'The update check is unavailable.').replace(/Try again\.?$/i, 'Choose Check for updates to retry.'); status.dataset.state = 'error'; return; }
       const value = message.value;
       status.dataset.state = value.phase === 'failed' ? 'error' : '';
-      status.textContent = value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
+      status.textContent = sidebar && value.available
+        ? 'Update ready'
+        : value.notice || (value.available ? `Breezer ${value.version} is available.` : status.textContent);
+      if (sidebar && value.available === true) container.hidden = false;
       if (value.available !== undefined) { available = value.available === true; install.hidden = !available; }
-      check.hidden = available && value.phase !== 'failed';
+      check.hidden = sidebar
+        ? container.hidden || available || Boolean(value.installing) || !['failed', 'installed'].includes(value.phase)
+        : available && value.phase !== 'failed';
+      if (sidebar && value.available === false && !installing && !value.installing) container.hidden = true;
       install.disabled = !available;
       if (['downloading', 'verifying', 'restarting'].includes(value.phase)) check.disabled = true;
       if (value.installing) {
@@ -516,7 +754,7 @@ export function mountUpdates(api) {
     status.dataset.state = '';
     check.disabled = true; install.disabled = true;
     if (type === 'update-check') status.textContent = 'Checking GitHub releases…';
-    timer = setTimeout(() => { pending = null; check.disabled = false; check.hidden = false; install.hidden = true; status.textContent = 'The update check did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
+    timer = setTimeout(() => { pending = null; check.disabled = false; showCheck(); install.hidden = true; status.textContent = 'The update check did not respond. Choose Check for updates to retry.'; status.dataset.state = 'error'; }, 65_000);
     try { connect().postMessage({ type, id: pending }); }
     catch {
       const connection = port; port = null;

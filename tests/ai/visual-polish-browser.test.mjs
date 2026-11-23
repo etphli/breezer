@@ -200,13 +200,14 @@ test('favourite tiles stay even, centred and usable across sidebar widths and th
   try {
     const cases = [
       { name: '240-light', width: 240 },
-      { name: '300-light', width: 300 },
+      { name: '260-light', width: 260, columns: 4 },
+      { name: '300-light', width: 300, columns: 4 },
       { name: '300-dark-tide-one', width: 300, favorites: 1, appearance: { theme: 'tide', colorMode: 'dark' } },
       { name: '240-dark-rose-six', width: 240, favorites: 6, appearance: { theme: 'rose', colorMode: 'dark' } },
-      { name: '300-custom', width: 300, appearance: { theme: '#d0543c' } },
-      { name: '300-custom-dark', width: 300, appearance: { theme: '#d0543c', colorMode: 'dark' } },
+      { name: '300-custom', width: 300, columns: 4, appearance: { theme: '#d0543c' } },
+      { name: '300-custom-dark', width: 300, columns: 4, appearance: { theme: '#d0543c', colorMode: 'dark' } },
       { name: 'compact-rail', width: 120, appearance: { sidebarMode: 'compact' } },
-      { name: '360-large-font', width: 360, appearance: { sidebarFontSize: 20 } },
+      { name: '360-large-font', width: 360, columns: 4, appearance: { sidebarFontSize: 20 } },
     ];
     for (const item of cases) {
       await withSidebar(browser, base, item, async (page) => {
@@ -215,7 +216,7 @@ test('favourite tiles stay even, centred and usable across sidebar widths and th
         if (item.name === 'compact-rail') {
           assert.equal(new Set(geometry.tiles.map((t) => Math.round(t.cx))).size, 1, 'compact rail stacks tiles in one column');
         } else {
-          const columns = item.width <= 320 ? 3 : 4;
+          const columns = item.columns ?? 3;
           assert.equal(new Set(geometry.tiles.slice(0, columns).map((t) => Math.round(t.top))).size, 1, 'favorites use wider columns on narrow sidebars');
           if (geometry.tiles.length > columns) assert.ok(geometry.tiles[columns].top > geometry.tiles[0].top);
         }

@@ -69,8 +69,19 @@ test('latest GPT models are selected by family and numeric version, with unknown
   ];
 
   assert.deepEqual(latestModels(models), [
-    models[2], models[3], models[4], models[5], models[6],
+    models[2], models[3], models[5], models[6],
   ]);
+});
+
+test('the picker offers the newest Sol, Terra and Luna the account reports, without Astra', () => {
+  const account = [
+    { id: 'gpt-6.2-sol' }, { id: 'gpt-6.2-astra' }, { id: 'gpt-6.1-terra' }, { id: 'gpt-6.1-sol' },
+    { id: 'gpt-6-astra' }, { id: 'gpt-6-luna' },
+  ];
+  assert.deepEqual(latestModels(account).map(model => model.id), ['gpt-6.2-sol', 'gpt-6.1-terra', 'gpt-6-luna']);
+  // Only what the account reports is shown; nothing is added.
+  assert.deepEqual(latestModels([{ id: 'gpt-6.1-sol' }, { id: 'gpt-6-astra' }]).map(model => model.id), ['gpt-6.1-sol']);
+  assert.deepEqual(latestModels([{ id: 'gpt-6-astra' }, { id: 'gpt-6.2-astra' }]), []);
 });
 
 test('latest Claude release is selected per family and later dated aliases win ties', () => {

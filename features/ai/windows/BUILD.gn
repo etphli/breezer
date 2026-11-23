@@ -1,3 +1,5 @@
+import("installer_files.gni")
+
 assert(is_win)
 
 executable("breezer_ai_host") {
@@ -6,4 +8,23 @@ executable("breezer_ai_host") {
     "host_identity.h",
     "host_launcher.cc",
   ]
+}
+
+_payload_targets = []
+foreach(directory, [ "breezer_ai", "breezer_ai/host", "breezer_ai/runtime" ]) {
+  _name = "stage_" + get_path_info(directory, "file")
+  copy(_name) {
+    sources = []
+    foreach(file, breezer_ai_staged_files) {
+      if (get_path_info(file, "dir") == directory) {
+        sources += [ "payload/$file" ]
+      }
+    }
+    outputs = [ "$root_out_dir/$directory/{{source_file_part}}" ]
+  }
+  _payload_targets += [ ":$_name" ]
+}
+
+group("breezer_ai_payload") {
+  public_deps = _payload_targets
 }

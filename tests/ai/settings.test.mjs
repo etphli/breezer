@@ -62,6 +62,10 @@ async function openSettings({ appearance, available = true } = {}) {
   const api = {
     storage,
     tabs: { query: async () => [{ index: 0, windowId: 1 }], create: async (props) => { opened.push(props); return props; } },
+    breezerPrivate: {
+      getAppearance: () => bridge.call('getAppearance'),
+      setAppearance: patch => bridge.call('setAppearance', patch),
+    },
   };
   const locks = { tail: Promise.resolve(), request(_name, fn) { const run = this.tail.then(fn); this.tail = run.catch(() => {}); return run; } };
   const workspace = new WorkspaceStore({ storage, locks, makeToken: () => 'session-test' });

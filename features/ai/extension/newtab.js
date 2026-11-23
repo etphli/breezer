@@ -11,6 +11,7 @@ import { startPanelTheme } from './panel-theme.js';
 // Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
 import { startThemeArtwork } from './browser-theme.js';
 import { HAS_NATIVE_HELPER } from './platform.js';
+import { PERSONALITIES, glassMode, handoffKey, readExperiments, recentChats, watchExperiments, CONVERSATION_PREFIX } from './experiments.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -494,9 +495,308 @@ function renderToday(root, now) {
   root.getElementById('today').textContent = longDate.format(now);
 }
 
+// ------------------------------------------------------------------ experiments
+// Settings > Experiments can swap the shortcut grid for one Search / Ask box and
+// give the page glass surfaces. Nothing below runs its feature code until the
+// stored record says that experiment is on.
+
+// The last record this page saw, kept in page storage so a reopened tab can
+// lay itself out before chrome.storage answers. chrome.storage stays the truth.
+export const EXPERIMENT_MIRROR_KEY = 'breezer.newtab.experiments';
+const MODE_KEY = 'breezer.newtab.mode';
+export const HANDOFF_WAIT_MS = 5000;
+
+const HOST = /^(?:localhost|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}|\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\])(?::\d{1,5})?$/i;
+
+// An address the box can open directly, or null for a search or a question.
+// Only one http(s) token counts, so "what is example.com" stays a search.
+export function toAddress(input) {
+  const value = typeof input === 'string' ? input.trim() : '';
+  if (!value || /\s/.test(value) || value.length > 2048) return null;
+  if (/^https?:\/\//i.test(value)) return safeUrl(value);
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value) && !/^[^/]+:\d+(?:[/?#]|$)/.test(value)) return null;
+  const host = value.split(/[/?#]/, 1)[0];
+  if (!HOST.test(host)) return null;
+  const local = /^(?:localhost|\d{1,3}(?:\.\d{1,3}){3}|\[)/i.test(host);
+  return safeUrl(`${local ? 'http' : 'https'}://${value}`);
+}
+
+const storageGet = (key) => { try { return globalThis.localStorage?.getItem(key) ?? null; } catch { return null; } };
+const storageSet = (key, value) => { try { globalThis.localStorage?.setItem(key, value); } catch { /* per-viewer convenience only */ } };
+
+function applyExperimentLayout(root, { composer, glass, personality }) {
+  const html = root.documentElement;
+  if (composer) html.dataset.composer = 'on'; else delete html.dataset.composer;
+  if (personality && personality !== 'off' && Object.hasOwn(PERSONALITIES, personality)) html.dataset.personality = personality;
+  else delete html.dataset.personality;
+  html.dataset.glass = glass;
+  root.getElementById('composer').hidden = !composer;
+}
+
+export function startNewTabExperiments({ api = globalThis.chrome, root = document, win = globalThis } = {}) {
+  const box = root.getElementById('composer-form');
+  const input = root.getElementById('composer-input');
+  const modes = root.getElementById('composer-modes');
+  const send = root.getElementById('composer-send');
+  const status = root.getElementById('composer-status');
+  const style = root.getElementById('composer-style');
+  const sitesList = root.getElementById('composer-sites');
+  const chatsSection = root.getElementById('recent-chats');
+  const chatsList = root.getElementById('recent-chats-list');
+  const canAsk = HAS_NATIVE_HELPER && typeof api?.sidePanel?.open === 'function';
+  const query = (text) => win.matchMedia?.(text) ?? { matches: false, addEventListener() {}, removeEventListener() {} };
+  const fullscreenQuery = query('(display-mode: fullscreen)');
+  const transparencyQuery = query('(prefers-reduced-transparency: reduce)');
+  const forcedQuery = query('(forced-colors: active)');
+  let experiments = null, sites = [], windowId = null, tabId = null, mode = 'search', started = false, disposed = false;
+  let windowFullscreen = false, chatsRequest = 0, waiting = null;
+  const cleanups = [];
+
+  let mirror = {};
+  try { mirror = JSON.parse(storageGet(EXPERIMENT_MIRROR_KEY) || '{}') || {}; } catch { mirror = {}; }
+  const layout = () => {
+    const on = experiments ?? { newTabComposer: mirror.composer === true, glass: mirror.glass === true, personality: mirror.personality };
+    applyExperimentLayout(root, {
+      composer: on.newTabComposer,
+      personality: on.personality,
+      glass: glassMode({ enabled: on.glass, fullscreen: fullscreenQuery.matches || windowFullscreen, reducedTransparency: transparencyQuery.matches || forcedQuery.matches }),
+    });
+  };
+  layout();
+
+  const say = (text, state = '') => { status.textContent = text; status.dataset.state = state; };
+
+  const placeThumb = () => {
+    const checked = modes.querySelector('[aria-checked="true"]');
+    if (!checked) return;
+    modes.style.setProperty('--thumb-x', `${checked.offsetLeft - 3}px`);
+    modes.style.setProperty('--thumb-w', `${checked.offsetWidth}px`);
+  };
+  const setMode = (next, { remember = true } = {}) => {
+    mode = next === 'ask' && canAsk ? 'ask' : 'search';
+    box.dataset.mode = mode;
+    for (const button of modes.querySelectorAll('[role="radio"]')) {
+      const checked = button.dataset.mode === mode;
+      button.setAttribute('aria-checked', String(checked));
+      button.tabIndex = checked ? 0 : -1;
+    }
+    const placeholder = mode === 'ask' ? 'Ask Breezer AI anything' : 'Search the web or type an address';
+    input.placeholder = placeholder;
+    input.setAttribute('aria-label', placeholder);
+    send.setAttribute('aria-label', mode === 'ask' ? 'Ask Breezer AI' : 'Search');
+    renderStyle();
+    placeThumb();
+    if (remember) storageSet(MODE_KEY, mode);
+  };
+  const renderStyle = () => {
+    const preset = experiments?.personality && experiments.personality !== 'off' ? PERSONALITIES[experiments.personality] : null;
+    style.hidden = !(preset && mode === 'ask');
+    if (preset) {
+      style.textContent = `${preset.label} replies`;
+      style.title = `${preset.description} Change it in Settings.`;
+    }
+  };
+  const grow = () => {
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+  };
+
+  const renderSites = () => {
+    const show = experiments?.newTabComposer && experiments.newTabShortcuts && sites.length;
+    sitesList.hidden = !show;
+    if (!show) { sitesList.replaceChildren(); return; }
+    sitesList.replaceChildren(...sites.map((site) => {
+      const item = el('li');
+      const link = el('a', 'composer-site', { href: site.url, title: site.title, 'aria-label': site.title });
+      const letter = [...site.title.replace(/[^\p{L}\p{N}]/gu, '')][0]?.toUpperCase() || '?';
+      link.textContent = letter;
+      const src = faviconUrl(api, site.url);
+      if (src) {
+        const img = el('img', '', { alt: '', width: '22', height: '22' });
+        img.addEventListener('load', () => { link.replaceChildren(img); }, { once: true });
+        img.src = src;
+      }
+      item.append(link);
+      return item;
+    }));
+  };
+
+  const openPanel = (targetWindowId) => {
+    // sidePanel.open must run inside the click or key press, before any await.
+    return api.sidePanel.open({ windowId: targetWindowId });
+  };
+
+  const renderChats = async () => {
+    const want = experiments?.newTabComposer && experiments.newTabRecentChats && canAsk;
+    const request = ++chatsRequest;
+    if (!want) { chatsSection.hidden = true; chatsList.replaceChildren(); return; }
+    let chats = [];
+    try { chats = await recentChats(api, windowId); } catch { chats = []; }
+    if (disposed || request !== chatsRequest) return;
+    chatsSection.hidden = !chats.length;
+    const focusedWindow = chatsList.contains(root.activeElement) ? root.activeElement.dataset.windowId : null;
+    chatsList.replaceChildren(...chats.map((chat) => {
+      const item = el('li');
+      const button = el('button', 'recent-chat', { type: 'button', 'data-window-id': String(chat.windowId) });
+      const title = el('span', 'recent-chat-title');
+      title.textContent = chat.title;
+      const preview = el('span', 'recent-chat-preview');
+      preview.textContent = chat.preview || `${chat.messages} messages`;
+      const where = el('span', 'recent-chat-where');
+      where.textContent = chat.current ? 'This window' : 'Other window';
+      button.append(title, preview, where);
+      button.addEventListener('click', () => {
+        let opening;
+        try { opening = openPanel(chat.windowId); } catch (error) { opening = Promise.reject(error); }
+        const focusing = chat.current ? null : api.windows?.update?.(chat.windowId, { focused: true });
+        Promise.all([opening, focusing]).catch(() => say('Breezer AI couldn’t open that conversation. Open Breezer AI in that window.', 'error'));
+      });
+      item.append(button);
+      return item;
+    }));
+    if (focusedWindow) {
+      [...chatsList.querySelectorAll('button')].find(button => button.dataset.windowId === focusedWindow)?.focus({ preventScroll: true });
+    }
+  };
+
+  const finishHandoff = (consumed) => {
+    if (!waiting) return;
+    const { key, timer, text } = waiting;
+    clearTimeout(timer);
+    waiting = null;
+    send.disabled = false;
+    if (consumed) {
+      if (input.value.trim() === text) { input.value = ''; grow(); }
+      say('Opened in Breezer AI.');
+    } else {
+      // Remove the unsent question so it can't appear in the sidebar later.
+      void api.storage.session.remove?.(key)?.catch?.(() => {});
+      say('Breezer AI is open in the sidebar. Your question is still here to paste.');
+    }
+  };
+
+  const ask = (text) => {
+    if (!canAsk) { say('Breezer AI isn’t available in this build.', 'error'); return; }
+    if (!Number.isInteger(windowId) || !Number.isInteger(tabId)) { say('Breezer is still getting this tab ready. Try again in a moment.', 'error'); return; }
+    let opening;
+    try { opening = openPanel(windowId); } catch (error) { opening = Promise.reject(error); }
+    const key = handoffKey(windowId);
+    send.disabled = true;
+    say('Opening Breezer AI…');
+    waiting = { key, text, timer: setTimeout(() => finishHandoff(false), HANDOFF_WAIT_MS) };
+    Promise.all([opening, api.storage.session.set({ [key]: { prompt: text, tabId, createdAt: Date.now(), source: 'newtab' } })])
+      .catch(() => {
+        if (!waiting) return;
+        clearTimeout(waiting.timer); waiting = null; send.disabled = false;
+        say('Breezer AI couldn’t open. Open it from the toolbar, then ask again.', 'error');
+      });
+  };
+
+  const search = (text) => {
+    if (typeof api?.search?.query !== 'function') { say('Search isn’t available here. Type a full web address instead.', 'error'); return; }
+    Promise.resolve(api.search.query({ text, ...(Number.isInteger(tabId) ? { tabId } : { disposition: 'CURRENT_TAB' }) }))
+      .catch(() => say('Search didn’t start. Try again.', 'error'));
+  };
+
+  const submit = () => {
+    const text = input.value.trim();
+    if (!text || waiting) return;
+    say('');
+    const address = mode === 'search' ? toAddress(text) : null;
+    if (address) { win.location.assign(address); return; }
+    if (mode === 'ask') ask(text.slice(0, 24000)); else search(text.slice(0, 2048));
+  };
+
+  const start = () => {
+    if (started) return;
+    started = true;
+    if (!canAsk) modes.hidden = true;
+    setMode(storageGet(MODE_KEY) === 'ask' ? 'ask' : 'search', { remember: false });
+    grow();
+    box.addEventListener('submit', (event) => { event.preventDefault(); submit(); });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' || event.isComposing || event.shiftKey) return;
+      event.preventDefault();
+      submit();
+    });
+    input.addEventListener('input', () => { grow(); if (status.dataset.state === 'error') say(''); });
+    modes.addEventListener('click', (event) => {
+      const button = event.target.closest('[role="radio"]');
+      if (!button) return;
+      setMode(button.dataset.mode);
+      input.focus();
+    });
+    modes.addEventListener('keydown', (event) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+      if (!step) return;
+      event.preventDefault();
+      setMode(mode === 'ask' ? 'search' : 'ask');
+      modes.querySelector('[aria-checked="true"]').focus();
+    });
+    const onResize = () => placeThumb();
+    win.addEventListener?.('resize', onResize);
+    cleanups.push(() => win.removeEventListener?.('resize', onResize));
+    const session = api?.storage?.session?.onChanged;
+    if (session?.addListener) {
+      const onSession = (changes) => {
+        if (waiting && changes[waiting.key] && changes[waiting.key].newValue === undefined) finishHandoff(true);
+        if (Object.keys(changes).some((key) => key.startsWith(CONVERSATION_PREFIX))) void renderChats();
+      };
+      session.addListener(onSession);
+      cleanups.push(() => session.removeListener?.(onSession));
+    }
+    // Fonts can change button widths after the first layout.
+    void root.fonts?.ready?.then(() => { if (!disposed) placeThumb(); });
+    win.requestAnimationFrame?.(() => { modes.dataset.ready = "true"; });
+  };
+
+  const apply = (next) => {
+    experiments = next;
+    mirror = { composer: next.newTabComposer, glass: next.glass, personality: next.personality };
+    storageSet(EXPERIMENT_MIRROR_KEY, JSON.stringify(mirror));
+    layout();
+    if (next.newTabComposer) start();
+    if (started) { renderStyle(); placeThumb(); }
+    renderSites();
+    void renderChats();
+  };
+
+  // Glass follows fullscreen: the display-mode query covers browser fullscreen,
+  // and the window state covers platforms where it does not match.
+  const checkWindow = async () => {
+    if (!experiments?.glass || typeof api?.windows?.getCurrent !== 'function') return;
+    try { windowFullscreen = (await api.windows.getCurrent())?.state === 'fullscreen'; } catch { windowFullscreen = false; }
+    if (!disposed) layout();
+  };
+  const onLayoutChange = () => { layout(); void checkWindow(); };
+  for (const media of [fullscreenQuery, transparencyQuery, forcedQuery]) {
+    media.addEventListener?.('change', onLayoutChange);
+    cleanups.push(() => media.removeEventListener?.('change', onLayoutChange));
+  }
+  win.addEventListener?.('resize', onLayoutChange);
+  cleanups.push(() => win.removeEventListener?.('resize', onLayoutChange));
+
+  cleanups.push(watchExperiments(api, (next) => apply(next)));
+  const ready = Promise.all([
+    readExperiments(api),
+    Promise.resolve(api?.tabs?.getCurrent?.()).then((tab) => { windowId = tab?.windowId ?? null; tabId = tab?.id ?? null; }, () => {}),
+  ]).then(([value]) => { if (!disposed) { apply(value); void checkWindow(); } });
+
+  return {
+    ready,
+    setSites(next) { sites = Array.isArray(next) ? next : []; renderSites(); },
+    dispose() {
+      disposed = true;
+      if (waiting) clearTimeout(waiting.timer);
+      for (const cleanup of cleanups.splice(0)) cleanup();
+    },
+  };
+}
+
 // ------------------------------------------------------------------ page
 
 export function startNewTab({ api = globalThis.chrome, root = document, now = () => new Date() } = {}) {
+  const experiments = startNewTabExperiments({ api, root });
   const lanes = root.getElementById('organato-lists');
   const laneButtons = lanes.querySelectorAll('.agenda-switch button');
   for (const button of laneButtons) {
@@ -569,6 +869,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     siteRevision++;
     clearTimeout(midnightTimer);
     disposeShortcuts();
+    experiments.dispose();
     storageChanges?.removeListener(changed);
     globalThis.removeEventListener?.('pagehide', dispose);
   };
@@ -584,6 +885,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
         visibleSites.some((site, index) => site.url !== paintedSites[index].url || site.title !== paintedSites[index].title))) {
       renderSites(api, root, visibleSites, favicons, retryIcons);
       paintedSites = visibleSites;
+      experiments.setSites(visibleSites);
     }
     if (visibleSites?.length === 0) {
       root.getElementById('sites-empty').textContent = shortcuts.hidden.size

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { defaultStore, addSpace, addFolder, addEntry, addFavorite, renameSpace, renameNode, removeNode, removeSpace, setFolderOpen, moveNode, setFolderColor, setPrefs } from '../../features/ai/extension/workspace-store.js';
+import { defaultStore, addSpace, addFolder, addEntry, addFavorite, renameSpace, renameNode, removeNode, removeSpace, setFolderOpen, moveNode, setFolderColor, setSpaceIcon, setPrefs, buildSidebarModel } from '../../features/ai/extension/workspace-store.js';
 import { emptySyncModel, projectWorkspace, recordWorkspaceChanges, mergeSyncModels, materializeWorkspace, validateSyncModel } from '../../features/ai/extension/workspace-sync-model.js';
 
 const initial = () => {
@@ -172,18 +172,21 @@ test('incomplete or conflicting cross-kind identities reject instead of dropping
   assert.throws(() => validateSyncModel(collision), /Conflicting synced identities/);
 });
 
-test('folder colors and their display mode stay device-local and survive a remote rename and move', () => {
+test('folder colors and sections stay device-local and survive a remote rename and move', () => {
   const { store, model, folder, second } = initial();
+  const entry = addEntry(store, 'space-default', { url: 'https://example.test/another', title: 'Another page' });
   const plain = projectWorkspace(store);
   setFolderColor(store, folder.id, '#3a7bd5');
+  moveNode(store, folder.id, { spaceId: 'space-default', section: 'today' });
   setPrefs(store, { folderColors: 'row' });
   const projection = projectWorkspace(store);
-  assert.deepEqual(projection, plain, 'color and mode add nothing to the synced projection');
+  assert.deepEqual(projection, plain, 'color, mode and display section leave existing sync positions intact');
+  const sidebar = buildSidebarModel({ store, records: {}, tabs: [], activeSpaceId: 'space-default' });
+  assert.deepEqual(sidebar.pinned.map(node => node.entry?.id || node.folder.id), [folder.id, entry.id], 'legacy sections keep saved slot order');
   assert.deepEqual(Object.keys(projection.preferences).sort(), ['closeButton', 'newTabPosition']);
   // The model a 1.2.6 client reads keeps exactly the fields its validator allows.
   const local = recordWorkspaceChanges(model, plain, projection, 'client_alpha');
-  assert.doesNotMatch(JSON.stringify(validateSyncModel(local)), /folderColors|"color"|3a7bd5/);
-  // Another client renames and moves the folder; this device keeps its color and mode.
+  assert.doesNotMatch(JSON.stringify(validateSyncModel(local)), /folderColors|"color"|3a7bd5|"section"/);
   const remote = edit(model, materializeWorkspace(model).store, 'client_beta1', s => {
     renameNode(s, folder.id, 'Renamed');
     moveNode(s, folder.id, { spaceId: second.id });
@@ -192,9 +195,24 @@ test('folder colors and their display mode stay device-local and survive a remot
   const moved = restored.spaces.find(s => s.id === second.id).pinned.find(n => n.id === folder.id);
   assert.equal(moved.name, 'Renamed');
   assert.equal(moved.color, '#3a7bd5');
+  assert.equal(moved.section, 'today');
   assert.equal(restored.prefs.folderColors, 'row');
   // A device that never colored the folder materializes it uncolored with the default mode.
   const other = materializeWorkspace(remote).store;
-  assert.equal('color' in other.spaces.flatMap(s => s.pinned).find(n => n.id === folder.id), false);
+  const otherFolder = other.spaces.flatMap(s => s.pinned).find(n => n.id === folder.id);
+  assert.equal('color' in otherFolder, false);
+  assert.equal('section' in otherFolder, false);
   assert.equal(other.prefs.folderColors, 'off');
+});
+
+test('space icons are optional, allowlisted, and retained by identity across sync', () => {
+  const { store, model, second } = initial();
+  setSpaceIcon(store, second.id, 'briefcase');
+  assert.throws(() => setSpaceIcon(store, second.id, 'invalid'), /Unknown space icon/);
+  const third = addSpace(store, { name: 'Reading', tone: 'tide', icon: 'book' });
+  assert.equal(third.icon, 'book');
+  assert.equal(projectWorkspace(store)[`space/${second.id}`].icon, undefined);
+  const remote = edit(model, materializeWorkspace(model).store, 'client_beta1', s => renameSpace(s, second.id, 'Renamed'));
+  const result = materializeWorkspace(remote, store).store;
+  assert.deepEqual(result.spaces.map(space => [space.name, space.icon]), [['Personal', undefined], ['Renamed', 'briefcase']]);
 });

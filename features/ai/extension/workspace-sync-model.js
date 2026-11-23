@@ -31,8 +31,8 @@ export function projectWorkspace(rawStore, rawAppearance) {
     space.pinned.forEach((item, at) => node(item, key, at));
   });
   store.favorites.forEach((item, at) => node(item, 'favorites', at));
-  // Folder colors and their display mode stay device-local, like folder
-  // expansion: clients up to 1.2.6 reject any unknown synced field, so adding
+  // Space icons and folder display preferences stay device-local:
+  // clients up to 1.2.6 reject any unknown synced field, so adding
   // one would stop sync for every older device sharing the vault.
   entities.preferences = { newTabPosition: store.prefs.newTabPosition, closeButton: store.prefs.closeButton };
   if (rawAppearance) {
@@ -155,7 +155,12 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   validateSyncModel(model);
   const values = syncModelValues(model);
   const ordered = (prefix) => Object.entries(values).filter(([key, value]) => key.startsWith(prefix) && value.alive === true).sort(([ak, a], [bk, b]) => (a.index || 0) - (b.index || 0) || (ak < bk ? -1 : 1));
-  const spaces = ordered('space/').map(([key, s]) => ({ id: key.slice(6), name: s.name || 'Space', tone: s.tone || 'mint', pinned: [] }));
+  const localIcons = new Map(localStore.spaces.map(space => [space.id, space.icon]));
+  const spaces = ordered('space/').map(([key, s]) => {
+    const id = key.slice(6);
+    const icon = localIcons.get(id);
+    return { id, name: s.name || 'Space', tone: s.tone || 'mint', ...(icon ? { icon } : {}), pinned: [] };
+  });
   if (spaces.length > MAX_SPACES) throw new Error(`Synced workspaces exceed ${MAX_SPACES} spaces. Local data is preserved.`);
   // Concurrent removal of the final spaces cannot strand the surviving pins.
   if (!spaces.length) spaces.push(recoveredSpace(model));
@@ -175,11 +180,12 @@ export function materializeWorkspace(model, localStore = defaultStore()) {
   const folders = new Map();
   for (const [key, folder] of orderedFolders) {
     const node = { kind: 'folder', id: key.slice(7), name: folder.name || 'Folder', open: true, children: [] };
-    // Expansion and color are device-local, even when a folder is renamed or moved remotely.
+    // Preserve local presentation even when a folder moves remotely.
     const local = localFolders.get(node.id);
     if (local) {
       node.open = local.open;
       if (local.color) node.color = local.color;
+      if (local.section === 'today') node.section = 'today';
     }
     folders.set(key, node);
     (bySpace.get(folder.parent) || spaces[0]).pinned.push(node);

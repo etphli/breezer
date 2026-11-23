@@ -5,12 +5,37 @@ import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { parseRoute } from '../../features/ai/extension/workspace-store.js';
 import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
+import { harness } from './workspace-activation-harness.mjs';
 
 const read = name => readFileSync(new URL(`../../features/ai/extension/${name}`, import.meta.url), 'utf8');
 const source = read('workspace.js');
 const mainCSS = readFileSync(new URL('./fixtures/workspace-main-port/main-workspace.css', import.meta.url), 'utf8');
 const mainFunctions = JSON.parse(readFileSync(new URL('./fixtures/workspace-main-port/main-functions.json', import.meta.url), 'utf8'));
-const assertStyles = (shared, settings) => assert.equal(restoreMainStyles(shared, settings), mainCSS);
+const sidebarStart = '/* ------------------------------------------------------------------ sidebar */';
+const retainedSelectors = [
+  '.row.entering, .folder.entering', '@keyframes row-in', '.leaving', '@keyframes row-out',
+  '.tile.leaving', '@keyframes tile-out', '@media (prefers-reduced-motion: reduce)',
+  ':root[data-tone="custom"], :root[data-tone="custom"] #sidebar',
+  ':root[data-scheme="dark"][data-tone="custom"], :root[data-scheme="dark"][data-tone="custom"] #sidebar',
+  'input::placeholder, textarea::placeholder', '.settings', '.nav-item[aria-current="page"] svg',
+];
+function selectorBlock(styles, selector) {
+  const lines = styles.split('\n');
+  const start = lines.findIndex(line => line.startsWith(`${selector} {`));
+  assert.ok(start >= 0, `missing CSS rule: ${selector}`);
+  if (lines[start].endsWith('}')) return lines[start];
+  const end = lines.indexOf('}', start + 1);
+  assert.ok(end >= 0, `unclosed CSS rule: ${selector}`);
+  return lines.slice(start, end + 1).join('\n');
+}
+function assertStyles(shared, settings) {
+  const reconstructed = restoreMainStyles(shared, settings);
+  assert.ok(reconstructed.includes(sidebarStart));
+  assert.equal(reconstructed.split(sidebarStart)[0], mainCSS.split(sidebarStart)[0], 'shared palette and base styles');
+  for (const selector of retainedSelectors) {
+    assert.equal(selectorBlock(reconstructed, selector), selectorBlock(mainCSS, selector), selector);
+  }
+}
 
 test('zero-viewport motion guard stays confined to the unseen sidebar controls', () => {
   const css = read('workspace.css');
@@ -21,7 +46,7 @@ test('zero-viewport motion guard stays confined to the unseen sidebar controls',
   assert.doesNotMatch(match[1], /(?:^|\n)\s*\*/);
 });
 
-test('route split reconstructs the reviewed Breezer stylesheet exactly', () => {
+test('route sheets retain the reviewed shared theme, motion and settings rules', () => {
   const shared = read('workspace.css'), settings = read('settings.css');
   assert.doesNotMatch(shared, /\.settings|\.setting-row|\.context-settings|#custom-theme-color/);
   assert.match(shared, /:root\[data-scheme="dark"\]\[data-tone="custom"\]/);
@@ -200,23 +225,45 @@ test('welcome timeout also has visible failure and reload instead of an unhandle
   assert.deepEqual(f.imports, []);
 });
 
-test('main draw, compact identities and activation-before-reveal remain the current-main operations', () => {
-  const next = { draw: 'syncRovingFocus', compactLabels: 'draw', updateFavicon: null, switchSpace: 'animateSpace' };
-  for (const [name, expected] of Object.entries(mainFunctions)) {
-    const start = source.indexOf(`function ${name === 'draw' ? 'paintSidebar' : name}(`);
-    const end = source.indexOf(next[name] ? `function ${next[name]}(` : 'export const favoriteTitle', start);
-    const slice = source.slice(start, end);
-    const actual = (name === 'draw' ? stripFolderColorDraw(slice) : slice).replace('  pendingRows = null;\n', '')
-      .replace("        tile.append(el('span', 'tile-label', { 'aria-hidden': 'true' }));\n", '')
-      .replace('        const [icon, label] = tile.children;\n        updateFavicon(icon, null, item.entry.url, title);\n        if (label.textContent !== title) label.textContent = title;\n', '        updateFavicon(tile.firstChild, null, item.entry.url, title);\n')
-      .replace('function paintSidebar() {', 'function draw() {')
-      .replace("      const modifier = PLATFORM === 'windows' ? 'Ctrl+Shift+' : '⌃';\n", '')
-      .replace(/\(\$\{modifier\}/, '(⌃')
-      .replace('  queryDrawDirty = false;\n', '');
-    assert.equal(actual.trim(), expected.trim(), name);
+test('compact identities and fallback favicon still use the reviewed operations', () => {
+  for (const [name, next] of Object.entries({ compactLabels: 'function draw(', updateFavicon: 'export const favoriteTitle' })) {
+    const start = source.indexOf(`function ${name}(`);
+    assert.equal(source.slice(start, source.indexOf(next, start)).trim(), mainFunctions[name].trim(), name);
   }
+});
+
+test('draw retains keyed nodes and switches space after Chromium activation', async () => {
+  const sidebar = await harness(source);
+  const today = sidebar.nodes.get('today');
+  const pinned = sidebar.nodes.get('pinned');
+  const favorites = sidebar.nodes.get('favorites');
+  const [workTab, workFolder, favorite] = [today.firstChild, pinned.firstChild, favorites.firstChild];
+  assert.equal(workTab.dataset.key, 't:3');
+  assert.equal(workFolder.dataset.key, 'f:f-design');
+  assert.equal(favorite.dataset.key, 'v:v-cal');
+
+  sidebar.draw();
+  assert.equal(today.firstChild, workTab);
+  assert.equal(pinned.firstChild, workFolder);
+  assert.equal(favorites.firstChild, favorite);
+
+  sidebar.holdActivation();
+  const changing = sidebar.switchSpace('space-personal');
+  assert.equal(sidebar.state.model.space.id, 'space-work');
+  assert.equal(today.firstChild, workTab);
+  sidebar.releaseActivation();
+  await changing;
+  assert.equal(sidebar.state.model.space.id, 'space-personal');
+  assert.equal(today.firstChild.dataset.key, 't:6');
+  assert.equal(today.firstChild.getAttribute('aria-selected'), 'true');
+  assert.equal(favorites.firstChild, favorite);
+});
+
+test('workspace loads Settings and Welcome modules and styles only on their routes', () => {
   assert.deepEqual([...source.matchAll(/import\('([^']+)'\)/g)].map(match => match[1]), ['./settings.js', './onboarding.js']);
-  assert.match(read('workspace.html'), /<link rel="stylesheet" href="workspace.css">/);
+  assert.deepEqual([...read('workspace.html').matchAll(/<link rel="stylesheet" href="([^"]+)">/g)].map(match => match[1]), [
+    'workspace.css', 'workspace-chrome.css',
+  ]);
   assert.equal(JSON.parse(read('manifest.json')).version, RELEASE_VERSION);
   assert.match(JSON.parse(read('manifest.json')).content_security_policy.extension_pages, /script-src 'self'/);
 });

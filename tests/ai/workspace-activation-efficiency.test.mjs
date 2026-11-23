@@ -103,9 +103,8 @@ test('space switching activates before revealing and retains main space names an
   h.releaseActivation(); await settle();
   assert.equal(h.state.model.space.id, 'space-personal');
   assert.equal(h.state.tabs.get(6).active, true);
-  assert.equal(h.nodes.get('space-name').textContent, 'Personal');
   const dot = h.nodes.get('spaces').children.find(n => n.dataset.key === 's:space-personal');
-  assert.equal(dot.querySelector('.space-label').textContent, 'Personal');
+  assert.match(dot.getAttribute('aria-label'), /^Personal,/);
   assert.equal(dot.title, 'Personal (⌃2)');
   assert.equal(dot.getAttribute('aria-selected'), 'true');
   assert.equal(h.counters.drawn, 1);

@@ -33,7 +33,7 @@ export const installPanelFixture = ({ contextDelay = 10 } = {}) => {
           onDisconnect: { addListener: () => {} },
           postMessage: (message) => {
             window.sent.push(message);
-            if (message.type === 'init') setTimeout(() => window.emit({ type: 'status', providers: window.testProviders }), 10);
+            if (['init', 'refresh-models'].includes(message.type)) setTimeout(() => window.emit({ type: 'status', providers: window.testProviders }), 10);
             if (message.type === 'context') setTimeout(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }), contextDelay);
           },
         }),

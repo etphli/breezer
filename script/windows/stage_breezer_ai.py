@@ -1,6 +1,7 @@
 """Stage the Windows AI host files and include them in the mini installer."""
 
 from pathlib import Path
+import filecmp
 import json
 import shutil
 import sys
@@ -17,6 +18,7 @@ LAUNCHER = PAYLOAD / "breezer_ai_host.exe"
 NODE = PAYLOAD / "runtime/node.exe"
 LICENSE = PAYLOAD / "runtime/LICENSE"
 MANIFEST = PAYLOAD / "io.github.etphli.breezer.ai.json"
+GN_PAYLOAD_DIRECTORY = Path("components/breezer_ai_windows/payload")
 GN_INSTALLER = "chrome/installer/mini_installer/BUILD.gn"
 RELEASE = "chrome/installer/mini_installer/chrome.release"
 
@@ -37,6 +39,7 @@ def stage(output, cache):
     archive = download_runtime(distribution, cache)
     prefix = distribution["filename"].removesuffix(".zip")
     cp = {MANIFEST: FEATURE / "windows/native-host-manifest.json", **host_files()}
+    output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="breezer-ai-", dir=output) as temporary:
         staged = Path(temporary)
         for name, original in cp.items():
@@ -51,6 +54,8 @@ def stage(output, cache):
         verify_archive(staged / NODE, distribution["exe_sha256"])
         for name in (*cp, NODE, LICENSE):
             target = output / name
+            if target.is_file() and filecmp.cmp(staged / name, target, shallow=False):
+                continue
             target.parent.mkdir(parents=True, exist_ok=True)
             (staged / name).replace(target)
 
@@ -71,9 +76,11 @@ def configure_installer(source):
         entries.append(f"{name}: %(VersionDir)s\\{directory}\\\n")
     release.write_text(header + general + begin + "".join(entries) + end + contents,
                        encoding="utf-8", newline="\n")
-    relative = "\n".join(f'  "{path.as_posix()}",' for path in files)
+    relative = "\n".join(f'  "{path.as_posix()}",' for path in files if path != LAUNCHER)
     (source / "components/breezer_ai_windows/installer_files.gni").write_text(
-        f"breezer_ai_installer_files = [\n{relative}\n]\n", encoding="utf-8", newline="\n",
+        f"breezer_ai_staged_files = [\n{relative}\n]\n"
+        f'breezer_ai_installer_files = breezer_ai_staged_files + [ "{LAUNCHER.as_posix()}" ]\n',
+        encoding="utf-8", newline="\n",
     )
     replace(source, GN_INSTALLER, 'action("mini_installer_archive") {',
             'import("//components/breezer_ai_windows/installer_files.gni")\n\n'
@@ -83,3 +90,6 @@ def configure_installer(source):
             '    inputs += [ "$root_out_dir/$file" ]\n  }')
     replace(source, GN_INSTALLER, '    ":chrome_runtime_deps",',
             '    ":chrome_runtime_deps",\n    "//components/breezer_ai_windows:breezer_ai_host",')
+    replace(source, GN_INSTALLER, '    "//components/breezer_ai_windows:breezer_ai_host",',
+            '    "//components/breezer_ai_windows:breezer_ai_host",\n'
+            '    "//components/breezer_ai_windows:breezer_ai_payload",')

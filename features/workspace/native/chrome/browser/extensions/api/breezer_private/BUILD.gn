@@ -2,6 +2,7 @@
 # This file is governed by the same license as the Breezer project.
 
 import("//extensions/buildflags/buildflags.gni")
+import("//pdf/features.gni")
 
 assert(enable_extensions)
 
@@ -10,6 +11,7 @@ source_set("breezer_private") {
     "breezer_private_api.cc",
     "breezer_private_api.h",
     "browser_stats_api.cc",
+    "pdf_context_api.cc",
     "research_text.h",
     "workspace_sync_api.cc",
   ]
@@ -24,6 +26,8 @@ source_set("breezer_private") {
     "//chrome/browser/sync",
     "//components/sync/service",
     "//components/sync/base",
+    "//chrome/browser/ui:browser_commands",
+    "//chrome/browser/ui:ui_features",
     "//chrome/browser/ui/browser_window",
     "//chrome/browser/ui/helium:helium_layout_state_controller",
     "//chrome/browser/ui/tabs:tab_strip",
@@ -32,12 +36,26 @@ source_set("breezer_private") {
     "//chrome/common:constants",
     "//components/bookmarks/common",
     "//components/prefs",
+    "//components/split_tabs",
+    "//components/tabs:public",
     "//content/public/browser",
     "//extensions/common",
     "//extensions/common:mojom",
+    "//pdf:buildflags",
     "//services/resource_coordinator/public/cpp/memory_instrumentation",
     "//skia",
     "//ui/base/mojom",
     "//url",
   ]
+
+  if (enable_pdf) {
+    deps += [
+      "//components/pdf/browser",
+      "//components/pdf/common:constants",
+      "//components/viz/common",
+      "//pdf:features",
+      "//ui/gfx/codec",
+      "//ui/gfx/geometry",
+    ]
+  }
 }

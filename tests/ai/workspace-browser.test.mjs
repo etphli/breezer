@@ -130,9 +130,9 @@ test('empty Settings-created spaces and sidebar controls respond to held clicks'
     await page.goto(`${base}/workspace.html#/sidebar?w=7`);
     await page.locator('#today [data-key="t:3"]').waitFor();
     assert.equal(await page.locator('#spaces [role="tab"]').count(), 3);
-    for (const [id, name] of [['space-personal', 'Personal'], ['space-research', 'Research'], ['space-work', 'Work']]) {
+    for (const id of ['space-personal', 'space-research', 'space-work']) {
       await page.locator(`#spaces [data-key="s:${id}"]`).click({ delay: 120 });
-      await page.waitForFunction(({ id, name }) => document.querySelector('#space-name').textContent === name && document.querySelector(`#spaces [data-key="s:${id}"]`).getAttribute('aria-selected') === 'true', { id, name });
+      await page.locator(`#spaces [data-key="s:${id}"][aria-selected="true"]`).waitFor();
       await page.waitForFunction(id => window.fx.session['workspace.window.7']?.activeSpaceId === id, id);
       await page.waitForFunction(() => document.querySelector('#today .row.active'));
     }
@@ -154,9 +154,10 @@ test('empty Settings-created spaces and sidebar controls respond to held clicks'
     await page.waitForFunction(() => window.fx.appearance.alwaysShowSidebar === false);
     assert.equal(await page.locator('#collapse').getAttribute('aria-pressed'), 'false');
     assert.equal(await page.evaluate(() => window.fx.appearance.sidebarMode), 'expanded', 'Unpinning preserves the chosen sidebar mode');
-    await page.getByRole('button', { name: 'New space', exact: true }).click({ delay: 120 });
+    await page.getByRole('tab', { name: /^Work,/, selected: true }).press('Shift+F10');
+    await page.getByRole('menuitem', { name: 'New space', exact: true }).click();
+    await page.getByRole('button', { name: 'Create', exact: true }).click();
     await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces.length === 4);
-    await page.keyboard.press('Enter');
     await page.getByRole('button', { name: 'Settings', exact: true }).click({ delay: 120 });
     await page.waitForFunction(() => window.fx.calls.some(([name, props]) => name === 'tabs.create' && props.url?.endsWith('/workspace.html#/settings')));
     assert.deepEqual(errors, []);
@@ -259,6 +260,288 @@ test('folder drops accept the row edges, preserve order and open closed destinat
   }
 });
 
+test('sidebar menus, one-line dock, icon palette and space gestures work in Chromium', { skip }, async () => {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await chromium.launch({ executablePath, headless: true });
+    const initial = seed();
+    const store = initial.local['workspace.v1'];
+    store.spaces[0].pinned[0].open = false;
+    store.spaces[0].pinned[0].section = 'today';
+    store.spaces[0].icon = 'briefcase';
+    store.spaces[1].icon = 'home';
+    store.spaces[1].pinned.push({ kind: 'entry', id: 'e-personal', title: 'Personal reading list', url: 'https://reading.example/' });
+    store.spaces.push({ id: 'space-reading', name: 'Reading', tone: 'dusk', icon: 'book', pinned: [] });
+    for (let sequence = 5; sequence <= 12; sequence += 1) {
+      store.favorites.push({ kind: 'entry', id: `v-${sequence}`, title: `Favorite ${sequence}`, url: `https://favorite-${sequence}.example/` });
+    }
+    const viewport = { width: 260, height: 820 };
+    const recordVideo = process.env.BREEZER_SIDEBAR_VIDEO ? { dir: `${evidence}/recordings`, size: viewport } : undefined;
+    const context = await browser.newContext({ viewport, recordVideo });
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.addInitScript(installFixture, { seed: initial, bridge: true, splitView: true, nativeControl: true });
+    await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
+    const sidebar = page.locator('#sidebar');
+    const pane = page.locator('#space-pane');
+    const folder = page.locator('[data-key="f:f-design"]');
+    const active = (name, target = page) => target.getByRole('tab', { name: new RegExp(`^${name},`), selected: true });
+    const menu = page.locator('#menu');
+    const tab = page.locator('[data-key="t:4"]');
+    await sidebar.waitFor();
+    assert.equal(await page.locator('#space-name, #add-space').count(), 0);
+    assert.deepEqual(await page.locator('#space-dock > *').evaluateAll(nodes => nodes.map(node => node.id)), ['open-updates', 'spaces', 'open-settings']);
+    assert.ok(await page.locator('.divider-row').evaluate(divider =>
+      [...document.querySelectorAll('#pinned .row, #today .row')].every(row => divider.compareDocumentPosition(row) & Node.DOCUMENT_POSITION_FOLLOWING)));
+    assert.equal(await sidebar.getAttribute('data-space-dock'), 'default');
+    assert.equal(await page.locator('#favorites .tile').count(), 12);
+    const favorites = page.locator('#favorites');
+    const columnCount = () => favorites.evaluate(node => getComputedStyle(node).gridTemplateColumns.split(' ').length);
+    assert.equal(await columnCount(), 3);
+    await page.setViewportSize({ width: 340, height: 820 });
+    assert.equal(await columnCount(), 4);
+    await page.setViewportSize(viewport);
+    assert.equal(await folder.locator('.folder-preview .favicon').count(), 2);
+    assert.equal(await folder.locator('.count').textContent(), '2');
+    assert.ok(await folder.locator('.folder-preview').isVisible());
+
+    await mkdir(evidence, { recursive: true });
+    await tab.click({ button: 'right' });
+    const move = menu.getByRole('menuitem', { name: 'Move to space' });
+    await move.hover();
+    const submenu = page.getByRole('menu', { name: 'Move to space' });
+    await submenu.waitFor();
+    const [mainBounds, childBounds] = await Promise.all([move.boundingBox(), submenu.boundingBox()]);
+    assert.ok(childBounds.x > mainBounds.x, 'The submenu opens alongside its trigger');
+    assert.ok(childBounds.x >= 0 && childBounds.x + childBounds.width <= viewport.width);
+    assert.ok(childBounds.y >= 0 && childBounds.y + childBounds.height <= viewport.height);
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-move-submenu.png` });
+    const newWindow = submenu.getByRole('menuitem', { name: 'New window' });
+    await newWindow.hover();
+    await newWindow.click();
+    await page.waitForFunction(() => window.fx.tabs.find(item => item.id === 4).windowId !== 7);
+    assert.deepEqual(await page.evaluate(() => window.fx.calls.find(([name]) => name === 'windows.create')), ['windows.create', { tabId: 4 }]);
+
+    await page.locator('[data-key="t:3"]').click({ button: 'right' });
+    await move.focus();
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Personal');
+    await page.keyboard.press('ArrowLeft');
+    assert.equal(await move.getAttribute('aria-expanded'), 'false');
+    assert.equal(await page.evaluate(() => document.activeElement.textContent), 'Move to space');
+    await menu.getByRole('menuitem', { name: 'Split View', exact: true }).click();
+    await page.waitForFunction(() => window.fx.calls.some(([name, id]) => name === 'toggleSplitView' && id === 3));
+    await page.evaluate(() => delete chrome.breezerPrivate.toggleSplitView);
+    await page.locator('[data-key="t:3"]').click({ button: 'right' });
+    assert.equal(await menu.getByRole('menuitem', { name: 'Split View', exact: true }).count(), 0);
+    await page.keyboard.press('Escape');
+
+    await folder.locator('.folder-row').click({ button: 'right' });
+    assert.equal(await menu.getByRole('menuitem', { name: /Move (below|above) Today/ }).count(), 0);
+    await page.keyboard.press('Escape');
+    await page.reload();
+    await page.locator('#pinned > [data-key="f:f-design"]').waitFor();
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-folder-preview.png` });
+
+    await page.setViewportSize({ width: 110, height: 820 });
+    const saved = page.locator('[data-key="e:e-linear"]');
+    await saved.dblclick();
+    const editor = page.getByRole('textbox', { name: 'Name', exact: true });
+    await editor.waitFor();
+    await editor.fill('Linear inbox');
+    await editor.press('Enter');
+    await page.getByRole('treeitem', { name: 'Linear inbox', exact: true }).waitFor();
+    await page.setViewportSize(viewport);
+
+    await pane.hover();
+    await page.mouse.wheel(10, 90);
+    await page.mouse.wheel(100, 1);
+    assert.equal(await active('Work').count(), 1, 'Vertical bursts do not switch spaces');
+    await page.waitForTimeout(230);
+    if (recordVideo) await page.waitForTimeout(400);
+    for (let event = 0; event < 8; event += 1) await page.mouse.wheel(14, 1);
+    await active('Personal').waitFor();
+    if (recordVideo) await page.waitForTimeout(400);
+    await active('Personal').press('ArrowRight');
+    await active('Reading').waitFor();
+    await page.getByRole('tab', { name: /^Personal,/ }).click({ button: 'right' });
+    await menu.getByRole('menuitem', { name: 'Open space in new window' }).click();
+    await page.waitForFunction(() => window.fx.calls.some(([name, signal]) => name === 'runtime.sendMessage' && signal.type === 'breezer.workspace.open-space'));
+    const newHost = await page.evaluate(() => {
+      const { fx } = window;
+      const [, signal] = fx.calls.find(([name, signal]) => name === 'runtime.sendMessage' && signal.type === 'breezer.workspace.open-space');
+      const { windowId } = signal;
+      const key = `workspace.open-space.${windowId}`;
+      const { [key]: opening, ...session } = fx.session;
+      return { key, opening, signal, windowId, session, local: fx.local, tabs: fx.tabs };
+    });
+    assert.equal(newHost.opening.spaceId, 'space-personal');
+    assert.equal(newHost.tabs.find(item => item.id === 6).windowId, 7);
+    const destination = await context.newPage();
+    await destination.addInitScript(installFixture, { seed: newHost, bridge: true });
+    await destination.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=${newHost.windowId}`);
+    await destination.locator('#sidebar').waitFor();
+    const unrelatedReads = await destination.evaluate(async ({ key, opening, signal }) => {
+      const before = window.fx.sessionReads.length;
+      await chrome.storage.session.set({ [key]: opening });
+      window.fx.fire('runtime.onMessage', { ...signal, windowId: signal.windowId + 1 });
+      await new Promise(resolve => setTimeout(resolve, 0));
+      return window.fx.sessionReads.slice(before);
+    }, newHost);
+    assert.deepEqual(unrelatedReads, [], 'Storage changes and signals for other windows do not read the handoff');
+    await destination.evaluate(signal => window.fx.fire('runtime.onMessage', signal), newHost.signal);
+    const starter = destination.locator(`#today [data-key="t:${newHost.opening.tabId}"]`);
+    await active('Personal', destination).waitFor();
+    await starter.waitFor();
+    await destination.waitForFunction(({ key, windowId }) => !window.fx.session[key] && window.fx.session[`workspace.window.${windowId}`]?.activeSpaceId === 'space-personal', newHost);
+    assert.ok(await destination.locator('#pinned [data-key="e:e-personal"].asleep').isVisible());
+    assert.equal(await destination.locator('[data-key="t:6"]').count(), 0);
+    await destination.reload();
+    await active('Personal', destination).waitFor();
+    await starter.waitFor();
+    const coldDestination = await browser.newPage({ viewport });
+    await coldDestination.addInitScript(installFixture, {
+      seed: { ...newHost, session: { ...newHost.session, [newHost.key]: newHost.opening } }, bridge: true,
+    });
+    await coldDestination.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=${newHost.windowId}`);
+    await active('Personal', coldDestination).waitFor();
+    await coldDestination.waitForFunction(key => !window.fx.session[key], newHost.key);
+    await coldDestination.close();
+    await page.bringToFront();
+    assert.equal(await active('Reading').count(), 1, 'Opening another window leaves this window’s selection intact');
+    await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { spaceDock: true } }));
+    await page.waitForFunction(() => document.getElementById('sidebar').dataset.spaceDock === 'alternate');
+    assert.equal(await active('Reading').locator('.dot').getAttribute('data-icon'), 'book');
+    await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { spaceDock: false } }));
+    await page.waitForFunction(() => document.getElementById('sidebar').dataset.spaceDock === 'default');
+    await page.locator('#spaces').click({ button: 'right', position: { x: 130, y: 10 } });
+    await menu.getByRole('menuitem', { name: 'New space', exact: true }).click();
+    const name = page.getByRole('textbox', { name: 'Space name' });
+    await name.fill('Projects');
+    await page.getByRole('radio', { name: 'Code' }).check();
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-space-picker.png` });
+    await page.getByRole('button', { name: 'Create', exact: true }).click();
+    await active('Projects').waitFor();
+    assert.equal(await active('Projects').locator('.dot').getAttribute('data-icon'), 'code');
+    await active('Projects').press('Shift+F10');
+    await menu.getByRole('menuitem', { name: 'Edit space', exact: true }).click();
+    assert.ok(await page.getByRole('radio', { name: 'Code' }).isChecked());
+    await page.getByRole('radio', { name: 'Leaf' }).check();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await page.waitForFunction(() => window.fx.local['workspace.v1'].spaces.some(space => space.name === 'Projects' && space.icon === 'leaf'));
+    await page.reload();
+    await active('Projects').waitFor();
+    assert.equal(await active('Projects').locator('.dot').getAttribute('data-icon'), 'leaf');
+    await page.evaluate(async () => {
+      const current = window.fx.local['workspace.v1'];
+      await chrome.storage.local.set({ 'workspace.v1': { ...current, rev: current.rev + 1, favorites: current.favorites.slice(0, 4) } });
+    });
+    await page.waitForFunction(() => document.querySelectorAll('#favorites .tile').length === 4);
+    await page.getByRole('tab', { name: /^Work,/ }).click();
+    await active('Work').waitFor();
+    const dockMetrics = () => page.locator('#space-dock').evaluate(dock => {
+      const rect = node => node.getBoundingClientRect().toJSON();
+      const tabs = [...dock.querySelectorAll('.space-dot:not(.leaving)')];
+      const icons = tabs.map(rect);
+      const color = [...dock.querySelectorAll('button svg')].map(node => getComputedStyle(node).color);
+      const bounds = rect(dock);
+      const scrollport = rect(dock.querySelector('#spaces'));
+      const visibleWidths = icons.map(icon => Math.max(0, Math.min(icon.right, scrollport.right) - Math.max(icon.left, scrollport.left)));
+      return {
+        icon: rect(tabs.find(tab => tab.getAttribute('aria-selected') === 'true')),
+        history: rect(dock.querySelector('#open-updates')),
+        settings: rect(dock.querySelector('#open-settings')),
+        centerOffset: (icons[0].left + icons.at(-1).right - bounds.left - bounds.right) / 2,
+        count: icons.length,
+        fullyVisible: icons.filter((icon, index) => visibleWidths[index] === icon.width).length,
+        visibleWidths,
+        colors: [...new Set(color)],
+      };
+    });
+    for (const width of [200, 260, 280, 110, 56]) {
+      await page.setViewportSize({ width, height: 820 });
+      const dock = await dockMetrics();
+      assert.equal(dock.icon.y, dock.history.y, 'Space and update history icons share one row');
+      assert.equal(dock.icon.y, dock.settings.y, 'Space and Settings icons share one row');
+      assert.ok(dock.history.right <= dock.icon.left && dock.icon.right <= dock.settings.left && dock.settings.right <= width);
+      assert.deepEqual(dock.colors, ['rgb(17, 17, 17)']);
+      await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-${width}.png` });
+      if (width >= 200) {
+        assert.equal(dock.icon.width, 34);
+        assert.equal(dock.icon.height, 34);
+        assert.equal(dock.count, 4);
+        assert.equal(dock.fullyVisible, 4, `All space targets fit at ${width}px (visible widths: ${dock.visibleWidths.join(', ')})`);
+        assert.ok(Math.abs(dock.centerOffset) < 1, 'Four spaces are centered in the full sidebar');
+        assert.equal(dock.history.left, width - dock.settings.right, 'Fixed actions use equal outer margins');
+        if (width >= 260) assert.equal(await columnCount(), 4);
+      }
+      if (width === 200 || width === 260) {
+        await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-${width}-light.png` });
+        await page.emulateMedia({ colorScheme: 'dark' });
+        await page.waitForFunction(() => document.documentElement.dataset.scheme === 'dark');
+        assert.deepEqual((await dockMetrics()).colors, ['rgb(255, 255, 255)']);
+        await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-${width}-dark.png` });
+        await page.emulateMedia({ colorScheme: 'light' });
+        await page.waitForFunction(() => document.documentElement.dataset.scheme === 'light');
+      }
+    }
+    await active('Work').press('End');
+    await active('Projects').waitFor();
+    assert.ok(await active('Projects').evaluate(node => node.getBoundingClientRect().left >= document.getElementById('spaces').getBoundingClientRect().left));
+    await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { spaceDock: true } }));
+    await page.waitForFunction(() => document.getElementById('sidebar').dataset.spaceDock === 'alternate');
+    const compactAlternate = await active('Projects').evaluate(node => ({
+      iconY: node.getBoundingClientRect().top,
+      historyY: document.getElementById('open-updates').getBoundingClientRect().top,
+      settings: document.getElementById('open-settings').getBoundingClientRect().toJSON(),
+    }));
+    assert.equal(compactAlternate.iconY, compactAlternate.historyY);
+    assert.equal(compactAlternate.iconY, compactAlternate.settings.y);
+    assert.ok(compactAlternate.settings.right <= 56);
+    await page.getByRole('button', { name: 'What’s new in Breezer' }).click();
+    await page.waitForFunction(() => window.fx.tabs.some(tab => tab.url.endsWith('/whats-new.html')));
+    await page.setViewportSize({ width: 200, height: 820 });
+    const narrowAlternate = await dockMetrics();
+    assert.equal(narrowAlternate.fullyVisible, 4);
+    assert.ok(Math.abs(narrowAlternate.centerOffset) < 1);
+    await page.evaluate(async () => {
+      const current = window.fx.local['workspace.v1'];
+      const extra = { id: 'space-gallery', name: 'Gallery', tone: 'pollen', icon: 'sparkle', pinned: [] };
+      await chrome.storage.local.set({ 'workspace.v1': { ...current, rev: current.rev + 1, spaces: [...current.spaces, extra] } });
+    });
+    await page.getByRole('tab', { name: /^Gallery,/ }).waitFor();
+    await active('Projects').press('End');
+    await active('Gallery').waitFor();
+    const overflow = await dockMetrics();
+    assert.equal(overflow.count, 5);
+    assert.ok(overflow.fullyVisible < 5);
+    assert.equal(overflow.visibleWidths.at(-1), 34, 'Keyboard selection reveals the complete last target');
+    await page.setViewportSize(viewport);
+    await page.getByRole('tab', { name: /^Work,/ }).click();
+    await active('Work').waitFor();
+    await page.evaluate(async () => {
+      const current = window.fx.local['workspace.v1'];
+      await chrome.storage.local.set({
+        breezerExperiments: { spaceDock: false },
+        'workspace.v1': { ...current, rev: current.rev + 1, spaces: current.spaces.slice(0, 2) },
+      });
+    });
+    await page.waitForFunction(() => document.querySelectorAll('#spaces .space-dot').length === 2);
+    const twoSpaces = await dockMetrics();
+    assert.equal(twoSpaces.count, 2);
+    assert.ok(Math.abs(twoSpaces.centerOffset) < 1, 'Two spaces are centered in the full sidebar');
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-260-two-spaces.png` });
+    assert.deepEqual(errors, []);
+    if (recordVideo) await page.waitForTimeout(500);
+    await context.close();
+    if (recordVideo) await page.video().saveAs(`${evidence}/sidebar-gesture-picker.webm`);
+  } finally {
+    try { await browser?.close(); } finally { await new Promise(done => server.close(done)); }
+  }
+});
+
 test('delayed tab queries cannot revive closed rows or overwrite navigation and activation', { skip }, async () => {
   const server = await startServer();
   let browser;
@@ -352,7 +635,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     await page.goto(`${base}/workspace.html#/sidebar?w=7`);
     const tree = page.locator('#today');
     await page.getByRole('treeitem', { name: /Pull request #42/ }).waitFor();
-    assert.equal(await page.locator('#space-name').innerText(), 'Work');
+    await page.getByRole('tab', { name: /^Work,/, selected: true }).waitFor();
     assert.equal(await page.locator('#favorites .tile').count(), 4);
     assert.equal(await page.locator('#favorites .tile.live').count(), 1, 'calendar favorite is bound to its live tab');
     assert.deepEqual(await tree.getByRole('treeitem').allInnerTexts(), ['Arc-style sidebar · Pull request #42', 'Arc review notes', 'Mail — 3 unread']);
@@ -410,7 +693,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
 
     // Spaces: switching shows Personal's tabs and activates one of them.
     await page.getByRole('tab', { name: /Personal/ }).click();
-    await page.waitForFunction(() => document.querySelector('#space-name').textContent === 'Personal');
+    await page.getByRole('tab', { name: /^Personal,/, selected: true }).waitFor();
     assert.deepEqual(await tree.getByRole('treeitem').allInnerTexts(), ['Miso glazed aubergine', 'Late night radio']);
     assert.equal(await page.locator('#sidebar').getAttribute('data-tone'), 'rose');
     await page.waitForFunction(() => window.fx.tabs.find((tab) => tab.active)?.id === 6);
@@ -425,7 +708,7 @@ test('Arc-style sidebar and settings work against the chrome.* fixture', { skip 
     });
     await page.reload();
     await tree.getByRole('treeitem', { name: /Miso glazed aubergine/ }).waitFor();
-    assert.equal(await page.locator('#space-name').innerText(), 'Personal', 'reopens in the active tab’s space');
+    assert.equal(await page.getByRole('tab', { name: /^Personal,/, selected: true }).count(), 1, 'reopens in the active tab’s space');
     assert.deepEqual(await tree.getByRole('treeitem').allInnerTexts(), ['Miso glazed aubergine', 'Late night radio']);
     await page.getByRole('tab', { name: /Work/ }).click();
     await tree.getByRole('treeitem', { name: /Pull request #42/ }).waitFor();
@@ -708,7 +991,7 @@ test('numbered saved slots reuse loaded and discarded tabs, follow reorder acros
     await page.locator('#spaces [data-key="s:space-personal"]').click();
     await numberedCommand(page, 0);
     await page.waitForFunction(() => window.fx.tabs.find(tab => tab.active)?.id === 8);
-    assert.equal(await page.locator('#space-name').textContent(), 'Personal', 'global favorite does not switch spaces');
+    assert.equal(await page.getByRole('tab', { name: /^Personal,/, selected: true }).count(), 1, 'global favorite does not switch spaces');
     assert.equal(await numberedCommand(page, 4), false, 'pins belong to the active space');
     await page.evaluate(async () => {
       const store = window.fx.local['workspace.v1'];

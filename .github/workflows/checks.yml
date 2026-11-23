@@ -133,8 +133,8 @@ jobs:
           node tests/ai/panel-browser.mjs
           node --test tests/ai/browser-theme-browser.test.mjs tests/ai/clipboard-image-browser.test.mjs
           node tests/ai/research-browser.mjs
-          node --test tests/ai/workspace-browser.test.mjs tests/ai/workspace-folder-colors-browser.test.mjs
-          node --test --test-concurrency=2 tests/ai/ui-polish-browser.test.mjs tests/ai/settings-redesign-browser.test.mjs tests/ai/newtab-browser.test.mjs tests/ai/workspace-frame.test.mjs
+          node --test tests/ai/workspace-browser.test.mjs tests/ai/workspace-folder-colors-browser.test.mjs tests/ai/workspace-chrome.test.mjs
+          node --test --test-concurrency=2 tests/ai/ui-polish-browser.test.mjs tests/ai/settings-redesign-browser.test.mjs tests/ai/newtab-browser.test.mjs tests/ai/experiments-browser.test.mjs tests/ai/workspace-frame.test.mjs
           node --test tests/ai/windows-component.test.mjs
           node --test tests/sync/setup-browser.test.mjs
           node tests/ai/browser-page.mjs

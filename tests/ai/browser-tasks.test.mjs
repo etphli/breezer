@@ -135,3 +135,30 @@ test('the worker sends measured browser stats to the panel and gives the provide
   assert.equal(fake.calls.length, callsAfter);
   assert.equal(fake.calls.some(([call]) => call === 'capture' || call === 'attach'), false);
 });
+
+test('a captured PDF viewport reaches the provider as a read-only image without the local file path', async () => {
+  const fake = fakeChrome();
+  fake.setTab({ url: 'file:///disposable/private-sheet.pdf', incognito: false });
+  installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init', windowId: 3 });
+  await tick();
+  const screenshot = 'data:image/jpeg;base64,AA==';
+  const request = { ...chat, tabId: 7, includeContext: true, pdfView: screenshot };
+  port.onMessage.emit(request);
+  await tick();
+  const native = fake.native.sent.at(-1);
+  assert.deepEqual(native.context, { kind: 'pdf-view', screenshot });
+  assert.doesNotMatch(JSON.stringify(native), /file:|private-sheet/);
+  assert.deepEqual(allowedTools(validateChat(native)), []);
+  assert.doesNotMatch(JSON.stringify(fake.calls), /"capture"|"attach"|"script"/);
+  assert.match(promptText(native), /visible part of the current PDF/);
+  assert.throws(() => validateChat({ ...native, control: true }), /Invalid read-only PDF context/);
+  assert.throws(() => validateChat({ ...native, context: { ...native.context, title: 'file.pdf' } }), /Invalid read-only PDF context/);
+  fake.native.onMessage.emit({ type: 'complete', id: native.id });
+
+  port.onMessage.emit({ ...request, id: 'different-tab', tabId: 8 });
+  await tick();
+  assert.match(port.sent.at(-1).error, /active PDF tab changed/);
+});

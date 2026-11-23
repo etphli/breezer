@@ -537,6 +537,46 @@ test('inactive tab updates do not query the active page or start the native host
   assert.equal(port.sent.filter(message => message.type === 'context').length, 1);
 });
 
+test('refreshing just the model catalog never restores a pending conversation', async () => {
+  const fake = fakeChrome();
+  const reads = [];
+  const pending = { type: 'turn-state', id: 'previous-conversation', text: 'Previous reply' };
+  fake.api.storage.session = { async get(key) { reads.push(key); return { [key]: pending }; } };
+  installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init', windowId: 3 });
+  await tick();
+  assert.deepEqual(reads, ['breezer-pending-reply-3']);
+  assert.deepEqual(port.sent.filter(message => message.type === 'turn-state'), [pending]);
+  port.onMessage.emit({ type: 'refresh-models' });
+  await tick();
+  assert.deepEqual(fake.native.sent, [{ type: 'init' }, { type: 'init' }]);
+  assert.deepEqual(port.sent.filter(message => message.type === 'turn-state'), [pending]);
+  assert.deepEqual(reads, ['breezer-pending-reply-3']);
+});
+
+test('model catalog refresh can retry a native connection that failed at startup', async () => {
+  const fake = fakeChrome();
+  const connect = fake.api.runtime.connectNative;
+  let attempts = 0;
+  fake.api.runtime.connectNative = name => {
+    if (++attempts === 1) throw new Error('Helper was unavailable');
+    return connect(name);
+  };
+  installBackground(fake.api);
+  const port = panel();
+  fake.api.runtime.onConnect.emit(port);
+  port.onMessage.emit({ type: 'init', windowId: 3 });
+  await tick();
+  assert.equal(port.sent.find(message => message.type === 'error')?.error, 'Helper was unavailable');
+  assert.deepEqual(fake.native.sent, []);
+  port.onMessage.emit({ type: 'refresh-models' });
+  await tick();
+  assert.equal(attempts, 2);
+  assert.deepEqual(fake.native.sent, [{ type: 'init' }]);
+});
+
 test('a delayed metadata query cannot overwrite a newer active page', async () => {
   const fake = fakeChrome();
   installBackground(fake.api);

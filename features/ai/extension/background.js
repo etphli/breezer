@@ -98,14 +98,15 @@ import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
+import { applyPersonality, readExperiments } from './experiments.js';
 import { readBrowserStats } from './browser-stats.js';
 import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
 import { installTranslation } from './translation-background.js';
-import { HAS_APP_UPDATER, HAS_NATIVE_HELPER } from './platform.js';
+import { HAS_APP_UPDATER, HAS_NATIVE_HELPER, NATIVE_HOST } from './platform.js';
 import { readDashboardPreference } from './dashboard-preference.js';
 
-export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
+export { NATIVE_HOST };
 // Extension-local copy of the helper's Organato switches. The helper's file stays
 // the source of truth; this copy lets new tabs honour "off" without starting it
 // and lets open new tabs follow a change made in Settings or setup.
@@ -535,6 +536,13 @@ export function installBackground(api) {
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
     const browserTask = message.browserTask;
+    const pdfView = message.pdfView;
+    if (pdfView !== undefined && (typeof pdfView !== 'string' || pdfView.length > 2 * 1024 * 1024
+        || !/^data:image\/jpeg;base64,[a-zA-Z0-9+/]+={0,2}$/.test(pdfView)
+        || !Number.isInteger(message.tabId) || message.includeContext !== true || message.control === true
+        || browserTask !== undefined || message.researchSources !== undefined)) {
+      throw new Error('Invalid PDF viewport. Open the PDF and send again.');
+    }
     if (browserTask !== undefined && (!['stats', 'theme'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('Browser stats and theme design require page access and research to be off.');
     if (runFor(panel)) await cancel(runFor(panel));
     if (message.control === true && controlRun()) await cancel(controlRun(), 'Browser control moved to another tab.', 'browser-control');
@@ -568,7 +576,14 @@ export function installBackground(api) {
         if (!researchSources.some(source => source.status === 'available' && source.text)) throw new Error('No source text is available. Select loaded tabs and try again.');
         run.user.sourceMetadata = researchSources.map(({ text, ...source }) => source);
       }
-      if (run.includeContext) {
+      if (pdfView) {
+        const [active] = await api.tabs.query({ active: true, windowId: panel.windowId });
+        ensureActive(run);
+        if (active?.id !== message.tabId || active.incognito !== false) {
+          throw new Error('The active PDF tab changed before sending.');
+        }
+        context = { kind: 'pdf-view', screenshot: pdfView };
+      } else if (run.includeContext) {
         const tab = await currentPage(panel);
         if (Number.isInteger(message.tabId) && tab?.id !== message.tabId) throw new Error('The active page changed before it could be shared. Send again from the page you want to share.');
         run.tab = tab;
@@ -581,14 +596,20 @@ export function installBackground(api) {
         context = await tools.snapshot(tab, run.session, true, () => current(run));
         ensureActive(run);
       }
-      const native = connectNative(panel);
+      const personal = await readExperiments(api);
+      const profile = applyPersonality({
+        name: String(message.profile?.name || '').slice(0, 100),
+        context: String(message.profile?.context || '').slice(0, 20_000),
+      }, personal);
+      profile.context = profile.context.slice(0, 20_000);
       ensureActive(run);
+      const native = connectNative(panel);
       native.postMessage({
         type: 'chat', id: run.id, provider: message.provider, model: message.model,
         ...(message.reasoning !== undefined ? { reasoning: message.reasoning } : {}),
         ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
         message: message.message, attachments: message.attachments, history,
-        profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
+        profile,
         ...(researchSources ? { researchSources } : {}),
         ...(browserTask ? { browserTask } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
@@ -622,6 +643,12 @@ export function installBackground(api) {
     const run = runFor(panel);
     if (run?.reader === panel && run.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
   };
+  const requestModelCatalog = panel => {
+    if (panel.closed) return;
+    const native = connectNative(panel);
+    try { native.postMessage({ type: 'init' }); }
+    catch (error) { releaseNative(panel); throw error; }
+  };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito || port.sender?.url !== api.runtime.getURL('panel.html')) return;
@@ -638,12 +665,12 @@ export function installBackground(api) {
             await tools.verifyGrant(tab);
             void contextMemory.observeGranted(tab);
             if (!panel.closed) await restoreTurn(panel);
-            if (!panel.closed) {
-              const native = connectNative(panel);
-              try { native.postMessage({ type: 'init' }); } catch (error) { releaseNative(panel); throw error; }
-            }
           })();
           await panel.ready;
+          requestModelCatalog(panel);
+        } else if (message.type === 'refresh-models') {
+          await panel.ready;
+          if (Number.isInteger(panel.windowId)) requestModelCatalog(panel);
         } else if (message.type === 'research-begin') {
           await panel.ready;
           panel.researchDraft = { id: message.id, selection: researchSelection(message.sources), invalidated: false };

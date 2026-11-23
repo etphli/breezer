@@ -3,6 +3,12 @@ export function installFixture({ colorMode, theme, initialLocal = {} }) {
   const load = (key, fallback) => JSON.parse(localStorage.getItem(key) || 'null') ?? fallback;
   const fx = { local: load('fx-local', initialLocal), appearance: load('fx-appearance', null), calls: [], ports: {}, listeners: [] };
   fx.context = { enabled: false, providerConsent: false, sites: [], habits: [], suggestions: [], retentionDays: 7 };
+  fx.providers = [{ id: 'codex', available: true, authenticated: true, models: [
+    { id: 'gpt-6.2-sol', label: 'GPT-6.2 Sol' },
+    { id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol' },
+    { id: 'gpt-6.2-astra', label: 'GPT-6.2 Astra' },
+    { id: 'gpt-6-luna', label: 'GPT-6 Luna' },
+  ] }];
   fx.appearance ??= { layout: 'sidebar', sidebarMode: 'expanded', theme, colorMode, showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true };
   window.fx = fx;
   const save = () => { localStorage.setItem('fx-local', JSON.stringify(fx.local)); localStorage.setItem('fx-appearance', JSON.stringify(fx.appearance)); };
@@ -29,6 +35,11 @@ export function installFixture({ colorMode, theme, initialLocal = {} }) {
       getURL: (path) => `${location.origin}/${path}`,
       getManifest: () => ({ version: '1.1.0' }),
       onMessage: event(),
+      async sendNativeMessage(host, message) {
+        fx.calls.push(['sendNativeMessage', host, message]);
+        if (fx.failModelDiscovery) throw new Error('Fixture helper disconnected');
+        return { type: 'status', providers: structuredClone(fx.providers) };
+      },
       connect({ name }) {
         const port = { name, sent: [], onMessage: event(), onDisconnect: event(), postMessage(message) { this.sent.push(message); }, disconnect() {} };
         port.reply = (message) => port.onMessage.list.forEach((fn) => fn(structuredClone(message)));

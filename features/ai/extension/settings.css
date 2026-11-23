@@ -220,6 +220,8 @@ body.route-settings {
   background: var(--set-control) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 6.5 3.5 3.5 3.5-3.5' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 8px center / 14px;
   appearance: none;
 }
+#default-ai-model { max-width: 60%; text-overflow: ellipsis; }
+@media (max-width: 560px) { #default-ai-model { min-width: 0; max-width: 100%; } }
 .setting-group > .setting-row > input:is([type="password"], [type="text"], [type="url"]) {
   width: min(260px, 100%);
   height: 30px;
@@ -680,3 +682,195 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
 [data-password-import-guide] li + li { margin-top: 14px; }
 [data-password-import-guide] li strong { display: block; margin-bottom: 3px; font-weight: 600; color: var(--ink); }
 [data-password-import-guide] li span { color: var(--muted); line-height: 1.5; }
+
+/* ------------------------------------------------------------ experiments */
+
+.experiments .experiment-group-title { margin: 20px 0 8px; color: var(--muted); font-size: 13px; line-height: 18px; font-weight: 600; }
+.experiments .section-note + .experiment-group-title { margin-top: 4px; }
+/* Options that only apply when the New Tab box is on sit one step in. */
+.experiment-group > .experiment-child { padding-left: 32px; }
+.experiment-personality { flex-wrap: wrap; row-gap: 10px; }
+.experiment-segmented { flex-wrap: wrap; }
+.experiment-note { margin: 0; padding: 10px 16px 12px; color: var(--muted); font-size: 13px; line-height: 18px; }
+@media (max-width: 640px) {
+  .experiment-personality { flex-direction: column; align-items: stretch; }
+  .experiment-group > .experiment-child { padding-left: 26px; }
+}
+
+/* Breezer looks in the theme picker: wider tiles after the six tones, each a
+   miniature of the look's New Tab (sidebar rail, Ask box and art) in the
+   current colour mode. The art matches newtab.css, drawn at preview scale. */
+.swatches:has(.swatch-look) { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.swatches:has(.swatch-look) > .swatch { grid-column: span 4; }
+.swatches:has(.swatch-look) > .swatch-look { grid-column: span 6; }
+.looks-note { grid-column: 1 / -1; margin: 6px 0 -6px; color: var(--muted); font-size: 12.5px; }
+.swatch-look .swatch-name { display: block; }
+.swatch-about { display: block; margin-top: -4px; padding-left: 2px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+.swatches[aria-busy="true"] .swatch-look { cursor: progress; }
+
+.look-preview { --lp-ink: #ecebe7; --lp-pane: #19191b; --lp-edge: rgb(255 255 255 / .08); --lp-send: #ecebe7; --lp-rail: rgb(255 255 255 / .05); }
+.swatch .look-preview { aspect-ratio: 2.6 / 1; background: var(--lp-art), var(--lp-field); }
+.look-preview[data-look="charcoal"] {
+  --lp-field: linear-gradient(180deg, #0b0b0c, #121213);
+  --lp-art:
+    radial-gradient(ellipse 30% 9% at 60% 72%, rgb(236 232 220 / .3), transparent 72%),
+    radial-gradient(ellipse 80% 40% at 60% 112%, transparent 74%, rgb(236 232 220 / .7) 77%, rgb(236 232 220 / .12) 82%, transparent 86%),
+    radial-gradient(circle at 34% 16%, rgb(240 238 230 / .8) 0 .7px, transparent 1.2px),
+    radial-gradient(circle at 82% 10%, rgb(240 238 230 / .8) 0 .8px, transparent 1.3px),
+    radial-gradient(circle at 66% 30%, rgb(240 238 230 / .6) 0 .6px, transparent 1.1px);
+}
+.look-preview[data-look="plum"] {
+  --lp-ink: #f1e8f4; --lp-pane: rgb(40 27 48 / .9); --lp-edge: rgb(240 220 250 / .1); --lp-send: #f1e8f4;
+  --lp-field: linear-gradient(180deg, #120b18, #1c1124 50%, #2b1832);
+  --lp-art:
+    radial-gradient(circle, rgb(222 180 240 / .32) 0 .6px, transparent 1px) 0 0 / 3px 3px,
+    radial-gradient(ellipse 60% 40% at 16% 100%, rgb(160 92 170 / .3), transparent 72%);
+}
+.look-preview[data-look="plum"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(158deg, rgb(24 14 30 / .0) 10%, rgb(24 14 30 / .78) 30%, rgb(24 14 30 / .9) 52%, rgb(24 14 30 / .2) 76%, transparent 90%);
+  pointer-events: none;
+}
+.look-preview[data-look="sage"] {
+  --lp-ink: #1b2420; --lp-pane: rgb(250 252 250 / .62); --lp-edge: rgb(255 255 255 / .75); --lp-send: #1d2622; --lp-rail: rgb(255 255 255 / .3);
+  --lp-field: #c8d3cc;
+  --lp-art: radial-gradient(42% 60% at 16% 22%, #a7b9ad, transparent 72%), radial-gradient(48% 60% at 86% 84%, #afc0b5, transparent 72%), radial-gradient(30% 40% at 72% 14%, #e2e9e4, transparent 72%);
+}
+.look-preview[data-look="umber"] {
+  --lp-ink: #f3e7dd; --lp-pane: #281b14; --lp-edge: rgb(255 230 210 / .08); --lp-send: #e3a37d;
+  --lp-field: linear-gradient(180deg, #110b08, #1b120c 46%, #2e180f);
+  --lp-art:
+    radial-gradient(ellipse 46% 16% at 34% 102%, #120b08 97%, transparent 100%),
+    radial-gradient(ellipse 50% 20% at 86% 106%, #1d120c 97%, transparent 100%),
+    radial-gradient(ellipse 50% 40% at 62% 100%, rgb(222 124 72 / .55), transparent 72%);
+}
+:root[data-scheme="light"] .look-preview[data-look="charcoal"] {
+  --lp-ink: #19191b; --lp-pane: #fbfbfa; --lp-edge: rgb(0 0 0 / .08); --lp-send: #19191b; --lp-rail: rgb(0 0 0 / .04);
+  --lp-field: linear-gradient(180deg, #f1f1ef, #e4e4e1);
+  --lp-art: radial-gradient(ellipse 80% 40% at 60% 112%, transparent 74%, rgb(28 28 31 / .55) 77%, rgb(28 28 31 / .1) 82%, transparent 86%);
+}
+:root[data-scheme="light"] .look-preview[data-look="plum"] {
+  --lp-ink: #2b1832; --lp-pane: #fcf9fc; --lp-edge: rgb(43 24 50 / .08); --lp-send: #2b1832; --lp-rail: rgb(43 24 50 / .05);
+  --lp-field: linear-gradient(180deg, #f5f0f6, #e2d2e6);
+  --lp-art: radial-gradient(circle, rgb(91 58 110 / .24) 0 .6px, transparent 1px) 0 0 / 3px 3px, radial-gradient(ellipse 60% 40% at 16% 100%, rgb(170 120 190 / .25), transparent 72%);
+}
+:root[data-scheme="light"] .look-preview[data-look="plum"]::after { background: linear-gradient(158deg, transparent 10%, rgb(244 238 245 / .8) 30%, rgb(244 238 245 / .9) 52%, rgb(244 238 245 / .2) 76%, transparent 90%); }
+:root[data-scheme="dark"] .look-preview[data-look="sage"] {
+  --lp-ink: #e5ece7; --lp-pane: rgb(38 49 43 / .66); --lp-edge: rgb(255 255 255 / .08); --lp-send: #dce6df; --lp-rail: rgb(255 255 255 / .04);
+  --lp-field: #161d19;
+  --lp-art: radial-gradient(42% 60% at 16% 22%, #2c3b33, transparent 72%), radial-gradient(48% 60% at 86% 84%, #33453b, transparent 72%), radial-gradient(30% 40% at 72% 14%, #24302a, transparent 72%);
+}
+:root[data-scheme="light"] .look-preview[data-look="umber"] {
+  --lp-ink: #2f1c13; --lp-pane: #fbf5f0; --lp-edge: rgb(47 28 19 / .08); --lp-send: #8a4a2c; --lp-rail: rgb(47 28 19 / .05);
+  --lp-field: linear-gradient(180deg, #f3e8df, #e3c6b2);
+  --lp-art:
+    radial-gradient(ellipse 46% 16% at 34% 102%, #d2ad97 97%, transparent 100%),
+    radial-gradient(ellipse 50% 20% at 86% 106%, #dcbda9 97%, transparent 100%),
+    radial-gradient(ellipse 50% 40% at 62% 100%, rgb(204 112 70 / .4), transparent 72%);
+}
+.look-preview[data-look="fathom"] {
+  --lp-ink: #e1ebf3; --lp-pane: #12233a; --lp-edge: rgb(200 230 255 / .1); --lp-send: #86bde6; --lp-rail: rgb(134 189 230 / .05);
+  --lp-field: linear-gradient(180deg, #07101a, #0c1c2d);
+  --lp-art: repeating-radial-gradient(circle at 94% 124%, transparent 0 9px, rgb(134 189 230 / .32) 9.5px, transparent 10.5px);
+}
+.look-preview[data-look="linen"] {
+  --lp-ink: #22201c; --lp-pane: #fffdf8; --lp-edge: rgb(110 90 60 / .12); --lp-send: #2c3d58; --lp-rail: rgb(110 90 60 / .05);
+  --lp-field: radial-gradient(120% 100% at 50% 38%, #f6f1e7 40%, #e2d6c0 100%);
+  --lp-art:
+    linear-gradient(97deg, transparent 57%, rgb(110 90 60 / .16) 61.6%, rgb(255 255 255 / .8) 62%, transparent 66%),
+    repeating-linear-gradient(0deg, rgb(120 100 70 / .09) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(120 100 70 / .06) 0 1px, transparent 1px 3px);
+}
+.look-preview[data-look="lune"] {
+  --lp-ink: #e9ebf2; --lp-pane: rgb(27 30 41 / .85); --lp-edge: rgb(230 236 255 / .1); --lp-send: #e9ebf2; --lp-rail: rgb(214 222 244 / .04);
+  --lp-field: radial-gradient(40% 70% at 84% 18%, #1c2030, transparent 72%), linear-gradient(180deg, #0b0d12, #13151e);
+  --lp-art: linear-gradient(transparent, transparent);
+  --moon-lit: #e9e8e3; --moon-mid: #a3a5b0; --moon-low: rgb(84 88 104 / .55); --moon-dots-blend: screen; --moon-dots-filter: contrast(18); --moon-dots-opacity: .8;
+}
+.look-preview[data-look="vesper"] {
+  --lp-ink: #f7e6ea; --lp-pane: #2a171e; --lp-edge: rgb(255 225 232 / .1); --lp-send: #f294a6; --lp-rail: rgb(246 146 166 / .05);
+  --lp-field: linear-gradient(180deg, #120709, #2a1219);
+  --lp-art:
+    radial-gradient(ellipse 44% 70% at 78% 20%, rgb(246 146 166 / .3), transparent 72%),
+    repeating-linear-gradient(-28deg, transparent 0, rgb(246 146 166 / .2) 3px 8px, transparent 11px 17px);
+}
+:root[data-scheme="light"] .look-preview[data-look="fathom"] {
+  --lp-ink: #0f2436; --lp-pane: #fbfdfe; --lp-edge: rgb(15 36 54 / .1); --lp-send: #1d5a8a; --lp-rail: rgb(15 36 54 / .04);
+  --lp-field: linear-gradient(180deg, #eef4f7, #d6e3eb);
+  --lp-art: repeating-radial-gradient(circle at 94% 124%, transparent 0 9px, rgb(29 90 138 / .34) 9.5px, transparent 10.5px);
+}
+:root[data-scheme="dark"] .look-preview[data-look="linen"] {
+  --lp-ink: #efe8da; --lp-pane: #29261f; --lp-edge: rgb(255 245 220 / .1); --lp-send: #b9c8de; --lp-rail: rgb(240 228 200 / .04);
+  --lp-field: radial-gradient(120% 100% at 50% 38%, #211e18 40%, #12100d 100%);
+  --lp-art:
+    linear-gradient(97deg, transparent 57%, rgb(0 0 0 / .4) 61.6%, rgb(255 245 220 / .08) 62%, transparent 66%),
+    repeating-linear-gradient(0deg, rgb(240 228 200 / .06) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgb(240 228 200 / .04) 0 1px, transparent 1px 3px);
+}
+:root[data-scheme="light"] .look-preview[data-look="lune"] {
+  --lp-ink: #161a24; --lp-pane: rgb(252 253 254 / .9); --lp-edge: rgb(22 26 36 / .1); --lp-send: #161a24; --lp-rail: rgb(22 26 36 / .04);
+  --lp-field: radial-gradient(40% 70% at 84% 18%, #f8f9fc, transparent 72%), linear-gradient(180deg, #f1f3f7, #dfe3eb);
+  --moon-lit: #ffffff; --moon-mid: #e2e6ee; --moon-low: rgb(206 212 226 / .35); --moon-dots-blend: multiply; --moon-dots-filter: contrast(18) invert(1); --moon-dots-opacity: .5;
+}
+:root[data-scheme="light"] .look-preview[data-look="vesper"] {
+  --lp-ink: #331920; --lp-pane: #fffafa; --lp-edge: rgb(51 25 32 / .1); --lp-send: #a1354f; --lp-rail: rgb(51 25 32 / .04);
+  --lp-field: linear-gradient(180deg, #f9f0f0, #ecd2d6);
+  --lp-art:
+    radial-gradient(ellipse 44% 70% at 78% 20%, rgb(238 150 162 / .45), transparent 72%),
+    repeating-linear-gradient(-28deg, transparent 0, rgb(236 120 142 / .26) 3px 8px, transparent 11px 17px);
+}
+/* Lune's preview: the New Tab moon in miniature, shaded disc and stippled edge. */
+.look-preview[data-look="lune"]::before,
+.look-preview[data-look="lune"]::after {
+  content: "";
+  position: absolute;
+  top: 6%;
+  right: 3%;
+  width: 14%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.look-preview[data-look="lune"]::before { background: radial-gradient(circle at 34% 32%, var(--moon-lit) 0, var(--moon-mid) 30%, var(--moon-low) 47%, transparent 63%); }
+.look-preview[data-look="lune"]::after {
+  background:
+    radial-gradient(closest-side, #6c6c6c, #000) 0 0 / 3px 3px,
+    radial-gradient(closest-side, #fff 84%, #000 100%),
+    radial-gradient(circle at 34% 32%, #fff 0, #c8c8c8 34%, #6a6a6a 52%, #303030 64%, #1c1c1c 72%, #121212 80%, #000 88%);
+  background-blend-mode: screen, multiply, normal;
+  filter: var(--moon-dots-filter);
+  mix-blend-mode: var(--moon-dots-blend);
+  opacity: var(--moon-dots-opacity);
+  -webkit-mask-image: radial-gradient(circle at 34% 32%, transparent 30%, #000 44%);
+  mask-image: radial-gradient(circle at 34% 32%, transparent 30%, #000 44%);
+}
+.look-preview .p-side { z-index: 1; top: 0; bottom: 0; left: 0; width: 22%; padding: 12% 5% 0; gap: 4px; background: var(--lp-rail); border-right: 1px solid var(--lp-edge); }
+.look-preview .p-row { height: 5px; background: color-mix(in srgb, var(--lp-ink) 22%, transparent); }
+.look-preview .p-row.active { background: color-mix(in srgb, var(--lp-ink) 45%, transparent); }
+.look-preview .p-compose {
+  position: absolute;
+  z-index: 1;
+  left: 36%;
+  right: 12%;
+  top: 36%;
+  height: 20%;
+  border-radius: 999px;
+  background: var(--lp-pane);
+  box-shadow: inset 0 0 0 1px var(--lp-edge), 0 6px 14px -8px rgb(0 0 0 / .5);
+}
+.look-preview[data-look="sage"] .p-compose { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.look-preview .p-compose i { position: absolute; right: 4%; top: 50%; width: 13%; aspect-ratio: 1; max-width: 18px; translate: 0 -50%; border-radius: 50%; background: var(--lp-send); }
+.look-status { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -8px 0 18px; padding: 8px 8px 8px 14px; border: 1px solid var(--set-edge); border-radius: 10px; background: var(--set-group); font-size: 13px; }
+.look-status[hidden] { display: none; }
+.look-cancel { flex: none; }
+@media (max-width: 560px) {
+  .swatches:has(.swatch-look) > .swatch-look { grid-column: span 6; }
+  .swatch .look-preview { aspect-ratio: 2 / 1; }
+  .swatch-about { display: none; }
+}
+@media (forced-colors: active) {
+  .look-preview { background: Canvas; }
+  .look-preview::after { display: none; }
+}

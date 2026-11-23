@@ -16,7 +16,7 @@ import { createServer } from 'node:http';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from './node_modules/playwright/index.mjs';
 
 const args = process.argv.slice(2);
@@ -54,9 +54,39 @@ const oldPreferences = freshProfile ? {} : {
 await mkdir(join(profile, 'Default'), { recursive: true });
 await writeFile(join(profile, 'Default/Preferences'), JSON.stringify(oldPreferences));
 
+function createPdfFixture() {
+  const page = '0.86 0.11 0.7 rg\n48 580 480 150 re f\n0 0 0 rg\nBT /F1 22 Tf 48 530 Td (Breezer PDF fixture) Tj ET\n';
+  const objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+    `<< /Length ${Buffer.byteLength(page)} >>\nstream\n${page}endstream`,
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offsets = objects.map((object, index) => {
+    const offset = Buffer.byteLength(pdf);
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+    return offset;
+  });
+  const xref = Buffer.byteLength(pdf);
+  pdf += `xref\n0 ${offsets.length + 1}\n0000000000 65535 f \n`;
+  for (const offset of offsets) pdf += `${String(offset).padStart(10, '0')} 00000 n \n`;
+  pdf += `trailer\n<< /Size ${offsets.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(pdf);
+}
+const pdfFixture = createPdfFixture();
+const pdfPath = join(profile, 'local fixture.pdf');
+await writeFile(pdfPath, pdfFixture);
+
 const titles = { alpha: 'Workspace fixture Alpha', beta: 'Workspace fixture Beta', gamma: 'Workspace fixture Gamma' };
 const server = createServer((request, response) => {
   const name = request.url.slice(1).split('?')[0];
+  if (name === 'pdf-document') {
+    response.setHeader('content-type', 'application/pdf');
+    response.end(pdfFixture);
+    return;
+  }
   response.setHeader('content-type', 'text/html');
   response.end(`<title>${titles[name] || 'Workspace fixture'}</title><main>Isolated Breezer workspace fixture: ${name}</main>`);
 });
@@ -267,8 +297,12 @@ try {
     observe('targetsAtPrecondition', (await targets()).map(({ type, url }) => ({ type, url })));
     throw new Precondition('chrome.breezerPrivate is absent in the Breezer AI service worker; this binary predates the native workspace.');
   }
-  assert.deepEqual(surface.breezerPrivate, ['authorizeCurrentPage', 'getAppearance', 'setAppearance', 'setPeekSources', 'setSidebarCollapsed']);
-  pass('privateApiSurface', 'exactly the 5 IDL methods are exposed to the component extension');
+  assert.deepEqual(surface.breezerPrivate, [
+    'authorizeCurrentPage', 'captureCurrentPdfContext', 'exchangeWorkspaceSync', 'focusLocationBar', 'getAppearance',
+    'getBrowserStats', 'getResearchTabs', 'isCurrentPdf', 'readResearchTab', 'readWorkspaceSync',
+    'setAppearance', 'setPeekSources', 'setSidebarCollapsed', 'toggleSplitView',
+  ]);
+  pass('privateApiSurface', 'the IDL methods are exposed to the component extension');
 
   const firstHosts = await waitFor('the native workspace host', async () => (await hostTargets()).length > 0 && hostTargets(), 20000)
     .catch(async error => {
@@ -591,6 +625,63 @@ try {
     : { unsupported: true, status: capture.status, stderr: capture.stderr.trim() });
   if (capture.status === 0) report.screenshots.push(regionPath);
 
+  // ---------------------------------------------------------------- current PDF context
+  const pdfCall = (name, tabId, options) => panel.evaluate(settle(privateCall(name, tabId)), options);
+  assert.deepEqual(await pdfCall('isCurrentPdf', alphaA), { ok: true, value: false });
+  assert.deepEqual(await pdfCall('captureCurrentPdfContext', alphaA, { userGesture: true }),
+    { ok: true, value: { isPdf: false } });
+  assert.deepEqual(await pdfCall('isCurrentPdf', alphaB), { ok: true, value: false });
+  assert.equal((await pdfCall('captureCurrentPdfContext', alphaB, { userGesture: true })).ok, false);
+  for (const [label, url] of [['online', fixture('pdf-document')], ['local', pathToFileURL(pdfPath).href]]) {
+    const tab = await worker.evaluate(options => chrome.tabs.create(options), { url, windowId: windowA, active: true });
+    await waitFor(`${label} built-in PDF viewer`, async () => {
+      const status = await pdfCall('isCurrentPdf', tab.id);
+      return status.ok && status.value;
+    });
+    if (label === 'online') {
+      await sleep(6000);
+      const attempt = await pdfCall('captureCurrentPdfContext', tab.id);
+      assert.equal(attempt.ok, false, 'PDF capture requires the panel’s Send gesture');
+      assert.match(attempt.error, /share the current PDF/);
+    }
+    const image = await waitFor(`${label} PDF viewport capture`, async () => {
+      const capture = await pdfCall('captureCurrentPdfContext', tab.id, { userGesture: true });
+      if (!capture.ok) throw new Error(capture.error);
+      return capture.value;
+    });
+    assert.deepEqual(Object.keys(image).sort(), ['imageDataUrl', 'isPdf']);
+    assert.equal(image.isPdf, true);
+    const prefix = 'data:image/jpeg;base64,';
+    assert.ok(image.imageDataUrl.startsWith(prefix));
+    const jpeg = Buffer.from(image.imageDataUrl.slice(prefix.length), 'base64');
+    assert.ok(jpeg.length > 100 && jpeg.length <= 2 * 1024 * 1024);
+    const pixels = await panel.evaluate(`(async () => {
+      const bytes = Uint8Array.from(atob(${JSON.stringify(image.imageDataUrl.slice(prefix.length))}), byte => byte.charCodeAt(0));
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/jpeg' }));
+      const { width, height } = bitmap;
+      const canvas = new OffscreenCanvas(width, height);
+      const context = canvas.getContext('2d');
+      context.drawImage(bitmap, 0, 0);
+      const { data } = context.getImageData(0, 0, width, height);
+      let fixtureColorPixels = 0;
+      for (let offset = 0; offset < data.length; offset += 4) {
+        if (data[offset] > 150 && data[offset + 1] < 90 && data[offset + 2] > 100) ++fixtureColorPixels;
+      }
+      bitmap.close();
+      return { width, height, fixtureColorPixels };
+    })()`);
+    assert.ok(pixels.width <= 1400 && pixels.height <= 1400);
+    assert.ok(pixels.fixtureColorPixels > 100, 'Capture must show the distinctive PDF fixture content');
+    const path = join(evidence, `${label}-pdf-viewport.jpg`);
+    await writeFile(path, jpeg);
+    report.screenshots.push(path);
+    await worker.evaluate(id => chrome.tabs.update(id, { active: true }), alphaA);
+    const inactive = await pdfCall('captureCurrentPdfContext', tab.id, { userGesture: true });
+    assert.equal(inactive.ok, false, 'Inactive PDFs must not be captured');
+    await worker.evaluate(id => chrome.tabs.remove(id), tab.id);
+  }
+  pass('activePdfContext', 'captured actual local and extensionless HTTP PDF pixels with a panel gesture and rejected inactive or foreign tabs');
+
   // ---------------------------------------------------------------- layout switch round trip
   const sidebarPageWidth = geometry.page.width;
   await settings.bringToFront();
@@ -659,19 +750,16 @@ try {
     assert.equal(saved.activeSpaceId, id);
   }
   pass('emptySpaceDotsViaRenderer', 'held clicks selected both Settings-created empty spaces, opened real tabs, and returned to the original space; physical macOS pointer routing is unverified');
-  const initiallyPinned = (await appearance()).alwaysShowSidebar;
-  for (const pinned of [!initiallyPinned, initiallyPinned]) {
-    await hostA.click(`document.getElementById('collapse')`, { holdMs: 120 });
-    await waitFor('footer visibility preference persisted', async () => (await appearance()).alwaysShowSidebar === pinned);
-    await waitFor('footer pin state reflected', () => hostA.evaluate(`document.querySelector('#collapse').getAttribute('aria-pressed') === '${pinned}'`));
-    assert.equal((await appearance()).sidebarMode, 'expanded', 'Pin control must not switch to compact mode');
-  }
-  await hostA.click(`document.getElementById('add-space')`, { holdMs: 120 });
-  await waitFor('footer plus created a space', async () => (await spaceIds()).length === originalSpaces.length + 3);
-  await waitFor('footer plus begins space rename', () => hostA.evaluate(`Boolean(document.querySelector('#space-name input'))`));
-  await hostA.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-  await hostA.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-  pass('footerControlsViaRenderer', 'permanent visibility toggled both ways through the native API without changing sidebar mode; plus created a space; physical pointer routing remains unverified');
+  assert.equal(await hostA.evaluate(`document.getElementById('collapse').hidden`), true, 'The native toolbar owns sidebar visibility');
+  await hostA.click(`document.querySelector('#spaces [aria-selected="true"]')`, { button: 'right' });
+  await waitFor('space menu expanded', () => hostA.evaluate(`document.querySelector('#spaces [aria-selected="true"]').getAttribute('aria-expanded') === 'true'`));
+  await hostA.click(`[...document.querySelectorAll('#menu [role="menuitem"]')].find(item => item.textContent === 'New space')`, { holdMs: 120 });
+  await waitFor('space editor focuses name', () => hostA.evaluate(`document.activeElement.matches('#menu input[aria-label="Space name"]')`));
+  await hostA.click(`document.querySelector('#menu input[aria-label="Code"]')`, { holdMs: 120 });
+  await hostA.click(`document.querySelector('#menu button[type="submit"]')`, { holdMs: 120 });
+  await waitFor('space editor created a space with the selected icon', async () => (await spaceIds()).length === originalSpaces.length + 3
+    && await hostA.evaluate(`document.querySelector('#spaces [aria-selected="true"] .dot').dataset.icon === 'code'`));
+  pass('spacePickerViaRenderer', 'the picker created a space and focused its name; toolbar visibility and physical pointer routing require desktop verification');
 
   // ---------------------------------------------------------------- window close releases its host
   await worker.evaluate(id => chrome.windows.remove(id), windowB);

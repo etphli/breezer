@@ -1,4 +1,4 @@
-// Compiled-app integration test for favourite-tab Peek.
+// Compiled-app integration test for favourite-tab Peek and Split View.
 //
 //   node tests/ai/peek-native.mjs /absolute/path/Breezer.app
 //
@@ -11,10 +11,11 @@
 // Verified here: which links open a peek, that the favourite tab stays on its
 // page, that the peek is a real page target outside the tab strip, and that
 // Escape, window.close() and switching tabs destroy it. UI DevTools directly
-// exercises native Expand, Close and backdrop handlers in this disposable app.
+// exercises native Expand, Split, Close and backdrop handlers in this app.
+// Also drives the sidebar menu to pair existing tabs and exit the split.
 // This does not establish physical macOS pointer routing or native hit-testing.
 //
-// Exit codes: 0 all checks passed, 1 a check failed, 2 the build lacks Peek.
+// Exit codes: 0 all checks passed, 1 a check failed, 2 the build lacks a required API.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -127,7 +128,9 @@ try {
   const worker = context.serviceWorkers().find(item => item.url() === `${origin}/background.js`)
     || await context.waitForEvent('serviceworker', { predicate: item => item.url() === `${origin}/background.js`, timeout: 30000 });
   const surface = await worker.evaluate(() => Object.keys(chrome.breezerPrivate || {}).sort());
-  if (!surface.includes('setPeekSources')) throw new Precondition(`chrome.breezerPrivate.setPeekSources is missing (surface: ${surface.join(', ')})`);
+  for (const method of ['setPeekSources', 'toggleSplitView']) {
+    if (!surface.includes(method)) throw new Precondition(`chrome.breezerPrivate.${method} is missing (surface: ${surface.join(', ')})`);
+  }
   uiSocket = new WebSocket(`ws://127.0.0.1:${uiPort}/0`);
   await new Promise((resolve, reject) => { uiSocket.onopen = resolve; uiSocket.onerror = reject; });
   uiSocket.onmessage = event => {
@@ -187,13 +190,16 @@ try {
     return {
       send, evaluate,
       // Trusted renderer click: real input events with user activation.
-      async click(selector, modifiers = 0) {
+      async click(selector, { modifiers = 0, button = 'left', label } = {}) {
         const box = await waitFor(`click target ${selector}`, () => evaluate(`(() => {
-          const r = document.querySelector(${JSON.stringify(selector)})?.getBoundingClientRect();
+          const nodes = [...document.querySelectorAll(${JSON.stringify(selector)})];
+          const node = ${JSON.stringify(label ?? null)} === null ? nodes[0]
+            : nodes.find(node => node.textContent.trim() === ${JSON.stringify(label ?? null)});
+          const r = node?.getBoundingClientRect();
           return r && r.width > 0 ? { x: r.x + r.width / 2, y: r.y + r.height / 2 } : null; })()`));
-        const base = { x: box.x, y: box.y, button: 'left', clickCount: 1, modifiers };
+        const base = { x: box.x, y: box.y, button, clickCount: 1, modifiers };
         await send('Input.dispatchMouseEvent', { ...base, type: 'mouseMoved', button: 'none' });
-        await send('Input.dispatchMouseEvent', { ...base, type: 'mousePressed', buttons: 1 });
+        await send('Input.dispatchMouseEvent', { ...base, type: 'mousePressed', buttons: button === 'right' ? 2 : 1 });
         await send('Input.dispatchMouseEvent', { ...base, type: 'mouseReleased', buttons: 0 });
       },
       async key(key, code, windowsVirtualKeyCode) {
@@ -288,6 +294,80 @@ try {
   await worker.evaluate(id => chrome.tabs.remove(id), expandedTab.id);
   await worker.evaluate(id => chrome.tabs.update(id, { active: true }), favourite.id);
 
+  // Both renderers remain visible and independently interactive in a native split.
+  const viewport = session => session.evaluate('({width:innerWidth,height:innerHeight,visible:!document.hidden})');
+  const fullWidth = (await viewport(page)).width;
+  const inSplit = tab => Number.isInteger(tab?.splitViewId) && tab.splitViewId >= 0;
+  const getTab = id => worker.evaluate(id => chrome.tabs.get(id), id);
+  async function splitPair(first, second) {
+    return waitFor('both original tabs share a split', async () => {
+      const [a, b] = await Promise.all([getTab(first), getTab(second)]);
+      return inSplit(a) && a.splitViewId === b.splitViewId;
+    });
+  }
+  async function splitAction(row, label) {
+    await host.click(row, { button: 'right' });
+    await host.click('#menu:not([hidden]) [role="menuitem"]', { label });
+  }
+  const sideUrl = new URL('/target?via=sidebar-split', home).href;
+  const sideTab = await worker.evaluate(url => chrome.tabs.create({ url, active: false }), sideUrl);
+  const sideTarget = await waitFor('second independent tab', async () =>
+    (await worker.evaluate(() => chrome.debugger.getTargets())).find(target => target.tabId === sideTab.id && target.url === sideUrl));
+  const side = await attach(sideTarget.id);
+  await splitAction(`#today [data-key="t:${sideTab.id}"]`, 'Split View');
+  await splitPair(favourite.id, sideTab.id);
+  assert.equal((await getTab(favourite.id)).active, true, 'pairing keeps the active tab');
+  await waitFor('both page viewports are side by side', async () => {
+    const [a, b] = await Promise.all([viewport(page), viewport(side)]);
+    return a.visible && b.visible && a.width < fullWidth && b.width < fullWidth &&
+      a.width + b.width > fullWidth * 0.75 && Math.abs(a.height - b.height) < 24;
+  });
+  await page.click('#draft');
+  await page.send('Input.insertText', { text: 'source pane' });
+  await side.click('#preview-draft');
+  await side.send('Input.insertText', { text: 'second pane' });
+  assert.equal(await page.evaluate('document.getElementById("draft").value'), 'source pane');
+  assert.equal(await side.evaluate('document.getElementById("preview-draft").value'), 'second pane');
+  await splitAction('#favorites .tile', 'Exit Split View');
+  await waitFor('split exits with both tabs present', async () =>
+    !(inSplit(await getTab(favourite.id)) || inSplit(await getTab(sideTab.id))));
+  assert.equal((await tabs()).length, baseline + 1);
+  assert.equal((await getTab(sideTab.id)).url, sideUrl);
+  await worker.evaluate(id => chrome.tabs.remove(id), sideTab.id);
+  await worker.evaluate(id => chrome.tabs.update(id, { active: true }), favourite.id);
+  pass('sidebarSplitKeepsBothTabs', 'paired two live tabs, used inputs in both panes, and exited with both tab IDs intact');
+
+  // A standalone selected row opens the browser's second-pane chooser.
+  const tabsBeforeChooser = new Set((await tabs()).map(tab => tab.id));
+  await splitAction('#favorites .tile', 'Split View');
+  const chooser = await waitFor('native second-pane chooser', async () => {
+    const source = await getTab(favourite.id);
+    return inSplit(source) && (await tabs()).find(tab =>
+      !tabsBeforeChooser.has(tab.id) && tab.splitViewId === source.splitViewId &&
+      [tab.url, tab.pendingUrl].some(url => url === 'chrome://tab-search.top-chrome/split_new_tab_page.html'));
+  });
+  await worker.evaluate(id => chrome.tabs.remove(id), chooser.id);
+  await worker.evaluate(id => chrome.tabs.update(id, { active: true }), favourite.id);
+  pass('sidebarSplitChooser', 'the selected tab stayed in place while Chromium opened its chooser beside it');
+
+  // The preview promotes the same page into the second pane.
+  await page.click('#blank');
+  const splitting = await waitFor('preview for split promotion', () => peekTarget(/\/target\?via=blank$/));
+  const splittingSession = await attach(splitting.targetId);
+  await waitFor('preview input loaded for split', () => splittingSession.evaluate('Boolean(document.getElementById("preview-draft"))'));
+  await splittingSession.evaluate(`document.getElementById('preview-draft').value='split draft';globalThis.peekMarker='split live page';`);
+  await nativeClick('BreezerPeekSplit');
+  const promoted = await waitFor('Peek becomes a browser tab', async () =>
+    (await tabs()).find(tab => /\/target\?via=blank$/.test(tab.url || tab.pendingUrl)));
+  await splitPair(favourite.id, promoted.id);
+  assert.equal((await targets()).find(target => target.targetId === splitting.targetId)?.url, promoted.url);
+  assert.deepEqual(await splittingSession.evaluate('({draft:document.getElementById("preview-draft").value,marker:globalThis.peekMarker})'),
+    { draft: 'split draft', marker: 'split live page' });
+  assert.equal((await getTab(favourite.id)).url, home);
+  await worker.evaluate(id => chrome.tabs.remove(id), promoted.id);
+  await worker.evaluate(id => chrome.tabs.update(id, { active: true }), favourite.id);
+  pass('peekSplitsLivePage', 'native Peek Split promoted the existing page and its draft beside the source tab');
+
   // ------------------------------------------------------------ window.open opens a peek; window.close destroys it
   await page.click('#open');
   const opened = await waitFor('peek for window.open', () => peekTarget(/\/target\?via=open$/));
@@ -309,7 +389,7 @@ try {
   pass('crossSiteContainment', 'a cross-site link click kept the favourite on its page and opened a peek; switching tabs destroyed it');
 
   // ------------------------------------------------------------ background-tab clicks keep normal behaviour
-  await page.click('#blank', 4 /* Meta */);
+  await page.click('#blank', { modifiers: 4 /* Meta */ });
   await waitFor('Cmd-click opens a background tab', async () => (await tabs()).length === baseline + 1);
   assert.equal(await peekTarget(/via=blank$/), null, 'Cmd-click must not open a peek');
   const background = (await tabs()).find(tab => /via=blank$/.test(tab.url || tab.pendingUrl));

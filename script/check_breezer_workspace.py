@@ -289,10 +289,18 @@ def check_peek(tree, added, idl, api):
             "Peek must be limited to marked, active, regular-profile tabs")
     require("IsEscape(event)" in peek.split("PreHandleKeyboardEvent(", 1)[1].split("}", 1)[0],
             "Escape must close a peek before the focused page sees it")
-    expand = peek.split("  void Expand() {", 1)[1].split("\n  }\n", 1)[0]
-    require("AddNewContents(&source, std::move(contents)" in expand and
+    expand = peek.split("  void Expand(WindowOpenDisposition disposition) {", 1)[1].split("\n  }\n", 1)[0]
+    require("AddNewContents(&source, std::move(contents), url, disposition" in expand and
             "LoadURL" not in expand and "Reload" not in expand,
-            "Expand must move the live WebContents without loading it again")
+            "Peek promotion must move the live WebContents without loading it again")
+    require("BreezerPeekSplit" in peek and
+            "WindowOpenDisposition::NEW_SPLIT_VIEW" in peek and
+            "!source_tab->IsSplit()" in peek,
+            "Peek must offer the browser's split disposition only for a standalone source")
+    require("FormatUrlForSecurityDisplay(url)" in peek and
+            "net::IsCertStatusError(ssl.cert_status)" in peek and
+            "content::SSLStatus::NORMAL_CONTENT" in peek,
+            "Peek must show a security-formatted origin and warn about compromised connections")
     detach = peek.split("  void Detach() {", 1)[1].split("\n  }\n", 1)[0]
     require("InvalidateWeakPtrs()" in detach and "RemoveAllObservations()" in detach and
             "tab_subscriptions_.clear()" in detach and "SetDelegate(nullptr)" in detach,
@@ -313,6 +321,37 @@ def check_peek(tree, added, idl, api):
             "GetCallerBrowser()" in setter and "kMaxPeekSources" in setter and
             "breezer_peek::SetSource(" in setter,
             "setPeekSources must be bounded to the calling sidebar's own window")
+
+    for function in ("toggleSplitView", "focusLocationBar"):
+        require(f"static void {function}(" in idl,
+                f"Private API IDL does not declare {function}")
+        class_name = function[0].upper() + function[1:]
+        body = api.split(f"BreezerPrivate{class_name}Function::RunFunction()", 1)[1].split("\n}", 1)[0]
+        require("!user_gesture()" in body and "GetCallerBrowser()" in body and
+                "source_url().GetPath() != kWorkspacePath" in body,
+                f"{function} must require a gesture from the calling sidebar")
+    require("tab_strip->RemoveSplit(" in api and "tab_strip->AddToNewSplit(" in api and
+            "chrome::NewSplitTab(browser, split_tabs::SplitTabLayout::kSideBySide" in api,
+            "Split View must pair, show the chooser and exit through Chromium's native model")
+
+    pdf_context = added[
+        "chrome/browser/extensions/api/breezer_private/pdf_context_api.cc"
+    ].read_text()
+    for function in ("isCurrentPdf", "captureCurrentPdfContext"):
+        require(f"static void {function}(long tabId," in idl,
+                f"Private API IDL does not declare {function}")
+    pdf_eligibility = pdf_context.split("BreezerPrivateIsCurrentPdfFunction::RunFunction()", 1)[1].split("\n}", 1)[0]
+    pdf_capture = pdf_context.split("BreezerPrivateCaptureCurrentPdfContextFunction::RunFunction()", 1)[1].split("\n}", 1)[0]
+    require("!user_gesture()" in pdf_capture and "user_gesture()" not in pdf_eligibility and
+            "GetActiveTab(GetCallerBrowser()" in pdf_capture and
+            "GetActiveTab(GetCallerBrowser()" in pdf_eligibility,
+            "PDF capture must require a gesture and only the calling panel's active tab")
+    require("FindFullPagePdfExtensionHost" in pdf_context and
+            "FindPdfChildFrame" in pdf_context and "pdf_frame->GetView()" in pdf_capture and
+            "view->CopyFromSurface(" in pdf_capture and "gfx::IntersectRects(" in pdf_capture and
+            "tab_document.AsRenderFrameHostIfValid()" in pdf_context and
+            "pdf_document.AsRenderFrameHostIfValid()" in pdf_context,
+            "PDF context must copy the trusted child viewport and revalidate both documents before returning")
 
 
 def main():

@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageOps
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import apply_breezer_branding as branding
+from apply_breezer_ai import replace
 from breezer_release import release_version
 from stage_breezer_ai import configure_installer
 
@@ -123,6 +124,17 @@ def apply_import_patch(tree):
         subprocess.run([*command, "-"], cwd=tree, input=patch_data, env=env, check=True)
 
 
+def use_cross_drive_rust_dependencies(tree):
+    replace(
+        tree, "build/rust/std/find_std_rlibs.py",
+        "    rustlib_dir = os.path.relpath(rustlib_dir, os.path.realpath(os.curdir))\n",
+        "    build_dir = os.path.realpath(os.curdir)\n"
+        "    # Keep rustc's absolute dependency path across volume junctions.\n"
+        "    if os.path.splitdrive(rustlib_dir)[0].lower() == os.path.splitdrive(build_dir)[0].lower():\n"
+        "        rustlib_dir = os.path.relpath(rustlib_dir, build_dir)\n",
+    )
+
+
 def apply(tree):
     branding.brand_product(tree, macos=False)
     brand_version(tree)
@@ -148,6 +160,7 @@ def apply(tree):
         subprocess.run([sys.executable, ROOT / script, *options, tree], env=env, check=True)
     apply_import_patch(tree)
     configure_installer(tree)
+    use_cross_drive_rust_dependencies(tree)
 
 
 if __name__ == "__main__":

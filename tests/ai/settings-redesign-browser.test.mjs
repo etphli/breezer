@@ -66,6 +66,7 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.equal(await current(page), 'General');
     assert.deepEqual(await visiblePages(page), ['general']);
     assert.equal(await page.locator('#settings-crumb').innerText(), 'General');
+    assert.equal(await page.evaluate(() => fx.calls.some(call => call[0] === 'sendNativeMessage')), false, 'General does not start model discovery');
     await page.screenshot({ path: join(evidence, 'settings-redesign-general-light.png') });
 
     // The sync module is mounted, and this browser fixture deliberately lacks
@@ -83,6 +84,24 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await page.locator('.nav-item[data-category="languages"]').waitFor();
     assert.equal(await page.locator('.nav-item[data-category="assistant"]').isVisible(), true, 'context settings mounted');
     await page.getByRole('link', { name: 'Assistant', exact: true }).click();
+    const defaultModel = page.getByRole('combobox', { name: 'Default model' });
+    await page.getByText('Automatic uses GPT-6.2 Sol.', { exact: true }).waitFor();
+    assert.deepEqual(await defaultModel.locator('option').allTextContents(), ['Automatic', 'GPT-6.2 Sol', 'GPT-6 Luna']);
+    await defaultModel.selectOption({ label: 'GPT-6 Luna' });
+    await page.waitForFunction(() => fx.local.breezerModel?.model === 'gpt-6-luna');
+    await page.reload();
+    await defaultModel.locator('option:checked').filter({ hasText: 'GPT-6 Luna' }).waitFor({ state: 'attached' });
+    await page.screenshot({ path: join(evidence, 'settings-ai-default-model.png') });
+    await page.evaluate(() => chrome.storage.local.set({ breezerModel: { provider: 'codex', model: 'gpt-6.2-sol' } }));
+    await defaultModel.locator('option:checked').filter({ hasText: 'GPT-6.2 Sol' }).waitFor({ state: 'attached' });
+    await page.evaluate(() => { fx.failModelDiscovery = true; });
+    await page.getByRole('button', { name: 'Refresh models' }).click();
+    await page.getByText('Couldn’t load models. Try refreshing.', { exact: true }).waitFor();
+    assert.equal(await defaultModel.inputValue(), 'codex:gpt-6.2-sol');
+    await page.evaluate(() => { fx.failModelDiscovery = false; });
+    await page.getByRole('button', { name: 'Refresh models' }).click();
+    await defaultModel.selectOption({ label: 'Automatic' });
+    await page.waitForFunction(() => fx.local.breezerModel === null);
     await page.getByText('Local context is off. No browsing activity is being remembered.', { exact: true }).waitFor({ state: 'attached' });
     const contextError = page.locator('#context-settings [role="alert"]');
     assert.equal(await contextError.isHidden(), true, await contextError.textContent());

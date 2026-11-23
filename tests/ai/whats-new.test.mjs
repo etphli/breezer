@@ -200,9 +200,11 @@ test('illustrates each highlight and uses unique heading IDs', () => {
 test('stays light and honours reduced motion', () => {
   assert.match(html, /<meta name="color-scheme" content="light">/);
   assert.doesNotMatch(css, /prefers-color-scheme/);
-  // Every animation sits behind a no-preference query.
+  // Every animation sits behind a no-preference query: the masthead breeze and
+  // the 1.3.5 PDF view moving into the composer, each played once.
   const animated = [...css.matchAll(/animation:/g)].length;
   const guarded = [...css.matchAll(/@media \(prefers-reduced-motion: no-preference\) \{[^@]*animation:/g)].length;
-  assert.equal(animated, 1);
-  assert.equal(guarded, 1);
+  assert.equal(animated, 2);
+  assert.equal(guarded, 2);
+  assert.match(css, /\.pdf-shot \{ animation: pdf-send [^;]* 1 both; \}/);
 });

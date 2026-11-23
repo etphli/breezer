@@ -488,6 +488,45 @@ body {
 .art .s4 { fill: #c8a2b4; }
 .art .s5 { fill: #9a9a8c; }
 
+/* 1.3.5 drawing parts. The hero is a Breezer window in the Lune look; the
+   only motion is the PDF view moving into the composer, which plays once. */
+.art .line { fill: none; stroke: color-mix(in srgb, var(--ink) 22%, transparent); stroke-width: 3.5; stroke-linecap: round; }
+.art .look-name { font-size: 11.5px; font-weight: 650; fill: #fbf7ee; }
+.art .look-name.ink { fill: #2f3c58; }
+.art .look-ring, .art .split-ring { fill: none; stroke: var(--accent); stroke-width: 2.4; }
+.art .view-corners { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+.patch-hero {
+  margin: clamp(28px, 4vw, 44px) 0 clamp(40px, 6vw, 64px);
+  border-radius: 22px;
+  background: #10121a;
+  box-shadow: var(--lift);
+  overflow: hidden;
+}
+.patch-hero svg { display: block; width: 100%; height: auto; }
+.patch-hero text { font-family: var(--sans); font-weight: 600; letter-spacing: -0.01em; }
+.patch-hero .hero-name { font-size: 12.5px; fill: #e9ebf2; }
+.patch-hero .hero-chip { font-size: 13px; fill: #e9ebf2; }
+.patch-hero .hero-view { fill: none; stroke: #c9d2e8; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.patch-hero .hero-narrow { display: none; }
+@media (max-width: 560px) {
+  .patch-hero { border-radius: 18px; }
+  .patch-hero .hero-wide { display: none; }
+  .patch-hero .hero-narrow { display: block; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .art .pdf-shot { animation: pdf-send 1.3s cubic-bezier(0.4, 0, 0.2, 1) 0.6s 1 both; }
+  @keyframes pdf-send {
+    from { transform: translate(-150px, -86px); opacity: 0; }
+    25% { opacity: 1; }
+    to { transform: translate(0, 0); opacity: 1; }
+  }
+}
+@media (forced-colors: active) {
+  .patch-hero { border: 1px solid CanvasText; }
+}
+
 /* What a patch leaves unchanged or can't promise, kept beside its notes. */
 .patch-limit {
   margin-top: clamp(32px, 4.5vw, 48px);

@@ -29,6 +29,10 @@ REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
 REGION_HEADER = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.h"
 REGION_TEST = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view_browsertest.cc"
 LAYOUT = "chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc"
+TOOLBAR = "chrome/browser/ui/views/toolbar/toolbar_view.cc"
+UI_FEATURES = "chrome/browser/ui/ui_features.cc"
+FRAME_MATERIALS = "chrome/browser/ui/views/helium/native_frame_materials.cc"
+MAC_WIDGET = "chrome/browser/ui/views/frame/browser_native_widget_mac.mm"
 
 
 def _region_header_replacements():
@@ -514,6 +518,41 @@ def _layout_replacements():
     ]
 
 
+
+def _toolbar_replacements():
+    press = "void ToolbarView::VerticalTabsCollapseButtonPressed(const ui::Event& event) {\n"
+    return [
+        (
+            press,
+            press +
+            "  if (browser_view_->IsZenModeEnabledForLayout() &&\n"
+            "      !browser_->GetProfile()->IsOffTheRecord()) {\n"
+            "    browser_view_->ToggleZenModeSideChrome();\n"
+            "    return;\n"
+            "  }\n",
+        ),
+        (
+            "  const bool should_show = controller && IsVerticalLayout() &&\n"
+            "                           show_vertical_tabs_collapse_button_.GetValue() &&\n"
+            "                           !zen_hide;\n",
+            "  const bool breezer_sidebar = !browser_->GetProfile()->IsOffTheRecord();\n"
+            "  const bool should_show = controller && IsVerticalLayout() &&\n"
+            "      (breezer_sidebar ||\n"
+            "       (show_vertical_tabs_collapse_button_.GetValue() && !zen_hide));\n",
+        ),
+        (
+            "  const int text_id = controller->IsCollapsed() ? IDS_EXPAND_VERTICAL_TABS\n"
+            "                                                : IDS_COLLAPSE_VERTICAL_TABS;\n",
+            "  const bool collapsed = breezer_sidebar &&\n"
+            "                                 browser_view_->IsZenModeEnabledForLayout()\n"
+            "                             ? zen_hide\n"
+            "                             : controller->IsCollapsed();\n"
+            "  const int text_id = collapsed ? IDS_EXPAND_VERTICAL_TABS\n"
+            "                                : IDS_COLLAPSE_VERTICAL_TABS;\n",
+        ),
+    ]
+
+
 def replacements():
     """Per-file (before, after) pairs, applied after the workspace replacements."""
     return {
@@ -521,6 +560,24 @@ def replacements():
         REGION_HEADER: _region_header_replacements(),
         REGION_TEST: _region_test_replacements(),
         LAYOUT: _layout_replacements(),
+        TOOLBAR: _toolbar_replacements(),
+        UI_FEATURES: [(
+            "BASE_FEATURE(kHeliumNativeFrameMaterials, base::FEATURE_DISABLED_BY_DEFAULT);\n",
+            "BASE_FEATURE(kHeliumNativeFrameMaterials, base::FEATURE_ENABLED_BY_DEFAULT);\n",
+        )],
+        FRAME_MATERIALS: [(
+            "  return profile &&\n"
+            "         profile->GetPrefs()->GetBoolean(prefs::kHeliumNativeFrameMaterials);\n",
+            "  const auto* widget = browser_view->GetWidget();\n"
+            "  return profile && !profile->IsOffTheRecord() &&\n"
+            "         !(widget && widget->IsFullscreen()) &&\n"
+            "         profile->GetPrefs()->GetBoolean(prefs::kHeliumNativeFrameMaterials);\n",
+        )],
+        MAC_WIDGET: [(
+            "    browser_view_->FullscreenStateChanged();\n",
+            "    browser_view_->FullscreenStateChanged();\n"
+            "    UpdateBackground();\n",
+        )],
     }
 
 

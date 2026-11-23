@@ -113,6 +113,38 @@ class WindowsPackageTest(unittest.TestCase):
 
 
 class WindowsOverlayTest(unittest.TestCase):
+    def test_existing_installer_overlay_adds_payload_dependency_once(self):
+        with tempfile.TemporaryDirectory() as directory:
+            tree = Path(directory)
+            release = tree / stage_breezer_ai.RELEASE
+            release.parent.mkdir(parents=True)
+            release.write_text("[GENERAL]\n", encoding="utf-8")
+            installer = tree / stage_breezer_ai.GN_INSTALLER
+            installer.write_text(
+                'action("mini_installer_archive") {\n'
+                '  inputs = [\n    release_file,\n  ]\n'
+                '  deps = [\n    ":chrome_runtime_deps",\n'
+                '    "//components/breezer_ai_windows:breezer_ai_host",\n  ]\n}\n',
+                encoding="utf-8",
+            )
+            component = tree / "components/breezer_ai_windows"
+            component.mkdir(parents=True)
+
+            stage_breezer_ai.configure_installer(tree)
+            updated = installer.read_bytes()
+            stage_breezer_ai.configure_installer(tree)
+            self.assertEqual(installer.read_bytes(), updated)
+            self.assertEqual(updated.count(b'breezer_ai_host"'), 1)
+            self.assertEqual(updated.count(b'breezer_ai_payload"'), 1)
+
+            staged, packaged = (component / "installer_files.gni").read_text(
+                encoding="utf-8",
+            ).split("breezer_ai_installer_files = ")
+            self.assertNotIn(stage_breezer_ai.LAUNCHER.as_posix(), staged)
+            self.assertIn(stage_breezer_ai.LAUNCHER.as_posix(), packaged)
+            for path in stage_breezer_ai.package_files() - {stage_breezer_ai.LAUNCHER}:
+                self.assertIn(f'"{path.as_posix()}"', staged)
+
     def test_branding_preserves_lf_anchors_for_later_overlays(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "delegate.cc"

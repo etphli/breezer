@@ -19,6 +19,7 @@
 
 class BrowserWindowInterface;
 class Profile;
+class SkBitmap;
 
 namespace memory_instrumentation {
 class GlobalMemoryDump;
@@ -149,6 +150,54 @@ class BreezerPrivateSetPeekSourcesFunction final
  private:
   ~BreezerPrivateSetPeekSourcesFunction() override = default;
   ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateToggleSplitViewFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.toggleSplitView", UNKNOWN)
+
+ private:
+  ~BreezerPrivateToggleSplitViewFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateFocusLocationBarFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.focusLocationBar", UNKNOWN)
+
+ private:
+  ~BreezerPrivateFocusLocationBarFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateIsCurrentPdfFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.isCurrentPdf", UNKNOWN)
+
+ private:
+  ~BreezerPrivateIsCurrentPdfFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateCaptureCurrentPdfContextFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.captureCurrentPdfContext", UNKNOWN)
+
+ private:
+  ~BreezerPrivateCaptureCurrentPdfContextFunction() override = default;
+  ResponseAction RunFunction() override;
+  void OnCopied(int tab_id,
+                content::WeakDocumentPtr tab_document,
+                content::WeakDocumentPtr pdf_document,
+                const SkBitmap& bitmap);
+  void OnTimeout();
+
+  base::OneShotTimer timeout_;
+  base::WeakPtrFactory<BreezerPrivateCaptureCurrentPdfContextFunction>
+      weak_factory_{this};
 };
 
 }  // namespace extensions

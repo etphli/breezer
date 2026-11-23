@@ -48,7 +48,7 @@ export class HostController {
       };
       this.#active = run;
       try {
-        const useOrganato = !message.browserTask && !message.researchSources && this.prepareChat;
+        const useOrganato = !message.browserTask && !message.researchSources && message.context?.kind !== 'pdf-view' && this.prepareChat;
         message = { ...message, organato: useOrganato ? await this.prepareChat() : false };
         if (run.controller.signal.aborted) return;
         run.tools = allowedTools(message);

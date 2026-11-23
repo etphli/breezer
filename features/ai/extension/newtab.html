@@ -12,6 +12,29 @@
 
   <header class="sky">
     <h1 id="today" class="today">New tab</h1>
+    <section id="composer" class="composer" aria-label="Search or ask" hidden>
+      <section id="recent-chats" class="recent-chats" aria-labelledby="recent-chats-title" hidden>
+        <h2 id="recent-chats-title" class="recent-chats-title">Recent chats</h2>
+        <ol id="recent-chats-list" class="recent-chats-list"></ol>
+      </section>
+      <form id="composer-form" class="composer-box" data-mode="search" novalidate>
+        <textarea id="composer-input" class="composer-input" rows="1" autocomplete="off" spellcheck="false" placeholder="Search the web or type an address" aria-label="Search the web or type an address" aria-describedby="composer-status"></textarea>
+        <div class="composer-bar">
+          <div id="composer-modes" class="composer-modes" role="radiogroup" aria-label="When you press Enter">
+            <span class="composer-thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" data-mode="search" aria-checked="true">Search</button>
+            <button type="button" role="radio" data-mode="ask" aria-checked="false">Ask Breezer</button>
+          </div>
+          <a id="composer-style" class="composer-style" href="workspace.html#/settings/experiments" hidden></a>
+          <button id="composer-send" class="composer-send" type="submit" aria-label="Search">
+            <svg class="send-search" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.25"/><path d="m10.2 10.2 3.3 3.3"/></svg>
+            <svg class="send-ask" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.5M4 7.5l4-4 4 4"/></svg>
+          </button>
+        </div>
+      </form>
+      <p id="composer-status" class="composer-status" role="status" aria-live="polite"></p>
+      <ul id="composer-sites" class="composer-sites" aria-label="Frequent sites" hidden></ul>
+    </section>
     <nav class="sites-nav" aria-label="Frequently visited sites">
       <ol id="sites" class="sites" aria-busy="true"></ol>
       <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
