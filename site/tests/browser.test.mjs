@@ -1,14 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { readFile, mkdir, readdir } from 'node:fs/promises';
+import { readFile, mkdir } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { chromium } from '../../tests/ai/node_modules/playwright/index.mjs';
 import { dashboardPage } from '../lib/dashboard-page.js';
 import { aggregateUsage } from '../lib/metrics.js';
-import { RELEASE_VERSION } from '../../features/ai/extension/release-info.js';
 
-test('homepage films, privacy, dashboard, responsive layout, errors, and the actual usage switch', { timeout: 60_000 }, async () => {
+test('homepage, privacy, dashboard, responsive layout, errors, and the actual usage switch', { timeout: 60_000 }, async () => {
   const root = resolve(new URL('../../', import.meta.url).pathname);
   const evidence = process.env.BREEZER_SITE_EVIDENCE || '/tmp/breezer-site-evidence';
   await mkdir(evidence, { recursive: true });
@@ -27,19 +26,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
       const relative = path.startsWith('/extension/') ? `features/ai/extension/${path.slice(11)}` : `site/${pages[path] ?? path.slice(1)}`;
       const file = resolve(root, relative);
       if (!file.startsWith(root + '/')) { res.writeHead(404).end(); return; }
-      res.setHeader('Content-Type', { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4' }[extname(file)] || 'application/octet-stream');
-      const data = await readFile(file);
-      if (extname(file) === '.mp4') {
-        res.setHeader('Accept-Ranges', 'bytes');
-        const range = /^bytes=(\d+)-(\d*)$/.exec(req.headers.range || '');
-        if (range) {
-          const start = Number(range[1]);
-          const end = Math.min(range[2] ? Number(range[2]) : data.length - 1, data.length - 1);
-          res.writeHead(206, { 'Content-Range': `bytes ${start}-${end}/${data.length}`, 'Content-Length': end - start + 1 });
-          res.end(data.subarray(start, end + 1)); return;
-        }
-      }
-      res.end(data);
+      res.setHeader('Content-Type', { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' }[extname(file)] || 'application/octet-stream');
+      res.end(await readFile(file));
     } catch { res.writeHead(404).end(); }
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -49,7 +37,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
   const page = await browser.newPage({ viewport: { width: 1440, height: 1050 } });
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   try {
-    const tag = `v${RELEASE_VERSION}`;
+    const version = '1.3.99';
+    const tag = `v${version}`;
     const filename = `Breezer-${tag}-arm64.dmg`;
     const sha = 'b'.repeat(64);
     const apiURL = 'https://api.github.com/repos/etphli/breezer/releases/latest';
@@ -61,47 +50,20 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
         { name: `${filename}.sha256`, state: 'uploaded', size: 91 },
       ] } });
     });
-    const mediaRequests = [];
-    page.on('request', request => { if (request.url().endsWith('.mp4')) mediaRequests.push(request.url()); });
     await page.goto(origin);
-    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, RELEASE_VERSION);
+    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, version);
     assert.equal(await page.title(), 'Breezer: a calmer browser for Mac');
-    assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${RELEASE_VERSION.replaceAll('.', '\\.')} for Mac`));
-    const videos = page.locator('#videos video');
-    const originals = (await readdir(resolve(root, 'advertising'))).filter(file => file.endsWith('.mp4')).sort();
-    assert.deepEqual(await videos.locator('source').evaluateAll(sources => sources.map(source => source.getAttribute('src').split('/').at(-1)).sort()), originals);
-    assert.equal(await videos.count(), 8);
-    assert.equal(mediaRequests.length, 0, 'films must not download on page load');
-    await page.getByRole('link', { name: 'Videos', exact: true }).first().click();
-    await page.locator('#videos').scrollIntoViewIfNeeded();
-    assert.equal(mediaRequests.length, 0, 'scrolling to the gallery must not download films');
-    for (const video of await videos.all()) {
-      await video.scrollIntoViewIfNeeded();
-      assert.equal(await video.getAttribute('preload'), 'none');
-      assert.equal(await video.getAttribute('autoplay'), null);
-      assert.equal(await video.evaluate(v => v.controls && v.playsInline), true);
-      const poster = await page.request.get(new URL(await video.getAttribute('poster'), origin).href);
-      assert.equal(poster.status(), 200);
-      assert.ok(poster.headers()['content-type'].startsWith('image/jpeg'));
-      await video.evaluate(v => { v.muted = true; return v.play(); });
-      await page.waitForFunction(() => [...document.querySelectorAll('#videos video')].some(v => !v.paused && v.currentTime > 0.1));
-      assert.equal(await videos.evaluateAll(items => items.filter(v => !v.paused).length), 1);
-      assert.ok(await video.evaluate(v => v.videoWidth > 0 && v.duration >= 30));
-      // Release paused downloads before testing the next file on this local server.
-      await videos.evaluateAll(items => { for (const item of items) if (item.paused) item.load(); });
-    }
-    await videos.last().evaluate(v => v.pause());
-    await page.locator('#videos').evaluate(el => window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 100, behavior: 'instant' }));
-    await page.screenshot({ path: `${evidence}/videos-desktop.png` });
+    assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${version.replaceAll('.', '\\.')} for Mac`));
+    assert.equal(await page.locator('video, a[href="#videos"]').count(), 0);
+    assert.equal((await page.request.get(`${origin}/videos/breezer-01-blink.mp4`)).status(), 404);
+    await page.screenshot({ path: `${evidence}/home-desktop.png` });
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.locator('#videos').evaluate(el => window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 100, behavior: 'instant' }));
-    assert.equal(await videos.evaluateAll(items => items.every(v => { const r = v.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth; })), true);
-    assert.equal(await page.locator('.film-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
-    await page.screenshot({ path: `${evidence}/videos-mobile.png` });
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.screenshot({ path: `${evidence}/home-mobile.png` });
     await page.setViewportSize({ width: 1440, height: 1050 });
     await page.goto(`${origin}/download`);
-    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, RELEASE_VERSION);
-    assert.equal(await page.locator('.release').innerText(), `Version ${RELEASE_VERSION}`);
+    await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, version);
+    assert.equal(await page.locator('.release').innerText(), `Version ${version}`);
     assert.equal(await page.getByRole('link', { name: 'Download Breezer', exact: true }).getAttribute('href'),
       `https://github.com/etphli/breezer/releases/download/${tag}/Breezer-${tag}-arm64.dmg`);
     assert.equal(await page.getByRole('link', { name: 'Release notes', exact: true }).getAttribute('href'),
@@ -117,8 +79,8 @@ test('homepage films, privacy, dashboard, responsive layout, errors, and the act
     await fallback.goto(`${origin}/download`);
     await incomplete;
     await fallback.waitForLoadState('networkidle');
-    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.0\//);
-    assert.equal(await fallback.locator('#sha').textContent(), '3df187d85bac15868b073858fe83f08bd2a5e23eff62bdc8eb75e7bd5f1b5ccc');
+    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.1\//);
+    assert.equal(await fallback.locator('#sha').textContent(), 'd4cea26348d3ad2c388b21511bb726ed1de5adc28bd30050ceda4da29af1b4e7');
     await fallback.close();
     await page.getByRole('link', { name: 'Privacy policy', exact: true }).click();
     await page.getByRole('heading', { name: 'Your browsing. Your business.' }).waitFor();

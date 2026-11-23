@@ -6,6 +6,8 @@ file sections of the pinned upstream patch series. Never changes vendor files.
 """
 
 import argparse
+import base64
+import binascii
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import gzip
@@ -27,20 +29,42 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def fetch(path):
-    destination = CACHE / path
-    if not destination.is_file():
-        destination.parent.mkdir(parents=True, exist_ok=True)
+def fetch(path, *, cache=None, version=VERSION):
+    destination = (CACHE if cache is None else cache) / path
+    if destination.is_file():
+        return destination
+
+    sources = (
+        (f'https://raw.githubusercontent.com/chromium/chromium/{version}/{path}', False),
+        (f'https://chromium.googlesource.com/chromium/src/+/refs/tags/{version}/{path}?format=TEXT', True),
+    )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    failures = []
+    for url, encoded in sources:
         with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as output:
             temporary = Path(output.name)
         try:
-            subprocess.run(['curl', '--fail', '--location', '--silent', '--show-error',
-                            f'https://raw.githubusercontent.com/chromium/chromium/{VERSION}/{path}',
-                            '--output', str(temporary)], check=True)
+            command = ['curl', '--fail', '--location', '--silent', '--show-error', '--max-time', '15']
+            if encoded:
+                command.extend(['--retry', '2', '--retry-max-time', '15'])
+            result = subprocess.run([*command, '--output', str(temporary), url], capture_output=True)
+            if result.returncode:
+                detail = result.stderr.decode(errors='replace').strip() or f'curl exited {result.returncode}'
+                failures.append(f'{url}: {detail}')
+                continue
+            if encoded:
+                try:
+                    payload = base64.b64decode(temporary.read_bytes(), validate=True)
+                except binascii.Error as error:
+                    failures.append(f'{url}: invalid base64 response ({error})')
+                    continue
+                temporary.write_bytes(payload)
             temporary.replace(destination)
         finally:
             temporary.unlink(missing_ok=True)
-    return destination
+        return destination
+
+    raise ValueError(f'Could not fetch Chromium {version} fixture {path}:\n' + '\n'.join(failures))
 
 
 def file_sections(patch):
@@ -139,7 +163,7 @@ def check(tree, grit_directory=None, offline=False):
     assert first == {str(path.relative_to(tree)): sha(path) for path in paths}, 'Overlay is not idempotent'
     component = tree / 'components/breezer_ai'
     manifest = json.loads((component / 'manifest.json').read_text())
-    public = __import__('base64').b64decode(manifest['key'])
+    public = base64.b64decode(manifest['key'])
     actual_id = ''.join(chr(ord('a') + int(c, 16)) for c in hashlib.sha256(public).hexdigest()[:32])
     assert actual_id == ai.EXTENSION_ID
     host = json.loads((ai.ROOT / 'features/ai/integration/native-host-manifest.json').read_text())

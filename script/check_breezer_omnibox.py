@@ -44,20 +44,12 @@ def prepare(tree, offline):
     paths = omnibox.sections()
 
     def fetch(name):
-        cached = CACHE / name
-        if not cached.is_file():
-            if offline:
+        if offline:
+            cached = CACHE / name
+            if not cached.is_file():
                 raise ValueError(f"Missing offline fixture: {name}")
-            cached.parent.mkdir(parents=True, exist_ok=True)
-            with tempfile.NamedTemporaryFile(dir=cached.parent, delete=False) as output:
-                temporary = Path(output.name)
-            try:
-                subprocess.run(["curl", "--fail", "--location", "--silent", "--show-error",
-                                f"https://raw.githubusercontent.com/chromium/chromium/{VERSION}/{name}",
-                                "--output", str(temporary)], check=True)
-                temporary.replace(cached)
-            finally:
-                temporary.unlink(missing_ok=True)
+        else:
+            cached = ai_check.fetch(name, cache=CACHE, version=VERSION)
         target = tree / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(cached, target)

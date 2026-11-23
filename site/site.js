@@ -270,11 +270,3 @@ if (macVersions.length) latestMacRelease().then((release) => {
     document.getElementById('sha').textContent = sha;
   }
 }).catch(() => {});
-
-// Keep sound from different films from overlapping.
-const films = [...document.querySelectorAll('.film video')];
-for (const film of films) {
-  film.addEventListener('play', () => {
-    for (const other of films) if (other !== film) other.pause();
-  });
-}
