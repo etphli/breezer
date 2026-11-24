@@ -48,10 +48,11 @@ try {
   for (const [id, look] of Object.entries(THEME_LOOKS)) {
     await select(`look:${id}`, look.seed, original.colorMode);
   }
-  await settings.getByRole('button', { name: 'Cancel Vesper and return to your previous theme' }).click();
-  await settings.waitForFunction(theme => chrome.breezerPrivate.getAppearance().then(value => value.theme === theme),
-    original.theme, { timeout });
+  const cancel = settings.getByRole('button', { name: 'Cancel Vesper and return to your previous theme' });
+  await cancel.click();
+  await cancel.waitFor({ state: 'hidden' });
   const restored = await appearance();
+  assert.equal(restored.theme, original.theme);
   assert.equal(restored.nativeDefaultTheme, original.nativeDefaultTheme);
   assert.equal(restored.colorMode, original.colorMode);
   await select('look:lune', THEME_LOOKS.lune.seed, original.colorMode);
