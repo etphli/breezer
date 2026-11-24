@@ -241,19 +241,23 @@ test('New Tab experiments stay off by default and each one works once turned on'
       await page.waitForFunction(() => document.querySelector('#composer-input')?.value === '');
 
       await page.evaluate(() => sessionStorage.setItem('draft-no-model', 'true'));
-      await input.fill('A draft to discard');
-      await Promise.all([page.waitForURL('**/panel.html?view=chat'), input.press('Enter')]);
-      await page.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
-      await page.goBack({ waitUntil: 'commit' });
-      await page.waitForFunction(() => document.querySelector('#composer-input')?.value === 'A draft to discard');
-      await input.clear();
-      await page.getByRole('radio', { name: 'Search' }).click();
-      await input.fill('a separate search query');
-      assert.equal(await page.evaluate(() => sessionStorage.getItem('breezer-handoff-7')), null);
-      await page.goForward({ waitUntil: 'commit' });
-      await page.waitForFunction(() => document.querySelector('.panel')?.dataset.accountState === 'signed-out');
-      assert.equal(await page.locator('#prompt').inputValue(), '');
-      await page.goBack({ waitUntil: 'commit' });
+      for (const clearFirst of [true, false]) {
+        await page.getByRole('radio', { name: 'Ask Breezer' }).click();
+        await input.fill('A draft to discard');
+        await Promise.all([page.waitForURL('**/panel.html?view=chat'), input.press('Enter')]);
+        await page.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
+        await page.goBack({ waitUntil: 'commit' });
+        await page.waitForFunction(() => document.querySelector('#composer-input')?.value === 'A draft to discard');
+        if (clearFirst) await input.clear();
+        await page.getByRole('radio', { name: 'Search' }).click();
+        if (!clearFirst) await input.clear();
+        await input.fill('a separate search query');
+        assert.equal(await page.evaluate(() => sessionStorage.getItem('breezer-handoff-7')), null);
+        await page.goForward({ waitUntil: 'commit' });
+        await page.waitForFunction(() => document.querySelector('.panel')?.dataset.accountState === 'signed-out');
+        assert.equal(await page.locator('#prompt').inputValue(), '');
+        await page.goBack({ waitUntil: 'commit' });
+      }
 
       await page.getByRole('radio', { name: 'Search' }).click();
       await input.fill('example.com');

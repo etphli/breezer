@@ -749,13 +749,14 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     input.addEventListener('input', () => {
       grow();
       if (status.dataset.state === 'error') say('');
-      if (recoveredDraft && mode === 'ask') {
+      if (recoveredDraft) {
         try {
           const key = handoffKey(tabId);
-          if (input.value.trim()) win.sessionStorage.setItem(key, JSON.stringify({ prompt: input.value }));
-          else {
+          if (!input.value.trim()) {
             win.sessionStorage.removeItem(key);
             recoveredDraft = false;
+          } else if (mode === 'ask') {
+            win.sessionStorage.setItem(key, JSON.stringify({ prompt: input.value }));
           }
         } catch { /* The question is still in the composer. */ }
       }
