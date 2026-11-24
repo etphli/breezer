@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { APPEARANCE_REV_KEY } from '../../features/ai/extension/workspace-store.js';
 import {
-  ARTWORK_KEY, LOOK_UNDO_KEY, PREVIOUS_LOOK_KEY, applyThemeLook, applyThemeProposal, cancelThemeLook,
+  ARTWORK_KEY, LOOK_UNDO_KEY, PREVIOUS_LOOK_KEY, applyThemeColor, applyThemeLook, applyThemeProposal, cancelThemeLook,
   normalizeThemeProposal, readThemeLook, restorePreviousLook,
 } from '../../features/ai/extension/browser-theme.js';
 import { THEME_LOOKS, activeLook, applyTheme, startPanelTheme } from '../../features/ai/extension/panel-theme.js';
@@ -16,7 +16,7 @@ const read = (name) => readFile(new URL(name, extension), 'utf8');
 const IDS = ['charcoal', 'plum', 'sage', 'umber', 'fathom', 'linen', 'lune', 'vesper'];
 const settle = () => new Promise((done) => setTimeout(done, 0));
 
-// Follows the native contract: a write naming a stale expectedThemeState is refused.
+// The native bridge requires a complete theme write and a matching snapshot.
 function fakeApi({ appearance = { theme: 'tide', colorMode: 'dark', themeCanRestore: true }, bridge = true, store = {} } = {}) {
   const calls = [];
   const listeners = [];
@@ -39,7 +39,11 @@ function fakeApi({ appearance = { theme: 'tide', colorMode: 'dark', themeCanRest
       setAppearance: async (patch) => {
         calls.push(patch);
         const { expectedThemeState: expected, ...change } = patch;
-        if (expected && (expected.theme !== current.theme || expected.colorMode !== current.colorMode || expected.nativeDefaultTheme !== current.nativeDefaultTheme)) throw new Error('Browser appearance changed. Try again.');
+        if (expected && (!Object.hasOwn(change, 'theme') || !Object.hasOwn(change, 'colorMode')
+          || !current.themeCanRestore || expected.theme !== current.theme
+          || expected.colorMode !== current.colorMode || expected.nativeDefaultTheme !== current.nativeDefaultTheme)) {
+          throw new Error('Browser appearance changed. Try again.');
+        }
         if (Object.hasOwn(change, 'theme')) delete current.nativeDefaultTheme;
         current = { ...current, ...change };
         return { ...current };
@@ -79,13 +83,13 @@ test('activeLook needs the record and, with a bridge, the browser still on the s
   assert.equal(activeLook(null, null), null);
 });
 
-test('applying a look sets only the seed natively, keeps the colour mode and saves Cancel', async () => {
+test('applying a look writes its seed and the existing colour mode atomically', async () => {
   const mine = { name: 'Mine', theme: '#336699', colorMode: 'system', html: '<svg></svg>', fingerprint: 'm' };
   const api = fakeApi({ store: { [ARTWORK_KEY]: mine } });
   const result = await applyThemeLook('charcoal', { api, now: () => 7 });
   assert.equal(result.look, 'charcoal');
   assert.equal(result.kept, false);
-  assert.deepEqual(api.calls[0], { theme: THEME_LOOKS.charcoal.seed, expectedThemeState: { theme: 'tide', colorMode: 'dark' } });
+  assert.deepEqual(api.calls[0], { theme: THEME_LOOKS.charcoal.seed, colorMode: 'dark', expectedThemeState: { theme: 'tide', colorMode: 'dark' } });
   assert.equal(api.current.colorMode, 'dark');
   assert.equal(api.store[ARTWORK_KEY].preset, 'charcoal');
   assert.equal(api.store[ARTWORK_KEY].colorMode, 'dark');
@@ -95,6 +99,16 @@ test('applying a look sets only the seed natively, keeps the colour mode and sav
   assert.equal(api.store[LOOK_UNDO_KEY].previous, null);
   assert.equal(api.store[APPEARANCE_REV_KEY], 7);
   assert.deepEqual(await readThemeLook({ api, theme: api.current.theme }), { look: 'charcoal', canCancel: true });
+});
+
+test('choosing a plain tone from a look keeps the mode and clears Cancel', async () => {
+  const api = fakeApi();
+  await applyThemeLook('lune', { api });
+  await applyThemeColor('rose', { api });
+  assert.equal(api.current.theme, 'rose');
+  assert.equal(api.current.colorMode, 'dark');
+  assert.equal(api.store[ARTWORK_KEY], null);
+  assert.equal(api.store[LOOK_UNDO_KEY], null);
 });
 
 test('switching looks keeps the first starting point; Cancel restores theme, artwork and previous look', async () => {

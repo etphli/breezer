@@ -324,7 +324,9 @@ const sameThemeState = (a, b) => Boolean(a && b) && a.theme === b.theme
 // browser reports, which is what a later compare must name.
 async function writeAppearance(api, patch, expected) {
   const { nativeDefaultTheme, ...themePatch } = patch;
-  const request = { ...validateAppearancePatch(themePatch), expectedThemeState: themeState(expected) };
+  // Guarded writes require a seed and a mode, even when only the seed changes.
+  const appearance = validateAppearancePatch({ colorMode: expected.colorMode, ...themePatch });
+  const request = { ...appearance, expectedThemeState: themeState(expected) };
   if (nativeDefaultTheme !== undefined) request.nativeDefaultTheme = nativeDefaultTheme;
   let result = await callBridge(api, 'setAppearance', request);
   if (!result || typeof result !== 'object') result = await callBridge(api, 'getAppearance');
