@@ -77,7 +77,7 @@ function harness(code, initial = [], ids = []) {
   });
   const prefix = code.replace(/^import .*;\n/gm, '').split("$('composer').addEventListener")[0];
   const newChat = code.slice(code.indexOf("$('new-chat').addEventListener"), code.indexOf("$('model-button').addEventListener"));
-  const initialize = code.slice(code.indexOf('async function initialize()'), code.indexOf('void startPanelTheme();'));
+  const initialize = code.slice(code.indexOf('function restoreNewTabDraft('), code.indexOf('void startPanelTheme();'));
   vm.runInContext(prefix + '\n' + initialize + `
     selectedModel = () => ({provider: {id: 'fixture'}, model: {id: 'fixture'}});
     selectedSettings = () => ({reasoning: '', speed: 'standard'});

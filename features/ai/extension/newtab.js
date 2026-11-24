@@ -11,7 +11,7 @@ import { startPanelTheme } from './panel-theme.js';
 // Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
 import { startThemeArtwork } from './browser-theme.js';
 import { HAS_NATIVE_HELPER } from './platform.js';
-import { PERSONALITIES, glassMode, handoffKey, readExperiments, recentChats, watchExperiments, CONVERSATION_PREFIX } from './experiments.js';
+import { PERSONALITIES, glassMode, handoffKey, readExperiments, recentChats, watchExperiments, CONVERSATION_PREFIX, FULL_CHAT_PATH, FULL_CHAT_PREFIX } from './experiments.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -504,7 +504,6 @@ function renderToday(root, now) {
 // lay itself out before chrome.storage answers. chrome.storage stays the truth.
 export const EXPERIMENT_MIRROR_KEY = 'breezer.newtab.experiments';
 const MODE_KEY = 'breezer.newtab.mode';
-export const HANDOFF_WAIT_MS = 5000;
 
 const HOST = /^(?:localhost|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}|\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\])(?::\d{1,5})?$/i;
 
@@ -543,13 +542,13 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
   const sitesList = root.getElementById('composer-sites');
   const chatsSection = root.getElementById('recent-chats');
   const chatsList = root.getElementById('recent-chats-list');
-  const canAsk = HAS_NATIVE_HELPER && typeof api?.sidePanel?.open === 'function';
+  const canAsk = HAS_NATIVE_HELPER && typeof api?.tabs?.update === 'function' && typeof api?.runtime?.getURL === 'function';
   const query = (text) => win.matchMedia?.(text) ?? { matches: false, addEventListener() {}, removeEventListener() {} };
   const fullscreenQuery = query('(display-mode: fullscreen)');
   const transparencyQuery = query('(prefers-reduced-transparency: reduce)');
   const forcedQuery = query('(forced-colors: active)');
   let experiments = null, sites = [], windowId = null, tabId = null, mode = 'search', started = false, disposed = false;
-  let windowFullscreen = false, chatsRequest = 0, waiting = null;
+  let windowFullscreen = false, chatsRequest = 0, openingChat = false, recoveredDraft = false;
   const cleanups = [];
 
   let mirror = {};
@@ -621,11 +620,6 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     }));
   };
 
-  const openPanel = (targetWindowId) => {
-    // sidePanel.open must run inside the click or key press, before any await.
-    return api.sidePanel.open({ windowId: targetWindowId });
-  };
-
   const renderChats = async () => {
     const want = experiments?.newTabComposer && experiments.newTabRecentChats && canAsk;
     const request = ++chatsRequest;
@@ -634,10 +628,12 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     try { chats = await recentChats(api, windowId); } catch { chats = []; }
     if (disposed || request !== chatsRequest) return;
     chatsSection.hidden = !chats.length;
-    const focusedWindow = chatsList.contains(root.activeElement) ? root.activeElement.dataset.windowId : null;
+    const focusedChat = chatsList.contains(root.activeElement) ? root.activeElement.dataset.chat : null;
     chatsList.replaceChildren(...chats.map((chat) => {
       const item = el('li');
-      const button = el('button', 'recent-chat', { type: 'button', 'data-window-id': String(chat.windowId) });
+      const fullChat = Number.isInteger(chat.tabId);
+      const identity = fullChat ? `tab-${chat.tabId}` : `window-${chat.windowId}`;
+      const button = el('button', 'recent-chat', { type: 'button', 'data-chat': identity });
       const title = el('span', 'recent-chat-title');
       title.textContent = chat.title;
       const preview = el('span', 'recent-chat-preview');
@@ -645,51 +641,82 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
       const where = el('span', 'recent-chat-where');
       where.textContent = chat.current ? 'This window' : 'Other window';
       button.append(title, preview, where);
-      button.addEventListener('click', () => {
-        let opening;
-        try { opening = openPanel(chat.windowId); } catch (error) { opening = Promise.reject(error); }
-        const focusing = chat.current ? null : api.windows?.update?.(chat.windowId, { focused: true });
-        Promise.all([opening, focusing]).catch(() => say('Breezer AI couldn’t open that conversation. Open Breezer AI in that window.', 'error'));
+      button.addEventListener('click', async () => {
+        try {
+          let targetWindow = chat.windowId;
+          if (fullChat) {
+            const tab = await api.tabs.get(chat.tabId);
+            if (tab.incognito || tab.url !== api.runtime.getURL(FULL_CHAT_PATH) || (tab.pendingUrl && tab.pendingUrl !== tab.url)) {
+              throw new Error('The chat tab has navigated.');
+            }
+            const active = await api.tabs.update(tab.id, { active: true });
+            targetWindow = active.windowId;
+          } else {
+            // The sidebar API requires the original click gesture.
+            await api.sidePanel.open({ windowId: targetWindow });
+          }
+          if (targetWindow !== windowId) await api.windows.update(targetWindow, { focused: true });
+        } catch {
+          say('Breezer AI couldn’t open that conversation.', 'error');
+          void renderChats();
+        }
       });
       item.append(button);
       return item;
     }));
-    if (focusedWindow) {
-      [...chatsList.querySelectorAll('button')].find(button => button.dataset.windowId === focusedWindow)?.focus({ preventScroll: true });
+    if (focusedChat) {
+      [...chatsList.querySelectorAll('button')].find(button => button.dataset.chat === focusedChat)?.focus({ preventScroll: true });
     }
   };
 
-  const finishHandoff = (consumed) => {
-    if (!waiting) return;
-    const { key, timer, text } = waiting;
-    clearTimeout(timer);
-    waiting = null;
-    send.disabled = false;
-    if (consumed) {
-      if (input.value.trim() === text) { input.value = ''; grow(); }
-      say('Opened in Breezer AI.');
-    } else {
-      // Remove the unsent question so it can't appear in the sidebar later.
-      void api.storage.session.remove?.(key)?.catch?.(() => {});
-      say('Breezer AI is open in the sidebar. Your question is still here to paste.');
-    }
+  const recoverAsk = () => {
+    if (!started || !canAsk || !Number.isInteger(tabId)) return;
+    const key = handoffKey(tabId);
+    try {
+      const draft = JSON.parse(win.sessionStorage.getItem(key));
+      if (typeof draft?.prompt !== 'string' || !draft.prompt) {
+        if (recoveredDraft) {
+          recoveredDraft = false;
+          input.value = '';
+          grow();
+        }
+        return;
+      }
+      // Back takes over the question. Keep it through reload, but remove
+      // the timestamp that authorized the chat tab to send it automatically.
+      win.sessionStorage.setItem(key, JSON.stringify({ prompt: draft.prompt }));
+      recoveredDraft = true;
+      input.value = draft.prompt;
+      setMode('ask');
+      grow();
+    } catch { /* The composer can still be used if session storage is unavailable. */ }
   };
 
-  const ask = (text) => {
-    if (!canAsk) { say('Breezer AI isn’t available in this build.', 'error'); return; }
-    if (!Number.isInteger(windowId) || !Number.isInteger(tabId)) { say('Breezer is still getting this tab ready. Try again in a moment.', 'error'); return; }
-    let opening;
-    try { opening = openPanel(windowId); } catch (error) { opening = Promise.reject(error); }
-    const key = handoffKey(windowId);
+  const ask = async (text) => {
+    if (!Number.isInteger(tabId)) { say('Breezer is still getting this tab ready. Try again in a moment.', 'error'); return; }
+    const key = handoffKey(tabId);
+    const value = input.value;
+    openingChat = true;
+    input.readOnly = true;
     send.disabled = true;
     say('Opening Breezer AI…');
-    waiting = { key, text, timer: setTimeout(() => finishHandoff(false), HANDOFF_WAIT_MS) };
-    Promise.all([opening, api.storage.session.set({ [key]: { prompt: text, tabId, createdAt: Date.now(), source: 'newtab' } })])
-      .catch(() => {
-        if (!waiting) return;
-        clearTimeout(waiting.timer); waiting = null; send.disabled = false;
-        say('Breezer AI couldn’t open. Open it from the toolbar, then ask again.', 'error');
-      });
+    try {
+      win.sessionStorage.setItem(key, JSON.stringify({ prompt: text, createdAt: Date.now() }));
+      input.value = '';
+      grow();
+      await api.tabs.update(tabId, { url: api.runtime.getURL(FULL_CHAT_PATH) });
+    } catch {
+      input.value = value;
+      grow();
+      try {
+        if (recoveredDraft) win.sessionStorage.setItem(key, JSON.stringify({ prompt: value }));
+        else win.sessionStorage.removeItem(key);
+      } catch { /* The question is still in the composer. */ }
+      openingChat = false;
+      input.readOnly = false;
+      send.disabled = false;
+      say('Breezer AI couldn’t open. Your question is still here. Try again.', 'error');
+    }
   };
 
   const search = (text) => {
@@ -700,7 +727,7 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
 
   const submit = () => {
     const text = input.value.trim();
-    if (!text || waiting) return;
+    if (!text || openingChat) return;
     say('');
     const address = mode === 'search' ? toAddress(text) : null;
     if (address) { win.location.assign(address); return; }
@@ -719,7 +746,20 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
       event.preventDefault();
       submit();
     });
-    input.addEventListener('input', () => { grow(); if (status.dataset.state === 'error') say(''); });
+    input.addEventListener('input', () => {
+      grow();
+      if (status.dataset.state === 'error') say('');
+      if (recoveredDraft && mode === 'ask') {
+        try {
+          const key = handoffKey(tabId);
+          if (input.value.trim()) win.sessionStorage.setItem(key, JSON.stringify({ prompt: input.value }));
+          else {
+            win.sessionStorage.removeItem(key);
+            recoveredDraft = false;
+          }
+        } catch { /* The question is still in the composer. */ }
+      }
+    });
     modes.addEventListener('click', (event) => {
       const button = event.target.closest('[role="radio"]');
       if (!button) return;
@@ -739,11 +779,24 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     const session = api?.storage?.session?.onChanged;
     if (session?.addListener) {
       const onSession = (changes) => {
-        if (waiting && changes[waiting.key] && changes[waiting.key].newValue === undefined) finishHandoff(true);
-        if (Object.keys(changes).some((key) => key.startsWith(CONVERSATION_PREFIX))) void renderChats();
+        if (Object.keys(changes).some(key => key.startsWith(CONVERSATION_PREFIX) || key.startsWith(FULL_CHAT_PREFIX))) void renderChats();
       };
       session.addListener(onSession);
       cleanups.push(() => session.removeListener?.(onSession));
+    }
+    const isListed = (id) => chatsList.querySelector(`[data-chat="tab-${id}"]`);
+    const onTabUpdated = (id, { url }) => {
+      if (url && (isListed(id) || url === api.runtime.getURL(FULL_CHAT_PATH))) void renderChats();
+    };
+    const onTabRemoved = (id) => { if (isListed(id)) void renderChats(); };
+    const onTabAttached = (id, { newWindowId }) => {
+      if (id === tabId) windowId = newWindowId;
+      void renderChats();
+    };
+    for (const [event, listener] of [[api.tabs?.onUpdated, onTabUpdated], [api.tabs?.onRemoved, onTabRemoved], [api.tabs?.onAttached, onTabAttached]]) {
+      if (!event?.addListener) continue;
+      event.addListener(listener);
+      cleanups.push(() => event.removeListener?.(listener));
     }
     // Fonts can change button widths after the first layout.
     void root.fonts?.ready?.then(() => { if (!disposed) placeThumb(); });
@@ -776,18 +829,33 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
   win.addEventListener?.('resize', onLayoutChange);
   cleanups.push(() => win.removeEventListener?.('resize', onLayoutChange));
 
+  const onPageShow = (event) => {
+    if (!event.persisted) return;
+    openingChat = false;
+    input.readOnly = false;
+    send.disabled = false;
+    say('');
+    recoverAsk();
+    void renderChats();
+  };
+  win.addEventListener?.('pageshow', onPageShow);
+  cleanups.push(() => win.removeEventListener?.('pageshow', onPageShow));
   cleanups.push(watchExperiments(api, (next) => apply(next)));
   const ready = Promise.all([
     readExperiments(api),
     Promise.resolve(api?.tabs?.getCurrent?.()).then((tab) => { windowId = tab?.windowId ?? null; tabId = tab?.id ?? null; }, () => {}),
-  ]).then(([value]) => { if (!disposed) { apply(value); void checkWindow(); } });
+  ]).then(([value]) => {
+    if (disposed) return;
+    apply(value);
+    if (value.newTabComposer) recoverAsk();
+    void checkWindow();
+  });
 
   return {
     ready,
     setSites(next) { sites = Array.isArray(next) ? next : []; renderSites(); },
     dispose() {
       disposed = true;
-      if (waiting) clearTimeout(waiting.timer);
       for (const cleanup of cleanups.splice(0)) cleanup();
     },
   };

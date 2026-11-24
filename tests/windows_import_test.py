@@ -21,9 +21,10 @@ FIREFOX_ONLY = """    if (!BUILDFLAG(IS_WIN) ||
         profile.importer_type != user_data_importer::TYPE_FIREFOX) {
       profile.services_supported &= ~user_data_importer::PASSWORDS;
     }"""
-PASSWORDS_OFF = """    key: 'import_dialog_saved_passwords',
-    type: chrome.settingsPrivate.PrefType.BOOLEAN,
-    value: false,"""
+PASSWORDS_OFF = """        key: 'import_dialog_saved_passwords',
+        type: chrome.settingsPrivate.PrefType.BOOLEAN,
+        value: false,"""
+PASSWORDS_REACTIVE = "savedPasswordsPref_: {type: Object}"
 PASSWORDS_TRANSIENT = "if (checkbox.id !== 'importDialogSavedPasswords')"
 
 
@@ -42,6 +43,7 @@ class WindowsImportPatchTest(unittest.TestCase):
         self.assertIn("-      profile.services_supported ^= user_data_importer::PASSWORDS;", patch)
         self.assertIn("profile.services_supported &= ~user_data_importer::AUTOFILL_FORM_DATA;", changes)
         self.assertIn(PASSWORDS_OFF, changes)
+        self.assertIn(PASSWORDS_REACTIVE, changes)
         self.assertIn(PASSWORDS_TRANSIENT, changes)
         self.assertIn('.pref="${this.savedPasswordsPref_}"', changes)
 
@@ -68,6 +70,7 @@ class WindowsImportSourceTest(unittest.TestCase):
         dialog = self.read(DIALOG)
         self.assertIn("checkbox.checked && !checkbox.hidden", dialog)
         self.assertIn(PASSWORDS_OFF, dialog)
+        self.assertIn(PASSWORDS_REACTIVE, dialog)
         self.assertIn(PASSWORDS_TRANSIENT, dialog)
         template = self.read(TEMPLATE)
         self.assertIn('.pref="${this.savedPasswordsPref_}"', template)

@@ -81,6 +81,7 @@ struct Appearance {
   bool frameless = true;
   bool always_show_sidebar = false;
   bool always_show_top_bar = true;
+  bool sidebar_address_search = false;
 };
 
 // Fixed mapping only. Callers cannot supply preference names.
@@ -100,6 +101,8 @@ constexpr BooleanAppearancePref kBooleanAppearancePrefs[] = {
      &Appearance::always_show_sidebar},
     {"alwaysShowTopBar", prefs::kHeliumZenModeTopChromePinned,
      &Appearance::always_show_top_bar},
+    {"sidebarAddressSearch", breezer_workspace::prefs::kSidebarAddressSearch,
+     &Appearance::sidebar_address_search},
 };
 
 const breezer_workspace::Theme* FindTheme(std::string_view name) {

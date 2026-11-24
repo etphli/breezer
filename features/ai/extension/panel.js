@@ -9,7 +9,7 @@ import { detectBrowserTask } from './browser-task-intent.js';
 import { preparePastedImage } from './clipboard-image.js';
 import { themeReferenceImages } from './theme-references.js';
 import { PLATFORM } from './platform.js';
-import { HANDOFF_TTL_MS, handoffKey, readExperiments, startPersonalityLook } from './experiments.js';
+import { FULL_CHAT_PATH, FULL_CHAT_PREFIX, HANDOFF_TTL_MS, handoffKey, startPersonalityLook } from './experiments.js';
 
 const BROWSER_TASKS = {
   stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
@@ -76,7 +76,6 @@ const state = {
   pageRevision: 0,
   restoringLook: false,
   newTabDraft: null,
-  newTabChatId: null,
   port: null,
   sessionKey: 'breezer-conversation',
   windowId: null,
@@ -479,10 +478,6 @@ function setPage(page) {
   const revision = ++state.pageRevision;
   const render = (pdf) => {
     if (revision !== state.pageRevision) return;
-    if (state.newTabChatId !== null && page?.tabId !== state.newTabChatId) {
-      state.newTabChatId = null;
-      delete document.documentElement.dataset.newTabChat;
-    }
     state.pageKnown = true;
     state.page = pdf ? { tabId: page.tabId, title: 'Current PDF', pdf: true }
       : page?.url && /^https?:\/\//i.test(page.url) ? page : null;
@@ -915,7 +910,7 @@ function revealPanel() {
   );
 }
 
-async function send() {
+async function send(automatic = false) {
   if (state.running) return stop();
   if (state.readingFiles || state.restoringLook) return;
   if (state.browserTask && research.size) {
@@ -924,6 +919,7 @@ async function send() {
   }
   const browserTask = draftBrowserTask();
   if (browserTask === 'restore') {
+    if (!consumeNewTabDraft(automatic)) return;
     state.restoringLook = true;
     updateControls();
     try {
@@ -934,9 +930,8 @@ async function send() {
     finally { state.restoringLook = false; resizePrompt(); }
     return;
   }
-  const fromNewTab = state.newTabDraft?.prompt === $('prompt').value.trim();
-  const includeContext = !fullChat && !fromNewTab && !browserTask && !research.size && state.includeContext;
-  const control = !fullChat && !fromNewTab && !browserTask && !research.size && state.control;
+  const includeContext = !fullChat && !browserTask && !research.size && state.includeContext;
+  const control = !fullChat && !browserTask && !research.size && state.control;
   const tabId = state.page?.tabId;
   const text = $('prompt').value.trim() || (state.attachments.length ? 'Review the attached files.' : '');
   const selected = selectedModel();
@@ -952,6 +947,7 @@ async function send() {
     notify('Enter an image prompt of up to 4,000 characters and remove any attachments.');
     return;
   }
+  if (!consumeNewTabDraft(automatic)) return;
   const settings = selectedSettings(selected);
   setModelMenu(false);
   notify('');
@@ -961,7 +957,6 @@ async function send() {
   if (state.retryMessage) state.retryMessage.superseded = true;
   state.retryMessage = null;
   state.browserTask = null;
-  state.newTabDraft = null;
   const history = browserTask === 'image' ? [] : requestHistory();
   if (browserTask === 'theme') {
     const previous = state.messages.findLast(message => message.themeProposal)?.themeProposal;
@@ -1097,6 +1092,7 @@ function receive(message) {
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
     if (discoveryFailed) {
+      keepNewTabDraft();
       state.modelRefreshQueued = false;
       applyModelSelection(state.preferredModel);
     }
@@ -1216,6 +1212,7 @@ $('composer').addEventListener('drop', event => {
 
 $('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
 $('prompt').addEventListener('input', () => {
+  keepNewTabDraft();
   if (!$('prompt').value.trim() && state.browserTask === '') state.browserTask = null;
   resizePrompt();
 });
@@ -1232,7 +1229,7 @@ $('prompt').addEventListener('keydown', (event) => {
   }
 });
 $('open-chat-tab').addEventListener('click', async () => {
-  const url = chrome.runtime.getURL('panel.html?view=chat');
+  const url = chrome.runtime.getURL(FULL_CHAT_PATH);
   try {
     const tabs = await chrome.tabs.query({ windowId: state.windowId });
     const existing = tabs.find(tab => tab.url === url && !tab.incognito);
@@ -1334,7 +1331,7 @@ $('new-chat').addEventListener('click', () => {
   updateControls();
   saveConversation();
   post({ type: 'clear-turn' });
-  post({ type: 'context' });
+  if (!fullChat) post({ type: 'context' });
   $('prompt').focus();
 });
 $('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
@@ -1376,10 +1373,14 @@ $('model-search').addEventListener('keydown', (event) => {
 $('model-menu').addEventListener('focusout', (event) => {
   if (event.relatedTarget && !$('model-menu').contains(event.relatedTarget) && event.relatedTarget !== $('model-button')) setModelMenu(false);
 });
-$('draft-toggle').addEventListener('click', () => {
-  const open = document.querySelector('.panel').toggleAttribute('data-drafting');
+function setDraftOpen(open) {
+  document.querySelector('.panel').toggleAttribute('data-drafting', open);
   $('draft-toggle').textContent = open ? 'Hide draft' : 'Write a draft';
   $('draft-toggle').setAttribute('aria-expanded', String(open));
+}
+$('draft-toggle').addEventListener('click', () => {
+  const open = !document.querySelector('.panel').hasAttribute('data-drafting');
+  setDraftOpen(open);
   if (open) $('prompt').focus();
 });
 $('welcome-action').addEventListener('click', () => {
@@ -1436,7 +1437,11 @@ document.addEventListener('visibilitychange', () => {
     setControl(false);
     research.clear(undefined, !state.running?.submitted);
   }
-  else if (state.port) { revealPanel(); post({ type: 'context' }); }
+  else if (state.port) {
+    revealPanel();
+    if (fullChat) sendNewTabDraft();
+    else post({ type: 'context' });
+  }
 });
 $('open-profile').addEventListener('click', () => {
   $('profile-name').value = state.profile.name;
@@ -1468,63 +1473,76 @@ localStorageChanges(chrome).addListener((changes) => {
   }
 });
 
-function sendNewTabDraft() {
-  const draft = state.newTabDraft;
-  if (!draft || Date.now() - draft.createdAt > HANDOFF_TTL_MS || !selectedModel()
-      || state.running || state.attachments.length || research.size
-      || $('prompt').value.trim() !== draft.prompt) return;
-  void send();
+function restoreNewTabDraft(tabId) {
+  const key = handoffKey(tabId);
+  try {
+    const record = sessionStorage.getItem(key);
+    const draft = JSON.parse(record);
+    if (typeof draft?.prompt !== 'string' || !draft.prompt.trim() || draft.prompt.length > 24_000) return;
+    const prompt = $('prompt');
+    state.newTabDraft = { key, record, prompt: draft.prompt, createdAt: draft.createdAt, autoSend: !prompt.value };
+    setDraftOpen(true);
+    if (!prompt.value) {
+      prompt.value = draft.prompt;
+      resizePrompt();
+    } else keepNewTabDraft();
+  } catch { /* Chat can still open with an empty composer. */ }
 }
 
-function listenForNewTabAsk() {
-  const area = chrome.storage.session;
-  if (typeof area?.remove !== 'function' || typeof chrome.tabs?.query !== 'function') return;
-  const key = handoffKey(state.windowId);
-  const take = async () => {
-    if (document.hidden || state.running || $('prompt').value || state.attachments.length || research.size) return;
-    const draft = (await area.get(key))[key];
-    const age = Date.now() - draft?.createdAt;
-    if (draft?.source !== 'newtab' || !Number.isFinite(age) || age < 0 || age > HANDOFF_TTL_MS
-        || typeof draft.prompt !== 'string' || !draft.prompt.trim() || draft.prompt.length > 24_000
-        || !Number.isInteger(draft.tabId)) return;
-    if (!(await readExperiments(chrome)).newTabComposer) return;
-    const [tab] = await chrome.tabs.query({ active: true, windowId: state.windowId });
-    if (tab?.id !== draft.tabId || tab.incognito || document.hidden || state.running || $('prompt').value) return;
-    if ((await area.get(key))[key]?.createdAt !== draft.createdAt) return;
-    await area.remove(key);
-    state.newTabDraft = draft;
-    state.newTabChatId = draft.tabId;
-    document.documentElement.dataset.newTabChat = 'true';
-    setControl(false);
-    $('prompt').value = draft.prompt;
-    resizePrompt();
-    sendNewTabDraft();
-  };
-  const refresh = () => {
-    const locks = navigator.locks;
-    void (locks ? locks.request(key, take) : take()).catch(() => {});
-  };
-  const onChange = changes => { if (changes[key]?.newValue) refresh(); };
-  area.onChanged?.addListener(onChange);
-  document.addEventListener('visibilitychange', refresh);
-  addEventListener('pagehide', () => {
-    area.onChanged?.removeListener(onChange);
-    document.removeEventListener('visibilitychange', refresh);
-  }, { once: true });
-  refresh();
+function keepNewTabDraft() {
+  const draft = state.newTabDraft;
+  if (!draft) return;
+  draft.autoSend = false;
+  try {
+    if (sessionStorage.getItem(draft.key) !== draft.record) return;
+    const record = JSON.stringify({ prompt: $('prompt').value });
+    sessionStorage.setItem(draft.key, record);
+    draft.record = record;
+  } catch { /* The draft is still in the composer. */ }
+}
+
+function consumeNewTabDraft(automatic) {
+  const draft = state.newTabDraft;
+  if (!draft) return !automatic;
+  draft.autoSend = false;
+  try {
+    // Back can restore the draft in New Tab while this document is in history.
+    const pending = sessionStorage.getItem(draft.key) === draft.record;
+    if (pending) sessionStorage.removeItem(draft.key);
+    state.newTabDraft = null;
+    return pending || !automatic;
+  } catch {
+    notify('Your question is still here. Breezer couldn’t send it. Try again.');
+    return false;
+  }
+}
+
+function sendNewTabDraft() {
+  const draft = state.newTabDraft;
+  if (!draft?.autoSend || document.hidden || state.discoveryPending) return;
+  draft.autoSend = false;
+  const age = Date.now() - draft.createdAt;
+  if (age >= 0 && age <= HANDOFF_TTL_MS && selectedModel() && !state.running
+      && !state.attachments.length && !state.readingFiles && $('prompt').value === draft.prompt) void send(true);
+  else keepNewTabDraft();
 }
 
 async function initialize() {
   try {
+    const currentTab = fullChat ? await chrome.tabs.getCurrent() : null;
+    if (fullChat) {
+      if (!Number.isInteger(currentTab?.id)) throw new Error('Open Breezer AI in a browser tab.');
+      restoreNewTabDraft(currentTab.id);
+    }
     const [saved, currentWindow] = await Promise.all([
       chrome.storage.local.get(['breezerProfile', MODEL_KEY, 'breezerModelPreferences']),
-      chrome.windows.getCurrent(),
+      fullChat ? null : chrome.windows.getCurrent(),
     ]);
     if (saved.breezerProfile && typeof saved.breezerProfile.name === 'string' && typeof saved.breezerProfile.context === 'string') state.profile = saved.breezerProfile;
     if (!modelChangeObserved) state.preferredModel = preferredModel(saved[MODEL_KEY]);
     if (saved.breezerModelPreferences && typeof saved.breezerModelPreferences === 'object' && !Array.isArray(saved.breezerModelPreferences)) state.preferences = saved.breezerModelPreferences;
-    state.windowId = currentWindow.id;
-    state.sessionKey = (fullChat ? 'breezer-full-conversation-' : 'breezer-conversation-') + currentWindow.id;
+    state.windowId = fullChat ? currentTab.windowId : currentWindow.id;
+    state.sessionKey = fullChat ? FULL_CHAT_PREFIX + currentTab.id : `breezer-conversation-${state.windowId}`;
     const session = await chrome.storage.session.get(state.sessionKey);
     if (Array.isArray(session[state.sessionKey])) {
       state.messages = session[state.sessionKey].filter((item) => ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-60);
@@ -1540,10 +1558,7 @@ async function initialize() {
     });
     post({ type: 'init', windowId: state.windowId });
     post({ type: 'visibility', visible: !document.hidden });
-    if (!fullChat) {
-      post({ type: 'context' });
-      listenForNewTabAsk();
-    }
+    if (!fullChat) post({ type: 'context' });
     updateControls();
     scrollToBottom();
     revealPanel();
@@ -1554,6 +1569,8 @@ async function initialize() {
 }
 
 if (fullChat) document.documentElement.dataset.fullChat = 'true';
+// A history-cached chat can hold a stale port and draft while New Tab is open.
+if (fullChat) addEventListener('pageshow', event => { if (event.persisted) location.reload(); });
 void startPanelTheme();
 const stopPersonalityLook = startPersonalityLook();
 addEventListener('pagehide', stopPersonalityLook, { once: true });

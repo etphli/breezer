@@ -220,19 +220,28 @@
    PK11_FreeSlot = NULL;
 --- a/chrome/browser/resources/settings/people_page/import_data_dialog.ts
 +++ b/chrome/browser/resources/settings/people_page/import_data_dialog.ts
-@@ -80,6 +80,11 @@
+@@ -60,6 +60,7 @@
+       browserProfiles_: {type: Array},
+       importDialogBookmarksPref_: {type: Object},
+       selected_: {type: Object},
++      savedPasswordsPref_: {type: Object},
+       noImportDataTypeSelected_: {type: Boolean},
+       importStatus_: {type: String},
+     };
+@@ -80,6 +81,12 @@
      autofillFormData: false,
      extensions: false,
    };
-+  protected readonly savedPasswordsPref_: chrome.settingsPrivate.PrefObject<boolean> = {
-+    key: 'import_dialog_saved_passwords',
-+    type: chrome.settingsPrivate.PrefType.BOOLEAN,
-+    value: false,
-+  };
++  protected accessor savedPasswordsPref_:
++      chrome.settingsPrivate.PrefObject<boolean> = {
++        key: 'import_dialog_saved_passwords',
++        type: chrome.settingsPrivate.PrefType.BOOLEAN,
++        value: false,
++      };
    protected accessor noImportDataTypeSelected_: boolean = false;
    protected accessor importStatus_: ImportDataStatus = ImportDataStatus.INITIAL;
    private browserProxy_: ImportDataBrowserProxy =
-@@ -181,7 +186,12 @@
+@@ -181,7 +188,12 @@
        });
        this.browserProxy_.importData(this.$.browserSelect.selectedIndex, types);
      }

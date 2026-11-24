@@ -862,27 +862,59 @@ try {
   await studio.waitForFunction(id => window.sent.some(message => message.type === 'turn-saved' && message.id === id), resumed.id);
   await studio.close();
   const draft = await browser.newPage({ viewport: { width: 380, height: 680 }, colorScheme: 'dark' });
+  const draftOrigin = `http://127.0.0.1:${server.address().port}`;
   await draft.addInitScript({ content: `
     (${installPanelFixture})(); (${installPanelAreaEvents})();
-    Object.assign(testStorage.local, { breezerExperiments: { newTabComposer: true, personality: 'warm' } });
-    Object.assign(testStorage.session, { 'breezer-handoff-7': { source: 'newtab', prompt: 'What should I read next?', tabId: 11, createdAt: Date.now() } });
-    chrome.tabs = { query: async () => [{ id: 11, incognito: false }] };
+    chrome.tabs = { getCurrent: async () => ({ id: 11, windowId: 7 }), query: async () => [{ id: 11, incognito: false }] };
+    Object.assign(testStorage.session, {
+      'breezer-conversation-7': [{ id: 'sidebar-user', role: 'user', text: 'Existing sidebar conversation' }],
+      'breezer-handoff-7': { source: 'newtab', prompt: 'Legacy handoff', tabId: 11, createdAt: Date.now() },
+      'breezer-full-conversation-tab-12': [{ id: 'other-user', role: 'user', text: 'A different full chat' }],
+    });
+    testStorage.local.breezerExperiments = { newTabComposer: true, personality: 'warm' };
     chrome.storage.session.remove = async key => { delete testStorage.session[key]; };
+    if (sessionStorage.getItem('draft-no-model')) testProviders[0].authenticated = false;
   ` });
-  await draft.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
-  await draft.waitForFunction(() => sent.some(message => message.type === 'chat'));
+  await draft.goto(draftOrigin + '/panel.html');
+  await draft.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await draft.locator('#prompt').inputValue(), '');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false);
+  assert.ok(await draft.evaluate(() => testStorage.session['breezer-handoff-7']), 'the sidebar leaves legacy drafts alone');
+  await draft.evaluate(() => {
+    sessionStorage.setItem('breezer-handoff-11', JSON.stringify({ prompt: 'What should I read next?', createdAt: Date.now() }));
+    sessionStorage.setItem('draft-no-model', 'true');
+  });
+  await draft.reload();
+  await draft.getByText('Existing sidebar conversation', { exact: true }).waitFor();
+  assert.equal(await draft.locator('#prompt').inputValue(), '');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false, 'the sidebar ignores both handoff stores');
+  await draft.goto(draftOrigin + '/panel.html?view=chat');
+  await draft.waitForFunction(() => document.querySelector('#prompt').value === 'What should I read next?');
+  await draft.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false);
+  assert.equal(await draft.locator('#prompt').isVisible(), true);
+  assert.equal(await draft.locator('#send').isDisabled(), true);
+  assert.equal(await draft.getByText('Existing sidebar conversation', { exact: true }).count(), 0);
+  assert.equal(await draft.getByText('A different full chat', { exact: true }).count(), 0);
+  await draft.locator('#prompt').fill('What short story should I read next?');
+  await draft.evaluate(() => sessionStorage.removeItem('draft-no-model'));
+  await draft.reload();
+  await draft.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await draft.locator('#prompt').inputValue(), 'What short story should I read next?');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false, 'an edited draft requires Send');
+  await draft.locator('#send').click();
   const handedOff = await draft.evaluate(() => sent.find(message => message.type === 'chat'));
-  assert.equal(handedOff.message, 'What should I read next?');
+  assert.equal(handedOff.message, 'What short story should I read next?');
   assert.equal(handedOff.includeContext, false);
   assert.equal(handedOff.control, false);
-  assert.equal(await draft.evaluate(() => 'breezer-handoff-7' in testStorage.session), false);
+  assert.equal(await draft.evaluate(() => sessionStorage.getItem('breezer-handoff-11')), null);
   assert.equal(await draft.locator('.context-row').isHidden(), true);
-  assert.equal(await draft.locator('.welcome').isHidden(), true);
   await draft.evaluate(id => {
     emit({ type: 'delta', id, text: 'Start with a short story tonight. Pick a book you can finish in one sitting.' });
     emit({ type: 'complete', id });
   }, handedOff.id);
   await draft.getByText('Start with a short story tonight.', { exact: false }).waitFor();
+  await draft.waitForFunction(() => testStorage.session['breezer-full-conversation-tab-11']?.length === 2);
   await draft.screenshot({ animations: 'disabled', path: `${evidence}/experimental-ask-chat.png` });
   await draft.close();
 
@@ -990,12 +1022,13 @@ try {
   await visuals.close();
 
   const full = await browser.newPage({ viewport: { width: 1050, height: 800 } });
-  await full.addInitScript({ content: '(' + installPanelFixture + ')(); (' + installPanelAreaEvents + ')();' });
-  await full.addInitScript(() => {
+  await full.addInitScript({ content: `
+    (${installPanelFixture})(); (${installPanelAreaEvents})();
+    chrome.tabs = { getCurrent: async () => ({ id: 11, windowId: 7 }) };
     testProviders[1].authenticated = true;
     testProviders[1].models = [{id:'claude-opus-5-5', label:'Claude Opus 5.5', reasoningEfforts:['medium']}];
     testStorage.local.breezerModel = { provider: 'claude', model: 'claude-opus-5-5' };
-  });
+  ` });
   await full.goto(fixtureOrigin + '/panel.html?view=chat');
   await full.locator('#model-button').getByText('Claude Opus 5.5', { exact: true }).waitFor();
   assert.equal(await full.locator('#research-open').isVisible(), false);
@@ -1011,7 +1044,7 @@ try {
   assert.equal(await full.locator('.reply-flow-node').count(), 3);
   const [conversation, composer] = await Promise.all([full.locator('#messages').boundingBox(), full.locator('.compose-area').boundingBox()]);
   assert.ok(Math.abs((conversation.x + conversation.width / 2) - (composer.x + composer.width / 2)) < 3, 'conversation and composer align');
-  await full.waitForFunction(() => testStorage.session['breezer-full-conversation-7']?.length === 2);
+  await full.waitForFunction(() => testStorage.session['breezer-full-conversation-tab-11']?.length === 2);
   await full.locator('.reply-flow').scrollIntoViewIfNeeded();
   await full.screenshot({ animations: 'disabled', path: evidence + '/full-chat-visual-replies.png' });
   await full.close();

@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { setImmediate } from 'node:timers/promises';
 import {
   DEFAULT_EXPERIMENTS, EXPERIMENTS_KEY, PERSONALITIES, applyGlassMaterial, applyPersonality, applyPersonalityLook,
-  glassMode, glassSupport, handoffKey, normalizeExperiments, personalityThemeName, pickRecentChats,
+  glassMode, glassSupport, handoffKey, installSidebarAddressSearch, normalizeExperiments, personalityThemeName, pickRecentChats,
   readExperiments, validateExperimentsPatch, watchExperiments, writeExperiments,
 } from '../../features/ai/extension/experiments.js';
 import { toAddress } from '../../features/ai/extension/newtab.js';
@@ -48,6 +49,36 @@ test('writes merge with the stored record and reach watchers', async () => {
   assert.equal(seen.at(-1).spaceDock, true);
   stop();
   assert.equal((await readExperiments({})).spaceDock, false);
+});
+
+test('sidebar address search reconciles saved profiles and rapid changes without rewriting the pin', async () => {
+  const { api } = storage({ [EXPERIMENTS_KEY]: { sidebarSearch: true } });
+  const appearance = { alwaysShowTopBar: true, sidebarAddressSearch: false };
+  const writes = [];
+  const writing = Promise.withResolvers();
+  const release = Promise.withResolvers();
+  api.breezerPrivate = {
+    async getAppearance() { return { ...appearance }; },
+    async setAppearance(patch) {
+      writes.push(patch);
+      writing.resolve();
+      await release.promise;
+      Object.assign(appearance, patch);
+    },
+  };
+  const startup = installSidebarAddressSearch(api);
+  await writing.promise;
+  await writeExperiments(api, { sidebarSearch: false });
+  await writeExperiments(api, { sidebarSearch: true });
+  await writeExperiments(api, { sidebarSearch: false, spaceDock: true });
+  release.resolve();
+  await startup;
+  await setImmediate();
+  assert.deepEqual(appearance, { alwaysShowTopBar: true, sidebarAddressSearch: false });
+  assert.deepEqual(writes, [{ sidebarAddressSearch: true }, { sidebarAddressSearch: false }]);
+  await writeExperiments(api, { glass: true });
+  await setImmediate();
+  assert.equal(writes.length, 2);
 });
 
 test('personality adds one reply-style line to the profile context only when chosen', () => {

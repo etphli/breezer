@@ -7,6 +7,8 @@ import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NOW, CONNECTED, installFixture as installNewTabFixture } from './newtab-browser-fixture.mjs';
 import { installFixture as installSettingsFixture } from './settings-browser-fixture.mjs';
+import { installPanelFixture } from './panel-browser-fixture.mjs';
+import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
 
 // Drives Settings > Experiments and the experimental New Tab in a real browser
 // against chrome.* fixtures. All data is disposable test data.
@@ -43,13 +45,13 @@ async function startServer() {
 
 // Runs after the shared New Tab fixture: seeds the experiments record once and adds
 // the APIs the experiments use (search, side panel, windows, session storage).
-function seedNewTab({ experiments, conversations = {}, windowState = 'normal' }) {
+function seedNewTab({ experiments, conversations = {}, chatTabs = [], windowState = 'normal' }) {
   if (experiments && !localStorage.getItem('shortcut-fixture')) localStorage.setItem('shortcut-fixture', JSON.stringify({ breezerExperiments: experiments }));
-  window.fxSeed = { conversations, windowState };
+  window.fxSeed = { conversations, chatTabs, windowState };
 }
 function extendNewTab() {
   const fx = window.fx;
-  Object.assign(fx, { searches: [], panels: [], focused: [], assigned: [] });
+  Object.assign(fx, { searches: [], panels: [], focused: [], updated: [] });
   const session = structuredClone(window.fxSeed.conversations);
   const listeners = [];
   const notify = (changes) => setTimeout(() => listeners.forEach((fn) => fn(structuredClone(changes), 'session')), 0);
@@ -60,13 +62,23 @@ function extendNewTab() {
     onChanged: { addListener: (fn) => listeners.push(fn), removeListener() {} },
   };
   fx.session = session;
-  // Stands in for the panel hook consuming a New Tab question.
-  fx.consumeHandoff = (windowId) => chrome.storage.session.remove(`breezer-handoff-${windowId}`);
   chrome.search = { async query(options) { fx.searches.push(options); } };
   chrome.sidePanel = { open(options) { fx.panels.push(options); return Promise.resolve(); } };
+  fx.chatTabs = window.fxSeed.chatTabs.map(tab => ({ url: chrome.runtime.getURL('panel.html?view=chat'), ...tab }));
   chrome.tabs.getCurrent = async () => ({ id: 7, windowId: 1 });
+  chrome.tabs.get = async id => structuredClone(fx.chatTabs.find(tab => tab.id === id));
+  chrome.tabs.update = async (id, changes) => {
+    fx.updated.push([id, changes]);
+    if (fx.failNavigation) throw new Error('synthetic navigation failure');
+    if (changes.url) location.assign(changes.url);
+    return { id, windowId: fx.chatTabs.find(tab => tab.id === id)?.windowId ?? 1 };
+  };
+  const query = chrome.tabs.query;
+  chrome.tabs.query = async (options) => options?.url ? fx.chatTabs.filter(tab => tab.url === options.url) : query(options);
   chrome.windows = {
-    async getAll() { return [{ id: 1, type: 'normal' }, { id: 2, type: 'normal' }]; },
+    async getAll({ populate } = {}) {
+      return [1, 2].map(id => ({ id, type: 'normal', ...(populate ? { tabs: fx.chatTabs.filter(tab => tab.windowId === id) } : {}) }));
+    },
     async getCurrent() { return { id: 1, state: window.fxSeed.windowState }; },
     async update(id, props) { fx.focused.push([id, props]); return { id }; },
   };
@@ -79,11 +91,20 @@ const CHATS = {
   'breezer-conversation-8': [{ role: 'user', text: 'From a closed window' }],
 };
 
-async function openNewTab(browser, base, { experiments, conversations, windowState, colorScheme = 'light', reducedMotion = 'reduce', video, viewport = { width: 1280, height: 820 } } = {}) {
+async function openNewTab(browser, base, { experiments, conversations, chatTabs, windowState, colorScheme = 'light', reducedMotion = 'reduce', video, viewport = { width: 1280, height: 820 } } = {}) {
   const context = await browser.newContext({ viewport, colorScheme, reducedMotion, locale: 'en-US', ...(video ? { recordVideo: { dir: video, size: viewport } } : {}) });
-  await context.addInitScript(seedNewTab, { experiments, conversations, windowState });
-  await context.addInitScript(installNewTabFixture, { view: { ...CONNECTED, organato: { enabled: false } } });
-  await context.addInitScript(extendNewTab);
+  await context.addInitScript({ content: `
+    if (location.pathname === '/panel.html') {
+      (${installPanelFixture})(); (${installPanelAreaEvents})();
+      chrome.tabs = { getCurrent: async () => ({ id: 7, windowId: 1 }) };
+      if (sessionStorage.getItem('draft-no-model')) testProviders[0].authenticated = false;
+      if (sessionStorage.getItem('draft-start-hidden')) Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+    } else if (location.pathname === '/newtab.html') {
+      (${seedNewTab})(${JSON.stringify({ experiments, conversations, chatTabs, windowState })});
+      (${installNewTabFixture})(${JSON.stringify({ view: { ...CONNECTED, organato: { enabled: false } } })});
+      (${extendNewTab})();
+    }
+  ` });
   await context.route('https://example.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Example</title>' }));
   const page = await context.newPage();
   await page.clock.setFixedTime(NOW);
@@ -143,27 +164,96 @@ test('New Tab experiments stay off by default and each one works once turned on'
       await page.getByRole('radio', { name: 'Ask Breezer' }).click();
       assert.equal(await page.locator('#composer-form').getAttribute('data-mode'), 'ask');
       assert.equal(await page.locator('#composer-style').innerText(), 'Warm replies');
+      await page.evaluate(() => { fx.failNavigation = true; });
       await input.fill('Summarise what I should revise tonight');
-      await input.press('Enter');
-      await page.waitForFunction(() => fx.panels.length === 1 && fx.session['breezer-handoff-1']);
-      assert.deepEqual(await page.evaluate(() => fx.panels[0]), { windowId: 1 });
-      const handoff = await page.evaluate(() => fx.session['breezer-handoff-1']);
-      assert.equal(handoff.prompt, 'Summarise what I should revise tonight');
-      assert.equal(handoff.source, 'newtab');
-      await page.evaluate(() => fx.consumeHandoff(1));
-      await page.getByText('Opened in Breezer AI.').waitFor();
-      assert.equal(await input.inputValue(), '');
-
-      // Without the panel taking it, the question stays and the stored copy is removed.
-      await input.fill('A question nobody picks up');
-      await input.press('Enter');
-      await page.getByText('Your question is still here to paste.', { exact: false }).waitFor({ timeout: 8000 });
-      assert.equal(await input.inputValue(), 'A question nobody picks up');
-      assert.equal(await page.evaluate(() => 'breezer-handoff-1' in fx.session), false);
+      await page.getByRole('button', { name: 'Ask Breezer AI', exact: true }).click();
+      await page.waitForFunction(() => fx.updated.length + fx.panels.length > 0);
+      assert.deepEqual(await page.evaluate(() => fx.panels), [], 'Ask should not open the sidebar');
+      await page.locator('#composer-status[data-state="error"]').waitFor();
+      assert.equal(await input.inputValue(), 'Summarise what I should revise tonight');
+      assert.equal(await page.evaluate(() => sessionStorage.getItem('breezer-handoff-7')), null);
+      assert.deepEqual(await page.evaluate(() => fx.updated), [[7, { url: `${base}/panel.html?view=chat` }]]);
 
       await page.locator('.recent-chat').nth(1).click();
-      await page.waitForFunction(() => fx.panels.length === 3 && fx.focused.length === 1);
-      assert.deepEqual(await page.evaluate(() => [fx.panels[2], fx.focused[0]]), [{ windowId: 2 }, [2, { focused: true }]]);
+      await page.waitForFunction(() => fx.panels.length === 1 && fx.focused.length === 1);
+      assert.deepEqual(await page.evaluate(() => [fx.panels[0], fx.focused[0]]), [{ windowId: 2 }, [2, { focused: true }]]);
+
+      await page.evaluate(() => {
+        fx.failNavigation = false;
+        sessionStorage.setItem('draft-start-hidden', 'true');
+      });
+      await Promise.all([page.waitForURL('**/panel.html?view=chat'), input.press('Enter')]);
+      await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+      assert.equal(await page.evaluate(() => sent.some(message => message.type === 'chat')), false);
+      assert.ok(await page.evaluate(() => sessionStorage.getItem('breezer-handoff-7')));
+      await page.evaluate(() => {
+        sessionStorage.removeItem('draft-start-hidden');
+        delete document.hidden;
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await page.waitForFunction(() => sent.some(message => message.type === 'chat'));
+      assert.equal(context.pages().length, 1, 'Ask reuses its browser tab');
+      assert.equal(await page.locator('html').getAttribute('data-full-chat'), 'true');
+      const request = await page.evaluate(() => sent.find(message => message.type === 'chat'));
+      assert.equal(request.message, 'Summarise what I should revise tonight');
+      assert.equal(request.includeContext, false);
+      assert.equal(request.control, false);
+      await page.evaluate(id => {
+        emit({ type: 'status', providers: testProviders });
+        emit({ type: 'delta', id, text: 'Review your history outline.' });
+        emit({ type: 'complete', id });
+      }, request.id);
+      await page.getByText('Review your history outline.', { exact: true }).waitFor();
+      await page.evaluate(() => emit({ type: 'status', providers: testProviders }));
+      assert.equal(await page.evaluate(() => sent.filter(message => message.type === 'chat').length), 1);
+      await page.waitForFunction(() => testStorage.session['breezer-full-conversation-tab-7']?.length === 2);
+      await page.evaluate(() => sessionStorage.setItem('breezer-fixture-session', JSON.stringify(testStorage.session)));
+      await page.reload();
+      await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+      await page.getByText('Review your history outline.', { exact: true }).waitFor();
+      assert.equal(await page.evaluate(() => sent.some(message => message.type === 'chat')), false);
+      await page.goBack({ waitUntil: 'commit' });
+      await page.locator('#composer-input').waitFor();
+      assert.equal(await input.inputValue(), '');
+
+      await page.evaluate(() => sessionStorage.setItem('draft-no-model', 'true'));
+      await input.fill('A question to keep when signed out');
+      await Promise.all([page.waitForURL('**/panel.html?view=chat'), input.press('Enter')]);
+      await page.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
+      assert.equal(await page.locator('#prompt').inputValue(), 'A question to keep when signed out');
+      assert.equal(await page.locator('#prompt').isVisible(), true);
+      await page.goBack({ waitUntil: 'commit' });
+      await page.waitForFunction(() => document.querySelector('#composer-input').value === 'A question to keep when signed out');
+      assert.deepEqual(await page.evaluate(() => JSON.parse(sessionStorage.getItem('breezer-handoff-7'))), { prompt: 'A question to keep when signed out' });
+      await page.reload();
+      await page.waitForFunction(() => document.querySelector('#composer-input').value === 'A question to keep when signed out');
+      await input.fill('My edited draft');
+      await page.reload();
+      await page.waitForFunction(() => document.querySelector('#composer-input').value === 'My edited draft');
+      await page.evaluate(() => sessionStorage.removeItem('draft-no-model'));
+      await page.goForward({ waitUntil: 'commit' });
+      await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+      assert.equal(await page.evaluate(() => sent.some(message => message.type === 'chat')), false, 'Back reclaimed the question');
+      await page.locator('#send').click();
+      assert.deepEqual(await page.evaluate(() => sent.filter(message => message.type === 'chat').map(message => message.message)), ['My edited draft']);
+      assert.equal(await page.evaluate(() => sessionStorage.getItem('breezer-handoff-7')), null);
+      await page.goBack({ waitUntil: 'commit' });
+      await page.waitForFunction(() => document.querySelector('#composer-input')?.value === '');
+
+      await page.evaluate(() => sessionStorage.setItem('draft-no-model', 'true'));
+      await input.fill('A draft to discard');
+      await Promise.all([page.waitForURL('**/panel.html?view=chat'), input.press('Enter')]);
+      await page.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
+      await page.goBack({ waitUntil: 'commit' });
+      await page.waitForFunction(() => document.querySelector('#composer-input')?.value === 'A draft to discard');
+      await input.clear();
+      await page.getByRole('radio', { name: 'Search' }).click();
+      await input.fill('a separate search query');
+      assert.equal(await page.evaluate(() => sessionStorage.getItem('breezer-handoff-7')), null);
+      await page.goForward({ waitUntil: 'commit' });
+      await page.waitForFunction(() => document.querySelector('.panel')?.dataset.accountState === 'signed-out');
+      assert.equal(await page.locator('#prompt').inputValue(), '');
+      await page.goBack({ waitUntil: 'commit' });
 
       await page.getByRole('radio', { name: 'Search' }).click();
       await input.fill('example.com');
@@ -225,6 +315,40 @@ test('New Tab experiments stay off by default and each one works once turned on'
   } finally {
     await browser.close();
     server.close();
+  }
+});
+
+test('New Tab recents return to the exact live chat tab', { skip, timeout: 30_000 }, async () => {
+  const server = await startServer();
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const browser = await chromium.launch({ executablePath, headless: true });
+  try {
+    const { page, context, errors } = await openNewTab(browser, base, {
+      experiments: ALL_ON,
+      chatTabs: [{ id: 17, windowId: 1 }, { id: 20, windowId: 2 }],
+      conversations: {
+        ...CHATS,
+        'breezer-full-conversation-tab-17': [{ role: 'user', text: 'Same-window chat', lastActivity: 1 }],
+        'breezer-full-conversation-tab-20': [{ role: 'user', text: 'Other-window chat', lastActivity: 2 }],
+      },
+    });
+    await page.getByRole('button', { name: /Same-window chat/ }).click();
+    await page.waitForFunction(() => fx.updated.length === 1);
+    await page.getByRole('button', { name: /Other-window chat/ }).click();
+    await page.waitForFunction(() => fx.focused.length === 1);
+    assert.deepEqual(await page.evaluate(() => [fx.updated, fx.focused, fx.panels]), [
+      [[17, { active: true }], [20, { active: true }]], [[2, { focused: true }]], [],
+    ]);
+    await page.evaluate(() => { fx.chatTabs[1].url = 'https://example.com/'; });
+    await page.getByRole('button', { name: /Other-window chat/ }).click();
+    await page.locator('#composer-status[data-state="error"]').waitFor();
+    await page.getByRole('button', { name: /Other-window chat/ }).waitFor({ state: 'detached' });
+    assert.equal(await page.evaluate(() => fx.updated.length), 2, 'a stale chat row never focuses an unrelated page');
+    assert.deepEqual(errors, []);
+    await context.close();
+  } finally {
+    await browser.close();
+    await new Promise(done => server.close(done));
   }
 });
 

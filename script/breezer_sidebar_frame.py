@@ -28,11 +28,90 @@ windows that show Chromium's own tab rows keep the upstream layout.
 REGION = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc"
 REGION_HEADER = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view.h"
 REGION_TEST = "chrome/browser/ui/views/frame/vertical_tab_strip_region_view_browsertest.cc"
+BROWSER_VIEW = "chrome/browser/ui/views/frame/browser_view.cc"
 LAYOUT = "chrome/browser/ui/views/frame/layout/browser_view_tabbed_layout_impl.cc"
 TOOLBAR = "chrome/browser/ui/views/toolbar/toolbar_view.cc"
 UI_FEATURES = "chrome/browser/ui/ui_features.cc"
 FRAME_MATERIALS = "chrome/browser/ui/views/helium/native_frame_materials.cc"
 MAC_WIDGET = "chrome/browser/ui/views/frame/browser_native_widget_mac.mm"
+
+
+def _browser_view_replacements():
+    pinned = """bool BrowserView::IsZenModeTopChromePinned() const {
+  return zen_mode_enabled_ && browser_->GetProfile()->GetPrefs()->GetBoolean(
+                                  prefs::kHeliumZenModeTopChromePinned);
+}
+"""
+    sidebar_address = """namespace {
+
+bool UsesBreezerSidebarAddress(const BrowserView& view) {
+  const Profile* profile = view.GetProfile();
+  return !profile->IsOffTheRecord() && view.ShouldDrawVerticalTabStrip() &&
+         profile->GetPrefs()->GetBoolean(
+             breezer_workspace::prefs::kSidebarAddressSearch);
+}
+
+}  // namespace
+
+bool BrowserView::IsZenModeTopChromePinned() const {
+  return zen_mode_enabled_ && !UsesBreezerSidebarAddress(*this) &&
+         browser_->GetProfile()->GetPrefs()->GetBoolean(
+             prefs::kHeliumZenModeTopChromePinned);
+}
+"""
+    watch_top_chrome = """  registrar_.Add(
+      prefs::kHeliumZenModeTopChromePinned,
+      base::BindRepeating(&BrowserView::OnZenModeTopChromePinnedPrefChanged,
+                          base::Unretained(this)));
+"""
+    watch_sidebar_address = """  registrar_.Add(
+      breezer_workspace::prefs::kSidebarAddressSearch,
+      base::BindRepeating(&BrowserView::OnZenModeTopChromePinnedPrefChanged,
+                          base::Unretained(this)));
+"""
+    toggle_top_chrome = """void BrowserView::ToggleZenModeTopChrome() {
+  if (!IsZenModeEnabled()) {"""
+    layout_changed = """  UpdateZenModeExpandOnHoverLock();
+
+  GetFrameView()->OnTabStripStateChanged();"""
+    focus = """  // In zen mode, snap the toolbar to fully shown so the omnibox is visible"""
+    return [
+        (
+            '#include "chrome/browser/ui/layout_constants.h"\n',
+            '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
+            '#include "chrome/browser/ui/layout_constants.h"\n',
+        ),
+        (watch_top_chrome, watch_top_chrome + watch_sidebar_address),
+        (pinned, sidebar_address),
+        (
+            toggle_top_chrome,
+            toggle_top_chrome.replace(
+                "!IsZenModeEnabled()", "!IsZenModeEnabled() || UsesBreezerSidebarAddress(*this)"
+            ),
+        ),
+        (
+            layout_changed,
+            layout_changed.replace(
+                "  UpdateZenModeExpandOnHoverLock();",
+                "  UpdateZenModeExpandOnHoverLock();\n"
+                "  OnZenModeTopChromePinnedPrefChanged();",
+            ),
+        ),
+        (
+            focus,
+            """  if (!is_user_initiated && zen_mode_enabled_ &&
+      UsesBreezerSidebarAddress(*this)) {
+    // A new tab normally focuses the omnibox automatically. Leave the page
+    // ready for keyboard input without revealing the toolbar.
+    if (auto* contents = GetActiveWebContents()) {
+      contents->Focus();
+    }
+    return;
+  }
+
+""" + focus,
+        ),
+    ]
 
 
 def _region_header_replacements():
@@ -559,6 +638,7 @@ def replacements():
         REGION: _region_replacements(),
         REGION_HEADER: _region_header_replacements(),
         REGION_TEST: _region_test_replacements(),
+        BROWSER_VIEW: _browser_view_replacements(),
         LAYOUT: _layout_replacements(),
         TOOLBAR: _toolbar_replacements(),
         UI_FEATURES: [(

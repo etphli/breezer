@@ -99,7 +99,7 @@ import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
-import { applyPersonality, readExperiments } from './experiments.js';
+import { applyPersonality, FULL_CHAT_PATH, FULL_CHAT_PREFIX, installSidebarAddressSearch, readExperiments } from './experiments.js';
 import { readBrowserStats } from './browser-stats.js';
 import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
@@ -202,6 +202,7 @@ function installCommands(api, toggleAssistant) {
 export function installBackground(api) {
   installTranslation(api);
   installWorkspaceSync(api);
+  void installSidebarAddressSearch(api);
   installUsage(api);
   const organato = createOrganatoTransport(api);
   const dashboardCache = createDashboardCache();
@@ -384,8 +385,8 @@ export function installBackground(api) {
   const runs = new Map();
   const replyWrites = new Map();
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
-  const fullChatKey = windowId => 'chat-' + windowId;
-  const runKey = panel => panel.fullChat && Number.isInteger(panel.windowId) ? fullChatKey(panel.windowId) : panel.windowId;
+  const fullChatKey = tabId => 'chat-tab-' + tabId;
+  const runKey = panel => panel.fullChat ? fullChatKey(panel.tabId) : panel.windowId;
   const runFor = panel => runs.get(runKey(panel));
   const controlRun = () => [...runs.values()].find(run => run.control);
   const current = run => runFor(run.panel) === run;
@@ -574,7 +575,15 @@ export function installBackground(api) {
     try {
       let context, researchSources;
       if (browserTask === 'stats') {
-        run.stats = await readBrowserStats(api, panel.windowId);
+        let windowId = panel.windowId;
+        if (panel.fullChat) {
+          const tab = await api.tabs.get(panel.tabId);
+          ensureActive(run);
+          if (tab?.incognito || tab?.url !== api.runtime.getURL(FULL_CHAT_PATH) ||
+              (tab.pendingUrl && tab.pendingUrl !== tab.url)) throw new Error('The chat tab is no longer open.');
+          windowId = tab.windowId;
+        }
+        run.stats = await readBrowserStats(api, windowId);
         ensureActive(run);
         const { windowTabCount, totalTabCount, browserMemory, systemMemory } = run.stats;
         run.statsSummary = { windowTabCount, totalTabCount, browserMemory, systemMemory };
@@ -668,10 +677,10 @@ export function installBackground(api) {
     if (port.name !== 'breezer-panel') return;
     const sender = port.sender;
     if (sender?.id !== api.runtime.id || sender?.tab?.incognito) return;
-    const fullChat = sender.url === api.runtime.getURL('panel.html?view=chat')
+    const fullChat = sender.url === api.runtime.getURL(FULL_CHAT_PATH)
       && Number.isInteger(sender.tab?.id) && Number.isInteger(sender.tab.windowId) && sender.frameId === 0;
     if (!fullChat && sender.url !== api.runtime.getURL('panel.html')) return;
-    const panel = { port, fullChat, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
+    const panel = { port, fullChat, tabId: fullChat ? sender.tab.id : undefined, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
     panels.add(panel);
     port.onMessage.addListener(message => {
       void (async () => {
@@ -774,6 +783,9 @@ export function installBackground(api) {
     tools.grants.delete(tabId);
     const run = controlRun();
     if (run?.tab?.id === tabId) void cancel(run, 'Browser control stopped because the tab closed.');
+    const key = fullChatKey(tabId);
+    void cancel(runs.get(key));
+    void writeReply(key, storageKey => api.storage.session.remove([storageKey, FULL_CHAT_PREFIX + tabId]));
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
     if (change.url || change.status === 'loading') for (const panel of panels) invalidateResearch(panel, tabId, 'Source navigated or is loading. Select source tabs again.');
@@ -800,10 +812,8 @@ export function installBackground(api) {
     if (run && run.panel.windowId !== windowId) void cancel(run, 'Browser control stopped because the active window changed.', 'browser-control');
   });
   api.windows?.onRemoved?.addListener(windowId => {
-    for (const key of [windowId, fullChatKey(windowId)]) {
-      void cancel(runs.get(key));
-      void writeReply(key, storageKey => api.storage.session.remove(storageKey));
-    }
+    void cancel(runs.get(windowId));
+    void writeReply(windowId, storageKey => api.storage.session.remove(storageKey));
   });
   api.debugger.onDetach.addListener(source => {
     const run = controlRun();

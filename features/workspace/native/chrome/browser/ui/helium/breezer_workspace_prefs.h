@@ -40,6 +40,8 @@ inline constexpr char kTheme[] = "breezer.workspace.theme";
 // Legacy v1 initialization marker. Retained so upgraded profiles keep their choices.
 inline constexpr char kInitialized[] = "breezer.workspace.initialized";
 inline constexpr char kSidebarMode[] = "breezer.workspace.sidebar_mode";
+inline constexpr char kSidebarAddressSearch[] =
+    "breezer.workspace.sidebar_address_search";
 inline constexpr char kSidebarFontSize[] = "breezer.workspace.sidebar_font_size";
 inline constexpr char kAppearanceDefaultsVersion[] =
     "breezer.workspace.appearance_defaults_version";

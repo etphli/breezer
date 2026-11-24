@@ -100,7 +100,8 @@ export function callBridge(name, ...args) {
 
 export async function loadAppearance() {
   try {
-    return { appearance: normalizeAppearance(await callBridge('getAppearance')), available: true, error: '' };
+    const raw = await callBridge('getAppearance');
+    return { appearance: normalizeAppearance(raw), sidebarAddressSearch: raw?.sidebarAddressSearch === true, available: true, error: '' };
   } catch (error) {
     return { appearance: { ...DEFAULT_APPEARANCE }, available: false, error: error instanceof BridgeUnavailable ? '' : errorText(error) };
   }

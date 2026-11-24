@@ -313,7 +313,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   if (HAS_NATIVE_HELPER && typeof api.runtime?.sendNativeMessage === 'function') mountModelSettings(api);
   nav = mountSettingsNav({ api });
   void featuresReady.then(() => nav.refreshAvailability());
-  let { appearance, available, error } = await loadAppearance();
+  let { appearance, available, error, sidebarAddressSearch } = await loadAppearance();
   let store = (await workspace.read()).store;
 
   // ------------------------------------------------------------ appearance
@@ -369,6 +369,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   const ranges = [...document.querySelectorAll('input[type="range"][data-field]')];
   const appearanceControls = [...groups.flatMap((group) => [...group.querySelectorAll('[role="radio"]')]), ...swatches.children, $('custom-theme-color'), $('custom-theme-apply'), ...ranges, ...switches].filter((control) => !control.matches?.('.looks-note'));
   const rowOf = (selector) => document.querySelector(selector).closest('.setting-row');
+  const sidebarControlsTopBar = () => appearance.frameless && appearance.layout === 'sidebar' && sidebarAddressSearch;
   // Rows whose setting is kept but has no visible effect with the current layout or frame.
   const mutedRows = [
     [rowOf('[data-field="sidebarMode"]'), () => appearance.layout === 'top'],
@@ -376,7 +377,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     [rowOf('[data-field="sidebarFontSize"]'), () => appearance.layout === 'top'],
     [rowOf('[data-pref="folderColors"]'), () => appearance.layout === 'top'],
     [rowOf('[data-field="alwaysShowSidebar"]'), () => !appearance.frameless],
-    [rowOf('[data-field="alwaysShowTopBar"]'), () => !appearance.frameless],
+    [rowOf('[data-field="alwaysShowTopBar"]'), () => !appearance.frameless || sidebarControlsTopBar()],
   ];
 
   // Writes go to the browser one at a time. The newest request per field waits
@@ -391,10 +392,12 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
   function renderAppearance() {
     applyAppearance(appearance);
     const preview = $('layout-preview');
+    const topBarOnDemand = sidebarControlsTopBar();
+    $('sidebar-address-top-bar-note').hidden = !topBarOnDemand;
     preview.dataset.tabs = appearance.layout;
     preview.dataset.sidebar = !appearance.alwaysShowSidebar && appearance.frameless
       ? 'autoHide' : appearance.sidebarMode;
-    preview.dataset.topBar = !appearance.frameless || appearance.alwaysShowTopBar ? 'visible' : 'autoHide';
+    preview.dataset.topBar = !appearance.frameless || (appearance.alwaysShowTopBar && !topBarOnDemand) ? 'visible' : 'autoHide';
     preview.dataset.address = appearance.centeredAddressBar ? 'center' : 'left';
     preview.dataset.url = appearance.minimalUrl ? 'minimal' : 'full';
     const sidebarNames = { expanded: 'Expanded sidebar', compact: 'Compact sidebar', autoHide: 'Sidebar on hover' };
@@ -432,7 +435,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
     for (const control of switches) control.setAttribute('aria-checked', String(appearance[control.dataset.field]));
     for (const [row, muted] of mutedRows) row.classList.toggle('muted-row', muted());
     for (const control of appearanceControls) {
-      const disabled = !available;
+      const disabled = !available || (control.dataset.field === 'alwaysShowTopBar' && topBarOnDemand);
       if (control.tagName === 'INPUT') control.disabled = disabled;
       else control.setAttribute('aria-disabled', String(disabled));
     }
@@ -533,7 +536,7 @@ export async function mountSettings({ api, workspace, callBridge, loadAppearance
 
   const refreshAppearance = async () => {
     if (writing || queued.size) return;
-    ({ appearance, available, error } = await loadAppearance());
+    ({ appearance, available, error, sidebarAddressSearch } = await loadAppearance());
     await refreshLook();
   };
   darkQuery.addEventListener('change', () => applyAppearance(appearance));

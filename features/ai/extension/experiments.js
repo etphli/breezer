@@ -21,10 +21,12 @@ import { applyThemeProposal, readThemeState, restorePreviousLook } from './brows
 
 export const EXPERIMENTS_KEY = 'breezerExperiments';
 export const EXPERIMENTS_VERSION = 1;
-// The panel reads and removes this storage.session key to send a question asked on the New Tab.
-export const handoffKey = (windowId) => `breezer-handoff-${windowId}`;
+// The New Tab and its full-page chat share the tab's sessionStorage draft.
+export const handoffKey = (tabId) => `breezer-handoff-${tabId}`;
 export const HANDOFF_TTL_MS = 60_000;
 export const CONVERSATION_PREFIX = 'breezer-conversation-';
+export const FULL_CHAT_PATH = 'panel.html?view=chat';
+export const FULL_CHAT_PREFIX = 'breezer-full-conversation-tab-';
 export const MAX_RECENT_CHATS = 3;
 
 const FLAGS = ['glass', 'sidebarSearch', 'newTabComposer', 'newTabRecentChats', 'newTabShortcuts', 'spaceDock'];
@@ -122,6 +124,29 @@ export function watchExperiments(api, onChange) {
   return () => events.removeListener(listener);
 }
 
+// The worker mirrors the local toggle even when the sidebar isn't open. Read
+// it again when a queued update runs so an older toggle can't win a race.
+export function installSidebarAddressSearch(api) {
+  if (typeof api?.breezerPrivate?.setAppearance !== 'function') return;
+  let pending = Promise.resolve();
+  const update = () => {
+    pending = pending.then(async () => {
+      const values = await api.storage.local.get(EXPERIMENTS_KEY);
+      const sidebarAddressSearch = normalizeExperiments(values[EXPERIMENTS_KEY]).sidebarSearch;
+      const appearance = await readAppearance(api);
+      if (typeof appearance?.sidebarAddressSearch === 'boolean' &&
+          appearance.sidebarAddressSearch !== sidebarAddressSearch) {
+        await setNativeExperiment(api, { sidebarAddressSearch });
+      }
+    }).catch(() => {});
+    return pending;
+  };
+  watchExperiments(api, (next, previous) => {
+    if (next.sidebarSearch !== previous.sidebarSearch) void update();
+  });
+  return update();
+}
+
 // ------------------------------------------------------------------ personality
 
 export function personalityInstruction(id) {
@@ -202,8 +227,13 @@ export async function glassSupport(api = globalThis.chrome) {
 // Throws when a supported write fails, so the caller can keep the old setting.
 export async function applyGlassMaterial(api, on) {
   if (!(await glassSupport(api)).native) return false;
+  await setNativeExperiment(api, { nativeGlass: on });
+  return true;
+}
+
+async function setNativeExperiment(api, patch) {
   await new Promise((resolve, reject) => {
-    const result = api.breezerPrivate.setAppearance({ nativeGlass: on }, () => {
+    const result = api.breezerPrivate.setAppearance(patch, () => {
       const error = api.runtime?.lastError;
       if (error) reject(new Error(error.message)); else resolve();
     });
@@ -211,7 +241,6 @@ export async function applyGlassMaterial(api, on) {
   });
   // Open pages re-read appearance when this revision changes.
   await api.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() }).catch(() => {});
-  return true;
 }
 
 // 'glass' or 'solid' for a page surface.
@@ -223,18 +252,25 @@ export function glassMode({ enabled, fullscreen = false, reducedTransparency = f
 
 const oneLine = (value, limit) => (typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, limit) : '');
 
-// The panel keeps one conversation per window in storage.session. Only conversations
-// whose window is still open can be reopened, so only those are listed: the current
-// window first, then newer windows. Messages have no timestamps, so window order
-// stands in for recency.
-export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_RECENT_CHATS) {
+// Sidebar conversations belong to their window. Full-page conversations
+// belong to the open chat tab, including when it moves to another window.
+export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_RECENT_CHATS, chatUrl) {
   const open = new Map((Array.isArray(windows) ? windows : [])
     .filter((win) => Number.isInteger(win?.id) && win.incognito !== true && (win.type ?? 'normal') === 'normal')
     .map((win) => [win.id, win]));
   const chats = [];
+  const chatTabs = new Map();
+  for (const win of open.values()) {
+    for (const tab of win.tabs ?? []) {
+      if (Number.isInteger(tab.id) && !tab.incognito && chatUrl && tab.url === chatUrl &&
+          (!tab.pendingUrl || tab.pendingUrl === chatUrl)) chatTabs.set(tab.id, win.id);
+    }
+  }
   for (const [key, messages] of Object.entries(saved && typeof saved === 'object' ? saved : {})) {
-    if (!key.startsWith(CONVERSATION_PREFIX) || !Array.isArray(messages)) continue;
-    const windowId = Number(key.slice(CONVERSATION_PREFIX.length));
+    const fullChat = key.startsWith(FULL_CHAT_PREFIX);
+    if ((!fullChat && !key.startsWith(CONVERSATION_PREFIX)) || !Array.isArray(messages)) continue;
+    const tabId = fullChat ? Number(key.slice(FULL_CHAT_PREFIX.length)) : undefined;
+    const windowId = fullChat ? chatTabs.get(tabId) : Number(key.slice(CONVERSATION_PREFIX.length));
     if (!open.has(windowId)) continue;
     const turns = messages.filter((item) => ['user', 'assistant'].includes(item?.role) && typeof item.text === 'string');
     const first = turns.find((item) => item.role === 'user' && oneLine(item.text, 1));
@@ -242,6 +278,7 @@ export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_REC
     const last = [...turns].reverse().find((item) => item.role === 'assistant' && oneLine(item.text, 1));
     chats.push({
       windowId,
+      ...(fullChat ? { tabId } : {}),
       title: oneLine(first.text, 90),
       preview: last ? oneLine(last.text, 140) : '',
       messages: turns.length,
@@ -256,8 +293,8 @@ export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_REC
 export async function recentChats(api = globalThis.chrome, currentWindowId, limit = MAX_RECENT_CHATS) {
   const session = api?.storage?.session;
   if (typeof session?.get !== 'function' || typeof api?.windows?.getAll !== 'function') return [];
-  const [saved, windows] = await Promise.all([session.get(null), api.windows.getAll()]);
-  return pickRecentChats(saved, windows, currentWindowId, limit);
+  const [saved, windows] = await Promise.all([session.get(null), api.windows.getAll({ populate: true })]);
+  return pickRecentChats(saved, windows, currentWindowId, limit, api.runtime?.getURL?.(FULL_CHAT_PATH));
 }
 
 // ------------------------------------------------------------------ settings
@@ -279,7 +316,7 @@ const ROWS = [
           ? 'Translucent window and New Tab surfaces. Fullscreen and Reduce transparency stay solid.'
           : 'Translucent New Tab surfaces. This build keeps the window frame solid, as do fullscreen and Reduce transparency.') },
       { flag: 'sidebarSearch', label: 'Address search in the sidebar', terms: 'address bar url search omnibox sidebar location',
-        description: () => 'Open the address bar from the top of the sidebar.' },
+        description: () => 'Open the address bar from the sidebar. In frameless sidebar layout, the top bar appears when needed.' },
       { flag: 'spaceDock', label: 'Space dock', terms: 'spaces dock switcher bottom sidebar icons',
         description: () => 'Shows your spaces as a row of icons at the foot of the sidebar.' },
     ],
