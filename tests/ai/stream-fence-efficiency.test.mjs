@@ -7,7 +7,19 @@ import { fixture, tree, rendererPath, beforePath, hash } from '../../script/veri
 const source = fs.readFileSync(rendererPath, 'utf8');
 const oracleSource = fs.readFileSync(beforePath, 'utf8');
 
-const sourceWithoutTables = source
+// Visual replies extend the whole-message parser only. Undo that layer while
+// the older fence benchmark continues to compare the pinned parser byte-for-byte.
+const sourceWithoutWidgets = source
+  .replace('renderMessage(container, text, renderWidget)', 'renderMessage(container, text)')
+  .replace('  let widgets = 0;\n', '')
+  .replace(
+    /      const body = \[\];\n(      while \(\+\+index[^\n]*\n)[\s\S]*?      code\.textContent = source;\n/,
+    "      const code = document.createElement('code');\n" +
+    "      const pre = document.createElement('pre');\n" +
+    "      const body = [];\n$1      code.textContent = body.join('\\n');\n",
+  );
+
+const sourceWithoutTables = sourceWithoutWidgets
   .replace('    let columns;\n', '')
   .replace(`    } else if (!paragraph.length && (columns = tableColumns(line, lines[index + 1]))) {
       flush();
@@ -248,7 +260,7 @@ test('panel completion, stop, error and New Chat preserve open-fence finalizatio
     };
     f.document.getElementById = get;
     f.document.body = f.root();
-    const context = vm.createContext({ document: f.document, ...f, requestAnimationFrame: fn => frames.push(fn), chrome: {}, ResearchSources: class { clear() {} }, console });
+    const context = vm.createContext({ document: f.document, ...f, requestAnimationFrame: fn => frames.push(fn), chrome: {}, renderReplyWidget: () => null, ResearchSources: class { clear() {} }, console });
     const newChat = panel.slice(panel.indexOf("$('new-chat').addEventListener"), panel.indexOf("$('model-button').addEventListener"));
     vm.runInContext(panel.slice(0, panel.indexOf("$('composer').addEventListener")) + `
       updateControls = () => {}; saveConversation = () => {}; setControl = () => {};

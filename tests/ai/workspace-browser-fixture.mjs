@@ -45,7 +45,7 @@ export function seed() {
 
 // Runs inside the page. Persists to localStorage/sessionStorage so reloads behave
 // like a sidebar document reopening in the same (or a restarted) browser.
-export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
+export function installFixture({ seed, bridge, bridgeFails, favicon = false, splitView = false, nativeControl = false }) {
   const windowId = seed.windowId ?? 7;
   const load = (store, key, fallback) => JSON.parse(store.getItem(key) || 'null') ?? fallback;
   const fx = {
@@ -54,6 +54,7 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
     session: load(sessionStorage, 'fx-session', seed.session),
     appearance: load(localStorage, 'fx-appearance', { layout: 'sidebar', sidebarMode: 'expanded', theme: 'mint', colorMode: 'system', showBookmarks: true, sidebarWidth: 240, sidebarFontSize: 15, centeredAddressBar: true, minimalUrl: true, showLoadProgress: true, frameless: true, alwaysShowSidebar: false, alwaysShowTopBar: true }),
     calls: [],
+    sessionReads: [],
     listeners: {},
   };
   window.fx = fx;
@@ -85,6 +86,7 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
   const area = (name) => ({
     onChanged: event(`storage.${name}.onChanged`),
     async get(keys) {
+      if (name === 'session') fx.sessionReads.push(copy(keys));
       const list = keys == null ? Object.keys(fx[name]) : [keys].flat();
       return copy(Object.fromEntries(list.filter((key) => key in fx[name]).map((key) => [key, fx[name][key]])));
     },
@@ -98,6 +100,15 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
       fire('storage.onChanged', changes, name);
       fire(`storage.${name}.onChanged`, changes);
     },
+    async remove(keys) {
+      const changes = {};
+      for (const key of [keys].flat()) {
+        changes[key] = { oldValue: fx[name][key] };
+        delete fx[name][key];
+      }
+      save();
+      fire(`storage.${name}.onChanged`, changes);
+    },
   });
   const hostOf = (url) => { try { return new URL(url).hostname; } catch { return url; } };
   window.chrome = {
@@ -105,11 +116,34 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
       getURL: (path) => `${location.origin}/${String(path).replace(/^\//, '')}`,
       getManifest: () => ({ permissions: ['tabs', 'storage', ...(favicon ? ['favicon'] : [])] }),
       onMessage: event('runtime.onMessage'),
+      async sendMessage(message) { fx.calls.push(['runtime.sendMessage', copy(message)]); },
       lastError: undefined,
     },
     windows: {
       getCurrent: async () => ({ id: windowId }),
       update: async (id, props) => { fx.calls.push(['windows.update', id, props]); return { id }; },
+      async create({ tabId }) {
+        const id = Math.max(windowId, ...fx.tabs.map((item) => item.windowId)) + 1;
+        if (tabId === undefined) {
+          fx.calls.push(['windows.create', {}]);
+          await window.chrome.tabs.create({ windowId: id });
+          return { id, tabs: copy(fx.tabs.filter((item) => item.windowId === id)) };
+        }
+        fx.calls.push(['windows.create', { tabId }]);
+        const tab = find(tabId);
+        const oldWindowId = tab.windowId;
+        const oldPosition = tab.index;
+        tab.windowId = id;
+        if (tab.active) {
+          const next = fx.tabs.find((item) => item.windowId === oldWindowId);
+          if (next) setActive(next.id);
+        }
+        tab.active = true;
+        save();
+        fire('tabs.onDetached', tabId, { oldWindowId, oldPosition });
+        fire('tabs.onAttached', tabId, { newWindowId: id, newPosition: 0 });
+        return { id, tabs: [copy(tab)] };
+      },
     },
     storage: { local: area('local'), session: area('session'), onChanged: event('storage.onChanged') },
     tabs: {
@@ -197,6 +231,8 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false }) {
         return copy(fx.appearance);
       },
       async setSidebarCollapsed(collapsed) { fx.calls.push(['setSidebarCollapsed', collapsed]); },
+      ...(nativeControl ? { async focusLocationBar() { fx.calls.push(['focusLocationBar']); } } : {}),
+      ...(splitView ? { async toggleSplitView(tabId) { fx.calls.push(['toggleSplitView', tabId]); } } : {}),
     };
   }
 }

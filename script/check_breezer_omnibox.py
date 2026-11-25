@@ -128,7 +128,15 @@ def check(tree, grit_directory):
     before = snapshot(tree)
     expect_failure(lambda: omnibox.apply(tree, check=True))
     assert snapshot(tree) == before, "--check wrote to unprepared source"
-    assert omnibox.apply(tree) == len(paths)
+    upstream_test = tree / omnibox.UPSTREAM_WEBUI_TEST
+    upstream_test.unlink()
+    without_test = snapshot(tree)
+    expect_failure(lambda: omnibox.apply(tree))
+    assert snapshot(tree) == without_test, "A missing upstream test modified real source"
+    assert omnibox.apply(tree, allow_missing_upstream_test=True) == len(paths) - 1
+    assert omnibox.apply(tree, check=True, allow_missing_upstream_test=True) == 0
+    upstream_test.write_bytes(original[omnibox.UPSTREAM_WEBUI_TEST])
+    assert omnibox.apply(tree, allow_missing_upstream_test=True) == 1
     applied = snapshot(tree)
     assert omnibox.apply(tree) == 0
     assert omnibox.apply(tree, check=True) == 0

@@ -7,6 +7,7 @@ import { installPanelFixture } from './panel-browser-fixture.mjs';
 import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
 import { detectBrowserTask } from '../../features/ai/extension/browser-task-intent.js';
 import { themeReferenceImages } from '../../features/ai/extension/theme-references.js';
+import { MODEL_KEY, preferredModel } from '../../features/ai/extension/model-catalog.js';
 
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
 // A current-main negative control: undo only the transcript scan/cache changes.
@@ -54,7 +55,8 @@ function harness(code, initial = [], ids = []) {
     };
     return Reflect.get(target, key, receiver);
   } });
-  let sequence = 0;
+  let sequence = 0, time = 1_700_000_000_000;
+  class FixtureDate extends Date { static now() { return ++time; } }
   const chrome = { storage: { session: {
     set(value) { writes.push({ refs: Object.values(value)[0], snapshot: JSON.parse(JSON.stringify(value)) }); events.push('write'); return Promise.resolve(); },
     async get(key) { return { [key]: initial }; },
@@ -62,18 +64,20 @@ function harness(code, initial = [], ids = []) {
   runtime: { connect() { return { postMessage(value) { posts.push(JSON.parse(JSON.stringify(value))); events.push(value.type); }, onMessage: { addListener() {} }, onDisconnect: { addListener() {} } }; } },
   breezerPrivate: { async authorizeCurrentPage() { return true; } },
   };
-  const context = vm.createContext({ document, chrome, crypto: { randomUUID: () => ids[sequence++] || `run-${sequence}` },
+  const context = vm.createContext({ document, chrome, Date: FixtureDate, crypto: { randomUUID: () => ids[sequence++] || `run-${sequence}` },
     detectBrowserTask,
     themeReferenceImages,
+    MODEL_KEY, preferredModel, listenForNewTabAsk() {},
     ResearchSources: class { size = 0; selected = new Map(); clear() {} },
     requestAnimationFrame(fn) { counts.frames++; frames.push(fn); },
     renderMessage(body, text) { renders.push(text); body.textContent = text; },
     createMessageStream(body) { const stream = { disposed: false, append(text) { assert.equal(this.disposed, false); body.textContent = (body.textContent || '') + text; }, dispose() { this.disposed = true; } }; streams.push(stream); return stream; },
+    renderReplyWidget: () => null,
     instrument, counts,
   });
   const prefix = code.replace(/^import .*;\n/gm, '').split("$('composer').addEventListener")[0];
   const newChat = code.slice(code.indexOf("$('new-chat').addEventListener"), code.indexOf("$('model-button').addEventListener"));
-  const initialize = code.slice(code.indexOf('async function initialize()'), code.indexOf('void startPanelTheme();'));
+  const initialize = code.slice(code.indexOf('function restoreNewTabDraft('), code.indexOf('void startPanelTheme();'));
   vm.runInContext(prefix + '\n' + initialize + `
     selectedModel = () => ({provider: {id: 'fixture'}, model: {id: 'fixture'}});
     selectedSettings = () => ({reasoning: '', speed: 'standard'});
@@ -180,6 +184,7 @@ test('actual initialize accepts loaded valid records, including empty text, befo
     const data = [...records(90), { role: 'invalid', text: 'reject' }, { role: 'user', text: 5 }];
     const h = harness(code, data);
     await h.initialize();
+    assert.equal(h.get('notice-text').textContent, undefined, 'startup completes without reporting an error');
     const expected = data.filter(item => ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-60);
     assert.deepEqual(plain(h.state.messages), expected);
     await h.start(); h.receive({ type: 'complete', id: h.state.running.id });

@@ -16,7 +16,6 @@
 #include "base/memory/raw_ptr.h"
 #include "base/memory/weak_ptr.h"
 #include "base/scoped_multi_source_observation.h"
-#include "base/strings/utf_string_conversions.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/time/time.h"
 #include "chrome/app/vector_icons/vector_icons.h"
@@ -28,14 +27,17 @@
 #include "content/public/browser/invalidate_type.h"
 #include "content/public/browser/keyboard_event_processing_result.h"
 #include "content/public/browser/navigation_controller.h"
+#include "content/public/browser/navigation_entry.h"
 #include "content/public/browser/navigation_handle.h"
 #include "content/public/browser/navigation_throttle.h"
 #include "content/public/browser/navigation_throttle_registry.h"
 #include "content/public/browser/page_navigator.h"
 #include "content/public/browser/render_frame_host.h"
+#include "content/public/browser/ssl_status.h"
 #include "content/public/browser/web_contents.h"
 #include "content/public/browser/web_contents_delegate.h"
 #include "content/public/browser/web_contents_user_data.h"
+#include "net/cert/cert_status_flags.h"
 #include "third_party/blink/public/mojom/window_features/window_features.mojom.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/accessibility/ax_enums.mojom.h"
@@ -68,7 +70,6 @@
 #include "ui/views/layout/box_layout.h"
 #include "ui/views/style/typography.h"
 #include "ui/views/view.h"
-#include "ui/views/view_class_properties.h"
 #include "ui/views/widget/widget.h"
 #include "ui/views/widget/widget_observer.h"
 #include "url/gurl.h"
@@ -78,13 +79,17 @@ namespace breezer_peek {
 
 namespace {
 
-constexpr int kMargin = 32;
-constexpr int kMaxCardSide = 920;
-constexpr int kMinCardSide = 280;
-constexpr int kToolbarHeight = 36;
-constexpr int kToolbarButtonSize = 28;
-constexpr float kCardRadius = 12;
-constexpr SkColor kScrimColor = SkColorSetA(SK_ColorBLACK, 0x4D);
+constexpr int kHorizontalMargin = 32;
+constexpr int kVerticalMargin = 24;
+constexpr int kMaxCardWidth = 1080;
+constexpr int kMaxCardHeight = 780;
+constexpr int kToolbarHeight = 44;
+constexpr int kToolbarButtonSize = 32;
+constexpr int kAddressHeight = 30;
+constexpr int kCardInset = 6;
+constexpr float kCardRadius = 16;
+constexpr float kPageRadius = 10;
+constexpr SkColor kScrimColor = SkColorSetA(SK_ColorBLACK, 0x58);
 // Entrance: the scrim settles first, then the card fades up over it.
 constexpr base::TimeDelta kScrimFadeIn = base::Milliseconds(120);
 constexpr base::TimeDelta kCardFadeInDelay = base::Milliseconds(40);
@@ -95,18 +100,13 @@ bool IsEscape(const input::NativeWebKeyboardEvent& event) {
          event.windows_key_code == ui::VKEY_ESCAPE;
 }
 
-// The card: centred, roughly square, never taller or wider than the window
-// allows.
 gfx::Rect CardBounds(const gfx::Rect& area) {
-  const int max_width = std::max(0, area.width() - 2 * kMargin);
-  const int max_height = std::max(0, area.height() - 2 * kMargin);
-  int height = std::min(max_height, kMaxCardSide);
-  const int width = std::min(max_width, height * 21 / 20);
-  height = std::min(height, std::max(width, kMinCardSide) * 21 / 20);
-  gfx::Rect card(width, height);
-  card.set_x(area.x() + (area.width() - width) / 2);
-  card.set_y(area.y() + (area.height() - height) / 2);
-  return card;
+  const int width = std::clamp(area.width() - 2 * kHorizontalMargin, 0,
+                               kMaxCardWidth);
+  const int height = std::clamp(area.height() - 2 * kVerticalMargin, 0,
+                                std::min(kMaxCardHeight, width * 3 / 4));
+  return gfx::Rect(area.x() + (area.width() - width) / 2,
+                   area.y() + (area.height() - height) / 2, width, height);
 }
 
 class Peek;
@@ -274,35 +274,54 @@ class Peek final : public content::WebContentsDelegate,
         views::CreateRoundedRectBorder(1, kCardRadius, ui::kColorBubbleBorder));
     auto* const card_layout =
         card->SetLayoutManager(std::make_unique<views::BoxLayout>(
-            views::BoxLayout::Orientation::kVertical));
+            views::BoxLayout::Orientation::kVertical,
+            gfx::Insets::TLBR(0, kCardInset, kCardInset, kCardInset)));
 
-    // Toolbar: where the page is, then Expand and Close at the top right.
     auto* const toolbar = card->AddChildView(std::make_unique<views::View>());
     toolbar->SetPreferredSize(gfx::Size(0, kToolbarHeight));
     auto* const toolbar_layout =
         toolbar->SetLayoutManager(std::make_unique<views::BoxLayout>(
             views::BoxLayout::Orientation::kHorizontal,
-            gfx::Insets::TLBR(0, 14, 0, 4), 4));
+            gfx::Insets::VH(0, 3), 4));
     toolbar_layout->set_cross_axis_alignment(
         views::BoxLayout::CrossAxisAlignment::kCenter);
 
+    auto* const address =
+        toolbar->AddChildView(std::make_unique<views::View>());
+    address->SetPreferredSize(gfx::Size(0, kAddressHeight));
+    address->SetBackground(views::CreateRoundedRectBackground(
+        ui::kColorSysSurface3, kAddressHeight / 2));
+    toolbar_layout->SetFlexForView(address, 1);
+    auto* const address_layout =
+        address->SetLayoutManager(std::make_unique<views::BoxLayout>(
+            views::BoxLayout::Orientation::kHorizontal, gfx::Insets::VH(0, 11),
+            8));
+    address_layout->set_cross_axis_alignment(
+        views::BoxLayout::CrossAxisAlignment::kCenter);
+
     not_secure_ =
-        toolbar->AddChildView(std::make_unique<views::Label>(u"Not secure"));
+        address->AddChildView(std::make_unique<views::Label>(u"Not secure"));
     not_secure_->SetTextStyle(views::style::STYLE_BODY_3_MEDIUM);
-    not_secure_->SetEnabledColor(ui::kColorLabelForegroundSecondary);
-    not_secure_->SetProperty(views::kMarginsKey,
-                             gfx::Insets::TLBR(0, 0, 0, 2));
-    origin_ = toolbar->AddChildView(std::make_unique<views::Label>());
-    origin_->SetTextStyle(views::style::STYLE_BODY_3);
+    not_secure_->SetEnabledColor(ui::kColorSysError);
+    origin_ = address->AddChildView(std::make_unique<views::Label>());
+    origin_->SetTextStyle(views::style::STYLE_BODY_3_MEDIUM);
     origin_->SetHorizontalAlignment(gfx::ALIGN_LEFT);
     origin_->SetElideBehavior(gfx::ELIDE_HEAD);
-    origin_->SetEnabledColor(ui::kColorLabelForegroundSecondary);
-    toolbar_layout->SetFlexForView(origin_, 1);
+    origin_->SetEnabledColor(ui::kColorLabelForeground);
+    address_layout->SetFlexForView(origin_, 1);
 
+    if (CanOpenInSplit()) {
+      toolbar->AddChildView(std::make_unique<PeekToolbarButton>(
+          base::BindRepeating(&Peek::Expand, weak_factory_.GetWeakPtr(),
+                              WindowOpenDisposition::NEW_SPLIT_VIEW),
+          kSplitSceneIcon, 17, "BreezerPeekSplit", u"Open in split view",
+          u"Open in split view"));
+    }
     toolbar->AddChildView(std::make_unique<PeekToolbarButton>(
-        base::BindRepeating(&Peek::Expand, weak_factory_.GetWeakPtr()),
-        kOpenInFullIcon, 14, "BreezerPeekExpand", u"Expand preview",
-        u"Open as a tab"));
+        base::BindRepeating(&Peek::Expand, weak_factory_.GetWeakPtr(),
+                            WindowOpenDisposition::NEW_FOREGROUND_TAB),
+        kOpenInFullIcon, 16, "BreezerPeekExpand", u"Open in a tab",
+        u"Open in a tab"));
     toolbar->AddChildView(std::make_unique<PeekToolbarButton>(
         base::BindRepeating(&Peek::Dismiss, weak_factory_.GetWeakPtr()),
         vector_icons::kCloseIcon, 16, "BreezerPeekClose", u"Close peek",
@@ -312,9 +331,9 @@ class Peek final : public content::WebContentsDelegate,
         std::make_unique<views::WebView>(contents_->GetBrowserContext()));
     web_view_->SetWebContents(contents_.get());
     web_view_->holder()->SetNativeViewCornerRadii(
-        gfx::RoundedCornersF(0, 0, kCardRadius - 1, kCardRadius - 1));
+        gfx::RoundedCornersF(kPageRadius));
     card_layout->SetFlexForView(web_view_, 1);
-    UpdateTitle();
+    UpdateAddress();
 
     // Close when the favourite tab stops being the visible tab or leaves.
     if (tabs::TabInterface* const tab =
@@ -435,10 +454,13 @@ class Peek final : public content::WebContentsDelegate,
 
   void NavigationStateChanged(content::WebContents* source,
                               content::InvalidateTypes changed_flags) override {
-    if (changed_flags &
-        (content::INVALIDATE_TYPE_URL | content::INVALIDATE_TYPE_TITLE)) {
-      UpdateTitle();
+    if (changed_flags & content::INVALIDATE_TYPE_URL) {
+      UpdateAddress();
     }
+  }
+
+  void VisibleSecurityStateChanged(content::WebContents* source) override {
+    UpdateAddress();
   }
 
   content::KeyboardEventProcessingResult PreHandleKeyboardEvent(
@@ -487,9 +509,18 @@ class Peek final : public content::WebContentsDelegate,
 
   void OnTabChanged(tabs::TabInterface* tab) { Dismiss(); }
 
-  // Moves the same live WebContents into an ordinary tab: no reload, so page
-  // state, form input and history stay as they are.
-  void Expand() {
+  bool CanOpenInSplit() const {
+    const tabs::TabInterface* const source_tab =
+        tabs::TabInterface::MaybeGetFromContents(source_);
+    return source_tab && source_tab->IsActivated() && !source_tab->IsSplit();
+  }
+
+  // Promote the live WebContents so the page keeps its form input and history.
+  void Expand(WindowOpenDisposition disposition) {
+    if (disposition == WindowOpenDisposition::NEW_SPLIT_VIEW &&
+        !CanOpenInSplit()) {
+      return;
+    }
     content::WebContentsDelegate* const delegate = source_->GetDelegate();
     if (!contents_ || !delegate) {
       Dismiss();
@@ -504,28 +535,30 @@ class Peek final : public content::WebContentsDelegate,
     // Destroys this peek in a later task; only locals are used below.
     Dismiss();
     auto forwarding = owner.Forward();
-    delegate->AddNewContents(&source, std::move(contents), url,
-                             WindowOpenDisposition::NEW_FOREGROUND_TAB,
+    delegate->AddNewContents(&source, std::move(contents), url, disposition,
                              blink::mojom::WindowFeatures(),
                              /*user_gesture=*/true, nullptr);
   }
 
-  void UpdateTitle() {
+  void UpdateAddress() {
     if (!origin_ || !contents_) {
       return;
     }
-    // One line: the page's origin, formatted for security display (IDN-safe).
-    // "https://" is implied; plain http keeps its scheme and a "Not secure"
-    // tag. The title is in the tooltip rather than repeated beside it.
+    // The address and tooltip both come from the browser's security formatter.
     const GURL& url = contents_->GetVisibleURL();
-    const bool not_secure = url.SchemeIs(url::kHttpScheme);
+    content::NavigationController& controller = contents_->GetController();
+    content::NavigationEntry* const entry = controller.GetVisibleEntry();
+    bool not_secure = url.SchemeIs(url::kHttpScheme);
+    if (url.SchemeIs(url::kHttpsScheme) && entry &&
+        entry == controller.GetLastCommittedEntry()) {
+      const content::SSLStatus& ssl = entry->GetSSL();
+      not_secure = net::IsCertStatusError(ssl.cert_status) ||
+                   ssl.content_status != content::SSLStatus::NORMAL_CONTENT;
+    }
     not_secure_->SetVisible(not_secure);
-    origin_->SetText(url_formatter::FormatUrlForSecurityDisplay(
-        url, not_secure ? url_formatter::SchemeDisplay::SHOW
-                        : url_formatter::SchemeDisplay::OMIT_CRYPTOGRAPHIC));
-    const std::u16string title = contents_->GetTitle();
-    const std::u16string spec = base::UTF8ToUTF16(url.possibly_invalid_spec());
-    origin_->SetTooltipText(title.empty() ? spec : title + u"\n" + spec);
+    const std::u16string address = url_formatter::FormatUrlForSecurityDisplay(url);
+    origin_->SetText(address);
+    origin_->SetTooltipText(address);
   }
 
   raw_ptr<PeekSource> owner_;

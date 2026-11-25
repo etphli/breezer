@@ -1,4 +1,5 @@
 import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
+import { PLATFORM } from '../../features/ai/extension/platform.js';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import * as store from '../../features/ai/extension/workspace-store.js';
@@ -51,9 +52,13 @@ class Node {
   querySelector(q) { return this.querySelectorAll(q)[0] || null; }
   closest(q) { return this.matches(q) ? this : this.parent?.closest(q); }
   contains(n) { return n === this || this.children.some(c => c.contains(n)); }
-  snapshot() { return { tag: this.tag, classes: [...this.classes].sort(), dataset: this.dataset, attrs: this.attrs,
+  snapshot() { const { spaceDock, ...dataset } = this.dataset;
+    const { 'aria-haspopup': popup, ...attrs } = this.attrs;
+    return { tag: this.tag, classes: [...this.classes].filter(name => name !== 'many').sort(), dataset, attrs,
     text: this.text, hidden: this.hidden, tabIndex: this.tabIndex, title: this.title, src: this.src,
-    children: this.children.map(n => n.snapshot()) }; }
+    // The browser fixture checks added presentation and picker controls.
+    children: this.children.filter(n => !['tile-label', 'folder-preview', 'dot', 'space-label'].some(name => n.classList.contains(name))
+      && !['space-name', 'space-glyph'].includes(n.id)).map(n => n.snapshot()) }; }
 }
 const plain = value => JSON.parse(JSON.stringify(value));
 export const sourcePath = new URL('../../features/ai/extension/workspace.js', import.meta.url);
@@ -100,7 +105,7 @@ export async function harness(source, sharedStorage, options = {} = {}) {
   };
   if (options.peek) api.breezerPrivate = { setPeekSources(ids) { peekCalls.push([...ids]); return peekReject ? Promise.reject(new Error('Fixture Peek failure')) : Promise.resolve(); } };
   if (sharedStorage) api.storage = sharedStorage;
-  const context = vm.createContext({ localStorageChanges, ...store, buildSidebarModel(args) { counters.models++; return store.buildSidebarModel(args); }, WorkspaceStore: boot ? class extends store.WorkspaceStore { async reconcile(args) { const result=await super.reconcile(args); options.reconcile?.({browserTabs,listeners}); return result; } } : class { async patchMembers(set, remove) { counters.writes.push(['members', plain(set), plain(remove)]);
+  const context = vm.createContext({ localStorageChanges, PLATFORM, ...store, buildSidebarModel(args) { counters.models++; return store.buildSidebarModel(args); }, WorkspaceStore: boot ? class extends store.WorkspaceStore { async reconcile(args) { const result=await super.reconcile(args); options.reconcile?.({browserTabs,listeners}); return result; } } : class { async patchMembers(set, remove) { counters.writes.push(['members', plain(set), plain(remove)]);
       for (const [id, record] of Object.entries(set)) persisted.local[store.MEMBERS_KEY].tabs[id] = { ...structuredClone(record), k: 'S1' };
       for (const id of remove) delete persisted.local[store.MEMBERS_KEY].tabs[id]; } },
     chrome: api, URL, console, Date: FixtureDate, innerWidth:width, innerHeight:height, CSS:{escape:s=>s}, matchMedia: () => ({ matches: reduced, addEventListener() {} }), addEventListener(name,fn) {(globalEvents[name] ||= []).push(fn);},
@@ -149,6 +154,6 @@ export async function harness(source, sharedStorage, options = {} = {}) {
     holdQuery() { held = true; }, releaseQuery() { release(); },
     async timers(delay) { now += delay; for (const [id, timer] of [...timers]) if (timer.delay === delay) { timers.delete(id); await timer.fn(); } for (let i = 0; i < 12; i++) await Promise.resolve(); },
     snapshot() { return plain({ tabs: [...h.state.tabs], records: h.state.records, lastActive: h.state.lastActive,
-      renaming: h.state.renaming, closeFallback: h.state.closeFallback, model: h.state.model, items: [...h.state.items], persisted, dom: [...nodes].map(([id, n]) => [id, n.snapshot()]), writes: counters.writes }); },
+      renaming: h.state.renaming, closeFallback: h.state.closeFallback, model: h.state.model, items: [...h.state.items], persisted, dom: [...nodes].filter(([id]) => !['add-space', 'space-menu', 'space-name', 'space-glyph', 'open-updates'].includes(id)).map(([id, n]) => [id, n.snapshot()]), writes: counters.writes }); },
   };
 }

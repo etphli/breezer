@@ -1,0 +1,112 @@
+.sidebar-address {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 34px;
+  margin: 7px 10px 0;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--ink) 5%, var(--canvas));
+  color: var(--muted);
+  text-align: start;
+}
+
+.sidebar-address:hover { color: var(--ink); background: var(--hover); }
+.sidebar-address span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sidebar-address svg, .sidebar-update svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+
+.sidebar-update {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  margin: 0 8px;
+  padding: 4px 5px 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in oklab, var(--accent) 8%, var(--raised));
+  color: var(--ink);
+  font-size: var(--fs-small);
+}
+
+.sidebar-update svg { color: inherit; }
+.sidebar-update-status { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.sidebar-update-action {
+  flex: none;
+  padding: 3px 7px;
+  border-radius: 7px;
+  background: var(--ink);
+  color: var(--canvas);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sidebar-update-action:hover { opacity: .86; }
+.sidebar-update-action:disabled { opacity: .6; }
+@container sidebar (max-width: 190px) { .sidebar-update svg { display: none; } }
+
+@media (prefers-reduced-transparency: no-preference) and (forced-colors: none) and (not (display-mode: fullscreen)) {
+  .sidebar[data-glass] {
+    background-image: linear-gradient(145deg, color-mix(in oklab, var(--accent) 13%, var(--canvas)), transparent 55%);
+    box-shadow: inset 1px 1px 0 color-mix(in srgb, var(--raised) 75%, transparent);
+  }
+  .sidebar[data-glass] :is(.sidebar-address, .sidebar-update) {
+    background: color-mix(in oklab, var(--raised) 74%, var(--canvas));
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 9%, transparent);
+  }
+}
+
+/* Keep the favicon prominent and reserve one line for each saved name. */
+@container sidebar (min-width: 151px) {
+  .favorites .tile {
+    min-height: 49px;
+    gap: 3px;
+    padding: 4px 4px 5px;
+    border-radius: 9px;
+  }
+  .favorites .tile .favicon, .favorites .tile .favicon img {
+    width: 21px;
+    height: 21px;
+  }
+  .favorites .tile-label {
+    display: block;
+    width: 100%;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    text-overflow: ellipsis;
+  }
+}
+@container sidebar (min-width: 151px) and (max-width: 320px) {
+  .favorites { --favorite-columns: 3; }
+}
+@container sidebar (min-width: 250px) and (max-width: 320px) {
+  .favorites:has(> :nth-child(4 of .tile:not(.leaving))):not(.many) {
+    --favorite-columns: 4;
+    column-gap: 5px;
+    .tile { padding-inline: 1px; }
+  }
+}
+
+#clear-today {
+  background: transparent;
+  border-color: transparent;
+  padding-inline: 5px;
+}
+#clear-today:hover {
+  background: var(--hover);
+  color: var(--ink);
+}
+
+.sidebar .folder {
+  --panel-tint: 7%;
+  box-shadow: none;
+}
+.sidebar .folder[aria-expanded="true"] { --panel-tint: 9%; }

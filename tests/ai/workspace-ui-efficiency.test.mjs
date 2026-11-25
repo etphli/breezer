@@ -1,4 +1,6 @@
 import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
+import { HAS_NATIVE_HELPER } from '../../features/ai/extension/platform.js';
+import * as experiments from '../../features/ai/extension/experiments.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -7,28 +9,39 @@ import vm from 'node:vm';
 const settle = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
 async function newtab({ duringInitialFilter } = {}) {
   const source = await readFile(new URL('../../features/ai/extension/newtab.js', import.meta.url), 'utf8');
-  const callbacks = new Map(), storageListeners = [], nodes = new Map();
-  const counters = { loads: 0, filters: 0, sites: 0, organato: 0, limits: [], failLoad: false };
+  const callbacks = new Map(), storageListeners = new Set(), nodes = new Map();
+  const counters = { storageReads: 0, loads: 0, filters: 0, sites: 0, organato: 0, replacements: 0, limits: [], failLoad: false };
   const node = id => {
     if (!nodes.has(id)) nodes.set(id, { hidden: false, dataset: {}, textContent: '', handlers: {},
+      querySelectorAll: () => [],
+      replaceChildren() { counters.replacements++; },
       addEventListener(name, fn) { this.handlers[name] = fn; }, setAttribute() {}, removeAttribute() {}, focus() {} });
     return nodes.get(id);
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
-  const api = { storage: { local: { async get() { return {}; }, onChanged: {
-    addListener(fn) { storageListeners.push(fn); }, removeListener(fn) { storageListeners.splice(storageListeners.indexOf(fn), 1); },
+  const api = { storage: { local: { async get() { counters.storageReads++; return {}; }, onChanged: {
+    addListener(fn) { storageListeners.add(fn); }, removeListener(fn) { storageListeners.delete(fn); },
   } } } };
+  const dispatch = (name) => { for (const callback of callbacks.get(name) || []) callback(); };
+  const resize = async (width) => { context.innerWidth = width; dispatch('resize'); await settle(); };
   let firstFilter = true;
-  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, root, api, counters, innerWidth: 1000,
+  const context = vm.createContext({ ...experiments, localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, root, api, counters, innerWidth: 1000,
     setTimeout: () => 1, clearTimeout() {},
-    addEventListener(name, fn) { callbacks.set(name, fn); },
-    removeEventListener(name, fn) { if (callbacks.get(name) === fn) callbacks.delete(name); },
+    addEventListener(name, fn) {
+      if (!callbacks.has(name)) callbacks.set(name, new Set());
+      callbacks.get(name).add(fn);
+    },
+    removeEventListener(name, fn) {
+      const listeners = callbacks.get(name);
+      listeners?.delete(fn);
+      if (!listeners?.size) callbacks.delete(name);
+    },
     ShortcutPreferences: class {
       constructor() { this.hidden = new Set(); }
       async load() { counters.loads++; if (counters.failLoad) throw new Error('Fixture read failed'); }
       async filter(sites, limit) {
         counters.filters++; counters.limits.push(limit);
-        if (firstFilter) { firstFilter = false; await duringInitialFilter?.(context, callbacks); }
+        if (firstFilter) { firstFilter = false; await duringInitialFilter?.(resize); }
         return sites.slice(0, limit);
       }
       async reset() { this.hidden.clear(); }
@@ -42,23 +55,30 @@ renderToday=()=>{}; renderPlaceholders=()=>{}; renderSites=(_api,_root,sites)=>{
 globalThis.run=()=>startNewTab({api,root});`;
   vm.runInContext(loaded, context);
   await context.run();
-  counters.loads = counters.filters = counters.sites = counters.organato = 0;
+  counters.storageReads = counters.loads = counters.filters = counters.sites = counters.organato = counters.replacements = 0;
   counters.limits.length = 0;
-  return { context, callbacks, counters, nodes, storageListeners, async resize(width) { context.innerWidth = width; callbacks.get('resize')?.(); await settle(); } };
+  return {
+    callbacks, counters, dispatch, nodes, resize, storageListeners,
+    storageChange(changes) { for (const listener of storageListeners) listener(changes); },
+  };
 }
 
 test('new-tab resizes keep every shortcut without storage, filtering or painting', async () => {
   const h = await newtab();
+  const counts = () => {
+    const { storageReads, loads, filters, sites, organato, replacements } = h.counters;
+    return [storageReads, loads, filters, sites, organato, replacements];
+  };
   for (let i = 0; i < 20; i++) await h.resize(1000 + i);
-  assert.deepEqual([h.counters.loads, h.counters.filters, h.counters.sites, h.counters.organato], [0, 0, 0, 0]);
+  assert.deepEqual(counts(), [0, 0, 0, 0, 0, 0]);
   for (const width of [900, 850, 700, 400, 401]) await h.resize(width);
   assert.deepEqual(h.counters.limits, []);
-  assert.deepEqual([h.counters.loads, h.counters.filters, h.counters.sites, h.counters.organato], [0, 0, 0, 0]);
+  assert.deepEqual(counts(), [0, 0, 0, 0, 0, 0]);
 });
 
 test('shortcut changes and explicit Reset still refresh at the same width', async () => {
   const h = await newtab();
-  h.storageListeners[0]({ hidden: { newValue: [] } }, 'local');
+  h.storageChange({ hidden: { newValue: [] } });
   await settle();
   assert.equal(h.counters.loads, 1);
   await h.nodes.get('sites-reset').handlers.click();
@@ -66,11 +86,7 @@ test('shortcut changes and explicit Reset still refresh at the same width', asyn
 });
 
 test('resize during initial shortcut filtering preserves all eight shortcuts', async () => {
-  const h = await newtab({ duringInitialFilter: async (context, callbacks) => {
-    context.innerWidth = 900;
-    callbacks.get('resize')?.();
-    await settle();
-  } });
+  const h = await newtab({ duringInitialFilter: resize => resize(900) });
   assert.equal(h.counters.shown, 8);
   await h.resize(900);
   assert.equal(h.counters.shown, 8);
@@ -79,16 +95,16 @@ test('resize during initial shortcut filtering preserves all eight shortcuts', a
 test('failed shortcut refreshes can retry and pagehide releases storage listeners', async () => {
   const h = await newtab();
   h.counters.failLoad = true;
-  h.storageListeners[0]({ hidden: { newValue: [] } }, 'local');
+  h.storageChange({ hidden: { newValue: [] } });
   await settle();
   h.counters.failLoad = false;
-  h.storageListeners[0]({ hidden: { newValue: [] } }, 'local');
+  h.storageChange({ hidden: { newValue: [] } });
   await settle();
   assert.equal(h.counters.loads, 2);
   assert.deepEqual(h.counters.limits, [8]);
-  h.callbacks.get('pagehide')();
+  h.dispatch('pagehide');
   assert.equal(h.callbacks.has('resize'), false);
-  assert.equal(h.storageListeners.length, 0);
+  assert.equal(h.storageListeners.size, 0);
 });
 
 async function toast() {

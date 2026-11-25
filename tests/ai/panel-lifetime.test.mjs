@@ -86,3 +86,23 @@ test('a theme finished with the panel closed is restored as a proposal in the or
   await tick();
   assert.ok(!(await connect()).sent.some(message => message.type === 'turn-state'));
 });
+
+test('full-page chat isolates its request and reply from the sidebar window', async () => {
+  const { api, native, port } = await fixture();
+  const tab = panel();
+  tab.sender = { id: 'fixture', url: api.runtime.getURL('panel.html?view=chat'), tab: { id: 42, windowId: 3, incognito: false }, frameId: 0 };
+  api.runtime.onConnect.emit(tab);
+  tab.onMessage.emit({ type: 'init', windowId: 999 });
+  await tick();
+  assert.ok(!tab.sent.some(message => message.type === 'turn-state'));
+  tab.onMessage.emit({ type: 'chat', id: 'blocked', provider: 'codex', model: 'gpt-6', message: 'Read this page', includeContext: true });
+  await tick();
+  assert.match(tab.sent.at(-1).error, /available from the sidebar/);
+  api.sidePanel.onClosed.emit({ windowId: 3 });
+  tab.onMessage.emit({ type: 'chat', id: 'tab-visual', provider: 'claude', model: 'claude-opus-5-5', message: 'Show the steps' });
+  await tick();
+  assert.ok(!tab.sent.some(message => message.id === 'tab-visual' && message.type === 'error'));
+  emitDelta(native, 'sidebar only');
+  assert.equal(port.sent.at(-1).text, 'sidebar only');
+  assert.ok(!tab.sent.some(message => message.text === 'sidebar only'));
+});

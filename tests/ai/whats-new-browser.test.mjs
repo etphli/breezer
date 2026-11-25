@@ -229,14 +229,32 @@ test('What\'s new page renders, closes its tab and opens Settings', { skip }, as
     await withPage(browser, base, { reducedMotion: 'no-preference' }, async (page) => {
       assert.equal(await page.$eval('.breeze-line', (line) => getComputedStyle(line).animationName), 'breeze');
       assert.equal(await page.$eval('.breeze-line', (line) => getComputedStyle(line).animationIterationCount), '1');
+      assert.equal(await page.$eval('.pdf-shot', (shot) => getComputedStyle(shot).animationName), 'pdf-send');
+      assert.equal(await page.$eval('.pdf-shot', (shot) => getComputedStyle(shot).animationIterationCount), '1');
+      await page.locator('#patch-135').scrollIntoViewIfNeeded();
+      await page.waitForTimeout(2200);
+      await page.locator('#patch-135').screenshot({ path: `${evidence}/whats-new-135-motion-end.png` });
     });
     await withPage(browser, base, {}, async (page) => {
       assert.equal(await page.$eval('.breeze-line', (line) => getComputedStyle(line).animationName), 'none');
+      assert.equal(await page.$eval('.pdf-shot', (shot) => getComputedStyle(shot).animationName), 'none');
+      assert.equal(await page.$eval('.pdf-shot', (shot) => getComputedStyle(shot).transform), 'none');
+      // The 1.3.5 hero is a large wide drawing on desktop.
+      assert.equal(await page.$eval('.patch-hero .hero-wide', (art) => art.getBoundingClientRect().width > 600 && getComputedStyle(art.parentElement).getPropertyValue('display') !== 'none'), true);
+      await page.locator('#patch-135').screenshot({ path: `${evidence}/whats-new-135-reduced.png` });
       assert.equal(await page.$eval('.breeze-line', (line) => getComputedStyle(line).strokeDashoffset), '0px');
+    });
+
+    // Windows laptop at 125%: 1366x768 physical is about 1093x614 CSS pixels.
+    await withPage(browser, base, { viewport: { width: 1093, height: 614 }, deviceScaleFactor: 1.25 }, async (page) => {
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      await page.locator('#patch-135').screenshot({ path: `${evidence}/whats-new-135-1366-125.png` });
     });
 
     await withPage(browser, base, { viewport: { width: 390, height: 844 } }, async (page) => {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 390), true);
+      assert.deepEqual(await page.$eval('.patch-hero', (hero) => [getComputedStyle(hero.querySelector('.hero-wide')).display, hero.querySelector('.hero-narrow').getBoundingClientRect().right <= 390]), ['none', true]);
+      await page.locator('#patch-135').screenshot({ path: `${evidence}/whats-new-135-narrow.png` });
       const stacked = await page.$$eval('.feature', rows => rows.map(row =>
         row.querySelector('.feature-copy').getBoundingClientRect().top >= row.querySelector('.plate').getBoundingClientRect().bottom));
       assert.deepEqual(stacked, [true, true, true, true, true]);

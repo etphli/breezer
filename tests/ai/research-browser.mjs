@@ -168,6 +168,10 @@ try {
   assert.equal(partial.researchSources[1].status, 'unavailable');
   assert.match(await page.locator('.message-meta').last().innerText(), /2 · Comparing browser memory[\s\S]*closed/);
   await page.evaluate(id => window.emit({ type: 'complete', id }), partial.id);
+  await page.locator('#research-chips .research-chip[data-unavailable]').waitFor();
+  await page.getByRole('button', { name: 'Review source tabs', exact: true }).click();
+  assert.match(await page.locator('#research-options').innerText(), /Unavailable\. Uncheck to remove\./);
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.screenshot({ animations: 'disabled', path: `${evidence}/research-partial-failure.png` });
   await page.getByRole('button', { name: 'Remove source 2:', exact: false }).click();
   assert.equal(await page.locator('#research-chips button').count(), 1);
@@ -191,7 +195,7 @@ try {
   await checkboxes.nth(0).check();
   assert.equal(await checkboxes.nth(7).isDisabled(), true);
   assert.equal(await checkboxes.nth(7).isChecked(), false);
-  assert.match(await page.locator('#research-limit').innerText(), /6 of 6 selected/);
+  assert.match(await page.locator('#research-limit').innerText(), /6 selected · Limit 6/);
   assert.equal(await page.locator('#research-chips button').count(), 6);
   await capturePicker(page, 'research-picker.png');
   await page.setViewportSize({ width: 320, height: 640 });

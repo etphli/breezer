@@ -116,11 +116,13 @@ export class ClaudeProvider {
     let rpc, directory;
     try {
       this.binary = await this.find('claude');
-      const [help, auth, version] = await Promise.all([this.run(this.binary, ['--help']), this.run(this.binary, ['auth', 'status']), this.run(this.binary, ['--version'])]);
+      if (process.platform === 'win32') directory = await mkdtemp(join(tmpdir(), 'breezer-claude-'));
+      const options = directory ? { cwd: directory } : undefined;
+      const [help, auth, version] = await Promise.all([this.run(this.binary, ['--help'], options), this.run(this.binary, ['auth', 'status'], options), this.run(this.binary, ['--version'], options)]);
       for (const option of ['--safe-mode', '--restricted', '--tools', '--strict-mcp-config', '--setting-sources', '--json-schema', '--disable-slash-commands', '--permission-prompts', '--effort']) if (!help.stdout.includes(option)) throw new Error('Update Claude Code to use its browser-only mode.');
       let account; try { account = JSON.parse(auth.stdout); } catch { throw new Error('Claude Code did not report its authentication status.'); }
       this.authenticated = account.loggedIn === true;
-      directory = await mkdtemp(join(tmpdir(), 'breezer-claude-'));
+      directory ??= await mkdtemp(join(tmpdir(), 'breezer-claude-'));
       rpc = this.createProcess(this.binary, claudeSafeArgs, { cwd: directory, env: cliEnvironment({ CLAUDE_CODE_SAFE_MODE: '1' }) });
       const initialized = await rpc.control({ subtype: 'initialize' });
       this.models = [];
@@ -152,10 +154,12 @@ export class ClaudeProvider {
     const directory = await mkdtemp(join(tmpdir(), 'breezer-claude-'));
     let rpc;
     try {
+      if (signal.aborted) throw new Error('Cancelled.');
       rpc = this.createProcess(this.binary, [...claudeSafeArgs, '--model', model, ...(effort !== undefined ? ['--effort', effort] : []), '--system-prompt', instructions, '--json-schema', JSON.stringify(schema)], { cwd: directory, env: cliEnvironment({ CLAUDE_CODE_SAFE_MODE: '1' }) });
       const abort = () => rpc.close(new Error('Cancelled.'));
       signal.addEventListener('abort', abort, { once: true });
       try {
+        if (signal.aborted) throw new Error('Cancelled.');
         await rpc.control({ subtype: 'initialize' });
         let content = [{ type: 'text', text: promptText(chat) }, ...researchParts(chat), ...claudeParts(attachmentParts(chat)), ...(chat.includeContext === true ? imageContent(chat.context) : [])];
         for (let round = 0; round < 30; round++) {

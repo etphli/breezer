@@ -94,16 +94,20 @@ function createDashboardCache({ now = Date.now, maximumBytes = 1024 * 1024 } = {
 return createDashboardCache;
 })();
 import { prepareResearch, researchSelection } from './research-policy.js';
+import { validGeneratedImage } from './reply-widgets.js';
 import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
+import { applyPersonality, FULL_CHAT_PATH, FULL_CHAT_PREFIX, installSidebarAddressSearch, readExperiments } from './experiments.js';
 import { readBrowserStats } from './browser-stats.js';
 import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
 import { installTranslation } from './translation-background.js';
+import { HAS_APP_UPDATER, HAS_NATIVE_HELPER, NATIVE_HOST } from './platform.js';
+import { readDashboardPreference } from './dashboard-preference.js';
 
-export const NATIVE_HOST = 'io.github.etphli.breezer.ai';
+export { NATIVE_HOST };
 // Extension-local copy of the helper's Organato switches. The helper's file stays
 // the source of truth; this copy lets new tabs honour "off" without starting it
 // and lets open new tabs follow a change made in Settings or setup.
@@ -179,15 +183,32 @@ function createOrganatoTransport(api) {
   return { ask, close };
 }
 
+function installCommands(api, toggleAssistant) {
+  api.commands.onCommand.addListener((command, tab) => {
+    if (command === 'toggle-breezer-ai') { toggleAssistant?.(tab); return; }
+    const space = /^space-([1-4])$/.exec(command);
+    if (!space) return;
+    void (async () => {
+      const current = tab?.windowId !== undefined ? tab
+        : (await api.tabs.query({ active: true, currentWindow: true }))[0];
+      if (current?.windowId === undefined) return;
+      await api.runtime.sendMessage({
+        type: 'breezer.workspace.space', windowId: current.windowId, index: Number(space[1]) - 1,
+      });
+    })().catch(() => {});
+  });
+}
+
 export function installBackground(api) {
   installTranslation(api);
   installWorkspaceSync(api);
+  void installSidebarAddressSearch(api);
   installUsage(api);
   const organato = createOrganatoTransport(api);
   const dashboardCache = createDashboardCache();
   const cacheOwner = {};
   installReleaseNotes(api);
-  api.runtime.onConnect.addListener(port => {
+  if (HAS_APP_UPDATER) api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-updates') return;
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
     let url;
@@ -243,6 +264,7 @@ export function installBackground(api) {
     if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito) return;
     let url; try { url = new URL(port.sender.url); url.hash = ''; url.search = ''; } catch { return; }
     const settings = port.name === 'breezer-organato-settings';
+    if (settings && !HAS_NATIVE_HELPER) return;
     if (url.href !== api.runtime.getURL(settings ? 'workspace.html' : 'newtab.html')) return;
     let closed = false, revision = 0, readerController;
     const ask = (type, values = {}, progress) => closed
@@ -268,7 +290,8 @@ export function installBackground(api) {
           const sites = Promise.resolve().then(() => api.topSites.get()).then(raw => raw.slice(0, 32).filter(site => /^https?:\/\//.test(site.url)));
           // Observe an early failure while retaining the existing config-first error order.
           void sites.catch(() => {});
-          const saved = await loadOrganatoSwitches(api);
+          const saved = HAS_NATIVE_HELPER ? await loadOrganatoSwitches(api)
+            : { enabled: false, dashboardEnabled: await readDashboardPreference(api) };
           if (message.earlySites === true && saved?.dashboardEnabled !== false) {
             void sites.then(topSites => {
               if (!closed && revision === requestRevision) port.postMessage({ type: 'sites', id: message.id, topSites });
@@ -354,16 +377,22 @@ export function installBackground(api) {
     });
     port.onDisconnect.addListener(() => { closed = true; readerController?.abort(); organato.close(port); });
   });
+  if (!HAS_NATIVE_HELPER) {
+    installCommands(api);
+    return;
+  }
   const panels = new Set();
   const runs = new Map();
   const replyWrites = new Map();
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
-  const runFor = panel => runs.get(panel.windowId);
+  const fullChatKey = tabId => 'chat-tab-' + tabId;
+  const runKey = panel => panel.fullChat ? fullChatKey(panel.tabId) : panel.windowId;
+  const runFor = panel => runs.get(runKey(panel));
   const controlRun = () => [...runs.values()].find(run => run.control);
   const current = run => runFor(run.panel) === run;
   const replyKey = windowId => `breezer-pending-reply-${windowId}`;
   const writeReply = (windowId, write) => {
-    if (!Number.isInteger(windowId) || !api.storage.session) return;
+    if (windowId === undefined || !api.storage.session) return;
     const pending = (replyWrites.get(windowId) || Promise.resolve()).then(() => write(replyKey(windowId))).catch(() => {});
     replyWrites.set(windowId, pending);
     void pending.then(() => { if (replyWrites.get(windowId) === pending) replyWrites.delete(windowId); });
@@ -381,14 +410,14 @@ export function installBackground(api) {
     browserTask: run.browserTask, stats: run.statsSummary,
   });
   const endRun = (run, terminal) => {
-    runs.delete(run.panel.windowId);
+    runs.delete(runKey(run.panel));
     let saved;
     if (!run.control) {
       // Keep a completed turn until the panel confirms its transcript was saved.
       const index = terminal.themeProposal?.imageAttachment;
       const value = { ...turnState(run), terminal };
       if (index) value.themeImage = run.themeImages[index - 1].image;
-      saved = writeReply(run.panel.windowId, key => api.storage.session.set({ [key]: value }));
+      saved = writeReply(runKey(run.panel), key => api.storage.session.set({ [key]: value }));
       if (index && run.reader !== run.panel) terminal = { ...terminal, themeImage: value.themeImage };
     }
     if (run.reader) post(run.reader.port, terminal);
@@ -427,7 +456,7 @@ export function installBackground(api) {
   };
   const publishMetadata = async (windowId, expectedTabId) => {
     for (const panel of panels) {
-      if (panel.closed || !panel.visible || panel.windowId === undefined || (windowId !== undefined && panel.windowId !== windowId)) continue;
+      if (panel.fullChat || panel.closed || !panel.visible || panel.windowId === undefined || (windowId !== undefined && panel.windowId !== windowId)) continue;
       const revision = ++panel.metadataRevision;
       const [tab] = await api.tabs.query({ active: true, windowId: panel.windowId });
       if (!tab || panel.closed || !panel.visible || panel.metadataRevision !== revision || (expectedTabId !== undefined && tab.id !== expectedTabId)) continue;
@@ -488,6 +517,10 @@ export function installBackground(api) {
         if (run.reader) post(run.reader.port, message);
       } else if (message.type === 'complete' || message.type === 'error') {
         let terminal = message;
+        if (message.generatedImage !== undefined && (run.browserTask !== 'image' || !validGeneratedImage(message.generatedImage))) {
+          const { generatedImage, ...ordinaryResponse } = message;
+          terminal = ordinaryResponse;
+        }
         if (message.type === 'complete' && !message.cancelled) {
           if (run.themeProposal) terminal = { ...message, themeProposal: run.themeProposal };
           else if (run.browserTask === 'theme') terminal = { type: 'error', id: run.id, source: 'theme', error: 'The model did not create a theme preview. Try again or choose another model.' };
@@ -510,8 +543,23 @@ export function installBackground(api) {
   };
   const sendChat = async (panel, message) => {
     if (typeof message.id !== 'string' || message.id.length > 200 || !['codex', 'claude'].includes(message.provider) || typeof message.message !== 'string' || !message.message.trim() || message.message.length > 50000 || typeof message.model !== 'string') throw new Error('Choose a provider and model, then enter a message.');
+    if (panel.fullChat && !Number.isInteger(panel.windowId)) throw new Error('Open the chat tab before sending a message.');
+    if (panel.fullChat && (message.control || message.includeContext || message.researchSources !== undefined || message.pdfView !== undefined)) {
+      throw new Error('Page sharing and browser control are available from the sidebar.');
+    }
     const browserTask = message.browserTask;
-    if (browserTask !== undefined && (!['stats', 'theme'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('Browser stats and theme design require page access and research to be off.');
+    const pdfView = message.pdfView;
+    if (pdfView !== undefined && (typeof pdfView !== 'string' || pdfView.length > 2 * 1024 * 1024
+        || !/^data:image\/jpeg;base64,[a-zA-Z0-9+/]+={0,2}$/.test(pdfView)
+        || !Number.isInteger(message.tabId) || message.includeContext !== true || message.control === true
+        || browserTask !== undefined || message.researchSources !== undefined)) {
+      throw new Error('Invalid PDF viewport. Open the PDF and send again.');
+    }
+    if (browserTask !== undefined && (!['stats', 'theme', 'image'].includes(browserTask) || message.control === true || message.includeContext === true || message.researchSources !== undefined)) throw new Error('This request requires page access and research to be off.');
+    if (browserTask === 'image' && (message.provider !== 'codex' || !/^gpt-/i.test(message.model)
+        || message.message.length > 4_000 || message.attachments?.length || message.history?.length)) {
+      throw new Error('Image generation requires a GPT model and a text prompt of up to 4,000 characters.');
+    }
     if (runFor(panel)) await cancel(runFor(panel));
     if (message.control === true && controlRun()) await cancel(controlRun(), 'Browser control moved to another tab.', 'browser-control');
     if (runFor(panel) || (message.control === true && controlRun())) throw new Error('A response is already running. Stop it before sending another message.');
@@ -523,11 +571,19 @@ export function installBackground(api) {
     };
     const history = Array.isArray(message.history) ? message.history.slice(-40) : [];
     if (browserTask === 'theme') run.themeImages = themeReferenceImages(message.attachments, history);
-    runs.set(panel.windowId, run);
+    runs.set(runKey(panel), run);
     try {
       let context, researchSources;
       if (browserTask === 'stats') {
-        run.stats = await readBrowserStats(api, panel.windowId);
+        let windowId = panel.windowId;
+        if (panel.fullChat) {
+          const tab = await api.tabs.get(panel.tabId);
+          ensureActive(run);
+          if (tab?.incognito || tab?.url !== api.runtime.getURL(FULL_CHAT_PATH) ||
+              (tab.pendingUrl && tab.pendingUrl !== tab.url)) throw new Error('The chat tab is no longer open.');
+          windowId = tab.windowId;
+        }
+        run.stats = await readBrowserStats(api, windowId);
         ensureActive(run);
         const { windowTabCount, totalTabCount, browserMemory, systemMemory } = run.stats;
         run.statsSummary = { windowTabCount, totalTabCount, browserMemory, systemMemory };
@@ -544,7 +600,14 @@ export function installBackground(api) {
         if (!researchSources.some(source => source.status === 'available' && source.text)) throw new Error('No source text is available. Select loaded tabs and try again.');
         run.user.sourceMetadata = researchSources.map(({ text, ...source }) => source);
       }
-      if (run.includeContext) {
+      if (pdfView) {
+        const [active] = await api.tabs.query({ active: true, windowId: panel.windowId });
+        ensureActive(run);
+        if (active?.id !== message.tabId || active.incognito !== false) {
+          throw new Error('The active PDF tab changed before sending.');
+        }
+        context = { kind: 'pdf-view', screenshot: pdfView };
+      } else if (run.includeContext) {
         const tab = await currentPage(panel);
         if (Number.isInteger(message.tabId) && tab?.id !== message.tabId) throw new Error('The active page changed before it could be shared. Send again from the page you want to share.');
         run.tab = tab;
@@ -557,14 +620,20 @@ export function installBackground(api) {
         context = await tools.snapshot(tab, run.session, true, () => current(run));
         ensureActive(run);
       }
-      const native = connectNative(panel);
+      const personal = await readExperiments(api);
+      const profile = applyPersonality({
+        name: String(message.profile?.name || '').slice(0, 100),
+        context: String(message.profile?.context || '').slice(0, 20_000),
+      }, personal);
+      profile.context = profile.context.slice(0, 20_000);
       ensureActive(run);
+      const native = connectNative(panel);
       native.postMessage({
         type: 'chat', id: run.id, provider: message.provider, model: message.model,
         ...(message.reasoning !== undefined ? { reasoning: message.reasoning } : {}),
         ...(message.provider === 'codex' && message.speed !== undefined ? { speed: message.speed } : {}),
         message: message.message, attachments: message.attachments, history,
-        profile: { name: String(message.profile?.name || '').slice(0, 100), context: String(message.profile?.context || '').slice(0, 20000) },
+        profile,
         ...(researchSources ? { researchSources } : {}),
         ...(browserTask ? { browserTask } : {}),
         context, includeContext: message.includeContext === true || run.control, control: run.control,
@@ -586,8 +655,8 @@ export function installBackground(api) {
       return true;
     };
     if (attach() || !api.storage.session) return;
-    const key = replyKey(panel.windowId);
-    await replyWrites.get(panel.windowId);
+    const key = replyKey(runKey(panel));
+    await replyWrites.get(runKey(panel));
     const saved = (await api.storage.session.get(key).catch(() => ({})))[key];
     if (!panel.closed && !attach() && !runFor(panel) && saved) post(panel.port, saved);
   };
@@ -598,29 +667,45 @@ export function installBackground(api) {
     const run = runFor(panel);
     if (run?.reader === panel && run.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
   };
+  const requestModelCatalog = panel => {
+    if (panel.closed) return;
+    const native = connectNative(panel);
+    try { native.postMessage({ type: 'init' }); }
+    catch (error) { releaseNative(panel); throw error; }
+  };
   api.runtime.onConnect.addListener(port => {
     if (port.name !== 'breezer-panel') return;
-    if (port.sender?.id !== api.runtime.id || port.sender?.tab?.incognito || port.sender?.url !== api.runtime.getURL('panel.html')) return;
-    const panel = { port, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
+    const sender = port.sender;
+    if (sender?.id !== api.runtime.id || sender?.tab?.incognito) return;
+    const fullChat = sender.url === api.runtime.getURL(FULL_CHAT_PATH)
+      && Number.isInteger(sender.tab?.id) && Number.isInteger(sender.tab.windowId) && sender.frameId === 0;
+    if (!fullChat && sender.url !== api.runtime.getURL('panel.html')) return;
+    const panel = { port, fullChat, tabId: fullChat ? sender.tab.id : undefined, native: null, closed: false, visible: true, windowId: undefined, metadataRevision: 0, ready: Promise.resolve() };
     panels.add(panel);
     port.onMessage.addListener(message => {
       void (async () => {
         if (!message || typeof message !== 'object' || panel.closed) return;
         if (message.type === 'init') {
           panel.ready = (async () => {
+            if (fullChat) {
+              panel.windowId = sender.tab.windowId;
+              await restoreTurn(panel);
+              return;
+            }
             const [tab] = await api.tabs.query({ active: true, ...(Number.isInteger(message.windowId) ? { windowId: message.windowId } : { currentWindow: true }) });
             if (panel.closed) return;
             panel.windowId = tab?.windowId ?? message.windowId;
             await tools.verifyGrant(tab);
             void contextMemory.observeGranted(tab);
             if (!panel.closed) await restoreTurn(panel);
-            if (!panel.closed) {
-              const native = connectNative(panel);
-              try { native.postMessage({ type: 'init' }); } catch (error) { releaseNative(panel); throw error; }
-            }
           })();
           await panel.ready;
+          requestModelCatalog(panel);
+        } else if (message.type === 'refresh-models') {
+          await panel.ready;
+          if (Number.isInteger(panel.windowId)) requestModelCatalog(panel);
         } else if (message.type === 'research-begin') {
+          if (fullChat) return;
           await panel.ready;
           panel.researchDraft = { id: message.id, selection: researchSelection(message.sources), invalidated: false };
         } else if (message.type === 'chat') { await panel.ready; await sendChat(panel, message); }
@@ -634,7 +719,7 @@ export function installBackground(api) {
           if (run?.reader === panel && (!message.id || run.id === message.id)) await cancel(run);
         } else if (message.type === 'turn-saved' || message.type === 'clear-turn') {
           await panel.ready;
-          await writeReply(panel.windowId, async key => {
+          await writeReply(runKey(panel), async key => {
             if (message.type === 'clear-turn' || (await api.storage.session.get(key))[key]?.id === message.id) await api.storage.session.remove(key);
           });
         } else if (message.type === 'context') {
@@ -656,7 +741,7 @@ export function installBackground(api) {
     if (!tab?.id) return;
     tools.authorize(tab);
     void contextMemory.observeGranted(tab);
-    const panel = [...panels].find(item => item.windowId === tab.windowId && !item.closed && item.visible);
+    const panel = [...panels].find(item => !item.fullChat && item.windowId === tab.windowId && !item.closed && item.visible);
     if (panel && api.sidePanel.close) {
       const run = runFor(panel);
       if (run?.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
@@ -666,25 +751,13 @@ export function installBackground(api) {
       void api.sidePanel.open({ windowId: tab.windowId }).catch(() => {});
     }
   };
-  api.commands.onCommand.addListener((command, tab) => {
-    if (command === 'toggle-breezer-ai') { toggle(tab); return; }
-    const space = /^space-([1-4])$/.exec(command);
-    if (!space) return;
-    void (async () => {
-      const current = tab?.windowId !== undefined ? tab
-        : (await api.tabs.query({ active: true, currentWindow: true }))[0];
-      if (current?.windowId === undefined) return;
-      await api.runtime.sendMessage({
-        type: 'breezer.workspace.space', windowId: current.windowId, index: Number(space[1]) - 1,
-      });
-    })().catch(() => {});
-  });
+  installCommands(api, toggle);
   api.action.onClicked.addListener(toggle);
   api.sidePanel.onClosed?.addListener(info => {
-    for (const panel of panels) if (panel.windowId === info.windowId) hidePanel(panel, 'Panel closed. Select source tabs again.');
+    for (const panel of panels) if (!panel.fullChat && panel.windowId === info.windowId) hidePanel(panel, 'Panel closed. Select source tabs again.');
   });
   api.sidePanel.onOpened?.addListener(info => {
-    for (const panel of panels) if (panel.windowId === info.windowId) panel.visible = true;
+    for (const panel of panels) if (!panel.fullChat && panel.windowId === info.windowId) panel.visible = true;
   });
   api.runtime.onMessage.addListener((message, sender) => {
     const run = controlRun();
@@ -710,6 +783,9 @@ export function installBackground(api) {
     tools.grants.delete(tabId);
     const run = controlRun();
     if (run?.tab?.id === tabId) void cancel(run, 'Browser control stopped because the tab closed.');
+    const key = fullChatKey(tabId);
+    void cancel(runs.get(key));
+    void writeReply(key, storageKey => api.storage.session.remove([storageKey, FULL_CHAT_PREFIX + tabId]));
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
     if (change.url || change.status === 'loading') for (const panel of panels) invalidateResearch(panel, tabId, 'Source navigated or is loading. Select source tabs again.');
@@ -737,7 +813,7 @@ export function installBackground(api) {
   });
   api.windows?.onRemoved?.addListener(windowId => {
     void cancel(runs.get(windowId));
-    void writeReply(windowId, key => api.storage.session.remove(key));
+    void writeReply(windowId, storageKey => api.storage.session.remove(storageKey));
   });
   api.debugger.onDetach.addListener(source => {
     const run = controlRun();

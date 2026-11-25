@@ -175,12 +175,12 @@ test('held transfer queries cannot postpone structural membership changes behind
 
 test('rename flush cancels the queued callback, draws current fields and releases queued IDs', async () => {
   const both = await pair();
-  for (const h of both) { h.update(3, { title: 'Before rename' }); h.startRename({ kind: 'space', id: 'space-work', key: 's:space-work' }); }
+  for (const h of both) { h.update(3, { title: 'Before rename' }); h.startRename({ kind: 'folder', id: 'f-design', key: 'f:f-design' }); }
   equal(both); assert.equal(both[1].pending().rows, null); assert.equal(both[1].framesPending(), 0);
   assert.equal(both[1].counters.models, 1);
   for (const h of both) h.update(3, { title: 'During rename' });
   flush(both); equal(both);
-  assert.equal(both[1].nodes.get('space-name').children[0].tag, 'input');
+  assert.equal(both[1].nodes.get('pinned').querySelector('.title input').tag, 'input');
 });
 
 test('roving focus is synchronized once and survives a burst', async () => {

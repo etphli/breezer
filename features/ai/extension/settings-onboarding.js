@@ -1,7 +1,6 @@
 import { localStorageChanges } from './storage-events.js';
-// First-run card on the settings page explaining how to bring data over from Chrome.
-// It only opens fixed native routes from passwords.js. It never reads Chrome files,
-// credentials, or import results, so it never reports that an import succeeded.
+import { PLATFORM } from './platform.js';
+// First-run card opens fixed native routes without reading import files or results.
 import { createPasswordActions } from './passwords.js';
 
 export const ONBOARDING_KEY = 'settings.onboarding.v1';
@@ -27,7 +26,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   section.hidden = true;
 
   const head = node('div', '', 'onboarding-head');
-  const heading = node('h2', 'Bring your Chrome data to Breezer');
+  const heading = node('h2', 'Import from another browser');
   heading.id = 'onboarding-heading';
   const hide = node('button', 'Hide', 'button subtle');
   hide.type = 'button';
@@ -35,9 +34,8 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   hide.setAttribute('aria-label', 'Hide getting started');
   head.append(heading, hide);
 
-  const intro = node('p', 'Copy the bookmarks, history and passwords you choose from Chrome.', 'onboarding-intro');
   const details = node('details', '', 'setting-details onboarding-details');
-  details.append(node('summary', 'Import details'), node('p', 'Chrome and Breezer keep separate profiles. Future changes in Chrome stay there.'));
+  details.append(node('summary', 'Import details'), node('p', 'Importing makes a one-time copy of the data you choose.'));
 
   const paths = node('div', '', 'onboarding-paths');
   const status = node('p', '', 'status-line');
@@ -55,7 +53,7 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
     paths.append(item);
   }
 
-  const browserImport = node('button', 'Import bookmarks and history', 'button primary');
+  const browserImport = node('button', 'Import browser data', 'button');
   browserImport.type = 'button';
   browserImport.dataset.onboardingAction = 'browserImport';
   controls.push(browserImport);
@@ -79,10 +77,10 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
       if (!disposed) for (const item of controls) item.disabled = false;
     }
     // Opening the dialog is not an import. The user checks the result there.
-    if (!disposed) status.textContent = 'Import dialog opened in a new tab. Choose what to copy there, then check your bookmarks and history.';
+    if (!disposed) status.textContent = 'Import dialog opened in a new tab. Choose what to copy and check the result there.';
   }, { signal: events.signal });
   path('Bookmarks and history',
-    'Choose Google Chrome in the import dialog, then select bookmarks, history, or both.',
+    'Choose a listed browser or import an exported bookmarks HTML file.',
     browserImport);
 
   const passwordSteps = node('button', 'Show password steps', 'button');
@@ -97,12 +95,15 @@ export function mountOnboarding({ container, api = globalThis.chrome, passwords 
   }, { signal: events.signal });
   if (!passwords) passwordSteps.hidden = true;
   path('Passwords',
-    'Choose Show password steps to export from Chrome and import into Breezer. Passkeys are not included.',
+    'Use the password steps to import a CSV export from Chrome, Edge or another password manager. Passkeys are not included.',
     passwordSteps);
+  if (PLATFORM === 'windows') {
+    details.append(node('p', 'To import directly from Firefox, choose it in the browser data dialog and check Saved passwords if the option appears.'));
+  }
 
   const footnote = node('p', 'Imports remain in Passwords and Browser tools.', 'field-note');
   details.append(footnote);
-  section.append(head, intro, paths, status, error, details);
+  section.append(head, paths, status, error, details);
 
   if (!api?.tabs?.create) {
     browserImport.disabled = true;

@@ -1,4 +1,4 @@
-// Drives the first-run Chrome import card against the shipped workspace.html in a fake DOM.
+// Drives the first-run import card against the shipped workspace.html in a fake DOM.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -42,8 +42,10 @@ test('first run shows the card only after the saved choice is read', async () =>
   assert.equal(f.section().hidden, true, 'hidden until storage answers');
   await settle();
   assert.equal(f.section().hidden, false);
-  assert.match(f.section().textContent, /Bring your Chrome data to Breezer/);
-  assert.match(f.section().textContent, /Future changes in Chrome stay there/);
+  assert.match(f.section().textContent, /Import from another browser/);
+  assert.match(f.section().textContent, /one-time copy/);
+  assert.match(f.section().textContent, /bookmarks HTML file/);
+  assert.match(f.section().textContent, /CSV export from Chrome, Edge or another password manager/);
   assert.doesNotMatch(f.section().textContent, /\bsync(s|ed|ing)? (with|to|from)\b|keeps? in sync/i, 'never implies sync');
   assert.doesNotMatch(f.section().textContent, /Touch ID|passkeys? (are|will be) imported/i);
   f.card.dispose();

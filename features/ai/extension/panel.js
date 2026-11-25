@@ -1,16 +1,21 @@
 import { localStorageChanges } from './storage-events.js';
 import { ResearchSources, maskSecrets } from './research-sources.js';
 import { renderMessage, createMessageStream } from './render-message.js';
-import { latestModels } from './model-catalog.js';
+import { appendGeneratedImage, renderReplyWidget, validGeneratedImage } from './reply-widgets.js';
+import { MODEL_KEY, connectedModel, modelProviders, preferredModel, providerLabel, selectModel } from './model-catalog.js';
 import { startPanelTheme } from './panel-theme.js';
 import { normalizeThemeProposal, readThemeState, renderThemeProposal, restorePreviousLook } from './browser-theme.js';
 import { detectBrowserTask } from './browser-task-intent.js';
 import { preparePastedImage } from './clipboard-image.js';
 import { themeReferenceImages } from './theme-references.js';
+import { PLATFORM } from './platform.js';
+import { FULL_CHAT_PATH, FULL_CHAT_PREFIX, HANDOFF_TTL_MS, handoffKey, startPersonalityLook } from './experiments.js';
 
 const BROWSER_TASKS = {
   stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
   theme: { label: 'Theme design', placeholder: 'Describe a theme, background, or animation…', prompt: '', sharing: 'Page sharing off' },
+  image: { label: 'Image generation', placeholder: 'Describe the image you want…', prompt: '', sharing: 'Only the prompt is sent to OpenAI' },
+  restore: { label: 'Restore previous look', sharing: 'Changes appearance on this device' },
 };
 
 const MAX_ATTACHMENT_TOTAL = 2 * 1024 * 1024;
@@ -45,24 +50,32 @@ async function readAttachment(file, { validatedImage = false } = {}) {
 }
 
 const $ = (id) => document.getElementById(id);
+const fullChat = globalThis.location?.search === '?view=chat';
 const state = {
   profile: { name: '', context: '' },
   providers: [],
   discoveryPending: true,
   selection: null,
+  preferredModel: null,
+  modelRefreshQueued: false,
   preferences: {},
+  modelQuery: '',
+  modelProvider: '',
   messages: [],
   attachments: [],
   readingFiles: false,
   retryMessage: null,
   fileGeneration: 0,
-  includeContext: true,
+  includeContext: !fullChat,
   control: false,
   controlTabId: null,
   browserTask: null,
   running: null,
   page: null,
-  pageKnown: false,
+  pageKnown: fullChat,
+  pageRevision: 0,
+  restoringLook: false,
+  newTabDraft: null,
   port: null,
   sessionKey: 'breezer-conversation',
   windowId: null,
@@ -75,6 +88,8 @@ const messageNodes = new Map();
 const themeCards = new Set();
 let lastContextTitle = null;
 let scheduledRender = false;
+let modelChangeObserved = false;
+let workingTimer;
 
 function notify(text) {
   $('notice-text').textContent = text;
@@ -94,9 +109,11 @@ function post(message) {
 }
 
 function selectedModel() {
-  const provider = state.providers.find((item) => item.id === state.selection?.provider);
-  const model = provider?.models?.find((item) => item.id === state.selection?.model);
-  return provider?.available && provider?.authenticated && model ? { provider, model } : null;
+  return connectedModel(state.providers, state.selection);
+}
+
+function effortLabel(level) {
+  return ({ xhigh: 'Extra high' })[level] || level.charAt(0).toUpperCase() + level.slice(1);
 }
 
 function selectedSettings(selected = selectedModel()) {
@@ -104,55 +121,93 @@ function selectedSettings(selected = selectedModel()) {
   const { provider, model } = selected;
   const saved = state.preferences[`${provider.id}:${model.id}`];
   const levels = model.reasoningEfforts || [];
-  const fallback = levels.includes('high') ? 'high' : levels.includes(model.defaultReasoningEffort) ? model.defaultReasoningEffort : '';
+  const reported = levels.includes(model.defaultReasoningEffort) ? model.defaultReasoningEffort : '';
+  const fallback = levels.includes('high') ? 'high' : reported;
+  // An older saved "Default" choice means the model's own default level.
   return {
-    reasoning: saved?.reasoning === '' || levels.includes(saved?.reasoning) ? saved.reasoning : fallback,
+    reasoning: levels.includes(saved?.reasoning) ? saved.reasoning : saved?.reasoning === '' ? reported : fallback,
     speed: model.speeds?.includes('fast') && saved?.speed === 'fast' ? 'fast' : 'standard',
   };
 }
 
+function reasoningOptions(model) {
+  const levels = model.reasoningEfforts || [];
+  if (!levels.length) {
+    const fixed = document.createElement('p');
+    fixed.className = 'option-note';
+    fixed.textContent = 'Set by the model';
+    return [fixed];
+  }
+  return levels.map((level) => {
+    const option = document.createElement('label');
+    option.className = 'tuning-option';
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'reasoning';
+    input.value = level;
+    const text = document.createElement('span');
+    text.textContent = effortLabel(level);
+    option.append(input, text);
+    if (level === model.defaultReasoningEffort) {
+      const tag = document.createElement('small');
+      tag.textContent = 'Default';
+      option.append(tag);
+    }
+    return option;
+  });
+}
+
+// Reasoning and speed are radio groups that always describe the selected model.
 function renderSettings(selected, running) {
   $('inference-model').textContent = selected ? selected.model.label || selected.model.id : '';
   const settings = selectedSettings(selected);
   const levels = selected?.model.reasoningEfforts || [];
-  const reasoning = $('reasoning-select');
-  reasoning.replaceChildren(new Option('Default', ''));
-  for (const level of levels) {
-    const label = ({ xhigh: 'Extra high' })[level] || level.charAt(0).toUpperCase() + level.slice(1);
-    reasoning.add(new Option(label, level));
+  // Rebuild only when the model changes; typing in the composer calls this often.
+  const signature = selected
+    ? `${selected.provider.id}:${selected.model.id}:${levels.join(',')}:${selected.model.defaultReasoningEffort ?? ''}` : '';
+  if ($('reasoning-options').dataset.signature !== signature) {
+    $('reasoning-options').dataset.signature = signature;
+    $('reasoning-options').replaceChildren(...(selected ? reasoningOptions(selected.model) : []));
   }
-  reasoning.value = settings.reasoning;
-  reasoning.disabled = running || !levels.length;
-  reasoning.parentElement.title = levels.length ? 'Reasoning effort' : 'This model does not report adjustable reasoning effort';
+  for (const input of document.querySelectorAll('input[name="reasoning"]')) input.checked = input.value === settings.reasoning;
+  $('reasoning-setting').disabled = running || !levels.length;
   const codex = selected?.provider.id === 'codex';
-  $('model-settings-label').textContent = codex ? 'Reasoning and speed' : 'Reasoning';
+  const fastAvailable = Boolean(selected?.model.speeds?.includes('fast'));
   $('speed-setting').hidden = !codex;
-  const speed = $('speed-select');
-  speed.replaceChildren(new Option('Standard', 'standard'));
-  const fast = new Option('Fast', 'fast');
-  fast.title = 'Higher usage; account eligibility is checked when you send';
-  fast.disabled = !selected?.model.speeds?.includes('fast');
-  speed.add(fast);
-  speed.value = settings.speed;
-  speed.disabled = running || !codex;
+  $('speed-setting').disabled = running || !codex;
+  for (const input of document.querySelectorAll('input[name="speed"]')) input.checked = input.value === settings.speed;
+  const fast = document.querySelector('input[name="speed"][value="fast"]');
+  fast.disabled = !fastAvailable;
+  $('speed-fast').title = fastAvailable ? 'Uses more of your Codex allowance' : 'Not available for this model';
   $('speed-note').hidden = !codex || settings.speed !== 'fast';
-  $('speed-setting').title = fast.disabled ? 'Fast is not available for this model and CLI' : 'Fast uses more of your Codex allowance. Account eligibility is checked when you send.';
+  // The composer shows the linked settings next to the model name.
+  const fastOn = codex && settings.speed === 'fast';
+  $('model-effort').textContent = [settings.reasoning ? effortLabel(settings.reasoning) : '', fastOn ? 'Fast' : ''].filter(Boolean).join(', ');
+  $('model-effort').dataset.fast = String(fastOn);
 }
 
 function saveSettings() {
   const selected = selectedModel();
   if (!selected || state.running) return;
+  const reasoning = document.querySelector('input[name="reasoning"]:checked')?.value ?? selectedSettings(selected).reasoning;
+  const speed = document.querySelector('input[name="speed"]:checked')?.value || 'standard';
   state.preferences[`${selected.provider.id}:${selected.model.id}`] = {
-    reasoning: $('reasoning-select').value,
-    ...(selected.provider.id === 'codex' ? { speed: $('speed-select').value } : {}),
+    reasoning,
+    ...(selected.provider.id === 'codex' ? { speed } : {}),
   };
   chrome.storage.local.set({ breezerModelPreferences: state.preferences }).catch(() => notify('Your model preferences could not be saved.'));
   updateControls();
 }
 
+function supportsImageGeneration(selected = selectedModel()) {
+  return selected?.provider.id === 'codex' && /^gpt-/i.test(selected.model.id);
+}
+
 function draftBrowserTask() {
   if (research.size) return '';
+  if (state.browserTask === 'image' && !supportsImageGeneration()) return '';
   return state.browserTask ?? detectBrowserTask($('prompt').value, {
+    get allowImage() { return supportsImageGeneration(); },
     get hasImage() { return themeReferenceImages(state.attachments, recentRequestMessages()).length > 0; },
     get hasTheme() { return Boolean(state.messages.findLast(message => message.role === 'assistant')?.themeProposal); },
   });
@@ -163,7 +218,7 @@ function updateControls() {
   const task = BROWSER_TASKS[state.running?.browserTask || draftBrowserTask()];
   document.querySelector('.panel').dataset.running = String(running);
   document.querySelector('.panel').dataset.pageState = state.pageKnown ? 'ready' : 'loading';
-  $('send').disabled = !running && (!selectedModel() || (!$('prompt').value.trim() && !state.attachments.length) || state.readingFiles);
+  $('send').disabled = state.restoringLook || (!running && ((task !== BROWSER_TASKS.restore && !selectedModel()) || (!$('prompt').value.trim() && !state.attachments.length) || state.readingFiles));
   $('send').dataset.running = String(running);
   $('send').setAttribute('aria-label', running ? 'Stop response' : 'Send message');
   $('send').title = running ? 'Stop response' : 'Send message';
@@ -173,20 +228,22 @@ function updateControls() {
   $('file-input').disabled = running || state.readingFiles;
   document.querySelectorAll('.attachment-remove').forEach(button => { button.disabled = running || state.readingFiles; });
   research.setBusy(running);
-  $('control-toggle').disabled = running || !state.page || research.size > 0;
+  $('control-toggle').disabled = running || !state.page || state.page.pdf || research.size > 0;
   $('context-toggle').hidden = Boolean(task) || research.size > 0 || !state.page;
   $('context-toggle').disabled = running || !state.page || research.size > 0;
   $('browser-task-open').disabled = running;
+  $('open-chat-tab').hidden = fullChat || !chrome.tabs?.create;
+  $('browser-task-image').hidden = !supportsImageGeneration();
   $('browser-task-clear').hidden = !task;
   $('browser-task-clear').disabled = running;
   $('browser-task-clear').textContent = task ? `${task.label} ×` : '';
   if (task) $('browser-task-clear').setAttribute('aria-label', `Clear ${task.label}`);
   $('control-toggle').setAttribute('aria-pressed', String(state.control));
   $('context-toggle').setAttribute('aria-pressed', String(state.includeContext));
-  $('sharing-label').textContent = state.control ? 'Page' : 'Page + screenshot';
+  $('sharing-label').textContent = state.page?.pdf ? 'PDF view' : state.control ? 'Page' : 'Page + screenshot';
   const share = !state.page ? 'unavailable' : state.control ? 'control' : state.includeContext ? 'shared' : 'off';
   $('context-hint').dataset.state = share;
-  $('context-hint').textContent = task ? task.sharing : !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Only web pages can be shared', control: 'Page + browser control', shared: 'Page + screenshot', off: 'Page not shared' })[share];
+  $('context-hint').textContent = task ? task.sharing : !state.pageKnown ? 'Loading current page…' : research.size ? 'Text only · screenshots and control off' : ({ unavailable: 'Chat without sharing this tab', control: 'Page + browser control', shared: state.page?.pdf ? 'Visible PDF only' : 'Page + screenshot', off: 'Page not shared' })[share];
   $('research-label').textContent = research.size ? `${research.size} ${research.size === 1 ? 'source' : 'sources'}` : 'Sources';
   $('research-open').dataset.active = String(research.size > 0);
   $('control-tip').textContent = state.page ? 'Click, type, scroll, and navigate in this tab.' : 'Available on ordinary web pages.';
@@ -227,73 +284,103 @@ function renderWelcomeStatus(selected) {
   $('welcome-account-steps').hidden = !showAccounts;
   $('welcome-action').hidden = !action;
   $('welcome-action').textContent = action;
+  $('draft-toggle').hidden = !action;
   document.querySelector('.suggestions').hidden = !selected && !state.discoveryPending || state.pageKnown && !state.page && !research.size;
-  document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
+  document.querySelectorAll('[data-page]').forEach((button) => { button.disabled = button.dataset.control ? research.size > 0 || state.page?.pdf || state.pageKnown && !state.page : !research.size && state.pageKnown && !state.page; });
 }
 
 function refreshModels() {
   state.discoveryPending = true;
   updateControls();
-  post({ type: 'init', windowId: state.windowId });
+  if (!post({ type: 'refresh-models' })) {
+    state.discoveryPending = false;
+    applyModelSelection(state.preferredModel);
+  }
 }
 
-function providerLabel(id) {
-  return id === 'codex' ? 'Codex' : id === 'claude' ? 'Claude' : id;
+function refreshQueuedModel() {
+  if (!state.modelRefreshQueued || state.discoveryPending || state.running || !state.port) return;
+  state.modelRefreshQueued = false;
+  state.selection = null;
+  refreshModels();
 }
 
 function renderModels() {
-  $('model-options').replaceChildren();
+  if (PLATFORM === 'windows') {
+    const codex = state.providers.find((provider) => provider.id === 'codex');
+    const steps = $('welcome-account-steps');
+    const instructions = steps.querySelector('[data-provider="codex"]');
+    instructions.hidden = typeof codex?.setup !== 'string';
+    instructions.querySelector('code').textContent = codex?.setup || '';
+    steps.querySelector('[data-account-shell-hint]').textContent = 'Open PowerShell and paste the command. Follow the sign-in prompts, then return here and refresh accounts.';
+  }
+  renderProviderFilter();
+  const focusKey = document.activeElement?.dataset?.modelKey;
+  const query = state.modelQuery.trim().toLowerCase();
+  const groups = [];
+  let matches = 0;
   if (!state.providers.length) {
     const note = document.createElement('p');
     note.className = 'provider-error';
     note.textContent = 'Checking your local Codex and Claude accounts…';
-    $('model-options').append(note);
+    groups.push(note);
   }
   for (const provider of state.providers) {
+    if (state.modelProvider && provider.id !== state.modelProvider) continue;
+    const connected = provider.available && provider.authenticated;
+    const providerMatch = providerLabel(provider.id).toLowerCase().includes(query);
+    const models = (connected ? provider.models || [] : [])
+      .filter((model) => providerMatch || `${model.label || ''} ${model.id}`.toLowerCase().includes(query));
+    if (query && !models.length && !providerMatch) continue;
+    matches += models.length;
     const group = document.createElement('div');
     group.className = 'provider-group';
     const heading = document.createElement('div');
     heading.className = 'provider-heading';
     const name = document.createElement('span');
     name.textContent = providerLabel(provider.id);
-    const status = document.createElement('span');
-    status.className = 'provider-state';
-    status.textContent = !provider.available ? 'Unavailable' : !provider.authenticated ? 'Sign in required' : 'Connected';
-    heading.append(name, status);
+    heading.append(name);
     group.append(heading);
-    for (const model of provider.available && provider.authenticated ? provider.models || [] : []) {
+    for (const model of models) {
       const button = document.createElement('button');
+      button.type = 'button';
       button.className = 'model-option';
+      button.dataset.modelKey = `${provider.id}:${model.id}`;
       const isSelected = state.selection?.provider === provider.id && state.selection?.model === model.id;
       button.classList.toggle('selected', isSelected);
-      button.disabled = Boolean(state.running) || !provider.available || !provider.authenticated;
+      button.disabled = Boolean(state.running);
       button.setAttribute('aria-pressed', String(isSelected));
       const label = document.createElement('span');
       label.textContent = model.label || model.id;
       button.append(label);
       if (isSelected) {
         const check = document.createElement('span');
+        check.className = 'model-check';
         check.textContent = '✓';
         check.setAttribute('aria-hidden', 'true');
         button.append(check);
       }
       button.addEventListener('click', () => {
-        state.selection = { provider: provider.id, model: model.id };
-        chrome.storage.local.set({ breezerModel: state.selection }).catch(() => {});
-        renderModels();
-        updateControls();
+        const previous = state.preferredModel;
+        const choice = { provider: provider.id, model: model.id };
+        state.modelRefreshQueued = false;
+        applyModelSelection(choice);
+        chrome.storage.local.set({ [MODEL_KEY]: choice }).catch(() => {
+          if (state.preferredModel === choice) applyModelSelection(previous);
+          notify('Your model choice could not be saved.');
+        });
         setModelMenu(false);
         $('prompt').focus();
       });
       group.append(button);
     }
-    if (provider.error || !provider.authenticated) {
+    if (provider.error || !connected || !provider.models?.length) {
       const error = document.createElement('p');
       error.className = 'provider-error';
-      error.textContent = provider.available && provider.authenticated ? provider.error
-        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is not available on this Mac.`;
+      error.textContent = connected ? provider.error || 'No eligible models on this account.'
+        : provider.available ? 'Connect this account to see its models.' : `${providerLabel(provider.id)} is unavailable on this device.`;
       group.append(error);
-      if (!provider.available || !provider.authenticated) {
+      if (!connected) {
         const connect = document.createElement('button');
         connect.type = 'button';
         connect.className = 'account-connect';
@@ -302,44 +389,83 @@ function renderModels() {
           setModelMenu(false);
           $('account-title').textContent = `Connect ${providerLabel(provider.id)}`;
           $('account-instructions').replaceChildren(...[...$('welcome-account-steps').children]
-            .filter(node => node.tagName !== 'SUMMARY' && (!node.dataset.provider || node.dataset.provider === provider.id))
+            .filter(node => node.tagName !== 'SUMMARY' && !node.hidden && (!node.dataset.provider || node.dataset.provider === provider.id))
             .map(node => node.cloneNode(true)));
-          if (!provider.available) $('account-instructions').querySelector('p').textContent = `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
+          if (!provider.available) $('account-instructions').querySelector('p').textContent = PLATFORM === 'windows' && provider.error
+            ? provider.error : `Make sure ${providerLabel(provider.id)} is installed, then copy this command.`;
           $('account-dialog').showModal();
         });
         group.replaceChildren(connect);
       }
     }
-    $('model-options').append(group);
+    groups.push(group);
   }
+  if (query && !groups.length) {
+    const empty = document.createElement('p');
+    empty.className = 'model-empty';
+    empty.textContent = `No models match “${state.modelQuery.trim()}”`;
+    groups.push(empty);
+  }
+  $('model-options').replaceChildren(...groups);
+  $('model-results').textContent = query ? `${matches} ${matches === 1 ? 'model' : 'models'}` : '';
+  if (focusKey) $('model-options').querySelector(`[data-model-key="${CSS.escape(focusKey)}"]`)?.focus();
 }
 
-function acceptProviders(providers) {
-  state.discoveryPending = false;
-  state.providers = Array.isArray(providers)
-    ? providers.map((provider) => ({ ...provider, models: latestModels(provider.models) }))
-    : [];
-  if (!selectedModel()) {
-    const codex = state.providers.find((item) => item.id === 'codex' && item.available && item.authenticated);
-    const provider = codex || state.providers.find((item) => item.available && item.authenticated && item.models?.length);
-    const preferred = provider?.id === 'codex' && provider.models?.find((item) => item.id === 'gpt-6.1-sol');
-    const fallback = provider?.models?.find((item) => item.id === provider.defaultModel) || provider?.models?.[0];
-    state.selection = provider && (preferred || fallback) ? { provider: provider.id, model: (preferred || fallback).id } : null;
+// Filters appear only when more than one provider is reported.
+function renderProviderFilter() {
+  const filter = $('provider-filter');
+  const ids = state.providers.map((provider) => provider.id);
+  if (state.modelProvider && !ids.includes(state.modelProvider)) state.modelProvider = '';
+  filter.hidden = ids.length < 2;
+  const wanted = ['', ...ids].join('|');
+  if (filter.dataset.ids !== wanted) {
+    filter.dataset.ids = wanted;
+    filter.replaceChildren(...['', ...ids].map((id) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'provider-chip';
+      chip.dataset.provider = id;
+      chip.textContent = id ? providerLabel(id) : 'All';
+      chip.addEventListener('click', () => {
+        state.modelProvider = id;
+        renderModels();
+      });
+      return chip;
+    }));
   }
+  for (const chip of filter.children) chip.setAttribute('aria-pressed', String(chip.dataset.provider === state.modelProvider));
+}
+
+function applyModelSelection(preferred) {
+  state.preferredModel = preferred;
+  if (!state.modelRefreshQueued) state.selection = selectModel(state.providers, preferred);
+  else if (!state.running) state.selection = null;
   renderModels();
   updateControls();
 }
 
+function acceptProviders(providers) {
+  state.discoveryPending = false;
+  state.providers = modelProviders(providers);
+  if (connectedModel(state.providers, state.preferredModel)) state.modelRefreshQueued = false;
+  applyModelSelection(state.preferredModel);
+  refreshQueuedModel();
+}
+
 function setModelMenu(open, focus = false) {
+  const wasOpen = !$('model-menu').hidden;
   $('model-menu').hidden = !open;
   $('model-button').setAttribute('aria-expanded', String(open));
-  if (open) {
-    $('inference-options').open = false;
+  if (open && !wasOpen) {
+    // Each opening starts from the full list.
+    state.modelQuery = '';
+    state.modelProvider = '';
+    $('model-search').value = '';
     renderModels();
   }
   if (open && focus) {
     const options = [...$('model-options').querySelectorAll('.model-option:not(:disabled)')];
-    (options.find((item) => item.classList.contains('selected')) || options[0] || $('refresh-models')).focus();
+    (options.find((item) => item.classList.contains('selected')) || options[0] || $('model-search')).focus();
   }
 }
 
@@ -349,29 +475,39 @@ function dismissModelMenu() {
 }
 
 function setPage(page) {
-  state.pageKnown = true;
-  state.page = page?.url && /^https?:\/\//i.test(page.url) ? page : null;
-  if (!state.page) {
-    state.includeContext = false;
-    setControl(false);
-  } else if (state.control && page.tabId !== state.controlTabId) {
-    setControl(false);
-    notify('Browser control turned off because the active tab changed. Turn it on again to let Breezer act in this tab.');
-  }
-  let label = 'No web page in this tab';
-  if (state.page) {
-    try { label = page.title || new URL(page.url).hostname; } catch { label = page.title || 'Current page'; }
-  }
-  $('context-title').textContent = label;
-  $('context-toggle').title = state.page ? `${page.url}\nInclude this page and a screenshot with your message` : 'Include the current page and a screenshot with your message';
-  updateControls();
+  const revision = ++state.pageRevision;
+  const render = (pdf) => {
+    if (revision !== state.pageRevision) return;
+    state.pageKnown = true;
+    state.page = pdf ? { tabId: page.tabId, title: 'Current PDF', pdf: true }
+      : page?.url && /^https?:\/\//i.test(page.url) ? page : null;
+    if (!state.page) {
+      state.includeContext = false;
+      setControl(false);
+    } else if (state.control && (pdf || page.tabId !== state.controlTabId)) {
+      setControl(false);
+      notify('Browser control turned off because the active tab changed.');
+    }
+    let label = pdf ? 'Current PDF' : 'No shareable page';
+    if (state.page && !pdf) {
+      try { label = page.title || new URL(page.url).hostname; } catch { label = page.title || 'Current page'; }
+    }
+    $('context-title').textContent = label;
+    $('context-toggle').title = pdf ? 'Include the visible part of this PDF with your message'
+      : state.page ? `${page.url}\nInclude this page and a screenshot with your message`
+      : 'Include the current page and a screenshot with your message';
+    updateControls();
+  };
+  if (Number.isInteger(page?.tabId) && typeof chrome.breezerPrivate?.isCurrentPdf === 'function') {
+    chrome.breezerPrivate.isCurrentPdf(page.tabId).then(render, () => render(false));
+  } else render(false);
 }
 
 // Consent belongs to one tab. It lasts across replies until the user turns it off,
 // stops a reply, switches tabs, starts a new conversation, or control fails.
 function setControl(on) {
   if (on && research.size) return;
-  state.control = on && Boolean(state.page);
+  state.control = on && Boolean(state.page) && !state.page.pdf;
   state.controlTabId = state.control ? state.page.tabId : null;
   if (state.control) state.includeContext = true;
 }
@@ -379,7 +515,7 @@ function setControl(on) {
 function applyProfile() {
   const name = state.profile.name.trim();
   $('greeting-name').textContent = name ? `, ${name}` : '';
-  $('open-profile').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
+  $('profile-initial').textContent = (state.profile.name.trim()[0] || 'Y').toLocaleUpperCase();
 }
 
 function appendMessage(message) {
@@ -401,7 +537,7 @@ function appendMessage(message) {
     label.textContent = 'Breezer';
     heading.append(logo, label);
     article.append(heading);
-    if (message.text) renderMessage(body, message.text);
+    if (message.text) renderMessage(body, message.text, renderReplyWidget);
     else {
       const thinking = document.createElement('div');
       thinking.className = 'thinking';
@@ -418,6 +554,7 @@ function appendMessage(message) {
     article.append(prompt);
   } else article.append(body);
   if (message.themeProposal) themeCards.add(renderThemeProposal(article, message.themeProposal));
+  if (message.generatedImage) appendGeneratedImage(body, message.generatedImage);
   if (message.stats) renderStats(body, message.stats);
   if (message.attachments?.length) {
     const files = document.createElement('div');
@@ -556,7 +693,16 @@ function renderSourceMetadata(meta, sources) {
       : `Unavailable · ${source.error}`;
     row.append(title, status); list.append(row);
   }
-  details.append(list); meta.replaceChildren(details);
+  details.append(list);
+  if (unavailable) {
+    const review = document.createElement('button');
+    review.type = 'button';
+    review.className = 'review-sources';
+    review.textContent = 'Review source tabs';
+    review.addEventListener('click', () => void research.open());
+    details.append(review);
+  }
+  meta.replaceChildren(details);
 }
 
 function recentMessages(limit) {
@@ -588,6 +734,16 @@ function requestHistory() {
 
 function saveConversation(completedId) {
   const messages = recentMessages(60);
+  let imageBytes = 0;
+  for (let index = messages.length - 1; index >= 0; index--) {
+    if (!messages[index].generatedImage) continue;
+    imageBytes += messages[index].generatedImage.length;
+    if (imageBytes > 2_500_000) {
+      const { generatedImage, ...message } = messages[index];
+      messages[index] = message;
+    }
+  }
+  if (messages.length) messages.at(-1).lastActivity = Date.now();
   return chrome.storage.session.set({ [state.sessionKey]: messages }).then(() => {
     if (completedId && state.port) post({ type: 'turn-saved', id: completedId });
   }).catch(() => {});
@@ -652,20 +808,45 @@ function offerRetry(run, failed = true) {
 }
 
 function activityLabel(label) {
-  const sharing = BROWSER_TASKS[state.running?.browserTask]?.label ?? (state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? 'Page + screenshot' : '');
-  $('activity-label').textContent = sharing ? `${sharing} · ${label}` : label;
+  const sharing = BROWSER_TASKS[state.running?.browserTask]?.label ?? (state.control ? 'Browser control' : research.size ? 'Source tabs' : state.includeContext ? state.page?.pdf ? 'PDF view' : 'Page + screenshot' : '');
+  const activity = $('activity-label');
+  activity.textContent = sharing ? `${sharing} · ${label}` : label;
+  if (fullChat && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    activity.animate([{ opacity: .4, transform: 'translateY(2px)' }, { opacity: 1, transform: 'translateY(0)' }],
+      { duration: 200, easing: 'ease-out' });
+  }
+}
+
+function stopWorkingStatus() {
+  if (workingTimer !== undefined) clearInterval(workingTimer);
+  workingTimer = undefined;
+}
+
+function startWorkingStatus(run) {
+  if (!fullChat || run.browserTask || run.message.text) return;
+  const phrases = ['Finding a tailwind…', 'Sorting the pieces…', 'Putting it together…'];
+  let next = 0;
+  const show = () => {
+    if (state.running !== run || run.message.text) { stopWorkingStatus(); return; }
+    if (next < phrases.length) activityLabel(phrases[next++]);
+    else stopWorkingStatus();
+  };
+  show();
+  workingTimer = setInterval(show, 2700);
 }
 
 function finish(label, keepControl = false, completedId) {
+  stopWorkingStatus();
   if (state.running) {
     state.running.renderer?.dispose();
     state.running.renderer = null;
     const message = state.messages.find((item) => item.id === state.running.assistantId);
     if (message && !message.text) {
       message.text = label || 'Response stopped.';
-      renderMessage(messageNodes.get(message.id), message.text);
-    } else if (message) renderMessage(messageNodes.get(message.id), message.text);
+      renderMessage(messageNodes.get(message.id), message.text, renderReplyWidget);
+    } else if (message) renderMessage(messageNodes.get(message.id), message.text, renderReplyWidget);
     if (message) linkResearchCitations(messageNodes.get(message.id), message.citations);
+    if (message?.generatedImage) appendGeneratedImage(messageNodes.get(message.id), message.generatedImage);
     if (message?.themeProposal) {
       const conversation = $('conversation');
       const followsReply = conversation.scrollHeight - conversation.scrollTop - conversation.clientHeight < 100;
@@ -679,6 +860,7 @@ function finish(label, keepControl = false, completedId) {
   $('activity').hidden = true;
   updateControls();
   saveConversation(completedId);
+  refreshQueuedModel();
   // The stop button turns into a disabled send button; keep keyboard focus in the composer.
   if (document.activeElement === $('send') || document.activeElement === document.body) $('prompt').focus();
 }
@@ -717,7 +899,7 @@ function providerFailureSummary(reason) {
   if (/unauthori[sz]ed|authentication|not signed in|sign[ -]in|\b401\b/i.test(reason)) return 'The provider could not verify your account. Check its sign-in, then try again.';
   if (/timed? out|timeout|deadline exceeded/i.test(reason)) return 'The provider took too long to reply. Try again.';
   if (/ECONNREFUSED|ENETUNREACH|network error|connection (?:failed|closed|refused)|fetch failed/i.test(reason)) return 'The connection to your provider failed. Check your connection, then try again.';
-  return 'The assistant could not complete this response.';
+  return 'The assistant could not complete this response. You can edit your message and try again.';
 }
 
 function revealPanel() {
@@ -728,16 +910,28 @@ function revealPanel() {
   );
 }
 
-async function send() {
+async function send(automatic = false) {
   if (state.running) return stop();
-  if (state.readingFiles) return;
+  if (state.readingFiles || state.restoringLook) return;
   if (state.browserTask && research.size) {
     notify('Clear source tabs before sending a browser tools request.');
     return;
   }
   const browserTask = draftBrowserTask();
-  const includeContext = !browserTask && !research.size && state.includeContext;
-  const control = !browserTask && !research.size && state.control;
+  if (browserTask === 'restore') {
+    if (!consumeNewTabDraft(automatic)) return;
+    state.restoringLook = true;
+    updateControls();
+    try {
+      const { restored } = await restorePreviousLook();
+      $('prompt').value = '';
+      notify(restored ? 'Restored your previous look.' : 'There’s no previous look to restore.');
+    } catch (error) { notify(error.message); }
+    finally { state.restoringLook = false; resizePrompt(); }
+    return;
+  }
+  const includeContext = !fullChat && !browserTask && !research.size && state.includeContext;
+  const control = !fullChat && !browserTask && !research.size && state.control;
   const tabId = state.page?.tabId;
   const text = $('prompt').value.trim() || (state.attachments.length ? 'Review the attached files.' : '');
   const selected = selectedModel();
@@ -749,6 +943,11 @@ async function send() {
     return;
   }
   if (!text) return;
+  if (browserTask === 'image' && (!$('prompt').value.trim() || state.attachments.length || text.length > 4_000)) {
+    notify('Enter an image prompt of up to 4,000 characters and remove any attachments.');
+    return;
+  }
+  if (!consumeNewTabDraft(automatic)) return;
   const settings = selectedSettings(selected);
   setModelMenu(false);
   notify('');
@@ -758,12 +957,12 @@ async function send() {
   if (state.retryMessage) state.retryMessage.superseded = true;
   state.retryMessage = null;
   state.browserTask = null;
-  const history = requestHistory();
+  const history = browserTask === 'image' ? [] : requestHistory();
   if (browserTask === 'theme') {
     const previous = state.messages.findLast(message => message.themeProposal)?.themeProposal;
     if (previous) history.push({ role: 'assistant', content: `Previous theme proposal (design data):\n${previous.name} ${previous.theme} ${previous.colorMode}\n${previous.image ? 'Uses an attached image as the background.\n' : ''}${previous.html || ''}` });
   }
-  const userMessage = { id, role: 'user', text, attachments: state.attachments, contextTitle: BROWSER_TASKS[browserTask]?.label ?? (research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : state.includeContext ? state.page?.title || 'Current page' : '') };
+  const userMessage = { id, role: 'user', text, attachments: state.attachments, contextTitle: BROWSER_TASKS[browserTask]?.label ?? (research.size ? [...research.selected.values()].map((tab, index) => `[S${index + 1}] ${maskSecrets(tab.title)}`).join(' · ') : includeContext ? state.page?.title || 'Current page' : '') };
   const assistantMessage = { id: assistantId, role: 'assistant', text: '' };
   state.messages.push(userMessage, assistantMessage);
   appendMessage(userMessage);
@@ -779,10 +978,11 @@ async function send() {
   $('prompt').value = '';
   resizePrompt();
   $('activity').hidden = false;
-  activityLabel(state.running.control ? 'Getting ready to help' : 'Thinking');
+  activityLabel(browserTask === 'image' ? 'Creating your image' : state.running.control ? 'Getting ready to help' : 'Thinking');
+  startWorkingStatus(state.running);
   updateControls();
   scrollToBottom();
-  let sources;
+  let sources, pdfView;
   if (research.size) {
     // Start before awaiting anything so native sees the user's send gesture.
     post({ type: 'research-begin', id, sources: [...research.selected.values()].map(tab => ({ tabId: tab.tabId, documentId: tab.documentId, expectedUrl: tab.url })) });
@@ -790,6 +990,7 @@ async function send() {
     try {
       sources = await capture;
       if (state.running?.id !== id) return;
+      research.markUnavailable(sources);
       const summary = sources.map(source => `[${source.sourceId}] ${source.title || 'Source'} (${source.url}): ${source.status === 'available' ? `${source.capturedCharacters} characters${source.truncated ? ', truncated' : ''}` : source.error}`).join('\n');
       userMessage.contextTitle = summary;
       userMessage.sourceMetadata = sources.map(({ sourceId, title, url, status, capturedCharacters, truncated, error }) => ({ sourceId, title, url, status, capturedCharacters, truncated, error }));
@@ -803,8 +1004,21 @@ async function send() {
     }
   } else if (includeContext || control) {
     try {
-      const allowed = await chrome.breezerPrivate.authorizeCurrentPage();
-      if (!allowed) throw new Error('Page access is only available on ordinary HTTP or HTTPS web pages.');
+      // Start both eligible capture paths in the original Send gesture. The
+      // native PDF path captures only this document's visible surface.
+      const expectsPdf = state.page?.pdf;
+      const pdf = !control && typeof chrome.breezerPrivate?.captureCurrentPdfContext === 'function'
+        ? chrome.breezerPrivate.captureCurrentPdfContext(tabId) : null;
+      const allowed = !expectsPdf
+        ? chrome.breezerPrivate.authorizeCurrentPage().catch(() => false) : false;
+      const captured = await pdf;
+      if (state.running?.id !== id) return;
+      if (captured?.isPdf) {
+        if (!captured.imageDataUrl) throw new Error('Scroll to the PDF content and try again.');
+        pdfView = captured.imageDataUrl;
+      } else if (!await allowed) {
+        throw new Error(expectsPdf ? 'The PDF changed. Open its page and try again.' : 'This tab cannot be shared. Send without page context or attach a file.');
+      }
       if (state.running?.id !== id) return;
     } catch (error) {
       if (state.running?.id !== id) return;
@@ -821,6 +1035,7 @@ async function send() {
     ...(includeContext || control ? { tabId } : {}),
     ...(browserTask ? { browserTask } : {}),
     ...(sources ? { researchSources: sources } : {}),
+    ...(pdfView ? { pdfView } : {}),
   });
   if (sent && state.running?.id === id) state.running.submitted = true;
   if (!sent) offerRetry({ id, assistantId, browserTask, control: false });
@@ -849,7 +1064,8 @@ function restoreTurn({ id, user, text, browserTask, terminal, themeImage, stats 
     setControl(false);
     state.running = { id, assistantId, browserTask, control: false, submitted: true, message };
     $('activity').hidden = false;
-    activityLabel('Thinking');
+    activityLabel(browserTask === 'image' ? 'Creating your image' : 'Thinking');
+    startWorkingStatus(state.running);
     updateControls();
     if (text && !terminal) renderDelta();
     scrollToBottom();
@@ -860,7 +1076,11 @@ function restoreTurn({ id, user, text, browserTask, terminal, themeImage, stats 
 function receive(message) {
   if (message.type === 'turn-state') return restoreTurn(message);
   if (message.type === 'research-invalidated') { research.invalidate(message.tabId, message.reason, !state.running?.submitted); return; }
-  if (message.type === 'status') return acceptProviders(message.providers);
+  if (message.type === 'status') {
+    acceptProviders(message.providers);
+    sendNewTabDraft();
+    return;
+  }
   if (message.type === 'context') return setPage(message.context);
   if (message.id && message.id !== state.running?.id) return;
   if (message.type === 'browser-stats' && state.running && !state.running.message.stats) {
@@ -868,18 +1088,27 @@ function receive(message) {
     renderStats(messageNodes.get(state.running.assistantId), message.stats);
     scrollToBottom();
   } else if (message.type === 'error') {
+    const discoveryFailed = state.discoveryPending && !message.id;
     state.discoveryPending = false;
     const reason = typeof message.error === 'string' ? message.error : 'The provider ended the reply without a reason.';
+    if (discoveryFailed) {
+      keepNewTabDraft();
+      state.modelRefreshQueued = false;
+      applyModelSelection(state.preferredModel);
+    }
     if (!state.running) return notify(reason);
     const completedId = state.running.submitted && !state.running.control ? message.id : undefined;
     if (message.source === 'theme') {
       state.running.message.text = '';
+      fail(reason, reason, completedId);
+    } else if (message.source === 'image') {
       fail(reason, reason, completedId);
     } else {
       fail(reason, message.source === 'browser-control' ? 'Browser control stopped.' : providerFailureSummary(reason), completedId);
     }
   } else if (message.type === 'delta' && state.running) {
     const reply = state.running.message;
+    if (fullChat && !reply.text && message.text) { stopWorkingStatus(); activityLabel('Writing…'); }
     reply.text += message.text || '';
     renderDelta();
   } else if (message.type === 'complete') {
@@ -898,8 +1127,13 @@ function receive(message) {
       }
       catch (error) { return fail(error.message, 'Breezer could not preview this theme.', completedId); }
     }
+    const hasImage = !message.cancelled && run.browserTask === 'image' && validGeneratedImage(message.generatedImage);
+    if (hasImage) {
+      run.message.generatedImage = message.generatedImage;
+      run.message.text ||= 'Image created.';
+    }
     const hasPreview = Boolean(run.message?.themeProposal);
-    const hasResult = hasPreview || Boolean(run.message.stats);
+    const hasResult = hasImage || hasPreview || Boolean(run.message.stats);
     finish(message.cancelled ? 'Stopped.' : hasPreview ? 'Theme ready to preview.' : hasResult ? 'Browser stats measured.' : 'The provider returned no response.', !message.cancelled, completedId);
     if (empty && !message.cancelled && !hasResult) offerRetry(run);
   }
@@ -978,6 +1212,7 @@ $('composer').addEventListener('drop', event => {
 
 $('composer').addEventListener('submit', (event) => { event.preventDefault(); send(); });
 $('prompt').addEventListener('input', () => {
+  keepNewTabDraft();
   if (!$('prompt').value.trim() && state.browserTask === '') state.browserTask = null;
   resizePrompt();
 });
@@ -992,6 +1227,16 @@ $('prompt').addEventListener('keydown', (event) => {
     event.preventDefault();
     if (!state.running) send();
   }
+});
+$('open-chat-tab').addEventListener('click', async () => {
+  const url = chrome.runtime.getURL(FULL_CHAT_PATH);
+  try {
+    const tabs = await chrome.tabs.query({ windowId: state.windowId });
+    const existing = tabs.find(tab => tab.url === url && !tab.incognito);
+    if (existing) await chrome.tabs.update(existing.id, { active: true });
+    else await chrome.tabs.create({ url, windowId: state.windowId });
+    await chrome.sidePanel.close?.({ windowId: state.windowId });
+  } catch (error) { notify(error.message); }
 });
 $('close-panel').addEventListener('click', async () => {
   if (state.running?.control) stop();
@@ -1049,18 +1294,6 @@ $('control-toggle').addEventListener('click', () => {
   notify(state.control ? 'Breezer can click, type, scroll, and navigate in this tab until you turn this off. It cannot use other tabs or apps. Press Stop or Escape to take over.' : '');
   updateControls();
 });
-function positionControlTip() {
-  const trigger = $('control-toggle').getBoundingClientRect();
-  const footer = document.querySelector('.context-row').getBoundingClientRect();
-  const tip = $('control-tip');
-  const center = trigger.left + trigger.width / 2 - footer.left;
-  const left = Math.max(8, Math.min(center - tip.offsetWidth / 2, footer.width - tip.offsetWidth - 8));
-  tip.style.left = `${left}px`;
-  tip.style.bottom = `${footer.bottom - trigger.top + 8}px`;
-  tip.style.setProperty('--tip-pointer', `${center - left}px`);
-}
-for (const type of ['pointerenter', 'focus']) $('control-toggle').addEventListener(type, positionControlTip);
-addEventListener('resize', positionControlTip);
 const resetControlTip = () => {
   if (!$('control-toggle').matches(':hover, :focus-visible')) delete $('control-toggle').dataset.tipDismissed;
 };
@@ -1098,21 +1331,57 @@ $('new-chat').addEventListener('click', () => {
   updateControls();
   saveConversation();
   post({ type: 'clear-turn' });
-  post({ type: 'context' });
+  if (!fullChat) post({ type: 'context' });
   $('prompt').focus();
 });
 $('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
 $('close-model-menu').addEventListener('click', dismissModelMenu);
+// Arrows move between search and the model list; typing on a model searches.
 $('model-menu').addEventListener('keydown', (event) => {
+  const search = $('model-search');
+  if (event.target.closest('#model-options') && event.key.length === 1 && event.key !== ' ' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+    event.preventDefault();
+    search.focus();
+    search.value += event.key;
+    search.dispatchEvent(new Event('input'));
+    return;
+  }
   if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
-  const options = [...$('model-menu').querySelectorAll('button:not(:disabled)')].filter(button => button.checkVisibility());
+  const options = [search, ...$('model-options').querySelectorAll('.model-option:not(:disabled), .account-connect')].filter(node => node.checkVisibility());
   const index = options.indexOf(document.activeElement);
   if (index < 0) return;
   event.preventDefault();
   options[(index + (event.key === 'ArrowDown' ? 1 : options.length - 1)) % options.length].focus();
 });
+$('model-search').addEventListener('input', () => {
+  state.modelQuery = $('model-search').value;
+  renderModels();
+});
+$('model-search').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    $('model-options').querySelector('.model-option:not(:disabled)')?.click();
+  } else if (event.key === 'Escape' && $('model-search').value) {
+    // The first Escape clears a search; the next closes the picker.
+    event.preventDefault();
+    event.stopPropagation();
+    $('model-search').value = '';
+    state.modelQuery = '';
+    renderModels();
+  }
+});
 $('model-menu').addEventListener('focusout', (event) => {
   if (event.relatedTarget && !$('model-menu').contains(event.relatedTarget) && event.relatedTarget !== $('model-button')) setModelMenu(false);
+});
+function setDraftOpen(open) {
+  document.querySelector('.panel').toggleAttribute('data-drafting', open);
+  $('draft-toggle').textContent = open ? 'Hide draft' : 'Write a draft';
+  $('draft-toggle').setAttribute('aria-expanded', String(open));
+}
+$('draft-toggle').addEventListener('click', () => {
+  const open = !document.querySelector('.panel').hasAttribute('data-drafting');
+  setDraftOpen(open);
+  if (open) $('prompt').focus();
 });
 $('welcome-action').addEventListener('click', () => {
   if (state.providers.some((item) => item.available && item.authenticated)) setModelMenu(true, true);
@@ -1150,11 +1419,7 @@ document.addEventListener('click', async event => {
 $('close-account').addEventListener('click', () => $('account-dialog').close());
 $('account-dialog').addEventListener('close', () => $('model-button').focus());
 $('refresh-accounts').addEventListener('click', () => { $('account-dialog').close(); refreshModels(); });
-$('reasoning-select').addEventListener('change', saveSettings);
-$('speed-select').addEventListener('change', () => {
-  saveSettings();
-  $('speed-note').hidden = $('speed-select').value !== 'fast';
-});
+$('inference-options').addEventListener('change', saveSettings);
 $('refresh-models').addEventListener('click', refreshModels);
 document.addEventListener('click', (event) => {
   if (!$('model-menu').contains(event.target) && !$('model-button').contains(event.target)) setModelMenu(false);
@@ -1172,7 +1437,11 @@ document.addEventListener('visibilitychange', () => {
     setControl(false);
     research.clear(undefined, !state.running?.submitted);
   }
-  else if (state.port) { revealPanel(); post({ type: 'context' }); }
+  else if (state.port) {
+    revealPanel();
+    if (fullChat) sendNewTabDraft();
+    else post({ type: 'context' });
+  }
 });
 $('open-profile').addEventListener('click', () => {
   $('profile-name').value = state.profile.name;
@@ -1190,23 +1459,90 @@ $('profile-form').addEventListener('submit', async (event) => {
   } catch { notify('Your context could not be saved. Please try again.'); }
 });
 
-// Setup or another panel may save the profile while this panel is open.
+// Settings and other windows can update the choice while this panel is open.
 localStorageChanges(chrome).addListener((changes) => {
   const profile = changes.breezerProfile?.newValue;
   if (profile && typeof profile.name === 'string' && typeof profile.context === 'string') { state.profile = profile; applyProfile(); }
+  if (MODEL_KEY in changes) {
+    modelChangeObserved = true;
+    const value = preferredModel(changes[MODEL_KEY].newValue);
+    if (value?.model === state.preferredModel?.model && value?.provider === state.preferredModel?.provider) return;
+    state.modelRefreshQueued = Boolean(value && !connectedModel(state.providers, value));
+    applyModelSelection(value);
+    refreshQueuedModel();
+  }
 });
+
+function restoreNewTabDraft(tabId) {
+  const key = handoffKey(tabId);
+  try {
+    const record = sessionStorage.getItem(key);
+    const draft = JSON.parse(record);
+    if (typeof draft?.prompt !== 'string' || !draft.prompt.trim() || draft.prompt.length > 24_000) return;
+    const prompt = $('prompt');
+    state.newTabDraft = { key, record, prompt: draft.prompt, createdAt: draft.createdAt, autoSend: !prompt.value };
+    setDraftOpen(true);
+    if (!prompt.value) {
+      prompt.value = draft.prompt;
+      resizePrompt();
+    } else keepNewTabDraft();
+  } catch { /* Chat can still open with an empty composer. */ }
+}
+
+function keepNewTabDraft() {
+  const draft = state.newTabDraft;
+  if (!draft) return;
+  draft.autoSend = false;
+  try {
+    if (sessionStorage.getItem(draft.key) !== draft.record) return;
+    const record = JSON.stringify({ prompt: $('prompt').value });
+    sessionStorage.setItem(draft.key, record);
+    draft.record = record;
+  } catch { /* The draft is still in the composer. */ }
+}
+
+function consumeNewTabDraft(automatic) {
+  const draft = state.newTabDraft;
+  if (!draft) return !automatic;
+  draft.autoSend = false;
+  try {
+    // Back can restore the draft in New Tab while this document is in history.
+    const pending = sessionStorage.getItem(draft.key) === draft.record;
+    if (pending) sessionStorage.removeItem(draft.key);
+    state.newTabDraft = null;
+    return pending || !automatic;
+  } catch {
+    notify('Your question is still here. Breezer couldn’t send it. Try again.');
+    return false;
+  }
+}
+
+function sendNewTabDraft() {
+  const draft = state.newTabDraft;
+  if (!draft?.autoSend || document.hidden || state.discoveryPending) return;
+  draft.autoSend = false;
+  const age = Date.now() - draft.createdAt;
+  if (age >= 0 && age <= HANDOFF_TTL_MS && selectedModel() && !state.running
+      && !state.attachments.length && !state.readingFiles && $('prompt').value === draft.prompt) void send(true);
+  else keepNewTabDraft();
+}
 
 async function initialize() {
   try {
+    const currentTab = fullChat ? await chrome.tabs.getCurrent() : null;
+    if (fullChat) {
+      if (!Number.isInteger(currentTab?.id)) throw new Error('Open Breezer AI in a browser tab.');
+      restoreNewTabDraft(currentTab.id);
+    }
     const [saved, currentWindow] = await Promise.all([
-      chrome.storage.local.get(['breezerProfile', 'breezerModel', 'breezerModelPreferences']),
-      chrome.windows.getCurrent(),
+      chrome.storage.local.get(['breezerProfile', MODEL_KEY, 'breezerModelPreferences']),
+      fullChat ? null : chrome.windows.getCurrent(),
     ]);
     if (saved.breezerProfile && typeof saved.breezerProfile.name === 'string' && typeof saved.breezerProfile.context === 'string') state.profile = saved.breezerProfile;
-    state.selection = saved.breezerModel || null;
+    if (!modelChangeObserved) state.preferredModel = preferredModel(saved[MODEL_KEY]);
     if (saved.breezerModelPreferences && typeof saved.breezerModelPreferences === 'object' && !Array.isArray(saved.breezerModelPreferences)) state.preferences = saved.breezerModelPreferences;
-    state.windowId = currentWindow.id;
-    state.sessionKey = `breezer-conversation-${currentWindow.id}`;
+    state.windowId = fullChat ? currentTab.windowId : currentWindow.id;
+    state.sessionKey = fullChat ? FULL_CHAT_PREFIX + currentTab.id : `breezer-conversation-${state.windowId}`;
     const session = await chrome.storage.session.get(state.sessionKey);
     if (Array.isArray(session[state.sessionKey])) {
       state.messages = session[state.sessionKey].filter((item) => ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-60);
@@ -1222,7 +1558,7 @@ async function initialize() {
     });
     post({ type: 'init', windowId: state.windowId });
     post({ type: 'visibility', visible: !document.hidden });
-    post({ type: 'context' });
+    if (!fullChat) post({ type: 'context' });
     updateControls();
     scrollToBottom();
     revealPanel();
@@ -1232,5 +1568,11 @@ async function initialize() {
   }
 }
 
+if (fullChat) document.documentElement.dataset.fullChat = 'true';
+// A history-cached chat can hold a stale port and draft while New Tab is open.
+if (fullChat) addEventListener('pageshow', event => { if (event.persisted) location.reload(); });
 void startPanelTheme();
+const stopPersonalityLook = startPersonalityLook();
+addEventListener('pagehide', stopPersonalityLook, { once: true });
+addEventListener('pagehide', stopWorkingStatus, { once: true });
 initialize();

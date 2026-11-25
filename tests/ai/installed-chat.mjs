@@ -151,17 +151,16 @@ try {
   assert.ok(codexMenu.models.every(label => !/gpt[- ]?(?:5|6\.0)(?:[ .-]|$)/i.test(label)), 'An older GPT generation remains in the actual model menu.');
   await panelTarget.evaluate(`document.querySelector('#model-button').click()`);
   const preferences = await panelTarget.evaluate(`(async () => {
-    const reasoning = document.querySelector('#reasoning-select');
-    const previous = reasoning.value;
-    const value = Array.from(reasoning.options).find(option => option.value && option.value !== previous)?.value;
-    if (value) {
-      reasoning.value = value;
-      reasoning.dispatchEvent(new Event('change', { bubbles: true }));
+    const levels = Array.from(document.querySelectorAll('input[name="reasoning"]'));
+    const previous = levels.find(input => input.checked);
+    const next = levels.find(input => input !== previous);
+    const value = next?.value;
+    if (next) {
+      next.click();
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     const stored = await chrome.storage.local.get('breezerModelPreferences');
-    reasoning.value = previous;
-    reasoning.dispatchEvent(new Event('change', { bubbles: true }));
+    previous?.click();
     return { tested: value || null, stored: stored.breezerModelPreferences || {}, speedVisible: !document.querySelector('#speed-setting').hidden };
   })()`);
   if (preferences.tested) assert.ok(Object.values(preferences.stored).some(item => item.reasoning === preferences.tested), 'Reasoning selection was not persisted.');

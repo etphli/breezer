@@ -1,4 +1,9 @@
 const aliases = new Set(['latest', 'current', 'default', 'stable']);
+const HIDDEN_GPT_FAMILIES = new Set(['gpt:astra']);
+
+export const MODEL_KEY = 'breezerModel';
+
+export const providerLabel = id => id === 'codex' ? 'Codex' : id === 'claude' ? 'Claude' : id;
 
 function normalizeId(id) {
   return id.trim().toLowerCase().replace(/[_\s]+/g, '-').replace(/-+/g, '-');
@@ -78,6 +83,7 @@ export function latestModels(models) {
     seenIds.add(model.id);
     const family = modelFamily(model.id);
     if (!family) { retained.push({ model, index }); continue; }
+    if (HIDDEN_GPT_FAMILIES.has(family.family)) continue;
     const candidate = { model, family, index };
     const existing = winners.get(family.family);
     if (!existing || compareModels(candidate, existing) > 0) winners.set(family.family, candidate);
@@ -85,4 +91,32 @@ export function latestModels(models) {
 
   retained.push(...winners.values());
   return retained.sort((left, right) => left.index - right.index).map(({ model }) => model);
+}
+
+export function modelProviders(providers) {
+  return Array.isArray(providers)
+    ? providers.filter(provider => provider?.id === 'codex' || provider?.id === 'claude')
+      .map(provider => ({ ...provider, models: latestModels(provider.models) }))
+    : [];
+}
+
+export function preferredModel(value) {
+  return (value?.provider === 'codex' || value?.provider === 'claude') && typeof value.model === 'string' && value.model
+    ? { provider: value.provider, model: value.model } : null;
+}
+
+export function connectedModel(providers, selection) {
+  const provider = providers.find(item => item.id === selection?.provider && item.available && item.authenticated);
+  const model = provider?.models.find(item => item.id === selection.model);
+  return model ? { provider, model } : null;
+}
+
+export function selectModel(providers, preferred) {
+  if (connectedModel(providers, preferred)) return preferred;
+  const connected = providers.filter(provider => provider.available && provider.authenticated && provider.models.length);
+  const provider = connected.find(item => item.id === 'codex') ?? connected[0];
+  if (!provider) return null;
+  const sol = provider.id === 'codex' && provider.models.find(item => /^gpt-\d+(?:\.\d+)*-sol$/.test(item.id));
+  const model = sol || provider.models.find(item => item.id === provider.defaultModel) || provider.models[0];
+  return { provider: provider.id, model: model.id };
 }

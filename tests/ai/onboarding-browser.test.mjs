@@ -100,13 +100,19 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
   const errors = [];
   // A tester pauses to read; automated runs only wait for animations to settle.
   const pause = (ms) => new Promise((done) => setTimeout(done, videoDir ? ms : 60));
-  const open = async ({ width = 1280, height = 800, reducedMotion = 'no-preference', bridge = true, record = false, layout = 'sidebar', local, organato } = {}) => {
+  const open = async ({ width = 1280, height = 800, reducedMotion = 'no-preference', bridge = true, record = false, layout = 'sidebar', local, organato, platform = 'mac' } = {}) => {
     const context = await browser.newContext({
       viewport: { width, height }, deviceScaleFactor: record ? 1 : 2, colorScheme: 'light', reducedMotion,
       ...(record ? { recordVideo: { dir: videoDir, size: { width, height } } } : {}),
     });
     await context.addInitScript(installFixture, { bridge, layout, local, organato });
     const page = await context.newPage();
+    if (platform === 'windows') {
+      await page.route('**/platform.js', async route => route.fulfill({
+        contentType: 'application/javascript',
+        body: (await readFile(join(root, 'platform.js'), 'utf8')).replace("PLATFORM = 'mac'", "PLATFORM = 'windows'"),
+      }));
+    }
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error' && !/404/.test(message.text())) errors.push(message.text()); });
     await page.goto(base);
@@ -117,6 +123,14 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
   const shot = async (page, name) => {
     await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState !== 'running' || animation.effect.getTiming().iterations === Infinity));
     await page.screenshot({ path: join(evidence, `onboarding-${name}.png`), fullPage: true });
+  };
+  const checkSelectedLabel = async control => {
+    assert.equal(await control.getAttribute('aria-checked'), 'true');
+    const { color, backgroundColor } = await control.evaluate(node => {
+      const style = getComputedStyle(node);
+      return { color: style.color, backgroundColor: style.backgroundColor };
+    });
+    assert.notEqual(color, backgroundColor, 'selected control text stays visible against its fill');
   };
 
   try {
@@ -163,6 +177,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     await pause(1600);
     await page.getByRole('radio', { name: 'Expanded' }).click();
     await page.waitForFunction(() => fx.appearance.sidebarMode === 'expanded');
+    await checkSelectedLabel(page.getByRole('radio', { name: 'Expanded', exact: true }));
     await pause(600);
     await shot(page, '3-layout');
     await next.click();
@@ -178,6 +193,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     assert.equal(await page.evaluate(() => document.documentElement.dataset.tone), 'dusk');
     await page.getByRole('radio', { name: 'Dark' }).click();
     await page.waitForFunction(() => document.documentElement.dataset.scheme === 'dark');
+    await checkSelectedLabel(page.getByRole('radio', { name: 'Dark', exact: true }));
     await pause(1200);
     await shot(page, '4-theme-dark');
     await page.getByRole('radio', { name: 'Light' }).click();
@@ -187,10 +203,12 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     await next.click();
 
     // Import: opens the native routes and never claims an import happened.
-    assert.equal(await heading(), 'Bring your things from Chrome');
+    assert.equal(await heading(), 'Bring your browser data');
     await pause(900);
-    await page.getByRole('button', { name: 'Open import dialog' }).click();
-    await page.getByRole('button', { name: 'Import passwords' }).click();
+    assert.match(await page.locator('section[data-step="import"]').innerText(), /Bookmarks HTML File/);
+    assert.equal(await page.locator('#wl-import-firefox').isHidden(), true);
+    await page.getByRole('button', { name: 'Import browser data' }).click();
+    await page.getByRole('button', { name: 'Import password CSV' }).click();
     assert.deepEqual(await page.evaluate(() => fx.opened.map((tab) => tab.url)), ['chrome://settings/importData', 'chrome://password-manager/settings?import=true']);
     assert.doesNotMatch(await page.locator('#wl-import-status').innerText(), /imported|success|complete/i);
     await pause(1200);
@@ -199,7 +217,8 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
 
     // Organato: optional; a key goes to the background helper, never into storage.
     assert.equal(await heading(), 'Connect Organato?');
-    assert.equal(await next.innerText(), 'Connect later');
+    assert.equal(await page.locator('#wl-organato-later').isVisible(), true);
+    assert.equal(await next.isVisible(), false);
     await pause(700);
     await page.getByRole('button', { name: 'Connect', exact: true }).click();
     assert.match(await page.locator('#wl-organato-status').innerText(), /Paste your API key/);
@@ -250,7 +269,8 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     // Skipping the tour keeps the completed setup choices and opens their summary.
     {
       const { context, page } = await open({ reducedMotion: 'reduce', layout: 'top' });
-      for (let at = 0; at < 6; at += 1) await page.locator('#wl-next').click();
+      for (let at = 0; at < 5; at += 1) await page.locator('#wl-next').click();
+      await page.locator('#wl-organato-later').click();
       assert.equal(await page.locator('#wl-h-tour').innerText(), 'Your tabs stay across the top');
       assert.equal(await page.locator('#wl-tour-count').innerText(), 'Tip 1 of 3');
       assert.equal(await page.locator('.wl-step:not([hidden])').evaluate((node) => getComputedStyle(node).animationName), 'none');
@@ -274,9 +294,10 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       assert.equal(await optOut.getAttribute('aria-describedby'), 'wl-organato-off-note');
       await shot(page, '6-organato-optout');
       // Keyboard: the opt-out is reachable and works with Enter.
-      // Key field, Connect, the Organato Settings link, then the opt-out.
       await page.locator('#wl-organato-key').focus();
       for (let at = 0; at < 3; at += 1) await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-later');
+      await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-off');
       await page.keyboard.press('Enter');
       // Nothing moves on, and nothing claims "off", until the helper confirms.
@@ -311,14 +332,14 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       await page.locator('#wl-organato-status', { hasText: 'Couldn’t turn Organato off.' }).waitFor();
       assert.equal(await page.locator('.wl-step:not([hidden]) h1').innerText(), 'Connect Organato?');
       assert.equal(await page.evaluate(() => document.activeElement.id), 'wl-organato-off');
-      assert.equal(await page.locator('#wl-next').isDisabled(), false);
+      assert.equal(await page.locator('#wl-organato-later').isDisabled(), false);
       assert.equal(await page.evaluate(() => fx.organato.enabled), true);
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), 0);
       for (const width of [320, 390]) {
         await page.setViewportSize({ width, height: 844 });
-        const footer = await page.evaluate(() => Object.fromEntries(['wl-back', 'wl-progress', 'wl-next'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
+        const footer = await page.evaluate(() => Object.fromEntries(['wl-back', 'wl-progress'].map(id => [id, document.getElementById(id).getBoundingClientRect().toJSON()])));
         assert.ok(footer['wl-back'].right + 8 <= footer['wl-progress'].left, 'Back leaves room for progress');
-        assert.ok(footer['wl-progress'].right + 8 <= footer['wl-next'].left, 'Progress leaves room for Connect later');
+        assert.equal(await page.locator('#wl-organato-later').isVisible(), true);
       }
       assert.equal(await page.locator('#wl-organato-status').evaluate(node => node.parentElement.id), 'wl-organato-off-status', 'Failure is adjacent to the opt-out action');
       await shot(page, '6-organato-optout-failed-narrow');
@@ -333,7 +354,7 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
     // Continue alone is not an opt-out, and a profile's earlier "off" is shown, not reset.
     {
       const { context, page } = await open({ reducedMotion: 'reduce', local: { 'breezer.setup.v1': { step: 'organato', completed: false } } });
-      await page.locator('#wl-next').click();
+      await page.locator('#wl-organato-later').click();
       assert.equal(await page.evaluate(() => fx.organato.enabled), true);
       assert.deepEqual(await page.evaluate(() => fx.ports['breezer-organato-settings'].sent.map(({ type }) => type)), ['view']);
       await context.close();
@@ -369,6 +390,22 @@ test('first-run setup walks through name, layout, theme, import, Organato and th
       const nextBounds = await page.locator('#wl-next').boundingBox();
       assert.ok(nextBounds.y + nextBounds.height <= 844, 'Continue stays available while setup content scrolls');
       await shot(page, 'narrow-no-bridge');
+      await context.close();
+    }
+
+    {
+      const { context, page } = await open({ platform: 'windows', width: 390, height: 844, reducedMotion: 'reduce' });
+      for (const step of ['welcome', 'you', 'layout', 'theme']) {
+        await page.locator(`section[data-step="${step}"]`).waitFor();
+        await page.locator('#wl-next').click();
+      }
+      assert.match(await page.locator('#wl-import-firefox').innerText(), /Choose Firefox and check Saved passwords/);
+      await shot(page, 'windows-import');
+      await page.getByRole('button', { name: 'Import browser data' }).click();
+      await page.getByRole('button', { name: 'Import password CSV' }).click();
+      assert.deepEqual(await page.evaluate(() => fx.opened.map(tab => tab.url)), [
+        'chrome://settings/importData', 'chrome://password-manager/settings?import=true',
+      ]);
       await context.close();
     }
 

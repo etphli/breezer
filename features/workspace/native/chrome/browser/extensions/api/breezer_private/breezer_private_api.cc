@@ -25,16 +25,22 @@
 #include "chrome/browser/themes/theme_helper.h"
 #include "chrome/browser/themes/theme_service.h"
 #include "chrome/browser/themes/theme_service_factory.h"
+#include "chrome/browser/ui/browser_commands.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
 #include "chrome/browser/ui/browser_window/public/global_browser_collection.h"
 #include "chrome/browser/ui/helium/breezer_workspace_prefs.h"
 #include "chrome/browser/ui/helium/helium_layout_state_controller.h"
+#include "chrome/browser/ui/tabs/split_tab_metrics.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
+#include "chrome/browser/ui/tabs/tab_strip_model_delegate.h"
 #include "chrome/browser/ui/tabs/vertical_tab_strip_state_controller.h"
+#include "chrome/browser/ui/ui_features.h"
 #include "chrome/browser/ui/views/breezer_peek/breezer_peek.h"
 #include "chrome/common/pref_names.h"
 #include "components/bookmarks/common/bookmark_pref_names.h"
 #include "components/prefs/pref_service.h"
+#include "components/split_tabs/split_tab_visual_data.h"
+#include "components/tabs/public/tab_interface.h"
 #include "content/public/browser/web_contents.h"
 #include "extensions/browser/extension_function_dispatcher.h"
 #include "extensions/browser/permissions/active_tab_permission_granter.h"
@@ -63,6 +69,7 @@ struct Appearance {
   std::string theme;       // one of breezer_workspace::kThemes
   std::string color_mode;  // "system" | "light" | "dark"
   std::optional<std::string> native_default_theme;
+  std::optional<bool> native_glass;
   bool theme_can_restore = false;
   bool show_bookmarks = true;
   std::string bookmark_bar_mode = "newTab";
@@ -74,6 +81,7 @@ struct Appearance {
   bool frameless = true;
   bool always_show_sidebar = false;
   bool always_show_top_bar = true;
+  bool sidebar_address_search = false;
 };
 
 // Fixed mapping only. Callers cannot supply preference names.
@@ -93,6 +101,8 @@ constexpr BooleanAppearancePref kBooleanAppearancePrefs[] = {
      &Appearance::always_show_sidebar},
     {"alwaysShowTopBar", prefs::kHeliumZenModeTopChromePinned,
      &Appearance::always_show_top_bar},
+    {"sidebarAddressSearch", breezer_workspace::prefs::kSidebarAddressSearch,
+     &Appearance::sidebar_address_search},
 };
 
 const breezer_workspace::Theme* FindTheme(std::string_view name) {
@@ -129,7 +139,7 @@ bool IsKnownAppearanceKey(std::string_view key) {
          key == "colorMode" || key == "showBookmarks" ||
          key == "bookmarkBarMode" || key == "sidebarWidth" ||
          key == "sidebarFontSize" || key == "nativeDefaultTheme" ||
-         key == "expectedThemeState";
+         key == "expectedThemeState" || key == "nativeGlass";
 }
 
 bool MatchesThemeState(const base::Value& expected,
@@ -222,6 +232,10 @@ Appearance ReadAppearance(Profile* profile) {
     result.*(setting.member) = prefs->GetBoolean(setting.pref);
   }
 
+  if (features::HeliumNativeFrameAvailable()) {
+    result.native_glass = prefs->GetBoolean(prefs::kHeliumNativeFrameMaterials);
+  }
+
   result.color_mode = "system";
   if (theme_service) {
     switch (theme_service->GetBrowserColorScheme()) {
@@ -247,6 +261,9 @@ base::DictValue AppearanceToValue(const Appearance& appearance) {
   result.Set("themeCanRestore", appearance.theme_can_restore);
   if (appearance.native_default_theme) {
     result.Set("nativeDefaultTheme", *appearance.native_default_theme);
+  }
+  if (appearance.native_glass.has_value()) {
+    result.Set("nativeGlass", *appearance.native_glass);
   }
   result.Set("showBookmarks", appearance.show_bookmarks);
   result.Set("bookmarkBarMode", appearance.bookmark_bar_mode);
@@ -281,6 +298,13 @@ bool ParseAppearancePatch(const base::DictValue& patch,
       }
       appearance->*(setting.member) = value->GetBool();
     }
+  }
+  if (const base::Value* value = patch.Find("nativeGlass")) {
+    if (!appearance->native_glass.has_value() || !value->is_bool()) {
+      *error = "Native glass is unavailable for this appearance change.";
+      return false;
+    }
+    appearance->native_glass = value->GetBool();
   }
   if (const base::Value* value = patch.Find("sidebarFontSize")) {
     if (!value->is_int() ||
@@ -385,6 +409,11 @@ bool CheckAppearanceWritable(Profile* profile,
       return false;
     }
   }
+  if (patch.contains("nativeGlass") &&
+      !IsUserModifiable(prefs, prefs::kHeliumNativeFrameMaterials)) {
+    *error = "Native glass is managed by your organization.";
+    return false;
+  }
   if (patch.contains("sidebarFontSize") &&
       !IsUserModifiable(prefs, breezer_workspace::prefs::kSidebarFontSize)) {
     *error = "The sidebar font size is managed by your organization.";
@@ -449,6 +478,9 @@ void ApplyAppearance(Profile* profile,
     if (patch.contains(setting.key)) {
       prefs->SetBoolean(setting.pref, appearance.*(setting.member));
     }
+  }
+  if (patch.contains("nativeGlass")) {
+    prefs->SetBoolean(prefs::kHeliumNativeFrameMaterials, *appearance.native_glass);
   }
   if (patch.contains("sidebarFontSize")) {
     prefs->SetInteger(breezer_workspace::prefs::kSidebarFontSize,
@@ -515,6 +547,29 @@ void ApplyAppearance(Profile* profile,
     prefs->SetInteger(prefs::kVerticalTabsUncollapsedWidth,
                       appearance.sidebar_width);
   }
+}
+
+void PairTabs(base::WeakPtr<BrowserWindowInterface> browser,
+              base::WeakPtr<tabs::TabInterface> active,
+              base::WeakPtr<tabs::TabInterface> partner) {
+  // A saved-group confirmation can leave time for either tab to close, move,
+  // or become part of another split.
+  if (!browser || browser->IsDeleteScheduled() || !active || !partner ||
+      active->GetBrowserWindowInterface() != browser.get() ||
+      partner->GetBrowserWindowInterface() != browser.get() ||
+      !active->IsActivated() || partner->IsSplit() ||
+      !ExtensionTabUtil::IsTabStripEditable(*browser->GetProfile())) {
+    return;
+  }
+
+  TabStripModel* const tab_strip = browser->GetTabStripModel();
+  if (const auto split = active->GetSplit()) {
+    tab_strip->RemoveSplit(*split);
+  }
+  tab_strip->AddToNewSplit(
+      {tab_strip->GetIndexOfTab(partner.get())},
+      split_tabs::SplitTabVisualData(split_tabs::SplitTabLayout::kSideBySide),
+      split_tabs::SplitTabCreatedSource::kExtensionsApi);
 }
 
 }  // namespace
@@ -780,6 +835,84 @@ BreezerPrivateSetPeekSourcesFunction::RunFunction() {
     breezer_peek::SetSource(
         contents, tab_ids.contains(ExtensionTabUtil::GetTabId(contents)));
   }
+  return RespondNow(NoArguments());
+}
+
+ExtensionFunction::ResponseAction
+BreezerPrivateToggleSplitViewFunction::RunFunction() {
+  if (!user_gesture() || source_url().GetPath() != kWorkspacePath) {
+    return RespondNow(Error("Open split view from the Breezer sidebar."));
+  }
+  if (args().size() != 1 || !args()[0].is_int() || args()[0].GetInt() < 0) {
+    return RespondNow(Error("A live tab ID is required."));
+  }
+
+  BrowserWindowInterface* const browser = GetCallerBrowser();
+  if (!browser || browser->IsDeleteScheduled() ||
+      browser->GetType() != BrowserWindowInterface::TYPE_NORMAL ||
+      !ExtensionTabUtil::IsTabStripEditable(*GetProfile())) {
+    return RespondNow(Error("Split view is unavailable in this window."));
+  }
+  TabStripModel* const tab_strip = browser->GetTabStripModel();
+  tabs::TabInterface* const active = tab_strip->GetActiveTab();
+  if (!active) {
+    return RespondNow(Error("The browser window has no active tab."));
+  }
+
+  const int tab_id = args()[0].GetInt();
+  const int active_index = tab_strip->active_index();
+  int index = active_index;
+  if (ExtensionTabUtil::GetTabId(active->GetContents()) != tab_id) {
+    for (index = 0; index < tab_strip->count(); ++index) {
+      if (ExtensionTabUtil::GetTabId(tab_strip->GetWebContentsAt(index)) ==
+          tab_id) {
+        break;
+      }
+    }
+    if (!tab_strip->ContainsIndex(index)) {
+      return RespondNow(Error("The tab closed or moved to another window."));
+    }
+  }
+
+  if (const auto split = tab_strip->GetSplitForTab(index)) {
+    tab_strip->RemoveSplit(*split);
+  } else if (index == active_index) {
+    chrome::NewSplitTab(browser, split_tabs::SplitTabLayout::kSideBySide,
+                        split_tabs::SplitTabCreatedSource::kExtensionsApi);
+  } else {
+    auto pair = base::BindOnce(&PairTabs, browser->GetWeakPtr(),
+                               active->GetWeakPtr(),
+                               tab_strip->GetTabAtIndex(index)->GetWeakPtr());
+    // A split adopts the active tab's group. Let Chromium present its usual
+    // confirmation if the move would remove the last tab from a saved group.
+    std::vector<tab_groups::TabGroupId> groups;
+    if (const auto group = tab_strip->GetTabGroupForTab(index);
+        group && group != tab_strip->GetTabGroupForTab(active_index)) {
+      groups = tab_strip->GetGroupsDestroyedFromRemovingIndices({index});
+    }
+    if (groups.empty()) {
+      std::move(pair).Run();
+    } else {
+      tab_strip->MarkTabGroupsForClosing(groups);
+      tab_strip->delegate()->OnRemovingAllTabsFromGroups(groups,
+                                                        std::move(pair));
+    }
+  }
+  return RespondNow(NoArguments());
+}
+
+ExtensionFunction::ResponseAction
+BreezerPrivateFocusLocationBarFunction::RunFunction() {
+  if (!args().empty() || !user_gesture() ||
+      source_url().GetPath() != kWorkspacePath) {
+    return RespondNow(Error("Focus the address bar from the Breezer sidebar."));
+  }
+  BrowserWindowInterface* const browser = GetCallerBrowser();
+  if (!browser || browser->IsDeleteScheduled() ||
+      browser->GetType() != BrowserWindowInterface::TYPE_NORMAL) {
+    return RespondNow(Error("The calling browser window is unavailable."));
+  }
+  chrome::FocusLocationBar(browser);
   return RespondNow(NoArguments());
 }
 

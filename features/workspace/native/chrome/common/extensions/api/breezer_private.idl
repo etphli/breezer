@@ -32,6 +32,7 @@ namespace breezerPrivate {
   };
 
   dictionary Appearance {
+    boolean? nativeGlass;
     Layout layout;
     SidebarMode sidebarMode;
     DOMString theme;
@@ -50,6 +51,7 @@ namespace breezerPrivate {
     boolean frameless;
     boolean alwaysShowSidebar;
     boolean alwaysShowTopBar;
+    boolean sidebarAddressSearch;
   };
 
   dictionary ThemeState {
@@ -59,6 +61,7 @@ namespace breezerPrivate {
   };
 
   dictionary AppearancePatch {
+    boolean? nativeGlass;
     Layout? layout;
     SidebarMode? sidebarMode;
     DOMString? theme;
@@ -74,6 +77,7 @@ namespace breezerPrivate {
     boolean? frameless;
     boolean? alwaysShowSidebar;
     boolean? alwaysShowTopBar;
+    boolean? sidebarAddressSearch;
     NativeDefaultTheme? nativeDefaultTheme;
     ThemeState? expectedThemeState;
   };
@@ -129,6 +133,12 @@ namespace breezerPrivate {
   callback BooleanCallback = void(boolean allowed);
   callback VoidCallback = void();
 
+  dictionary PdfPageContext {
+    boolean isPdf;
+    DOMString? imageDataUrl;
+  };
+  callback PdfPageContextCallback = void(PdfPageContext context);
+
   // Workspace metadata only; native passwords and vault keys are never exposed.
   dictionary WorkspaceSyncState {
     boolean configured;
@@ -179,5 +189,15 @@ namespace breezerPrivate {
     static void setPeekSources(
         long[] tabIds,
         optional VoidCallback callback);
+    // Toggle a native split using a tab in this sidebar's browser window.
+    // An active, unsplit tab opens Chromium's second-pane tab chooser.
+    static void toggleSplitView(long tabId, optional VoidCallback callback);
+    // Focus the calling sidebar window's native omnibox.
+    static void focusLocationBar(optional VoidCallback callback);
+    // Check whether the panel's active tab is a built-in full-page PDF viewer.
+    static void isCurrentPdf(long tabId, BooleanCallback callback);
+    // One user-gesture-bound capture of the active PDF's visible content.
+    static void captureCurrentPdfContext(long tabId,
+                                         PdfPageContextCallback callback);
   };
 };

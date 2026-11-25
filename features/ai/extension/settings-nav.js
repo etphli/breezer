@@ -140,14 +140,17 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
     const available = () => Boolean(page) && (!page.hasAttribute('data-optional') || page.querySelector('[id] > *') !== null);
     return [link.dataset.category, { label: clean(link.textContent), link, page, available }];
   }));
-  for (const [value, category] of categories) {
-    const option = doc.createElement('option');
-    option.value = value; option.textContent = category.label;
-    categorySelect.append(option);
+  for (const list of nav.querySelectorAll('.nav-list')) {
+    const group = doc.createElement('optgroup');
+    group.label = list.getAttribute('aria-label') || $(list.getAttribute('aria-labelledby')).textContent;
+    for (const item of list.querySelectorAll('.nav-item')) {
+      const option = doc.createElement('option');
+      option.value = item.dataset.category || 'all';
+      option.textContent = clean(item.textContent);
+      group.append(option);
+    }
+    categorySelect.append(group);
   }
-  const allSettings = doc.createElement('option');
-  allSettings.value = 'all'; allSettings.textContent = 'All browser settings';
-  categorySelect.append(allSettings);
   const reduceMotion = () => Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   let current = null;
   let options = [];
@@ -157,6 +160,7 @@ export function mountSettingsNav({ api, document: doc = globalThis.document, loc
   function refreshAvailability() {
     for (const { link, available } of categories.values()) link.closest('li').hidden = !available();
     for (const option of categorySelect.options) if (categories.has(option.value)) option.hidden = !categories.get(option.value).available();
+    for (const group of categorySelect.querySelectorAll('optgroup')) group.hidden = [...group.children].every(option => option.hidden);
     if (current && !categories.get(current)?.available()) show(DEFAULT_CATEGORY);
     if (searching()) render();
   }

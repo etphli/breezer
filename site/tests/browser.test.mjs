@@ -52,7 +52,7 @@ test('homepage, privacy, dashboard, responsive layout, errors, and the actual us
     });
     await page.goto(origin);
     await page.waitForFunction(version => document.querySelector('[data-mac-version]').textContent === version, version);
-    assert.equal(await page.title(), 'Breezer: a calmer browser for Mac');
+    assert.equal(await page.title(), 'Breezer: a calmer browser');
     assert.match(await page.locator('main .release').first().textContent(), new RegExp(`Breezer ${version.replaceAll('.', '\\.')} for Mac`));
     assert.equal(await page.locator('video, a[href="#videos"]').count(), 0);
     assert.equal((await page.request.get(`${origin}/videos/breezer-01-blink.mp4`)).status(), 404);

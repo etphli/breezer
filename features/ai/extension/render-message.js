@@ -1,9 +1,10 @@
 // Provider output is untrusted. Build nodes directly; never interpret output as HTML.
-export function renderMessage(container, text) {
+export function renderMessage(container, text, renderWidget) {
   container.replaceChildren();
   const lines = text.split('\n');
   let paragraph = [];
   let list = null;
+  let widgets = 0;
   function flush() {
     if (paragraph.length) {
       const p = document.createElement('p');
@@ -18,11 +19,20 @@ export function renderMessage(container, text) {
     let columns;
     if (/^\s*```/.test(line)) {
       flush();
-      const code = document.createElement('code');
-      const pre = document.createElement('pre');
       const body = [];
       while (++index < lines.length && !/^\s*```/.test(lines[index])) body.push(lines[index]);
-      code.textContent = body.join('\n');
+      const source = body.join('\n');
+      const isWidget = line.trim() === '```breezer';
+      const widget = isWidget && widgets < 4 && index < lines.length ? renderWidget?.(source) : null;
+      if (widget) {
+        widgets++;
+        container.append(widget);
+        continue;
+      }
+      const code = document.createElement('code');
+      const pre = document.createElement('pre');
+      if (isWidget && !renderWidget) pre.className = 'reply-widget-source';
+      code.textContent = source;
       pre.append(code);
       container.append(pre);
     } else if (/^#{1,4}\s/.test(line)) {

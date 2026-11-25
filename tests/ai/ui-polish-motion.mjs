@@ -9,6 +9,7 @@ import { installFixture as workspaceFixture, seed } from './workspace-browser-fi
 import { installFixture as settingsFixture } from './settings-browser-fixture.mjs';
 import { installFixture as newtabFixture, CONNECTED, NOW } from './newtab-browser-fixture.mjs';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
+import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
 
 const root = resolve('features/ai/extension');
 const output = resolve(process.argv[2] || '/tmp/breezer-ui-motion');
@@ -40,7 +41,7 @@ try {
     } else if (area === 'settings') {
       await page.addInitScript(settingsFixture, { theme: 'mint', colorMode: 'light' });
       await page.goto(`${base}/workspace.html#/settings`);
-      await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer' }).waitFor();
+      await page.getByRole('heading', { name: 'Import from another browser' }).waitFor();
     } else if (area === 'newtab') {
       await page.addInitScript(newtabFixture, { view: CONNECTED, appearance: { theme: 'mint', colorMode: 'light' }, delay: 400 });
       await page.clock.setFixedTime(NOW);
@@ -53,7 +54,7 @@ try {
       await page.locator('#wl-next').click();
       await page.locator('#wl-layout [data-value="top"]').click();
     } else {
-      await page.addInitScript(installPanelFixture);
+      await page.addInitScript({ content: `(${installPanelFixture.toString()})(); (${installPanelAreaEvents.toString()})();` });
       await page.goto(`${base}/panel.html`);
       await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
       if (area === 'control') {

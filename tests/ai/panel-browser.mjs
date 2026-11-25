@@ -2,7 +2,7 @@ import { attachmentParts } from '../../features/ai/host/attachments.mjs';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
-import { resolve, dirname, extname } from 'node:path';
+import { resolve, dirname, extname, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { installPanelFixture } from './panel-browser-fixture.mjs';
 import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-fixture.mjs';
@@ -19,7 +19,7 @@ const server = createServer(async (request, response) => {
   try {
     const pathname = new URL(request.url, 'http://localhost').pathname;
     const path = resolve(root, `.${pathname}`);
-    if (!path.startsWith(`${root}/`)) throw new Error('Outside fixture root');
+    if (!path.startsWith(`${root}${sep}`)) throw new Error('Outside fixture root');
     const content = await readFile(path);
     response.setHeader('Content-Type', ({ '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.png': 'image/png' })[extname(path)] || 'application/octet-stream');
     response.end(content);
@@ -33,13 +33,12 @@ try {
     headless: true,
   });
   const page = await browser.newPage({ viewport: { width: 400, height: 850 }, deviceScaleFactor: 2 });
+  // Reasoning and speed share the model picker's surface, so opening it is enough.
   const openModelOptions = async () => {
     if (await page.locator('#model-menu').isHidden()) await page.locator('#model-button').click();
-    if (!await page.locator('#inference-options').evaluate(node => node.open)) {
-      await page.locator('#inference-options > summary').focus();
-      await page.keyboard.press('Enter');
-    }
   };
+  const checked = name => page.evaluate(name => document.querySelector(`input[name="${name}"]:checked`)?.value ?? '', name);
+  const choose = (group, label) => page.locator(group).getByRole('radio', { name: label, exact: true }).check();
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error' && !message.text().includes('404')) errors.push(message.text()); });
@@ -64,8 +63,9 @@ try {
   assert.equal(await page.locator('#greeting-name').innerText(), '');
   assert.equal(await page.locator('#context-title').innerText(), 'Designing a calmer browser');
   assert.equal(await page.locator('#send').isDisabled(), true);
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
+  assert.equal(await checked('reasoning'), 'high');
+  assert.equal(await checked('speed'), 'standard');
+  assert.equal(await page.locator('#model-effort').innerText(), 'High', 'the composer names the linked reasoning level');
   assert.equal(await page.locator('#welcome-status').isVisible(), false);
   assert.equal(await page.locator('#context-hint').innerText(), 'Page + screenshot');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-welcome.png` });
@@ -78,9 +78,11 @@ try {
     const writing = await page.locator('#prompt').boundingBox();
     assert.ok(tip.y + tip.height <= writing.y, 'Control explanation leaves the writing area uncovered');
     const trigger = await page.locator('#control-toggle').boundingBox();
-    assert.ok(Math.abs(trigger.y - tip.y - tip.height - 8) < 1, 'Tooltip is anchored directly above Browser control');
-    const pointer = await page.locator('#control-tip').evaluate(node => parseFloat(node.style.getPropertyValue('--tip-pointer')));
-    assert.ok(Math.abs(tip.x + pointer - trigger.x - trigger.width / 2) < 1, 'Tooltip pointer follows the browser-control trigger');
+    assert.ok(tip.y + tip.height <= trigger.y, 'Control explanation sits above the permission controls');
+    const suggestion = await page.locator('[data-control="true"]').boundingBox();
+    assert.ok(tip.y >= suggestion.y + suggestion.height, 'Control explanation leaves the suggestion uncovered');
+    const sharing = await page.locator('#context-toggle').boundingBox();
+    assert.ok(sharing.x + sharing.width < trigger.x, 'Sharing and control fit side by side without overlap');
     await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-control-tooltip${width === 320 ? '-narrow' : ''}.png` });
     await page.mouse.move(1, 1);
   }
@@ -122,6 +124,53 @@ try {
   assert.equal(await page.locator('#model-button').getAttribute('aria-expanded'), 'false');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6.1 Sol');
+
+  // Search, provider filter and layout at the narrowest and a roomy sidebar width.
+  const visibleModels = () => page.locator('#model-options .model-option').evaluateAll(nodes => nodes.map(node => node.firstChild.textContent));
+  for (const width of [280, 450]) {
+    await page.setViewportSize({ width, height: 640 });
+    await page.locator('#model-button').focus();
+    await page.keyboard.press('Enter');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.modelKey), 'codex:gpt-6.1-sol', 'opening focuses the current model');
+    const menuBox = await modelMenu.boundingBox();
+    assert.ok(menuBox.x >= 0 && menuBox.x + menuBox.width <= width, `the picker fits a ${width}px sidebar`);
+    assert.equal(await modelMenu.evaluate(node => node.scrollWidth <= node.clientWidth), true, 'no sideways scrolling');
+    const list = await page.locator('#model-options').boundingBox();
+    const tuning = await page.locator('#inference-options').boundingBox();
+    if (width === 450) assert.ok(tuning.x >= list.x + list.width - 1 && tuning.y < list.y + list.height, 'reasoning sits beside the models when there is room');
+    else assert.ok(tuning.y >= list.y + list.height - 1, 'reasoning stacks below the models in a narrow sidebar');
+    const attach = page.getByRole('button', { name: 'Attach files', exact: true });
+    const plus = await attach.locator('svg').boundingBox();
+    assert.ok(plus && plus.width >= 14 && plus.x + plus.width <= width, 'the attach plus stays visible');
+    assert.equal(await attach.innerText(), '', 'the attach button has no visible caption');
+    await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-picker-${width}.png` });
+    // Typing on a model moves into search.
+    await page.keyboard.type('lu');
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'model-search');
+    assert.equal(await page.locator('#model-search').inputValue(), 'lu');
+    assert.deepEqual(await visibleModels(), ['GPT-6 Luna']);
+    assert.equal(await page.locator('#model-results').textContent(), '1 model');
+    await page.keyboard.press('ArrowDown');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.modelKey), 'codex:gpt-6-luna', 'ArrowDown moves from search into results');
+    await page.locator('#model-search').fill('nothing like this');
+    assert.match(await page.locator('.model-empty').innerText(), /No models match/);
+    await page.locator('#model-search').press('Escape');
+    assert.equal(await modelMenu.isVisible(), true, 'the first Escape clears the search');
+    assert.deepEqual(await visibleModels(), ['GPT-6.1 Sol', 'GPT-6 Luna']);
+    await page.getByRole('button', { name: 'Claude', exact: true }).click();
+    assert.equal(await page.locator('#provider-filter [aria-pressed="true"]').innerText(), 'Claude');
+    assert.deepEqual(await visibleModels(), [], 'the filter shows only Claude');
+    assert.equal(await page.getByRole('button', { name: 'Connect Claude', exact: true }).isVisible(), true, 'a disconnected provider offers a way to connect');
+    await page.getByRole('button', { name: 'All', exact: true }).click();
+    assert.deepEqual(await visibleModels(), ['GPT-6.1 Sol', 'GPT-6 Luna']);
+    await page.keyboard.press('Escape');
+    assert.equal(await modelMenu.isHidden(), true);
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
+  }
+  await page.locator('#model-button').click();
+  assert.equal(await page.locator('#model-search').inputValue(), '', 'reopening starts from the full list');
+  assert.equal(await page.locator('#provider-filter [aria-pressed="true"]').innerText(), 'All');
+  await closeModelPicker.click();
   await page.emulateMedia({ colorScheme: 'light' });
   await page.setViewportSize({ width: 400, height: 850 });
 
@@ -159,15 +208,13 @@ try {
   assert.equal(await page.evaluate(() => window.testStorage.local.breezerProfile.context), 'I build thoughtful software. Keep explanations clear and concise.');
 
   await openModelOptions();
-  await page.getByLabel('Reasoning effort', { exact: true }).selectOption('medium');
-  await page.getByLabel('Codex speed', { exact: true }).selectOption('fast');
-  assert.equal(await page.locator('#model-options').isVisible(), false, 'tuning has its own view');
+  await choose('#reasoning-setting', 'Medium');
+  await choose('#speed-setting', 'Fast');
+  assert.equal(await page.locator('#model-menu').isVisible(), true, 'changing reasoning or speed keeps the picker open');
+  assert.equal(await page.locator('#model-options').getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).isVisible(), true, 'models and tuning share one surface');
   assert.equal(await page.locator('#inference-model').innerText(), 'GPT-6.1 Sol');
-  assert.equal(await page.locator('.menu-note').isVisible(), false, 'Fast guidance replaces the generic allowance note');
+  assert.equal(await page.locator('#model-effort').innerText(), 'Medium, Fast');
   assert.equal(await page.locator('.suggestions').isVisible(), false, 'no clipped starter text behind the menu');
-  await page.getByText('Back to models', { exact: true }).click();
-  assert.equal(await page.locator('#model-options').getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).isVisible(), true);
-  await openModelOptions();
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-model-options.png` });
   await page.setViewportSize({ width: 320, height: 640 });
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
@@ -181,12 +228,12 @@ try {
   assert.equal(await modelMenu.isHidden(), true, 'the close button also dismisses model settings');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'model-button');
   await page.locator('#model-button').click();
-  assert.equal(await page.locator('#inference-options').evaluate(node => node.open), false, 'reopening starts in the model list');
   await page.getByRole('button', { name: 'GPT-6 Luna', exact: true }).click();
   assert.equal(await page.locator('#model-label').innerText(), 'GPT-6 Luna');
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'standard');
-  assert.equal(await page.locator('#speed-select option[value="fast"]').evaluate(option => option.disabled), true);
+  assert.equal(await checked('reasoning'), 'low');
+  assert.equal(await checked('speed'), 'standard');
+  assert.equal(await page.locator('input[name="speed"][value="fast"]').isDisabled(), true);
+  assert.deepEqual(await page.locator('#reasoning-options input').evaluateAll(inputs => inputs.map(input => input.value)), ['low', 'medium'], 'reasoning lists only the levels the selected model reports');
   await page.locator('#model-button').click();
   assert.match(await page.locator('#model-menu').innerText(), /Connect Claude/);
   assert.doesNotMatch(await page.locator('#model-menu').innerText(), /claude auth login/);
@@ -198,6 +245,7 @@ try {
   assert.equal(await page.locator('#account-instructions code').textContent(), 'claude auth login');
   for (const scheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: scheme });
+    await page.waitForFunction(scheme => document.documentElement.dataset.scheme === scheme, scheme);
     for (const width of [400, 320]) {
       await page.setViewportSize({ width, height: width === 320 ? 640 : 850 });
       const file = `sidebar-account-dialog-${scheme}${width === 320 ? '-narrow' : ''}.png`;
@@ -211,13 +259,43 @@ try {
   assert.equal(await page.locator('#account-dialog').isVisible(), false);
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.equal(await checked('reasoning'), 'medium');
+  assert.equal(await checked('speed'), 'fast');
   await page.reload();
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'medium');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.equal(await checked('reasoning'), 'medium');
+  assert.equal(await checked('speed'), 'fast');
   assert.deepEqual(await page.evaluate(() => window.testStorage.local.breezerModelPreferences['codex:gpt-6.1-sol']), { reasoning: 'medium', speed: 'fast' });
+  await page.evaluate(() => chrome.storage.local.set({ breezerModel: { provider: 'codex', model: 'gpt-6-luna' } }));
+  await page.locator('#model-button').getByText('GPT-6 Luna', { exact: true }).waitFor();
+  await page.evaluate(() => chrome.storage.local.set({ breezerModel: null }));
+  await page.locator('#model-button').getByText('GPT-6.1 Sol', { exact: true }).waitFor();
+
+  await page.getByLabel('Message Breezer').fill('Keep this reply running');
+  await page.getByRole('button', { name: 'Send message', exact: true }).click();
+  const modelRefreshes = () => page.evaluate(() => window.sent.filter(({ type }) => type === 'refresh-models').length);
+  const initialDiscoveryCount = await modelRefreshes();
+  await page.evaluate(async () => {
+    window.testProviders[0].models.push({ id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra' });
+    await chrome.storage.local.set({ breezerModel: { provider: 'codex', model: 'gpt-6.1-terra' } });
+  });
+  assert.equal(await modelRefreshes(), initialDiscoveryCount);
+  await page.getByRole('button', { name: 'Stop response', exact: true }).click();
+  await page.locator('#model-button').getByText('GPT-6.1 Terra', { exact: true }).waitFor();
+  assert.equal(await modelRefreshes(), initialDiscoveryCount + 1);
+  await page.getByRole('button', { name: 'New conversation' }).click();
+  await page.evaluate(() => {
+    window.testProviders[0].models.pop();
+    return chrome.storage.local.set({ breezerModel: null });
+  });
+  await page.locator('#model-button').getByText('GPT-6.1 Sol', { exact: true }).waitFor();
+  await openModelOptions();
+  await page.evaluate(() => { window.testProviders[0].models[0].defaultReasoningEffort = 'high'; });
+  await page.getByRole('button', { name: 'Refresh models', exact: true }).click();
+  const defaultReasoning = page.locator('#reasoning-options label:has(small) input');
+  await page.waitForFunction(() => document.querySelector('#reasoning-options label:has(small) input')?.value === 'high');
+  assert.equal(await defaultReasoning.inputValue(), 'high');
+  await page.getByRole('button', { name: 'Close model picker', exact: true }).click();
 
   await page.evaluate(() => {
     window.testProviders[1] = { id: 'claude', available: true, authenticated: true, models: [
@@ -230,8 +308,8 @@ try {
   await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
   await openModelOptions();
   assert.equal(await page.locator('#speed-setting').isVisible(), false);
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'high');
-  await page.locator('#reasoning-select').selectOption('low');
+  assert.equal(await checked('reasoning'), 'high');
+  await choose('#reasoning-setting', 'Low');
   await page.getByLabel('Message Breezer').fill('A Claude settings check');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const claudeChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
@@ -241,8 +319,9 @@ try {
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'Claude Haiku', exact: true }).click();
-  assert.equal(await page.locator('#reasoning-select').isDisabled(), true);
-  assert.equal(await page.locator('#reasoning-select').inputValue(), '');
+  assert.equal(await page.locator('#reasoning-setting').evaluate(node => node.disabled), true);
+  assert.equal(await page.locator('#reasoning-options').innerText(), 'Set by the model');
+  assert.equal(await checked('reasoning'), '');
   await page.getByLabel('Message Breezer').fill('Use the CLI default');
   await page.getByRole('button', { name: 'Send message', exact: true }).click();
   const defaultChat = await page.evaluate(() => window.sent.filter(message => message.type === 'chat').at(-1));
@@ -252,13 +331,13 @@ try {
   await page.getByRole('button', { name: 'New conversation' }).click();
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'Claude Opus', exact: true }).click();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'low');
+  assert.equal(await checked('reasoning'), 'low');
   await page.locator('#model-button').click();
   await page.getByRole('button', { name: 'GPT-6.1 Sol', exact: true }).click();
   await openModelOptions();
   assert.equal(await page.locator('#speed-setting').isVisible(), true);
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
-  await page.locator('#reasoning-select').selectOption('xhigh');
+  assert.equal(await checked('speed'), 'fast');
+  await choose('#reasoning-setting', 'Extra high');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-settings.png` });
   await page.keyboard.press('Escape');
 
@@ -329,7 +408,7 @@ try {
   assert.equal(firstChat.profile.name, 'Ethan');
   assert.equal(firstChat.reasoning, 'xhigh');
   assert.equal(firstChat.speed, 'fast');
-  for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), true);
+  for (const id of ['model-button', 'reasoning-setting', 'speed-setting']) assert.equal(await page.locator(`#${id}`).evaluate(node => node.disabled), true);
   await page.evaluate((id) => {
     window.emit({ type: 'delta', id, text: 'The page makes a simple point: **a browser should give you room to think**.\n\n- Keep the page at the centre.\n- Make useful actions easy to find.\n- Let people stay in control.\n\nThe strongest idea is to show the assistant only when you need a hand.' });
     window.emit({ type: 'complete', id });
@@ -337,7 +416,7 @@ try {
   await page.locator('.assistant .message-body strong').waitFor();
   assert.equal(await page.locator('.assistant .message-body li').count(), 3);
   assert.equal(await page.getByRole('button', { name: 'Send message', exact: true }).isVisible(), true);
-  for (const id of ['model-button', 'reasoning-select', 'speed-select']) assert.equal(await page.locator(`#${id}`).isDisabled(), false);
+  for (const id of ['model-button', 'reasoning-setting', 'speed-setting']) assert.equal(await page.locator(`#${id}`).evaluate(node => node.disabled), false);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-conversation.png` });
 
   const controlToggle = page.getByRole('button', { name: 'Browser control', exact: true });
@@ -458,13 +537,13 @@ try {
   await page.setViewportSize({ width: 400, height: 850 });
   await page.reload();
   await page.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
-  assert.equal(await page.locator('#reasoning-select').inputValue(), 'xhigh');
-  assert.equal(await page.locator('#speed-select').inputValue(), 'fast');
+  assert.equal(await checked('reasoning'), 'xhigh');
+  assert.equal(await checked('speed'), 'fast');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-dark.png` });
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'New tab', url: 'chrome://newtab/' } }));
   assert.equal(await page.locator('#context-toggle').isDisabled(), true);
   assert.equal(await page.locator('#prompt').getAttribute('placeholder'), 'Ask anything…');
-  assert.equal(await page.locator('#context-hint').innerText(), 'Only web pages can be shared');
+  assert.equal(await page.locator('#context-hint').innerText(), 'Chat without sharing this tab');
   assert.equal(await page.locator('#control-toggle').isDisabled(), true);
   assert.match(await page.locator('#welcome-status').innerText(), /Open a web page/);
   assert.equal(await page.locator('.suggestions').isHidden(), true, 'non-web pages omit unavailable page actions');
@@ -586,6 +665,7 @@ try {
   await page.evaluate(() => window.emit({ type: 'context', context: { title: 'Designing a calmer browser', url: 'https://example.com/design', tabId: 11 } }));
   assert.match(await page.locator('#welcome-status').innerText(), /Sign in to Codex or Claude/);
   assert.equal(await page.locator('#model-label').innerText(), 'Accounts');
+  await page.getByRole('button', { name: 'Write a draft', exact: true }).click();
   await page.getByLabel('Message Breezer').fill('Hello');
   await page.getByLabel('Message Breezer').press('Enter');
   assert.equal(await page.locator('#notice').isVisible(), false);
@@ -593,6 +673,7 @@ try {
   assert.equal(await page.getByLabel('Message Breezer').inputValue(), 'Hello');
   assert.equal(await page.locator('#model-menu').isVisible(), true);
   await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Hide draft', exact: true }).click();
   await page.setViewportSize({ width: 320, height: 640 });
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
   const signInGap = await page.evaluate(() => document.querySelector('#welcome-status').getBoundingClientRect().top - document.querySelector('#welcome h1').getBoundingClientRect().bottom);
@@ -604,6 +685,7 @@ try {
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), false, 'commands are secondary to the sign-in explanation');
   await page.getByRole('button', { name: 'Set up an account', exact: true }).click();
   assert.equal(await page.locator('#welcome-account-steps code').first().isVisible(), true, 'sign-in instructions remain available');
+  assert.equal(await page.locator('#prompt').isVisible(), false, 'the draft stays collapsed while signing in');
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-signed-out-instructions-narrow.png` });
   await page.getByRole('button', { name: 'Copy Codex sign-in command' }).click();
   await page.waitForFunction(() => window.copiedCommand === 'codex login');
@@ -613,9 +695,9 @@ try {
   assert.match(await page.locator('.copy-feedback').innerText(), /keyboard to copy/);
   await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-command-copy-fallback-narrow.png` });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
-  const sentInits = await page.evaluate(() => window.sent.filter(message => message.type === 'init').length);
+  const sentRefreshes = await modelRefreshes();
   await page.getByRole('button', { name: 'Refresh accounts' }).click();
-  assert.equal(await page.evaluate(() => window.sent.filter(message => message.type === 'init').length), sentInits + 1);
+  assert.equal(await modelRefreshes(), sentRefreshes + 1);
   assert.deepEqual(errors, []);
   await writeFile(`${evidence}/panel-capture-geometry.json`, JSON.stringify(captureChecks, null, 2));
   const loading = await browser.newPage({ viewport: { width: 320, height: 640 } });
@@ -779,6 +861,194 @@ try {
   await studio.getByText('Blackberry', { exact: true }).waitFor();
   await studio.waitForFunction(id => window.sent.some(message => message.type === 'turn-saved' && message.id === id), resumed.id);
   await studio.close();
+  const draft = await browser.newPage({ viewport: { width: 380, height: 680 }, colorScheme: 'dark' });
+  const draftOrigin = `http://127.0.0.1:${server.address().port}`;
+  await draft.addInitScript({ content: `
+    (${installPanelFixture})(); (${installPanelAreaEvents})();
+    chrome.tabs = { getCurrent: async () => ({ id: 11, windowId: 7 }), query: async () => [{ id: 11, incognito: false }] };
+    Object.assign(testStorage.session, {
+      'breezer-conversation-7': [{ id: 'sidebar-user', role: 'user', text: 'Existing sidebar conversation' }],
+      'breezer-handoff-7': { source: 'newtab', prompt: 'Legacy handoff', tabId: 11, createdAt: Date.now() },
+      'breezer-full-conversation-tab-12': [{ id: 'other-user', role: 'user', text: 'A different full chat' }],
+    });
+    testStorage.local.breezerExperiments = { newTabComposer: true, personality: 'warm' };
+    chrome.storage.session.remove = async key => { delete testStorage.session[key]; };
+    if (sessionStorage.getItem('draft-no-model')) testProviders[0].authenticated = false;
+  ` });
+  await draft.goto(draftOrigin + '/panel.html');
+  await draft.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await draft.locator('#prompt').inputValue(), '');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false);
+  assert.ok(await draft.evaluate(() => testStorage.session['breezer-handoff-7']), 'the sidebar leaves legacy drafts alone');
+  await draft.evaluate(() => {
+    sessionStorage.setItem('breezer-handoff-11', JSON.stringify({ prompt: 'What should I read next?', createdAt: Date.now() }));
+    sessionStorage.setItem('draft-no-model', 'true');
+  });
+  await draft.reload();
+  await draft.getByText('Existing sidebar conversation', { exact: true }).waitFor();
+  assert.equal(await draft.locator('#prompt').inputValue(), '');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false, 'the sidebar ignores both handoff stores');
+  await draft.goto(draftOrigin + '/panel.html?view=chat');
+  await draft.waitForFunction(() => document.querySelector('#prompt').value === 'What should I read next?');
+  await draft.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false);
+  assert.equal(await draft.locator('#prompt').isVisible(), true);
+  assert.equal(await draft.locator('#send').isDisabled(), true);
+  assert.equal(await draft.getByText('Existing sidebar conversation', { exact: true }).count(), 0);
+  assert.equal(await draft.getByText('A different full chat', { exact: true }).count(), 0);
+  await draft.locator('#prompt').fill('What short story should I read next?');
+  await draft.evaluate(() => sessionStorage.removeItem('draft-no-model'));
+  await draft.reload();
+  await draft.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  assert.equal(await draft.locator('#prompt').inputValue(), 'What short story should I read next?');
+  assert.equal(await draft.evaluate(() => sent.some(message => message.type === 'chat')), false, 'an edited draft requires Send');
+  await draft.locator('#send').click();
+  const handedOff = await draft.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(handedOff.message, 'What short story should I read next?');
+  assert.equal(handedOff.includeContext, false);
+  assert.equal(handedOff.control, false);
+  assert.equal(await draft.evaluate(() => sessionStorage.getItem('breezer-handoff-11')), null);
+  assert.equal(await draft.locator('.context-row').isHidden(), true);
+  await draft.evaluate(id => {
+    emit({ type: 'delta', id, text: 'Start with a short story tonight. Pick a book you can finish in one sitting.' });
+    emit({ type: 'complete', id });
+  }, handedOff.id);
+  await draft.getByText('Start with a short story tonight.', { exact: false }).waitFor();
+  await draft.waitForFunction(() => testStorage.session['breezer-full-conversation-tab-11']?.length === 2);
+  await draft.screenshot({ animations: 'disabled', path: `${evidence}/experimental-ask-chat.png` });
+  await draft.close();
+
+  const pdf = await browser.newPage({ viewport: { width: 360, height: 650 } });
+  await pdf.addInitScript({ content: `
+    (${installPanelFixture})(); (${installPanelAreaEvents})();
+    chrome.breezerPrivate.isCurrentPdf = async tabId => tabId === 11;
+    chrome.breezerPrivate.captureCurrentPdfContext = async () => ({isPdf:true,imageDataUrl:'data:image/jpeg;base64,AA=='});
+  ` });
+  await pdf.goto(`http://127.0.0.1:${server.address().port}/panel.html`);
+  await pdf.getByRole('button', { name: 'PDF view', exact: false }).waitFor();
+  assert.equal(await pdf.locator('#control-toggle').isDisabled(), true);
+  await pdf.getByLabel('Message Breezer').fill('What is stated on the visible PDF page?');
+  await pdf.getByRole('button', { name: 'Send message', exact: true }).click();
+  await pdf.waitForFunction(() => sent.some(message => message.type === 'chat'));
+  const pdfRequest = await pdf.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(pdfRequest.pdfView, 'data:image/jpeg;base64,AA==');
+  assert.equal(pdfRequest.contextTitle, 'Current PDF');
+  assert.equal(pdfRequest.control, false);
+  assert.equal(pdfRequest.includeContext, true);
+  await pdf.close();
+  const opening = await browser.newPage();
+  await opening.addInitScript({ content: `
+    (${installPanelFixture})();
+    (${installPanelAreaEvents})();
+    const next = new URLSearchParams(location.search).get('choice');
+    window.testStorage.local.breezerModel = { provider: 'codex', model: next ? 'gpt-6.1-sol' : 'gpt-6-luna' };
+    chrome.windows.getCurrent = () => new Promise(resolve => { window.finishOpening = () => resolve({ id: 7 }); });
+  ` });
+  for (const [choice, expected] of [['gpt-6-luna', 'GPT-6 Luna'], ['', 'GPT-6.1 Sol']]) {
+    await opening.goto(`http://127.0.0.1:${server.address().port}/panel.html?choice=${choice}`);
+    await opening.waitForFunction(() => typeof window.finishOpening === 'function');
+    await opening.evaluate(async choice => {
+      await chrome.storage.local.set({ breezerModel: choice ? { provider: 'codex', model: choice } : null });
+      window.finishOpening();
+    }, choice);
+    await opening.locator('#model-button').getByText(expected, { exact: true }).waitFor();
+  }
+  await opening.close();
+
+  const visuals = await browser.newPage({ viewport: { width: 320, height: 750 } });
+  await visuals.addInitScript({ content: '(' + installPanelFixture + ')(); (' + installPanelAreaEvents + ')();' });
+  let mapRequests = 0;
+  await visuals.route('https://www.openstreetmap.org/**', route => {
+    mapRequests++;
+    assert.equal(new URL(route.request().url()).searchParams.get('marker'), '38.6916,-9.216');
+    return route.fulfill({ body: '<p>Map fixture</p>', contentType: 'text/html' });
+  });
+  const fixtureOrigin = new URL(page.url()).origin;
+  await visuals.goto(fixtureOrigin + '/panel.html');
+  await visuals.getByRole('button', { name: /GPT-6.1 Sol/ }).waitFor();
+  await visuals.getByLabel('Message Breezer').fill('Create an image of a blue pear');
+  await visuals.getByRole('button', { name: 'Send message', exact: true }).click();
+  const imageTask = await visuals.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(imageTask.browserTask, 'image');
+  assert.equal(imageTask.includeContext, false);
+  assert.deepEqual(imageTask.history, []);
+  const imageSample = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+  await visuals.evaluate(({ id, image }) => emit({ type: 'complete', id, generatedImage: image }), { id: imageTask.id, image: imageSample });
+  await visuals.getByRole('link', { name: 'Save image' }).waitFor();
+  assert.equal(await visuals.getByRole('link', { name: 'Save image' }).getAttribute('download'), 'breezer-image.webp');
+  await visuals.waitForFunction(() => testStorage.session['breezer-conversation-7']?.some(message => message.generatedImage));
+  await visuals.getByLabel('Message Breezer').fill('Show the trip as a flow, chart, map, and cards.');
+  await visuals.getByRole('button', { name: 'Send message', exact: true }).click();
+  const visualId = await visuals.evaluate(() => sent.filter(message => message.type === 'chat').at(-1).id);
+  const widgets = [
+    { type: 'flow', title: 'Weekend plan', nodes: [{id:'a', label:'Pack'}, {id:'b', label:'Train'}, {id:'c', label:'Bus'}],
+      edges: [{from:'a',to:'b',label:'Quickest'}, {from:'a',to:'c'}, {from:'c',to:'a',label:'Return'}] },
+    { type: 'chart', title: 'Travel time', unit: 'min', items: [{ label:'Train', value:25 },{label:'Bus',value:40}] },
+    { type: 'map', title: 'Belém Tower', lat:38.6916, lon:-9.216, zoom:15 },
+    { type: 'cards', title: 'Travel tips', items: [{label:'Pack light',detail:'Bring water.'}] },
+    { type: 'map', title: 'Invalid coordinates', lat:120, lon:180 },
+  ];
+  const fence = String.fromCharCode(96).repeat(3);
+  const blocks = widgets.map(widget => fence + 'breezer\n' + JSON.stringify(widget) + '\n' + fence).join('\n\n');
+  await visuals.evaluate(({ id, blocks }) => emit({ type: 'delta', id, text: 'A short trip.\n\n' + blocks }), { id: visualId, blocks });
+  await visuals.getByText('A short trip.').waitFor();
+  assert.equal(await visuals.locator('.reply-widget figcaption').getByText('Weekend plan').count(), 0, 'render validated widgets only after the reply completes');
+  await visuals.evaluate(id => emit({ type: 'complete', id }), visualId);
+  await visuals.locator('.reply-flow').waitFor();
+  assert.equal(await visuals.locator('.reply-flow-node').count(), 3);
+  assert.equal(await visuals.locator('.reply-flow-edge').count(), 3);
+  const fills = await visuals.evaluate(() => {
+    const node = document.querySelector('.reply-flow-node');
+    const old = getComputedStyle(node).fill;
+    document.documentElement.dataset.tone = 'rose';
+    document.documentElement.dataset.scheme = 'dark';
+    return [old, getComputedStyle(node).fill];
+  });
+  assert.notEqual(...fills, 'diagram nodes follow live theme changes');
+  assert.equal(await visuals.locator('.reply-chart-bar').count(), 2);
+  assert.equal(await visuals.locator('.reply-widget iframe').count(), 0);
+  assert.equal(mapRequests, 0, 'generated maps never contact the provider before opening');
+  await visuals.getByRole('button', { name: 'Load interactive map' }).click();
+  await visuals.frameLocator('.reply-widget iframe').getByText('Map fixture').waitFor();
+  assert.equal(mapRequests, 1);
+  await visuals.getByRole('button', { name: 'Hide map' }).click();
+  assert.equal(await visuals.locator('.reply-widget iframe').count(), 0);
+  await visuals.locator('summary').getByText('Pack light', { exact: true }).click();
+  assert.equal(await visuals.getByText('Bring water.', { exact:true }).isVisible(), true);
+  assert.equal(await visuals.locator('.reply-widget figcaption').getByText('Invalid coordinates').count(), 0);
+  assert.equal(await visuals.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await visuals.locator('.reply-flow').scrollIntoViewIfNeeded();
+  await visuals.screenshot({ animations: 'disabled', path: evidence + '/sidebar-visual-replies.png' });
+  await visuals.close();
+
+  const full = await browser.newPage({ viewport: { width: 1050, height: 800 } });
+  await full.addInitScript({ content: `
+    (${installPanelFixture})(); (${installPanelAreaEvents})();
+    chrome.tabs = { getCurrent: async () => ({ id: 11, windowId: 7 }) };
+    testProviders[1].authenticated = true;
+    testProviders[1].models = [{id:'claude-opus-5-5', label:'Claude Opus 5.5', reasoningEfforts:['medium']}];
+    testStorage.local.breezerModel = { provider: 'claude', model: 'claude-opus-5-5' };
+  ` });
+  await full.goto(fixtureOrigin + '/panel.html?view=chat');
+  await full.locator('#model-button').getByText('Claude Opus 5.5', { exact: true }).waitFor();
+  assert.equal(await full.locator('#research-open').isVisible(), false);
+  await full.getByLabel('Message Breezer').fill('Compare the options');
+  await full.getByRole('button', { name: 'Send message', exact: true }).click();
+  await full.locator('#activity-label').getByText('Finding a tailwind…').waitFor();
+  const fullRequest = await full.evaluate(() => sent.find(message => message.type === 'chat'));
+  assert.equal(fullRequest.provider, 'claude');
+  assert.equal(fullRequest.includeContext, false);
+  await full.evaluate(({ id, blocks }) => emit({ type: 'delta', id, text: blocks }), { id: fullRequest.id, blocks });
+  await full.locator('#activity-label').getByText('Writing…').waitFor();
+  await full.evaluate(id => emit({ type: 'complete', id }), fullRequest.id);
+  assert.equal(await full.locator('.reply-flow-node').count(), 3);
+  const [conversation, composer] = await Promise.all([full.locator('#messages').boundingBox(), full.locator('.compose-area').boundingBox()]);
+  assert.ok(Math.abs((conversation.x + conversation.width / 2) - (composer.x + composer.width / 2)) < 3, 'conversation and composer align');
+  await full.waitForFunction(() => testStorage.session['breezer-full-conversation-tab-11']?.length === 2);
+  await full.locator('.reply-flow').scrollIntoViewIfNeeded();
+  await full.screenshot({ animations: 'disabled', path: evidence + '/full-chat-visual-replies.png' });
+  await full.close();
+
   console.log('PASS: file picker, drop, removal, unsupported/oversize errors, image decoding, attachment-only send, retry restoration and follow-up history; real-browser sidebar rendering, profile, model/reasoning/speed selection and persistence, provider capability changes, chat settings/context, streaming Markdown, Enter/Shift+Enter, keyboard model menu, per-tab control consent across replies, control/cancel, Edit and resend without automatic retry, page and control status, signed-out and no-page empty states, injection safety, narrow, dark and reduced-motion layouts.');
   console.log(`Screenshots: ${evidence}`);
 } finally {

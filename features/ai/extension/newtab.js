@@ -10,6 +10,8 @@ import { ShortcutPreferences, installShortcutActions, HIDDEN_SITES_KEY, CUSTOM_S
 import { startPanelTheme } from './panel-theme.js';
 // Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
 import { startThemeArtwork } from './browser-theme.js';
+import { HAS_NATIVE_HELPER } from './platform.js';
+import { PERSONALITIES, glassMode, handoffKey, readExperiments, recentChats, watchExperiments, CONVERSATION_PREFIX, FULL_CHAT_PATH, FULL_CHAT_PREFIX } from './experiments.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -262,19 +264,19 @@ function createFaviconCache(api) {
       const icon = icons.get(url);
       return icon?.expires > Date.now() ? icon.png : null;
     },
-    async save(url, img) {
-      if (!storage?.set || url.length > 4096) return;
+    async accept(url, img) {
       try {
         const png = rasterize(img);
-        if (png.length > FAVICON_MAX_LENGTH) return;
-        defaultPng ??= readDefault(img.ownerDocument);
-        if (png === await defaultPng) return;
-        const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
-        remember(icons, entry);
-        remember(dirty, entry);
-      } catch { return; }
-      if (saveTimer) return;
-      saveTimer = setTimeout(() => void flush().catch(() => {}), 30);
+        defaultPng ??= readDefault(img.ownerDocument).catch(() => null);
+        if (png === await defaultPng) return false;
+        if (storage?.set && url.length <= 4096 && png.length <= FAVICON_MAX_LENGTH) {
+          const entry = { url, png, expires: Date.now() + FAVICON_TTL_MS };
+          remember(icons, entry);
+          remember(dirty, entry);
+          saveTimer ??= setTimeout(() => void flush().catch(() => {}), 30);
+        }
+      } catch { /* A usable image can still be shown when it can't be cached. */ }
+      return true;
     },
   };
 }
@@ -290,22 +292,31 @@ function siteTile(api, site, favicons, retryIcons) {
   if (src) {
     const img = el('img', '', { alt: '', width: '28', height: '28', decoding: 'sync' });
     let cached = favicons?.get(site.url);
-    img.addEventListener('load', () => {
-      icon.classList.add('has-icon');
-      if (!cached) void favicons?.save(site.url, img);
+    img.addEventListener('load', async () => {
+      if (cached || !favicons || await favicons.accept(site.url, img)) icon.classList.add('has-icon');
+      else img.remove();
     }, { once: true });
     img.addEventListener('error', () => {
       if (cached) { cached = null; img.src = src; }
       else img.remove();
     });
     img.src = cached || src;
-    if (img.complete && img.naturalWidth) icon.classList.add('has-icon');
+    if (cached && img.complete && img.naturalWidth) icon.classList.add('has-icon');
     icon.append(img);
   }
   const name = el('span', 'site-name');
   name.textContent = site.title;
-  if (site.title.toLowerCase().replace(/^www\./, '') === new URL(site.url).hostname.replace(/^www\./, '')) name.classList.add('hostname');
-  link.append(icon, name);
+  const host = new URL(site.url).hostname.replace(/^www\./, '');
+  const isHost = site.title.toLowerCase().replace(/^www\./, '') === host;
+  if (isHost) name.classList.add('hostname');
+  const caption = el('span', 'site-caption');
+  caption.append(name);
+  if (!isHost && site.title.length >= 36) {
+    const domain = el('span', 'site-host', { 'aria-hidden': 'true' });
+    domain.textContent = host;
+    caption.append(domain);
+  }
+  link.append(icon, caption);
   const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
   remove.textContent = '×';
   item.append(link, remove);
@@ -339,18 +350,18 @@ const monthDay = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'sh
 const clock = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const longDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
-function itemRow(item, now) {
+function itemRow(item, now, list) {
   const days = item.due ? daysUntil(item.due, now) : null;
   const row = el('li', 'item', { 'data-urgency': urgency(days) });
 
   const stub = el('span', 'stub', { 'aria-hidden': 'true' });
-  const day = el('span', 'stub-day');
-  const week = el('span', 'stub-week');
-  if (item.due) {
+  if (list === 'upcoming' && item.due) {
+    const day = el('span', 'stub-day');
+    const week = el('span', 'stub-week');
     day.textContent = String(item.due.getDate());
     week.textContent = weekday.format(item.due);
+    stub.append(day, week);
   }
-  stub.append(day, week);
 
   const body = el('span', 'item-body');
   const title = item.url ? el('a', 'item-title', { href: item.url }) : el('span', 'item-title');
@@ -442,7 +453,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     const items = organato[list];
     const target = lanes.querySelector(`[data-list="${list}"]`);
     const limit = MAX_ITEMS[list];
-    const shown = items.slice(0, limit).map((item) => itemRow(item, now));
+    const shown = items.slice(0, limit).map((item) => itemRow(item, now, list));
     if (!items.length) {
       const empty = el('li', 'item-empty');
       empty.textContent = EMPTY[list];
@@ -454,6 +465,7 @@ export function renderOrganato(root, organato, now = new Date(), problem = null)
     }
     target.replaceChildren(...shown);
     lanes.querySelector(`[data-count="${list}"]`).textContent = items.length ? String(items.length) : '';
+    lanes.querySelector(`button[data-lane="${list}"] .lane-count`).textContent = String(items.length);
   }
 }
 
@@ -483,9 +495,385 @@ function renderToday(root, now) {
   root.getElementById('today').textContent = longDate.format(now);
 }
 
+// ------------------------------------------------------------------ experiments
+// Settings > Experiments can swap the shortcut grid for one Search / Ask box and
+// give the page glass surfaces. Nothing below runs its feature code until the
+// stored record says that experiment is on.
+
+// The last record this page saw, kept in page storage so a reopened tab can
+// lay itself out before chrome.storage answers. chrome.storage stays the truth.
+export const EXPERIMENT_MIRROR_KEY = 'breezer.newtab.experiments';
+const MODE_KEY = 'breezer.newtab.mode';
+
+const HOST = /^(?:localhost|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}|\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\])(?::\d{1,5})?$/i;
+
+// An address the box can open directly, or null for a search or a question.
+// Only one http(s) token counts, so "what is example.com" stays a search.
+export function toAddress(input) {
+  const value = typeof input === 'string' ? input.trim() : '';
+  if (!value || /\s/.test(value) || value.length > 2048) return null;
+  if (/^https?:\/\//i.test(value)) return safeUrl(value);
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value) && !/^[^/]+:\d+(?:[/?#]|$)/.test(value)) return null;
+  const host = value.split(/[/?#]/, 1)[0];
+  if (!HOST.test(host)) return null;
+  const local = /^(?:localhost|\d{1,3}(?:\.\d{1,3}){3}|\[)/i.test(host);
+  return safeUrl(`${local ? 'http' : 'https'}://${value}`);
+}
+
+const storageGet = (key) => { try { return globalThis.localStorage?.getItem(key) ?? null; } catch { return null; } };
+const storageSet = (key, value) => { try { globalThis.localStorage?.setItem(key, value); } catch { /* per-viewer convenience only */ } };
+
+function applyExperimentLayout(root, { composer, glass, personality }) {
+  const html = root.documentElement;
+  if (composer) html.dataset.composer = 'on'; else delete html.dataset.composer;
+  if (personality && personality !== 'off' && Object.hasOwn(PERSONALITIES, personality)) html.dataset.personality = personality;
+  else delete html.dataset.personality;
+  html.dataset.glass = glass;
+  root.getElementById('composer').hidden = !composer;
+}
+
+export function startNewTabExperiments({ api = globalThis.chrome, root = document, win = globalThis } = {}) {
+  const box = root.getElementById('composer-form');
+  const input = root.getElementById('composer-input');
+  const modes = root.getElementById('composer-modes');
+  const send = root.getElementById('composer-send');
+  const status = root.getElementById('composer-status');
+  const style = root.getElementById('composer-style');
+  const sitesList = root.getElementById('composer-sites');
+  const chatsSection = root.getElementById('recent-chats');
+  const chatsList = root.getElementById('recent-chats-list');
+  const canAsk = HAS_NATIVE_HELPER && typeof api?.tabs?.update === 'function' && typeof api?.runtime?.getURL === 'function';
+  const query = (text) => win.matchMedia?.(text) ?? { matches: false, addEventListener() {}, removeEventListener() {} };
+  const fullscreenQuery = query('(display-mode: fullscreen)');
+  const transparencyQuery = query('(prefers-reduced-transparency: reduce)');
+  const forcedQuery = query('(forced-colors: active)');
+  let experiments = null, sites = [], windowId = null, tabId = null, mode = 'search', started = false, disposed = false;
+  let windowFullscreen = false, chatsRequest = 0, openingChat = false, recoveredDraft = false;
+  const cleanups = [];
+
+  let mirror = {};
+  try { mirror = JSON.parse(storageGet(EXPERIMENT_MIRROR_KEY) || '{}') || {}; } catch { mirror = {}; }
+  const layout = () => {
+    const on = experiments ?? { newTabComposer: mirror.composer === true, glass: mirror.glass === true, personality: mirror.personality };
+    applyExperimentLayout(root, {
+      composer: on.newTabComposer,
+      personality: on.personality,
+      glass: glassMode({ enabled: on.glass, fullscreen: fullscreenQuery.matches || windowFullscreen, reducedTransparency: transparencyQuery.matches || forcedQuery.matches }),
+    });
+  };
+  layout();
+
+  const say = (text, state = '') => { status.textContent = text; status.dataset.state = state; };
+
+  const placeThumb = () => {
+    const checked = modes.querySelector('[aria-checked="true"]');
+    if (!checked) return;
+    modes.style.setProperty('--thumb-x', `${checked.offsetLeft - 3}px`);
+    modes.style.setProperty('--thumb-w', `${checked.offsetWidth}px`);
+  };
+  const setMode = (next, { remember = true } = {}) => {
+    mode = next === 'ask' && canAsk ? 'ask' : 'search';
+    box.dataset.mode = mode;
+    for (const button of modes.querySelectorAll('[role="radio"]')) {
+      const checked = button.dataset.mode === mode;
+      button.setAttribute('aria-checked', String(checked));
+      button.tabIndex = checked ? 0 : -1;
+    }
+    const placeholder = mode === 'ask' ? 'Ask Breezer AI anything' : 'Search the web or type an address';
+    input.placeholder = placeholder;
+    input.setAttribute('aria-label', placeholder);
+    send.setAttribute('aria-label', mode === 'ask' ? 'Ask Breezer AI' : 'Search');
+    renderStyle();
+    placeThumb();
+    if (remember) storageSet(MODE_KEY, mode);
+  };
+  const renderStyle = () => {
+    const preset = experiments?.personality && experiments.personality !== 'off' ? PERSONALITIES[experiments.personality] : null;
+    style.hidden = !(preset && mode === 'ask');
+    if (preset) {
+      style.textContent = `${preset.label} replies`;
+      style.title = `${preset.description} Change it in Settings.`;
+    }
+  };
+  const grow = () => {
+    input.style.height = 'auto';
+    input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+  };
+
+  const renderSites = () => {
+    const show = experiments?.newTabComposer && experiments.newTabShortcuts && sites.length;
+    sitesList.hidden = !show;
+    if (!show) { sitesList.replaceChildren(); return; }
+    sitesList.replaceChildren(...sites.map((site) => {
+      const item = el('li');
+      const link = el('a', 'composer-site', { href: site.url, title: site.title, 'aria-label': site.title });
+      const letter = [...site.title.replace(/[^\p{L}\p{N}]/gu, '')][0]?.toUpperCase() || '?';
+      link.textContent = letter;
+      const src = faviconUrl(api, site.url);
+      if (src) {
+        const img = el('img', '', { alt: '', width: '22', height: '22' });
+        img.addEventListener('load', () => { link.replaceChildren(img); }, { once: true });
+        img.src = src;
+      }
+      item.append(link);
+      return item;
+    }));
+  };
+
+  const renderChats = async () => {
+    const want = experiments?.newTabComposer && experiments.newTabRecentChats && canAsk;
+    const request = ++chatsRequest;
+    if (!want) { chatsSection.hidden = true; chatsList.replaceChildren(); return; }
+    let chats = [];
+    try { chats = await recentChats(api, windowId); } catch { chats = []; }
+    if (disposed || request !== chatsRequest) return;
+    chatsSection.hidden = !chats.length;
+    const focusedChat = chatsList.contains(root.activeElement) ? root.activeElement.dataset.chat : null;
+    chatsList.replaceChildren(...chats.map((chat) => {
+      const item = el('li');
+      const fullChat = Number.isInteger(chat.tabId);
+      const identity = fullChat ? `tab-${chat.tabId}` : `window-${chat.windowId}`;
+      const button = el('button', 'recent-chat', { type: 'button', 'data-chat': identity });
+      const title = el('span', 'recent-chat-title');
+      title.textContent = chat.title;
+      const preview = el('span', 'recent-chat-preview');
+      preview.textContent = chat.preview || `${chat.messages} messages`;
+      const where = el('span', 'recent-chat-where');
+      where.textContent = chat.current ? 'This window' : 'Other window';
+      button.append(title, preview, where);
+      button.addEventListener('click', async () => {
+        try {
+          let targetWindow = chat.windowId;
+          if (fullChat) {
+            const tab = await api.tabs.get(chat.tabId);
+            if (tab.incognito || tab.url !== api.runtime.getURL(FULL_CHAT_PATH) || (tab.pendingUrl && tab.pendingUrl !== tab.url)) {
+              throw new Error('The chat tab has navigated.');
+            }
+            const active = await api.tabs.update(tab.id, { active: true });
+            targetWindow = active.windowId;
+          } else {
+            // The sidebar API requires the original click gesture.
+            await api.sidePanel.open({ windowId: targetWindow });
+          }
+          if (targetWindow !== windowId) await api.windows.update(targetWindow, { focused: true });
+        } catch {
+          say('Breezer AI couldn’t open that conversation.', 'error');
+          void renderChats();
+        }
+      });
+      item.append(button);
+      return item;
+    }));
+    if (focusedChat) {
+      [...chatsList.querySelectorAll('button')].find(button => button.dataset.chat === focusedChat)?.focus({ preventScroll: true });
+    }
+  };
+
+  const recoverAsk = () => {
+    if (!started || !canAsk || !Number.isInteger(tabId)) return;
+    const key = handoffKey(tabId);
+    try {
+      const draft = JSON.parse(win.sessionStorage.getItem(key));
+      if (typeof draft?.prompt !== 'string' || !draft.prompt) {
+        if (recoveredDraft) {
+          recoveredDraft = false;
+          input.value = '';
+          grow();
+        }
+        return;
+      }
+      // Back takes over the question. Keep it through reload, but remove
+      // the timestamp that authorized the chat tab to send it automatically.
+      win.sessionStorage.setItem(key, JSON.stringify({ prompt: draft.prompt }));
+      recoveredDraft = true;
+      input.value = draft.prompt;
+      setMode('ask');
+      grow();
+    } catch { /* The composer can still be used if session storage is unavailable. */ }
+  };
+
+  const ask = async (text) => {
+    if (!Number.isInteger(tabId)) { say('Breezer is still getting this tab ready. Try again in a moment.', 'error'); return; }
+    const key = handoffKey(tabId);
+    const value = input.value;
+    openingChat = true;
+    input.readOnly = true;
+    send.disabled = true;
+    say('Opening Breezer AI…');
+    try {
+      win.sessionStorage.setItem(key, JSON.stringify({ prompt: text, createdAt: Date.now() }));
+      input.value = '';
+      grow();
+      await api.tabs.update(tabId, { url: api.runtime.getURL(FULL_CHAT_PATH) });
+    } catch {
+      input.value = value;
+      grow();
+      try {
+        if (recoveredDraft) win.sessionStorage.setItem(key, JSON.stringify({ prompt: value }));
+        else win.sessionStorage.removeItem(key);
+      } catch { /* The question is still in the composer. */ }
+      openingChat = false;
+      input.readOnly = false;
+      send.disabled = false;
+      say('Breezer AI couldn’t open. Your question is still here. Try again.', 'error');
+    }
+  };
+
+  const search = (text) => {
+    if (typeof api?.search?.query !== 'function') { say('Search isn’t available here. Type a full web address instead.', 'error'); return; }
+    Promise.resolve(api.search.query({ text, ...(Number.isInteger(tabId) ? { tabId } : { disposition: 'CURRENT_TAB' }) }))
+      .catch(() => say('Search didn’t start. Try again.', 'error'));
+  };
+
+  const submit = () => {
+    const text = input.value.trim();
+    if (!text || openingChat) return;
+    say('');
+    const address = mode === 'search' ? toAddress(text) : null;
+    if (address) { win.location.assign(address); return; }
+    if (mode === 'ask') ask(text.slice(0, 24000)); else search(text.slice(0, 2048));
+  };
+
+  const start = () => {
+    if (started) return;
+    started = true;
+    if (!canAsk) modes.hidden = true;
+    setMode(storageGet(MODE_KEY) === 'ask' ? 'ask' : 'search', { remember: false });
+    grow();
+    box.addEventListener('submit', (event) => { event.preventDefault(); submit(); });
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter' || event.isComposing || event.shiftKey) return;
+      event.preventDefault();
+      submit();
+    });
+    input.addEventListener('input', () => {
+      grow();
+      if (status.dataset.state === 'error') say('');
+      if (recoveredDraft) {
+        try {
+          const key = handoffKey(tabId);
+          if (!input.value.trim()) {
+            win.sessionStorage.removeItem(key);
+            recoveredDraft = false;
+          } else if (mode === 'ask') {
+            win.sessionStorage.setItem(key, JSON.stringify({ prompt: input.value }));
+          }
+        } catch { /* The question is still in the composer. */ }
+      }
+    });
+    modes.addEventListener('click', (event) => {
+      const button = event.target.closest('[role="radio"]');
+      if (!button) return;
+      setMode(button.dataset.mode);
+      input.focus();
+    });
+    modes.addEventListener('keydown', (event) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+      if (!step) return;
+      event.preventDefault();
+      setMode(mode === 'ask' ? 'search' : 'ask');
+      modes.querySelector('[aria-checked="true"]').focus();
+    });
+    const onResize = () => placeThumb();
+    win.addEventListener?.('resize', onResize);
+    cleanups.push(() => win.removeEventListener?.('resize', onResize));
+    const session = api?.storage?.session?.onChanged;
+    if (session?.addListener) {
+      const onSession = (changes) => {
+        if (Object.keys(changes).some(key => key.startsWith(CONVERSATION_PREFIX) || key.startsWith(FULL_CHAT_PREFIX))) void renderChats();
+      };
+      session.addListener(onSession);
+      cleanups.push(() => session.removeListener?.(onSession));
+    }
+    const isListed = (id) => chatsList.querySelector(`[data-chat="tab-${id}"]`);
+    const onTabUpdated = (id, { url }) => {
+      if (url && (isListed(id) || url === api.runtime.getURL(FULL_CHAT_PATH))) void renderChats();
+    };
+    const onTabRemoved = (id) => { if (isListed(id)) void renderChats(); };
+    const onTabAttached = (id, { newWindowId }) => {
+      if (id === tabId) windowId = newWindowId;
+      void renderChats();
+    };
+    for (const [event, listener] of [[api.tabs?.onUpdated, onTabUpdated], [api.tabs?.onRemoved, onTabRemoved], [api.tabs?.onAttached, onTabAttached]]) {
+      if (!event?.addListener) continue;
+      event.addListener(listener);
+      cleanups.push(() => event.removeListener?.(listener));
+    }
+    // Fonts can change button widths after the first layout.
+    void root.fonts?.ready?.then(() => { if (!disposed) placeThumb(); });
+    win.requestAnimationFrame?.(() => { modes.dataset.ready = "true"; });
+  };
+
+  const apply = (next) => {
+    experiments = next;
+    mirror = { composer: next.newTabComposer, glass: next.glass, personality: next.personality };
+    storageSet(EXPERIMENT_MIRROR_KEY, JSON.stringify(mirror));
+    layout();
+    if (next.newTabComposer) start();
+    if (started) { renderStyle(); placeThumb(); }
+    renderSites();
+    void renderChats();
+  };
+
+  // Glass follows fullscreen: the display-mode query covers browser fullscreen,
+  // and the window state covers platforms where it does not match.
+  const checkWindow = async () => {
+    if (!experiments?.glass || typeof api?.windows?.getCurrent !== 'function') return;
+    try { windowFullscreen = (await api.windows.getCurrent())?.state === 'fullscreen'; } catch { windowFullscreen = false; }
+    if (!disposed) layout();
+  };
+  const onLayoutChange = () => { layout(); void checkWindow(); };
+  for (const media of [fullscreenQuery, transparencyQuery, forcedQuery]) {
+    media.addEventListener?.('change', onLayoutChange);
+    cleanups.push(() => media.removeEventListener?.('change', onLayoutChange));
+  }
+  win.addEventListener?.('resize', onLayoutChange);
+  cleanups.push(() => win.removeEventListener?.('resize', onLayoutChange));
+
+  const onPageShow = (event) => {
+    if (!event.persisted) return;
+    openingChat = false;
+    input.readOnly = false;
+    send.disabled = false;
+    say('');
+    recoverAsk();
+    void renderChats();
+  };
+  win.addEventListener?.('pageshow', onPageShow);
+  cleanups.push(() => win.removeEventListener?.('pageshow', onPageShow));
+  cleanups.push(watchExperiments(api, (next) => apply(next)));
+  const ready = Promise.all([
+    readExperiments(api),
+    Promise.resolve(api?.tabs?.getCurrent?.()).then((tab) => { windowId = tab?.windowId ?? null; tabId = tab?.id ?? null; }, () => {}),
+  ]).then(([value]) => {
+    if (disposed) return;
+    apply(value);
+    if (value.newTabComposer) recoverAsk();
+    void checkWindow();
+  });
+
+  return {
+    ready,
+    setSites(next) { sites = Array.isArray(next) ? next : []; renderSites(); },
+    dispose() {
+      disposed = true;
+      for (const cleanup of cleanups.splice(0)) cleanup();
+    },
+  };
+}
+
 // ------------------------------------------------------------------ page
 
 export function startNewTab({ api = globalThis.chrome, root = document, now = () => new Date() } = {}) {
+  const experiments = startNewTabExperiments({ api, root });
+  const lanes = root.getElementById('organato-lists');
+  const laneButtons = lanes.querySelectorAll('.agenda-switch button');
+  for (const button of laneButtons) {
+    button.addEventListener('click', () => {
+      lanes.dataset.lane = button.dataset.lane;
+      for (const choice of laneButtons) choice.setAttribute('aria-pressed', String(choice === button));
+    });
+  }
   let view = null;
   let problem = null;
   let pending = false;
@@ -493,7 +881,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   let disposed = false, midnightTimer;
   // The saved switch wins over any answer: turning Organato off hides it at
   // once, including over an answer still on its way.
-  let off = false, organatoDay;
+  let off = !HAS_NATIVE_HELPER, organatoDay;
   const refreshButton = root.getElementById('refresh');
   const shortcuts = new ShortcutPreferences(api);
   const favicons = createFaviconCache(api);
@@ -528,7 +916,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   });
   const changed = (changes) => {
     if (changes[HIDDEN_SITES_KEY] || changes[CUSTOM_SITES_KEY]) void updateSites().catch(() => { status.textContent = 'Could not refresh shortcuts. Reload this tab to try again.'; });
-    if (changes[ORGANATO_SWITCHES_KEY]) {
+    if (HAS_NATIVE_HELPER && changes[ORGANATO_SWITCHES_KEY]) {
       const nowOff = switchedOff(changes[ORGANATO_SWITCHES_KEY].newValue);
       if (nowOff === off) return;
       off = nowOff;
@@ -550,6 +938,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
     siteRevision++;
     clearTimeout(midnightTimer);
     disposeShortcuts();
+    experiments.dispose();
     storageChanges?.removeListener(changed);
     globalThis.removeEventListener?.('pagehide', dispose);
   };
@@ -565,6 +954,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
         visibleSites.some((site, index) => site.url !== paintedSites[index].url || site.title !== paintedSites[index].title))) {
       renderSites(api, root, visibleSites, favicons, retryIcons);
       paintedSites = visibleSites;
+      experiments.setSites(visibleSites);
     }
     if (visibleSites?.length === 0) {
       root.getElementById('sites-empty').textContent = shortcuts.hidden.size
@@ -594,13 +984,20 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       allSites = Array.isArray(sites) ? sites : [];
       await filterSites();
     };
+    const recoverSites = async () => {
+      if (allSites?.length) return;
+      let sites;
+      try { sites = await api.topSites?.get(); } catch { /* Visits may be unavailable. */ }
+      await acceptSites(sites);
+    };
     const accept = async result => {
       if (disposed) return;
       if (result.dashboardEnabled === false) {
         globalThis.location.replace('chrome://new-tab-page/');
         return;
       }
-      await acceptSites(result.topSites);
+      if (result.organato?.error && !result.topSites?.length) await recoverSites();
+      else await acceptSites(result.topSites);
       if (disposed) return;
       view = normalizeView({ organato: result.organato });
       problem = null;
@@ -625,7 +1022,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
       if (disposed) return;
       problem = text(error?.message, 160) || null;
       if (!view) view = { organato: null };
-      if (!visibleSites) await acceptSites([]);
+      if (!visibleSites) await recoverSites();
     } finally {
       pending = false;
       if (!disposed) {
@@ -653,10 +1050,13 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   refreshButton.addEventListener('click', () => void load(true));
   scheduleMidnight();
   // A saved "off" hides the sheet before the first answer, so it never flashes.
-  const saved = Promise.resolve(api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
-    if (!disposed && switchedOff(value?.[ORGANATO_SWITCHES_KEY])) { off = true; showOrganato(root, false); }
+  const saved = Promise.resolve(HAS_NATIVE_HELPER && api?.storage?.local?.get?.(ORGANATO_SWITCHES_KEY)).then((value) => {
+    if (switchedOff(value?.[ORGANATO_SWITCHES_KEY])) off = true;
   }, () => {});
-  return saved.then(() => load(false));
+  return saved.then(() => {
+    if (!disposed) showOrganato(root, !off);
+    return load(false);
+  });
 }
 
 if (typeof document !== 'undefined' && document.getElementById('organato')) {

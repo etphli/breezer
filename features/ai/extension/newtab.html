@@ -12,6 +12,29 @@
 
   <header class="sky">
     <h1 id="today" class="today">New tab</h1>
+    <section id="composer" class="composer" aria-label="Search or ask" hidden>
+      <section id="recent-chats" class="recent-chats" aria-labelledby="recent-chats-title" hidden>
+        <h2 id="recent-chats-title" class="recent-chats-title">Recent chats</h2>
+        <ol id="recent-chats-list" class="recent-chats-list"></ol>
+      </section>
+      <form id="composer-form" class="composer-box" data-mode="search" novalidate>
+        <textarea id="composer-input" class="composer-input" rows="1" autocomplete="off" spellcheck="false" placeholder="Search the web or type an address" aria-label="Search the web or type an address" aria-describedby="composer-status"></textarea>
+        <div class="composer-bar">
+          <div id="composer-modes" class="composer-modes" role="radiogroup" aria-label="When you press Enter">
+            <span class="composer-thumb" aria-hidden="true"></span>
+            <button type="button" role="radio" data-mode="search" aria-checked="true">Search</button>
+            <button type="button" role="radio" data-mode="ask" aria-checked="false">Ask Breezer</button>
+          </div>
+          <a id="composer-style" class="composer-style" href="workspace.html#/settings/experiments" hidden></a>
+          <button id="composer-send" class="composer-send" type="submit" aria-label="Search">
+            <svg class="send-search" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.25"/><path d="m10.2 10.2 3.3 3.3"/></svg>
+            <svg class="send-ask" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.5M4 7.5l4-4 4 4"/></svg>
+          </button>
+        </div>
+      </form>
+      <p id="composer-status" class="composer-status" role="status" aria-live="polite"></p>
+      <ul id="composer-sites" class="composer-sites" aria-label="Frequent sites" hidden></ul>
+    </section>
     <nav class="sites-nav" aria-label="Frequently visited sites">
       <ol id="sites" class="sites" aria-busy="true"></ol>
       <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
@@ -34,7 +57,10 @@
     <section id="organato" class="organato" data-state="loading" aria-labelledby="organato-title" aria-busy="true">
       <div class="organato-head">
         <h2 id="organato-title" class="organato-title">Coming up in Organato</h2>
-        <button id="refresh" class="refresh" type="button" hidden title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
+        <div class="agenda-actions">
+          <a class="organato-open" href="https://organato.vercel.app" rel="noreferrer">Open Organato</a>
+          <button id="refresh" class="refresh" type="button" hidden title="Refresh sites and Organato"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7"/><path d="M13 2.5v3h-3"/></svg><span>Refresh</span></button>
+        </div>
       </div>
 
       <p id="organato-status" class="organato-status" role="status" aria-live="polite">Loading your exams, assignments and to-dos…</p>
@@ -46,11 +72,15 @@
       </div>
 
       <div id="organato-lists" class="lanes" hidden>
-        <section class="lane lane-upcoming" aria-labelledby="lane-upcoming">
-          <div class="lane-heading"><h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3><a class="todos-jump" href="#lane-todos">To-dos</a></div>
+        <div class="agenda-switch" role="group" aria-label="Agenda view">
+          <button type="button" data-lane="upcoming" aria-pressed="true" aria-controls="upcoming-lane">Upcoming <span class="lane-count"></span></button>
+          <button type="button" data-lane="todos" aria-pressed="false" aria-controls="todos-lane">To-dos <span class="lane-count"></span></button>
+        </div>
+        <section id="upcoming-lane" class="lane lane-upcoming" aria-labelledby="lane-upcoming">
+          <h3 id="lane-upcoming" class="lane-title">Upcoming <span class="lane-count" data-count="upcoming"></span></h3>
           <ol class="items" data-list="upcoming"></ol>
         </section>
-        <section class="lane lane-todos" aria-labelledby="lane-todos">
+        <section id="todos-lane" class="lane lane-todos" aria-labelledby="lane-todos">
           <h3 id="lane-todos" class="lane-title" tabindex="-1">To-dos <span class="lane-count" data-count="todos"></span></h3>
           <ol class="items" data-list="todos"></ol>
         </section>

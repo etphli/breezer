@@ -48,12 +48,12 @@ BREEZER_MARK = (
 
 
 def replace_file(path, replacements):
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     for before, after in replacements.items():
         if before not in text and after not in text:
             raise ValueError(f"Branding input changed in {path}: {before!r}")
         text = text.replace(before, after)
-    path.write_text(text)
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 
 def brand_internal_urls(tree):
@@ -203,7 +203,7 @@ def brand_internal_urls(tree):
     })
 
 
-def brand_product(tree):
+def brand_product(tree, *, macos=True):
     branding = tree / "chrome/app/theme/chromium/BRANDING"
     values = {
         "COMPANY_FULLNAME": "Breezer contributors",
@@ -223,13 +223,14 @@ def brand_product(tree):
         f"{key}={values[key]}" if (key := line.split("=", 1)[0]) in values else line
         for line in lines
     ) + "\n")
-    replace_file(tree / "chrome/common/chrome_paths_mac.mm", {
-        "net.imput.helium": BUNDLE_ID,
-    })
-    replace_file(tree / "components/os_crypt/common/keychain_password_mac.mm", {
-        '"Helium Storage Key"': '"Breezer Storage Key"',
-        'kDefaultAccountName[] = "Helium"': 'kDefaultAccountName[] = "Breezer"',
-    })
+    if macos:
+        replace_file(tree / "chrome/common/chrome_paths_mac.mm", {
+            "net.imput.helium": BUNDLE_ID,
+        })
+        replace_file(tree / "components/os_crypt/common/keychain_password_mac.mm", {
+            '"Helium Storage Key"': '"Breezer Storage Key"',
+            'kDefaultAccountName[] = "Helium"': 'kDefaultAccountName[] = "Breezer"',
+        })
     replace_file(tree / "chrome/app/chrome_crash_reporter_client.cc", {
         'const char* product_name = "Helium"': 'const char* product_name = "Breezer"',
     })
@@ -476,6 +477,11 @@ def brand_icons(tree):
         "--app-icon", "AppIcon", "--output-partial-info-plist", str(output / "icon-info.plist"),
     ], check=True)
 
+    brand_shared_icons(tree)
+
+
+def brand_shared_icons(tree):
+    logo = ROOT / "assets/branding/breezer-logo.png"
     for source, target in branding_resources():
         if not source.endswith(".png"):
             continue

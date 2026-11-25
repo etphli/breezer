@@ -1,4 +1,5 @@
 import { localStorageChanges } from '../../features/ai/extension/storage-events.js';
+import { HAS_NATIVE_HELPER } from '../../features/ai/extension/platform.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -9,7 +10,7 @@ test('a pre-response shortcut filter cannot overwrite the loaded sites', async (
   const preferences = await readFile(new URL('../../features/ai/extension/top-sites.js', import.meta.url), 'utf8');
   const callbacks = new Map(), nodes = new Map(), observed = { shown: 0, filters: 0 };
   const node = id => {
-    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {} });
+    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {}, querySelectorAll: () => [] });
     return nodes.get(id);
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
@@ -22,7 +23,7 @@ test('a pre-response shortcut filter cannot overwrite the loaded sites', async (
     if (key === 'newtab.customSites.v1') return { [key]: [{ url: 'https://hidden.example/', title: 'Hidden' }] };
     return {};
   } } } };
-  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, TextEncoder, root, api, observed, innerWidth: 1000,
+  const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, TextEncoder, root, api, observed, innerWidth: 1000,
     crypto: { subtle: { async digest(_algorithm, bytes) {
       if (++digests === 1) { digestReady(); await new Promise(resolve => { releaseDigest = resolve; }); }
       return new Uint8Array(32).fill(new TextDecoder().decode(bytes).includes('hidden.example') ? 0 : 1).buffer;
@@ -40,6 +41,7 @@ installShortcutActions=()=>()=>{}; requestView=viewReply;
 const originalFilter=ShortcutPreferences.prototype.filter;
 ShortcutPreferences.prototype.filter=function(...args){observed.filters++;return originalFilter.apply(this,args)};
 renderToday=()=>{}; renderPlaceholders=()=>{}; renderSites=(_api,_root,sites)=>{observed.shown=sites.length}; renderOrganato=()=>{};
+startNewTabExperiments=()=>({ready:Promise.resolve(),setSites(){},dispose(){}});
 globalThis.run=()=>startNewTab({api,root});`;
   vm.runInContext(script, context);
   const loaded = context.run();
@@ -66,12 +68,12 @@ for (const dashboardEnabled of [false, true]) test(`disposed new-tab ignores lat
   let paints = 0, navigations = 0, reply, started;
   const ready = new Promise(resolve => { started = resolve; });
   const node = id => {
-    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {} });
+    if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, addEventListener() {}, setAttribute() {}, removeAttribute() {}, querySelectorAll: () => [] });
     return nodes.get(id);
   };
   const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
   const api = { storage: { local: { onChanged: { addListener() {}, removeListener() {} }, async get() { return {}; } }, onChanged: { addListener() {}, removeListener() {} } } };
-  const context = vm.createContext({ localStorageChanges, URL, Intl, Date, TextEncoder, root, api, innerWidth: 1000,
+  const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, TextEncoder, root, api, innerWidth: 1000,
     installShortcutAdder() {},
     location: { replace() { navigations++; } },
     async viewReply() { started(); return new Promise(resolve => { reply = resolve; }); },
@@ -82,6 +84,7 @@ for (const dashboardEnabled of [false, true]) test(`disposed new-tab ignores lat
   vm.runInContext(preferences.replace(/^export /gm, '') + '\n' + source.replace(/^import .*;\n/gm, '').replace(/^export /gm, '') + `
 installShortcutActions=()=>()=>{}; requestView=viewReply;
 renderToday=recordPaint; renderPlaceholders=()=>{}; renderSites=recordPaint; renderOrganato=recordPaint;
+startNewTabExperiments=()=>({ready:Promise.resolve(),setSites(){},dispose(){}});
 globalThis.run=()=>startNewTab({api,root});`, context);
   const loaded = context.run(); await ready;
   const before = paints;
@@ -112,6 +115,7 @@ test('refresh stays hidden during loading, setup and off with only local storage
     const ready = new Promise(resolve => { started = resolve; });
     const node = id => {
       if (!nodes.has(id)) nodes.set(id, { dataset: {}, hidden: false, attributes: new Map(),
+        querySelectorAll: () => [],
         addEventListener() {}, setAttribute(name, value) { this.attributes.set(name, value); }, removeAttribute(name) { this.attributes.delete(name); } });
       return nodes.get(id);
     };
@@ -123,7 +127,7 @@ test('refresh stays hidden during loading, setup and off with only local storage
       } },
       onChanged: { addListener() { assert.fail('general storage listener subscribed'); } },
     } };
-    const context = vm.createContext({ localStorageChanges, URL, Intl, Date, TextEncoder, root, api,
+    const context = vm.createContext({ localStorageChanges, HAS_NATIVE_HELPER, URL, Intl, Date, TextEncoder, root, api,
       installShortcutAdder() {}, setTimeout: () => 1, clearTimeout() {},
       addEventListener(name, fn) { callbacks.set(name, fn); }, removeEventListener(name) { callbacks.delete(name); },
       async viewReply() { started(); return new Promise(resolve => { release = resolve; }); },
@@ -131,6 +135,7 @@ test('refresh stays hidden during loading, setup and off with only local storage
     vm.runInContext(preferences.replace(/^export /gm, '') + '\n' + source.replace(/^import .*;\n/gm, '').replace(/^export /gm, '') + `
 installShortcutActions=()=>()=>{}; requestView=viewReply;
 renderToday=()=>{}; renderPlaceholders=()=>{}; renderSites=()=>{}; renderOrganato=()=>{};
+startNewTabExperiments=()=>({ready:Promise.resolve(),setSites(){},dispose(){}});
 globalThis.run=()=>startNewTab({api,root});`, context);
     const loaded = context.run(); await ready;
     assert.equal(node('refresh').hidden, true, 'loading hides Refresh');

@@ -828,6 +828,12 @@ def replacements():
                 '  registry->RegisterIntegerPref(\n'
                 '      breezer_workspace::prefs::kAppearanceDefaultsVersion, 0);\n',
             ),
+            (
+                "void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {\n",
+                "void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {\n"
+                "  registry->RegisterBooleanPref(\n"
+                "      breezer_workspace::prefs::kSidebarAddressSearch, false);\n",
+            ),
         ],
         "chrome/browser/ui/BUILD.gn": [
             (

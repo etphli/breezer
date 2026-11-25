@@ -128,7 +128,7 @@ function panelHarness() {
   };
   f.document.getElementById = get;
   f.document.body = f.root();
-  const context = vm.createContext({ document: f.document, ...f, requestAnimationFrame: fn => frames.push(fn), chrome: {}, ResearchSources: class { clear() {} }, console });
+  const context = vm.createContext({ document: f.document, ...f, requestAnimationFrame: fn => frames.push(fn), chrome: {}, renderReplyWidget: () => null, ResearchSources: class { clear() {} }, console });
   const panel = fs.readFileSync('features/ai/extension/panel.js', 'utf8').replace(/^import .*;\n/gm, '');
   const newChat = panel.slice(panel.indexOf("$('new-chat').addEventListener"), panel.indexOf("$('model-button').addEventListener"));
   vm.runInContext(panel.slice(0, panel.indexOf("$('composer').addEventListener")) + `

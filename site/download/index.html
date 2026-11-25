@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#f3ebda">
-  <title>Download Breezer for Mac</title>
-  <meta name="description" content="Download the latest Breezer release for Macs with Apple Silicon.">
-  <meta property="og:title" content="Download Breezer for Mac">
+  <title>Download Breezer</title>
+  <meta name="description" content="Download the latest Breezer release and find installation steps and checksums for your platform.">
+  <meta property="og:title" content="Download Breezer">
   <meta property="og:image" content="https://breezer-browser.vercel.app/shots/newtab-light.jpg">
   <meta property="og:url" content="https://breezer-browser.vercel.app/download">
   <meta name="twitter:card" content="summary_large_image">
@@ -39,8 +39,8 @@
         <img src="/icon.png" alt="" width="512" height="512">
       </div>
       <div class="get-copy">
-        <p class="release reveal"><span>Version <span data-mac-version>1.3.1</span></span></p>
-        <h1 id="get-title" class="title split"><span>Breezer</span> <span>for Mac</span></h1>
+        <p class="release reveal"><span id="get-version">Version <span data-mac-version>1.3.1</span></span></p>
+        <h1 id="get-title" class="title split"><span>Breezer</span> <span id="get-platform">for Mac</span></h1>
         <svg class="breeze" viewBox="0 0 640 120" preserveAspectRatio="xMinYMid meet" aria-hidden="true" focusable="false">
           <defs>
             <linearGradient id="breeze-ink" x1="0" x2="1" y1="0" y2="0">
@@ -55,6 +55,23 @@
           <a class="button secondary" href="https://github.com/etphli/breezer/releases/tag/v1.3.1" data-mac-release-notes>Release notes</a>
         </div>
         <p class="download-started" role="status" hidden>Your download has started. The steps below take about a minute.</p>
+        <section class="windows" id="windows" aria-labelledby="windows-title" hidden>
+          <h2 id="windows-title">Breezer for Windows</h2>
+          <p class="windows-meta"><span id="windows-version"></span> for 64-bit Intel and AMD PCs</p>
+          <div class="actions">
+            <a class="button primary" id="windows-primary" href="#">Download for Windows</a>
+            <a class="button secondary" id="windows-zip" href="#" hidden>Download zip</a>
+            <a class="button secondary" id="windows-release-notes" href="https://github.com/etphli/breezer/releases">Windows release notes</a>
+          </div>
+          <p>For the installer, run the setup file. For the portable ZIP, extract the full archive and open <code>chrome.exe</code> from the extracted folder.</p>
+          <p>Import bookmarks and history from Settings. Import saved passwords directly from an installed 64-bit Firefox, or use a password CSV exported from Chrome, Edge, or another browser.</p>
+          <p class="windows-check">Compare these SHA-256 checksums with the output of <code>Get-FileHash</code> in PowerShell.</p>
+          <dl class="windows-sums">
+            <div><dt id="windows-sha-name"></dt><dd class="checksum"><code id="windows-sha"></code><button class="button secondary small" type="button" data-copy="windows-sha">Copy</button></dd></div>
+            <div id="windows-zip-row" hidden><dt>Breezer-Windows-x64.zip</dt><dd class="checksum"><code id="windows-zip-sha"></code><button class="button secondary small" type="button" data-copy="windows-zip-sha">Copy</button></dd></div>
+          </dl>
+        </section>
+        <p class="platform-note" id="windows-unavailable" hidden><span data-reason="missing">There's no Windows version yet. </span>This download needs a Mac with Apple Silicon. New versions appear on the <a href="https://github.com/etphli/breezer/releases">releases page</a>.</p>
         <dl class="specs reveal">
           <div><dt>Mac</dt><dd>Apple Silicon (M1 or later)</dd></div>
           <div><dt>Download</dt><dd>Disk image (.dmg)</dd></div>
@@ -65,7 +82,7 @@
     </section>
 
     <section class="install" aria-labelledby="install-title">
-      <h2 id="install-title" class="section-title split">Install in three steps</h2>
+      <h2 id="install-title" class="section-title split">Install on a Mac in three steps</h2>
       <ol class="install-steps">
         <li class="install-step reveal">
           <figure class="plate plate-drag" aria-hidden="true">
@@ -101,7 +118,7 @@
 
     <section class="verify" aria-labelledby="verify-title">
       <div>
-        <h2 id="verify-title">Check the download</h2>
+        <h2 id="verify-title">Check the Mac download</h2>
         <p>Compare this SHA-256 checksum with the output of <code>shasum -a 256</code> on the disk image.</p>
       </div>
       <div class="checksum">
@@ -113,10 +130,10 @@
     <section class="notes" aria-labelledby="notes-title">
       <h2 id="notes-title">Good to know</h2>
       <ul class="ticks">
-        <li>Intel Macs, Windows and Linux aren't supported yet.</li>
+        <li id="platform-support">Intel Macs, Windows and Linux aren't supported yet.</li>
         <li>Breezer keeps its own profile. Chrome stays exactly as it is.</li>
-        <li>After this, updates install from Breezer's Settings.</li>
-        <li>The assistant uses your own signed-in Codex or Claude command-line tool.</li>
+        <li>On Mac, updates install from Breezer's Settings.</li>
+        <li>On Mac, the assistant uses your own signed-in Codex or Claude command-line tool.</li>
       </ul>
     </section>
   </main>

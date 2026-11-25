@@ -66,9 +66,14 @@ export function detectBrowserTask(text, context = {}) {
     .replace(/^(?:(?:please|(?:can|could|would|will) you) )+/, '')
     .replace(/[.!?]+$/, '').replace(/,? please$/, '');
 
-  if (asksForStats(request)) return 'stats';
+  const direct = request.replace(/^(?:use (?:your |the )?browser tools? to |run )/, '');
+  if (asksForStats(direct) || /^(?:browser_stats|(?:get|check|show(?: me)?) (?:my |the )?browser stats|(?:check|tell me) how much (?:ram|memory) (?:breezer|(?:my|the|this) browser) (?:uses|is using))$/.test(direct)) return 'stats';
+  if (/^(?:restore|bring back|go back to|revert to) (?:my |the )?(?:previous|last) (?:look|appearance|theme|browser theme)$/.test(direct)
+      || /^undo (?:my |the )?(?:last |previous )?(?:browser )?theme(?: change)?$/.test(direct)) return 'restore';
+  if (context.allowImage && /^(?:create|generate|draw|make) (?:me )?(?:an? )?(?:image|illustration|picture|poster) (?:of|showing|depicting|that) .+$/i.test(direct)) return 'image';
   if (PROJECT_DESIGN.test(request)) return '';
-  if (SHORT_THEME.test(request) || BROWSER_DESIGN.test(request) || GIVE_BROWSER_DESIGN.test(request) || BROWSER_COLOR.test(request) ||
-      (IMAGE_DESIGN.test(request) && context.hasImage) || (THEME_REVISION.test(request) && context.hasTheme)) return 'theme';
+  if (SHORT_THEME.test(direct) || BROWSER_DESIGN.test(direct) || GIVE_BROWSER_DESIGN.test(direct) || BROWSER_COLOR.test(direct) ||
+      /^(?:make|style|design) (?:my |the |this )?(?:browser|breezer) (?:look like |look as if |with the look of )\S.{0,250}$/.test(direct) ||
+      (IMAGE_DESIGN.test(direct) && context.hasImage) || (THEME_REVISION.test(direct) && context.hasTheme)) return 'theme';
   return '';
 }

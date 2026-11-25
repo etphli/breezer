@@ -107,12 +107,12 @@ test('rename still flushes queued work and preserves its input through the next 
   const pair = await both();
   for (const h of pair) {
     h.update(3, {title: 'Before rename'});
-    h.startRename({kind: 'space', id: 'space-work', key: 's:space-work'});
+    h.startRename({kind: 'folder', id: 'f-design', key: 'f:f-design'});
     h.flushFrames();
     h.update(3, {title: 'During rename'}); h.flushFrames();
   }
   equal(pair);
-  assert.equal(pair[1].nodes.get('space-name').children[0].tag, 'input');
+  assert.equal(pair[1].nodes.get('pinned').querySelector('.title input').tag, 'input');
 });
 
 test('uninterrupted queued rendering and drawing with no queued frame remain unchanged', async () => {

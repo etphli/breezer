@@ -233,40 +233,96 @@ for (const link of document.querySelectorAll('[data-download]')) {
   });
 }
 
-async function latestMacRelease() {
-  const key = 'breezer.mac-release';
-  const tagPattern = /^v\d+\.\d+\.\d+$/;
-  const shaPattern = /^[a-f0-9]{64}$/;
+// Only offer a published asset with an uploaded checksum and a SHA-256 digest.
+const WINDOWS_FILES = ['Breezer-Windows-x64-Setup.exe', 'Breezer-Windows-x64.zip'];
+const RELEASES_URL = 'https://github.com/etphli/breezer/releases';
+
+function verifiedDownload(release, name) {
+  const uploaded = asset => asset.state === 'uploaded' && Number.isSafeInteger(asset.size) && asset.size > 0;
+  const asset = release.assets.find(asset => asset.name === name && uploaded(asset));
+  const sha = /^sha256:([0-9a-f]{64})$/.exec(asset?.digest || '')?.[1];
+  if (!sha || !release.assets.some(asset => asset.name === `${name}.sha256` && uploaded(asset))) return null;
+  return { name, sha, url: `${RELEASES_URL}/download/${release.tag_name}/${name}` };
+}
+
+async function latestRelease() {
+  const key = 'breezer.latest-release';
+  const valid = release => /^v\d+\.\d+\.\d+$/.test(release?.tag_name) &&
+    Array.isArray(release.assets) && release.assets.every(asset => typeof asset?.name === 'string');
   try {
     const cached = JSON.parse(sessionStorage.getItem(key));
-    if (cached?.expires > Date.now() && tagPattern.test(cached.tag) && shaPattern.test(cached.sha)) return cached;
+    if (cached && Date.now() - cached.at < 10 * 60_000 && valid(cached.release)) return cached.release;
   } catch {}
   const response = await fetch('https://api.github.com/repos/etphli/breezer/releases/latest', {
     credentials: 'omit', signal: AbortSignal.timeout(5000),
   });
-  if (!response.ok) return;
-  const { tag_name: tag, assets } = await response.json();
-  if (!tagPattern.test(tag) || !Array.isArray(assets)) return;
-  const name = 'Breezer-' + tag + '-arm64.dmg';
-  const uploaded = (asset) => asset.state === 'uploaded' && Number.isSafeInteger(asset.size) && asset.size > 0;
-  const dmg = assets.find(asset => asset.name === name && uploaded(asset));
-  const sha = /^sha256:([a-f0-9]{64})$/.exec(dmg?.digest || '')?.[1];
-  if (!sha || !assets.some(asset => asset.name === name + '.sha256' && uploaded(asset))) return;
-  const release = { tag, sha, expires: Date.now() + 10 * 60_000 };
-  try { sessionStorage.setItem(key, JSON.stringify(release)); } catch {}
+  if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+  const { tag_name, assets } = await response.json();
+  if (!valid({ tag_name, assets })) throw new Error('GitHub returned invalid release metadata');
+  const release = { tag_name, assets: assets.map(({ name, digest, state, size }) => ({ name, digest, state, size })) };
+  try { sessionStorage.setItem(key, JSON.stringify({ at: Date.now(), release })); } catch {}
   return release;
 }
 
-const macVersions = document.querySelectorAll('[data-mac-version]');
-if (macVersions.length) latestMacRelease().then((release) => {
-  if (!release) return;
-  const { tag, sha } = release;
-  for (const version of macVersions) version.textContent = tag.slice(1);
-  const notes = document.querySelector('[data-mac-release-notes]');
-  if (notes) {
-    const releases = 'https://github.com/etphli/breezer/releases';
-    document.querySelector('[data-download]').href = releases + '/download/' + tag + '/Breezer-' + tag + '-arm64.dmg';
-    notes.href = releases + '/tag/' + tag;
-    document.getElementById('sha').textContent = sha;
-  }
-}).catch(() => {});
+const windowsPanel = document.getElementById('windows');
+const homeDownload = document.getElementById('home-download');
+if (windowsPanel || homeDownload) {
+  const onWindows = navigator.userAgentData?.platform === 'Windows' || /Windows NT/.test(navigator.userAgent);
+  // When GitHub can't be reached, don't claim that no Windows build exists.
+  const showUnavailable = (known) => {
+    if (!onWindows || !windowsPanel) return;
+    const note = document.getElementById('windows-unavailable');
+    note.querySelector('[data-reason]').hidden = !known;
+    note.hidden = false;
+  };
+  latestRelease().then((release) => {
+    const version = release.tag_name.slice(1);
+    const notesURL = `${RELEASES_URL}/tag/${release.tag_name}`;
+    const macDownload = verifiedDownload(release, `Breezer-${release.tag_name}-arm64.dmg`);
+    if (macDownload) {
+      for (const label of document.querySelectorAll('[data-mac-version]')) label.textContent = version;
+      if (windowsPanel) {
+        document.querySelector('[data-download]').href = macDownload.url;
+        document.querySelector('[data-mac-release-notes]').href = notesURL;
+        document.getElementById('sha').textContent = macDownload.sha;
+      }
+    }
+    const files = WINDOWS_FILES.map(name => verifiedDownload(release, name)).filter(Boolean);
+    if (!files.length) { showUnavailable(true); return; }
+    if (homeDownload) {
+      document.getElementById('home-platforms').textContent = 'Free for Apple Silicon Macs and Windows x64. Built on Chromium 156.';
+      document.getElementById('home-download-platforms').textContent = 'Available for Apple Silicon Macs and Windows x64.';
+      if (onWindows) {
+        homeDownload.textContent = 'Download for Windows';
+        document.getElementById('home-version').textContent = `Breezer ${version} for Windows`;
+      }
+      return;
+    }
+    const [primary, zip] = files;
+    const button = document.getElementById('windows-primary');
+    button.href = primary.url;
+    if (primary.name.endsWith('.zip')) button.textContent = 'Download zip for Windows';
+    document.getElementById('windows-sha-name').textContent = primary.name;
+    document.getElementById('windows-sha').textContent = primary.sha;
+    if (zip) {
+      Object.assign(document.getElementById('windows-zip'), { href: zip.url, hidden: false });
+      document.getElementById('windows-zip-sha').textContent = zip.sha;
+      document.getElementById('windows-zip-row').hidden = false;
+    }
+    document.getElementById('windows-version').textContent = `Version ${version}`;
+    document.getElementById('windows-release-notes').href = notesURL;
+    document.getElementById('platform-support').textContent = "Intel Macs and Linux aren't supported yet.";
+    // Windows visitors see their download first; everyone else sees it below the Mac one.
+    if (onWindows) {
+      document.getElementById('get-platform').textContent = 'for Windows';
+      document.getElementById('get-title').setAttribute('aria-label', 'Breezer for Windows');
+      document.getElementById('get-version').textContent = `Version ${version}`;
+      const mac = document.querySelector('.get-copy .actions');
+      mac?.before(windowsPanel);
+      const macButton = mac?.querySelector('[data-download]');
+      if (macButton) { macButton.className = 'button secondary'; macButton.textContent = 'Download for Mac'; }
+    }
+    windowsPanel.classList.toggle('first', onWindows);
+    windowsPanel.hidden = false;
+  }).catch(() => showUnavailable(false));
+}

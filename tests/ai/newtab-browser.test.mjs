@@ -174,9 +174,11 @@ test('parallel New Tabs merge icons and refresh retries a shortcut that used Chr
     const first = await context.newPage();
     const second = await context.newPage();
     await Promise.all([first.goto(`${base}/newtab.html?sites=first`), second.goto(`${base}/newtab.html?sites=second`)]);
+    await first.bringToFront();
     const cachedUrls = page => page.evaluate(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.map(entry => entry.url));
-    await first.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length >= 2);
+    await first.waitForFunction(() => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.length >= 2, null, { polling: 50 });
     assert.deepEqual((await cachedUrls(first)).sort(), [SITES[0].url, SITES[1].url].sort());
+    assert.equal(await first.getByRole('link', { name: 'New site', exact: true }).locator('.site-monogram').isVisible(), true);
     known = true;
     await first.getByRole('button', { name: 'Refresh', exact: false }).click();
     await first.waitForFunction(url => JSON.parse(localStorage.getItem('newtab.icons.v1'))?.some(entry => entry.url === url), missing.url);
@@ -268,11 +270,8 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(await page.textContent('[data-list="todos"] .item:last-child .item-when'), 'No due date');
       await page.screenshot({ path: `${evidence}/newtab-connected-light.png` });
 
-      // Keyboard: the first stop is Settings, then the sites in order.
-      await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), 'workspace.html#/settings');
-      await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(() => document.activeElement.getAttribute('href')), 'https://mail.example.com/');
+      assert.equal(await page.getByRole('searchbox').count(), 0);
+      assert.deepEqual(await tabStops(page, 2), ['workspace.html#/settings', 'https://mail.example.com/']);
       await page.screenshot({ path: `${evidence}/newtab-keyboard-focus.png`, clip: { x: 0, y: 0, width: 1440, height: 460 } });
       // Refresh asks exactly once more and never on its own.
       await page.click('#refresh');
@@ -338,12 +337,15 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       assert.equal(visible.length, 9, 'all eight shortcuts and Add remain available at narrow widths');
       assert.equal(new Set(visible).size, 3, 'shortcuts form complete rows without clipped tiles');
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= 420), true);
-      const lanes = await page.$$eval('.lane', (nodes) => nodes.map((node) => node.getBoundingClientRect().top));
-      assert.ok(lanes[1] > lanes[0], 'lanes stack on narrow windows');
+      const todos = page.getByRole('button', { name: /^To-dos/ });
+      assert.equal(await page.locator('#upcoming-lane').isVisible(), true);
+      assert.equal(await page.locator('#todos-lane').isVisible(), false);
       await page.screenshot({ path: `${evidence}/newtab-narrow.png`, fullPage: true });
-      await page.getByRole('link', { name: 'To-dos', exact: true }).click();
-      assert.equal(await page.evaluate(() => document.activeElement.id), 'lane-todos');
-      assert.ok((await page.locator('#lane-todos').boundingBox()).y >= 0, 'To-dos jump brings its heading into view');
+      await todos.click();
+      assert.equal(await todos.getAttribute('aria-pressed'), 'true');
+      assert.equal(await page.locator('#todos-lane').isVisible(), true);
+      assert.equal(await page.locator('#upcoming-lane').isVisible(), false);
+      await page.screenshot({ path: `${evidence}/newtab-narrow-todos.png` });
       await page.evaluate(() => { history.replaceState(null, '', location.pathname); scrollTo(0, 0); });
       const lastSite = page.locator('.site:not(.site-add) a').last();
       await lastSite.focus();
@@ -571,9 +573,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
       assert.equal(await page.locator('.item, .item-empty, #organato-action a').count(), 0);
       assert.equal(await page.getByRole('heading', { name: /Organato/ }).count(), 0);
       assert.equal(await page.getByRole('status').filter({ hasText: /Organato/ }).count(), 0);
-      // Keyboard: Settings, six sites (each with its remove button) and Add; then out of the page.
-      const stops = await tabStops(page, 2);
-      assert.deepEqual(stops, ['workspace.html#/settings', 'https://mail.example.com/']);
+      assert.deepEqual(await tabStops(page, 2), ['workspace.html#/settings', 'https://mail.example.com/']);
       await page.locator('.site-add-button').focus();
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.closest('.sheet')), null, 'nothing in the hidden sheet takes focus');
@@ -655,7 +655,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
       const loadingSheet = await other.locator('.sheet').boundingBox();
       const loadingAnchor = await other.locator('#today').boundingBox();
       assert.ok(Math.abs(dateAnchor.x - loadingAnchor.x) < 1 && Math.abs(dateAnchor.y - loadingAnchor.y) < 1, 'the date stays anchored while reloading');
-      assert.ok(Math.abs(readySheet.y - loadingSheet.y) < 1 && Math.abs(readySheet.height - loadingSheet.height) < 1, 'loading reserves the full desktop agenda footprint');
+      assert.ok(Math.abs(readySheet.y - loadingSheet.y) < 1 && Math.abs(readySheet.height - loadingSheet.height) < 1, `loading reserves the full desktop agenda footprint: ready ${readySheet.height} at ${readySheet.y}, loading ${loadingSheet.height} at ${loadingSheet.y}`);
       await other.screenshot({ path: `${evidence}/newtab-organato-reenabled-loading.png` });
       for (const tab of [page, other]) await tab.waitForFunction(() => document.getElementById('organato').dataset.state === 'ready');
       assert.equal(await other.evaluate(() => window.fx.requests.length), before + 1);

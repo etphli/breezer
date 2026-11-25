@@ -85,7 +85,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(category ? `${url}/${category}` : url);
     if (category) await page.locator('#settings-title').waitFor();
-    else await page.getByRole('heading', { name: 'Bring your Chrome data to Breezer', exact: true }).waitFor();
+    else await page.getByRole('heading', { name: 'Import from another browser', exact: true }).waitFor();
     // Initial helper replies: Organato not connected, no update available.
     await page.evaluate(() => {
       const org = window.fx.ports['breezer-organato-settings'];
@@ -118,7 +118,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
       await details.locator('summary').focus();
       await page.keyboard.press('Space');
       assert.equal(await details.locator('p').last().isVisible(), false);
-      assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).isVisible(), true);
+      assert.equal(await page.getByRole('button', { name: 'Import browser data' }).isVisible(), true);
       await context.close();
     }
     // ---------------------------------------------------- light, first run
@@ -128,7 +128,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     // Subtle buttons must not inherit the sidebar's hover-only .quiet opacity.
     assert.equal(await page.getByRole('button', { name: 'Hide getting started' }).evaluate((node) => getComputedStyle(node).opacity), '1');
     // Native import destinations, keyboard only.
-    await page.getByRole('button', { name: 'Import bookmarks and history' }).first().focus();
+    await page.getByRole('button', { name: 'Import browser data' }).first().focus();
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => window.fx.opened.length === 1);
     assert.deepEqual(await page.evaluate(() => window.fx.opened), [{ url: 'chrome://settings/importData', active: true }]);
@@ -139,6 +139,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     assert.equal(await page.evaluate(() => document.activeElement.dataset.onboardingAction), 'passwords');
     await page.keyboard.press('Enter');
     assert.equal(await page.locator('[data-password-import-guide]').evaluate((node) => node.open), true);
+    assert.equal(await page.getByRole('button', { name: 'Import password CSV' }).isVisible(), true);
     assert.equal(await page.locator('.nav-item[aria-current="page"]').innerText(), 'Passwords', 'password steps open the Passwords category');
     assert.equal(await page.evaluate(() => document.activeElement.tagName), 'SUMMARY');
     assert.equal(await page.evaluate(() => window.fx.opened.length), 1, 'password steps do not open the importer by themselves');
@@ -207,7 +208,7 @@ test('settings onboarding, Organato and updates render and respond in a real bro
     assert.equal(await page.locator('[data-onboarding]').isHidden(), true, 'stays hidden after reload');
     await page.screenshot({ path: join(evidence, 'settings-general-setup-dismissed.png') });
     await page.getByRole('link', { name: 'Browser tools' }).click();
-    assert.equal(await page.getByRole('button', { name: 'Import bookmarks and history' }).count(), 1, 'browser import remains in Browser settings');
+    assert.equal(await page.locator('#settings button[data-url="chrome://settings/importData"]').count(), 1, 'browser import remains in Browser tools');
     await context.close();
 
     // ---------------------------------------------------- dark, custom colour
