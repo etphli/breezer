@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm';
 import { newtabRenderer } from './fixtures/organato-main-port/newtab-render.mjs';
 import { installFixture } from './newtab-browser-fixture.mjs';
 import {
-  PORT_NAME, MAX_SITES, daysUntil, normalizeView, organatoState, parseDue, relativeDay, requestView, safeUrl, urgency,
+  PORT_NAME, MAX_SITES, daysUntil, normalizeView, organatoState, parseDue, relativeDay, requestView, safeUrl, toAddress, urgency,
 } from '../../features/ai/extension/newtab.js';
 
 const dir = new URL('../../features/ai/extension/', import.meta.url);
@@ -44,6 +44,14 @@ test('only http(s) URLs survive', () => {
   for (const bad of ['javascript:alert(1)', 'data:text/html,<b>x</b>', 'chrome://settings', 'file:///etc/hosts', 'not a url', '', null, 42]) {
     assert.equal(safeUrl(bad), null, String(bad));
   }
+});
+
+test('the fallback address check accepts international and fully qualified hosts', () => {
+  assert.equal(toAddress('bücher.example'), 'https://xn--bcher-kva.example/');
+  assert.equal(toAddress('例え.テスト'), 'https://xn--r8jz45g.xn--zckzah/');
+  assert.equal(toAddress('xn--r8jz45g.xn--zckzah/a'), 'https://xn--r8jz45g.xn--zckzah/a');
+  assert.equal(toAddress('example.com./path'), 'https://example.com./path');
+  for (const text of ['example', '3.14', 'version 1.2', 'a..b', '-a.com', 'é', 'javascript:alert(1)']) assert.equal(toAddress(text), null, text);
 });
 
 test('normalizeView drops unsafe and duplicate sites and caps the row', () => {

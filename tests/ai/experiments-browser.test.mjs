@@ -129,7 +129,13 @@ test('New Tab experiments stay off by default and each one works once turned on'
       assert.equal(html.composer, undefined);
       assert.equal(html.personality, undefined);
       assert.equal(html.glass, 'solid');
-      assert.equal(await page.locator('#composer').isHidden(), true);
+      assert.equal(await page.locator('#composer').isVisible(), true);
+      assert.equal(await page.locator('#composer-modes').isHidden(), true);
+      await page.waitForFunction(() => document.activeElement?.id === 'composer-input');
+      await page.keyboard.type('local library hours');
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(() => fx.searches.length === 1);
+      assert.deepEqual(await page.evaluate(() => fx.searches[0]), { text: 'local library hours', tabId: 7 });
       assert.equal(await page.locator('.sites-nav').isVisible(), true);
       assert.deepEqual(errors, []);
       await context.close();
@@ -156,13 +162,20 @@ test('New Tab experiments stay off by default and each one works once turned on'
     {
       const { page, context, errors } = await openNewTab(browser, base, { experiments: ALL_ON, conversations: CHATS });
       const input = page.locator('#composer-input');
-      await input.fill('rain radar sydney');
-      await input.press('Enter');
+      await page.waitForFunction(() => document.activeElement?.id === 'composer-input');
+      await page.keyboard.type('rain radar sydney');
+      await page.keyboard.press('Enter');
       await page.waitForFunction(() => fx.searches.length === 1);
       assert.deepEqual(await page.evaluate(() => fx.searches[0]), { text: 'rain radar sydney', tabId: 7 });
 
       await page.getByRole('radio', { name: 'Ask Breezer' }).click();
       assert.equal(await page.locator('#composer-form').getAttribute('data-mode'), 'ask');
+      await page.evaluate(() => localStorage.setItem('breezer.newtab.mode', 'ask'));
+      const freshTab = await context.newPage();
+      await freshTab.goto(`${base}/newtab.html`);
+      await freshTab.getByRole('radio', { name: 'Search', checked: true }).waitFor();
+      await freshTab.waitForFunction(() => document.activeElement?.id === 'composer-input');
+      await freshTab.close();
       assert.equal(await page.locator('#composer-style').innerText(), 'Warm replies');
       await page.evaluate(() => { fx.failNavigation = true; });
       await input.fill('Summarise what I should revise tonight');
@@ -217,6 +230,7 @@ test('New Tab experiments stay off by default and each one works once turned on'
       assert.equal(await input.inputValue(), '');
 
       await page.evaluate(() => sessionStorage.setItem('draft-no-model', 'true'));
+      await page.getByRole('radio', { name: 'Ask Breezer' }).click();
       await input.fill('A question to keep when signed out');
       await Promise.all([page.waitForURL('**/panel.html?view=chat'), input.press('Enter')]);
       await page.waitForFunction(() => document.querySelector('.panel').dataset.accountState === 'signed-out');
@@ -275,6 +289,17 @@ test('New Tab experiments stay off by default and each one works once turned on'
       await live.page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { newTabComposer: true, personality: 'direct' } }));
       await live.page.waitForFunction(() => document.documentElement.dataset.composer === 'on' && document.documentElement.dataset.personality === 'direct');
       assert.equal(await live.page.locator('#composer').isVisible(), true);
+      for (const opacity of [28, 74]) {
+        await live.page.evaluate(value => chrome.storage.local.set({ breezerExperiments: { newTabComposer: true, glass: true, glassOpacity: value } }), opacity);
+        await live.page.waitForFunction(value => document.documentElement.style.getPropertyValue('--glass-opacity') === `${value}%`, opacity);
+        const alpha = await live.page.locator('#composer-form').evaluate(form => {
+          const canvas = document.createElement('canvas').getContext('2d');
+          canvas.fillStyle = getComputedStyle(form).backgroundColor;
+          canvas.fillRect(0, 0, 1, 1);
+          return canvas.getImageData(0, 0, 1, 1).data[3];
+        });
+        assert.ok(Math.abs(alpha - 255 * opacity / 100) <= 1);
+      }
       await live.page.evaluate(() => chrome.storage.local.set({ breezerExperiments: {} }));
       await live.page.waitForFunction(() => !document.documentElement.dataset.composer && !document.documentElement.dataset.personality);
       assert.equal(await live.page.locator('.sites-nav').isVisible(), true);
@@ -390,7 +415,9 @@ test('Settings > Experiments saves each toggle, gates native glass and personali
       const { page, context, errors } = await open({ nativeGlass: false });
       assert.equal(await page.locator('.nav-item[aria-current="page"]').innerText(), 'Experiments');
       const toggles = page.locator('#experiments-settings input.toggle');
+      const glassOpacity = page.getByRole('slider', { name: 'Glass opacity' });
       assert.equal(await toggles.count(), 6);
+      assert.equal(await glassOpacity.isDisabled(), true);
       for (const checked of await toggles.evaluateAll((nodes) => nodes.map((node) => node.checked))) assert.equal(checked, false);
       assert.equal(await page.locator('#experiment-newTabRecentChats').isDisabled(), true);
       assert.equal(await page.locator('[role="radio"][aria-checked="true"]', { hasText: 'Standard' }).count(), 1);
@@ -405,6 +432,10 @@ test('Settings > Experiments saves each toggle, gates native glass and personali
       await page.waitForFunction(() => fx.local.breezerExperiments?.sidebarSearch === true);
       await page.getByLabel('Glossy glass').check();
       await page.waitForFunction(() => fx.local.breezerExperiments?.glass === true);
+      await glassOpacity.press('Home');
+      await page.waitForFunction(() => fx.local.breezerExperiments?.glassOpacity === 0);
+      await glassOpacity.press('End');
+      await page.waitForFunction(() => fx.local.breezerExperiments?.glassOpacity === 100);
       const calls = await page.evaluate(() => fx.calls.filter(([name, patch]) => name === 'setAppearance' && 'nativeGlass' in patch));
       assert.deepEqual(calls.map(([, patch]) => patch), [{ nativeGlass: true }]);
 
@@ -418,7 +449,7 @@ test('Settings > Experiments saves each toggle, gates native glass and personali
       assert.equal(await page.evaluate(() => fx.appearance.theme), 'mint');
 
       const saved = await record(page);
-      assert.deepEqual(saved, { version: 1, glass: true, sidebarSearch: true, newTabComposer: true, newTabRecentChats: true, newTabShortcuts: false, spaceDock: true, personality: 'off' });
+      assert.deepEqual(saved, { version: 1, glass: true, glassOpacity: 100, sidebarSearch: true, newTabComposer: true, newTabRecentChats: true, newTabShortcuts: false, spaceDock: true, personality: 'off' });
       await page.locator('#settings-search').fill('personality');
       await page.locator('#settings-results .result-title', { hasText: /^Style$/ }).waitFor();
       assert.deepEqual(errors, []);

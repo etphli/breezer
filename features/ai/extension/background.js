@@ -99,7 +99,7 @@ import { installReleaseNotes } from './release-notes.js';
 import { installWorkspaceSync } from './workspace-sync.js';
 import { installUsage } from './usage.js';
 import { BrowserTools, isWebURL } from './browser-tools.js';
-import { applyPersonality, FULL_CHAT_PATH, FULL_CHAT_PREFIX, installSidebarAddressSearch, readExperiments } from './experiments.js';
+import { applyPersonality, CHAT_ID_PREFIX, FULL_CHAT_PATH, FULL_CHAT_PREFIX, installNativeAddressExperiments, installSavedChats, PENDING_REPLY_PREFIX, readExperiments, saveChatTurn, validChatId } from './experiments.js';
 import { readBrowserStats } from './browser-stats.js';
 import { themeReferenceImages } from './theme-references.js';
 import { installContextBackground } from './context-background.js';
@@ -183,6 +183,98 @@ function createOrganatoTransport(api) {
   return { ask, close };
 }
 
+export const WARM_LIFETIME_MS = 120_000;
+export const WARM_HANDOFF_MS = 10_000;
+export const WARM_RETRY_MS = 30_000;
+
+// Starts one local helper and reads its model catalog while someone writes a New
+// Tab question. Only the chat page that replaces one of those New Tabs can take it
+// over. It holds no chat and no page data, and an unclaimed helper always exits.
+function createAskWarmer(api) {
+  let warm = null, retryAt = 0;
+  const owners = new Map(); // Each New Tab that selected Ask, with its open port or null while it navigates.
+  let handoffTimer;
+  const release = () => {
+    const helper = warm;
+    warm = null;
+    clearTimeout(handoffTimer);
+    clearTimeout(helper?.timer);
+    owners.clear();
+    try { helper?.native.disconnect(); } catch { /* It already exited. */ }
+  };
+  const releaseAfterHandoff = () => {
+    clearTimeout(handoffTimer);
+    if (warm && ![...owners.values()].some(Boolean)) handoffTimer = setTimeout(release, WARM_HANDOFF_MS);
+  };
+  const start = () => {
+    if (warm || Date.now() < retryAt) return;
+    let native;
+    try { native = api.runtime.connectNative(NATIVE_HOST); }
+    catch { retryAt = Date.now() + WARM_RETRY_MS; return; }
+    const helper = { native, status: null, timer: setTimeout(() => { if (warm === helper) release(); }, WARM_LIFETIME_MS) };
+    warm = helper;
+    const failed = () => {
+      if (warm !== helper) return;
+      retryAt = Date.now() + WARM_RETRY_MS;
+      release();
+    };
+    native.onMessage.addListener(message => {
+      if (warm !== helper) return;
+      if (message?.type === 'status' && Array.isArray(message.providers)) helper.status = message;
+      else if (message?.type === 'error') failed();
+    });
+    native.onDisconnect.addListener(() => {
+      if (warm !== helper) return;
+      void api.runtime.lastError;
+      failed();
+    });
+    try { native.postMessage({ type: 'init' }); } catch { failed(); }
+  };
+  api.runtime.onConnect.addListener(port => {
+    if (port.name !== 'breezer-ask') return;
+    const { id, tab, frameId, documentLifecycle, url } = port.sender ?? {};
+    if (id !== api.runtime.id || frameId !== 0 || !Number.isInteger(tab?.id) || tab.incognito
+        || (documentLifecycle !== undefined && documentLifecycle !== 'active')) return;
+    let page;
+    try { page = new URL(url); } catch { return; }
+    page.hash = ''; page.search = '';
+    if (page.href !== api.runtime.getURL('newtab.html')) return;
+    let open = true;
+    port.onMessage.addListener(message => {
+      void (async () => {
+        if (message?.type !== 'prewarm' || !open) return;
+        const [experiments, current] = await Promise.all([readExperiments(api), api.tabs.get(tab.id)]);
+        if (!open || !experiments.newTabComposer || current?.active !== true || current.incognito) return;
+        owners.set(tab.id, port);
+        clearTimeout(handoffTimer);
+        start();
+        if (!warm) owners.delete(tab.id);
+      })().catch(() => {});
+    });
+    port.onDisconnect.addListener(() => {
+      open = false;
+      if (owners.get(tab.id) !== port) return;
+      owners.set(tab.id, null);
+      releaseAfterHandoff();
+    });
+  });
+  return {
+    take(tabId) {
+      if (!warm || !owners.has(tabId)) return null;
+      const helper = warm;
+      warm = null;
+      clearTimeout(handoffTimer);
+      clearTimeout(helper.timer);
+      owners.clear();
+      return helper;
+    },
+    tabClosed(tabId) {
+      if (!owners.delete(tabId)) return;
+      if (owners.size) releaseAfterHandoff(); else release();
+    },
+  };
+}
+
 function installCommands(api, toggleAssistant) {
   api.commands.onCommand.addListener((command, tab) => {
     if (command === 'toggle-breezer-ai') { toggleAssistant?.(tab); return; }
@@ -202,7 +294,7 @@ function installCommands(api, toggleAssistant) {
 export function installBackground(api) {
   installTranslation(api);
   installWorkspaceSync(api);
-  void installSidebarAddressSearch(api);
+  void installNativeAddressExperiments(api);
   installUsage(api);
   const organato = createOrganatoTransport(api);
   const dashboardCache = createDashboardCache();
@@ -381,16 +473,19 @@ export function installBackground(api) {
     installCommands(api);
     return;
   }
+  const askWarmer = createAskWarmer(api);
   const panels = new Set();
   const runs = new Map();
   const replyWrites = new Map();
   const post = (port, message) => { try { port.postMessage(message); } catch { /* The panel may close during a request. */ } };
   const fullChatKey = tabId => 'chat-tab-' + tabId;
-  const runKey = panel => panel.fullChat ? fullChatKey(panel.tabId) : panel.windowId;
+  // A New Tab question has its own conversation, even when one tab asks several.
+  const runKey = panel => !panel.fullChat ? panel.windowId
+    : panel.conversation ? 'chat-' + panel.conversation : fullChatKey(panel.tabId);
   const runFor = panel => runs.get(runKey(panel));
   const controlRun = () => [...runs.values()].find(run => run.control);
-  const current = run => runFor(run.panel) === run;
-  const replyKey = windowId => `breezer-pending-reply-${windowId}`;
+  const current = run => runs.get(run.key) === run;
+  const replyKey = windowId => PENDING_REPLY_PREFIX + windowId;
   const writeReply = (windowId, write) => {
     if (windowId === undefined || !api.storage.session) return;
     const pending = (replyWrites.get(windowId) || Promise.resolve()).then(() => write(replyKey(windowId))).catch(() => {});
@@ -409,15 +504,32 @@ export function installBackground(api) {
     type: 'turn-state', id: run.id, user: run.user, text: run.text,
     browserTask: run.browserTask, stats: run.statsSummary,
   });
+  // Save the turn even when its page has closed. A page that opens the chat again
+  // replaces an unread reply with the restored one, including its error details.
+  const saveEndedRun = (run, terminal) => {
+    if (!run.archive || !run.conversation) return;
+    const { name, theme, colorMode, html } = terminal.themeProposal ?? {};
+    const reply = {
+      id: `${run.id}-reply`, role: 'assistant', unread: true,
+      text: run.text || (terminal.type === 'error' ? 'The reply ended before it finished.' : terminal.cancelled ? 'Stopped.'
+        : terminal.themeProposal ? 'Theme ready to preview.' : terminal.generatedImage ? 'Image created.'
+          : run.statsSummary ? 'Browser stats measured.' : 'The provider returned no response.'),
+      ...(run.statsSummary ? { stats: run.statsSummary } : {}),
+      ...(terminal.generatedImage ? { generatedImage: terminal.generatedImage } : {}),
+      ...(terminal.themeProposal ? { themeProposal: { name, theme, colorMode, ...(html === undefined ? {} : { html }), ...(terminal.themeImage ? { image: terminal.themeImage } : {}) } } : {}),
+    };
+    return saveChatTurn(api, { id: run.conversation, epoch: run.epoch, user: run.user, reply }).catch(() => {});
+  };
   const endRun = (run, terminal) => {
-    runs.delete(runKey(run.panel));
+    runs.delete(run.key);
     let saved;
     if (!run.control) {
       // Keep a completed turn until the panel confirms its transcript was saved.
       const index = terminal.themeProposal?.imageAttachment;
       const value = { ...turnState(run), terminal };
       if (index) value.themeImage = run.themeImages[index - 1].image;
-      saved = writeReply(runKey(run.panel), key => api.storage.session.set({ [key]: value }));
+      saved = writeReply(run.key, key => api.storage.session.set({ [key]: value }));
+      void saveEndedRun(run, { ...terminal, ...(value.themeImage ? { themeImage: value.themeImage } : {}) });
       if (index && run.reader !== run.panel) terminal = { ...terminal, themeImage: value.themeImage };
     }
     if (run.reader) post(run.reader.port, terminal);
@@ -430,6 +542,15 @@ export function installBackground(api) {
     for (const panel of panels) post(panel.port, { type: 'activity', id, active: false, label: '' });
     const run = controlRun();
     if (run?.session?.id === id) void cancel(run, reason || 'Browser control stopped.', 'browser-control');
+  });
+  installSavedChats(api, () => {
+    // Pages showing a chat start over themselves. Replies no page is reading stop here.
+    for (const run of [...runs.values()]) {
+      if (run.reader || run.control) continue;
+      const { key } = run;
+      void cancel(run);
+      void writeReply(key, storageKey => api.storage.session.remove(storageKey));
+    }
   });
   const contextMemory = installContextBackground(api, {
     isPermitted(tab) {
@@ -463,11 +584,11 @@ export function installBackground(api) {
       post(panel.port, { type: 'context', context: { url: tab.url || '', title: tab.title || '', tabId: tab.id } });
     }
   };
-  const connectNative = panel => {
+  const connectNative = (panel, warmed) => {
     if (panel.native) return panel.native;
     const release = dashboardCache.hold();
     let native;
-    try { native = api.runtime.connectNative(NATIVE_HOST); } catch (error) { release(); throw error; }
+    try { native = warmed ?? api.runtime.connectNative(NATIVE_HOST); } catch (error) { release(); throw error; }
     panel.releaseCache = release;
     panel.native = native;
     native.onMessage.addListener(message => {
@@ -565,13 +686,14 @@ export function installBackground(api) {
     if (runFor(panel) || (message.control === true && controlRun())) throw new Error('A response is already running. Stop it before sending another message.');
     if (panel.closed || !panel.visible) throw new Error('The assistant closed. Reopen it and select sources again.');
     const run = {
-      id: message.id, panel, reader: panel, browserTask, control: message.control === true,
+      id: message.id, key: runKey(panel), panel, reader: panel, browserTask, control: message.control === true,
+      conversation: panel.conversation, epoch: panel.chatEpoch, archive: panel.fullChat,
       includeContext: message.includeContext === true || message.control === true, session: null, tab: null, text: '',
       user: { id: message.id, role: 'user', text: message.message, attachments: message.attachments, contextTitle: message.contextTitle },
     };
     const history = Array.isArray(message.history) ? message.history.slice(-40) : [];
     if (browserTask === 'theme') run.themeImages = themeReferenceImages(message.attachments, history);
-    runs.set(runKey(panel), run);
+    runs.set(run.key, run);
     try {
       let context, researchSources;
       if (browserTask === 'stats') {
@@ -621,6 +743,8 @@ export function installBackground(api) {
         ensureActive(run);
       }
       const personal = await readExperiments(api);
+      // Sidebar chats are kept only where Recent conversations can reopen them.
+      run.archive ||= personal.newTabComposer && personal.newTabRecentChats;
       const profile = applyPersonality({
         name: String(message.profile?.name || '').slice(0, 100),
         context: String(message.profile?.context || '').slice(0, 20_000),
@@ -667,9 +791,14 @@ export function installBackground(api) {
     const run = runFor(panel);
     if (run?.reader === panel && run.control) void cancel(run, 'Browser control stopped because the sidebar closed.', 'browser-control');
   };
-  const requestModelCatalog = panel => {
+  const requestModelCatalog = (panel, warm = null) => {
     if (panel.closed) return;
-    const native = connectNative(panel);
+    const native = connectNative(panel, warm?.native);
+    if (warm) {
+      // Its first catalog request is finished or still on its way.
+      if (warm.status) post(panel.port, warm.status);
+      return;
+    }
     try { native.postMessage({ type: 'init' }); }
     catch (error) { releaseNative(panel); throw error; }
   };
@@ -686,6 +815,11 @@ export function installBackground(api) {
       void (async () => {
         if (!message || typeof message !== 'object' || panel.closed) return;
         if (message.type === 'init') {
+          const held = [...panels].some(other => other !== panel && !other.closed && other.conversation === message.conversation && other.tabId !== panel.tabId);
+          if (validChatId(message.conversation) && !held) {
+            panel.conversation = message.conversation;
+            panel.chatEpoch = typeof message.epoch === 'string' ? message.epoch : undefined;
+          }
           panel.ready = (async () => {
             if (fullChat) {
               panel.windowId = sender.tab.windowId;
@@ -700,7 +834,7 @@ export function installBackground(api) {
             if (!panel.closed) await restoreTurn(panel);
           })();
           await panel.ready;
-          requestModelCatalog(panel);
+          requestModelCatalog(panel, fullChat && !panel.native && !panel.closed ? askWarmer.take(panel.tabId) : null);
         } else if (message.type === 'refresh-models') {
           await panel.ready;
           if (Number.isInteger(panel.windowId)) requestModelCatalog(panel);
@@ -719,7 +853,12 @@ export function installBackground(api) {
           if (run?.reader === panel && (!message.id || run.id === message.id)) await cancel(run);
         } else if (message.type === 'turn-saved' || message.type === 'clear-turn') {
           await panel.ready;
-          await writeReply(runKey(panel), async key => {
+          const previous = runKey(panel);
+          if (message.type === 'clear-turn' && validChatId(message.conversation)) {
+            panel.conversation = message.conversation;
+            panel.chatEpoch = typeof message.epoch === 'string' ? message.epoch : undefined;
+          }
+          await writeReply(previous, async key => {
             if (message.type === 'clear-turn' || (await api.storage.session.get(key))[key]?.id === message.id) await api.storage.session.remove(key);
           });
         } else if (message.type === 'context') {
@@ -783,9 +922,21 @@ export function installBackground(api) {
     tools.grants.delete(tabId);
     const run = controlRun();
     if (run?.tab?.id === tabId) void cancel(run, 'Browser control stopped because the tab closed.');
+    askWarmer.tabClosed(tabId);
+    // Closing a tab ends every question it asked, unless another tab is reading the reply.
+    for (const run of [...runs.values()]) {
+      if (!run.panel.fullChat || (run.reader ?? run.panel).tabId !== tabId) continue;
+      void cancel(run);
+      void writeReply(run.key, storageKey => api.storage.session.remove(storageKey));
+    }
     const key = fullChatKey(tabId);
-    void cancel(runs.get(key));
-    void writeReply(key, storageKey => api.storage.session.remove([storageKey, FULL_CHAT_PREFIX + tabId]));
+    void writeReply(key, async storageKey => {
+      const bindingKey = CHAT_ID_PREFIX + 'tab-' + tabId;
+      const id = (await api.storage.session.get(bindingKey).catch(() => ({})))?.[bindingKey];
+      const reading = [...panels].some(panel => !panel.closed && panel.tabId !== tabId && panel.conversation === id);
+      await api.storage.session.remove([storageKey, FULL_CHAT_PREFIX + tabId, bindingKey,
+        ...(validChatId(id) && !reading ? [replyKey('chat-' + id)] : [])]);
+    });
   });
   api.tabs.onUpdated.addListener((tabId, change, tab) => {
     if (change.url || change.status === 'loading') for (const panel of panels) invalidateResearch(panel, tabId, 'Source navigated or is loading. Select source tabs again.');

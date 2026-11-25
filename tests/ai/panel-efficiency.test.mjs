@@ -8,6 +8,7 @@ import { installPanelAreaEvents } from './fixtures/host-main-port/panel-storage-
 import { detectBrowserTask } from '../../features/ai/extension/browser-task-intent.js';
 import { themeReferenceImages } from '../../features/ai/extension/theme-references.js';
 import { MODEL_KEY, preferredModel } from '../../features/ai/extension/model-catalog.js';
+import * as experiments from '../../features/ai/extension/experiments.js';
 
 const source = fs.readFileSync(new URL('../../features/ai/extension/panel.js', import.meta.url), 'utf8');
 // A current-main negative control: undo only the transcript scan/cache changes.
@@ -65,6 +66,7 @@ function harness(code, initial = [], ids = []) {
   breezerPrivate: { async authorizeCurrentPage() { return true; } },
   };
   const context = vm.createContext({ document, chrome, Date: FixtureDate, crypto: { randomUUID: () => ids[sequence++] || `run-${sequence}` },
+    ...experiments,
     detectBrowserTask,
     themeReferenceImages,
     MODEL_KEY, preferredModel, listenForNewTabAsk() {},

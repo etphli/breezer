@@ -180,6 +180,7 @@ def check_overlay(tree, originals):
             "Native settings category navigation changed")
 
     check_peek(tree, added, idl, api)
+    check_omnibox(added, idl)
     check_numbered_tabs(tree, host)
 
     fingerprint = workspace.fingerprint()
@@ -334,6 +335,16 @@ def check_peek(tree, added, idl, api):
             "chrome::NewSplitTab(browser, split_tabs::SplitTabLayout::kSideBySide" in api,
             "Split View must pair, show the chooser and exit through Chromium's native model")
 
+    require("static void showExtensionsMenu(" in idl,
+            "Private API IDL does not declare showExtensionsMenu")
+    menu = added[
+        "chrome/browser/extensions/api/breezer_private/extensions_menu_api.cc"
+    ].read_text().split("RunFunction()", 1)[1]
+    require("!user_gesture()" in menu and "GetCallerBrowser()" in menu and
+            'source_url().GetPath() != "/workspace.html"' in menu and
+            menu.index("kShowExtensionsButton") < menu.index("ToggleExtensionsMenu()"),
+            "showExtensionsMenu must require a gesture from the calling sidebar")
+
     pdf_context = added[
         "chrome/browser/extensions/api/breezer_private/pdf_context_api.cc"
     ].read_text()
@@ -357,6 +368,34 @@ def check_peek(tree, added, idl, api):
     require("base::RetainedRef(this)" in timer_start and
             "keep_alive(this)" in on_copied.split("timeout_.Stop();", 1)[0],
             "PDF capture must retain the request through the timeout and through cancellation of that timer")
+
+
+def check_omnibox(added, idl):
+    directory = "chrome/browser/extensions/api/breezer_private/"
+    source = added[directory + "omnibox_api.cc"].read_text()
+    require('"omnibox_api.cc"' in added[directory + "BUILD.gn"].read_text(),
+            "The New Tab address API must be compiled")
+    for function in ("queryOmnibox", "nextOmniboxResult", "openOmnibox"):
+        require(f"static void {function}(" in idl,
+                f"Private API IDL does not declare {function}")
+        body = source.split(f"BreezerPrivate{function[0].upper() + function[1:]}Function::RunFunction()",
+                            1)[1].split("\n}", 1)[0]
+        require("GetSession(*this, source_url())" in body,
+                f"{function} must be limited to a Breezer New Tab")
+    require("AutocompleteClassifier::DefaultOmniboxProviders()" in source and
+            "std::make_unique<ChromeAutocompleteProviderClient>(" in source and
+            "INSTANT_NTP_WITH_OMNIBOX_AS_STARTING_FOCUS" in source,
+            "New Tab suggestions must come from the address bar's own providers and context")
+    session = source.split("OmniboxSession* GetSession(", 1)[1].split("\n}", 1)[0]
+    require("IsInPrimaryMainFrame()" in session and "kNewTabPath" in session,
+            "New Tab suggestions must be limited to the page itself")
+    opened = source.split("BreezerPrivateOpenOmniboxFunction::RunFunction()", 1)[1]
+    require("params.source_contents = contents;" in opened and
+            "GetActiveWebContents() != contents" in opened and
+            "!user_gesture()" in opened and
+            'request.FindString("url")' not in source and
+            "SchemeIs(url::kJavaScriptScheme)" in source,
+            "New Tab must open only native matches, in its own tab, and never run a script address")
 
 
 def main():

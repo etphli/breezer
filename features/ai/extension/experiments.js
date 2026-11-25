@@ -3,9 +3,10 @@
 //   chrome.storage.local['breezerExperiments'] = {
 //     version: 1,
 //     glass: false,             // glossy glass surfaces; native window material where the bridge offers it
+//     glassOpacity: 66,         // opacity of the glossy page surfaces, in percent
 //     sidebarSearch: false,     // search/address button in the sidebar (workspace-chrome.js)
-//     newTabComposer: false,    // New Tab search and Ask composer
-//     newTabRecentChats: false, // up to three open-window conversations under the composer
+//     newTabComposer: false,    // compact New Tab with Ask
+//     newTabRecentChats: false, // open and saved conversations under the composer
 //     newTabShortcuts: false,   // compact frequent-site icons under the composer
 //     personality: 'off',       // browser-wide assistant reply style, see PERSONALITIES
 //     spaceDock: false,         // alternate space dock (workspace)
@@ -28,6 +29,11 @@ export const CONVERSATION_PREFIX = 'breezer-conversation-';
 export const FULL_CHAT_PATH = 'panel.html?view=chat';
 export const FULL_CHAT_PREFIX = 'breezer-full-conversation-tab-';
 export const MAX_RECENT_CHATS = 3;
+// Which saved chat a tab or sidebar window is showing: '...tab-<id>' or '...window-<id>'.
+export const CHAT_ID_PREFIX = 'breezer-chat-id-';
+export const PENDING_REPLY_PREFIX = 'breezer-pending-reply-';
+// New Tab leaves the chosen saved chat here for the chat page it opens in the same tab.
+export const openChatKey = (tabId) => `breezer-open-chat-${tabId}`;
 
 const FLAGS = ['glass', 'sidebarSearch', 'newTabComposer', 'newTabRecentChats', 'newTabShortcuts', 'spaceDock'];
 
@@ -62,13 +68,17 @@ export const PERSONALITIES = Object.freeze({
 export const DEFAULT_EXPERIMENTS = Object.freeze({
   version: EXPERIMENTS_VERSION,
   ...Object.fromEntries(FLAGS.map((flag) => [flag, false])),
+  glassOpacity: 66,
   personality: 'off',
 });
+
+const validOpacity = value => Number.isInteger(value) && value >= 0 && value <= 100;
 
 export function normalizeExperiments(raw) {
   const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
   const value = { ...DEFAULT_EXPERIMENTS };
   for (const flag of FLAGS) value[flag] = source[flag] === true;
+  if (validOpacity(source.glassOpacity)) value.glassOpacity = source.glassOpacity;
   value.personality = Object.hasOwn(PERSONALITIES, source.personality) ? source.personality : 'off';
   return value;
 }
@@ -79,6 +89,9 @@ export function validateExperimentsPatch(patch) {
   for (const [key, value] of Object.entries(patch)) {
     if (FLAGS.includes(key)) {
       if (typeof value !== 'boolean') throw new Error(`${key} must be on or off.`);
+      clean[key] = value;
+    } else if (key === 'glassOpacity') {
+      if (!validOpacity(value)) throw new Error('Choose a glass opacity between 0 and 100.');
       clean[key] = value;
     } else if (key === 'personality') {
       if (!Object.hasOwn(PERSONALITIES, value)) throw new Error('Choose a listed personality.');
@@ -124,25 +137,27 @@ export function watchExperiments(api, onChange) {
   return () => events.removeListener(listener);
 }
 
-// The worker mirrors the local toggle even when the sidebar isn't open. Read
+// The worker mirrors the local toggles even when the sidebar isn't open. Read
 // it again when a queued update runs so an older toggle can't win a race.
-export function installSidebarAddressSearch(api) {
+export function installNativeAddressExperiments(api) {
   if (typeof api?.breezerPrivate?.setAppearance !== 'function') return;
   let pending = Promise.resolve();
   const update = () => {
     pending = pending.then(async () => {
       const values = await api.storage.local.get(EXPERIMENTS_KEY);
-      const sidebarAddressSearch = normalizeExperiments(values[EXPERIMENTS_KEY]).sidebarSearch;
+      const { sidebarSearch, newTabComposer } = normalizeExperiments(values[EXPERIMENTS_KEY]);
       const appearance = await readAppearance(api);
+      const patch = {};
       if (typeof appearance?.sidebarAddressSearch === 'boolean' &&
-          appearance.sidebarAddressSearch !== sidebarAddressSearch) {
-        await setNativeExperiment(api, { sidebarAddressSearch });
-      }
+          appearance.sidebarAddressSearch !== sidebarSearch) patch.sidebarAddressSearch = sidebarSearch;
+      if (typeof appearance?.newTabComposer === 'boolean' &&
+          appearance.newTabComposer !== newTabComposer) patch.newTabComposer = newTabComposer;
+      if (Object.keys(patch).length) await setNativeExperiment(api, patch);
     }).catch(() => {});
     return pending;
   };
   watchExperiments(api, (next, previous) => {
-    if (next.sidebarSearch !== previous.sidebarSearch) void update();
+    if (next.sidebarSearch !== previous.sidebarSearch || next.newTabComposer !== previous.newTabComposer) void update();
   });
   return update();
 }
@@ -254,12 +269,14 @@ const oneLine = (value, limit) => (typeof value === 'string' ? value.replace(/\s
 
 // Sidebar conversations belong to their window. Full-page conversations
 // belong to the open chat tab, including when it moves to another window.
-export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_RECENT_CHATS, chatUrl) {
+// Saved chats that are not open anywhere follow from the archive.
+export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_RECENT_CHATS, chatUrl, archived = []) {
   const open = new Map((Array.isArray(windows) ? windows : [])
     .filter((win) => Number.isInteger(win?.id) && win.incognito !== true && (win.type ?? 'normal') === 'normal')
     .map((win) => [win.id, win]));
   const chats = [];
   const chatTabs = new Map();
+  const openIds = new Set();
   for (const win of open.values()) {
     for (const tab of win.tabs ?? []) {
       if (Number.isInteger(tab.id) && !tab.incognito && chatUrl && tab.url === chatUrl &&
@@ -272,29 +289,238 @@ export function pickRecentChats(saved, windows, currentWindowId, limit = MAX_REC
     const tabId = fullChat ? Number(key.slice(FULL_CHAT_PREFIX.length)) : undefined;
     const windowId = fullChat ? chatTabs.get(tabId) : Number(key.slice(CONVERSATION_PREFIX.length));
     if (!open.has(windowId)) continue;
-    const turns = messages.filter((item) => ['user', 'assistant'].includes(item?.role) && typeof item.text === 'string');
-    const first = turns.find((item) => item.role === 'user' && oneLine(item.text, 1));
-    if (!first) continue;
-    const last = [...turns].reverse().find((item) => item.role === 'assistant' && oneLine(item.text, 1));
+    const summary = summarizeChat(messages);
+    if (!summary) continue;
+    openIds.add(saved[`${CHAT_ID_PREFIX}${fullChat ? `tab-${tabId}` : `window-${windowId}`}`]);
     chats.push({
       windowId,
       ...(fullChat ? { tabId } : {}),
-      title: oneLine(first.text, 90),
-      preview: last ? oneLine(last.text, 140) : '',
-      messages: turns.length,
+      ...summary,
       current: windowId === currentWindowId,
-      lastActivity: Math.max(0, ...turns.slice(-60).map(item => Number.isSafeInteger(item.lastActivity) ? item.lastActivity : 0)),
     });
   }
-  chats.sort((a, b) => b.lastActivity - a.lastActivity || Number(b.current) - Number(a.current) || b.windowId - a.windowId);
+  for (const { id, title, preview, messages, lastActivity } of archived) {
+    if (!openIds.has(id)) chats.push({ id, title, preview, messages, current: false, lastActivity });
+  }
+  chats.sort((a, b) => b.lastActivity - a.lastActivity || Number(b.current) - Number(a.current) || (b.windowId ?? 0) - (a.windowId ?? 0));
   return chats.slice(0, limit);
 }
 
 export async function recentChats(api = globalThis.chrome, currentWindowId, limit = MAX_RECENT_CHATS) {
   const session = api?.storage?.session;
-  if (typeof session?.get !== 'function' || typeof api?.windows?.getAll !== 'function') return [];
+  const archived = await listChats(api).catch(() => []);
+  if (typeof session?.get !== 'function' || typeof api?.windows?.getAll !== 'function') return pickRecentChats({}, [], currentWindowId, limit, undefined, archived);
   const [saved, windows] = await Promise.all([session.get(null), api.windows.getAll({ populate: true })]);
-  return pickRecentChats(saved, windows, currentWindowId, limit, api.runtime?.getURL?.(FULL_CHAT_PATH));
+  return pickRecentChats(saved, windows, currentWindowId, limit, api.runtime?.getURL?.(FULL_CHAT_PATH), archived);
+}
+
+// ------------------------------------------------------------------ saved chats
+// Transcripts stay in this profile's extension storage for seven days after the
+// last message. They are never written from a private window.
+//
+//   chrome.storage.local['breezerChats']     { version, epoch, chats: [summary] }
+//   chrome.storage.local['breezerChat.<id>'] { version, id, createdAt, lastActivity, messages }
+//
+// Clearing replaces the epoch. A save that began before it carries the old epoch
+// and is refused, so a page or reply still finishing cannot bring a chat back.
+
+export const CHAT_INDEX_KEY = 'breezerChats';
+export const CHAT_RECORD_PREFIX = 'breezerChat.';
+export const CHAT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+export const MAX_SAVED_CHATS = 100;
+export const MAX_CHAT_BYTES = 1_500_000;
+// Leaves about half of the extension's 10 MB for everything else it stores.
+export const MAX_SAVED_BYTES = 5_000_000;
+const MAX_CHAT_MESSAGES = 60;
+const CHAT_PRUNE_ALARM = 'breezer-saved-chats';
+
+const recordKey = (id) => CHAT_RECORD_PREFIX + id;
+const byteLength = (value) => new TextEncoder().encode(JSON.stringify(value)).byteLength;
+export const validChatId = (value) => typeof value === 'string' && /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(value);
+const isTurn = (item) => ['user', 'assistant'].includes(item?.role) && typeof item.text === 'string';
+
+function summarizeChat(messages) {
+  const turns = messages.filter(isTurn);
+  const first = turns.find((item) => item.role === 'user' && oneLine(item.text, 1));
+  if (!first) return null;
+  const last = [...turns].reverse().find((item) => item.role === 'assistant' && oneLine(item.text, 1));
+  return {
+    title: oneLine(first.text, 90),
+    preview: last ? oneLine(last.text, 140) : '',
+    messages: turns.length,
+    lastActivity: Math.max(0, ...turns.slice(-MAX_CHAT_MESSAGES).map((item) => Number.isSafeInteger(item.lastActivity) ? item.lastActivity : 0)),
+  };
+}
+
+// Pages and the worker share one lock, so no writer can drop another's index entry.
+let chatWrites = Promise.resolve();
+function withSavedChats(work) {
+  const locks = globalThis.navigator?.locks;
+  if (locks) return locks.request(CHAT_INDEX_KEY, work);
+  const result = chatWrites.then(work);
+  chatWrites = result.catch(() => {});
+  return result;
+}
+
+async function readChatIndex(api) {
+  const raw = (await api.storage.local.get(CHAT_INDEX_KEY))?.[CHAT_INDEX_KEY];
+  return {
+    version: 1,
+    epoch: typeof raw?.epoch === 'string' ? raw.epoch : '',
+    chats: (Array.isArray(raw?.chats) ? raw.chats : []).filter((chat) => validChatId(chat?.id) && typeof chat.title === 'string'
+      && Number.isSafeInteger(chat.lastActivity) && Number.isSafeInteger(chat.bytes)),
+  };
+}
+
+const expiredChat = (chat, now) => now - chat.lastActivity >= CHAT_RETENTION_MS;
+const newestFirst = (a, b) => b.lastActivity - a.lastActivity;
+
+export async function readChatEpoch(api) {
+  return (await readChatIndex(api)).epoch;
+}
+
+export async function listChats(api, now = Date.now()) {
+  return (await readChatIndex(api)).chats.filter((chat) => !expiredChat(chat, now)).sort(newestFirst);
+}
+
+export async function loadChat(api, id, now = Date.now()) {
+  if (!validChatId(id)) return null;
+  const chat = (await readChatIndex(api)).chats.find((item) => item.id === id);
+  if (!chat || expiredChat(chat, now)) return null;
+  const record = (await api.storage.local.get(recordKey(id)))?.[recordKey(id)];
+  return Array.isArray(record?.messages) ? { ...record, messages: record.messages.filter(isTurn) } : null;
+}
+
+// Text is kept ahead of files: older images go first, then older attachments, then older turns.
+function compactMessages(messages) {
+  const kept = messages.filter(isTurn).slice(-MAX_CHAT_MESSAGES).map((message) => ({ ...message }));
+  const sizes = kept.map(byteLength);
+  let total = sizes.reduce((sum, size) => sum + size, 0);
+  const strip = (fields) => {
+    for (let index = 0; index < kept.length && total > MAX_CHAT_BYTES; index++) {
+      if (!fields.some((field) => kept[index][field])) continue;
+      for (const field of fields) delete kept[index][field];
+      total -= sizes[index];
+      sizes[index] = byteLength(kept[index]);
+      total += sizes[index];
+    }
+  };
+  strip(['generatedImage']);
+  strip(['attachments', 'themeProposal']);
+  while (kept.length > 1 && total > MAX_CHAT_BYTES) { total -= sizes.shift(); kept.shift(); }
+  return kept;
+}
+
+async function storeChat(api, index, { id, messages, createdAt }, now) {
+  const kept = compactMessages(messages);
+  const summary = summarizeChat(kept);
+  if (!summary) return false;
+  const lastActivity = Math.min(now, summary.lastActivity || now);
+  const record = { version: 1, id, createdAt, lastActivity, messages: kept };
+  const chat = { id, ...summary, lastActivity, bytes: byteLength(record) };
+  if (expiredChat(chat, now) || chat.bytes > MAX_SAVED_BYTES) return false;
+  const write = async (budget) => {
+    const others = index.chats.filter((item) => item.id !== id).sort(newestFirst);
+    const chats = [chat];
+    const dropped = [];
+    let total = chat.bytes;
+    for (const item of others) {
+      if (expiredChat(item, now) || chats.length >= MAX_SAVED_CHATS || total + item.bytes > budget) { dropped.push(recordKey(item.id)); continue; }
+      total += item.bytes;
+      chats.push(item);
+    }
+    if (dropped.length) await api.storage.local.remove(dropped);
+    await api.storage.local.set({ [recordKey(id)]: record, [CHAT_INDEX_KEY]: { ...index, chats } });
+  };
+  try { await write(MAX_SAVED_BYTES); }
+  catch (error) {
+    // Other features share this quota. Make room once by dropping the oldest chats.
+    if (!/quota/i.test(error?.message)) throw error;
+    await write(Math.max(chat.bytes, MAX_SAVED_BYTES / 4));
+  }
+  return true;
+}
+
+const canSaveChats = (api, id, epoch) => validChatId(id) && typeof epoch === 'string'
+  && api?.extension?.inIncognitoContext !== true && typeof api?.storage?.local?.set === 'function';
+
+// Replaces a chat's transcript with the one its page is showing.
+export function saveChat(api, { id, epoch, messages }, now = Date.now()) {
+  if (!canSaveChats(api, id, epoch) || !Array.isArray(messages)) return Promise.resolve(false);
+  const snapshot = structuredClone(messages);
+  return withSavedChats(async () => {
+    const index = await readChatIndex(api);
+    if (index.epoch !== epoch) return false;
+    const existing = index.chats.some((chat) => chat.id === id) ? (await api.storage.local.get(recordKey(id)))?.[recordKey(id)] : null;
+    return storeChat(api, index, { id, messages: snapshot, createdAt: existing?.createdAt ?? now }, now);
+  });
+}
+
+// Adds a finished turn when its page may already be gone. The page's own copy wins.
+export function saveChatTurn(api, { id, epoch, user, reply }, now = Date.now()) {
+  if (!canSaveChats(api, id, epoch) || !isTurn(user) || !isTurn(reply)) return Promise.resolve(false);
+  return withSavedChats(async () => {
+    const index = await readChatIndex(api);
+    if (index.epoch !== epoch) return false;
+    const existing = index.chats.some((chat) => chat.id === id) ? (await api.storage.local.get(recordKey(id)))?.[recordKey(id)] : null;
+    const messages = (existing?.messages ?? []).filter(isTurn);
+    if (messages.some((item) => item.id === reply.id)) return false;
+    const at = messages.findIndex((item) => item.id === user.id);
+    const turn = [...(at < 0 ? [user] : []), { ...reply, lastActivity: now }];
+    messages.splice(at < 0 ? messages.length : at + 1, 0, ...turn);
+    return storeChat(api, index, { id, messages, createdAt: existing?.createdAt ?? now }, now);
+  });
+}
+
+async function savedChatKeys(api) {
+  const local = api.storage.local;
+  const keys = typeof local.getKeys === 'function' ? await local.getKeys() : Object.keys(await local.get(null) ?? {});
+  return keys.filter((key) => key.startsWith(CHAT_RECORD_PREFIX));
+}
+
+// Removes expired chats and any transcript the index no longer lists.
+export function pruneChats(api, now = Date.now()) {
+  return withSavedChats(async () => {
+    const index = await readChatIndex(api);
+    const keys = await savedChatKeys(api);
+    // A clock that was set forward must not keep a chat past its seven days.
+    const chats = index.chats.filter((chat) => !expiredChat(chat, now) && keys.includes(recordKey(chat.id)))
+      .map((chat) => chat.lastActivity > now ? { ...chat, lastActivity: now } : chat);
+    const keep = new Set(chats.map((chat) => recordKey(chat.id)));
+    const removed = keys.filter((key) => !keep.has(key));
+    if (removed.length) await api.storage.local.remove(removed);
+    if (JSON.stringify(chats) !== JSON.stringify(index.chats)) await api.storage.local.set({ [CHAT_INDEX_KEY]: { ...index, chats } });
+    return removed.length;
+  });
+}
+
+// Clears saved and open chats. Open chat pages see the new epoch and start over.
+export function clearChats(api) {
+  return withSavedChats(async () => {
+    await api.storage.local.set({ [CHAT_INDEX_KEY]: { version: 1, epoch: crypto.randomUUID(), chats: [] } });
+    const records = await savedChatKeys(api);
+    if (records.length) await api.storage.local.remove(records);
+    const session = api.storage.session;
+    if (typeof session?.get !== 'function' || typeof session.remove !== 'function') return;
+    const prefixes = [FULL_CHAT_PREFIX, CONVERSATION_PREFIX, CHAT_ID_PREFIX, PENDING_REPLY_PREFIX];
+    const keys = Object.keys(await session.get(null) ?? {}).filter((key) => prefixes.some((prefix) => key.startsWith(prefix)));
+    if (keys.length) await session.remove(keys);
+  });
+}
+
+// The worker prunes when it starts and every few hours while the browser stays open.
+export function installSavedChats(api, onCleared = () => {}) {
+  if (api?.extension?.inIncognitoContext === true || typeof api?.storage?.local?.get !== 'function') return;
+  const prune = () => { void pruneChats(api).catch(() => {}); };
+  prune();
+  if (api.alarms?.onAlarm?.addListener) {
+    api.alarms.onAlarm.addListener((alarm) => { if (alarm?.name === CHAT_PRUNE_ALARM) prune(); });
+    void Promise.resolve(api.alarms.create?.(CHAT_PRUNE_ALARM, { periodInMinutes: 360 })).catch(() => {});
+  }
+  api.storage.local.onChanged?.addListener?.((changes) => {
+    const change = changes?.[CHAT_INDEX_KEY];
+    if (change && typeof change.newValue?.epoch === 'string' && change.newValue.epoch !== (change.oldValue?.epoch ?? '')) onCleared(change.newValue.epoch);
+  });
 }
 
 // ------------------------------------------------------------------ settings
@@ -316,7 +542,7 @@ const ROWS = [
           ? 'Translucent window and New Tab surfaces. Fullscreen and Reduce transparency stay solid.'
           : 'Translucent New Tab surfaces. This build keeps the window frame solid, as do fullscreen and Reduce transparency.') },
       { flag: 'sidebarSearch', label: 'Address search in the sidebar', terms: 'address bar url search omnibox sidebar location',
-        description: () => 'Open the address bar from the sidebar. In frameless sidebar layout, the top bar appears when needed.' },
+        description: () => 'Shows the page address and your extensions in the sidebar. In frameless mode, Layout controls the top bar.' },
       { flag: 'spaceDock', label: 'Space dock', terms: 'spaces dock switcher bottom sidebar icons',
         description: () => 'Shows your spaces as a row of icons at the foot of the sidebar.' },
     ],
@@ -325,9 +551,9 @@ const ROWS = [
     group: 'New tab',
     rows: [
       { flag: 'newTabComposer', label: 'Search and ask box', terms: 'new tab composer search ask ai minimal',
-        description: () => 'Replaces the shortcut grid with one box: search the web, open an address or ask Breezer AI.' },
+        description: () => 'Adds Ask Breezer to search and uses a compact New Tab layout.' },
       { flag: 'newTabRecentChats', label: 'Recent conversations', parent: 'newTabComposer', terms: 'chats conversations history assistant recent',
-        description: () => 'Lists up to three conversations from open windows under the box. They stay on this device.' },
+        description: () => 'Lists your chats under the box. They stay on this device for seven days after the last message.' },
       { flag: 'newTabShortcuts', label: 'Site shortcuts', parent: 'newTabComposer', terms: 'shortcuts sites favorites icons frequent',
         description: () => 'Shows your frequent sites as small icons under the box.' },
     ],
@@ -339,6 +565,43 @@ function el(tag, className, attrs = {}) {
   if (className) node.className = className;
   for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
   return node;
+}
+
+// A button that asks once before it clears. Moving away cancels it.
+export function wireClearChats(button, api, { onCleared = () => {}, onError = () => {} } = {}) {
+  const label = button.textContent;
+  const reset = () => { delete button.dataset.confirm; button.textContent = label; };
+  button.addEventListener('blur', reset);
+  button.addEventListener('click', async () => {
+    if (button.dataset.confirm !== 'true') {
+      button.dataset.confirm = 'true';
+      button.textContent = 'Clear all chats?';
+      return;
+    }
+    reset();
+    button.disabled = true;
+    try { await clearChats(api); onCleared(); }
+    catch (error) { onError(error); }
+    finally { button.disabled = false; }
+  });
+}
+
+function clearChatsRow(api) {
+  const row = el('div', 'setting-row', { 'data-search-terms': 'clear delete saved chats conversations history', 'data-experiment-row': 'savedChats' });
+  const text = el('span', 'setting-label');
+  const name = el('span');
+  name.textContent = 'Saved chats';
+  const help = el('small', '', { role: 'status' });
+  help.textContent = 'Clears saved chats and any that are open.';
+  text.append(name, help);
+  const button = el('button', 'button', { type: 'button', id: 'clear-saved-chats' });
+  button.textContent = 'Clear';
+  wireClearChats(button, api, {
+    onCleared: () => { help.textContent = 'Chats cleared.'; },
+    onError: () => { help.textContent = 'Couldn’t clear your chats. Try again.'; },
+  });
+  row.append(text, button);
+  return row;
 }
 
 export async function mountExperimentSettings({ container, api }) {
@@ -353,6 +616,17 @@ export async function mountExperimentSettings({ container, api }) {
   const inputs = new Map();
   const error = el('p', 'field-error', { id: 'experiments-error', role: 'alert' });
   error.hidden = true;
+  const opacityRow = el('div', 'setting-row experiment-child', { 'data-search-terms': 'glass opacity transparency translucent' });
+  const opacityLabel = el('label', 'setting-label', { for: 'experiment-glass-opacity' });
+  opacityLabel.textContent = 'Glass opacity';
+  const opacityHelp = el('small', '', { id: 'glass-opacity-help' });
+  opacityHelp.textContent = 'Adjusts glossy surfaces on New Tab and the sidebar.';
+  opacityLabel.append(opacityHelp);
+  const opacityControls = el('span', 'range-control');
+  const opacity = el('input', '', { id: 'experiment-glass-opacity', type: 'range', min: '0', max: '100', 'aria-describedby': opacityHelp.id });
+  const opacityValue = el('output', '', { for: opacity.id });
+  opacityControls.append(opacity, opacityValue);
+  opacityRow.append(opacityLabel, opacityControls);
 
   for (const { group, rows } of ROWS) {
     const label = el('h3', 'experiment-group-title');
@@ -373,6 +647,8 @@ export async function mountExperimentSettings({ container, api }) {
       inputs.set(row.flag, input);
       node.append(text, input);
       list.append(node);
+      if (row.flag === 'newTabShortcuts') list.append(clearChatsRow(api));
+      if (row.flag === 'glass') list.append(opacityRow);
     }
     section.append(label, list);
   }
@@ -403,6 +679,10 @@ export async function mountExperimentSettings({ container, api }) {
   container.replaceChildren(section);
 
   const render = () => {
+    opacity.value = value.glassOpacity;
+    opacityValue.textContent = `${value.glassOpacity}%`;
+    opacity.disabled = !value.glass || opacity.dataset.saving === 'true';
+    opacityRow.classList.toggle('muted-row', !value.glass);
     for (const [flag, input] of inputs) {
       input.checked = value[flag];
       const parent = input.dataset.parent;
@@ -442,6 +722,8 @@ export async function mountExperimentSettings({ container, api }) {
   };
 
   for (const [flag, input] of inputs) input.addEventListener('change', () => void save({ [flag]: input.checked }, input));
+  opacity.addEventListener('input', () => { opacityValue.textContent = `${opacity.value}%`; });
+  opacity.addEventListener('change', () => void save({ glassOpacity: opacity.valueAsNumber }, opacity));
   const choose = (id) => { if (id !== value.personality) void save({ personality: id }); };
   choices.addEventListener('click', (event) => {
     const choice = event.target.closest('[role="radio"]');
@@ -460,7 +742,7 @@ export async function mountExperimentSettings({ container, api }) {
   if (!HAS_NATIVE_HELPER) {
     // Builds without the local assistant have nothing for these to change.
     personalityTitle.remove(); personalityGroup.remove();
-    section.querySelector('[data-experiment-row="newTabRecentChats"]')?.remove();
+    for (const row of ['newTabRecentChats', 'savedChats']) section.querySelector(`[data-experiment-row="${row}"]`)?.remove();
     inputs.delete('newTabRecentChats');
   }
   const stop = watchExperiments(api, (next) => { value = next; render(); });

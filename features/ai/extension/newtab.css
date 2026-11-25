@@ -97,6 +97,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 .sky {
   --sky-top: clamp(36px, 5vh, 62px);
+  --search-height: 78px;
   --date-size: clamp(23px, 2.6vw, 32px);
   --date-gap: 18px;
   --date-lines: 1;
@@ -108,7 +109,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Keep the sheet below the tallest shortcut layout without moving the tiles. */
 .sky:has(+ .sheet:not([hidden])) {
-  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--shortcuts-height));
+  min-height: calc(var(--sky-top) + var(--date-size) * 1.1 * var(--date-lines) + var(--date-gap) + var(--search-height) + var(--shortcuts-height));
 }
 
 .today {
@@ -559,6 +560,14 @@ a.item-title:hover { text-decoration-color: currentColor; }
 
 .composer { width: min(620px, 100%); margin: 0 auto; text-align: left; }
 
+:root:not([data-composer="on"]) .composer-box {
+  display: flex;
+  align-items: center;
+  padding: 8px 9px 8px 16px;
+}
+
+:root:not([data-composer="on"]) .composer-input { flex: 1; min-width: 0; }
+
 .composer-box {
   --mode-accent: var(--ink);
   display: grid;
@@ -675,6 +684,43 @@ a.item-title:hover { text-decoration-color: currentColor; }
 .composer-status[data-state="error"] { color: var(--danger); }
 .composer-status:empty { visibility: hidden; }
 
+/* Address-bar suggestions open over the page, so nothing below moves. */
+.composer-box { position: relative; }
+.sky:has(.composer-suggestions:not([hidden])) { position: relative; z-index: 2; }
+.composer-suggestions {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: -1px;
+  right: -1px;
+  z-index: 20;
+  max-height: min(340px, 46vh);
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  list-style: none;
+  text-align: left;
+  color: var(--ink);
+  /* Opaque even where a look makes --raised translucent. */
+  background: linear-gradient(var(--raised), var(--raised)), var(--canvas);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.1), 0 18px 40px -18px rgb(0 0 0 / 0.4);
+}
+.suggestion { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 6px 10px; border-radius: 9px; font-size: 14px; line-height: 20px; cursor: pointer; }
+.suggestion:hover { background: var(--hover); }
+.suggestion[aria-selected="true"] { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.suggestion-icon { display: grid; place-items: center; flex: none; width: 16px; height: 16px; color: var(--muted); }
+.suggestion-icon svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; }
+.suggestion-icon img { width: 16px; height: 16px; border-radius: 4px; }
+.suggestion-title, .suggestion-detail { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.suggestion-title { flex: 0 1 auto; }
+.suggestion-detail { flex: 1 2 0; color: var(--muted); font-size: 13px; }
+.composer-suggestion-count { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (forced-colors: active) {
+  .suggestion[aria-selected="true"] { color: HighlightText; background: Highlight; forced-color-adjust: none; }
+  .suggestion[aria-selected="true"] :is(.suggestion-icon, .suggestion-detail) { color: inherit; }
+}
+
 /* Shortcuts: small, unboxed glyphs under the input. */
 .composer-sites {
   display: flex;
@@ -699,11 +745,29 @@ a.item-title:hover { text-decoration-color: currentColor; }
 .composer-site:hover { color: var(--ink); background: var(--hover); }
 .composer-site:focus-visible { outline-offset: 1px; border-radius: 9px; }
 .composer-site img { width: 18px; height: 18px; border-radius: 4px; }
+/* A 24px target around an 18px disc. Until it shows it lets its neighbour be clicked. */
+.composer-sites li { position: relative; }
+.composer-sites .site-remove { top: -9px; right: -9px; z-index: 1; width: 24px; height: 24px; padding: 0; border: 3px solid transparent; background: var(--raised) padding-box; box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; line-height: 1; pointer-events: none; }
+.composer-sites li:is(:hover, :focus-within) .site-remove { opacity: 1; pointer-events: auto; }
+.composer-sites .site-remove:focus-visible { outline-offset: 0; }
+@media (hover: none) {
+  .composer-sites { gap: 12px; }
+  .composer-sites .site-remove { pointer-events: auto; }
+}
+:root[data-composer="on"] .shortcut-feedback { grid-template-columns: auto auto auto; justify-content: center; }
+:root[data-composer="on"] .shortcut-feedback button { color: var(--muted); }
+:root[data-composer="on"] .shortcut-feedback button:hover { color: var(--ink); }
 
 /* Recent chats: one quiet line each, title then a muted trace of the reply. */
 .recent-chats { width: min(440px, 100%); margin: 0 auto 14px; }
 .recent-chats-title { margin: 0 0 4px; padding-inline: 10px; color: var(--muted); font-size: 12px; font-weight: 500; text-align: left; }
+.recent-chats-head { display: flex; align-items: baseline; gap: 4px; }
+.recent-chats-head .recent-chats-title { flex: 1 1 auto; }
+.recent-chats-action { padding: 3px 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: inherit; font-size: 12px; }
+.recent-chats-action:hover { background: var(--hover); color: var(--ink); }
+.recent-chats-action[data-confirm="true"] { color: var(--danger); }
 .recent-chats-list { margin: 0; padding: 0; list-style: none; }
+.recent-chats-list[data-expanded="true"] { max-height: min(270px, 36vh); overflow-y: auto; }
 .recent-chat {
   display: flex;
   align-items: baseline;
@@ -735,7 +799,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
   background-attachment: fixed;
 }
 :root[data-glass="glass"] :is(.composer-box, .settings-link, .sheet) {
-  background: color-mix(in srgb, var(--raised) 66%, transparent);
+  background: color-mix(in srgb, var(--raised) var(--glass-opacity, 66%), transparent);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
 }
@@ -1019,6 +1083,7 @@ a.item-title:hover { text-decoration-color: currentColor; }
 :root[data-look="sage"] .sheet { border: 1px solid var(--look-pane-edge); }
 /* Gloss: with the Glass experiment the panes catch a light along their top edge. */
 :root[data-look="sage"][data-glass="glass"] :is(.composer-box, .sheet) {
+  background-color: color-mix(in srgb, var(--raised) var(--glass-opacity, 66%), transparent);
   background-image: linear-gradient(180deg, var(--look-gloss), transparent 42%);
   box-shadow: inset 0 1px 0 var(--look-gloss), var(--lift, 0 18px 40px -28px rgb(0 0 0 / .45));
 }
@@ -1153,6 +1218,13 @@ a.item-title:hover { text-decoration-color: currentColor; }
   --lift: inset 0 1px 0 rgb(255 225 232 / .05), 0 0 0 1px rgb(14 4 8 / .6), 0 30px 60px -30px #0b0306;
 }
 :root[data-look][data-composer="on"] .composer-site:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+
+:root[data-look][data-glass="glass"] .composer-box {
+  background-color: color-mix(in srgb, var(--raised) var(--glass-opacity, 66%), transparent);
+}
+:root[data-look][data-glass="glass"] .sheet {
+  background-color: color-mix(in srgb, var(--sheet) var(--glass-opacity, 66%), transparent);
+}
 
 @media (prefers-reduced-transparency: reduce) {
   :root[data-look="sage"][data-scheme="light"] { --raised: #f2f5f3; --sheet: #f2f5f3; }

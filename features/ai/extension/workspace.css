@@ -112,9 +112,14 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   line-height: calc(var(--fs) * 1.35);
   color: var(--ink);
   background-color: var(--canvas);
+  /* Raised rows lift off the native toolbar color, so they keep its hue. */
+  --raised: color-mix(in oklab, #fff 72%, var(--canvas));
+  overscroll-behavior-x: none;
   user-select: none;
   -webkit-user-select: none;
 }
+
+:root[data-scheme="dark"] .sidebar { --raised: color-mix(in oklab, var(--ink) 11%, var(--canvas)); }
 
 .icon-button {
   width: 28px;
@@ -215,7 +220,9 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   display: flex;
   flex-direction: column;
   scrollbar-width: none;
+  transition: translate 140ms ease-out;
 }
+.space-pane.swiping { transition: none; }
 .space-pane::-webkit-scrollbar { display: none; }
 .space-pane.slide-next { animation: slide-next 190ms cubic-bezier(.2, .8, .2, 1); }
 .space-pane.slide-prev { animation: slide-prev 190ms cubic-bezier(.2, .8, .2, 1); }
@@ -391,6 +398,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .sidebar .folder[data-color][data-color-preview] > .folder-row .folder-glyph { color: var(--folder-color); }
 .sidebar:is([data-folder-colors="icon"], [data-folder-colors="row"]) .folder[data-color] > .folder-row .folder-glyph path,
 .sidebar .folder[data-color][data-color-preview] > .folder-row .folder-glyph path { fill: color-mix(in srgb, var(--folder-color) 24%, transparent); }
+/* Light tint: the whole card takes a trace of the folder's own color. */
+.sidebar[data-folder-colors="icon"] .folder[data-color] { --panel-color: var(--folder-color); --panel-tint: 8%; }
 .sidebar[data-folder-colors="row"] .folder[data-color] { --panel-color: var(--folder-color); --panel-tint: 8%; }
 .sidebar[data-folder-colors="row"] .folder[data-color]:not(.drop-into) > .folder-row { background: color-mix(in srgb, var(--folder-color) var(--folder-tint), transparent); }
 .sidebar[data-folder-colors="row"]:not(.dragging) .folder[data-color]:not(.drop-into) > .folder-row:hover { background: color-mix(in srgb, var(--folder-color) calc(var(--folder-tint) + 6%), transparent); }
@@ -492,14 +501,17 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .space-dot .dot svg { width: 20px; height: 20px; }
 .space-dot .dot[data-icon="space"] svg { fill: currentColor; }
 .space-dot.drop-into { background: color-mix(in srgb, var(--focus) 18%, transparent); box-shadow: inset 0 0 0 1.5px var(--focus); }
+/* One tray that fits its icons, and one fill on the selected space. */
 [data-space-dock="alternate"] .space-dots {
+  flex: 0 1 auto;
+  margin-inline: auto;
   padding: 0 2px;
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--dock-ink) 6%, transparent);
 }
-[data-space-dock="alternate"] .space-dot .dot {
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--dock-ink) 8%, transparent);
+[data-space-dock="alternate"] .space-dot[aria-selected="true"] {
+  background: color-mix(in srgb, var(--dock-ink) 12%, transparent);
+  box-shadow: none;
 }
 
 /* Leave room for four full-size space targets at the 200px sidebar minimum. */

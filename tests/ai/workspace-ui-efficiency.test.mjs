@@ -13,12 +13,12 @@ async function newtab({ duringInitialFilter } = {}) {
   const counters = { storageReads: 0, loads: 0, filters: 0, sites: 0, organato: 0, replacements: 0, limits: [], failLoad: false };
   const node = id => {
     if (!nodes.has(id)) nodes.set(id, { hidden: false, dataset: {}, textContent: '', handlers: {},
-      querySelectorAll: () => [],
+      querySelectorAll: () => [], querySelector: () => null, contains: () => false, style: { setProperty() {} },
       replaceChildren() { counters.replacements++; },
       addEventListener(name, fn) { this.handlers[name] = fn; }, setAttribute() {}, removeAttribute() {}, focus() {} });
     return nodes.get(id);
   };
-  const root = { documentElement: { dataset: {} }, getElementById: node, querySelector: node };
+  const root = { documentElement: { dataset: {}, style: { setProperty() {} } }, getElementById: node, querySelector: node, addEventListener() {}, removeEventListener() {} };
   const api = { storage: { local: { async get() { counters.storageReads++; return {}; }, onChanged: {
     addListener(fn) { storageListeners.add(fn); }, removeListener(fn) { storageListeners.delete(fn); },
   } } } };

@@ -8,7 +8,7 @@ Expand **Model options** inside the model menu to choose the selected model's re
 
 Codex also has a Standard / Fast menu. Standard is the initial setting. Fast uses more of your Codex allowance and is enabled only when the model advertises a Fast service tier and the installed CLI passes a local request check. Account eligibility and capacity are checked by Codex when you send; a failed Fast request offers Standard as the retry option. Claude has no speed menu. Model, reasoning, and speed controls are locked during a reply.
 
-The profile button edits your name and personal context. These are saved in this browser and included with messages to the chosen provider. Conversation history is kept in browser session storage per window. It is not synced or retained after the browser session ends.
+The profile button edits your name and personal context. These are saved in this browser and included with messages to the chosen provider. Full-page chats, including every New Tab question, are saved in this browser for seven days after their last message, so they reopen after their tab closes or Breezer restarts. Sidebar chats are kept for the window's session, and are saved the same way while **Recent conversations** is on. Chats are never synced, and private windows save nothing. **Clear** beside Recent chats, or **Settings → Experiments → Saved chats**, erases saved chats and starts open ones over. Saved chats share a 5 MB limit: large files and images are dropped before text, and the oldest chats are removed first.
 
 Submitted read-only replies keep running if you close the sidebar or switch tabs or windows. Reopen the sidebar in the original window to see the reply or press **Stop** while it is still running. Page questions use the original page. Browser control stops when you close the sidebar or move away from the controlled tab or window.
 
@@ -22,7 +22,7 @@ Use **Attach files**, drop files onto the composer, or paste an image into the m
 
 Text files are limited to 24,000 characters and 96 KB each. Images have a 512 KB attachment limit, and Breezer resizes larger pasted images when possible. The recent conversation plus draft can contain at most 2 MB of attachment content. Oversized, unreadable and unsupported files show an error without discarding accepted files. Files are never silently truncated.
 
-File contents are sent to the selected provider only when you send, independently of the page chip. Recent messages include their attachments for follow-up questions. Sent files remain in per-window browser session history, with the same lifetime as messages. New conversation clears them; Edit and resend restores a failed message's files. Attaching a file grants no filesystem or browser-control access.
+File contents are sent to the selected provider only when you send, independently of the page chip. Recent messages include their attachments for follow-up questions. Sent files are kept with their messages, within the saved-chat size limit. New conversation starts without them; Edit and resend restores a failed message's files. Attaching a file grants no filesystem or browser-control access.
 
 ## Research across selected tabs
 
@@ -149,12 +149,17 @@ Xcode is available; licence acceptance is no longer a compilation blocker. Main 
 Ask either provider to explain a process in a flow diagram, compare figures in a
 chart, mark a known location on a map, or group details into expandable cards.
 Breezer renders these from bounded JSON in the sidebar and in **Open chat in a
-tab**. The chat tab has its own conversation for the current window. The sidebar
+tab**. Each chat tab has its own conversation, and each New Tab question starts a new one. The sidebar
 provides page sharing and browser control.
 
-Diagrams and charts follow the current Breezer appearance. Maps contact
-OpenStreetMap after you choose **Load interactive map** or **Open in
-OpenStreetMap**.
+Diagrams and charts follow the current Breezer appearance. Maps show the
+coordinates supplied by the assistant and contact OpenStreetMap when you choose
+to load them or follow an OpenStreetMap link. A place name can also open a map
+search. Choose **View image** to load a linked HTTPS image from its source.
+
+With Browser control enabled, the assistant can search in the controlled tab.
+When it is off, a **Search the web** button can open a suggested query in your
+default search engine. The query runs when you click it.
 
 With a GPT model selected, use **Tools → Create an image** or ask for an image
 directly. The local helper sends only the image prompt to the OpenAI Images API

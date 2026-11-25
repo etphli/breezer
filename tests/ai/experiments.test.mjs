@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { setImmediate } from 'node:timers/promises';
 import {
   DEFAULT_EXPERIMENTS, EXPERIMENTS_KEY, PERSONALITIES, applyGlassMaterial, applyPersonality, applyPersonalityLook,
-  glassMode, glassSupport, handoffKey, installSidebarAddressSearch, normalizeExperiments, personalityThemeName, pickRecentChats,
+  glassMode, glassSupport, handoffKey, installNativeAddressExperiments, normalizeExperiments, personalityThemeName, pickRecentChats,
   readExperiments, validateExperimentsPatch, watchExperiments, writeExperiments,
 } from '../../features/ai/extension/experiments.js';
 import { toAddress } from '../../features/ai/extension/newtab.js';
@@ -27,8 +27,19 @@ function storage(initial = {}) {
 test('every experiment defaults to off and damaged records read as off', () => {
   assert.deepEqual(normalizeExperiments(undefined), DEFAULT_EXPERIMENTS);
   assert.deepEqual(normalizeExperiments({ glass: 'yes', spaceDock: 1, personality: 'loud', extra: true }), DEFAULT_EXPERIMENTS);
-  for (const [key, value] of Object.entries(DEFAULT_EXPERIMENTS)) if (key !== 'version') assert.ok(value === false || value === 'off', key);
-  assert.deepEqual(Object.keys(DEFAULT_EXPERIMENTS).sort(), ['glass', 'newTabComposer', 'newTabRecentChats', 'newTabShortcuts', 'personality', 'sidebarSearch', 'spaceDock', 'version']);
+  for (const [key, value] of Object.entries(DEFAULT_EXPERIMENTS)) if (key !== 'version' && key !== 'glassOpacity') assert.ok(value === false || value === 'off', key);
+  assert.deepEqual(Object.keys(DEFAULT_EXPERIMENTS).sort(), ['glass', 'glassOpacity', 'newTabComposer', 'newTabRecentChats', 'newTabShortcuts', 'personality', 'sidebarSearch', 'spaceDock', 'version']);
+});
+
+test('glass opacity preserves the old appearance and accepts both endpoints', async () => {
+  const { api } = storage({ [EXPERIMENTS_KEY]: { glass: true } });
+  assert.equal((await readExperiments(api)).glassOpacity, 66);
+  await writeExperiments(api, { glassOpacity: 0 });
+  await writeExperiments(api, { glass: false });
+  assert.equal((await readExperiments(api)).glassOpacity, 0);
+  assert.equal((await writeExperiments(api, { glassOpacity: 100 })).glassOpacity, 100);
+  assert.equal(normalizeExperiments({ glassOpacity: '40' }).glassOpacity, 66);
+  for (const value of [-1, 101, 30.5, '50']) assert.throws(() => validateExperimentsPatch({ glassOpacity: value }), /opacity/i);
 });
 
 test('patches accept only known flags and presets', () => {
@@ -51,9 +62,9 @@ test('writes merge with the stored record and reach watchers', async () => {
   assert.equal((await readExperiments({})).spaceDock, false);
 });
 
-test('sidebar address search reconciles saved profiles and rapid changes without rewriting the pin', async () => {
-  const { api } = storage({ [EXPERIMENTS_KEY]: { sidebarSearch: true } });
-  const appearance = { alwaysShowTopBar: true, sidebarAddressSearch: false };
+test('address experiments reconcile saved profiles and rapid changes without rewriting the pin', async () => {
+  const { api } = storage({ [EXPERIMENTS_KEY]: { sidebarSearch: true, newTabComposer: true } });
+  const appearance = { alwaysShowTopBar: true, sidebarAddressSearch: false, newTabComposer: false };
   const writes = [];
   const writing = Promise.withResolvers();
   const release = Promise.withResolvers();
@@ -66,7 +77,7 @@ test('sidebar address search reconciles saved profiles and rapid changes without
       Object.assign(appearance, patch);
     },
   };
-  const startup = installSidebarAddressSearch(api);
+  const startup = installNativeAddressExperiments(api);
   await writing.promise;
   await writeExperiments(api, { sidebarSearch: false });
   await writeExperiments(api, { sidebarSearch: true });
@@ -74,11 +85,14 @@ test('sidebar address search reconciles saved profiles and rapid changes without
   release.resolve();
   await startup;
   await setImmediate();
-  assert.deepEqual(appearance, { alwaysShowTopBar: true, sidebarAddressSearch: false });
-  assert.deepEqual(writes, [{ sidebarAddressSearch: true }, { sidebarAddressSearch: false }]);
+  assert.deepEqual(appearance, { alwaysShowTopBar: true, sidebarAddressSearch: false, newTabComposer: true });
+  assert.deepEqual(writes, [{ sidebarAddressSearch: true, newTabComposer: true }, { sidebarAddressSearch: false }]);
+  await writeExperiments(api, { newTabComposer: false });
+  await setImmediate();
+  assert.deepEqual(writes.at(-1), { newTabComposer: false });
   await writeExperiments(api, { glass: true });
   await setImmediate();
-  assert.equal(writes.length, 2);
+  assert.equal(writes.length, 3);
 });
 
 test('personality adds one reply-style line to the profile context only when chosen', () => {

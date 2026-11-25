@@ -52,6 +52,7 @@ namespace breezerPrivate {
     boolean alwaysShowSidebar;
     boolean alwaysShowTopBar;
     boolean sidebarAddressSearch;
+    boolean newTabComposer;
   };
 
   dictionary ThemeState {
@@ -78,6 +79,7 @@ namespace breezerPrivate {
     boolean? alwaysShowSidebar;
     boolean? alwaysShowTopBar;
     boolean? sidebarAddressSearch;
+    boolean? newTabComposer;
     NativeDefaultTheme? nativeDefaultTheme;
     ThemeState? expectedThemeState;
   };
@@ -157,6 +159,41 @@ namespace breezerPrivate {
   };
   callback WorkspaceSyncCallback = void(WorkspaceSyncState state);
 
+  enum OmniboxMatchKind {
+    search,
+    url
+  };
+
+  // One address-bar suggestion. Text is for display; the browser keeps the
+  // real match and opens that, never a URL supplied by the page.
+  dictionary OmniboxMatch {
+    OmniboxMatchKind kind;
+    DOMString contents;
+    DOMString description;
+    DOMString url;
+    DOMString fillIntoEdit;
+    DOMString inlineAutocompletion;
+    // What Enter opens while nothing else is selected.
+    boolean isDefault;
+  };
+  dictionary OmniboxResult {
+    long revision;
+    boolean done;
+    OmniboxMatch[] matches;
+  };
+  dictionary OmniboxQuery {
+    DOMString text;
+    boolean preventInline;
+  };
+  // With a revision and index, opens that suggestion. Otherwise decides what
+  // the text means exactly as the address bar does.
+  dictionary OmniboxOpen {
+    DOMString text;
+    long? revision;
+    long? index;
+  };
+  callback OmniboxResultCallback = void(OmniboxResult result);
+
   interface Events {
     // Bounded wake-up hint only. No key, credential or workspace payload.
     static void onSyncStateChanged();
@@ -194,6 +231,17 @@ namespace breezerPrivate {
     static void toggleSplitView(long tabId, optional VoidCallback callback);
     // Focus the calling sidebar window's native omnibox.
     static void focusLocationBar(optional VoidCallback callback);
+    // Toggle the native extensions menu in the calling sidebar's window.
+    static void showExtensionsMenu(optional VoidCallback callback);
+    // The address bar's own suggestions for a New Tab's text. Returns what is
+    // ready now; nextOmniboxResult waits for anything newer. Empty text stops.
+    static void queryOmnibox(OmniboxQuery query,
+                             OmniboxResultCallback callback);
+    static void nextOmniboxResult(long revision,
+                                  OmniboxResultCallback callback);
+    // Open text or a shown suggestion in the calling New Tab's own tab.
+    static void openOmnibox(OmniboxOpen request,
+                            optional VoidCallback callback);
     // Check whether the panel's active tab is a built-in full-page PDF viewer.
     static void isCurrentPdf(long tabId, BooleanCallback callback);
     // One user-gesture-bound capture of the active PDF's visible content.

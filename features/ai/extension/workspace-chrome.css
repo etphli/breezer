@@ -1,20 +1,47 @@
+.sidebar-address-row {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 8px 0;
+}
+
 .sidebar-address {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
   min-height: 34px;
-  margin: 7px 10px 0;
   padding: 4px 10px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: color-mix(in oklab, var(--ink) 5%, var(--canvas));
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   color: var(--muted);
   text-align: start;
 }
 
-.sidebar-address:hover { color: var(--ink); background: var(--hover); }
-.sidebar-address span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-address:hover { color: var(--ink); background: var(--press); }
+.sidebar-address-hint, .sidebar-address-site, .sidebar-address-path {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sidebar-address-url { flex: 1; display: flex; min-width: 0; }
+/* The path gives way first. A long site loses its start, never its domain. */
+.sidebar-address-site { flex: 0 1 auto; min-width: 0; direction: rtl; color: var(--ink); }
+.sidebar-address-site bdi { direction: ltr; unicode-bidi: isolate; }
+.sidebar-address-path { flex: 0 9999 auto; min-width: 0; }
+.sidebar-address:has(.sidebar-address-hint[hidden]) > svg { display: none; }
+#sidebar-extensions { flex: none; width: 32px; height: 34px; }
+#sidebar-extensions svg { stroke-width: 1.35; }
+
+@container sidebar (max-width: 150px) {
+  .sidebar-address-row { flex-direction: column; padding: 6px 4px 0; }
+  .sidebar-address { flex: none; width: 100%; max-width: 44px; justify-content: center; padding: 4px; }
+  .sidebar-address > span { display: none; }
+  .sidebar-address:has(.sidebar-address-hint[hidden]) > svg { display: block; }
+}
 
 .sidebar-address svg, .sidebar-update svg {
   flex: none;
@@ -52,14 +79,11 @@
 .sidebar-update-action:disabled { opacity: .6; }
 @container sidebar (max-width: 190px) { .sidebar-update svg { display: none; } }
 
+/* The sidebar canvas stays the toolbar color with glass on. A gradient here
+   leaves a visible seam where the two meet. */
 @media (prefers-reduced-transparency: no-preference) and (forced-colors: none) and (not (display-mode: fullscreen)) {
-  .sidebar[data-glass] {
-    background-image: linear-gradient(145deg, color-mix(in oklab, var(--accent) 13%, var(--canvas)), transparent 55%);
-    box-shadow: inset 1px 1px 0 color-mix(in srgb, var(--raised) 75%, transparent);
-  }
   .sidebar[data-glass] :is(.sidebar-address, .sidebar-update) {
-    background: color-mix(in oklab, var(--raised) 74%, var(--canvas));
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink) 9%, transparent);
+    background: color-mix(in oklab, var(--raised) var(--glass-opacity, 66%), var(--canvas));
   }
 }
 

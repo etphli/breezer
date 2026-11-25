@@ -73,18 +73,20 @@ export class ShortcutPreferences {
   }
 }
 
+// The tile grid and the compact icon row share one set of removal actions.
 export function installShortcutActions({ root, remove }) {
-  const list = root.getElementById('sites'), events = new AbortController();
+  const lists = ['sites', 'composer-sites'].map(id => root.getElementById(id)).filter(Boolean), events = new AbortController();
+  const LINK = 'a.site-link, a.composer-site';
   let menu, menuLink;
   const closeMenu = (focus = false) => { const origin = menuLink; menu?.remove(); menu = null; menuLink = null; if (focus && origin?.isConnected) origin.focus(); };
-  const linkAt = target => target.closest?.('.site')?.querySelector('.site-link');
-  const hide = link => { closeMenu(); void remove({ url: link.href, title: link.querySelector('.site-name')?.textContent || 'Site' }); };
-  list.addEventListener('click', event => {
+  const linkAt = target => target.closest?.('li')?.querySelector(LINK);
+  const hide = link => { closeMenu(); void remove({ url: link.href, title: link.querySelector('.site-name')?.textContent || link.title || 'Site' }); };
+  for (const list of lists) list.addEventListener('click', event => {
     const link = linkAt(event.target); if (!link) return;
     if (event.target.closest('.site-remove')) { event.preventDefault(); hide(link); return; }
   }, { signal: events.signal });
-  list.addEventListener('contextmenu', event => {
-    const link = event.target.closest?.('.site-link'); if (!link) return;
+  for (const list of lists) list.addEventListener('contextmenu', event => {
+    const link = event.target.closest?.(LINK); if (!link) return;
     event.preventDefault(); closeMenu();
     menuLink = link; menu = root.createElement('div'); menu.className = 'shortcut-menu'; menu.setAttribute('role', 'menu');
     const button = root.createElement('button'); button.type = 'button'; button.setAttribute('role', 'menuitem'); button.textContent = 'Remove shortcut'; button.addEventListener('click', () => hide(link)); menu.append(button);

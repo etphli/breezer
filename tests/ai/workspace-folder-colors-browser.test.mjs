@@ -195,7 +195,7 @@ test('folder colors: Settings mode, context menu, keyboard, custom hex, preview 
     await page.locator('#toast').evaluate((node) => { node.hidden = true; });
     await page.screenshot({ animations: 'disabled', path: `${evidence}/folder-colors-row-dark.png` });
 
-    // Icon only colors the glyph and leaves the row untinted.
+    // Light tint colors the glyph and the whole card evenly, without a row band.
     await page.evaluate(async () => {
       const value = structuredClone(window.fx.local['workspace.v1']);
       value.prefs.folderColors = 'icon';
@@ -205,6 +205,15 @@ test('folder colors: Settings mode, context menu, keyboard, custom hex, preview 
     });
     await page.waitForFunction(() => document.getElementById('sidebar').dataset.folderColors === 'icon');
     assert.equal(await head.evaluate((node) => getComputedStyle(node).backgroundColor), 'rgba(0, 0, 0, 0)');
+    const card = await head.evaluate((node) => {
+      const { backgroundColor } = getComputedStyle(node.parentElement);
+      const probe = node.parentElement.appendChild(document.createElement('i'));
+      probe.style.color = 'color-mix(in srgb, var(--folder-color) 8%, transparent)';
+      const expected = getComputedStyle(probe).color;
+      probe.remove();
+      return { backgroundColor, expected };
+    });
+    assert.equal(card.backgroundColor, card.expected, 'the card carries a trace of its own color');
     assert.notEqual(await head.locator('.folder-glyph').evaluate((node) => getComputedStyle(node).color),
       await page.locator('.row:not(.folder-row) .title').first().evaluate((node) => getComputedStyle(node).color));
     await page.screenshot({ animations: 'disabled', path: `${evidence}/folder-colors-icon-light.png` });

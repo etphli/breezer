@@ -271,7 +271,7 @@ test('new tab renders sites and Organato lanes across states', { skip }, async (
       await page.screenshot({ path: `${evidence}/newtab-connected-light.png` });
 
       assert.equal(await page.getByRole('searchbox').count(), 0);
-      assert.deepEqual(await tabStops(page, 2), ['workspace.html#/settings', 'https://mail.example.com/']);
+      assert.deepEqual(await tabStops(page, 2), ['composer-send', 'https://mail.example.com/']);
       await page.screenshot({ path: `${evidence}/newtab-keyboard-focus.png`, clip: { x: 0, y: 0, width: 1440, height: 460 } });
       // Refresh asks exactly once more and never on its own.
       await page.click('#refresh');
@@ -573,7 +573,7 @@ test('Organato off removes the whole section and follows the switch live', { ski
       assert.equal(await page.locator('.item, .item-empty, #organato-action a').count(), 0);
       assert.equal(await page.getByRole('heading', { name: /Organato/ }).count(), 0);
       assert.equal(await page.getByRole('status').filter({ hasText: /Organato/ }).count(), 0);
-      assert.deepEqual(await tabStops(page, 2), ['workspace.html#/settings', 'https://mail.example.com/']);
+      assert.deepEqual(await tabStops(page, 2), ['composer-send', 'https://mail.example.com/']);
       await page.locator('.site-add-button').focus();
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(() => document.activeElement.closest('.sheet')), null, 'nothing in the hidden sheet takes focus');

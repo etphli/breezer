@@ -1,4 +1,4 @@
-// Replies supply data. Breezer owns the elements, styles, and allowed map URL.
+// Replies supply data. Breezer owns the elements, styles, and allowed requests.
 const svgNamespace = 'http://www.w3.org/2000/svg';
 const text = (value, limit) => typeof value === 'string' && value.trim() && value.length <= limit;
 const range = (value, min, max) => Number.isFinite(value) && value >= min && value <= max;
@@ -137,25 +137,64 @@ function chart(card, data) {
   return true;
 }
 
-function map(card, data) {
-  const { lat, lon, zoom = 13 } = data;
-  if (!range(lat, -85, 85) || !range(lon, -180, 180) || !Number.isInteger(zoom) || !range(zoom, 3, 18)) return false;
-  const distance = 120 / 2 ** zoom;
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const bounds = [clamp(lon - distance, -180, 180), clamp(lat - distance, -85.051, 85.051),
-    clamp(lon + distance, -180, 180), clamp(lat + distance, -85.051, 85.051)];
+const decimal = value => String(Number(value.toFixed(6)));
+
+// OpenStreetMap snaps its embed to the closest zoom where these bounds fit.
+// A 200px Web Mercator square selects the requested zoom in the 240px frame at
+// every latitude. Longitudes may pass 180 so an antimeridian marker stays centered.
+export function mapURL({ lat, lon, zoom }) {
+  const half = 100 * 360 / (256 * 2 ** zoom);
+  const radians = half * Math.PI / 180;
+  const center = Math.asinh(Math.tan(lat * Math.PI / 180));
+  const latitude = y => Math.max(-85.0511, Math.min(85.0511, Math.atan(Math.sinh(y)) * 180 / Math.PI));
+  const bounds = [lon - half, latitude(center - radians), lon + half, latitude(center + radians)];
   const url = new URL('https://www.openstreetmap.org/export/embed.html');
-  url.search = new URLSearchParams({ bbox: bounds.join(','), layer: 'mapnik', marker: [lat, lon].join(',') });
-  const load = element('button', 'Load interactive map', 'reply-widget-button');
-  load.type = 'button';
-  const link = element('a', 'Open in OpenStreetMap');
-  link.href = 'https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=' + zoom + '/' + lat + '/' + lon;
+  url.search = new URLSearchParams({ bbox: bounds.map(decimal).join(','), layer: 'mapnik', marker: decimal(lat) + ',' + decimal(lon) });
+  return url.href;
+}
+
+function webLink(label, href) {
+  const link = element('a', label);
+  link.href = href;
   link.target = '_blank';
   link.rel = 'noopener noreferrer';
-  const actions = element('div', undefined, 'reply-map-actions');
-  actions.append(load, link);
+  return link;
+}
+
+function widgetButton(label) {
+  const button = element('button', label, 'reply-widget-button');
+  button.type = 'button';
+  return button;
+}
+
+function statusLine() {
+  const status = element('p', '', 'reply-widget-status');
+  status.setAttribute('role', 'status');
+  return status;
+}
+
+function map(card, data) {
+  const { lat, lon, place } = data;
+  if (place !== undefined && !text(place, 200)) return false;
+  const placeLink = place && webLink('Find this place', 'https://www.openstreetmap.org/search?' + new URLSearchParams({ query: place.trim() }));
+  const actions = element('div', undefined, 'reply-widget-actions');
+  if (lat === undefined && lon === undefined && placeLink) {
+    actions.append(placeLink);
+    card.append(element('p', 'No coordinates were provided. Find the place in OpenStreetMap.'), actions);
+    return true;
+  }
+  if (!range(lat, -85, 85) || !range(lon, -180, 180) || (data.zoom !== undefined && !Number.isFinite(data.zoom))) return false;
+  const zoom = Math.min(19, Math.max(3, Math.round(data.zoom ?? 13)));
+  const load = widgetButton('Load interactive map');
+  const point = decimal(lat) + '/' + decimal(lon);
+  actions.append(load, webLink('Open in OpenStreetMap', 'https://www.openstreetmap.org/?mlat=' + decimal(lat) + '&mlon=' + decimal(lon) + '#map=' + zoom + '/' + point));
+  if (placeLink) actions.append(placeLink);
   const mapSlot = element('div');
+  const status = statusLine();
+  let slow;
   load.addEventListener('click', () => {
+    clearTimeout(slow);
+    status.textContent = '';
     if (mapSlot.firstChild) {
       mapSlot.replaceChildren();
       load.textContent = 'Load interactive map';
@@ -165,11 +204,96 @@ function map(card, data) {
     frame.title = data.title + ' · OpenStreetMap';
     frame.referrerPolicy = 'no-referrer';
     frame.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-    frame.src = url.href;
+    frame.addEventListener('load', () => {
+      if (!frame.isConnected) return;
+      clearTimeout(slow);
+      status.textContent = '';
+    });
+    frame.src = mapURL({ lat, lon, zoom });
+    status.textContent = 'Loading map…';
+    slow = setTimeout(() => { status.textContent = 'The map is taking a while. Hide it and try again, or open it in OpenStreetMap.'; }, 12_000);
     mapSlot.append(frame);
     load.textContent = 'Hide map';
   });
-  card.append(element('p', 'Map tiles load from OpenStreetMap when you open the map.'), actions, mapSlot);
+  card.append(element('p', 'Marker at ' + decimal(lat) + ', ' + decimal(lon) + ', supplied by the assistant. The map loads from OpenStreetMap when you open it.'), actions, status, mapSlot);
+  return true;
+}
+
+function ordinaryURL(value, protocols) {
+  if (!text(value, 2048)) return null;
+  let url;
+  try { url = new URL(value); } catch { return null; }
+  return protocols.includes(url.protocol) && !url.username && !url.password ? url : null;
+}
+
+// Images load only after a click, and only from a named public HTTPS host.
+function imageURL(value) {
+  const url = ordinaryURL(value, ['https:']);
+  if (!url || url.port || /^\[|^\d+(?:\.\d+){3}\.?$/.test(url.hostname) || !url.hostname.includes('.')
+      || /(?:^|\.)(?:local|localhost|internal|lan|home|arpa|test|invalid|onion)\.?$/.test(url.hostname)) return null;
+  return url;
+}
+
+function existingImage(card, data) {
+  const source = data.source === undefined ? null : ordinaryURL(data.source, ['http:', 'https:']);
+  const url = data.url === undefined ? null : imageURL(data.url);
+  if ((data.source !== undefined && !source) || (data.url !== undefined && !url) || (!url && !source)
+      || (data.alt !== undefined && !text(data.alt, 300))) return false;
+  const actions = element('div', undefined, 'reply-widget-actions');
+  const note = element('p', url ? 'Web image from ' + url.hostname + '. It loads when you view it.' : 'Web image on ' + source.hostname + '. Open the source to view it.');
+  if (!url) {
+    actions.append(webLink('Open source', source.href));
+    card.append(note, actions);
+    return true;
+  }
+  const view = widgetButton('View image');
+  actions.append(view, webLink('Open image', url.href));
+  if (source) actions.append(webLink('Open source', source.href));
+  const status = statusLine();
+  const slot = element('div', undefined, 'reply-web-image');
+  view.addEventListener('click', () => {
+    status.textContent = '';
+    if (slot.firstChild) {
+      slot.replaceChildren();
+      view.textContent = 'View image';
+      return;
+    }
+    const art = element('img');
+    art.alt = data.alt || data.title;
+    art.referrerPolicy = 'no-referrer';
+    art.decoding = 'async';
+    art.addEventListener('load', () => { if (art.isConnected) status.textContent = ''; });
+    art.addEventListener('error', () => {
+      if (!art.isConnected) return;
+      slot.replaceChildren();
+      view.textContent = 'View image';
+      status.textContent = 'This image could not load. Open its link to check it.';
+    });
+    status.textContent = 'Loading image…';
+    slot.append(art);
+    view.textContent = 'Hide image';
+    art.src = url.href;
+  });
+  card.append(note, actions, status, slot);
+  return true;
+}
+
+// A reply can suggest a query. Only the user's click runs it, in the user's
+// default search engine, through the browser's search API.
+function webSearch(card, data) {
+  if (!text(data.query, 200) || /[\u0000-\u001f\u007f]/.test(data.query)) return false;
+  const query = data.query.trim();
+  const run = widgetButton('Search the web');
+  const status = statusLine();
+  run.addEventListener('click', async () => {
+    try {
+      await globalThis.chrome.search.query({ text: query, disposition: 'NEW_TAB' });
+      status.textContent = 'Results opened in a new tab. Open the pages you want to use, then choose them with Sources in the sidebar and ask again.';
+    } catch { status.textContent = 'The search could not open. Enter the query in the address bar.'; }
+  });
+  const actions = element('div', undefined, 'reply-widget-actions');
+  actions.append(run);
+  card.append(element('p', query, 'reply-search-query'), actions, status);
   return true;
 }
 
@@ -180,7 +304,8 @@ function cards(card, data) {
   return true;
 }
 
-const renderers = new Map([['flow', diagram], ['chart', chart], ['map', map], ['cards', cards]]);
+const renderers = new Map([['flow', diagram], ['chart', chart], ['map', map], ['cards', cards],
+  ['image', existingImage], ['search', webSearch]]);
 
 export function renderReplyWidget(source) {
   if (source.length > 12_000) return null;

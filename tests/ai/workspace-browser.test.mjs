@@ -414,6 +414,12 @@ test('sidebar menus, one-line dock, icon palette and space gestures work in Chro
     await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { spaceDock: true } }));
     await page.waitForFunction(() => document.getElementById('sidebar').dataset.spaceDock === 'alternate');
     assert.equal(await active('Reading').locator('.dot').getAttribute('data-icon'), 'book');
+    const tray = await page.locator('#spaces').evaluate(node => ({
+      dots: [...node.querySelectorAll('.dot')].map(dot => getComputedStyle(dot).backgroundColor),
+      slack: node.clientWidth - [...node.querySelectorAll('.space-dot')].reduce((sum, dot) => sum + dot.offsetWidth + 3, -3),
+    }));
+    assert.deepEqual([...new Set(tray.dots)], ['rgba(0, 0, 0, 0)'], 'Icons have no second fill inside the tray');
+    assert.ok(tray.slack <= 4, 'The tray fits its icons');
     await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { spaceDock: false } }));
     await page.waitForFunction(() => document.getElementById('sidebar').dataset.spaceDock === 'default');
     await page.locator('#spaces').click({ button: 'right', position: { x: 130, y: 10 } });

@@ -300,7 +300,7 @@ try {
   assert.deepEqual(surface.breezerPrivate, [
     'authorizeCurrentPage', 'captureCurrentPdfContext', 'exchangeWorkspaceSync', 'focusLocationBar', 'getAppearance',
     'getBrowserStats', 'getResearchTabs', 'isCurrentPdf', 'readResearchTab', 'readWorkspaceSync',
-    'setAppearance', 'setPeekSources', 'setSidebarCollapsed', 'toggleSplitView',
+    'setAppearance', 'setPeekSources', 'setSidebarCollapsed', 'showExtensionsMenu', 'toggleSplitView',
   ]);
   pass('privateApiSurface', 'the IDL methods are exposed to the component extension');
 
