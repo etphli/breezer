@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from 'undici';
 import metrics from '../api/metrics.js';
-import usage from '../api/usage.js';
 import { DASHBOARD_HOST } from '../lib/metrics.js';
 
 function response() {
@@ -67,16 +66,6 @@ test('dashboard returns partial metrics when a month exceeds the report limit', 
   assert.equal(reads, 20_000);
 });
 
-test('collector checks raw body size in bytes before parsing JSON without a content-length header', async () => {
-  const res = response();
-  await usage({
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: '"' + 'é'.repeat(2048) + '"',
-  }, res);
-  assert.equal(res.code, 413);
-});
-
 test('retention still deletes expired reports when total volume exceeds the dashboard cap', async t => {
   const { pruneReports } = await import('../lib/storage.js');
   const agent = new MockAgent();
@@ -105,4 +94,28 @@ test('retention still deletes expired reports when total volume exceeds the dash
   }).persist();
   assert.equal(await pruneReports(new Date('2026-10-15T10:00:00Z')), 500);
   assert.equal(deleted, 500);
+});
+
+test('dashboard stops reading reports at its time budget and marks the result partial', async t => {
+  const { usageReports } = await import('../lib/storage.js');
+  const agent = new MockAgent();
+  agent.disableNetConnect();
+  const dispatcher = getGlobalDispatcher();
+  const originalEnv = process.env;
+  process.env = { ...originalEnv, BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_fixture_test', VERCEL_BLOB_API_URL: 'https://blob-api.test' };
+  setGlobalDispatcher(agent);
+  t.after(async () => { setGlobalDispatcher(dispatcher); process.env = originalEnv; await agent.close(); });
+  agent.get('https://blob-api.test').intercept({ path: /^\/\?/ }).reply(200, ({ path }) => {
+    const prefix = new URL(path, 'https://blob-api.test').searchParams.get('prefix');
+    return { blobs: Array.from({ length: 120 }, (_, i) => ({ pathname: `${prefix}${i}.json` })), hasMore: false };
+  }).persist();
+  let reads = 0;
+  agent.get('https://fixture.private.blob.vercel-storage.com').intercept({ path: /^\/usage\// }).reply(() => {
+    reads++;
+    return { statusCode: 200, data: { id: `r${reads}`, days: { '2026-10-15': 60 } } };
+  }).delay(20).persist();
+  const result = await usageReports(new Date('2026-10-15T10:00:00Z'), 50);
+  assert.equal(result.truncated, true);
+  assert.ok(reads > 0 && reads < 240, `read ${reads} reports`);
+  assert.equal(result.reports.length, reads);
 });

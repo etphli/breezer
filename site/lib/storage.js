@@ -42,16 +42,20 @@ export async function allBlobs(prefix, maxBlobs = 20_000) {
   return { blobs, truncated: false };
 }
 
-export async function usageReports(now = new Date()) {
+// Leave headroom under the 60-second function limit for listing and the GitHub request.
+export async function usageReports(now = new Date(), readBudgetMs = 40_000) {
+  const started = performance.now();
   const months = new Set([now.toISOString().slice(0, 7), new Date(now.getTime() - 29 * 86400_000).toISOString().slice(0, 7)]);
   const listings = await Promise.all([...months].map(month => allBlobs(`usage/${month}/`)));
   const blobs = listings.flatMap(listing => listing.blobs);
   const reports = [];
+  let truncated = listings.some(listing => listing.truncated);
   for (let i = 0; i < blobs.length; i += 12) {
+    if (performance.now() - started > readBudgetMs) { truncated = true; break; }
     const batch = await Promise.all(blobs.slice(i, i + 12).map(blob => readReport(blob.pathname)));
     reports.push(...batch.filter(Boolean).map(report => report.value));
   }
-  return { reports, truncated: listings.some(listing => listing.truncated) };
+  return { reports, truncated };
 }
 
 export async function pruneReports(now = new Date()) {
