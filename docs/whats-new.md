@@ -32,6 +32,8 @@ Only bump published version metadata as part of preparing an actual release. Pag
 
 See [the 1.3.1 draft notes](release-1.3.1-notes.md) when preparing that update.
 
+See [the 1.3.7 draft notes](release-1.3.7-notes.md) for fixes queued for the patch after 1.3.6.
+
 ## Illustrated patch layout
 
 Each patch has a `.patch-lead` row for its main illustration and related notes, then a `.patch-pair` with two `.patch-group` blocks. Each group has a `.plate.patch-plate` figure, decorative `svg.art`, a heading and a `.notes` list. Both layouts stack at 720px. Artwork colors come from the page palette through the `.art` rules in `whats-new.css`.

@@ -64,10 +64,20 @@ bool ClearEnvironmentVariable(const wchar_t* name) {
          ::GetLastError() == ERROR_ENVVAR_NOT_FOUND;
 }
 
+bool IsParentWindowArgument(std::wstring_view argument) {
+  constexpr std::wstring_view prefix = L"--parent-window=";
+  return argument.starts_with(prefix) && argument.size() > prefix.size() &&
+         argument.find_first_not_of(L"0123456789", prefix.size()) ==
+             std::wstring_view::npos;
+}
+
 }  // namespace
 
 int wmain(int argc, wchar_t* argv[]) {
-  if (argc != 2 || std::wstring_view(argv[1]) != kBreezerAiExtensionOrigin) {
+  // Chromium can append a parent window after the origin.
+  if (argc < 2 || argc > 3 ||
+      std::wstring_view(argv[1]) != kBreezerAiExtensionOrigin ||
+      (argc == 3 && !IsParentWindowArgument(argv[2]))) {
     return 1;
   }
   const std::wstring directory = HostDirectory();

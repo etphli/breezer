@@ -99,12 +99,12 @@ export class HostController {
     run.chunks.push(event.text); run.bytes += bytes;
     turn.flushers.add(run.flush);
   }
-  callTool(run, name, args) {
+  async callTool(run, name, args) {
     run.flush();
-    if (this.#active !== run || run.controller.signal.aborted) return Promise.reject(new Error('Cancelled.'));
+    if (this.#active !== run || run.controller.signal.aborted) throw new Error('Cancelled.');
     validateTool(name, args, run.tools);
     if (name.startsWith('organato_')) {
-      if (!this.integrationTool) return Promise.reject(new Error('Organato is unavailable.'));
+      if (!this.integrationTool) throw new Error('Organato is unavailable.');
       return this.integrationTool(name, args, run.controller.signal);
     }
     const requestId = randomUUID();
@@ -116,12 +116,14 @@ export class HostController {
   }
   toolResult(message) {
     const pending = this.#pending.get(message.requestId);
-    if (!pending || pending.id !== message.id || this.#active?.id !== message.id) throw new Error('Unknown browser action result.');
-    if (!messageWithinLimit(message, MAX_MESSAGE_BYTES - 1000)) throw new Error('Browser action result is too large.');
+    if (!pending || pending.id !== message.id || this.#active?.id !== message.id) return;
     this.#pending.delete(message.requestId); clearTimeout(pending.timer);
-    if (typeof message.error === 'string') pending.reject(new Error(message.error.slice(0, 1000)));
-    else if (!message.result || typeof message.result !== 'object' || Array.isArray(message.result)) pending.reject(new Error('Invalid browser action result.'));
-    else pending.resolve(message.result);
+    try {
+      if (!messageWithinLimit(message, MAX_MESSAGE_BYTES - 1000)) throw new Error('Browser action result is too large.');
+      if (typeof message.error === 'string') throw new Error(message.error.slice(0, 1000));
+      if (!message.result || typeof message.result !== 'object' || Array.isArray(message.result)) throw new Error('Invalid browser action result.');
+      pending.resolve(message.result);
+    } catch (error) { pending.reject(error); }
   }
   rejectTools(id, error) {
     for (const [key, pending] of this.#pending) {

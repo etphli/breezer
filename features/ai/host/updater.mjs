@@ -7,6 +7,8 @@ import { spawn } from 'node:child_process';
 export const REPO = 'etphli/breezer';
 const API = `https://api.github.com/repos/${REPO}`;
 const HOST = dirname(fileURLToPath(import.meta.url));
+const appEnd = HOST.indexOf('/Breezer.app/');
+const APP = appEnd < 0 ? null : HOST.slice(0, appEnd + '/Breezer.app'.length);
 export function validateManifest(value, release) {
   if (value?.schema !== 1 || value.platform !== 'darwin-arm64' || !/^[a-f0-9]{40}$/.test(value.commit) || !/^[a-f0-9]{64}$/.test(value.sha256)) throw new Error('This release has invalid update metadata.');
   const asset = release.assets?.find(a => a.name === value.asset);
@@ -57,7 +59,10 @@ export async function startUpdateWorker(app, candidate, {
       };
       const onError = error => finish(error);
       const onExit = () => finish(new Error('The update helper stopped before starting. macOS may have blocked it.'));
-      const onMessage = value => { if (value?.type === 'update-worker-ready') finish(); };
+      const onMessage = value => {
+        if (value?.type === 'update-worker-ready') finish();
+        if (value?.type === 'update-worker-blocked') finish(new Error(value.notice));
+      };
       const timer = setTimeout(() => finish(new Error('The update helper did not start. Check for a macOS security prompt.')), startupTimeoutMs);
       child.once('error', onError); child.once('exit', onExit); child.on('message', onMessage);
     });
@@ -80,10 +85,10 @@ export class UpdateController {
     try {
       if (process.platform !== 'darwin' || process.arch !== 'arm64') throw new Error('In-app updates currently support Apple Silicon Macs.');
       if (message.type === 'update-status') {
-        const end = HOST.indexOf('/Breezer.app/');
-        const parent = dirname(HOST.slice(0, end + '/Breezer.app'.length));
         let value = {};
-        try { value = JSON.parse(await readFile(join(parent, '.Breezer-update-status.json'), 'utf8')); } catch {}
+        if (APP) {
+          try { value = JSON.parse(await readFile(join(dirname(APP), '.Breezer-update-status.json'), 'utf8')); } catch {}
+        }
         this.send({ type: 'update-result', id, ok: true, value }); return;
       }
       const current = JSON.parse(await readFile(join(HOST, 'build-identity.json'), 'utf8'));
@@ -95,11 +100,9 @@ export class UpdateController {
         if (!this.candidate) throw new Error('Check for updates before installing.');
         const result = await checkRelease(current);
         if (!result.available || JSON.stringify(result.candidate) !== JSON.stringify(this.candidate)) throw new Error('The release changed. Check for updates again.');
-        const appEnd = HOST.indexOf('/Breezer.app/');
-        if (appEnd < 0) throw new Error('Run the installed Breezer app to update.');
-        const app = HOST.slice(0, appEnd + '/Breezer.app'.length);
-        if (![join(homedir(), 'Applications/Breezer.app'), '/Applications/Breezer.app'].includes(app)) throw new Error('Move Breezer to Applications before updating.');
-        await startUpdateWorker(app, this.candidate);
+        if (!APP) throw new Error('Run the installed Breezer app to update.');
+        if (![join(homedir(), 'Applications/Breezer.app'), '/Applications/Breezer.app'].includes(APP)) throw new Error('Move Breezer to Applications before updating.');
+        await startUpdateWorker(APP, this.candidate);
         this.candidate = null;
         this.send({ type: 'update-result', id, ok: true, value: { installing: true, notice: 'Downloading update. Breezer will close and reopen when it is ready. Your tabs and profile are preserved.' } });
       }

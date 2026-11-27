@@ -62,7 +62,9 @@ test('ASCII and Unicode preserve exact canonical character boundaries', async ()
       return JSON.stringify({ ...m, result: { text: text.repeat(units) + 'x'.repeat(limit + offset - base - units * unit) } });
     };
     const old = await action(Before, rawFor), current = await action(HostController, rawFor);
-    assert.equal(old.accepted, offset === 0); assert.equal(current.accepted, old.accepted); assert.equal(current.error, old.error);
+    assert.equal(old.accepted, offset === 0); assert.equal(current.accepted, old.accepted);
+    // Oversized results now reject only the pending tool call instead of ending the chat.
+    assert.equal(current.error, undefined); assert.equal(current.failure, old.error);
   }
   for (const offset of [0, 1]) {
     const rawFor = m => sized(m, limit + offset).replace('"text":"', '"text":"é').replace(/x(?="\}\}$)/, '');
@@ -80,14 +82,14 @@ test('whitespace, Unicode escapes and numeric spellings do not silently change u
     m => sized({ ...m, number: 1e-6, nested: [1e20, -0, 1e999] }, limit).replace('0.000001', '1e-6'),
   ]) {
     const old = await action(Before, rawFor), current = await action(HostController, rawFor);
-    assert.equal(current.accepted, old.accepted); assert.equal(current.error, old.error);
+    assert.equal(current.accepted, old.accepted); assert.equal(current.error, undefined); assert.equal(current.failure, old.error);
   }
 });
 
 test('payload claims and direct callers cannot supply trusted metadata; fallback remains exact', async () => {
   for (const native of [true, false]) {
     const result = await action(HostController, m => sized({ ...m, frameBytes: 1, byteLength: 1, serializedLength: 1 }, limit + 1), { native });
-    assert.equal(result.accepted, false); assert.match(result.error, /too large/);
+    assert.equal(result.accepted, false); assert.equal(result.error, undefined); assert.match(result.failure, /too large/);
   }
   const direct = await action(HostController, JSON.stringify, { native: false, mutate: m => { m.result.text = 'x'.repeat(limit); } });
   assert.equal(direct.accepted, false); assert.equal(direct.serializations, 1);
@@ -176,7 +178,7 @@ test('native dispatch retains main attachment validation, forwarding and browser
   const provider = { id: 'codex', async discover() { discoveries++; return {}; }, async chat(chat, api) {
     accepted.push(chat);
     assert.equal(chat.organato, false, 'extension cannot grant integration permissions');
-    assert.throws(() => api.callTool('browser_snapshot', {}), /not permitted/);
+    await assert.rejects(api.callTool('browser_snapshot', {}), /not permitted/);
   } };
   const host = new HostController([provider], message => messages.push(message));
   const base = { type: 'chat', id: 'files', provider: 'codex', message: 'Review the attached files.', organato: true };

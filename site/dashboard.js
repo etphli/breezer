@@ -42,7 +42,7 @@ async function load() {
     $('mau').textContent = numbers.format(data.mau);
     $('hours').textContent = hours(data.seconds);
     $('month').textContent = new Date(`${data.month}-01T00:00:00Z`).toLocaleDateString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-    $('updated').textContent = `Updated ${new Date(data.updatedAt).toLocaleString('en', { timeZone: 'UTC' })} UTC`;
+    $('updated').textContent = `Updated ${new Date(data.updatedAt).toLocaleString('en', { timeZone: 'UTC' })} UTC${data.truncated ? ' · Partial: report volume exceeded the dashboard limit' : ''}`;
     $('range').textContent = `${dayLabel(data.start)} to ${dayLabel(data.end)} · Daily active hours`;
     $('chart-start').textContent = dayLabel(data.start); $('chart-end').textContent = dayLabel(data.end);
     $('empty').hidden = data.series.some(row => row.users > 0);

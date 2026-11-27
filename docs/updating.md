@@ -31,9 +31,11 @@ rules do not change release validation, worker handoff or replacement checks.
 
 The native host starts its existing `process.execPath` with a standalone worker script and request file in a private sibling staging directory. It copies no executable. The worker acknowledges startup through Node IPC after acquiring its update lock and writing download status. The controller reports progress only after that acknowledgement. An early exit or a missing acknowledgement produces an error and removes the failed staging directory.
 
+The lock records the worker PID and start time. A later worker can reclaim it when the PID is gone or the lock is at least one hour old. A live lock reports that another update is already running and preserves that update's progress. Development hosts outside Breezer.app return empty update status.
+
 The worker and request are outside the app so they survive replacement. A running executable remains available while its original path is renamed or removed; the updater regression suite exercises that lifetime with a disposable runtime. The test uses the repository's ignored build directory because macOS may reject executable copies in its per-user temporary directory. This is a lifecycle test, not Gatekeeper acceptance.
 
-A previous app retained during replacement has a concrete rollback purpose. Remove it after the updated app is verified; do not accumulate obsolete copies. The browser profile and passwords live outside the app and are preserved.
+If normal DMG detach fails, the worker retries with forced detach and removes staging. If the volume remains mounted, the worker removes the downloaded DMG and leaves the mount point alone. A successful verified replacement keeps the previous app for rollback and prunes older Breezer backups. The browser profile and passwords live outside the app and are preserved.
 
 ## Why the earlier helper was blocked
 

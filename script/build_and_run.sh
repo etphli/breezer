@@ -8,6 +8,26 @@ case "$BREEZER_MODE" in
   *) echo "Usage: $0 [--check|--build-only|--install|--verify|--debug|--logs|--telemetry]" >&2; exit 2 ;;
 esac
 
+check_install_hold() {
+  if [[ "$BREEZER_MODE" != --install || "${BREEZER_OVERRIDE_UPDATE_HOLD:-0}" == 1 ]]; then
+    return 0
+  fi
+  local common_dir hold reason
+  # Linked worktrees share the installed app and the primary checkout's hold.
+  common_dir="$(git -C "$BREEZER_ROOT" rev-parse --path-format=absolute --git-common-dir)"
+  for hold in "$BREEZER_ROOT/build/local-update-hold.json" "${common_dir%/*}/build/local-update-hold.json"; do
+    if [[ -e "$hold" || -L "$hold" ]]; then
+      reason="$(plutil -extract instruction raw -expect string -o - "$hold" 2>/dev/null ||
+                plutil -extract reason raw -expect string -o - "$hold" 2>/dev/null ||
+                printf '%s\n' 'No readable reason was recorded.')"
+      printf 'Local Breezer installation is on hold (%s).\n%s\n' "$hold" "$reason" >&2
+      echo "For an explicitly authorized install, set BREEZER_OVERRIDE_UPDATE_HOLD=1." >&2
+      exit 1
+    fi
+  done
+}
+check_install_hold
+
 if [[ -z "${BREEZER_BUILD_PROFILE:-}" ]]; then
   BREEZER_BUILD_PROFILE=upstream
   if [[ "${BREEZER_DEVELOPMENT_BUILD:-0}" == 1 ]]; then
@@ -273,9 +293,81 @@ echo "Source-built Breezer app: $BREEZER_APP"
 if [[ "$BREEZER_MODE" == --build-only ]]; then
   exit 0
 fi
-pkill -x Breezer >/dev/null 2>&1 || true
+check_install_hold
+
+running_breezer_executables() {
+  ps -ww -axo uid=,comm= | awk -v uid="$UID" '
+    $1 == uid {
+      sub(/^[[:space:]]*[0-9]+[[:space:]]+/, "")
+      if ($0 ~ /\/Contents\/MacOS\/Breezer$/) print
+    }'
+}
+
+has_breezer_executable() {
+  [[ $'\n'$1$'\n' == *$'\n'"$2"$'\n'* ]]
+}
+
+quit_breezer() {
+  local executable="$1" running deadline
+  running="$(running_breezer_executables)"
+  if ! has_breezer_executable "$running" "$executable"; then
+    return 0
+  fi
+  # Quit only the running app at this path. Looking up by name can select the installed copy.
+  osascript -l JavaScript - "$executable" <<'JXA'
+ObjC.import('AppKit');
+function run(argv) {
+  const apps = $.NSRunningApplication.runningApplicationsWithBundleIdentifier('io.github.etphli.breezer');
+  for (let i = 0; i < apps.count; i++) {
+    const app = apps.objectAtIndex(i);
+    if (ObjC.unwrap(app.executableURL.path) === argv[0]) {
+      app.terminate;
+    }
+  }
+}
+JXA
+  deadline=$((SECONDS + 15))
+  while has_breezer_executable "$running" "$executable"; do
+    if (( SECONDS >= deadline )); then
+      printf 'Breezer did not quit within 15 seconds: %s\n' "$executable" >&2
+      exit 1
+    fi
+    sleep 1
+    running="$(running_breezer_executables)"
+  done
+}
+
+BREEZER_APP="$(greadlink -f -- "$BREEZER_APP")"
+BREEZER_DESTINATION="$(greadlink -m -- "$HOME/Applications")/Breezer.app"
+BREEZER_EXECUTABLE="$BREEZER_APP/Contents/MacOS/Breezer"
+BREEZER_INSTALLED_EXECUTABLE="$(greadlink -m -- "$BREEZER_DESTINATION/Contents/MacOS/Breezer")"
+if [[ "$BREEZER_EXECUTABLE" == "$BREEZER_INSTALLED_EXECUTABLE" ]]; then
+  echo "Select a build output separate from the installed Breezer app." >&2
+  exit 1
+fi
+
+BREEZER_RUNNING="$(running_breezer_executables)"
+while IFS= read -r BREEZER_RUNNING_EXECUTABLE; do
+  if [[ -z "$BREEZER_RUNNING_EXECUTABLE" || "$BREEZER_RUNNING_EXECUTABLE" == "$BREEZER_EXECUTABLE" ]]; then
+    continue
+  fi
+  if [[ "$BREEZER_MODE" == --install && "$BREEZER_RUNNING_EXECUTABLE" == "$BREEZER_INSTALLED_EXECUTABLE" ]]; then
+    continue
+  fi
+  printf 'Quit the running Breezer before launching a build on the same profile: %s\n' "$BREEZER_RUNNING_EXECUTABLE" >&2
+  exit 1
+done <<< "$BREEZER_RUNNING"
+
+quit_breezer "$BREEZER_EXECUTABLE"
 if [[ "$BREEZER_MODE" == --install ]]; then
-  BREEZER_DESTINATION="$HOME/Applications/Breezer.app"
+  quit_breezer "$BREEZER_INSTALLED_EXECUTABLE"
+fi
+BREEZER_RUNNING="$(running_breezer_executables)"
+if [[ -n "$BREEZER_RUNNING" ]]; then
+  printf 'Breezer is still running. Close it before continuing.\n%s\n' "$BREEZER_RUNNING" >&2
+  exit 1
+fi
+if [[ "$BREEZER_MODE" == --install ]]; then
   if [[ -e "$BREEZER_DESTINATION" ]]; then
     mkdir -p "$HOME/Applications/.Breezer-backups"
     mv "$BREEZER_DESTINATION" "$HOME/Applications/.Breezer-backups/Breezer-$(date +%Y%m%d-%H%M%S).app"
@@ -293,7 +385,11 @@ case "$BREEZER_MODE" in
   --verify)
     open -n "$BREEZER_APP"
     sleep 2
-    pgrep -x Breezer >/dev/null
+    BREEZER_RUNNING="$(running_breezer_executables)"
+    if ! has_breezer_executable "$BREEZER_RUNNING" "$BREEZER_EXECUTABLE"; then
+      printf 'Could not verify a running Breezer process at %s\n' "$BREEZER_EXECUTABLE" >&2
+      exit 1
+    fi
     ;;
   *) open -n "$BREEZER_APP" ;;
 esac

@@ -33,18 +33,26 @@ if (process.argv.length === 3 && process.argv[2] === '--discover') {
     controller = new ContextHostController(available, send, { integrationTool: (...args) => organato.tool(...args), prepareChat: async () => { const state = await organato.view(); return state.enabled && state.allowAI && state.connected; } });
     if (closed) controller.close();
     return controller;
+  }).catch(error => {
+    loadingController = undefined;
+    throw error;
   });
   const close = () => { closed = true; controller?.close(); };
   async function receive(message) {
-    try {
-      if (['update-check', 'update-install', 'update-status'].includes(message.type)) return updater.receive(message);
-      if (['organato-view', 'organato-configure', 'organato-list'].includes(message.type)) {
+    if (['update-check', 'update-install', 'update-status'].includes(message?.type)) return updater.receive(message);
+    if (['organato-view', 'organato-configure', 'organato-list'].includes(message?.type)) {
+      try {
         const value = message.type === 'organato-view' ? await (message.dashboardCache === 1 ? organato.dashboardView() : organato.view()) : message.type === 'organato-configure' ? await organato.configure(message.settings || {}, stage => send({ type: 'organato-progress', id: message.id, stage })) : await (typeof message.dashboardIdentity === 'string' ? organato.dashboardList(message.dashboardIdentity, undefined, { onCached: value => send({ type: 'organato-cache', id: message.id, value }) }) : organato.list(undefined, { onCached: value => send({ type: 'organato-cache', id: message.id, value }) }));
-        send({ type: 'organato-result', id: message.id, ok: true, value }); return;
-      }
+        send({ type: 'organato-result', id: message.id, ok: true, value });
+      } catch (error) { send({ type: 'organato-result', id: message.id, ok: false, error: error.message, ...(['NETWORK_ERROR', 'DASHBOARD_CHANGED'].includes(error.code) ? { code: error.code } : {}), ...(Number.isInteger(error.status) && error.status >= 100 && error.status <= 599 ? { status: error.status } : {}) }); }
+      return;
+    }
+    try {
       const host = await getController();
       if (!closed) await decoder.dispatch(message, value => host.receive(value));
-    } catch (error) { send({ type: 'organato-result', id: message.id, ok: false, error: error.message, ...(['NETWORK_ERROR', 'DASHBOARD_CHANGED'].includes(error.code) ? { code: error.code } : {}), ...(Number.isInteger(error.status) && error.status >= 100 && error.status <= 599 ? { status: error.status } : {}) }); }
+    } catch (error) {
+      send({ type: 'error', ...(typeof message?.id === 'string' ? { id: message.id.slice(0, 100) } : {}), error: error.message.slice(0, 1500) });
+    }
   }
   process.stdin.on('data', (chunk) => {
     try { for (const message of decoder.push(chunk)) void receive(message); }
