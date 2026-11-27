@@ -430,7 +430,7 @@ export class BrowserTools {
     } else if (name === 'browser_scroll') {
       if (!['up', 'down'].includes(args.direction) || (args.amount !== undefined && (!Number.isFinite(args.amount) || args.amount <= 0))) throw new Error('Choose up or down and a positive scroll amount.');
       await this.injectControl(session, 'pointer', { sessionId: session.id, x: 120, y: 120 });
-      await this.command(session, 'Input.dispatchMouseEvent', { type: 'mouseWheel', x: 120, y: 120, deltaX: 0, deltaY: Math.min(args.amount || 600, 2000) * (args.direction === 'up' ? -1 : 1) });
+      await this.command(session, 'Input.dispatchMouseEvent', { type: 'mouseWheel', x: 120, y: 120, deltaX: 0, deltaY: Math.min(args.amount || 600, 3000) * (args.direction === 'up' ? -1 : 1) });
     } else if (name === 'browser_mouse') {
       await this.mouse(session, args);
     } else if (name === 'browser_key') {

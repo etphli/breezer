@@ -133,7 +133,14 @@ class PackagedNativeHostTest(unittest.TestCase):
     def test_rejects_other_origins_and_launch_flags(self):
         for args in ((), (overlay.ORIGIN.rstrip('/'),),
                      ('chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/',),
-                     (overlay.ORIGIN, '--parent-window=123'), ('--discover',)):
+                     ('chrome-extension://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/',
+                      '--parent-window=123'),
+                     (overlay.ORIGIN, '--parent-window='),
+                     (overlay.ORIGIN, '--parent-window=12x'),
+                     (overlay.ORIGIN, '--parent-window=-1'),
+                     (overlay.ORIGIN, '--parent-window=\uff11'),
+                     (overlay.ORIGIN, '--parent-window=123', '--discover'),
+                     (overlay.ORIGIN, '--discover'), ('--discover',)):
             with self.subTest(args=args):
                 result = self.invoke(*args)
                 self.assertEqual(result.returncode, 1)
@@ -141,7 +148,7 @@ class PackagedNativeHostTest(unittest.TestCase):
 
     def test_pipes_round_trip_packaged_organato_message(self):
         payload = json.dumps({'type': 'organato-view', 'id': 'launcher-smoke'}).encode()
-        launcher = self.open_launcher(self.launcher)
+        launcher = self.open_launcher(self.launcher, '--parent-window=123')
         launcher.stdin.write(struct.pack('<I', len(payload)) + payload)
         launcher.stdin.flush()
 
@@ -191,8 +198,8 @@ class PackagedNativeHostTest(unittest.TestCase):
         self.assertEqual(len(pids), 2)
         self.verify_job_shutdown(launcher, pids)
 
-    def open_launcher(self, path):
-        launcher = subprocess.Popen([str(path), overlay.ORIGIN],
+    def open_launcher(self, path, *args):
+        launcher = subprocess.Popen([str(path), overlay.ORIGIN, *args],
                                     stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE, cwd=self.directory, env=self.env)
         self.addCleanup(self.close_launcher, launcher)

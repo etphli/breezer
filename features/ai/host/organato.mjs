@@ -102,7 +102,11 @@ export function validateItem(input, update = false) {
   if (!update && (typeof input.displayName !== 'string' || !input.displayName.trim())) throw new Error('An item title is required.');
   if (input.displayName !== undefined && (typeof input.displayName !== 'string' || !input.displayName.trim() || input.displayName.length > 500)) throw new Error('Invalid item title.');
   if (input.classification !== undefined && !['assignment', 'checkpoint', 'both', 'unclassified'].includes(input.classification)) throw new Error('Invalid classification.');
-  if (input.dueDateLocal !== undefined && (!/^\d{4}-\d{2}-\d{2}$/.test(input.dueDateLocal) || new Date(input.dueDateLocal).toISOString().slice(0, 10) !== input.dueDateLocal)) throw new Error('Use a valid YYYY-MM-DD deadline.');
+  const { dueDateLocal } = input;
+  if (dueDateLocal !== undefined) {
+    const timestamp = typeof dueDateLocal === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dueDateLocal) ? Date.parse(dueDateLocal) : NaN;
+    if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString().slice(0, 10) !== dueDateLocal) throw new Error('Use a valid YYYY-MM-DD deadline.');
+  }
   if (input.notesMarkdown !== undefined && (typeof input.notesMarkdown !== 'string' || input.notesMarkdown.length > 20_000)) throw new Error('Notes are too long.');
   if (input.workingStatus !== undefined && !['not_started', 'in_progress', 'submitted', 'completed'].includes(input.workingStatus)) throw new Error('Invalid work status.');
   if (update && (!/^[a-zA-Z0-9_-]{1,100}$/.test(input.id) || !Number.isInteger(input.version) || input.version < 1)) throw new Error('Read the current item and version before updating it.');

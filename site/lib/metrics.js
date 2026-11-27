@@ -30,7 +30,8 @@ export function mergeDays(previous = {}, incoming) {
   return days;
 }
 
-export function aggregateUsage(reports, now = new Date()) {
+export function aggregateUsage(input, now = new Date()) {
+  const { reports, truncated } = Array.isArray(input) ? { reports: input, truncated: false } : input;
   const end = now.toISOString().slice(0, 10);
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 29)).toISOString().slice(0, 10);
   const series = [];
@@ -47,5 +48,5 @@ export function aggregateUsage(reports, now = new Date()) {
       // A monthly rotating identifier cannot deduplicate people across months.
     }
   }
-  return { start, end, mau: monthly.size, month: end.slice(0, 7), seconds: series.reduce((sum, row) => sum + row.seconds, 0), series };
+  return { start, end, mau: monthly.size, month: end.slice(0, 7), seconds: series.reduce((sum, row) => sum + row.seconds, 0), series, truncated };
 }
