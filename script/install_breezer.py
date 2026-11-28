@@ -238,6 +238,34 @@ def verify_app(app):
     command(["/usr/bin/codesign", "--verify", "--deep", "--strict", "--verbose=2", str(app)])
 
 
+def update_hold_paths(root=ROOT):
+    """Return this checkout's hold and the primary checkout's, which linked worktrees share."""
+    paths = [root / "build/local-update-hold.json"]
+    try:
+        common = subprocess.run(["git", "-C", str(root), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+                                check=True, capture_output=True, text=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return paths
+    primary = Path(common).parent / "build/local-update-hold.json"
+    return paths if primary == paths[0] else paths + [primary]
+
+
+def check_update_hold(root=None, environ=None):
+    environ = os.environ if environ is None else environ
+    if environ.get("BREEZER_OVERRIDE_UPDATE_HOLD") == "1":
+        return
+    for hold in update_hold_paths(ROOT if root is None else root):
+        if hold.exists() or hold.is_symlink():
+            try:
+                data = json.loads(hold.read_text(encoding="utf-8"))
+                reason = data.get("instruction") or data.get("reason")
+            except (OSError, ValueError, AttributeError):
+                reason = None
+            raise ValueError(f"Local Breezer installation is on hold ({hold}).\n"
+                             f"{reason if isinstance(reason, str) and reason else 'No readable reason was recorded.'}\n"
+                             "For an explicitly authorized install, set BREEZER_OVERRIDE_UPDATE_HOLD=1.")
+
+
 def running_pids(app):
     result = command(["/bin/ps", "-axo", "pid=,comm="], capture_output=True, text=True)
     executable = str(app / "Contents/MacOS/Breezer")
@@ -322,6 +350,7 @@ def main():
     args = parser.parse_args()
     if args.run_id <= 0 or not re.fullmatch(r"[a-fA-F0-9]{40}", args.commit):
         parser.error("Use a positive run ID and a complete 40-character commit SHA.")
+    check_update_hold()
     if platform.system() != "Darwin" or platform.machine() != "arm64":
         parser.error("This installer requires an Apple Silicon Mac.")
     if not shutil.which("gh"):

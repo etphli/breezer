@@ -78,13 +78,19 @@ inline Fd OpenRoot(const std::string& path, bool create) {
   return Fd();
 }
 
-inline Fd LockRoot(int root, bool wait) {
+// Without `wait`, a held lock is retried for up to `retry_for` and then skipped.
+inline Fd LockRoot(int root, bool wait,
+                   std::chrono::milliseconds retry_for = std::chrono::milliseconds(0)) {
   Fd gate(openat(root, ".cleanup-lock", O_RDWR | O_CREAT | O_NOFOLLOW | O_CLOEXEC, 0600));
   if (!PrivateFile(gate.get(), false)) return Fd();
-  int result;
-  do { result = flock(gate.get(), LOCK_EX | (wait ? 0 : LOCK_NB)); }
-  while (result != 0 && errno == EINTR);
-  return result == 0 ? std::move(gate) : Fd();
+  const auto give_up = std::chrono::steady_clock::now() + retry_for;
+  while (flock(gate.get(), LOCK_EX | (wait ? 0 : LOCK_NB)) != 0) {
+    if (errno == EINTR) continue;
+    if (wait || errno != EWOULDBLOCK || std::chrono::steady_clock::now() >= give_up)
+      return Fd();
+    usleep(10000);
+  }
+  return gate;
 }
 
 struct Session {
@@ -124,6 +130,9 @@ struct Limits {
   size_t sessions = 8;
   size_t nodes = 8192;
   std::chrono::milliseconds duration{100};
+  // Exit-time cleanup of one session waits out another instance's brief
+  // creation or sweep instead of leaving its own clone behind.
+  std::chrono::milliseconds targeted_lock_wait{2000};
 };
 
 inline bool SameEntry(int parent, const char* name, int fd) {
@@ -240,7 +249,9 @@ inline size_t Cleanup(const std::string& root_path,
   if (!only_suffix.empty() && !ValidSuffix(only_suffix)) return 0;
   Fd root = OpenRoot(root_path, false);
   if (!root.valid()) return 0;
-  Fd gate = LockRoot(root.get(), false);
+  Fd gate = LockRoot(root.get(), false,
+                     only_suffix.empty() ? std::chrono::milliseconds(0)
+                                         : limits.targeted_lock_wait);
   if (!gate.valid()) return 0;
   Deadline deadline = std::chrono::steady_clock::now() + limits.duration;
   if (!only_suffix.empty())

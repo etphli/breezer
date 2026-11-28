@@ -2,10 +2,10 @@ import { localStorageChanges } from './storage-events.js';
 import { PLATFORM } from './platform.js';
 import { createSpaceSwipe, SWIPE_IDLE_MS } from './space-swipe.js';
 import {
-  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
+  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MEMBERS_KEY, MAX_SPACES, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
-  findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeStore, parseRoute,
-  normalizeFolderColor, removeNode, removeSpace, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
+  findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeMembers, normalizeStore, parseRoute,
+  normalizeFolderColor, removeNode, removeSpace, restoreRemovedEntry, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
   setPrefs, setSpaceIcon, setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
 } from './workspace-store.js';
 
@@ -164,7 +164,10 @@ const state = {
   instant: false,
 };
 
-const pending = { set: {}, remove: new Set(), timer: 0 };
+const pending = { set: {}, remove: new Set(), handoff: new Set(), timer: 0 };
+// Tabs attached from another window. Their link is provisional: shown from
+// storage, never written by this window, until the user sets it here.
+const linkWaits = new Map();
 const urlOf = (tab) => tab?.url || tab?.pendingUrl || '';
 const activeTab = () => [...state.tabs.values()].find((tab) => tab.active) || null;
 const canFavicon = Boolean(api?.runtime?.getManifest?.().permissions?.includes('favicon'));
@@ -175,7 +178,13 @@ function setRecord(tabId, patch) {
   if (!record.e) delete record.e;
   delete record.k;
   state.records[tabId] = record;
-  pending.set[tabId] = record;
+  // Storage keeps a link unless the write carries `e`; '' is an explicit unlink.
+  const unlink = 'e' in patch ? !patch.e : pending.set[tabId]?.e === '';
+  const provisional = linkWaits.has(tabId) && !('e' in patch);
+  if (unlink) pending.set[tabId] = { ...record, e: '' };
+  else if (provisional) { const { e: _link, ...rest } = record; pending.set[tabId] = rest; }
+  else pending.set[tabId] = record;
+  if ('e' in patch) linkWaits.delete(tabId);
   pending.remove.delete(String(tabId));
   scheduleFlush();
   // An empty URL patch can still create membership or default its space.
@@ -185,6 +194,7 @@ function setRecord(tabId, patch) {
 
 function dropRecord(tabId, persist = true) {
   delete state.records[tabId];
+  linkWaits.delete(tabId);
   delete pending.set[tabId];
   if (persist) {
     pending.remove.add(String(tabId));
@@ -202,10 +212,12 @@ function flushRecords() {
   clearTimeout(pending.timer);
   const set = pending.set;
   const remove = [...pending.remove];
+  const handoff = [...pending.handoff];
   if (!Object.keys(set).length && !remove.length) return Promise.resolve();
   pending.set = {};
   pending.remove = new Set();
-  return workspace.patchMembers(set, remove).catch((error) => showToast(`Couldn’t save tab spaces. ${errorText(error)}`));
+  pending.handoff = new Set();
+  return workspace.patchMembers(set, remove, handoff).catch((error) => showToast(`Couldn’t save tab spaces. ${errorText(error)}`));
 }
 
 let windowStateWrite = null;
@@ -415,10 +427,7 @@ async function unpinEntry(entry, tab, { undo = true } = {}) {
   }
   render();
   if (undo && !tab) {
-    showToast(snapshot.favorite ? 'Removed from favorites.' : 'Unpinned.', 'Undo', () => mutate((store) => {
-      if (snapshot.favorite) store.favorites.splice(snapshot.index, 0, snapshot.node);
-      else addEntry(store, resolveSpaceId(store, snapshot.spaceId), snapshot.node, { folderId: snapshot.folderId, index: snapshot.index });
-    }).catch(() => {}));
+    showToast(snapshot.favorite ? 'Removed from favorites.' : 'Unpinned.', 'Undo', () => mutate((store) => restoreRemovedEntry(store, snapshot)).catch(() => {}));
   }
 }
 
@@ -468,20 +477,28 @@ async function clearToday() {
 }
 
 async function restoreClosed(items, spaceId) {
-  const restorable = new Map(items.map((item) => [item.url, item]));
+  // A list, not a URL map: several closed tabs can share one URL.
+  const restorable = [...items];
   if (typeof api.sessions?.getRecentlyClosed === 'function' && typeof api.sessions.restore === 'function') {
     try {
       const recent = await api.sessions.getRecentlyClosed({ maxResults: 25 });
       for (const session of recent) {
         const tab = session.tab;
-        if (!tab || !restorable.has(tab.url)) continue;
-        restorable.delete(tab.url);
-        state.expect.push({ url: tab.url, spaceId, entryId: '', pinned: false, at: Date.now() });
-        await api.sessions.restore(tab.sessionId);
+        if (!tab || !restorable.some((item) => item.url === tab.url)) continue;
+        const expectation = { url: tab.url, spaceId, entryId: '', pinned: false, at: Date.now() };
+        state.expect.push(expectation);
+        try {
+          await api.sessions.restore(tab.sessionId);
+        } catch {
+          // Leave the item for the fallback below, and no stale expectation.
+          state.expect = state.expect.filter((item) => item !== expectation);
+          continue;
+        }
+        restorable.splice(restorable.findIndex((item) => item.url === tab.url), 1);
       }
     } catch { /* Fall back to reopening the URLs below. */ }
   }
-  for (const item of restorable.values()) await createTab({ url: item.url, spaceId, active: false });
+  for (const item of restorable) await createTab({ url: item.url, spaceId, active: false });
 }
 
 // ---------------------------------------------------------------- spaces
@@ -2074,14 +2091,27 @@ function onAttached(tabId, info) {
   queryDrawDirty = true;
   ++pendingTabAttachments;
   state.peekKey = null;
-  void api.tabs.get(tabId).then((tab) => {
+  // A tab from another window keeps its saved-entry link from stored membership.
+  // The read waits behind the sending window's pending membership write. If
+  // the sender has not flushed yet, its later write supplies the link.
+  // null until a storage change reports the link; that report is newer than the read.
+  linkWaits.set(tabId, null);
+  const stored = Promise.resolve().then(() => workspace.readMembers()).then((members) => members.tabs[tabId], () => null);
+  void Promise.all([api.tabs.get(tabId), stored]).then(([tab, member]) => {
     ++tabEventVersion;
     queryDrawDirty = true;
     state.tabs.set(tabId, tab);
-    const record = state.records[tabId];
-    setRecord(tabId, { s: state.activeSpaceId, e: record?.e || '' });
+    const known = state.records[tabId]?.e;
+    if (known) setRecord(tabId, { s: state.activeSpaceId, e: known });
+    else {
+      // Omit `e` so this write can neither erase nor restore the sender's link.
+      setRecord(tabId, { s: state.activeSpaceId });
+      const reported = linkWaits.get(tabId);
+      const shown = typeof reported === 'string' ? reported : member?.e || '';
+      if (shown && linkWaits.has(tabId)) state.records[tabId].e = shown;
+    }
     return refreshTabs();
-  }).catch(() => {}).finally(() => { --pendingTabAttachments; });
+  }).catch(() => { if (!state.records[tabId]) linkWaits.delete(tabId); }).finally(() => { --pendingTabAttachments; });
 }
 
 function onDetached(tabId, info) {
@@ -2090,9 +2120,30 @@ function onDetached(tabId, info) {
   queryDrawDirty = true;
   state.peekKey = null;
   state.tabs.delete(tabId);
-  // The receiving window rewrites the record; don't race it with a delete.
+  // Hand the latest membership to the receiving window, which reads it under
+  // the same lock. Then don't race its rewrite with a delete. If it already
+  // claimed the tab, this write only supplies the link.
+  if (pending.set[tabId]) { pending.handoff.add(tabId); void flushRecords(); }
   dropRecord(tabId, false);
   void refreshTabs();
+}
+
+// The sending window's late flush links a tab this window already claimed.
+function adoptLinks(members) {
+  let changed = false;
+  for (const tabId of [...linkWaits.keys()]) {
+    const stored = members.tabs[tabId];
+    if (!stored) continue;
+    const e = stored.e || '';
+    const record = state.records[tabId];
+    if (!record) { linkWaits.set(tabId, e); continue; }
+    // Follow storage in memory only; the sender's handoff is authoritative.
+    if ((record.e || '') === e) continue;
+    if (e) record.e = e; else delete record.e;
+    changed = true;
+  }
+  // Tab snapshots are unchanged, so refreshTabs would skip the redraw.
+  if (changed) render();
 }
 
 function onReplaced(addedTabId, removedTabId) {
@@ -2217,6 +2268,7 @@ function bindSidebar() {
       state.store = normalizeStore(changes[STORE_KEY].newValue);
       render();
     }
+    if (changes[MEMBERS_KEY] && linkWaits.size) adoptLinks(normalizeMembers(changes[MEMBERS_KEY].newValue));
     if (changes[EXPERIMENTS_KEY]) {
       state.spaceDock = changes[EXPERIMENTS_KEY].newValue?.spaceDock === true;
       render();

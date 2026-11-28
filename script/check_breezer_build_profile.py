@@ -45,8 +45,12 @@ class BuildProfileTests(unittest.TestCase):
         self.selection = selection + source.split(selection, 1)[1].split('\nif [[ "$(uname -s)"', 1)[0]
         overrides = 'BREEZER_PROFILE_ARGS="'
         self.overrides = overrides + source.split(overrides, 1)[1].split('\nif [[ "$BREEZER_MODE" == --check', 1)[0]
-        output = 'source "$_root_dir/devutils/shared.sh"'
+        output = 'BREEZER_UPSTREAM_ENV="'
         self.output = output + source.split(output, 1)[1].split('\nBREEZER_OMNIBOX_PREPARED=', 1)[0]
+        # Upstream build functions are sourced after the prepared-input checks; keep
+        # the profile output directory that env.sh would otherwise reset.
+        upstream = 'BREEZER_PROFILE_OUT_DIR="$_out_dir"'
+        self.upstream = upstream + source.split(upstream, 1)[1].split('\nif [[ -f "$BREEZER_PREPARED" ]]', 1)[0]
         config = 'write_gn_args "$_arch" release'
         self.config = config + source.split(config, 1)[1].split('\ngn_gen\n', 1)[0]
 
@@ -55,7 +59,7 @@ class BuildProfileTests(unittest.TestCase):
                if key not in ("BREEZER_BUILD_PROFILE", "BREEZER_DEVELOPMENT_BUILD", "BREEZER_OUT_DIR")}
         env.update(BREEZER_ROOT=str(ROOT), BREEZER_PYTHON=sys.executable, _root_dir=str(self.stage))
         env.update(extra or {})
-        shell = "set -euo pipefail\n" + "\n".join((self.selection, self.overrides, self.output, self.config))
+        shell = "set -euo pipefail\n" + "\n".join((self.selection, self.overrides, self.output, self.upstream, self.config))
         return subprocess.run(["bash", "-c", shell], env=env, capture_output=True, text=True)
 
     def test_upstream_and_legacy_development_remain_compatible(self):

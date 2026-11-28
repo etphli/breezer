@@ -4,6 +4,7 @@
 import json
 from pathlib import Path
 import plistlib
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -89,6 +90,11 @@ class ReleaseVersionTests(unittest.TestCase):
         (feature / 'integration/native-host-manifest.json').write_text('{}')
         (feature / 'runtime.lock.json').write_text(json.dumps({
             'version': '24.22.1', 'distributions': {'arm64': {}}}))
+        # Packaging copies only tracked host files, so the fixture is a committed checkout.
+        for arguments in (['init', '-q'], ['add', 'features'],
+                          ['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', '-c', 'commit.gpgsign=false',
+                           'commit', '-q', '-m', 'fixture']):
+            subprocess.run(['git', *arguments], cwd=self.root, check=True, capture_output=True)
         app = self.root / 'Breezer.app'
         info = app / 'Contents/Info.plist'
         info.parent.mkdir(parents=True)

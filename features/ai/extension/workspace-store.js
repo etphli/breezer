@@ -317,8 +317,8 @@ export function removeSpace(store, id) {
   return store.spaces[0].id;
 }
 
-export function addEntry(store, spaceId, { id, url, title } = {}, { folderId = null, index } = {}) {
-  const entry = normalizeEntry({ id, url, title });
+export function addEntry(store, spaceId, { id, url, title, customTitle } = {}, { folderId = null, index } = {}) {
+  const entry = normalizeEntry({ id, url, title, customTitle });
   if (!entry) throw new Error('This page can’t be pinned.');
   if (findNode(store, entry.id)) throw new Error('Already pinned.');
   const space = requireSpace(store, spaceId);
@@ -402,13 +402,24 @@ export function moveNode(store, id, target) {
   return found.node;
 }
 
-export function addFavorite(store, { id, url, title } = {}) {
-  const entry = normalizeEntry({ id, url, title });
+export function addFavorite(store, { id, url, title, customTitle } = {}) {
+  const entry = normalizeEntry({ id, url, title, customTitle });
   if (!entry) throw new Error('This page can’t be added to favorites.');
   if (store.favorites.length >= MAX_FAVORITES) throw new Error(`Favorites hold up to ${MAX_FAVORITES} pages.`);
   if (findNode(store, entry.id)) throw new Error('Already saved.');
   store.favorites.push(entry);
   return entry;
+}
+
+// Undo of an unpin or favorite removal. Sync treats a removed id as deleted
+// for good, so the entry returns under a fresh id that every device sees as a
+// new item. Favorites may share a URL, so a same-URL favorite is no reason to skip it.
+export function restoreRemovedEntry(store, { node, favorite, spaceId, folderId = null, index }) {
+  const entry = { url: node.url, title: node.title, customTitle: node.customTitle };
+  if (!favorite) return addEntry(store, resolveSpaceId(store, spaceId), entry, { folderId, index });
+  const restored = addFavorite(store, entry);
+  moveNode(store, restored.id, { favorites: true, index });
+  return restored;
 }
 
 export function setPrefs(store, patch) {
@@ -669,19 +680,34 @@ export class WorkspaceStore {
     });
   }
 
+  // Reads membership after any write already queued by another window.
+  readMembers() {
+    return this.locks.request(LOCK_NAME, async () => (await this.read()).members);
+  }
+
   update(fn) {
     return this.transact(({ store }) => fn(store));
   }
 
   // Applies this window's membership changes without touching other windows' tabs.
-  patchMembers(set = {}, remove = []) {
+  // A record without an `e` key keeps the stored saved-entry link; `e: ''`
+  // removes it. `handoff` ids belong to a tab this window just sent elsewhere:
+  // an existing record gets only the link, so the receiver keeps its space.
+  patchMembers(set = {}, remove = [], handoff = []) {
     return this.locks.request(LOCK_NAME, async () => {
       const values = await this.storage.local.get([MEMBERS_KEY]);
       const members = normalizeMembers(values[MEMBERS_KEY]);
       const beforeMembers = JSON.stringify(members);
       const session = await this.sessionToken();
       rollSession(members, session);
-      for (const [id, record] of Object.entries(set)) members.tabs[id] = { ...record, k: session };
+      const handed = new Set(handoff.map(String));
+      for (const [id, record] of Object.entries(set)) {
+        const stored = members.tabs[id];
+        const next = handed.has(id) && stored ? { ...stored } : { ...record, k: session };
+        if (!('e' in record)) { if (stored?.e) next.e = stored.e; } else if (record.e) next.e = record.e;
+        else delete next.e;
+        members.tabs[id] = next;
+      }
       for (const id of remove) delete members.tabs[id];
       if (JSON.stringify(members) !== beforeMembers) await this.storage.local.set({ [MEMBERS_KEY]: members });
     });

@@ -18,6 +18,31 @@ from breezer_release import release_version
 ROOT = Path(__file__).resolve().parent.parent
 FEATURE = ROOT / "features/ai"
 BUNDLE_ID = "io.github.etphli.breezer"
+# Paths whose uncommitted changes make HEAD an inaccurate description of the build.
+BUILD_INPUTS = ("features", "script", "upstream", "assets", "upstream.lock.json")
+
+
+def git(*arguments):
+    return subprocess.run(["git", *arguments], cwd=ROOT, check=True, capture_output=True, text=True).stdout
+
+
+def build_inputs_dirty():
+    return bool(git("status", "--porcelain", "--untracked-files=all", "--", *BUILD_INPUTS).strip())
+
+
+def copy_tracked_host(destination):
+    """Copy only committed or staged host files, never untracked local files."""
+    host = FEATURE / "host"
+    names = [name for name in git("ls-files", "-z", "--", host.relative_to(ROOT).as_posix()).split("\0") if name]
+    if not names:
+        raise ValueError(f"No tracked AI host files under {host}.")
+    for name in names:
+        source = ROOT / name
+        if not source.is_file():
+            continue  # Deleted in the working tree; build_inputs_dirty() reports it.
+        target = destination / source.relative_to(host)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
 
 
 def verify_archive(archive, checksum):
@@ -107,11 +132,16 @@ def package(app, architecture, cache, memory_packet=None):
     with tempfile.TemporaryDirectory(prefix=".breezer-ai-", dir=resources) as temporary:
         staged = Path(temporary) / "breezer_ai"
         staged.mkdir()
-        shutil.copytree(FEATURE / "host", staged / "host", ignore=shutil.ignore_patterns("__pycache__", ".DS_Store"))
+        copy_tracked_host(staged / "host")
         shutil.copyfile(FEATURE / "integration/native-host-manifest.json", staged / "io.github.etphli.breezer.ai.json")
         (staged / "host/launch.sh").chmod(0o755)
         commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-        (staged / "host/build-identity.json").write_text(json.dumps({"commit": commit}) + "\n")
+        identity = {"commit": commit}
+        if build_inputs_dirty():
+            # A dirty tree is not the commit it names; release manifests must refuse it.
+            identity["dirty"] = True
+            print(f"Warning: build inputs differ from {commit}; build-identity.json is marked dirty.")
+        (staged / "host/build-identity.json").write_text(json.dumps(identity) + "\n")
         unpack_runtime(archive, staged / "runtime", lock["distributions"][architecture])
         runtime = staged / "runtime/node"
         if platform.system() == "Darwin" and architecture == {"arm64": "arm64", "x86_64": "x64"}.get(platform.machine()):

@@ -13,7 +13,16 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 // The download can take 15 minutes, followed by several timed macOS commands.
 const lockMaxAge = 60 * 60_000;
 const ownerName = /^owner-[a-f0-9-]+\.json$/;
-const backupName = /^Breezer-(?:update-\d+(?:-[a-f0-9-]+)?|\d{8}-\d{6}(?:-[a-f0-9]{8})?)\.app$/;
+// Each worker writes only its own status file, keyed by its lock owner id, so a
+// worker that lost the lock can never overwrite its successor's progress.
+// readUpdateStatus in updater.mjs selects the record to show.
+const statusName = /^\.Breezer-update-status-[a-f0-9-]+\.json$/;
+const legacyStatusName = '.Breezer-update-status.json';
+// Only prune rollback copies made by this worker; manual backups are the user's.
+const backupName = /^Breezer-update-\d+(?:-[a-f0-9-]+)?\.app$/;
+const stagingName = /^\.breezer-update-[A-Za-z0-9]+$/;
+// A newer sibling may be a worker that is still starting; leave it to its owner.
+const stagingMinAge = 10 * 60_000;
 
 function pidIsAlive(pid) {
   try {
@@ -24,6 +33,27 @@ function pidIsAlive(pid) {
     if (error.code === 'EPERM') return true;
     throw error;
   }
+}
+
+// Wall-clock process start, or null when it cannot be read.
+async function processStart(pid) {
+  try {
+    const { stdout } = await exec('/bin/ps', ['-o', 'lstart=', '-p', String(pid)], { timeout: 10_000, env: { ...process.env, LC_ALL: 'C' } });
+    const started = Date.parse(stdout.trim());
+    return Number.isFinite(started) ? started : null;
+  } catch { return null; }
+}
+
+// Keep a live owner regardless of age: sleep advances Date.now() during a long
+// download. A live PID that started after the lock was taken was reused, so the
+// lock is stale. Age decides only when the owner's start cannot be checked.
+async function ownerIsStale(pid, startedAt) {
+  if (!(Number.isInteger(pid) && pid > 0 && pid <= 0x7fffffff)) return Date.now() - startedAt >= lockMaxAge;
+  if (!pidIsAlive(pid)) return true;
+  const started = await processStart(pid);
+  if (started === null) return Date.now() - startedAt >= lockMaxAge;
+  // ps reports whole seconds.
+  return started > startedAt + 2000;
 }
 
 async function releaseLock(owner) {
@@ -52,9 +82,7 @@ async function acquireLock(work, lock) {
         let record;
         try { record = JSON.parse(raw); } catch {}
         const startedAt = Number.isFinite(record?.startedAt) ? record.startedAt : info.mtimeMs;
-        const pid = record?.pid;
-        const dead = Number.isInteger(pid) && pid > 0 && pid <= 0x7fffffff && !pidIsAlive(pid);
-        if (!dead && Date.now() - startedAt < lockMaxAge) return null;
+        if (!await ownerIsStale(record?.pid, startedAt)) return null;
         await releaseLock(owner);
       } else {
         // Older versions created an empty directory with no way to check its owner.
@@ -96,6 +124,28 @@ async function cleanStaging(work, mount, mounted, detachAttempted) {
     }
   }
   await rm(work, { recursive: true, force: true });
+}
+
+// Earlier workers can leave staging behind, including a DMG whose forced detach
+// failed. Run only while holding the update lock.
+async function cleanEarlierStaging(parent, work) {
+  for (const name of await readdir(parent).catch(() => [])) {
+    const path = join(parent, name);
+    if (!stagingName.test(name) || path === work) continue;
+    try {
+      const info = await lstat(path);
+      if (!info.isDirectory() || Date.now() - info.mtimeMs < stagingMinAge) continue;
+      const mount = join(path, 'mount');
+      const mountInfo = await lstat(mount).catch(() => null);
+      if (mountInfo?.isDirectory() && mountInfo.dev !== info.dev) {
+        await detach(mount, true);
+        const after = await lstat(mount).catch(() => null);
+        if (after && after.dev !== info.dev) continue;
+      }
+      // rm removes symbolic links themselves and never follows them.
+      await rm(path, { recursive: true, force: true });
+    } catch {}
+  }
 }
 
 export async function verifyBundle(app, commit) {
@@ -143,28 +193,49 @@ export async function installUpdate(work) {
   const { app, candidate } = JSON.parse(await readFile(join(work, 'request.json'), 'utf8'));
   if (![join(homedir(), 'Applications/Breezer.app'), '/Applications/Breezer.app'].includes(app) || resolve(work) !== work || dirname(work) !== dirname(app) || !basename(work).startsWith('.breezer-update-')) throw new Error('Updates require Breezer in Applications.');
   const parent = dirname(app), lock = join(parent, '.Breezer-update.lock');
-  let owner;
+  let owner, acknowledged = false, acquiredAt, statusPath;
+  const worker = basename(work);
   const requireLock = () => lstat(owner);
-  const status = async (phase, notice) => {
-    const path = join(parent, '.Breezer-update-status.json');
+  // Progress aborts the update once the lock is lost. A terminal phase is written
+  // regardless, or Settings keeps polling; it only ever touches this worker's file.
+  const status = async (phase, notice, { locked = true } = {}) => {
     const temporary = join(work, 'status.json');
-    await writeFile(temporary, JSON.stringify({ phase, notice, version: candidate.version, updatedAt: Date.now() }), { mode: 0o600 });
-    await requireLock();
-    await rename(temporary, path);
+    await writeFile(temporary, JSON.stringify({ phase, notice, version: candidate.version, worker, acquiredAt, updatedAt: Date.now() }), { mode: 0o600 });
+    if (locked) await requireLock();
+    await rename(temporary, statusPath);
+  };
+  const finalStatus = (phase, notice) => status(phase, notice, { locked: false }).catch(() => {});
+  // Before acknowledgement the controller is still waiting; give it the real cause.
+  const reportBlocked = (notice) => {
+    if (acknowledged || !process.connected) return false;
+    acknowledged = true;
+    process.send({ type: 'update-worker-blocked', notice });
+    return true;
   };
   const mount = join(work, 'mount'), staged = join(work, 'Breezer.app');
-  let mounted = false, detachAttempted = false;
+  let mounted = false, detachAttempted = false, installed = false;
   try {
     owner = await acquireLock(work, lock);
     if (!owner) {
       const notice = 'Another update is already running.';
-      if (!process.connected) throw new Error(notice);
-      process.send({ type: 'update-worker-blocked', notice });
+      if (!reportBlocked(notice)) throw new Error(notice);
       return;
     }
+    acquiredAt = Date.now();
+    statusPath = join(parent, `.Breezer-update-status-${basename(owner).slice('owner-'.length, -'.json'.length)}.json`);
     await status('downloading', 'Downloading the verified GitHub release…');
+    // Records written before this worker took the lock are superseded. A newer
+    // record belongs to a successor and must survive if this worker is stale.
+    for (const name of await readdir(parent).catch(() => [])) {
+      const path = join(parent, name);
+      if (!(statusName.test(name) || name === legacyStatusName) || path === statusPath) continue;
+      const info = await lstat(path).catch(() => null);
+      if (info && info.mtimeMs < acquiredAt) await rm(path, { force: true }).catch(() => {});
+    }
     // A process spawning is not proof its script survived Gatekeeper/startup.
     if (process.connected) process.send({ type: 'update-worker-ready' });
+    acknowledged = true;
+    await cleanEarlierStaging(parent, work);
     const disk = await statfs(parent);
     if (disk.bavail * disk.bsize < candidate.size * 4 + 2 * 1024 ** 3) throw new Error('Not enough free disk space for this update.');
     const url = new URL(candidate.url);
@@ -194,16 +265,21 @@ export async function installUpdate(work) {
     const backup = join(backups, `Breezer-update-${Date.now()}-${randomUUID()}.app`);
     await requireLock();
     await replaceApp(staged, app, backup, path => verifyBundle(path, candidate.commit), path => run('/usr/bin/open', [path, '--args', '--restore-last-session']));
-    await requireLock();
-    for (const entry of obsolete) {
-      if (entry.isDirectory() && backupName.test(entry.name)) {
-        await rm(join(backups, entry.name), { recursive: true, force: true }).catch(() => {});
+    installed = true;
+    // The new app is running; pruning is best effort and never turns this into a failure.
+    try {
+      await requireLock();
+      for (const entry of obsolete) {
+        if (entry.isDirectory() && backupName.test(entry.name)) {
+          await rm(join(backups, entry.name), { recursive: true, force: true }).catch(() => {});
+        }
       }
-    }
-    await status('installed', `Updated to ${candidate.version}. The previous app is kept in .Breezer-backups for rollback.`);
+    } catch {}
+    await finalStatus('installed', `Updated to ${candidate.version}. The previous app is kept in .Breezer-backups for rollback.`);
   } catch (error) {
-    if (!owner) throw error;
-    await status('failed', `Update failed: ${error.message}`);
+    const notice = `Update failed: ${error.message}`;
+    if (owner && !installed) await finalStatus('failed', notice);
+    if (!reportBlocked(notice) && !owner) throw error;
   } finally {
     try {
       await cleanStaging(work, mount, mounted, detachAttempted);
@@ -212,4 +288,10 @@ export async function installUpdate(work) {
     }
   }
 }
-if (process.argv[1]?.endsWith('/worker.mjs')) await installUpdate(process.argv[2]);
+if (process.argv[1]?.endsWith('/worker.mjs')) {
+  await installUpdate(process.argv[2]).catch(error => {
+    // Request or location errors happen before acknowledgement.
+    if (!process.connected) throw error;
+    process.send({ type: 'update-worker-blocked', notice: `Update failed: ${error.message}` });
+  });
+}

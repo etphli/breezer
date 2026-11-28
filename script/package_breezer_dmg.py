@@ -77,6 +77,8 @@ def package(app_argument, output_argument, verify_app=install_breezer.verify_app
         identity = json.loads(identities.pop().read_text())
         if len(identity.get("commit", "")) != 40 or any(c not in "0123456789abcdef" for c in identity["commit"]):
             raise ValueError("Invalid app commit.")
+        if identity.get("dirty"):
+            raise ValueError("Refusing to publish an update manifest for a build with uncommitted changes.")
 
     # Keep staging and the image on the output volume so final links are atomic.
     with tempfile.TemporaryDirectory(prefix=".breezer-dmg-", dir=output.parent) as temporary:

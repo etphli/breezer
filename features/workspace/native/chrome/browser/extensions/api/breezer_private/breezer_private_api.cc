@@ -763,8 +763,14 @@ BreezerPrivateReadResearchTabFunction::RunFunction() {
     }
     expected_url_ = url.spec();
     document_ = frame->GetWeakDocumentPtr();
-    timeout_.Start(FROM_HERE, base::Seconds(8), this,
-                   &BreezerPrivateReadResearchTabFunction::OnTimeout);
+    // The script callback is dropped without running if the renderer or frame
+    // goes away, so the timer holds its own reference. This keeps the request
+    // alive until exactly one of OnText or OnTimeout responds. Stopping or
+    // firing the timer releases that reference, so no cycle remains.
+    timeout_.Start(
+        FROM_HERE, base::Seconds(8),
+        base::BindOnce(&BreezerPrivateReadResearchTabFunction::OnTimeout,
+                       base::RetainedRef(this)));
     frame->ExecuteJavaScriptInIsolatedWorld(
         kBreezerResearchText,
         base::BindOnce(&BreezerPrivateReadResearchTabFunction::OnText, this),

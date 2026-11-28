@@ -26,6 +26,23 @@ PORTABLE = "Breezer-Windows-x64.zip"
 PORTABLE_EXCLUSIONS = set(map(Path, (
     "mini_installer.exe", "mini_installer_exe_version.rc", "setup.exe", "helium.packed.7z",
 )))
+# Overlays that insert source text. Re-applying a changed one over its earlier
+# result can insert a second copy, so a prepared tree accepts only the inputs it
+# was first built with.
+OVERLAY_SCRIPTS = (
+    "script/apply_breezer_omnibox.py", "script/apply_breezer_workspace.py", "script/apply_breezer_ai_ui.py",
+    "features/passwords/native-ui/apply.py", "script/apply_breezer_sync.py",
+)
+OVERLAY_FILES = (
+    "script/apply_breezer_ai.py", "script/apply_breezer_ai_windows_host.py", "script/apply_breezer_branding.py",
+    "script/windows/apply_breezer_windows.py", "script/windows/stage_breezer_ai.py",
+    "features/passwords/native-ui/windows-import.patch",
+)
+OVERLAY_DIRECTORIES = ("features/ai/integration", "features/ai/windows")
+# Written by prepare. A tree without it predates overlay tracking, so nothing
+# shows which overlays it already holds.
+SOURCE_SCHEMA = ("breezer_source_schema", 2)
+SOURCE_OPTIONAL = (SOURCE_SCHEMA[0], "breezer_commit", "breezer_overlays")
 
 
 def run(*command, **kwargs):
@@ -43,9 +60,52 @@ def write_marker(path, data):
     temporary.replace(path)
 
 
-def require_marker(path, expected):
-    if not path.is_file() or json.loads(path.read_text(encoding="utf-8")) != expected:
+def read_marker(path, expected, optional=()):
+    data = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+    if not isinstance(data, dict) or {key: value for key, value in data.items() if key not in optional} != expected:
         raise ValueError(f"Missing or mismatched build inputs at {path}.")
+    return data
+
+
+def overlay_fingerprints():
+    result = {name: run(sys.executable, ROOT / name, "--fingerprint", capture_output=True,
+                        encoding="utf-8").stdout.strip() for name in OVERLAY_SCRIPTS}
+    files = [ROOT / name for name in OVERLAY_FILES]
+    files.extend(path for directory in OVERLAY_DIRECTORIES for path in (ROOT / directory).rglob("*") if path.is_file())
+    digest = hashlib.sha256()
+    for path in sorted(files):
+        digest.update(path.relative_to(ROOT).as_posix().encode() + b"\0")
+        digest.update(hashlib.sha256(path.read_bytes()).digest())
+    result["windows_overlay_files"] = digest.hexdigest()
+    return result
+
+
+def breezer_inputs():
+    return {"breezer_commit": git(ROOT, "rev-parse", "HEAD"), "breezer_overlays": overlay_fingerprints()}
+
+
+def prepared_marker(expected):
+    return {**expected, SOURCE_SCHEMA[0]: SOURCE_SCHEMA[1]}
+
+
+def record_overlays(marker, expected, breezer):
+    """Refuse to re-apply changed overlays to a tree that already holds older ones."""
+    data = read_marker(marker, expected, optional=SOURCE_OPTIONAL)
+    if data.get(SOURCE_SCHEMA[0]) != SOURCE_SCHEMA[1]:
+        raise ValueError(
+            f"{marker.parent} was prepared by an older build script, so the Breezer overlays it already "
+            f"holds are unknown. Re-applying them could duplicate inserted source. "
+            f"Remove {marker.parent} and run prepare again, or use a separate --build-dir.")
+    previous = data.get("breezer_overlays")
+    if previous is not None and previous != breezer["breezer_overlays"]:
+        changed = ", ".join(sorted(name for name in {*previous, *breezer["breezer_overlays"]}
+                                   if previous.get(name) != breezer["breezer_overlays"].get(name)))
+        raise ValueError(
+            f"Breezer overlay inputs changed ({changed}) since {marker.parent} was built from commit "
+            f"{data.get('breezer_commit', 'unknown')}. Re-applying them would duplicate inserted source. "
+            f"Remove {marker.parent} and run prepare again, or use a separate --build-dir.")
+    # Record before applying, so an interrupted apply is retried only with the same inputs.
+    write_marker(marker, {**prepared_marker(expected), **breezer})
 
 
 @contextmanager
@@ -158,7 +218,7 @@ def prepare_sources(build_dir, core, platform, expected):
 
     source = build_dir / "src"
     if source.exists():
-        require_marker(source / SOURCE_MARKER, expected)
+        read_marker(source / SOURCE_MARKER, expected, optional=SOURCE_OPTIONAL)
         print(f"Reusing prepared Windows sources in {source}", flush=True)
         return
 
@@ -185,7 +245,7 @@ def prepare_sources(build_dir, core, platform, expected):
     run(sys.executable, stage / "build/config/siso/configure_siso.py",
         "--rbe_instance=projects/rbe-chrome-untrusted/instances/default_instance",
         "--reapi_address=", "--reapi_instance=", "--reapi_backend_config_path=")
-    write_marker(stage / SOURCE_MARKER, expected)
+    write_marker(stage / SOURCE_MARKER, prepared_marker(expected))
     stage.rename(source)
     print(f"Prepared Windows sources in {source}", flush=True)
 
@@ -234,12 +294,16 @@ def require_x64_pe(path):
 
 def build_browser(build_dir, core, platform, expected, jobs, gen_only, *, use_ninja=False):
     source = build_dir / "src"
-    require_marker(source / SOURCE_MARKER, expected)
+    breezer = breezer_inputs()
+    read_marker(source / SOURCE_MARKER, expected, optional=SOURCE_OPTIONAL)
     output = source / "out/Default"
     output.mkdir(parents=True, exist_ok=True)
-    (output / BUILD_MARKER).unlink(missing_ok=True)
     env = visual_studio_environment()
 
+    # Refuse before touching the build marker, so a tree compiled from another
+    # commit stays packageable from that commit.
+    record_overlays(source / SOURCE_MARKER, expected, breezer)
+    (output / BUILD_MARKER).unlink(missing_ok=True)
     run(sys.executable, ROOT / "script/windows/apply_breezer_windows.py", source, cwd=ROOT,
         env={**os.environ, "PYTHONUTF8": "1"})
 
@@ -270,7 +334,7 @@ def build_browser(build_dir, core, platform, expected, jobs, gen_only, *, use_ni
         require_x64_pe(output / name)
     require_x64_pe(output / stage_breezer_ai.LAUNCHER)
     require_x64_pe(output / stage_breezer_ai.NODE)
-    write_marker(output / BUILD_MARKER, expected)
+    write_marker(output / BUILD_MARKER, {**expected, **breezer})
 
 
 def sha256(path):
@@ -286,7 +350,13 @@ def package_browser(build_dir, destination, expected):
 
     source = build_dir / "src"
     output = source / "out/Default"
-    require_marker(output / BUILD_MARKER, expected)
+    breezer = breezer_inputs()
+    built = read_marker(output / BUILD_MARKER, expected, optional=tuple(breezer))
+    if built.get("breezer_commit") != breezer["breezer_commit"]:
+        raise ValueError(f"This build was compiled from Breezer commit {built.get('breezer_commit', 'unknown')}, "
+                         f"but the checkout is at {breezer['breezer_commit']}. Build again before packaging.")
+    if built.get("breezer_overlays") != breezer["breezer_overlays"]:
+        raise ValueError("Breezer overlay inputs changed since this build. Build again before packaging.")
     if destination.exists():
         raise FileExistsError(f"Choose a new output directory: {destination}")
     for name in ("chrome.exe", "chrome.dll", "mini_installer.exe"):
