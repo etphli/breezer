@@ -2,6 +2,8 @@
 
 Ship a feature release after roughly four or five finished, user-visible features. Ship a patch release sooner when something is broken; do not wait for a feature quota to fix a regression.
 
+For releases after 1.3.7, start release preparation with the [update queue](docs/update-queue.md#prepare-and-close-a-release). Check the exact candidate commit before publishing and record the tagged release after publication and artifact verification.
+
 ## Before publishing
 
 - Keep the change focused. Finish the relevant tests, native build and actual-app checks.
