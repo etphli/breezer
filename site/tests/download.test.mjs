@@ -11,7 +11,7 @@ const WINDOWS_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 const MAC_UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36';
 
 const asset = (name, digest = `sha256:${'a'.repeat(64)}`) => ({ name, digest, state: 'uploaded', size: 100, browser_download_url: `https://github.com/etphli/breezer/releases/download/v1.3.5/${name}` });
-const macOnly = { tag_name: 'v1.3.1', assets: [asset('Breezer-v1.3.1-arm64.dmg'), asset('Breezer-v1.3.1-arm64.dmg.sha256')] };
+const macOnly = { tag_name: 'v1.3.5', assets: [asset('Breezer-v1.3.5-arm64.dmg'), asset('Breezer-v1.3.5-arm64.dmg.sha256')] };
 const withWindows = { tag_name: 'v1.3.5', assets: [
   asset('Breezer-v1.3.5-arm64.dmg'), asset('Breezer-v1.3.5-arm64.dmg.sha256'),
   asset('Breezer-Windows-x64-Setup.exe', `sha256:${'b'.repeat(64)}`), asset('Breezer-Windows-x64-Setup.exe.sha256'),

@@ -79,8 +79,8 @@ test('homepage, privacy, dashboard, responsive layout, errors, and the actual us
     await fallback.goto(`${origin}/download`);
     await incomplete;
     await fallback.waitForLoadState('networkidle');
-    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.1\//);
-    assert.equal(await fallback.locator('#sha').textContent(), 'd4cea26348d3ad2c388b21511bb726ed1de5adc28bd30050ceda4da29af1b4e7');
+    assert.match(await fallback.locator('[data-download]').getAttribute('href'), /\/v1\.3\.5\//);
+    assert.equal(await fallback.locator('#sha').textContent(), 'd069eecc961ab0d6728e8cb05dce202c0a53d5f481bfc20ba0a6801600a3a713');
     await fallback.close();
     await page.getByRole('link', { name: 'Privacy policy', exact: true }).click();
     await page.getByRole('heading', { name: 'Your browsing. Your business.' }).waitFor();
