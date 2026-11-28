@@ -2094,7 +2094,8 @@ function onAttached(tabId, info) {
   // A tab from another window keeps its saved-entry link from stored membership.
   // The read waits behind the sending window's pending membership write. If
   // the sender has not flushed yet, its later write supplies the link.
-  linkWaits.set(tabId, '');
+  // null until a storage change reports the link; that report is newer than the read.
+  linkWaits.set(tabId, null);
   const stored = Promise.resolve().then(() => workspace.readMembers()).then((members) => members.tabs[tabId], () => null);
   void Promise.all([api.tabs.get(tabId), stored]).then(([tab, member]) => {
     ++tabEventVersion;
@@ -2105,7 +2106,8 @@ function onAttached(tabId, info) {
     else {
       // Omit `e` so this write can neither erase nor restore the sender's link.
       setRecord(tabId, { s: state.activeSpaceId });
-      const shown = member?.e || linkWaits.get(tabId) || '';
+      const reported = linkWaits.get(tabId);
+      const shown = typeof reported === 'string' ? reported : member?.e || '';
       if (shown && linkWaits.has(tabId)) state.records[tabId].e = shown;
     }
     return refreshTabs();
@@ -2140,7 +2142,8 @@ function adoptLinks(members) {
     if (e) record.e = e; else delete record.e;
     changed = true;
   }
-  if (changed) void refreshTabs();
+  // Tab snapshots are unchanged, so refreshTabs would skip the redraw.
+  if (changed) render();
 }
 
 function onReplaced(addedTabId, removedTabId) {

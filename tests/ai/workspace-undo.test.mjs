@@ -160,9 +160,15 @@ test('a tab detached before the membership flush hands its saved-entry link to t
 async function twoSidebars() {
   const persisted = structuredClone({ local: seed().local, session: seed().session });
   const sidebars = [];
+  // Like Chrome, report only keys whose stored value actually changed.
   const storageSet = ({ area, values, commit }) => {
-    const changes = Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: structuredClone(value) }]));
+    const before = JSON.stringify(persisted[area]);
+    const previous = JSON.parse(before);
     commit();
+    const changes = Object.fromEntries(Object.entries(values)
+      .filter(([key]) => JSON.stringify(previous[key]) !== JSON.stringify(persisted[area][key]))
+      .map(([key, value]) => [key, { newValue: structuredClone(value) }]));
+    if (!Object.keys(changes).length) return Promise.resolve();
     if (area === 'local') for (const sidebar of sidebars) sidebar.emit('storage.local.onChanged', structuredClone(changes), 'local');
     return Promise.resolve();
   };
@@ -245,5 +251,41 @@ for (const [change, link] of [['unlink', undefined], ['replacement link', 'v-cha
     await run();
     assert.equal(stored(8)?.e, link, 'storage has the sender\'s latest link');
     assert.equal(receiver.state.records[8]?.e, link, 'the receiving window shows the latest link');
+  });
+}
+
+for (const [change, link] of [['unlink', undefined], ['replacement link', 'v-chat']]) {
+  test(`a ${change} reported while the attached tab loads beats the earlier stored read`, async () => {
+    const { sender, receiver, run, stored } = await twoSidebars();
+    delete receiver.state.records[8]; receiver.state.tabs.delete(8);
+    // Same space as the sender, so the receiver's own write changes nothing in storage.
+    receiver.state.activeSpaceId = 'space-work';
+    sender.setRecord(8, { e: link || '' });
+    receiver.holdGet();
+    receiver.onAttached(8, { newWindowId: 9 });
+    for (let i = 0; i < 10; i++) await settle();
+    // The membership read resolved with the stale link; the handoff lands before tabs.get.
+    sender.onDetached(8, { oldWindowId: 7 });
+    for (let i = 0; i < 10; i++) await settle();
+    receiver.releaseGet();
+    await run();
+    assert.equal(stored(8)?.e, link);
+    assert.equal(receiver.state.records[8]?.e, link);
+  });
+
+  test(`an adopted ${change} redraws the receiving sidebar`, async () => {
+    const { sender, receiver, run } = await twoSidebars();
+    delete receiver.state.records[8]; receiver.state.tabs.delete(8);
+    receiver.onAttached(8, { newWindowId: 9 });
+    await run();
+    receiver.flushFrames();
+    assert.equal(receiver.state.records[8]?.e, 'v-cal');
+    const drawn = receiver.counters.drawn;
+    sender.setRecord(8, { e: link || '' });
+    sender.onDetached(8, { oldWindowId: 7 });
+    await run();
+    receiver.flushFrames();
+    assert.equal(receiver.state.records[8]?.e, link);
+    assert.ok(receiver.counters.drawn > drawn, 'the sidebar redraws after adopting the link');
   });
 }
