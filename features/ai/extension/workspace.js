@@ -2,10 +2,10 @@ import { localStorageChanges } from './storage-events.js';
 import { PLATFORM } from './platform.js';
 import { createSpaceSwipe, SWIPE_IDLE_MS } from './space-swipe.js';
 import {
-  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
+  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, MEMBERS_KEY, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
-  findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeStore, parseRoute,
-  normalizeFolderColor, removeNode, removeSpace, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
+  findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeMembers, normalizeStore, parseRoute,
+  normalizeFolderColor, removeNode, removeSpace, restoreRemovedEntry, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
   setPrefs, setSpaceIcon, setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
 } from './workspace-store.js';
 
@@ -415,10 +415,7 @@ async function unpinEntry(entry, tab, { undo = true } = {}) {
   }
   render();
   if (undo && !tab) {
-    showToast(snapshot.favorite ? 'Removed from favorites.' : 'Unpinned.', 'Undo', () => mutate((store) => {
-      if (snapshot.favorite) store.favorites.splice(snapshot.index, 0, snapshot.node);
-      else addEntry(store, resolveSpaceId(store, snapshot.spaceId), snapshot.node, { folderId: snapshot.folderId, index: snapshot.index });
-    }).catch(() => {}));
+    showToast(snapshot.favorite ? 'Removed from favorites.' : 'Unpinned.', 'Undo', () => mutate((store) => restoreRemovedEntry(store, snapshot)).catch(() => {}));
   }
 }
 
@@ -468,20 +465,22 @@ async function clearToday() {
 }
 
 async function restoreClosed(items, spaceId) {
-  const restorable = new Map(items.map((item) => [item.url, item]));
+  // A list, not a URL map: several closed tabs can share one URL.
+  const restorable = [...items];
   if (typeof api.sessions?.getRecentlyClosed === 'function' && typeof api.sessions.restore === 'function') {
     try {
       const recent = await api.sessions.getRecentlyClosed({ maxResults: 25 });
       for (const session of recent) {
         const tab = session.tab;
-        if (!tab || !restorable.has(tab.url)) continue;
-        restorable.delete(tab.url);
+        const at = tab ? restorable.findIndex((item) => item.url === tab.url) : -1;
+        if (at < 0) continue;
+        restorable.splice(at, 1);
         state.expect.push({ url: tab.url, spaceId, entryId: '', pinned: false, at: Date.now() });
         await api.sessions.restore(tab.sessionId);
       }
     } catch { /* Fall back to reopening the URLs below. */ }
   }
-  for (const item of restorable.values()) await createTab({ url: item.url, spaceId, active: false });
+  for (const item of restorable) await createTab({ url: item.url, spaceId, active: false });
 }
 
 // ---------------------------------------------------------------- spaces
@@ -2074,12 +2073,14 @@ function onAttached(tabId, info) {
   queryDrawDirty = true;
   ++pendingTabAttachments;
   state.peekKey = null;
-  void api.tabs.get(tabId).then((tab) => {
+  // A tab from another window keeps its saved-entry link from stored membership.
+  const stored = api.storage.local.get(MEMBERS_KEY).then((values) => normalizeMembers(values[MEMBERS_KEY]).tabs[tabId], () => null);
+  void Promise.all([api.tabs.get(tabId), stored]).then(([tab, member]) => {
     ++tabEventVersion;
     queryDrawDirty = true;
     state.tabs.set(tabId, tab);
     const record = state.records[tabId];
-    setRecord(tabId, { s: state.activeSpaceId, e: record?.e || '' });
+    setRecord(tabId, { s: state.activeSpaceId, e: record?.e || member?.e || '' });
     return refreshTabs();
   }).catch(() => {}).finally(() => { --pendingTabAttachments; });
 }

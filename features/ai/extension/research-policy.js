@@ -21,8 +21,10 @@ export async function prepareResearch(api, sources, draft, windowId) {
       if (tab.incognito || tab.windowId !== windowId || tab.url !== source.expectedUrl || tab.status === 'loading') throw new Error('Source closed, moved, loading or navigated. Select it again.');
       if (source.status !== 'available') throw new Error(String(source.error || 'Source text is unavailable.'));
       if (typeof source.text !== 'string' || source.text.length > 24000 || typeof source.truncated !== 'boolean') throw new Error('Invalid source text.');
-      const text = maskSecrets(source.text);
-      return { ...clean, status: 'available', text, truncated: source.truncated, capturedCharacters: text.length };
+      // Masking can lengthen a marker cut at the panel's limit, so cut after it.
+      const masked = maskSecrets(source.text);
+      const text = masked.slice(0, 24000);
+      return { ...clean, status: 'available', text, truncated: source.truncated || masked.length > text.length, capturedCharacters: text.length };
     } catch (error) { return { ...clean, status: 'unavailable', error: String(error.message).slice(0, 500) }; }
   }));
 }

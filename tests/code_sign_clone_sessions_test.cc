@@ -124,6 +124,54 @@ int main() {
     Require(clones::Cleanup(root.string(), {}, limits) == 0, "entry budget ignored");
     std::cout << "PASS session, node, entry and deadline budgets; resumable partial cleanup\n";
 
+    // Exit-time cleanup of one session waits briefly for another instance's
+    // root lock; broad sweeps still skip immediately.
+    auto own = clones::CreateSession(bounded_root.string());
+    Require(own.lease.valid(), "targeted session creation");
+    std::string own_path = own.path;
+    std::string own_suffix = own_path.substr(own_path.size() - 6);
+    own.lease = clones::Fd();
+    {
+      clones::Fd held_root(clones::OpenRoot(bounded_root.string(), false));
+      clones::Fd held = clones::LockRoot(held_root.get(), true);
+      Require(held.valid(), "hold root lock");
+      limits = {};
+      limits.targeted_lock_wait = std::chrono::milliseconds(50);
+      auto started = std::chrono::steady_clock::now();
+      Require(clones::Cleanup(bounded_root.string(), own_suffix, limits) == 0 && fs::exists(own_path) &&
+              std::chrono::steady_clock::now() - started >= std::chrono::milliseconds(50),
+              "targeted cleanup did not wait for a held lock");
+      started = std::chrono::steady_clock::now();
+      Require(clones::Cleanup(bounded_root.string()) == 0 && fs::exists(own_path) &&
+              std::chrono::steady_clock::now() - started < std::chrono::milliseconds(50),
+              "sweep waited for a held lock");
+    }
+    int locked[2];
+    Require(pipe(locked) == 0, "lock holder pipe");
+    pid_t holder = fork();
+    Require(holder >= 0, "lock holder fork");
+    if (holder == 0) {
+      close(locked[0]);
+      clones::Fd held_root(clones::OpenRoot(bounded_root.string(), false));
+      clones::Fd held = clones::LockRoot(held_root.get(), true);
+      char result = held.valid() ? 'Y' : 'N';
+      if (write(locked[1], &result, 1) != 1) _exit(4);
+      usleep(200000);
+      _exit(result == 'Y' ? 0 : 5);
+    }
+    children.push_back(holder);
+    close(locked[1]);
+    char holder_ready;
+    Require(read(locked[0], &holder_ready, 1) == 1 && holder_ready == 'Y', "lock holder failed");
+    close(locked[0]);
+    Require(clones::Cleanup(bounded_root.string(), own_suffix) == 1 && !fs::exists(own_path),
+            "targeted cleanup skipped its clone while the lock was briefly held");
+    int holder_status;
+    Require(waitpid(holder, &holder_status, 0) == holder && WIFEXITED(holder_status) &&
+            WEXITSTATUS(holder_status) == 0, "lock holder exit");
+    children.clear();
+    std::cout << "PASS targeted exit cleanup waits briefly for a held root lock\n";
+
     int release[2], published[2];
     Require(pipe(release) == 0 && pipe(published) == 0, "concurrent owner pipes");
     for (int i = 0; i < 4; ++i) {

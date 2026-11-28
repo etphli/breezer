@@ -183,6 +183,15 @@ function createOrganatoTransport(api) {
   return { ask, close };
 }
 
+// The host rejects a chat whose history has any entry over 100,000 characters.
+// Keep the end of a long entry, where a reply's conclusion usually is.
+const HISTORY_ENTRY_LIMIT = 100_000;
+const HISTORY_TRUNCATED = '[Earlier part of this message truncated.]\n';
+export function capHistoryEntry(item) {
+  if (typeof item?.content !== 'string' || item.content.length <= HISTORY_ENTRY_LIMIT) return item;
+  return { ...item, content: HISTORY_TRUNCATED + item.content.slice(-(HISTORY_ENTRY_LIMIT - HISTORY_TRUNCATED.length)) };
+}
+
 export const WARM_LIFETIME_MS = 120_000;
 export const WARM_HANDOFF_MS = 10_000;
 export const WARM_RETRY_MS = 30_000;
@@ -691,7 +700,7 @@ export function installBackground(api) {
       includeContext: message.includeContext === true || message.control === true, session: null, tab: null, text: '',
       user: { id: message.id, role: 'user', text: message.message, attachments: message.attachments, contextTitle: message.contextTitle },
     };
-    const history = Array.isArray(message.history) ? message.history.slice(-40) : [];
+    const history = Array.isArray(message.history) ? message.history.slice(-40).map(capHistoryEntry) : [];
     if (browserTask === 'theme') run.themeImages = themeReferenceImages(message.attachments, history);
     runs.set(run.key, run);
     try {
@@ -865,7 +874,7 @@ export function installBackground(api) {
           await panel.ready;
           await publishMetadata(panel.windowId);
         }
-      })().catch(error => post(port, { type: 'error', id: message?.id, error: error.message }));
+      })().catch(error => post(port, { type: 'error', ...(message?.id ? { id: message.id } : { request: String(message?.type) }), error: error.message }));
     });
     port.onDisconnect.addListener(() => {
       panel.closed = true;

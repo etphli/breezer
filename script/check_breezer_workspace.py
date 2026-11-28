@@ -368,6 +368,12 @@ def check_peek(tree, added, idl, api):
     require("base::RetainedRef(this)" in timer_start and
             "keep_alive(this)" in on_copied.split("timeout_.Stop();", 1)[0],
             "PDF capture must retain the request through the timeout and through cancellation of that timer")
+    research = api.split("BreezerPrivateReadResearchTabFunction::RunFunction()", 1)[1].split("\n}", 1)[0]
+    research_timer = research.split("timeout_.Start(", 1)[1].split("ExecuteJavaScriptInIsolatedWorld(", 1)[0]
+    research_text = api.split("BreezerPrivateReadResearchTabFunction::OnText(", 1)[1].split("\n}", 1)[0]
+    require("base::RetainedRef(this)" in research_timer and
+            research_text.index("did_respond()") < research_text.index("timeout_.Stop();"),
+            "Research reads must answer by timeout when the renderer drops the script callback, and respond once")
 
 
 def check_omnibox(added, idl):

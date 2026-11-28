@@ -20,6 +20,7 @@ const BROWSER_TASKS = {
 
 const MAX_ATTACHMENT_TOTAL = 2 * 1024 * 1024;
 const attachmentSize = file => (file.text || file.image || '').length;
+const STORED_IMAGE_BUDGET = 2_500_000;
 const textExtension = /\.(txt|md|markdown|csv|tsv|json|jsonl|xml|html?|css|scss|js|jsx|mjs|cjs|ts|tsx|py|rb|rs|go|java|kt|swift|c|h|cpp|hpp|cs|sh|bash|zsh|sql|ya?ml|toml|ini|cfg|log|svg)$/i;
 
 async function readAttachment(file, { validatedImage = false } = {}) {
@@ -86,6 +87,7 @@ const state = {
   keepChats: false,
   seenEpoch: undefined,
   chatSaveFailed: false,
+  sessionSaveFailed: false,
 };
 const research = new ResearchSources({ api: chrome, root: document,
   onChange: () => { if (research.size) { state.browserTask = null; setControl(false); } updateControls(); },
@@ -764,20 +766,33 @@ function setChatId(id, opened = false) {
 
 function saveConversation(completedId, active = true) {
   const messages = recentMessages(60);
+  // Every window shares the 10 MB session quota. Keep the newest images within
+  // a budget; older messages keep their text and text files.
   let imageBytes = 0;
   for (let index = messages.length - 1; index >= 0; index--) {
-    if (!messages[index].generatedImage) continue;
-    imageBytes += messages[index].generatedImage.length;
-    if (imageBytes > 2_500_000) {
-      const { generatedImage, ...message } = messages[index];
-      messages[index] = message;
+    const { generatedImage, attachments } = messages[index];
+    if (generatedImage) {
+      imageBytes += generatedImage.length;
+      if (imageBytes > STORED_IMAGE_BUDGET) {
+        messages[index] = { ...messages[index] };
+        delete messages[index].generatedImage;
+      }
+    }
+    if (attachments?.some(file => file.image)) {
+      const kept = attachments.filter(file => !file.image || (imageBytes += file.image.length) <= STORED_IMAGE_BUDGET);
+      if (kept.length !== attachments.length) messages[index] = { ...messages[index], attachments: kept };
     }
   }
   if (messages.length && active) messages.at(-1).lastActivity = Date.now();
   archiveConversation(messages);
   return chrome.storage.session.set({ [state.sessionKey]: messages, ...(state.chatId ? { [state.chatIdKey]: state.chatId } : {}) }).then(() => {
+    state.sessionSaveFailed = false;
     if (completedId && state.port) post({ type: 'turn-saved', id: completedId });
-  }).catch(() => {});
+  }).catch(() => {
+    if (state.sessionSaveFailed) return;
+    state.sessionSaveFailed = true;
+    notify('Breezer couldn’t save this conversation. Close other assistant windows or start a new chat.');
+  });
 }
 
 function scrollToBottom() {
@@ -1138,7 +1153,8 @@ function receive(message) {
       state.modelRefreshQueued = false;
       applyModelSelection(state.preferredModel);
     }
-    if (!state.running) return notify(reason);
+    // Only an error for the running turn ends it; others (context, models) are notices.
+    if (!state.running || message.id !== state.running.id) return notify(reason);
     const completedId = state.running.submitted && !state.running.control ? message.id : undefined;
     if (message.source === 'theme') {
       state.running.message.text = '';

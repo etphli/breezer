@@ -312,7 +312,7 @@ export class BrowserTools {
     try { await this.injectControl(session, 'control-check', { sessionId: session.id }); }
     catch (error) { await this.stop(session, error.message); throw error; }
     await this.check(session);
-    if (focus.focusId) await this.injectControl(session, 'check-focus', focus);
+    if (focus.focusId || focus.elementId) await this.injectControl(session, 'check-focus', focus);
     await this.protocol(session, method, params);
     await this.check(session);
   }
@@ -424,8 +424,9 @@ export class BrowserTools {
       await this.command(session, 'Input.dispatchMouseEvent', { type: 'mouseReleased', ...point, button: 'left', clickCount: 1 });
       await this.injectControl(session, 'bind-editor', { elementId: args.elementId });
       if (name === 'browser_type') {
-        await this.injectControl(session, 'select-content', { elementId: args.elementId });
-        await this.command(session, 'Input.insertText', { text: args.text });
+        const focus = await this.injectControl(session, 'select-content', { elementId: args.elementId });
+        // Refuse to type if focus moved after the field was selected.
+        await this.command(session, 'Input.insertText', { text: args.text }, focus?.focusId ? focus : { elementId: args.elementId });
       }
     } else if (name === 'browser_scroll') {
       if (!['up', 'down'].includes(args.direction) || (args.amount !== undefined && (!Number.isFinite(args.amount) || args.amount <= 0))) throw new Error('Choose up or down and a positive scroll amount.');

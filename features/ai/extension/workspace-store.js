@@ -317,8 +317,8 @@ export function removeSpace(store, id) {
   return store.spaces[0].id;
 }
 
-export function addEntry(store, spaceId, { id, url, title } = {}, { folderId = null, index } = {}) {
-  const entry = normalizeEntry({ id, url, title });
+export function addEntry(store, spaceId, { id, url, title, customTitle } = {}, { folderId = null, index } = {}) {
+  const entry = normalizeEntry({ id, url, title, customTitle });
   if (!entry) throw new Error('This page can’t be pinned.');
   if (findNode(store, entry.id)) throw new Error('Already pinned.');
   const space = requireSpace(store, spaceId);
@@ -402,13 +402,26 @@ export function moveNode(store, id, target) {
   return found.node;
 }
 
-export function addFavorite(store, { id, url, title } = {}) {
-  const entry = normalizeEntry({ id, url, title });
+export function addFavorite(store, { id, url, title, customTitle } = {}) {
+  const entry = normalizeEntry({ id, url, title, customTitle });
   if (!entry) throw new Error('This page can’t be added to favorites.');
   if (store.favorites.length >= MAX_FAVORITES) throw new Error(`Favorites hold up to ${MAX_FAVORITES} pages.`);
   if (findNode(store, entry.id)) throw new Error('Already saved.');
   store.favorites.push(entry);
   return entry;
+}
+
+// Undo of an unpin or favorite removal. Sync treats a removed id as deleted
+// for good, so the entry returns under a fresh id that every device sees as a
+// new item. A favorite that was saved again meanwhile is not duplicated.
+export function restoreRemovedEntry(store, { node, favorite, spaceId, folderId = null, index }) {
+  const entry = { url: node.url, title: node.title, customTitle: node.customTitle };
+  if (!favorite) return addEntry(store, resolveSpaceId(store, spaceId), entry, { folderId, index });
+  const existing = store.favorites.find((item) => item.url === node.url);
+  if (existing) return existing;
+  const restored = addFavorite(store, entry);
+  moveNode(store, restored.id, { favorites: true, index });
+  return restored;
 }
 
 export function setPrefs(store, patch) {

@@ -36,7 +36,7 @@ class WindowsPackageTest(unittest.TestCase):
 
         lock = build_breezer.load_lock()
         build_breezer.write_marker(self.output / build_breezer.BUILD_MARKER,
-                                   build_breezer.prepared_inputs(lock))
+                                   {**build_breezer.prepared_inputs(lock), **build_breezer.breezer_inputs()})
         base_portable = ("chrome.exe", "chrome.dll", "chrome_elf.dll", "chrome_100_percent.pak", "chrome_200_percent.pak",
                          "icudtl.dat", "resources.pak", "locales/en-US.pak", "v8_context_snapshot.bin")
         self.portable = (*base_portable, *(path.as_posix() for path in sorted(stage_breezer_ai.package_files())))

@@ -14,21 +14,23 @@ import apply_breezer_workspace as workspace
 TARGET = 'chrome/browser/ui/ui_features.cc'
 BEFORE = b'BASE_FEATURE(kTabHoverCardImages, base::FEATURE_ENABLED_BY_DEFAULT);\n'
 NEIGHBOR = b'BASE_FEATURE(kOtherFeature, base::FEATURE_DISABLED_BY_DEFAULT);\n'
+# The same file also carries the sidebar-frame overlay's native-materials default.
+FRAME = b'BASE_FEATURE(kHeliumNativeFrameMaterials, base::FEATURE_DISABLED_BY_DEFAULT);\n'
 
 
 class MacHoverCardDefaultTest(unittest.TestCase):
     def test_overlay_preserves_neighbors_and_is_idempotent(self):
-        result = workspace.transform(TARGET, NEIGHBOR + BEFORE + NEIGHBOR)
+        result = workspace.transform(TARGET, NEIGHBOR + FRAME + BEFORE + NEIGHBOR)
         self.assertTrue(result.startswith(NEIGHBOR) and result.endswith(NEIGHBOR))
         self.assertEqual(workspace.transform(TARGET, result), result)
 
     def test_missing_and_duplicate_anchors_fail(self):
-        for source in [NEIGHBOR, BEFORE + BEFORE]:
+        for source in [FRAME + NEIGHBOR, FRAME + BEFORE + BEFORE]:
             with self.subTest(source=source), self.assertRaises(ValueError):
                 workspace.transform(TARGET, source)
 
     def test_mixed_original_and_applied_states_fail(self):
-        applied = workspace.transform(TARGET, BEFORE)
+        applied = workspace.transform(TARGET, FRAME + BEFORE)
         for source in [BEFORE + applied, applied + BEFORE,
                        b'#if 1\n' + BEFORE + b'#else\n' + applied + b'#endif\n',
                        applied + applied,
@@ -38,7 +40,7 @@ class MacHoverCardDefaultTest(unittest.TestCase):
 
     def test_apply_and_check_reject_mixed_state_before_any_write(self):
         choices = workspace.replacements()[TARGET]
-        applied = workspace.transform(TARGET, BEFORE)
+        applied = workspace.transform(TARGET, FRAME + BEFORE)
         with tempfile.TemporaryDirectory(prefix='breezer-hover-prepare-') as directory:
             tree = Path(directory)
             target = tree / TARGET
@@ -57,7 +59,7 @@ class MacHoverCardDefaultTest(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which('clang++'), 'Clang required for platform-branch verification')
     def test_compiled_platform_defaults(self):
-        feature = workspace.transform(TARGET, BEFORE).decode()
+        feature = workspace.transform(TARGET, FRAME + BEFORE).decode()
         preamble = ('#define BUILDFLAG(flag) flag\n'
                     '#define BASE_FEATURE(name, state) constexpr bool name = state\n'
                     'namespace base { constexpr bool FEATURE_ENABLED_BY_DEFAULT = true; '

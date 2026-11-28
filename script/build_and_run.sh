@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Exit status 3: an existing prepared tree no longer matches this checkout's
+# inputs. It is preserved unchanged and must not be cached as current progress.
 BREEZER_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BREEZER_MODE="${1:-run}"
 case "$BREEZER_MODE" in
@@ -128,10 +130,11 @@ if [[ -f "$BREEZER_STAGE/build/src/.breezer-filter-lists-prepared" && -z "${BREE
   exit 1
 fi
 mkdir -p "$BREEZER_STAGE"
-git archive HEAD:upstream/helium-macos | tar -x -C "$BREEZER_STAGE"
-
 _root_dir="$BREEZER_STAGE"
-source "$_root_dir/devutils/shared.sh"
+# Read this commit's path definitions without changing the stage; upstream build
+# scripts are extracted only after the prepared inputs below are verified.
+BREEZER_UPSTREAM_ENV="$(git -C "$BREEZER_ROOT" show HEAD:upstream/helium-macos/env.sh)"
+eval "$BREEZER_UPSTREAM_ENV"
 _out_dir="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_build_profile.py" \
   --profile "$BREEZER_BUILD_PROFILE" --source-dir "$_src_dir" --out-dir "${BREEZER_OUT_DIR:-}")"
 BREEZER_PREPARED="$_root_dir/build/.breezer-prepared"
@@ -139,7 +142,7 @@ if [[ ! -f "$BREEZER_PREPARED" && -d "$_src_dir/out" ]] &&
    [[ -n "$(find "$_src_dir/out" -mindepth 1 -print -quit)" ]]; then
   echo "Prepared-source marker is missing. Existing output is preserved in $_src_dir/out." >&2
   echo "Use a separate BREEZER_BUILD_DIR or verify the preparation marker before rebuilding." >&2
-  exit 1
+  exit 3
 fi
 echo "Breezer build profile: $BREEZER_BUILD_PROFILE; output: $_out_dir"
 BREEZER_OMNIBOX_PREPARED="$_src_dir/.breezer-omnibox-prepared"
@@ -148,7 +151,7 @@ if [[ -e "$BREEZER_OMNIBOX_PREPARED" ]] &&
    [[ "$(cat "$BREEZER_OMNIBOX_PREPARED")" != "$BREEZER_OMNIBOX_ID" ]]; then
   echo "Omnibox overlay inputs changed. Existing source and compiled output are preserved in $BREEZER_STAGE." >&2
   echo "Set BREEZER_BUILD_DIR to a separate directory; changed overlays require fresh base preparation." >&2
-  exit 1
+  exit 3
 fi
 BREEZER_WORKSPACE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_workspace.py" --fingerprint)"
 BREEZER_AI_UI_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_ai_ui.py" --fingerprint)"
@@ -157,7 +160,7 @@ BREEZER_CLONE_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/features/storage/code-sign-
 BREEZER_CLONE_PREPARED="$_src_dir/.breezer-code-sign-clones-prepared"
 if [[ -f "$BREEZER_CLONE_PREPARED" ]] && [[ "$(cat "$BREEZER_CLONE_PREPARED")" != "$BREEZER_CLONE_ID" ]]; then
   echo "Signature-clone overlay changed. Existing source and compiled caches are preserved; verify a targeted overlay migration before rebuilding." >&2
-  exit 1
+  exit 3
 fi
 BREEZER_SYNC_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_sync.py" --fingerprint)"
 for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
@@ -175,7 +178,7 @@ for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
      [[ "$(cat "$BREEZER_OVERLAY_MARKER")" != "$BREEZER_OVERLAY_ID" ]]; then
     echo "$BREEZER_OVERLAY native overlay changed. Source and compiled output are preserved in $BREEZER_STAGE." >&2
     echo "Use a separate build directory or a separately verified overlay migration." >&2
-    exit 1
+    exit 3
   fi
 done
 BREEZER_SOURCE_TREE="$(git rev-parse HEAD:upstream/helium-macos)"
@@ -186,9 +189,9 @@ BREEZER_BASE_PREPARATION_ID="$(
   } | shasum -a 256 | awk '{print $1}'
 )"
 BREEZER_PREPARATION_ID="$("$BREEZER_PYTHON" "$BREEZER_ROOT/script/breezer_preparation.py" --base-id "$BREEZER_BASE_PREPARATION_ID")"
+BREEZER_REFRESH_AI=false
 if [[ -f "$BREEZER_PREPARED" ]]; then
   BREEZER_PREVIOUS_PREPARATION="$(cat "$BREEZER_PREPARED")"
-  BREEZER_REFRESH_AI=false
   if [[ "$BREEZER_PREVIOUS_PREPARATION" == "$BREEZER_PREPARATION_ID" ]]; then
     :
   elif [[ "$BREEZER_PREVIOUS_PREPARATION" == "$BREEZER_BASE_PREPARATION_ID" ]]; then
@@ -201,8 +204,15 @@ if [[ -f "$BREEZER_PREPARED" ]]; then
   else
     echo "Build inputs changed. The existing source and compiled output have been preserved in $BREEZER_STAGE." >&2
     echo "Set BREEZER_BUILD_DIR to a separate directory before preparing the changed source." >&2
-    exit 1
+    exit 3
   fi
+fi
+# The stage is unprepared or verified, so its upstream build scripts can be refreshed.
+git archive HEAD:upstream/helium-macos | tar -x -C "$BREEZER_STAGE"
+BREEZER_PROFILE_OUT_DIR="$_out_dir"
+source "$_root_dir/devutils/shared.sh"
+_out_dir="$BREEZER_PROFILE_OUT_DIR"
+if [[ -f "$BREEZER_PREPARED" ]]; then
   if [[ "$BREEZER_REFRESH_AI" == true ]]; then
     echo "Updating Breezer AI resources with verified matching native inputs; preserving compiled output."
     "$BREEZER_PYTHON" "$BREEZER_ROOT/script/check_ai_overlay.py" --grit-directory "$_src_dir/tools/grit"
@@ -295,6 +305,23 @@ if [[ "$BREEZER_MODE" == --build-only ]]; then
 fi
 check_install_hold
 
+# Development launches use a separate profile so an unreleased build never opens
+# or migrates the real one. --install keeps using the real profile.
+BREEZER_DEV_PROFILE_DIR=""
+if [[ "$BREEZER_MODE" != --install && "${BREEZER_USE_REAL_PROFILE:-0}" != 1 ]]; then
+  BREEZER_DEV_PROFILE_DIR="${BREEZER_DEV_PROFILE:-$BREEZER_ROOT/build/dev-profile}"
+  mkdir -p "$BREEZER_DEV_PROFILE_DIR"
+  echo "Using development profile: $BREEZER_DEV_PROFILE_DIR (set BREEZER_USE_REAL_PROFILE=1 for the real profile)"
+fi
+
+launch_breezer() {
+  if [[ -n "$BREEZER_DEV_PROFILE_DIR" ]]; then
+    open -n "$BREEZER_APP" --args --user-data-dir="$BREEZER_DEV_PROFILE_DIR"
+  else
+    open -n "$BREEZER_APP"
+  fi
+}
+
 running_breezer_executables() {
   ps -ww -axo uid=,comm= | awk -v uid="$UID" '
     $1 == uid {
@@ -348,6 +375,10 @@ fi
 
 BREEZER_RUNNING="$(running_breezer_executables)"
 while IFS= read -r BREEZER_RUNNING_EXECUTABLE; do
+  # Other Breezer copies can keep running when this build uses its own profile.
+  if [[ -n "$BREEZER_DEV_PROFILE_DIR" ]]; then
+    break
+  fi
   if [[ -z "$BREEZER_RUNNING_EXECUTABLE" || "$BREEZER_RUNNING_EXECUTABLE" == "$BREEZER_EXECUTABLE" ]]; then
     continue
   fi
@@ -363,27 +394,57 @@ if [[ "$BREEZER_MODE" == --install ]]; then
   quit_breezer "$BREEZER_INSTALLED_EXECUTABLE"
 fi
 BREEZER_RUNNING="$(running_breezer_executables)"
-if [[ -n "$BREEZER_RUNNING" ]]; then
+if [[ -n "$BREEZER_DEV_PROFILE_DIR" ]]; then
+  if has_breezer_executable "$BREEZER_RUNNING" "$BREEZER_EXECUTABLE"; then
+    printf 'This Breezer build is still running. Close it before continuing: %s\n' "$BREEZER_EXECUTABLE" >&2
+    exit 1
+  fi
+elif [[ -n "$BREEZER_RUNNING" ]]; then
   printf 'Breezer is still running. Close it before continuing.\n%s\n' "$BREEZER_RUNNING" >&2
   exit 1
 fi
+verify_installed_app() {
+  local app="$1"
+  [[ -x "$app/Contents/MacOS/Breezer" ]] &&
+    [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist" 2>/dev/null)" == io.github.etphli.breezer ]] &&
+    codesign --verify --deep --strict "$app"
+}
+
 if [[ "$BREEZER_MODE" == --install ]]; then
-  if [[ -e "$BREEZER_DESTINATION" ]]; then
-    mkdir -p "$HOME/Applications/.Breezer-backups"
-    mv "$BREEZER_DESTINATION" "$HOME/Applications/.Breezer-backups/Breezer-$(date +%Y%m%d-%H%M%S).app"
+  BREEZER_BACKUP=""
+  if [[ -e "$BREEZER_DESTINATION" || -L "$BREEZER_DESTINATION" ]]; then
+    BREEZER_BACKUPS="$(greadlink -m -- "$HOME/Applications")/.Breezer-backups"
+    mkdir -p "$BREEZER_BACKUPS"
+    # A unique, not-yet-existing name: mv into an existing path would nest the app.
+    BREEZER_BACKUP="$BREEZER_BACKUPS/Breezer-$(date +%Y%m%d-%H%M%S)-$(uuidgen | tr 'A-Z' 'a-z' | cut -c1-8).app"
+    if [[ -e "$BREEZER_BACKUP" || -L "$BREEZER_BACKUP" ]]; then
+      printf 'Backup path already exists: %s\n' "$BREEZER_BACKUP" >&2
+      exit 1
+    fi
+    mv "$BREEZER_DESTINATION" "$BREEZER_BACKUP"
   fi
-  ditto "$BREEZER_APP" "$BREEZER_DESTINATION"
+  if ! ditto "$BREEZER_APP" "$BREEZER_DESTINATION" || ! verify_installed_app "$BREEZER_DESTINATION"; then
+    echo "The installed copy failed verification; restoring the previous app." >&2
+    rm -rf "$BREEZER_DESTINATION"
+    if [[ -n "$BREEZER_BACKUP" ]]; then
+      mv "$BREEZER_BACKUP" "$BREEZER_DESTINATION"
+    fi
+    exit 1
+  fi
+  if [[ -n "$BREEZER_BACKUP" ]]; then
+    printf 'Previous app retained: %s\n' "$BREEZER_BACKUP"
+  fi
   BREEZER_APP="$BREEZER_DESTINATION"
 fi
 
 case "$BREEZER_MODE" in
-  --debug) lldb -- "$BREEZER_APP/Contents/MacOS/Breezer" ;;
+  --debug) lldb -- "$BREEZER_APP/Contents/MacOS/Breezer" ${BREEZER_DEV_PROFILE_DIR:+"--user-data-dir=$BREEZER_DEV_PROFILE_DIR"} ;;
   --logs|--telemetry)
-    open -n "$BREEZER_APP"
+    launch_breezer
     /usr/bin/log stream --info --style compact --predicate 'process == "Breezer"'
     ;;
   --verify)
-    open -n "$BREEZER_APP"
+    launch_breezer
     sleep 2
     BREEZER_RUNNING="$(running_breezer_executables)"
     if ! has_breezer_executable "$BREEZER_RUNNING" "$BREEZER_EXECUTABLE"; then
@@ -391,5 +452,5 @@ case "$BREEZER_MODE" in
       exit 1
     fi
     ;;
-  *) open -n "$BREEZER_APP" ;;
+  *) launch_breezer ;;
 esac

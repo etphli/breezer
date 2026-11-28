@@ -56,8 +56,14 @@ jobs:
           python -B tests/ai_resources_test.py
           python script/check_breezer_installer.py
           python script/check_breezer_preparation.py
+          python -B tests/ai/overlay_fetch_test.py
+          python -B tests/memory_package_test.py
       - name: Test AI browser controls and CLI protocol
-        run: node --test tests/*.test.mjs tests/ai/*.test.mjs
+        # tests/sync/setup-browser.test.mjs needs Playwright and runs in browser-tests.
+        run: >-
+          node --test tests/*.test.mjs tests/ai/*.test.mjs
+          tests/sync/lifetime.test.mjs tests/sync/provider-lifecycle.test.mjs tests/sync/provider.test.mjs
+          tests/sync/reconcile.test.mjs tests/sync/size-guard.test.mjs tests/sync/workspace-model.test.mjs
       - name: Verify filter source overlays
         run: |
           python -B tests/filter-source-overlays/fixtures/main-port-20261115/prepare.py --check
@@ -75,6 +81,19 @@ jobs:
           python tests/windows/build_breezer_test.py
           python tests/windows/ai_native_host_test.py
           python tests/windows_import_test.py
+          python -B tests/windows/unattended_cleanup_test.py
+          python -B tests/windows/memory_update_test.py
+      - name: Verify build, install and packaging tooling refusals
+        run: python -B tests/build_tooling_test.py
+      - name: Verify branding against the pinned Chromium GRIT
+        run: |
+          set -o pipefail
+          version="$(cd script && python -c 'import check_ai_overlay; print(check_ai_overlay.VERSION)')"
+          mkdir -p "$RUNNER_TEMP/grit"
+          curl --fail --location --silent --show-error --retry 3 --max-time 120 \
+            "https://chromium.googlesource.com/chromium/src/+archive/refs/tags/$version/tools/grit.tar.gz" |
+            tar -xz -C "$RUNNER_TEMP/grit"
+          python -B script/check_branding.py "$RUNNER_TEMP/grit" --native
       - name: Verify omnibox source overlay
         run: python script/check_breezer_omnibox.py
       - name: Verify workspace and full-height assistant overlays
@@ -85,6 +104,7 @@ jobs:
           python script/check_breezer_ai_ui.py
           python script/check_breezer_passwords.py
           python tests/passwords_native_test.py
+          python -B tests/mac_hover_card_default_test.py
       - name: Run all imported tests and configuration checks
         run: python script/check_helium.py
 

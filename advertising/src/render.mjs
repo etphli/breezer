@@ -9,6 +9,7 @@
 // finished video and a temporary soundtrack.
 
 import { spawn } from "node:child_process";
+import { once } from "node:events";
 import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
@@ -24,15 +25,35 @@ const ffmpeg = tools ? path.join(tools, "ffmpeg") : "ffmpeg";
 const chrome = process.env.CHROME || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const concurrency = Number(process.env.AD_JOBS || 2);
 
-const run = (cmd, args, opts = {}) =>
-  new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { stdio: ["pipe", "inherit", "pipe"], ...opts });
-    let err = "";
-    child.stderr.on("data", (d) => (err += d));
+async function run(cmd, args, { feed, ...opts } = {}) {
+  const child = spawn(cmd, args, { stdio: ["pipe", "inherit", "pipe"], ...opts });
+  let err = "";
+  child.stderr.on("data", (d) => (err += d));
+  const exited = new Promise((resolve, reject) => {
     child.on("error", reject);
     child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}\n${err.slice(-2000)}`))));
-    if (opts.feed) opts.feed(child.stdin);
   });
+  if (!feed) return exited;
+  // If the process dies early, writes fail with EPIPE and "drain" never fires.
+  let failure;
+  const stopped = new Promise((_, reject) => {
+    const stop = (error) => { failure ||= error; reject(failure); };
+    child.stdin.on("error", stop);
+    exited.then(() => stop(new Error(`${cmd} stopped reading its input`)), stop);
+  });
+  stopped.catch(() => {});
+  const write = async (chunk) => {
+    if (failure) throw failure;
+    if (!child.stdin.write(chunk)) await Promise.race([once(child.stdin, "drain"), stopped]);
+  };
+  const fed = (async () => { await feed(write); child.stdin.end(); })();
+  fed.catch(() => { child.stdin.destroy(); child.kill(); });
+  const [exit, input] = await Promise.allSettled([exited, fed]);
+  // A capture error is the cause; a broken pipe is only a symptom of the exit.
+  if (input.status === "rejected" && input.reason !== failure) throw input.reason;
+  if (exit.status === "rejected") throw exit.reason;
+  if (input.status === "rejected") throw input.reason;
+}
 
 async function renderAd(name) {
   // One browser per ad: a fast capture can stall on a tab that isn't in front.
@@ -69,17 +90,16 @@ async function renderAd(name) {
       "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart",
       out,
     ], {
-      feed: async (stdin) => {
+      feed: async (write) => {
         for (let f = 0; f < frames; f++) {
           for (let k = 0; k < subframes; k++) {
             await page.evaluate((t) => AD.frame(t), (f + (k * 0.5) / subframes) / fps);
             const { data } = await cdp.send("Page.captureScreenshot", { format: "jpeg", quality: premium ? 97 : 94, optimizeForSpeed: true });
             const jpg = Buffer.from(data, "base64");
-            if (!stdin.write(jpg)) await new Promise((r) => stdin.once("drain", r));
+            await write(jpg);
           }
           if (f % 150 === 0) console.log(`${name}: frame ${f}/${frames}`);
         }
-        stdin.end();
       },
     });
     console.log(`${name}: done in ${Math.round((Date.now() - started) / 1000)}s -> ${path.relative(process.cwd(), out)}`);

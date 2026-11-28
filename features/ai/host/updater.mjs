@@ -61,7 +61,8 @@ export async function startUpdateWorker(app, candidate, {
       const onExit = () => finish(new Error('The update helper stopped before starting. macOS may have blocked it.'));
       const onMessage = value => {
         if (value?.type === 'update-worker-ready') finish();
-        if (value?.type === 'update-worker-blocked') finish(new Error(value.notice));
+        // The worker reports its real startup error, such as a lock it cannot read.
+        if (value?.type === 'update-worker-blocked') finish(new Error(typeof value.notice === 'string' && value.notice ? value.notice.slice(0, 500) : 'The update helper could not start.'));
       };
       const timer = setTimeout(() => finish(new Error('The update helper did not start. Check for a macOS security prompt.')), startupTimeoutMs);
       child.once('error', onError); child.once('exit', onExit); child.on('message', onMessage);
