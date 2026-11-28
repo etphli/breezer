@@ -111,16 +111,29 @@ body.route-settings {
 .nav-error { margin: 8px 10px 0; font-size: 12px; line-height: 16px; }
 
 /* ---- main pane */
-.settings-main { --set-gutter: clamp(24px, 4vw, 54px); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.settings-main {
+  --set-gutter: clamp(24px, 4vw, 54px);
+  --set-column-width: calc(680px + 2 * var(--set-gutter));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
 .settings-head {
   flex: none;
+  border-bottom: 1px solid var(--set-rule);
+}
+.settings-head-inner, .settings-column {
+  width: 100%;
+  max-width: var(--set-column-width);
+  margin-inline: auto;
+  padding-inline: var(--set-gutter);
+}
+.settings-head-inner {
   display: flex;
   align-items: center;
   gap: 16px;
   min-height: 80px;
-  /* Lines the breadcrumb and link up with the edges of the settings column. */
-  padding: 0 max(var(--set-gutter), calc(100% - var(--set-gutter) - 680px)) 0 var(--set-gutter);
-  border-bottom: 1px solid var(--set-rule);
 }
 .crumbs { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
 .settings-label { font-size: 12px; line-height: 16px; color: var(--muted); }
@@ -129,13 +142,12 @@ body.route-settings {
 .settings-head .setup-link { margin-left: auto; border: 1px solid var(--set-edge); text-decoration: none; }
 
 .settings-scroll { flex: 1; min-height: 0; overflow-y: auto; scroll-padding: 24px; }
-.settings-column { max-width: calc(680px + 2 * var(--set-gutter)); padding: 24px var(--set-gutter) 96px; }
+.settings-column { padding-block: 24px 96px; }
 .context-save { align-items: center; padding: 12px 16px; border-top: 1px solid var(--set-rule); margin: 0; }
 .context-save .field-note { margin: 0; }
 .context-settings .setting-group > .setting-details { padding: 12px 16px; margin: 0; border-top: 1px solid var(--set-rule); }
 #collapse[aria-pressed="true"] { background: var(--hover); color: var(--accent); }
 @media (max-width: 560px) {
-  .settings-head { min-height: 72px; }
   .crumbs h1 { font-size: 18px; line-height: 24px; }
   .settings-head .setup-link { font-size: 12px; padding-inline: 8px; }
   .context-save { flex-direction: column; align-items: stretch; }
@@ -220,8 +232,41 @@ body.route-settings {
   background: var(--set-control) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 6.5 3.5 3.5 3.5-3.5' fill='none' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 8px center / 14px;
   appearance: none;
 }
-#default-ai-model { max-width: 60%; text-overflow: ellipsis; }
-@media (max-width: 560px) { #default-ai-model { min-width: 0; max-width: 100%; } }
+#default-ai-model {
+  width: min(280px, 52%);
+  min-width: 0;
+  height: 42px;
+  padding-inline: 12px 32px;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+@supports (appearance: base-select) {
+  #default-ai-model, #default-ai-model::picker(select) { appearance: base-select; }
+  #default-ai-model {
+    align-items: center;
+    padding-inline: 12px;
+    background: var(--set-control);
+  }
+  #default-ai-model::picker-icon { color: var(--muted); }
+  #default-ai-model::picker(select) {
+    margin-block: 5px;
+    padding: 5px;
+    border: 1px solid var(--set-edge);
+    border-radius: 10px;
+    background: var(--set-group);
+    color: var(--ink);
+    box-shadow: 0 8px 24px #0003;
+  }
+  #default-ai-model option {
+    min-height: 36px;
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+  #default-ai-model option:hover, #default-ai-model option:focus-visible { background: var(--hover); }
+  #default-ai-model option:checked { background: var(--set-selected); font-weight: 600; }
+  #default-ai-model optgroup::before { padding: 8px 10px 4px; color: var(--muted); font-size: 12px; }
+}
+@media (max-width: 560px) { #default-ai-model { width: 100%; } }
 .setting-group > .setting-row > input:is([type="password"], [type="text"], [type="url"]) {
   width: min(260px, 100%);
   height: 30px;
@@ -604,11 +649,11 @@ input[type="range"] { width: 220px; accent-color: var(--accent); }
   .nav-error { position: absolute; }
   .nav-item { width: 100%; gap: 7px; padding: 0 8px; min-height: 32px; }
   .nav-item span { white-space: normal; }
-  .settings-main { display: block; }
-  .settings-head { min-height: 55px; padding: 0 16px; }
+  .settings-main { --set-gutter: 16px; display: block; }
+  .settings-head-inner { min-height: 55px; }
   .settings-label { display: none; }
   .settings-scroll { overflow: visible; }
-  .settings-column { padding: 20px 16px 64px; }
+  .settings-column { padding-block: 20px 64px; }
 }
 
 @media (max-width: 560px) {

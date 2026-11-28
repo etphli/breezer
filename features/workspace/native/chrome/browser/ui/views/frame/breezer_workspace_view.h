@@ -72,6 +72,7 @@ class BreezerWorkspaceView final
 
   bool is_available() const;
   views::View* GetFocusableView() const;
+  bool FocusAddress(base::OnceClosure fallback);
 
   // Sets the title bar band drawn over the top of the document: `height` from
   // the top edge, with the window controls covering `controls_width` at the

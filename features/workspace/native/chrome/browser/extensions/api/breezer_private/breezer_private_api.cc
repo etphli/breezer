@@ -910,19 +910,4 @@ BreezerPrivateToggleSplitViewFunction::RunFunction() {
   return RespondNow(NoArguments());
 }
 
-ExtensionFunction::ResponseAction
-BreezerPrivateFocusLocationBarFunction::RunFunction() {
-  if (!args().empty() || !user_gesture() ||
-      source_url().GetPath() != kWorkspacePath) {
-    return RespondNow(Error("Focus the address bar from the Breezer sidebar."));
-  }
-  BrowserWindowInterface* const browser = GetCallerBrowser();
-  if (!browser || browser->IsDeleteScheduled() ||
-      browser->GetType() != BrowserWindowInterface::TYPE_NORMAL) {
-    return RespondNow(Error("The calling browser window is unavailable."));
-  }
-  chrome::FocusLocationBar(browser);
-  return RespondNow(NoArguments());
-}
-
 }  // namespace extensions

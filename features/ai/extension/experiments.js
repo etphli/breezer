@@ -4,7 +4,7 @@
 //     version: 1,
 //     glass: false,             // glossy glass surfaces; native window material where the bridge offers it
 //     glassOpacity: 66,         // opacity of the glossy page surfaces, in percent
-//     sidebarSearch: false,     // search/address button in the sidebar (workspace-chrome.js)
+//     sidebarSearch: false,     // editable address in the sidebar (workspace-chrome.js)
 //     newTabComposer: false,    // compact New Tab with Ask
 //     newTabRecentChats: false, // open and saved conversations under the composer
 //     newTabShortcuts: false,   // compact frequent-site icons under the composer
@@ -547,7 +547,7 @@ const ROWS = [
           ? 'Translucent window and New Tab surfaces. Fullscreen and Reduce transparency stay solid.'
           : 'Translucent New Tab surfaces. This build keeps the window frame solid, as do fullscreen and Reduce transparency.') },
       { flag: 'sidebarSearch', label: 'Address search in the sidebar', terms: 'address bar url search omnibox sidebar location',
-        description: () => 'Shows the page address and your extensions in the sidebar. In frameless mode, Layout controls the top bar.' },
+        description: () => 'Moves address search and editing into the sidebar and hides the top bar.' },
       { flag: 'spaceDock', label: 'Space dock', terms: 'spaces dock switcher bottom sidebar icons',
         description: () => 'Shows your spaces as a row of icons at the foot of the sidebar.' },
     ],

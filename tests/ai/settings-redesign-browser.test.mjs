@@ -67,6 +67,13 @@ test('settings categories, search, Other and narrow layout work in a real browse
     assert.deepEqual(await visiblePages(page), ['general']);
     assert.equal(await page.locator('#settings-crumb').innerText(), 'General');
     assert.equal(await page.evaluate(() => fx.calls.some(call => call[0] === 'sendNativeMessage')), false, 'General does not start model discovery');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const pane = await page.locator('.settings-main').boundingBox();
+    const column = await page.locator('.settings-column').boundingBox();
+    const heading = await page.locator('.crumbs').boundingBox();
+    const group = await page.locator('[data-page="general"] .setting-group').first().boundingBox();
+    assert.ok(Math.abs(column.x + column.width / 2 - (pane.x + pane.width / 2)) < 1, 'settings column is centered in the main pane');
+    assert.ok(Math.abs(heading.x - group.x) < 1, 'heading and content share the same left edge');
     await page.screenshot({ path: join(evidence, 'settings-redesign-general-light.png') });
 
     // The sync module is mounted, and this browser fixture deliberately lacks
@@ -86,6 +93,11 @@ test('settings categories, search, Other and narrow layout work in a real browse
     await page.getByRole('link', { name: 'Assistant', exact: true }).click();
     const defaultModel = page.getByRole('combobox', { name: 'Default model' });
     await page.getByText('Automatic uses GPT-6.2 Sol.', { exact: true }).waitFor();
+    await defaultModel.click();
+    assert.equal(await defaultModel.evaluate(node => node.matches(':open') && getComputedStyle(node, '::picker(select)').appearance === 'base-select'), true, 'the model picker uses a styleable in-page menu');
+    assert.ok((await defaultModel.boundingBox()).height >= 40, 'the model control is at least 40px tall');
+    await page.screenshot({ path: join(evidence, 'settings-ai-model-picker-open.png') });
+    await page.keyboard.press('Escape');
     assert.deepEqual(await defaultModel.locator('option').allTextContents(), ['Automatic', 'GPT-6.2 Sol', 'GPT-6 Luna']);
     await defaultModel.selectOption({ label: 'GPT-6 Luna' });
     await page.waitForFunction(() => fx.local.breezerModel?.model === 'gpt-6-luna');

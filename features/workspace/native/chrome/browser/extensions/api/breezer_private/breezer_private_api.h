@@ -162,16 +162,6 @@ class BreezerPrivateToggleSplitViewFunction final
   ResponseAction RunFunction() override;
 };
 
-class BreezerPrivateFocusLocationBarFunction final
-    : public BreezerPrivateFunction {
- public:
-  DECLARE_EXTENSION_FUNCTION("breezerPrivate.focusLocationBar", UNKNOWN)
-
- private:
-  ~BreezerPrivateFocusLocationBarFunction() override = default;
-  ResponseAction RunFunction() override;
-};
-
 class BreezerPrivateShowExtensionsMenuFunction final
     : public BreezerPrivateFunction {
  public:

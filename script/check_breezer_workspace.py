@@ -330,14 +330,11 @@ def check_peek(tree, added, idl, api):
             "breezer_peek::SetSource(" in setter,
             "setPeekSources must be bounded to the calling sidebar's own window")
 
-    for function in ("toggleSplitView", "focusLocationBar"):
-        require(f"static void {function}(" in idl,
-                f"Private API IDL does not declare {function}")
-        class_name = function[0].upper() + function[1:]
-        body = api.split(f"BreezerPrivate{class_name}Function::RunFunction()", 1)[1].split("\n}", 1)[0]
-        require("!user_gesture()" in body and "GetCallerBrowser()" in body and
-                "source_url().GetPath() != kWorkspacePath" in body,
-                f"{function} must require a gesture from the calling sidebar")
+    require("static void toggleSplitView(" in idl, "Private API IDL does not declare toggleSplitView")
+    split = api.split("BreezerPrivateToggleSplitViewFunction::RunFunction()", 1)[1].split("\n}", 1)[0]
+    require("!user_gesture()" in split and "GetCallerBrowser()" in split and
+            "source_url().GetPath() != kWorkspacePath" in split,
+            "toggleSplitView must require a gesture from the calling sidebar")
     require("tab_strip->RemoveSplit(" in api and "tab_strip->AddToNewSplit(" in api and
             "chrome::NewSplitTab(browser, split_tabs::SplitTabLayout::kSideBySide" in api,
             "Split View must pair, show the chooser and exit through Chromium's native model")
@@ -408,18 +405,21 @@ def check_omnibox(added, idl):
                 f"Private API IDL does not declare {function}")
         body = source.split(f"BreezerPrivate{function[0].upper() + function[1:]}Function::RunFunction()",
                             1)[1].split("\n}", 1)[0]
-        require("GetSession(*this, source_url())" in body,
-                f"{function} must be limited to a Breezer New Tab")
+        require("GetSession(*this, source_url()," in body,
+                f"{function} must be limited to a Breezer address field")
     require("AutocompleteClassifier::DefaultOmniboxProviders()" in source and
             "std::make_unique<ChromeAutocompleteProviderClient>(" in source and
             "INSTANT_NTP_WITH_OMNIBOX_AS_STARTING_FOCUS" in source,
             "New Tab suggestions must come from the address bar's own providers and context")
     session = source.split("OmniboxSession* GetSession(", 1)[1].split("\n}", 1)[0]
-    require("IsInPrimaryMainFrame()" in session and "kNewTabPath" in session,
-            "New Tab suggestions must be limited to the page itself")
+    require("IsInPrimaryMainFrame()" in session and "kNewTabPath" in session and
+            "IsSidebarFrame(browser, frame)" in session and "GetIndexOfWebContents(" in source and
+            'url.ref_piece().starts_with("/sidebar?w=")' in source,
+            "Suggestions must be limited to the New Tab or the window-owned sidebar")
     opened = source.split("BreezerPrivateOpenOmniboxFunction::RunFunction()", 1)[1]
     require("params.source_contents = contents;" in opened and
-            "GetActiveWebContents() != contents" in opened and
+            "contents != GetSenderWebContents()" in opened and
+            "*tab_id != ExtensionTabUtil::GetTabId(contents)" in opened and
             "!user_gesture()" in opened and
             'request.FindString("url")' not in source and
             "SchemeIs(url::kJavaScriptScheme)" in source,

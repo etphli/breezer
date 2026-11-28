@@ -451,7 +451,11 @@ test('sidebar menus, one-line dock, icon palette and space gestures work in Chro
       const rect = node => node.getBoundingClientRect().toJSON();
       const tabs = [...dock.querySelectorAll('.space-dot:not(.leaving)')];
       const icons = tabs.map(rect);
-      const color = [...dock.querySelectorAll('button svg')].map(node => getComputedStyle(node).color);
+      const iconsUseTheme = [...dock.querySelectorAll('button svg')].every(node => {
+        const selected = node.closest('button').getAttribute('aria-selected') === 'true';
+        const { color } = getComputedStyle(node);
+        return color === getComputedStyle(selected ? document.querySelector('.sidebar') : dock).color;
+      });
       const bounds = rect(dock);
       const scrollport = rect(dock.querySelector('#spaces'));
       const visibleWidths = icons.map(icon => Math.max(0, Math.min(icon.right, scrollport.right) - Math.max(icon.left, scrollport.left)));
@@ -463,20 +467,21 @@ test('sidebar menus, one-line dock, icon palette and space gestures work in Chro
         count: icons.length,
         fullyVisible: icons.filter((icon, index) => visibleWidths[index] === icon.width).length,
         visibleWidths,
-        colors: [...new Set(color)],
+        iconsUseTheme,
       };
     });
     for (const width of [200, 260, 280, 110, 56]) {
       await page.setViewportSize({ width, height: 820 });
+      await page.mouse.move(1, 1);
       const dock = await dockMetrics();
       assert.equal(dock.icon.y, dock.history.y, 'Space and update history icons share one row');
       assert.equal(dock.icon.y, dock.settings.y, 'Space and Settings icons share one row');
       assert.ok(dock.history.right <= dock.icon.left && dock.icon.right <= dock.settings.left && dock.settings.right <= width);
-      assert.deepEqual(dock.colors, ['rgb(17, 17, 17)']);
+      assert.equal(dock.iconsUseTheme, true);
       await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-${width}.png` });
       if (width >= 200) {
-        assert.equal(dock.icon.width, 34);
-        assert.equal(dock.icon.height, 34);
+        assert.equal(dock.icon.width, 28);
+        assert.equal(dock.icon.height, 28);
         assert.equal(dock.count, 4);
         assert.equal(dock.fullyVisible, 4, `All space targets fit at ${width}px (visible widths: ${dock.visibleWidths.join(', ')})`);
         assert.ok(Math.abs(dock.centerOffset) < 1, 'Four spaces are centered in the full sidebar');
@@ -487,7 +492,7 @@ test('sidebar menus, one-line dock, icon palette and space gestures work in Chro
         await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-${width}-light.png` });
         await page.emulateMedia({ colorScheme: 'dark' });
         await page.waitForFunction(() => document.documentElement.dataset.scheme === 'dark');
-        assert.deepEqual((await dockMetrics()).colors, ['rgb(255, 255, 255)']);
+        assert.equal((await dockMetrics()).iconsUseTheme, true);
         await page.screenshot({ animations: 'disabled', path: `${evidence}/sidebar-${width}-dark.png` });
         await page.emulateMedia({ colorScheme: 'light' });
         await page.waitForFunction(() => document.documentElement.dataset.scheme === 'light');
@@ -514,16 +519,19 @@ test('sidebar menus, one-line dock, icon palette and space gestures work in Chro
     assert.ok(Math.abs(narrowAlternate.centerOffset) < 1);
     await page.evaluate(async () => {
       const current = window.fx.local['workspace.v1'];
-      const extra = { id: 'space-gallery', name: 'Gallery', tone: 'pollen', icon: 'sparkle', pinned: [] };
-      await chrome.storage.local.set({ 'workspace.v1': { ...current, rev: current.rev + 1, spaces: [...current.spaces, extra] } });
+      const extra = [
+        { id: 'space-archive', name: 'Archive', tone: 'tide', icon: 'book', pinned: [] },
+        { id: 'space-gallery', name: 'Gallery', tone: 'pollen', icon: 'sparkle', pinned: [] },
+      ];
+      await chrome.storage.local.set({ 'workspace.v1': { ...current, rev: current.rev + 1, spaces: [...current.spaces, ...extra] } });
     });
     await page.getByRole('tab', { name: /^Gallery,/ }).waitFor();
     await active('Projects').press('End');
     await active('Gallery').waitFor();
     const overflow = await dockMetrics();
-    assert.equal(overflow.count, 5);
-    assert.ok(overflow.fullyVisible < 5);
-    assert.equal(overflow.visibleWidths.at(-1), 34, 'Keyboard selection reveals the complete last target');
+    assert.equal(overflow.count, 6);
+    assert.ok(overflow.fullyVisible < 6);
+    assert.equal(overflow.visibleWidths.at(-1), 28, 'Keyboard selection reveals the complete last target');
     await page.setViewportSize(viewport);
     await page.getByRole('tab', { name: /^Work,/ }).click();
     await active('Work').waitFor();

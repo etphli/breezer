@@ -150,6 +150,7 @@ def _region_replacements():
             '            }\n'
             '            region->bottom_button_container_->SetVisible(!available);\n'
             '            region->InvalidateLayout();\n'
+            '            region->browser_view()->OnBreezerSidebarAddressChanged();\n'
             '          },\n'
             '          base::Unretained(this)));\n'
             '  workspace->SetProperty(\n'

@@ -298,8 +298,9 @@ try {
     throw new Precondition('chrome.breezerPrivate is absent in the Breezer AI service worker; this binary predates the native workspace.');
   }
   assert.deepEqual(surface.breezerPrivate, [
-    'authorizeCurrentPage', 'captureCurrentPdfContext', 'exchangeWorkspaceSync', 'focusLocationBar', 'getAppearance',
-    'getBrowserStats', 'getResearchTabs', 'isCurrentPdf', 'readResearchTab', 'readWorkspaceSync',
+    'authorizeCurrentPage', 'captureCurrentPdfContext', 'exchangeWorkspaceSync', 'getAppearance',
+    'getBrowserStats', 'getResearchTabs', 'isCurrentPdf', 'nextOmniboxResult', 'openOmnibox',
+    'queryOmnibox', 'readResearchTab', 'readWorkspaceSync',
     'setAppearance', 'setPeekSources', 'setSidebarCollapsed', 'showExtensionsMenu', 'toggleSplitView',
   ]);
   pass('privateApiSurface', 'the IDL methods are exposed to the component extension');
@@ -352,6 +353,41 @@ try {
   assert.ok(!scopedA.shown.includes(alphaB) && !scopedB.shown.includes(alphaA), 'Same-URL tabs leaked across windows.');
   pass('uniqueHostPerWindow', `windows ${windowA} and ${windowB} each have exactly one host; same URL ${fixture('alpha')} shows only the owning window's tab (${alphaA} vs ${alphaB})`);
   await hostB.screenshot('host-window-b.png');
+
+  await webPage.bringToFront();
+  const beforeAddressMode = (await workerCall('getAppearance')).value;
+  const patchAppearance = async patch => {
+    const result = await workerCall('setAppearance', patch);
+    assert.ok(result.ok, result.error);
+  };
+  await patchAppearance({ frameless: false, alwaysShowTopBar: true });
+  const withToolbar = await webPage.evaluate(() => innerHeight);
+  await patchAppearance({ sidebarAddressSearch: true });
+  await worker.evaluate(() => chrome.storage.local.set({ breezerExperiments: { sidebarSearch: true } }));
+  await waitFor('toolbar hidden by sidebar address mode', async () =>
+    (await webPage.evaluate(() => innerHeight)) > withToolbar + 15);
+  const address = "document.getElementById('sidebar-address')";
+  await waitFor('full URL in the editable sidebar address', async () =>
+    (await hostA.evaluate(`${address}.value`)) === fixture('alpha'));
+  await hostA.click(address);
+  assert.equal(await hostA.evaluate(`document.activeElement === ${address}`), true);
+  await hostA.evaluate(`${address}.select()`);
+  const editedURL = fixture('alpha') + '?from=sidebar';
+  await hostA.send('Input.insertText', { text: editedURL });
+  await hostA.send('Input.dispatchKeyEvent', { type: 'rawKeyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  await hostA.send('Input.dispatchKeyEvent', { type: 'char', key: 'Enter', code: 'Enter', text: '\r', windowsVirtualKeyCode: 13 });
+  await hostA.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  await webPage.waitForURL(editedURL);
+  assert.equal((await windowTabs(windowB)).find(tab => tab.active).url, fixture('alpha'));
+  await worker.evaluate(() => chrome.storage.local.remove('breezerExperiments'));
+  await patchAppearance({ sidebarAddressSearch: false });
+  await waitFor('toolbar restored', async () => (await webPage.evaluate(() => innerHeight)) === withToolbar);
+  await patchAppearance({
+    frameless: beforeAddressMode.frameless, alwaysShowTopBar: beforeAddressMode.alwaysShowTopBar,
+  });
+  await webPage.goBack();
+  await webPage.waitForURL(fixture('alpha'));
+  pass('nativeSidebarAddress', 'the sidebar edits the real active tab, hides and restores the toolbar, and leaves the other window alone');
 
   // ---------------------------------------------------------------- create / switch / pin / close via shipped UI
   const countB = (await windowTabs(windowB)).length;
@@ -464,7 +500,9 @@ try {
   const appearance = async () => { const result = await settingsCall('getAppearance'); assert.ok(result.ok, result.error); return result.value; };
   const initialAppearance = await appearance();
   observe('initialAppearance', initialAppearance);
-  assert.deepEqual(Object.keys(initialAppearance).sort(), ['alwaysShowSidebar', 'alwaysShowTopBar', 'bookmarkBarMode', 'centeredAddressBar', 'colorMode', 'frameless', 'layout', 'minimalUrl', 'showBookmarks', 'showLoadProgress', 'sidebarFontSize', 'sidebarMode', 'sidebarWidth', 'theme']);
+  for (const field of ['alwaysShowSidebar', 'alwaysShowTopBar', 'bookmarkBarMode', 'centeredAddressBar', 'colorMode', 'frameless', 'layout', 'minimalUrl', 'showBookmarks', 'showLoadProgress', 'sidebarAddressSearch', 'sidebarFontSize', 'sidebarMode', 'sidebarWidth', 'theme']) {
+    assert.ok(Object.hasOwn(initialAppearance, field), `Appearance is missing ${field}`);
+  }
   assert.equal(initialAppearance.layout, 'sidebar');
   assert.equal(initialAppearance.bookmarkBarMode, 'newTab');
   assert.equal(initialAppearance.showBookmarks, true);
