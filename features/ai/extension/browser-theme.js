@@ -532,17 +532,20 @@ async function cancelLookLocked(api, area, now) {
   return { cancelled: true, appearance, artwork };
 }
 
-export async function restorePreviousLook({ api = globalThis.chrome, now = Date.now } = {}) {
+// With expectedTheme, restore only while the browser still shows that seed, so a
+// colour picked after the caller checked is never restored away.
+export async function restorePreviousLook({ api = globalThis.chrome, now = Date.now, expectedTheme } = {}) {
   const area = storageArea(api);
-  return exclusive(() => restoreLocked(api, area, now));
+  return exclusive(() => restoreLocked(api, area, now, expectedTheme));
 }
 
-async function restoreLocked(api, area, now) {
+async function restoreLocked(api, area, now, expectedTheme) {
   const values = await readKeys(area, [PREVIOUS_LOOK_KEY]);
   const previous = values[PREVIOUS_LOOK_KEY];
   if (!previous || typeof previous !== 'object') return { restored: false };
   if (previous.appearance && !hasBridge(api)) throw new Error('Browser appearance is unavailable in this build.');
   const current = previous.appearance ? await readRestorableAppearance(api) : null;
+  if (expectedTheme !== undefined && String(current?.theme ?? '').toLowerCase() !== expectedTheme) return { restored: false };
   const artwork = readArtworkRecord(previous.artwork);
   const appearance = await saveLook(api, area, current, previous.appearance, {
     [ARTWORK_KEY]: artwork, [FIRST_FRAME_KEY]: null, [PREVIOUS_LOOK_KEY]: null, [APPEARANCE_REV_KEY]: now(),

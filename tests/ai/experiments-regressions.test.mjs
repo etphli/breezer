@@ -86,3 +86,18 @@ test('Standard keeps a picked colour when the browser theme cannot be read', asy
   assert.deepEqual(await applyPersonalityLook(api, 'off'), { colors: 'unchanged' });
   assert.equal(state.appearance.theme, '#123456');
 });
+
+test('Standard does not restore over a colour picked after its personality check', async () => {
+  const { api, state } = fakeApi();
+  assert.deepEqual(await applyPersonalityLook(api, 'warm'), { colors: 'applied' });
+  const getAppearance = api.breezerPrivate.getAppearance;
+  let first = true;
+  api.breezerPrivate.getAppearance = async () => {
+    const value = await getAppearance();
+    // The person picks a colour right after the check reads the browser theme.
+    if (first) { first = false; state.appearance = { ...state.appearance, theme: '#123456' }; }
+    return value;
+  };
+  assert.deepEqual(await applyPersonalityLook(api, 'off'), { colors: 'unchanged' });
+  assert.equal(state.appearance.theme, '#123456');
+});

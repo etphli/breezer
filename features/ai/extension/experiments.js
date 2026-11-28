@@ -206,8 +206,9 @@ export async function applyPersonalityLook(api, id) {
   const ours = isPersonalityTheme(applied, appearance?.theme);
   if (!preset.seed) {
     if (!ours) return { colors: 'unchanged' };
-    await restorePreviousLook({ api });
-    return { colors: 'restored' };
+    // The browser must still show the matched seed when Restore reads it under the theme lock.
+    const { restored } = await restorePreviousLook({ api, expectedTheme: appearance.theme.toLowerCase() });
+    return { colors: restored ? 'restored' : 'unchanged' };
   }
   if (applied && !ours) return { colors: 'kept', reason: 'Your current theme was kept.' };
   try {

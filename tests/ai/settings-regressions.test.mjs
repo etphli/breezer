@@ -52,19 +52,24 @@ test('a confirmed Organato change keeps the new value', () => {
   f.service.dispose();
 });
 
-test('a change made before Organato first reports goes back when it fails', () => {
+test('Organato switches stay off until the first read succeeds, and a failed read is retried', async () => {
   const dom = createDom(html);
   Object.assign(globalThis, dom.globals);
   globalThis.window = dom.window;
   const ports = [];
   const events = () => ({ listeners: [], addListener(fn) { this.listeners.push(fn); }, fire(value) { this.listeners.forEach((fn) => fn(value)); } });
   const api = { runtime: { connect: () => { const port = { onMessage: events(), onDisconnect: events(), sent: [], postMessage(m) { this.sent.push(m); }, disconnect() {} }; ports.push(port); return port; } } };
-  mountOrganato(api, { timeoutMs: 20 });
+  const service = mountOrganato(api, { timeoutMs: 20, retryMs: 10 });
   const $ = (id) => dom.document.getElementById(id);
-  for (const id of ['dashboard-enabled', 'organato-enabled', 'organato-ai']) $(id).checked = true;
-  const before = true;
-  $('organato-ai').checked = !before; $('organato-ai').dispatchEvent(event('change'));
-  const sent = ports[0].sent.at(-1);
-  ports[0].onMessage.fire({ id: sent.id, ok: false, error: 'Keychain write failed.' });
-  assert.equal($('organato-ai').checked, before);
+  const switches = ['dashboard-enabled', 'organato-enabled', 'organato-ai'];
+  assert.deepEqual(switches.map((id) => $(id).disabled), [true, true, true]);
+  ports[0].onMessage.fire({ id: ports[0].sent[0].id, ok: false, error: 'Helper unavailable.' });
+  assert.deepEqual(switches.map((id) => $(id).disabled), [true, true, true]);
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  const retry = ports[0].sent.at(-1);
+  assert.equal(retry.type, 'view');
+  ports[0].onMessage.fire({ id: retry.id, ok: true, value: { enabled: true, dashboardEnabled: true, allowAI: false, connected: true } });
+  assert.deepEqual(switches.map((id) => $(id).disabled), [false, false, false]);
+  assert.equal($('organato-ai').checked, false);
+  service.dispose();
 });
