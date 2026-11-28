@@ -106,8 +106,10 @@ def contract_for(tree):
 
 def prepare(tree, artifacts):
     folder = tree / 'third_party/ublock'
-    storage = (folder / 'js/storage.js').read_text()
-    if (folder / 'js/breezer-startup-body.js').is_file():
+    storage_bytes = (folder / 'js/storage.js').read_bytes()
+    storage = storage_bytes.decode()
+    startup_body = (folder / 'js/breezer-startup-body.js').is_file()
+    if startup_body:
         # The native contract hashes these storage bytes literally, so staging must not change them.
         try:
             unchanged = hook(storage) == storage
@@ -155,7 +157,7 @@ def prepare(tree, artifacts):
     existing = {path.relative_to(folder).as_posix() for path in (folder / 'assets/breezer-compiled').rglob('*') if path.is_file()}
     if existing - files.keys():
         raise ValueError('Unexpected compiled-list resources remain; preserve this tree and use a fresh source snapshot')
-    files['js/storage.js'] = hook(storage).encode()
+    files['js/storage.js'] = storage_bytes if startup_body else hook(storage).encode()
     gn = (folder / 'BUILD.gn').read_text()
     if GN_MARKER in gn:
         gn = re.sub(re.escape(GN_MARKER) + r'.*?    # End Breezer compiled-list inputs\.\n', '', gn, count=1, flags=re.S)

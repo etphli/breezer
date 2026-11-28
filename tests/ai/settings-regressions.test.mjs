@@ -51,3 +51,20 @@ test('a confirmed Organato change keeps the new value', () => {
   assert.equal(f.$('organato-ai').checked, false);
   f.service.dispose();
 });
+
+test('a change made before Organato first reports goes back when it fails', () => {
+  const dom = createDom(html);
+  Object.assign(globalThis, dom.globals);
+  globalThis.window = dom.window;
+  const ports = [];
+  const events = () => ({ listeners: [], addListener(fn) { this.listeners.push(fn); }, fire(value) { this.listeners.forEach((fn) => fn(value)); } });
+  const api = { runtime: { connect: () => { const port = { onMessage: events(), onDisconnect: events(), sent: [], postMessage(m) { this.sent.push(m); }, disconnect() {} }; ports.push(port); return port; } } };
+  mountOrganato(api, { timeoutMs: 20 });
+  const $ = (id) => dom.document.getElementById(id);
+  for (const id of ['dashboard-enabled', 'organato-enabled', 'organato-ai']) $(id).checked = true;
+  const before = true;
+  $('organato-ai').checked = !before; $('organato-ai').dispatchEvent(event('change'));
+  const sent = ports[0].sent.at(-1);
+  ports[0].onMessage.fire({ id: sent.id, ok: false, error: 'Keychain write failed.' });
+  assert.equal($('organato-ai').checked, before);
+});

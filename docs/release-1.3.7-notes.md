@@ -53,7 +53,7 @@ These notes collect fixes for the next patch after 1.3.6. Nothing here is publis
 - Organato and AI memory consent switches go back to their real state when a change fails, so a failed consent revoke no longer looks revoked.
 - AI memory counts visits by your local calendar day.
 - New Tab shows a date instead of a weekday for chats from about a week ago.
-- Very long text in the New Tab search box no longer closes suggestions without explanation.
+- New Tab suggestions use the browser's 8,192-byte limit, so long non-English text no longer sends requests the browser refuses.
 
 ## Organato
 

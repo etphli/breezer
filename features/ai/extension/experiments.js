@@ -190,10 +190,10 @@ export const personalityThemeName = (id) => `Breezer ${PERSONALITIES[id]?.label 
 
 // The record alone is not enough: picking a colour in Appearance settings keeps
 // the record, so the browser must still show the preset's seed (like activeLook).
-// theme is null only when the bridge could not be read.
+// An unreadable browser theme is not a match, so a failed read never replaces it.
 const isPersonalityTheme = (record, theme) => Boolean(record) && Object.entries(PERSONALITIES)
   .some(([id, preset]) => preset.seed && record.name === personalityThemeName(id) && record.theme === preset.seed &&
-    (theme == null || (typeof theme === 'string' && theme.toLowerCase() === preset.seed)));
+    typeof theme === 'string' && theme.toLowerCase() === preset.seed);
 
 const hasAppearanceBridge = (api) => typeof api?.breezerPrivate?.setAppearance === 'function' && typeof api?.breezerPrivate?.getAppearance === 'function';
 

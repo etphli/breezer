@@ -74,5 +74,17 @@ class StartupBodyStaging(unittest.TestCase):
                 self.assertEqual(snapshot(tree), before)
 
 
+    def test_crlf_startup_body_storage_is_never_rewritten(self):
+        tree, artifacts = self.tree(lambda text: text.replace('\n', '\r\n'))
+        path = tree / 'third_party/ublock/js/storage.js'
+        self.assertIn(b'\r\n', path.read_bytes())
+        before = path.read_bytes()
+        try:
+            compiled.apply(tree, artifacts)
+        except ValueError:
+            pass
+        self.assertEqual(path.read_bytes(), before)
+
+
 if __name__ == '__main__':
     unittest.main()

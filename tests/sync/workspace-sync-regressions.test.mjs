@@ -220,3 +220,30 @@ test('a joining default space that holds local pins is a real edit and is kept',
   assert.equal(await a.cycle(), 'reconciled');
   assert.deepEqual(a.saved[STORE_KEY].spaces.map(space => space.name).sort(), ['Personal', 'Work']);
 });
+
+test('an appearance field changed during a cycle keeps the local value even when sync was applying that field', async () => {
+  const pref = { value: '' };
+  const a = client('client_alpha', pref), b = client('client_beta1', pref);
+  assert.equal(await a.cycle(), 'reconciled'); assert.equal(await b.cycle(), 'reconciled');
+  a.appearance.theme = 'rose';
+  assert.equal(await a.cycle(), 'reconciled');
+  b.onExchange = () => { b.appearance.theme = 'dusk'; b.onExchange = null; };
+  b.saved[STORE_KEY].spaces[0].name = 'force exchange';
+  assert.equal(await b.cycle(), 'reconciled');
+  assert.equal(b.appearance.theme, 'dusk', 'sync does not overwrite the change made during the cycle');
+  await b.cycle(); await a.cycle();
+  assert.equal(b.appearance.theme, 'dusk');
+  assert.equal(a.appearance.theme, 'dusk', 'the local change reaches other devices');
+});
+
+test('a lone surrogate kept on a deleted record in local recovery data is healed before publishing', async () => {
+  const pref = { value: '' };
+  const a = client('client_alpha', pref);
+  assert.equal(await a.cycle(), 'reconciled');
+  const local = a.saved[SYNC_LOCAL_KEY];
+  local.model.records['entry/old-pin'] = { alive: [40, 'client_alpha', false], title: [39, 'client_alpha', 'cut \ud83d'] };
+  a.saved[STORE_KEY].spaces[0].name = 'force exchange';
+  assert.equal(await a.cycle(), 'reconciled');
+  assert.ok(pref.value.includes('entry/old-pin'));
+  assert.ok(!/\\ud8[0-9a-f]{2}/i.test(pref.value), 'no lone surrogate reaches the native JSON parser');
+});

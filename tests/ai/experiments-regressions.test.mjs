@@ -75,3 +75,14 @@ test('quick personality choices settle on the last one chosen', async () => {
   assert.equal(radio('concise').getAttribute('aria-checked'), 'false');
   ui.dispose();
 });
+
+test('Standard keeps a picked colour when the browser theme cannot be read', async () => {
+  const { api, state } = fakeApi();
+  assert.deepEqual(await applyPersonalityLook(api, 'warm'), { colors: 'applied' });
+  await applyThemeColor('#123456', { api });
+  const getAppearance = api.breezerPrivate.getAppearance;
+  let failures = 1;
+  api.breezerPrivate.getAppearance = async () => { if (failures-- > 0) throw new Error('bridge busy'); return getAppearance(); };
+  assert.deepEqual(await applyPersonalityLook(api, 'off'), { colors: 'unchanged' });
+  assert.equal(state.appearance.theme, '#123456');
+});

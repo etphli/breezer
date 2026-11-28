@@ -15,6 +15,18 @@ const order = (a, b) => compare(a, b) || (JSON.stringify(a[2]) < JSON.stringify(
 // may hold them, so every projected string is made well-formed.
 const wellFormed = value => value.toWellFormed();
 
+// Local recovery data written by earlier builds can hold lone surrogates in
+// any register, including fields kept on deleted records.
+export function wellFormedSyncModel(model) {
+  const result = structuredClone(model);
+  for (const record of Object.values(result.records || {})) {
+    for (const register of Object.values(record)) {
+      if (Array.isArray(register) && typeof register[2] === 'string') register[2] = wellFormed(register[2]);
+    }
+  }
+  return result;
+}
+
 export function emptySyncModel() { return { version: SYNC_MODEL_VERSION, records: {} }; }
 
 // Only these fields can cross the native workspace boundary. In particular this

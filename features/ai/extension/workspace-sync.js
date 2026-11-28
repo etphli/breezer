@@ -2,7 +2,7 @@ import { localStorageChanges } from './storage-events.js';
 // The native bridge exchanges workspace metadata only. Passwords and vault keys
 // never pass through this worker, extension messages, AI prompts or storage.
 import { APPEARANCE_REV_KEY, LOCK_NAME, STORE_KEY, DEFAULT_APPEARANCE, defaultStore, normalizeStore, normalizeAppearance } from './workspace-store.js';
-import { emptySyncModel, projectWorkspace, recordWorkspaceChanges, mergeSyncModels, materializeWorkspace, serializeSyncModel, validateSyncModel, syncModelValues, recoveredSpace } from './workspace-sync-model.js';
+import { emptySyncModel, projectWorkspace, recordWorkspaceChanges, mergeSyncModels, materializeWorkspace, serializeSyncModel, validateSyncModel, syncModelValues, recoveredSpace, wellFormedSyncModel } from './workspace-sync-model.js';
 
 export const SYNC_LOCAL_KEY = 'workspace.sync.local.v1';
 export const SYNC_STATE_KEY = 'workspace.sync.state.v1';
@@ -108,6 +108,7 @@ export class WorkspaceSync {
       local = { version: 1, providerId: remote.providerId, vaultId: remote.vaultId, clientId: this.makeClientId(), model, baseline, ...(skip.length ? { skip } : {}) };
     }
     if (local.version !== 1 || !local.baseline || typeof local.baseline !== 'object') throw new Error('Local sync recovery data is invalid. Local data is preserved.');
+    local = { ...local, model: wellFormedSyncModel(local.model) };
     // An untouched skipped default is left out; one that was edited or holds
     // local pins is a real local change and is published.
     const recorded = Array.isArray(local.skip) ? Object.fromEntries(Object.entries(current).filter(([key, value]) => !(local.skip.includes(key) &&
@@ -138,8 +139,12 @@ export class WorkspaceSync {
       let appearanceError;
       if (Object.keys(patch).length) {
         try {
-          appearanceChanged = !same(normalizeAppearance(await this.bridge.setAppearance(patch)), appearance);
-          applyAppearance = patch;
+          // A field the person changed since this cycle's read keeps their value;
+          // the next cycle records it as an edit.
+          const fresh = normalizeAppearance(await this.bridge.getAppearance());
+          const pending = Object.fromEntries(Object.entries(patch).filter(([field]) => same(fresh[field], appearance[field])));
+          if (Object.keys(pending).length) appearanceChanged = !same(normalizeAppearance(await this.bridge.setAppearance(pending)), fresh);
+          applyAppearance = pending;
         } catch (error) { appearanceError = error.message || 'Native appearance settings could not be changed.'; }
       }
       const changed = !same(projectWorkspace(store), projectWorkspace(applied.store));

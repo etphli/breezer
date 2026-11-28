@@ -52,6 +52,8 @@ export async function usageReports(now = new Date(), readBudgetMs = 40_000) {
     year * 12 + month <= now.getUTCFullYear() * 12 + now.getUTCMonth(); month++) {
     months.push(new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 7));
   }
+  // Newest first, so a partial read still counts the current month.
+  months.reverse();
   const listings = await Promise.all(months.map(month => allBlobs(`usage/${month}/`)));
   const blobs = listings.flatMap(listing => listing.blobs);
   const reports = [];

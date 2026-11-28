@@ -857,7 +857,11 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
       finish('Breezer could not connect to Organato. Try again.', true);
     }
   };
-  for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => request('configure', { [field]: $(id).checked }));
+  for (const [id, field] of Object.entries(mappings)) $(id).addEventListener('change', () => {
+    // Before Organato first reports, the value to fall back to is the one shown before this change.
+    confirmed ||= Object.fromEntries(Object.entries(mappings).map(([other, name]) => [name, other === id ? !$(other).checked : $(other).checked]));
+    request('configure', { [field]: $(id).checked });
+  });
   $('organato-connect').addEventListener('click', () => {
     const key = $('organato-key').value.trim(); $('organato-key').value = '';
     $('organato-status').textContent = 'Connecting to Organato…'; request('configure', { key });
