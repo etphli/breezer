@@ -836,6 +836,7 @@ export function mountOrganato(api, { timeoutMs = 85000, retryMs = 5000 } = {}) {
       if (!message.ok) { finish(message.error, true); return; }
       connected = message.value.connected === true;
       confirmed = message.value;
+      clearTimeout(retry);
       show(confirmed);
       finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show deadlines on your new tab.');
     });
