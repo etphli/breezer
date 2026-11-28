@@ -228,3 +228,22 @@ test('membership writes merge saved-entry links instead of clobbering them', asy
   await workspace.patchMembers({ 5: { s: 'space-personal', u: 'https://mail.example.com/inbox', e: '' } });
   assert.equal('e' in tabs()[5], false);
 });
+
+for (const [change, link] of [['unlink', undefined], ['replacement link', 'v-chat']]) {
+  test(`a pending ${change} wins over the stale stored link when attach arrives first`, async () => {
+    const { sender, receiver, run, stored } = await twoSidebars();
+    assert.equal(stored(8)?.e, 'v-cal');
+    // A real sidebar loads only its own window's tabs (tabs.query by windowId).
+    delete receiver.state.records[8]; receiver.state.tabs.delete(8);
+    sender.setRecord(8, { e: link || '' });
+    receiver.onAttached(8, { newWindowId: 9 });
+    for (let i = 0; i < 10; i++) await settle();
+    sender.onDetached(8, { oldWindowId: 7 });
+    await run();
+    // A later unrelated receiver write must not restore the stale link either.
+    receiver.setRecord(8, {});
+    await run();
+    assert.equal(stored(8)?.e, link, 'storage has the sender\'s latest link');
+    assert.equal(receiver.state.records[8]?.e, link, 'the receiving window shows the latest link');
+  });
+}

@@ -165,7 +165,8 @@ const state = {
 };
 
 const pending = { set: {}, remove: new Set(), handoff: new Set(), timer: 0 };
-// Tabs attached from another window before its sidebar flushed their link.
+// Tabs attached from another window. Their link is provisional: shown from
+// storage, never written by this window, until the user sets it here.
 const linkWaits = new Map();
 const urlOf = (tab) => tab?.url || tab?.pendingUrl || '';
 const activeTab = () => [...state.tabs.values()].find((tab) => tab.active) || null;
@@ -179,8 +180,11 @@ function setRecord(tabId, patch) {
   state.records[tabId] = record;
   // Storage keeps a link unless the write carries `e`; '' is an explicit unlink.
   const unlink = 'e' in patch ? !patch.e : pending.set[tabId]?.e === '';
-  pending.set[tabId] = unlink ? { ...record, e: '' } : record;
-  if ('e' in patch || record.e) linkWaits.delete(tabId);
+  const provisional = linkWaits.has(tabId) && !('e' in patch);
+  if (unlink) pending.set[tabId] = { ...record, e: '' };
+  else if (provisional) { const { e: _link, ...rest } = record; pending.set[tabId] = rest; }
+  else pending.set[tabId] = record;
+  if ('e' in patch) linkWaits.delete(tabId);
   pending.remove.delete(String(tabId));
   scheduleFlush();
   // An empty URL patch can still create membership or default its space.
@@ -2096,9 +2100,14 @@ function onAttached(tabId, info) {
     ++tabEventVersion;
     queryDrawDirty = true;
     state.tabs.set(tabId, tab);
-    const e = state.records[tabId]?.e || member?.e || linkWaits.get(tabId) || '';
-    // Without a known link, omit `e` so this write cannot erase the sender's.
-    setRecord(tabId, e ? { s: state.activeSpaceId, e } : { s: state.activeSpaceId });
+    const known = state.records[tabId]?.e;
+    if (known) setRecord(tabId, { s: state.activeSpaceId, e: known });
+    else {
+      // Omit `e` so this write can neither erase nor restore the sender's link.
+      setRecord(tabId, { s: state.activeSpaceId });
+      const shown = member?.e || linkWaits.get(tabId) || '';
+      if (shown && linkWaits.has(tabId)) state.records[tabId].e = shown;
+    }
     return refreshTabs();
   }).catch(() => { if (!state.records[tabId]) linkWaits.delete(tabId); }).finally(() => { --pendingTabAttachments; });
 }
@@ -2119,13 +2128,19 @@ function onDetached(tabId, info) {
 
 // The sending window's late flush links a tab this window already claimed.
 function adoptLinks(members) {
+  let changed = false;
   for (const tabId of [...linkWaits.keys()]) {
-    const e = members.tabs[tabId]?.e;
-    if (!e) continue;
-    if (!state.records[tabId]) { linkWaits.set(tabId, e); continue; }
-    if (!state.records[tabId].e) setRecord(tabId, { e });
-    linkWaits.delete(tabId);
+    const stored = members.tabs[tabId];
+    if (!stored) continue;
+    const e = stored.e || '';
+    const record = state.records[tabId];
+    if (!record) { linkWaits.set(tabId, e); continue; }
+    // Follow storage in memory only; the sender's handoff is authoritative.
+    if ((record.e || '') === e) continue;
+    if (e) record.e = e; else delete record.e;
+    changed = true;
   }
+  if (changed) void refreshTabs();
 }
 
 function onReplaced(addedTabId, removedTabId) {
