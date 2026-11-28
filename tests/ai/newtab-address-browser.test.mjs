@@ -17,10 +17,11 @@ let chromium = null;
 try { ({ chromium } = await import(process.env.BREEZER_PLAYWRIGHT_MODULE || 'playwright')); } catch { /* reported by skip below */ }
 const skip = !chromium ? 'playwright is not installed' : (executablePath && !existsSync(executablePath) ? `no browser at ${executablePath}` : false);
 
-function extendPage({ omnibox, experiments }) {
+function extendPage({ omnibox, experiments, look }) {
   if (experiments && !JSON.parse(localStorage.getItem('shortcut-fixture') || '{}').breezerExperiments) {
     void chrome.storage.local.set({ breezerExperiments: experiments });
   }
+  if (look) void chrome.storage.local.set({ 'theme.artwork.v1': look });
   Object.assign(fx, { searches: [], queries: [], waits: [], opened: [], delays: {}, failOpen: false });
   chrome.search = { async query(options) { fx.searches.push(options); } };
   chrome.tabs.getCurrent = async () => ({ id: 7, windowId: 1 });
@@ -45,7 +46,11 @@ function extendPage({ omnibox, experiments }) {
   };
   fx.settle = null;
   chrome.breezerPrivate = {
-    getAppearance: async () => ({ layout: 'sidebar', theme: 'mint', colorMode: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light' }),
+    getAppearance: async () => ({
+      layout: 'sidebar',
+      theme: look?.theme ?? 'mint',
+      colorMode: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+    }),
     async queryOmnibox(request) {
       fx.queries.push(request);
       const current = ++revision;
@@ -66,7 +71,15 @@ function extendPage({ omnibox, experiments }) {
   fx.search = search;
 }
 
-async function open({ omnibox = true, experiments = { newTabComposer: true, newTabShortcuts: true }, colorScheme = 'light', viewport = { width: 1280, height: 820 }, run }) {
+async function open({
+  omnibox = true,
+  experiments = { newTabComposer: true, newTabShortcuts: true },
+  colorScheme = 'light',
+  viewport = { width: 1280, height: 820 },
+  view = { ...CONNECTED, organato: { enabled: false } },
+  look,
+  run,
+}) {
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url, 'http://localhost');
@@ -87,8 +100,8 @@ async function open({ omnibox = true, experiments = { newTabComposer: true, newT
   try {
     const context = await browser.newContext({ viewport, colorScheme, reducedMotion: 'reduce', locale: 'en-US' });
     await context.addInitScript({ content: `if (location.pathname === '/newtab.html') {
-      (${installFixture})(${JSON.stringify({ view: { ...CONNECTED, organato: { enabled: false } } })});
-      (${extendPage})(${JSON.stringify({ omnibox, experiments })});
+      (${installFixture})(${JSON.stringify({ view })});
+      (${extendPage})(${JSON.stringify({ omnibox, experiments, look })});
     }` });
     await context.route('https://example.com/**', route => route.fulfill({ status: 200, contentType: 'text/html', body: '<title>Example</title>' }));
     const page = await context.newPage();
@@ -135,6 +148,40 @@ test('typing shows the address bar’s suggestions and Enter opens its default m
     assert.equal(first.index, 0);
     assert.ok(Number.isInteger(first.revision));
     assert.deepEqual(await page.evaluate(() => fx.searches), []);
+    assert.equal(await list.isHidden(), true);
+  },
+}));
+
+test('Charcoal autocomplete stays above Organato and the overlapping rows can be clicked', { skip, timeout: 60_000 }, () => open({
+  colorScheme: 'dark',
+  view: CONNECTED,
+  look: { preset: 'charcoal', theme: '#2e2f33' },
+  run: async ({ page, list, rows }) => {
+    await page.locator('html[data-look="charcoal"][data-scheme="dark"]').waitFor({ state: 'attached' });
+    await page.locator('#organato[data-state="ready"]').waitFor();
+    const sheet = page.locator('.sheet');
+    const before = await sheet.boundingBox();
+    await page.evaluate(() => {
+      fx.local = text => [fx.search(text, true), ...Array.from({ length: 7 }, (_, i) => fx.search(`${text} ${i + 1}`))];
+    });
+    await page.keyboard.type('te');
+    const last = rows.nth(7);
+    await last.waitFor();
+    assert.deepEqual(await sheet.boundingBox(), before, 'Opening suggestions keeps the agenda in place');
+
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: join(evidence, 'newtab-suggestions-over-organato.png') });
+    const row = await last.boundingBox();
+    const x = row.x + row.width / 2;
+    const y = row.y + row.height / 2;
+    assert.ok(x > before.x && x < before.x + before.width && y > before.y && y < before.y + before.height, 'The suggestion overlaps Organato');
+    const top = await page.evaluate(({ x, y }) => {
+      return document.elementFromPoint(x, y)?.closest('[role="option"], .sheet')?.className;
+    }, { x, y });
+    assert.equal(top, 'suggestion', 'The suggestion receives pointer input over Organato');
+
+    await page.mouse.click(x, y);
+    assert.equal((await opened(page)).index, 7);
     assert.equal(await list.isHidden(), true);
   },
 }));
