@@ -141,6 +141,28 @@ views::View* BreezerWorkspaceView::GetFocusableView() const {
   return extension_view_;
 }
 
+bool BreezerWorkspaceView::FocusAddress(base::OnceClosure fallback) {
+  auto* frame = GetSidebarFrame();
+  if (!frame || !IsDrawn() || width() <= 150) {
+    return false;
+  }
+  extension_view_->RequestFocus();
+  frame->ExecuteJavaScriptInIsolatedWorld(
+      u"document.dispatchEvent(new Event('breezer-focus-sidebar-address'));"
+      u"document.activeElement?.id === 'sidebar-address';",
+      mojo::WrapCallbackWithDefaultInvokeIfNotRun(
+          base::BindPostTaskToCurrentDefault(base::BindOnce(
+              [](base::OnceClosure fallback, base::Value focused) {
+                if (!focused.is_bool() || !focused.GetBool()) {
+                  std::move(fallback).Run();
+                }
+              },
+              std::move(fallback))),
+          base::Value()),
+      ISOLATED_WORLD_ID_CHROME_INTERNAL);
+  return true;
+}
+
 void BreezerWorkspaceView::SetTitlebar(int height, int controls_width) {
   height = std::max(0, height);
   controls_width = std::max(0, controls_width);

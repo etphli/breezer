@@ -231,7 +231,6 @@ export function installFixture({ seed, bridge, bridgeFails, favicon = false, spl
         return copy(fx.appearance);
       },
       async setSidebarCollapsed(collapsed) { fx.calls.push(['setSidebarCollapsed', collapsed]); },
-      ...(nativeControl ? { async focusLocationBar() { fx.calls.push(['focusLocationBar']); } } : {}),
       ...(splitView ? { async toggleSplitView(tabId) { fx.calls.push(['toggleSplitView', tabId]); } } : {}),
     };
   }

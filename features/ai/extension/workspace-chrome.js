@@ -32,47 +32,46 @@ export function windowsUpdate(release, installedVersion = RELEASE_VERSION) {
     : null;
 }
 
-// What the sidebar shows for a page. Only a committed address is ever shown,
-// and the site stays separate from the path so it survives truncation.
+// Show the committed address. On focus, expose the full URL for editing.
 export function sidebarAddress(tab, ownOrigin = '') {
-  const url = typeof tab?.url === 'string' ? tab.url : '';
-  if (!url || /^(about:blank|chrome:\/\/(newtab|new-tab-page))(\/|$)/.test(url)) return null;
-  let parsed;
-  try { parsed = new URL(url); } catch { return null; }
-  if (ownOrigin && url.startsWith(`${ownOrigin}/`)) {
-    if (parsed.pathname === '/newtab.html') return null;
-    const settings = parsed.pathname === '/workspace.html' && parsed.hash.startsWith('#/settings');
-    return { site: settings ? 'Breezer Settings' : tab.title || 'Breezer', path: '' };
+  let url;
+  try { url = new URL(tab?.url); } catch { return null; }
+  if (/^(about:blank|chrome:\/\/(newtab|new-tab-page))(\/|$)/.test(url.href) ||
+      (url.href.startsWith(`${ownOrigin}/`) && url.pathname === '/newtab.html')) return null;
+  url.username = '';
+  url.password = '';
+  const value = url.href;
+  if (url.href.startsWith(`${ownOrigin}/`)) {
+    const settings = url.pathname === '/workspace.html' && url.hash.startsWith('#/settings');
+    return { value, label: settings ? 'Breezer Settings' : tab.title || 'Breezer' };
   }
-  const path = `${parsed.pathname}${parsed.search}${parsed.hash}`.slice(0, 2048);
-  if (/^https?:$/.test(parsed.protocol)) {
-    const scheme = parsed.protocol === 'http:' ? 'http://' : '';
-    return { site: scheme + parsed.host.replace(/^www\./, ''), path: path === '/' ? '' : path };
-  }
-  return parsed.host
-    ? { site: `${parsed.protocol}//${parsed.host}`, path: path === '/' ? '' : path }
-    : { site: parsed.protocol, path };
+  const originOnly = url.pathname === '/' && !url.search && !url.hash;
+  return { value, label: (originOnly ? value.slice(0, -1) : value).replace(/^https:\/\//, '') };
 }
 
-// Follows the selected tab of this window while the address is shown.
-function mountAddress(api, button) {
-  const hint = button.querySelector('.sidebar-address-hint');
-  const label = button.querySelector('.sidebar-address-url');
-  const site = label.querySelector('bdi');
-  const path = label.querySelector('.sidebar-address-path');
+function mountAddress(api, sidebar, installAddressSuggestions) {
+  const form = sidebar.querySelector('#sidebar-address-form');
+  const input = form.querySelector('input');
+  const display = form.querySelector('.sidebar-address-display');
+  const list = form.querySelector('#sidebar-address-suggestions');
+  const error = form.querySelector('#sidebar-address-error');
   const own = api.runtime.getURL('').replace(/\/$/, '');
   const { windowId } = parseRoute(location.hash);
-  let on = false, version = 0;
+  let on = false, version = 0, selectedId, address;
 
+  const reset = () => {
+    input.value = address?.value ?? '';
+    input.setSelectionRange(0, 0);
+    display.textContent = address?.label ?? '';
+    form.title = address?.label ?? '';
+    error.hidden = true;
+  };
   const paint = tab => {
-    const address = sidebarAddress(tab, own);
-    hint.hidden = Boolean(address);
-    label.hidden = !address;
-    site.textContent = address?.site ?? '';
-    path.textContent = address?.path ?? '';
-    const text = address ? address.site + address.path : '';
-    button.title = text;
-    button.setAttribute('aria-label', text ? `Open the address bar, ${text}` : 'Open the address bar');
+    const changedTab = tab?.id !== selectedId;
+    selectedId = tab?.id;
+    address = sidebarAddress(tab, own);
+    if (changedTab) suggestions.close();
+    if (changedTab || document.activeElement !== input) reset();
   };
   const refresh = async () => {
     const current = ++version;
@@ -84,13 +83,56 @@ function mountAddress(api, button) {
     }
   };
   const here = id => windowId === null || id === windowId;
-  const onActivated = info => { if (here(info.windowId)) void refresh(); };
+  const onActivated = info => {
+    if (!here(info.windowId)) return;
+    paint(undefined);
+    void refresh();
+  };
   const onUpdated = (_id, change, tab) => {
     if (!tab?.active || !here(tab.windowId) || !('url' in change || 'title' in change)) return;
     ++version;
     paint(tab);
   };
-  const onReplaced = () => void refresh();
+  const onReplaced = (_addedId, removedId) => {
+    if (removedId !== selectedId) return;
+    paint(undefined);
+    void refresh();
+  };
+
+  async function open() {
+    if (!input.value.trim() || selectedId === undefined) return;
+    try {
+      await suggestions.open({ tabId: selectedId });
+      input.blur();
+    } catch {
+      if (on && document.activeElement === input) error.hidden = false;
+    }
+  }
+  const suggestions = installAddressSuggestions({
+    api, root: document, input, list,
+    isActive: () => on && document.activeElement === input,
+    onOpen: () => void open(),
+    onCount: count => input.setAttribute('aria-expanded', String(Boolean(count))),
+  });
+  form.addEventListener('submit', event => { event.preventDefault(); void open(); });
+  input.addEventListener('focus', () => { reset(); input.select(); });
+  input.addEventListener('blur', () => { suggestions.close(); reset(); });
+  input.addEventListener('input', () => { error.hidden = true; });
+  input.addEventListener('keydown', event => {
+    if (event.isComposing) return;
+    if (suggestions.key(event.key)) event.preventDefault();
+    else if (event.key === 'Escape') {
+      event.preventDefault();
+      input.blur();
+    }
+  });
+  document.addEventListener('breezer-focus-sidebar-address', () => {
+    if (on && input.getClientRects().length) {
+      input.focus();
+      input.select();
+    }
+  });
+
   return show => {
     if (show === on) return;
     on = show;
@@ -98,20 +140,33 @@ function mountAddress(api, button) {
     api.tabs.onActivated[call](onActivated);
     api.tabs.onUpdated[call](onUpdated);
     api.tabs.onReplaced?.[call]?.(onReplaced);
-    if (on) void refresh(); else ++version;
+    if (on) void refresh();
+    else {
+      ++version;
+      input.blur();
+    }
   };
 }
 
 function mountExperiments(api, sidebar) {
   if (!api.storage?.local) return;
   const row = sidebar.querySelector('#sidebar-address-row');
-  const button = sidebar.querySelector('#sidebar-address');
-  const followAddress = mountAddress(api, button);
-  const canFocus = typeof api.breezerPrivate?.focusLocationBar === 'function';
+  const bridge = api.breezerPrivate;
+  const canEdit = typeof bridge?.queryOmnibox === 'function' && typeof bridge?.openOmnibox === 'function';
+  let followAddress, addressEnabled;
   const render = value => {
     const experiments = normalizeExperiments(value);
-    row.hidden = !canFocus || !experiments.sidebarSearch;
-    followAddress(!row.hidden);
+    addressEnabled = canEdit && experiments.sidebarSearch;
+    if (addressEnabled && !followAddress) {
+      void import('./newtab.js').then(({ installAddressSuggestions }) => {
+        followAddress ??= mountAddress(api, sidebar, installAddressSuggestions);
+        row.hidden = !addressEnabled;
+        followAddress(addressEnabled);
+      });
+    } else {
+      followAddress?.(addressEnabled);
+      row.hidden = !addressEnabled;
+    }
     sidebar.toggleAttribute('data-glass', experiments.glass);
     sidebar.style.setProperty('--glass-opacity', `${experiments.glassOpacity}%`);
   };
@@ -126,9 +181,6 @@ function mountExperiments(api, sidebar) {
   void api.storage.local.get(EXPERIMENTS).then(values => {
     if (!changed) render(values[EXPERIMENTS]);
   }).catch(() => {});
-  button.addEventListener('click', () => {
-    if (!row.hidden) api.breezerPrivate.focusLocationBar(() => { void api.runtime.lastError; });
-  });
   const openExtensionsPage = () => void Promise.resolve(api.tabs.create({ url: 'chrome://extensions/' })).catch(() => {});
   sidebar.querySelector('#sidebar-extensions').addEventListener('click', () => {
     if (typeof api.breezerPrivate.showExtensionsMenu !== 'function') { openExtensionsPage(); return; }

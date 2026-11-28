@@ -458,15 +458,13 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 
 /* Dock */
 .dock {
-  --dock-ink: #111;
   flex: none;
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 8px;
-  color: var(--dock-ink);
+  padding: 5px 8px;
+  color: var(--muted);
 }
-:root[data-scheme="dark"] .dock { --dock-ink: #fff; }
 .space-dots {
   flex: 1;
   min-width: 0;
@@ -478,40 +476,33 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   scrollbar-width: none;
 }
 .space-dot {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .space-dot:focus-visible { outline-offset: -2px; }
 .space-dot[aria-selected="true"] {
-  background: color-mix(in srgb, var(--dock-ink) 9%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dock-ink) 16%, transparent);
+  background: var(--press);
+  color: var(--ink);
 }
-#open-updates, #open-settings { flex: none; width: 32px; height: 34px; color: var(--dock-ink); }
+#open-updates, #open-settings { flex: none; width: 28px; height: 28px; }
 .space-dot:hover, .space-dot[aria-expanded="true"] { background: var(--hover); }
 .space-dot .dot {
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
 }
-.space-dot .dot svg { width: 20px; height: 20px; }
+.space-dot .dot svg { width: 16px; height: 16px; }
 .space-dot .dot[data-icon="space"] svg { fill: currentColor; }
 .space-dot.drop-into { background: color-mix(in srgb, var(--focus) 18%, transparent); box-shadow: inset 0 0 0 1.5px var(--focus); }
-/* One tray that fits its icons, and one fill on the selected space. */
+/* The alternate dock still groups the space icons in the middle. */
 [data-space-dock="alternate"] .space-dots {
   flex: 0 1 auto;
   margin-inline: auto;
-  padding: 0 2px;
-  border-radius: var(--radius-card);
-  background: color-mix(in srgb, var(--dock-ink) 6%, transparent);
-}
-[data-space-dock="alternate"] .space-dot[aria-selected="true"] {
-  background: color-mix(in srgb, var(--dock-ink) 12%, transparent);
-  box-shadow: none;
 }
 
 /* Leave room for four full-size space targets at the 200px sidebar minimum. */
@@ -519,7 +510,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .dock { gap: 1px; padding-inline: 2px; }
   .space-dots { gap: 1px; }
   #open-updates, #open-settings { width: 26px; }
-  [data-space-dock="alternate"] .space-dots { padding-inline: 1px; }
 }
 
 /* Drag and drop */
@@ -699,7 +689,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .folder-children { padding-left: 0; }
   .dock { gap: 2px; padding: 5px 3px; }
   .space-dot, #open-updates, #open-settings { width: 26px; height: 28px; }
-  .space-dot .dot svg { width: 17px; height: 17px; }
   .row.active { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 52%, transparent); }
   .folder-children .row { margin-left: 5px; }
   .menu { padding: 3px; }
@@ -712,7 +701,6 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
   .space-dot, #open-updates, #open-settings { width: 17px; height: 25px; }
   .space-dot .dot { width: 16px; height: 17px; }
   .space-dot .dot svg, #open-updates svg, #open-settings svg { width: 13px; height: 13px; }
-  [data-space-dock="alternate"] .space-dots { padding-inline: 0; }
 }
 
 @container sidebar (max-width: 56px) {

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 
 import { sidebarAddress, windowsUpdate } from '../../features/ai/extension/workspace-chrome.js';
@@ -39,17 +39,20 @@ test('Windows update notices require a newer stable release and both complete in
   ] }, '1.3.5'), null);
 });
 
-test('the sidebar address shows only the committed page, with its site apart from its path', () => {
+test('the sidebar address keeps the URL prefix and removes credentials from the editable text', () => {
   const own = 'chrome-extension://breezer';
   const show = (url, extra) => sidebarAddress({ url, ...extra }, own);
-  assert.deepEqual(show('https://www.example.com/a/b?c=1#d'), { site: 'example.com', path: '/a/b?c=1#d' });
-  assert.deepEqual(show('https://example.com/'), { site: 'example.com', path: '' });
-  assert.deepEqual(show('http://example.com:8080/x'), { site: 'http://example.com:8080', path: '/x' });
-  assert.deepEqual(show('https://user:secret@example.com/'), { site: 'example.com', path: '' });
-  assert.deepEqual(show('chrome://extensions/'), { site: 'chrome://extensions', path: '' });
-  assert.deepEqual(show('file:///tmp/a.pdf'), { site: 'file:', path: '/tmp/a.pdf' });
-  assert.deepEqual(show(`${own}/workspace.html#/settings/layout`), { site: 'Breezer Settings', path: '' });
-  assert.deepEqual(show(`${own}/whats-new.html`, { title: 'What’s new' }), { site: 'What’s new', path: '' });
+  assert.deepEqual(show('https://www.example.com/a/b?c=1#d'), {
+    value: 'https://www.example.com/a/b?c=1#d', label: 'www.example.com/a/b?c=1#d',
+  });
+  assert.deepEqual(show('https://user:secret@example.com/'), {
+    value: 'https://example.com/', label: 'example.com',
+  });
+  assert.equal(show('http://example.com:8080/x').label, 'http://example.com:8080/x');
+  assert.equal(show('chrome://extensions/').label, 'chrome://extensions');
+  assert.equal(show('file:///tmp/a.pdf').label, 'file:///tmp/a.pdf');
+  assert.equal(show(`${own}/workspace.html#/settings/layout`).label, 'Breezer Settings');
+  assert.equal(show(`${own}/whats-new.html`, { title: 'What’s new' }).label, 'What’s new');
   for (const empty of ['', 'about:blank', 'chrome://newtab/', `${own}/newtab.html`, 'not a url']) assert.equal(show(empty), null);
   assert.equal(sidebarAddress({ url: '', pendingUrl: 'https://pending.test/' }, own), null);
   assert.equal(sidebarAddress(undefined, own), null);
@@ -62,7 +65,7 @@ const executablePath = process.env.BREEZER_TEST_BROWSER
 const skip = !chromium ? 'playwright is not installed' : executablePath && !existsSync(executablePath) && 'browser is missing';
 const contentTypes = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css' };
 
-test('sidebar checks once, offers restart after a validated reply, and opens the native address bar only when enabled', { skip }, async () => {
+test('sidebar checks once, offers restart after a validated reply, and edits and submits the address in the sidebar only when enabled', { skip }, async () => {
   const root = resolve('features/ai/extension');
   const server = createServer(async (req, res) => {
     const path = resolve(root, '.' + new URL(req.url, 'http://127.0.0.1').pathname);
@@ -94,13 +97,15 @@ test('sidebar checks once, offers restart after a validated reply, and opens the
         disconnect() {},
       };
       chrome.runtime.connect = () => updatePort;
-      chrome.breezerPrivate.focusLocationBar = callback => {
-        fx.calls.push(['focusLocationBar']);
-        callback();
-      };
+      chrome.breezerPrivate.queryOmnibox = async ({ text }) => ({
+        revision: 7, done: true, matches: text ? [{
+          kind: 'search', contents: text, description: 'Search', fillIntoEdit: text, isDefault: true,
+        }] : [],
+      });
+      chrome.breezerPrivate.openOmnibox = async request => fx.calls.push(['openOmnibox', request]);
     ` });
     await page.goto(`http://127.0.0.1:${server.address().port}/workspace.html#/sidebar?w=7`);
-    const address = page.getByRole('button', { name: 'Open the address bar' });
+    const address = page.getByRole('combobox', { name: 'Search or type an address' });
     const restart = page.getByRole('button', { name: 'Restart', exact: true });
     assert.equal(await address.isVisible(), false);
     assert.equal(await restart.isVisible(), false);
@@ -119,8 +124,11 @@ test('sidebar checks once, offers restart after a validated reply, and opens the
     assert.equal(await restart.isVisible(), false);
     assert.equal(await page.evaluate(() => updatePort.sent.length), 2, 'installation never replays');
     await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { sidebarSearch: true } }));
-    await address.click();
-    assert.equal(await page.evaluate(() => fx.calls.filter(([name]) => name === 'focusLocationBar').length), 1);
+    await address.waitFor();
+    const dock = page.locator('#space-dock');
+    await page.locator('.sidebar').evaluate(node => { node.dataset.spaceDock = 'alternate'; });
+    assert.equal(await dock.locator('.space-dots').evaluate(node => getComputedStyle(node).backgroundColor), 'rgba(0, 0, 0, 0)');
+    assert.ok((await dock.locator('.space-dot').first().boundingBox()).height <= 28);
     const extensions = page.getByRole('button', { name: 'Extensions', exact: true });
     await extensions.click();
     await page.waitForFunction(() => fx.tabs.some(tab => tab.url === 'chrome://extensions/'));
@@ -130,25 +138,51 @@ test('sidebar checks once, offers restart after a validated reply, and opens the
     assert.equal(await page.evaluate(() => fx.calls.filter(([name]) => name === 'showExtensionsMenu').length), 1);
     assert.equal(await page.evaluate(() => fx.tabs.length), opened, 'the native menu needs no extensions page');
     // The address follows the selected tab, including its own navigation.
-    const url = page.locator('.sidebar-address-url');
+    const url = page.locator('.sidebar-address-display');
     const target = await page.evaluate(async () => {
       const tab = fx.tabs.find(tab => tab.windowId === 7 && !tab.active && tab.url.startsWith('https://'));
       await chrome.tabs.update(tab.id, { active: true });
       return tab;
     });
-    const host = new URL(target.url).host.replace(/^www\./, '');
-    await page.waitForFunction(host => document.querySelector('.sidebar-address-site').textContent === host, host);
+    const host = new URL(target.url).host;
+    await page.waitForFunction(host => document.querySelector('.sidebar-address-display').textContent.startsWith(host), host);
     await page.evaluate(id => {
       const tab = fx.tabs.find(tab => tab.id === id);
       tab.url = 'https://login.accounts.a-very-long-subdomain.example.com/one/two?three=four';
       fx.fire('tabs.onUpdated', id, { url: tab.url }, { ...tab });
     }, target.id);
-    await page.waitForFunction(() => document.querySelector('.sidebar-address-site').textContent.endsWith('example.com'));
-    assert.match(await address.getAttribute('aria-label'), /example\.com\/one\/two\?three=four$/);
-    assert.equal(await page.locator('.sidebar-address-hint').isVisible(), false);
-    const fit = await url.evaluate(node => ({ width: node.scrollWidth - node.clientWidth, site: node.querySelector('.sidebar-address-site').clientWidth }));
-    assert.ok(fit.width <= 0 && fit.site > 60, 'a long site keeps the room it needs');
-    const listeners = await page.evaluate(() => document.querySelector('.sidebar-address-site').textContent);
+    const longURL = 'https://login.accounts.a-very-long-subdomain.example.com/one/two?three=four';
+    await page.waitForFunction(expected => document.querySelector('#sidebar-address').value === expected, longURL);
+    assert.deepEqual(await url.evaluate(node => ({
+      text: node.textContent, direction: getComputedStyle(node).direction,
+      ellipsis: getComputedStyle(node).textOverflow, clipped: node.scrollWidth > node.clientWidth,
+    })), { text: longURL.slice(8), direction: 'ltr', ellipsis: 'ellipsis', clipped: true });
+    await address.click();
+    assert.equal(await address.inputValue(), longURL);
+    await address.fill('weather in Sydney');
+    const options = page.getByRole('listbox', { name: 'Address suggestions' });
+    await options.waitFor();
+    assert.equal(await address.getAttribute('aria-expanded'), 'true');
+    await page.evaluate(() => fx.fire('tabs.onReplaced', 999, 998));
+    assert.equal(await address.inputValue(), 'weather in Sydney', 'a replacement elsewhere leaves the draft intact');
+    const evidence = process.env.BREEZER_AI_EVIDENCE;
+    if (evidence) {
+      await mkdir(evidence, { recursive: true });
+      await page.screenshot({ path: resolve(evidence, 'sidebar-inline-address.png') });
+    }
+    await address.press('Enter');
+    await page.waitForFunction(() => fx.calls.some(([name]) => name === 'openOmnibox'));
+    assert.deepEqual(await page.evaluate(() => fx.calls.find(([name]) => name === 'openOmnibox')[1]), {
+      text: 'weather in Sydney', revision: 7, index: 0, tabId: target.id,
+    });
+    await page.waitForFunction(() => document.activeElement.id !== 'sidebar-address');
+    assert.equal(await address.inputValue(), longURL);
+    await page.evaluate(() => document.dispatchEvent(new Event('breezer-focus-sidebar-address')));
+    await address.fill('discard this');
+    await address.press('Escape');
+    await address.press('Escape');
+    assert.equal(await address.inputValue(), longURL);
+    const label = await url.textContent();
     await page.evaluate(() => chrome.storage.local.set({ breezerExperiments: { sidebarSearch: false } }));
     await address.waitFor({ state: 'hidden' });
     assert.equal(await extensions.isVisible(), false);
@@ -157,7 +191,7 @@ test('sidebar checks once, offers restart after a validated reply, and opens the
       tab.url = 'https://changed.test/';
       fx.fire('tabs.onUpdated', id, { url: tab.url }, { ...tab });
     }, target.id);
-    assert.equal(await page.locator('.sidebar-address-site').textContent(), listeners, 'nothing follows tabs while it is off');
+    assert.equal(await url.textContent(), label, 'nothing follows tabs while it is off');
     assert.deepEqual(errors, []);
   } finally {
     try { await browser?.close(); } finally { await new Promise(resolve => server.close(resolve)); }

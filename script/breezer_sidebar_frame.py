@@ -9,23 +9,16 @@ the vertical tab strip region after the workspace replacements have run.
   full window height. The toolbar and bookmarks bar sit beside it and the
   window controls are drawn over the document's top band. That band drags the
   window and is reported to the document as CSS titlebar-area-* variables.
-- Zen mode (frameless) does the same while its top bar is pinned. A pinned
-  sidebar sits beside the toolbar as in a normal window. An unpinned
-  (floating) sidebar still overlays the page while it is revealed, but the top
-  bar moves aside with it, so the back, forward, and address controls stay
-  usable beside it. It starts at the window top with a square top, like the
-  attached sidebar.
-- An unpinned sidebar overlays the page as a drawer flush with the window edge
-  and the top bar. Helium's 8 DIP inset showed a strip of the page around it.
-- The sidebar address control never changes whether the top bar is pinned.
-  The extensions menu it opens reveals an unpinned top bar first, because the
-  menu is anchored there.
+- A floating sidebar is inset and rounded. When the top bar is visible, the
+  floating sidebar opens below it.
+- The sidebar address experiment hides the top bar and uses its own editor.
+  Toolbar-anchored menus and other native controls can reveal it temporarily.
 - The document fills the region edge to edge, so no frame-colored bands show
   above or below it, and it takes the region's rounded floating shape.
 - The unpinned (zen mode) sidebar keeps its native resize edge, placed at the
   region's own right edge rather than in its parent's coordinates.
 
-Zen mode with an auto-hiding top bar, a hidden floating sidebar, fullscreen,
+A hidden floating sidebar, fullscreen,
 a collapsed rail, a hidden autoHide sidebar, a right-aligned sidebar, and
 windows that show Chromium's own tab rows keep the upstream layout.
 """
@@ -49,16 +42,19 @@ def _browser_view_replacements():
                                   prefs::kHeliumZenModeTopChromePinned);
 }
 """
-    # The saved "Always show the top bar" value decides the pin on its own, so
-    # the sidebar address control cannot hide the top bar on any page.
-    sidebar_address = """namespace {
-
-bool UsesBreezerSidebarAddress(const BrowserView& view) {
-  const Profile* profile = view.GetProfile();
-  return !profile->IsOffTheRecord() && view.ShouldDrawVerticalTabStrip() &&
+    sidebar_address = """bool BrowserView::UsesBreezerSidebarAddress() const {
+#if BUILDFLAG(ENABLE_EXTENSIONS)
+  const Profile* profile = GetProfile();
+  return !profile->IsOffTheRecord() && ShouldDrawVerticalTabStrip() &&
          profile->GetPrefs()->GetBoolean(
-             breezer_workspace::prefs::kSidebarAddressSearch);
+             breezer_workspace::prefs::kSidebarAddressSearch) &&
+         BreezerWorkspaceView::FromBrowser(browser_);
+#else
+  return false;
+#endif
 }
+
+namespace {
 
 bool UsesBreezerNewTabSearch(const BrowserView& view,
                             content::WebContents& contents) {
@@ -74,10 +70,37 @@ bool UsesBreezerNewTabSearch(const BrowserView& view,
 
 }  // namespace
 
-""" + pinned
+""" + pinned.replace(
+        "return zen_mode_enabled_ &&",
+        "return zen_mode_enabled_ && !UsesBreezerSidebarAddress() &&",
+    )
+    watch_top_chrome = """  registrar_.Add(
+      prefs::kHeliumZenModeTopChromePinned,
+      base::BindRepeating(&BrowserView::OnZenModeTopChromePinnedPrefChanged,
+                          base::Unretained(this)));
+"""
+    watch_sidebar_address = """  registrar_.Add(
+      breezer_workspace::prefs::kSidebarAddressSearch,
+      base::BindRepeating(&BrowserView::OnBreezerSidebarAddressChanged,
+                          base::Unretained(this)));
+"""
+    side_pinned = """bool BrowserView::IsZenModeSideChromePinned() const {
+  return zen_mode_enabled_ && browser_->GetProfile()->GetPrefs()->GetBoolean(
+                                  prefs::kHeliumZenModeSidebarPinned);
+}
+"""
     menu_shown = """void BrowserView::AppMenuShown() {
 """
-    reveal_for_menu = """void BrowserView::RevealTopChromeForExtensionsMenu() {
+    reveal_for_menu = """void BrowserView::OnBreezerSidebarAddressChanged() {
+  if (browser_->IsDeleteScheduled()) {
+    return;
+  }
+  UpdateZenModeState();
+  OnZenModeTopChromePinnedPrefChanged();
+  InvalidateLayout();
+}
+
+void BrowserView::RevealTopChromeForExtensionsMenu() {
   // The menu is anchored to the toolbar, which needs its shown bounds first.
   // The open bubble then keeps the top bar revealed until it closes.
   if (zen_mode_enabled_) {
@@ -93,26 +116,131 @@ bool UsesBreezerNewTabSearch(const BrowserView& view,
             '#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"\n'
             '#include "chrome/browser/ui/layout_constants.h"\n',
         ),
+        (
+            '#include "chrome/browser/ui/views/frame/browser_view.h"\n',
+            '#include "chrome/browser/ui/views/frame/browser_view.h"\n'
+            '#include "extensions/buildflags/buildflags.h"\n'
+            '#if BUILDFLAG(ENABLE_EXTENSIONS)\n'
+            '#include "chrome/browser/ui/views/frame/breezer_workspace_view.h"\n'
+            '#endif\n',
+        ),
+        (watch_top_chrome, watch_top_chrome + watch_sidebar_address),
         (pinned, sidebar_address),
+        (
+            "return controller && controller->IsZenModeEnabled() && GetIsNormalType() &&",
+            "return controller && GetIsNormalType() &&\n"
+            "         (controller->IsZenModeEnabled() || UsesBreezerSidebarAddress()) &&",
+        ),
+        (
+            side_pinned,
+            """bool BrowserView::IsZenModeSideChromePinned() const {
+  auto* controller = HeliumLayoutStateController::From(browser_);
+  return zen_mode_enabled_ &&
+         ((controller && !controller->IsZenModeEnabled()) ||
+          browser_->GetProfile()->GetPrefs()->GetBoolean(
+              prefs::kHeliumZenModeSidebarPinned));
+}
+""",
+        ),
+        (
+            "void BrowserView::ToggleZenModeTopChrome() {\n  if (!IsZenModeEnabled()) {",
+            "void BrowserView::ToggleZenModeTopChrome() {\n"
+            "  if (!IsZenModeEnabled() || UsesBreezerSidebarAddress()) {",
+        ),
+        (
+            "  const bool in_top_trigger = IsPointInZenTopTrigger(cursor);\n"
+            "  const bool in_top_chrome = IsPointInZenTopChromeBounds(cursor);",
+            """  const bool sidebar_address = UsesBreezerSidebarAddress();
+  const bool in_top_trigger = !sidebar_address && IsPointInZenTopTrigger(cursor);
+  const bool in_top_chrome =
+      (!sidebar_address || GetTopChromeRevealRatio() > 0.0f) &&
+      IsPointInZenTopChromeBounds(cursor);""",
+        ),
+        (
+            "  // Pinned VTS stays visible regardless of cursor position.\n",
+            """#if BUILDFLAG(ENABLE_EXTENSIONS)
+  if (UsesBreezerSidebarAddress()) {
+    auto* workspace = BreezerWorkspaceView::FromBrowser(browser_);
+    reveal_side |= workspace && workspace->GetFocusableView()->HasFocus();
+  }
+#endif
+
+  // Pinned VTS stays visible regardless of cursor position.
+""",
+        ),
+        (
+            "  if (IsSidePanelOpen(side_panel_)) {\n    return true;",
+            "  if (!UsesBreezerSidebarAddress() && IsSidePanelOpen(side_panel_)) {\n"
+            "    return true;",
+        ),
+        *[
+            (
+                f"\n{indent}frame_view->SetCaptionButtonsOpacity(GetTopChromeRevealRatio());",
+                f"\n{indent}frame_view->SetCaptionButtonsOpacity(\n"
+                f"{indent}    UsesBreezerSidebarAddress() ? 1.0f : GetTopChromeRevealRatio());",
+            )
+            for indent in ("      ", "        ")
+        ],
+        (
+            "  UpdateZenModeExpandOnHoverLock();\n\n  GetFrameView()->OnTabStripStateChanged();",
+            "  UpdateZenModeExpandOnHoverLock();\n"
+            "  OnBreezerSidebarAddressChanged();\n\n"
+            "  GetFrameView()->OnTabStripStateChanged();",
+        ),
         (menu_shown, reveal_for_menu + menu_shown),
         (
             focus,
-            """  if (!is_user_initiated) {
+            """  ++breezer_address_focus_request_;
+  if (!is_user_initiated) {
     auto* contents = GetActiveWebContents();
     const bool new_tab_search =
         contents && UsesBreezerNewTabSearch(*this, *contents);
     if (new_tab_search ||
-        (zen_mode_enabled_ && !IsZenModeTopChromePinned() &&
-         UsesBreezerSidebarAddress(*this))) {
-      // Automatic New Tab focus belongs to the page. Explicit address
-      // commands continue to reveal and focus the toolbar.
+        (zen_mode_enabled_ && UsesBreezerSidebarAddress())) {
+      // Automatic New Tab focus belongs to the page.
       if (contents) {
         contents->Focus();
       }
       return;
     }
   }
+#if BUILDFLAG(ENABLE_EXTENSIONS)
+  if (is_user_initiated && zen_mode_enabled_ &&
+      UsesBreezerSidebarAddress()) {
+    if (auto* workspace = BreezerWorkspaceView::FromBrowser(browser_)) {
+      zen_side_chrome_animation_.Reset(1);
+      InvalidateLayout();
+      DeprecatedLayoutImmediately();
+      if (workspace->FocusAddress(base::BindOnce(
+              &BrowserView::FocusFallbackLocationBar,
+              weak_ptr_factory_.GetWeakPtr(), breezer_address_focus_request_))) {
+        return;
+      }
+    }
+  }
+#endif
+  FocusNativeLocationBar(is_user_initiated);
+}
 
+void BrowserView::FocusFallbackLocationBar(unsigned request) {
+#if BUILDFLAG(ENABLE_EXTENSIONS)
+  if (request != breezer_address_focus_request_ || !GetWidget() || !toolbar_ ||
+      browser_->IsDeleteScheduled() || !IsActive() || !IsLocationBarVisible()) {
+    return;
+  }
+  auto* focus_manager = GetFocusManager();
+  if (!focus_manager) {
+    return;
+  }
+  auto* workspace = BreezerWorkspaceView::FromBrowser(browser_);
+  auto* focused = focus_manager->GetFocusedView();
+  if (!focused || (workspace && focused == workspace->GetFocusableView())) {
+    FocusNativeLocationBar(/*is_user_initiated=*/true);
+  }
+#endif
+}
+
+void BrowserView::FocusNativeLocationBar(bool is_user_initiated) {
 """ + focus,
         ),
     ]
@@ -124,8 +252,16 @@ def _browser_view_header_replacements():
         toggle,
         toggle +
         "\n"
+        "  bool UsesBreezerSidebarAddress() const;\n"
+        "  void FocusFallbackLocationBar(unsigned request);\n"
+        "  void FocusNativeLocationBar(bool is_user_initiated);\n"
+        "  void OnBreezerSidebarAddressChanged();\n"
         "  // Breezer: shows an unpinned top bar before the extensions menu opens.\n"
         "  void RevealTopChromeForExtensionsMenu();\n",
+    ), (
+        "  bool zen_mode_enabled_ = false;\n",
+        "  bool zen_mode_enabled_ = false;\n"
+        "  unsigned breezer_address_focus_request_ = 0;\n",
     )]
 
 
@@ -442,40 +578,7 @@ IN_PROC_BROWSER_TEST_F(VerticalTabStripRegionViewTest,
 
 
 def _layout_replacements():
-    zen_state = (
-        "ZenModeLayoutState zen = GetZenModeLayoutState(\n"
-        "      delegate(), layout_data_->tab_strip_type == TabStripType::kVertical);\n"
-    )
-    after_zen = "  std::optional<int> dynamic_tab_strip_top;\n"
-    detached = (
-        "    if (zen.floating_vertical_tab_strip) {\n"
-        "      floating_style = FloatingStyle::kDetached;\n"
-    )
     return [
-        (
-            "  const " + zen_state + after_zen,
-            "  " + zen_state +
-            "  // Breezer: an unpinned sidebar is a drawer along the window edge. Insets\n"
-            "  // around it would show strips of the page in a different color.\n"
-            "  const bool breezer_drawer =\n"
-            "      zen.floating_vertical_tab_strip &&\n"
-            "      IsParentedTo(views().vertical_tab_strip_region_view,\n"
-            "                   views().browser_view) &&\n"
-            "      views().vertical_tab_strip_region_view->HostsBreezerWorkspace();\n"
-            "  if (breezer_drawer) {\n"
-            "    zen.vertical_tab_strip_padding = 0;\n"
-            "    zen.vertical_tab_strip_top_padding = 0;\n"
-            "  }\n" + after_zen,
-        ),
-        (
-            detached,
-            "    if (breezer_drawer) {\n"
-            "      floating_style = vertical_right_aligned\n"
-            "                           ? FloatingStyle::kAttachedTrailing\n"
-            "                           : FloatingStyle::kAttachedLeading;\n"
-            "    } else if (zen.floating_vertical_tab_strip) {\n"
-            "      floating_style = FloatingStyle::kDetached;\n",
-        ),
         (
             "void InsetHorizontal(gfx::Rect& rect, int amount, bool leading) {\n"
             "  rect.Inset(\n"
@@ -505,13 +608,14 @@ def _layout_replacements():
             "      delegate().IsVerticalTabStripRightAligned();\n"
             "  // Breezer: the sidebar document runs the full window height. The window\n"
             "  // controls are drawn over its top and the toolbar sits beside it. In zen\n"
-            "  // mode this needs a pinned top bar and a shown sidebar. An auto-hiding\n"
-            "  // top bar, fullscreen, a collapsed rail or right-aligned sidebar, and\n"
+            "  // mode a floating sidebar keeps its inset below the toolbar. Fullscreen,\n"
+            "  // a collapsed rail or right-aligned sidebar, and\n"
             "  // Chromium's own tab rows keep the upstream layout.\n"
             "  // Hover expansion leaves the controller collapsed. Keep autoHide\n"
             "  // full height through its reveal and closing animation.\n"
             "  const bool breezer_full_height_sidebar =\n"
             "      layout_data_->tab_strip_type == TabStripType::kVertical &&\n"
+            "      !zen.floating_vertical_tab_strip &&\n"
             "      (!zen.enabled || (delegate().IsZenModeTopChromePinned() &&\n"
             "                        zen.top_chrome_ratio >= 1.0f)) &&\n"
             "      zen.ShouldLayoutVerticalTabStrip() && !vertical_right_aligned &&\n"
@@ -551,8 +655,7 @@ def _layout_replacements():
             "      if (zen.enabled) {\n"
             "        top_offset = ScaleExtent(top_offset, zen.top_chrome_ratio);\n"
             "      }\n"
-            "      // A floating sidebar running full height joins the window top too,\n"
-            "      // rather than starting below the toolbar row.\n"
+            "      // An attached full-height sidebar starts at the window top.\n"
             "      if (breezer_full_height_sidebar) {\n"
             "        top_offset = 0;\n"
             "      }\n"

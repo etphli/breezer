@@ -1,6 +1,13 @@
 # Breezer 1.3.7 draft notes
 
-These notes collect fixes for the next patch after 1.3.6. Nothing here is published yet. When the 1.3.7 release is prepared, append an illustrated `patch-137` section to `features/ai/extension/whats-new.html` after the 1.3.6 section, following [whats-new.md](whats-new.md). Patches keep the 1.3.0 seen-version key and do not open another tab.
+These notes collect fixes for the patch after 1.3.6. The bundled update page keeps the 1.3.0 seen-version key.
+
+## Browser interface
+
+- Settings centers the heading and content in the pane beside the category list.
+- The floating sidebar opens with rounded corners and a gap around it. The footer uses compact controls and a transparent background around the space icons.
+- The sidebar address experiment lets you search and edit URLs in place. It shows the start of long addresses and hides the top bar during browsing.
+- Settings has a wider AI model selector with taller options and visible provider headings.
 
 ## New Tab
 

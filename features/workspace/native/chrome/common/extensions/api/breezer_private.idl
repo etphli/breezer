@@ -193,6 +193,7 @@ namespace breezerPrivate {
     DOMString text;
     long? revision;
     long? index;
+    long? tabId;
   };
   callback OmniboxResultCallback = void(OmniboxResult result);
 
@@ -231,17 +232,15 @@ namespace breezerPrivate {
     // Toggle a native split using a tab in this sidebar's browser window.
     // An active, unsplit tab opens Chromium's second-pane tab chooser.
     static void toggleSplitView(long tabId, optional VoidCallback callback);
-    // Focus the calling sidebar window's native omnibox.
-    static void focusLocationBar(optional VoidCallback callback);
     // Toggle the native extensions menu in the calling sidebar's window.
     static void showExtensionsMenu(optional VoidCallback callback);
-    // The address bar's own suggestions for a New Tab's text. Returns what is
+    // The address bar's own suggestions for New Tab or the sidebar. Returns what is
     // ready now; nextOmniboxResult waits for anything newer. Empty text stops.
     static void queryOmnibox(OmniboxQuery query,
                              OmniboxResultCallback callback);
     static void nextOmniboxResult(long revision,
                                   OmniboxResultCallback callback);
-    // Open text or a shown suggestion in the calling New Tab's own tab.
+    // Open text or a shown suggestion in New Tab or the sidebar's selected tab.
     static void openOmnibox(OmniboxOpen request,
                             optional VoidCallback callback);
     // Check whether the panel's active tab is a built-in full-page PDF viewer.

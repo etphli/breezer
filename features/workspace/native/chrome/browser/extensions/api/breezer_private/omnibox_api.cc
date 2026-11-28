@@ -1,7 +1,7 @@
 // Copyright 2026 The Breezer Authors
 // This file is governed by the same license as the Breezer project.
 
-// Runs the New Tab box on the address bar's own engine: the same providers,
+// Runs the New Tab and sidebar boxes on the address bar's own engine: the same providers,
 // preferences, default search engine and URL-or-search decision.
 
 #include "chrome/browser/extensions/api/breezer_private/breezer_private_api.h"
@@ -22,12 +22,15 @@
 #include "base/task/sequenced_task_runner.h"
 #include "base/values.h"
 #include "chrome/browser/autocomplete/chrome_autocomplete_provider_client.h"
+#include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/omnibox/chrome_omnibox_navigation_observer_base.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
+#include "chrome/browser/ui/helium/breezer_workspace_prefs.h"
 #include "chrome/browser/ui/navigator/browser_navigator.h"
 #include "chrome/browser/ui/navigator/browser_navigator_params.h"
 #include "chrome/browser/ui/tabs/tab_strip_model.h"
+#include "components/prefs/pref_service.h"
 #include "components/omnibox/browser/autocomplete_classifier.h"
 #include "components/omnibox/browser/autocomplete_controller.h"
 #include "components/omnibox/browser/autocomplete_controller_config.h"
@@ -63,7 +66,7 @@ struct Selection {
   bool typed_with_http_scheme = false;
 };
 
-// One address-bar query session per New Tab document. It dies with the
+// One address-bar query session per document. It dies with the
 // document, so no query or result outlives the page that asked.
 class OmniboxSession final
     : public content::DocumentUserData<OmniboxSession>,
@@ -284,11 +287,30 @@ void OmniboxSession::AnswerPending() {
   }
 }
 
-// Returns the calling New Tab's session, or null for any other caller.
-OmniboxSession* GetSession(ExtensionFunction& function, const GURL& source) {
+bool IsSidebarFrame(BrowserWindowInterface* browser,
+                    content::RenderFrameHost* frame) {
+  if (!frame || !browser || browser->IsDeleteScheduled() ||
+      browser->GetType() != BrowserWindowInterface::TYPE_NORMAL ||
+      !browser->GetProfile()->GetPrefs()->GetBoolean(
+          breezer_workspace::prefs::kSidebarAddressSearch)) {
+    return false;
+  }
+  // The embedded sidebar has its own window controller and is outside the
+  // tab strip. A workspace page opened in a browser tab cannot act as it.
+  const GURL& url = frame->GetLastCommittedURL();
+  return url.GetPath() == "/workspace.html" &&
+         url.ref_piece().starts_with("/sidebar?w=") &&
+         browser->GetTabStripModel()->GetIndexOfWebContents(
+             content::WebContents::FromRenderFrameHost(frame)) ==
+             TabStripModel::kNoTab;
+}
+
+OmniboxSession* GetSession(ExtensionFunction& function,
+                           const GURL& source,
+                           BrowserWindowInterface* browser) {
   content::RenderFrameHost* const frame = function.render_frame_host();
   if (!frame || !frame->IsInPrimaryMainFrame() ||
-      source.GetPath() != kNewTabPath) {
+      (source.GetPath() != kNewTabPath && !IsSidebarFrame(browser, frame))) {
     return nullptr;
   }
   return OmniboxSession::GetOrCreateForCurrentDocument(frame);
@@ -306,9 +328,10 @@ std::optional<std::u16string> ReadText(const base::DictValue& request) {
 
 ExtensionFunction::ResponseAction
 BreezerPrivateQueryOmniboxFunction::RunFunction() {
-  OmniboxSession* const session = GetSession(*this, source_url());
+  OmniboxSession* const session =
+      GetSession(*this, source_url(), GetCallerBrowser());
   if (!session) {
-    return RespondNow(Error("Ask for suggestions from a Breezer New Tab."));
+    return RespondNow(Error("Ask for suggestions from a Breezer address field."));
   }
   if (args().size() != 1 || !args()[0].is_dict()) {
     return RespondNow(Error("Invalid suggestion request."));
@@ -324,9 +347,10 @@ BreezerPrivateQueryOmniboxFunction::RunFunction() {
 
 ExtensionFunction::ResponseAction
 BreezerPrivateNextOmniboxResultFunction::RunFunction() {
-  OmniboxSession* const session = GetSession(*this, source_url());
+  OmniboxSession* const session =
+      GetSession(*this, source_url(), GetCallerBrowser());
   if (!session) {
-    return RespondNow(Error("Ask for suggestions from a Breezer New Tab."));
+    return RespondNow(Error("Ask for suggestions from a Breezer address field."));
   }
   if (args().size() != 1 || !args()[0].is_int()) {
     return RespondNow(Error("Invalid suggestion request."));
@@ -344,15 +368,19 @@ void BreezerPrivateNextOmniboxResultFunction::OnResult(
 
 ExtensionFunction::ResponseAction
 BreezerPrivateOpenOmniboxFunction::RunFunction() {
-  OmniboxSession* const session = GetSession(*this, source_url());
-  if (!session || !user_gesture()) {
-    return RespondNow(Error("Open an address from a Breezer New Tab."));
-  }
-  content::WebContents* const contents = GetSenderWebContents();
   BrowserWindowInterface* const browser = GetCallerBrowser();
-  if (!contents || !browser || browser->IsDeleteScheduled() ||
-      browser->GetType() != BrowserWindowInterface::TYPE_NORMAL ||
-      browser->GetTabStripModel()->GetActiveWebContents() != contents) {
+  OmniboxSession* const session = GetSession(*this, source_url(), browser);
+  if (!session || !user_gesture()) {
+    return RespondNow(Error("Open an address from a Breezer address field."));
+  }
+  if (!browser || browser->IsDeleteScheduled() ||
+      browser->GetType() != BrowserWindowInterface::TYPE_NORMAL) {
+    return RespondNow(Error("The calling window is unavailable."));
+  }
+  const bool sidebar = IsSidebarFrame(browser, render_frame_host());
+  content::WebContents* const contents =
+      browser->GetTabStripModel()->GetActiveWebContents();
+  if (!contents || (!sidebar && contents != GetSenderWebContents())) {
     return RespondNow(Error("The calling tab is unavailable."));
   }
   if (args().size() != 1 || !args()[0].is_dict()) {
@@ -362,9 +390,14 @@ BreezerPrivateOpenOmniboxFunction::RunFunction() {
   const std::optional<std::u16string> text = ReadText(request);
   const std::optional<int> revision = request.FindInt("revision");
   const std::optional<int> index = request.FindInt("index");
+  const std::optional<int> tab_id = request.FindInt("tabId");
   if (!text || text->empty() || revision.has_value() != index.has_value() ||
-      request.size() != (index ? 3u : 1u)) {
+      sidebar != tab_id.has_value() ||
+      request.size() != 1u + (index ? 2u : 0u) + (sidebar ? 1u : 0u)) {
     return RespondNow(Error("Invalid address."));
+  }
+  if (sidebar && *tab_id != ExtensionTabUtil::GetTabId(contents)) {
+    return RespondNow(Error("The selected tab changed. Try again."));
   }
   const std::optional<Selection> selection =
       index ? session->Find(*revision, *index) : session->Classify(*text);
@@ -393,6 +426,9 @@ BreezerPrivateOpenOmniboxFunction::RunFunction() {
   // Learns the choice, as the address bar does, once the page loads.
   ChromeOmniboxNavigationObserverBase::Create(
       navigation.get(), profile, selection->text, match, AutocompleteMatch());
+  if (sidebar) {
+    contents->Focus();
+  }
   return RespondNow(NoArguments());
 }
 

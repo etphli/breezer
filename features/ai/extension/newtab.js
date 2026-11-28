@@ -606,7 +606,7 @@ export function installAddressSuggestions({ api, root, input, list, favicon = ()
     if (!matches.length) { hide(); return; }
     list.replaceChildren(...matches.map((match, index) => {
       const row = root.createElement('li');
-      row.id = `composer-suggestion-${index}`;
+      row.id = `${list.id}-${index}`;
       row.className = 'suggestion';
       row.dataset.kind = match.kind;
       row.setAttribute('role', 'option');
@@ -719,9 +719,10 @@ export function installAddressSuggestions({ api, root, input, list, favicon = ()
     },
     // Opens the chosen row, or what the browser decides the text means. Rejects
     // when the browser could not open it, so the caller can still act on Enter.
-    async open() {
+    async open({ tabId } = {}) {
       const text = oneLine(input.value.trim());
       const request = { text };
+      if (tabId !== undefined) request.tabId = tabId;
       const fresh = answered !== null && answered === typed && matches.length > 0;
       const unchanged = fresh && matches[0].isDefault && input.value === typed + completion()
         && completion() === (matches[0].inlineAutocompletion || '');

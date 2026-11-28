@@ -231,10 +231,11 @@ else
   printf '%s\n' "$BREEZER_PREPARATION_ID" > "$BREEZER_PREPARED.tmp"
   mv "$BREEZER_PREPARED.tmp" "$BREEZER_PREPARED"
 fi
+# Helium's build archive can omit the upstream WebUI test. The source checks still patch it.
 if [[ ! -f "$BREEZER_OMNIBOX_PREPARED" ]]; then
-  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" "$_src_dir"
+  "$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --allow-missing-upstream-test "$_src_dir"
 fi
-"$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check "$_src_dir"
+"$BREEZER_PYTHON" "$BREEZER_ROOT/script/apply_breezer_omnibox.py" --check --allow-missing-upstream-test "$_src_dir"
 printf '%s\n' "$BREEZER_OMNIBOX_ID" > "$BREEZER_OMNIBOX_PREPARED.tmp"
 mv "$BREEZER_OMNIBOX_PREPARED.tmp" "$BREEZER_OMNIBOX_PREPARED"
 for BREEZER_OVERLAY in workspace ai-ui passwords sync; do
