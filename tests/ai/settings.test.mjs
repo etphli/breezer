@@ -287,7 +287,7 @@ test('folder colors default to off and save on the Layout page', async () => {
   const page = await openSettings();
   const group = page.document.querySelector('[data-pref="folderColors"]');
   assert.ok(group.closest('[data-page="layout"]'), 'folder colors live on the Layout page');
-  assert.deepEqual([...group.querySelectorAll('[role="radio"]')].map((radio) => radio.textContent), ['Off', 'Icon only', 'Whole row']);
+  assert.deepEqual([...group.querySelectorAll('[role="radio"]')].map((radio) => radio.textContent), ['Off', 'Light tint', 'Whole row']);
   assert.equal(group.querySelector('[data-value="off"]').getAttribute('aria-checked'), 'true');
   const bridgeCalls = page.bridge.calls.length;
   userClick(group.querySelector('[data-value="row"]'));

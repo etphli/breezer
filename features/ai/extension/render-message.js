@@ -16,7 +16,7 @@ export function renderMessage(container, text, renderWidget) {
   }
   for (let index = 0; index < lines.length; index++) {
     const line = lines[index];
-    let columns;
+    let columns, media;
     if (/^\s*```/.test(line)) {
       flush();
       const body = [];
@@ -35,6 +35,10 @@ export function renderMessage(container, text, renderWidget) {
       code.textContent = source;
       pre.append(code);
       container.append(pre);
+    } else if (renderWidget && widgets < 4 && (media = imageLine(line, renderWidget))) {
+      flush();
+      widgets++;
+      container.append(media);
     } else if (/^#{1,4}\s/.test(line)) {
       flush();
       const heading = document.createElement('h3');
@@ -132,8 +136,14 @@ function appendTable(container, lines, index, columns) {
   return index - 1;
 }
 
+// A lone Markdown image uses the same click-to-load card as an image block.
+function imageLine(line, renderWidget) {
+  const match = /^\s*!\[([^\]]*)\]\((https:\/\/[^\s)]+)\)\s*$/.exec(line);
+  return match && renderWidget(JSON.stringify({ type: 'image', title: match[1].trim().slice(0, 100) || 'Image', url: match[2] }));
+}
+
 function inline(parent, text) {
-  const pattern = /(`[^`\n]+`|\*\*[^*\n]+\*\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/g;
+  const pattern = /(`[^`\n]+`|\*\*[^*\n]+\*\*|!\[[^\]\n]*\]\(https?:\/\/[^\s)]+\)|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/g;
   let start = 0;
   for (const match of text.matchAll(pattern)) {
     parent.append(document.createTextNode(text.slice(start, match.index)));
@@ -149,7 +159,7 @@ function inline(parent, text) {
     } else {
       const split = token.indexOf('](');
       const link = document.createElement('a');
-      link.textContent = token.slice(1, split);
+      link.textContent = token.startsWith('!') ? token.slice(2, split).trim() || 'Image' : token.slice(1, split);
       link.href = token.slice(split + 2, -1);
       link.target = '_blank';
       link.rel = 'noopener noreferrer';

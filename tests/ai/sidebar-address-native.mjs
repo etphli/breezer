@@ -31,19 +31,33 @@ try {
   const toggle = settings.locator('#experiment-sidebarSearch');
   const awaitNative = value => settings.waitForFunction(async expected => {
     const appearance = await chrome.breezerPrivate.getAppearance();
-    return appearance.sidebarAddressSearch === expected && appearance.alwaysShowTopBar;
+    return appearance.sidebarAddressSearch === expected;
   }, value);
+  const appearance = patch => settings.evaluate(patch => chrome.breezerPrivate.setAppearance(patch), patch);
   const pinned = await settings.evaluate(() => innerHeight);
   await toggle.check();
   await awaitNative(true);
+
+  // "Always show the top bar" decides on its own, on New Tab too.
+  const openNewTab = async () => {
+    const opened = context.waitForEvent('page');
+    await settings.evaluate(() => chrome.tabs.create({ url: 'chrome://newtab/' }));
+    const page = await opened;
+    await page.waitForURL(`${origin}/newtab.html`);
+    return page;
+  };
+  const pinnedNewTab = await openNewTab();
+  await pinnedNewTab.waitForTimeout(800);
+  assert.ok(Math.abs(await pinnedNewTab.evaluate(() => innerHeight) - pinned) <= 2, 'New Tab keeps the pinned top bar.');
+  await pinnedNewTab.close();
+  await settings.bringToFront();
+  assert.ok(Math.abs(await settings.evaluate(() => innerHeight) - pinned) <= 2, 'The address control leaves the top bar pinned.');
+  await appearance({ alwaysShowTopBar: false });
   await settings.waitForFunction(height => innerHeight > height + 15, pinned);
   const idle = await settings.evaluate(() => innerHeight);
 
   // Creating a real New Tab normally focuses the native omnibox automatically.
-  const opened = context.waitForEvent('page');
-  await settings.evaluate(() => chrome.tabs.create({ url: 'chrome://newtab/' }));
-  const newtab = await opened;
-  await newtab.waitForURL(`${origin}/newtab.html`);
+  const newtab = await openNewTab();
   await newtab.waitForFunction(height => innerHeight >= height - 2, idle);
   await newtab.close();
   await settings.bringToFront();
@@ -84,21 +98,32 @@ try {
     }
   };
   const evaluate = async expression => (await send('Runtime.evaluate', { expression, returnByValue: true })).result.value;
-  const point = await evaluate(`(() => {
-    const { x, y, width, height } = document.querySelector('#sidebar-address').getBoundingClientRect();
-    return { x: x + width / 2, y: y + height / 2, width, height };
-  })()`);
-  assert.ok(point?.width && point.height, 'The address control is visible in the embedded sidebar.');
-  const { x, y } = point;
-  await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
-  await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
+  const press = async selector => {
+    const point = await evaluate(`(() => {
+      const { x, y, width, height } = document.querySelector('${selector}').getBoundingClientRect();
+      return { x: x + width / 2, y: y + height / 2, width, height };
+    })()`);
+    assert.ok(point?.width && point.height, `${selector} is visible in the embedded sidebar.`);
+    const { x, y } = point;
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', x, y, button: 'left', clickCount: 1 });
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
+  };
+  assert.equal(await evaluate(`document.querySelector('.sidebar-address-site').textContent`), 'Breezer Settings');
+  await press('#sidebar-address');
   await settings.waitForFunction(height => innerHeight < height - 15 && !document.hasFocus(), idle);
   assert.equal(await evaluate('document.hasFocus()'), false, 'The embedded sidebar transfers focus to native chrome.');
   await settings.locator('body').click({ position: { x: 420, y: 360 } });
   await settings.waitForFunction(height => innerHeight >= height - 2, idle);
+
+  // The extensions menu is anchored to the toolbar, so it shows the top bar.
+  const pages = context.pages().length;
+  await press('#sidebar-extensions');
+  await settings.waitForFunction(height => innerHeight < height - 15, idle);
+  assert.equal(context.pages().length, pages, 'The native menu opens instead of the extensions page.');
+  await settings.locator('body').click({ position: { x: 420, y: 360 } });
+  await settings.waitForFunction(height => innerHeight >= height - 2, idle);
   await browser.send('Target.detachFromTarget', { sessionId });
 
-  const appearance = patch => settings.evaluate(patch => chrome.breezerPrivate.setAppearance(patch), patch);
   const pinnedToolbar = () => settings.waitForFunction(height => innerHeight < height - 15, idle);
   await appearance({ frameless: false });
   await pinnedToolbar();
@@ -112,8 +137,10 @@ try {
   await settings.bringToFront();
   await toggle.uncheck();
   await awaitNative(false);
-  await settings.waitForFunction(height => innerHeight < height - 15, idle);
-  console.log('PASS: sidebar address search hides the idle top bar, reveals it for address entry, and restores the saved pin when disabled.');
+  await settings.waitForFunction(height => innerHeight >= height - 2, idle);
+  await appearance({ alwaysShowTopBar: true });
+  await pinnedToolbar();
+  console.log('PASS: the sidebar address leaves the saved top bar pin alone, and address entry and extensions reveal a hidden top bar.');
 } finally {
   try { await context?.close(); } finally { await rm(profile, { recursive: true, force: true }); }
 }

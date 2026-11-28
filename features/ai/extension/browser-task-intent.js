@@ -60,6 +60,10 @@ const IMAGE_DESIGN = new RegExp(
 );
 const THEME_REVISION = /^(?:make it (?:a (?:little|bit) |slightly )?(?:darker|lighter|brighter|warmer|cooler)|(?:change|set) (?:the )?(?:background(?: colou?r)?|wallpaper|theme colou?r) to (?!.*\b(?:in|for|on) (?:my|our|the|this|a|an) ).+)$/;
 
+// Viewing, linking or reusing an image that already exists is an ordinary chat
+// request. Generation would send only these words and return unrelated art.
+const EXISTING_IMAGE = /https?:\/\/|\b(?:on|from|in|of) (?:this|the current|my current) (?:web ?)?(?:page|tab|site|article|screen|screenshot|source)\b|\b(?:found|taken|sourced) (?:on|from) (?:the )?(?:web|internet)\b|\bfrom (?:the internet|google(?: images)?|wikipedia|wikimedia(?: commons)?)\b/;
+
 export function detectBrowserTask(text, context = {}) {
   if (typeof text !== 'string' || /[`{}]/.test(text)) return '';
   const request = text.trim().toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ')
@@ -70,7 +74,7 @@ export function detectBrowserTask(text, context = {}) {
   if (asksForStats(direct) || /^(?:browser_stats|(?:get|check|show(?: me)?) (?:my |the )?browser stats|(?:check|tell me) how much (?:ram|memory) (?:breezer|(?:my|the|this) browser) (?:uses|is using))$/.test(direct)) return 'stats';
   if (/^(?:restore|bring back|go back to|revert to) (?:my |the )?(?:previous|last) (?:look|appearance|theme|browser theme)$/.test(direct)
       || /^undo (?:my |the )?(?:last |previous )?(?:browser )?theme(?: change)?$/.test(direct)) return 'restore';
-  if (context.allowImage && /^(?:create|generate|draw|make) (?:me )?(?:an? )?(?:image|illustration|picture|poster) (?:of|showing|depicting|that) .+$/i.test(direct)) return 'image';
+  if (context.allowImage && !EXISTING_IMAGE.test(direct) && /^(?:create|generate|draw|make) (?:me )?(?:an? )?(?:image|illustration|picture|poster) (?:of|showing|depicting|that) .+$/i.test(direct)) return 'image';
   if (PROJECT_DESIGN.test(request)) return '';
   if (SHORT_THEME.test(direct) || BROWSER_DESIGN.test(direct) || GIVE_BROWSER_DESIGN.test(direct) || BROWSER_COLOR.test(direct) ||
       /^(?:make|style|design) (?:my |the |this )?(?:browser|breezer) (?:look like |look as if |with the look of )\S.{0,250}$/.test(direct) ||

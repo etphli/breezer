@@ -16,6 +16,27 @@ The row reserves space for saved shortcuts and the Add tile on smaller windows.
 The native Organato helper supplies `https://organato.vercel.app/items/<id>`
 links so assignment titles open their task inside Organato.
 
+## Search and address box
+
+In Search, the box uses the address bar's own engine through three private
+calls, each limited to the main frame of `newtab.html` in a regular profile:
+`queryOmnibox` and `nextOmniboxResult` return suggestions from the same
+providers, preferences and default search engine, and `openOmnibox` opens a
+shown suggestion or asks the same code whether text is an address or a search.
+The browser keeps the real matches; the page never supplies a URL to open.
+Without the bridge, or when it fails, `submit` falls back to `toAddress` and
+`chrome.search`. Nothing typed in Ask is queried.
+
+Enter never waits for suggestions. Arrow keys choose a row, Escape restores what
+was typed, and deleted or pasted text is never completed. Tab turns on Ask and
+keeps the draft without an unaccepted ending. A second Tab continues the normal
+order; Escape returns to Search and lets the next Tab leave the box.
+
+The compact icon row shares its remove button, right-click menu, Undo and
+Restore with the tile grid (`installShortcutActions` in `top-sites.js`).
+`node --test tests/ai/newtab-address-browser.test.mjs` covers this with a
+synthetic bridge. Native behavior needs a compiled build.
+
 ## Design
 
 - **Sky and sheet.** The top of the page is the profile's Breezer tone (`--air`)

@@ -12,18 +12,22 @@
 
   <header class="sky">
     <h1 id="today" class="today">New tab</h1>
-    <section id="composer" class="composer" aria-label="Search or ask" hidden>
+    <section id="composer" class="composer" aria-label="Web search">
       <section id="recent-chats" class="recent-chats" aria-labelledby="recent-chats-title" hidden>
-        <h2 id="recent-chats-title" class="recent-chats-title">Recent chats</h2>
+        <div class="recent-chats-head">
+          <h2 id="recent-chats-title" class="recent-chats-title">Recent chats</h2>
+          <button type="button" id="recent-chats-more" class="recent-chats-action" aria-controls="recent-chats-list" aria-expanded="false" hidden>Show all</button>
+          <button type="button" id="recent-chats-clear" class="recent-chats-action">Clear</button>
+        </div>
         <ol id="recent-chats-list" class="recent-chats-list"></ol>
       </section>
       <form id="composer-form" class="composer-box" data-mode="search" novalidate>
-        <textarea id="composer-input" class="composer-input" rows="1" autocomplete="off" spellcheck="false" placeholder="Search the web or type an address" aria-label="Search the web or type an address" aria-describedby="composer-status"></textarea>
+        <textarea id="composer-input" class="composer-input" rows="1" autofocus autocomplete="off" spellcheck="false" placeholder="Search the web or type an address" aria-label="Search the web or type an address" aria-describedby="composer-status"></textarea>
         <div class="composer-bar">
-          <div id="composer-modes" class="composer-modes" role="radiogroup" aria-label="When you press Enter">
+          <div id="composer-modes" class="composer-modes" role="radiogroup" aria-label="When you press Enter" hidden>
             <span class="composer-thumb" aria-hidden="true"></span>
             <button type="button" role="radio" data-mode="search" aria-checked="true">Search</button>
-            <button type="button" role="radio" data-mode="ask" aria-checked="false">Ask Breezer</button>
+            <button type="button" role="radio" data-mode="ask" aria-checked="false" aria-keyshortcuts="Tab" title="Press Tab in the box">Ask Breezer</button>
           </div>
           <a id="composer-style" class="composer-style" href="workspace.html#/settings/experiments" hidden></a>
           <button id="composer-send" class="composer-send" type="submit" aria-label="Search">
@@ -31,14 +35,15 @@
             <svg class="send-ask" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.5M4 7.5l4-4 4 4"/></svg>
           </button>
         </div>
+        <ul id="composer-suggestions" class="composer-suggestions" role="listbox" aria-label="Suggestions" hidden></ul>
       </form>
+      <span id="composer-suggestion-count" class="composer-suggestion-count" role="status" aria-live="polite"></span>
       <p id="composer-status" class="composer-status" role="status" aria-live="polite"></p>
       <ul id="composer-sites" class="composer-sites" aria-label="Frequent sites" hidden></ul>
     </section>
     <nav class="sites-nav" aria-label="Frequently visited sites">
       <ol id="sites" class="sites" aria-busy="true"></ol>
       <p id="sites-empty" class="sites-empty" hidden>Sites you visit often will appear here.</p>
-      <div class="shortcut-feedback"><span id="shortcut-status" role="status" aria-live="polite"></span><button id="shortcut-undo" type="button" hidden>Undo</button><button id="sites-reset" type="button" hidden>Restore shortcuts</button></div>
       <form id="shortcut-add" class="shortcut-add" popover="auto" role="dialog" aria-labelledby="shortcut-add-title" novalidate>
         <h2 id="shortcut-add-title">Add shortcut</h2>
         <input id="shortcut-add-input" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Type a URL or find an open tab" aria-label="Website address or open tab" role="combobox" aria-expanded="true" aria-autocomplete="list" aria-controls="shortcut-add-tabs" aria-describedby="shortcut-add-error">
@@ -51,6 +56,7 @@
         </div>
       </form>
     </nav>
+    <div id="shortcut-feedback" class="shortcut-feedback"><span id="shortcut-status" role="status" aria-live="polite"></span><button id="shortcut-undo" type="button" hidden>Undo</button><button id="sites-reset" type="button" hidden>Restore shortcuts</button></div>
   </header>
 
   <main class="sheet">

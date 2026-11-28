@@ -11,7 +11,7 @@ import { startPanelTheme } from './panel-theme.js';
 // Applied AI theme artwork paints behind the page in a sandboxed, inert frame.
 import { startThemeArtwork } from './browser-theme.js';
 import { HAS_NATIVE_HELPER } from './platform.js';
-import { PERSONALITIES, glassMode, handoffKey, readExperiments, recentChats, watchExperiments, CONVERSATION_PREFIX, FULL_CHAT_PATH, FULL_CHAT_PREFIX } from './experiments.js';
+import { PERSONALITIES, glassMode, handoffKey, listChats, openChatKey, readExperiments, recentChats, watchExperiments, wireClearChats, CHAT_INDEX_KEY, CONVERSATION_PREFIX, FULL_CHAT_PATH, FULL_CHAT_PREFIX, MAX_RECENT_CHATS, MAX_SAVED_CHATS } from './experiments.js';
 
 export const PORT_NAME = 'breezer-newtab';
 export const REQUEST_TIMEOUT_MS = 65000;
@@ -317,10 +317,14 @@ function siteTile(api, site, favicons, retryIcons) {
     caption.append(domain);
   }
   link.append(icon, caption);
+  item.append(link, removeButton(site));
+  return item;
+}
+
+function removeButton(site) {
   const remove = el('button', 'site-remove', { type: 'button', title: 'Remove shortcut', 'aria-label': `Remove ${site.title} shortcut` });
   remove.textContent = '×';
-  item.append(link, remove);
-  return item;
+  return remove;
 }
 
 export function renderSites(api, root, sites, favicons, retryIcons) {
@@ -503,9 +507,8 @@ function renderToday(root, now) {
 // The last record this page saw, kept in page storage so a reopened tab can
 // lay itself out before chrome.storage answers. chrome.storage stays the truth.
 export const EXPERIMENT_MIRROR_KEY = 'breezer.newtab.experiments';
-const MODE_KEY = 'breezer.newtab.mode';
 
-const HOST = /^(?:localhost|(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}|\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\])(?::\d{1,5})?$/i;
+const HOST = /^(?:localhost|(?:[\p{L}\p{N}](?:[\p{L}\p{N}\p{M}-]{0,61}[\p{L}\p{N}\p{M}])?\.)+(?:xn--[a-z0-9-]{2,59}|[\p{L}\p{M}]{2,63})\.?|\d{1,3}(?:\.\d{1,3}){3}|\[[0-9a-f:]+\])(?::\d{1,5})?$/iu;
 
 // An address the box can open directly, or null for a search or a question.
 // Only one http(s) token counts, so "what is example.com" stays a search.
@@ -520,44 +523,250 @@ export function toAddress(input) {
   return safeUrl(`${local ? 'http' : 'https'}://${value}`);
 }
 
+// ------------------------------------------------------------------ address
+// Address-bar suggestions for the box. chrome.breezerPrivate runs the browser's
+// own omnibox providers and decides URL or search; the page only shows what it
+// answers and sends back which row was chosen. Without that bridge this stays
+// idle and submit() below opens addresses itself.
+
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+const MAX_SUGGESTIONS = 8;
+const MAX_ADDRESS_TEXT = 8000;
+
+const oneLine = (value) => value.replace(/[\r\n]+/g, ' ');
+
+function searchGlyph(root) {
+  const svg = root.createElementNS(SVG_NAMESPACE, 'svg');
+  svg.setAttribute('viewBox', '0 0 16 16');
+  const circle = root.createElementNS(SVG_NAMESPACE, 'circle');
+  for (const [key, value] of Object.entries({ cx: 7, cy: 7, r: 4.25 })) circle.setAttribute(key, value);
+  const path = root.createElementNS(SVG_NAMESPACE, 'path');
+  path.setAttribute('d', 'm10.2 10.2 3.3 3.3');
+  svg.append(circle, path);
+  return svg;
+}
+
+export function installAddressSuggestions({ api, root, input, list, favicon = () => null, isActive, onOpen, onCount = () => {} }) {
+  const bridge = api?.breezerPrivate;
+  const available = typeof bridge?.queryOmnibox === 'function' && typeof bridge.openOmnibox === 'function';
+  let typed = '', matches = [], revision = null, answered = null;
+  let active = 0, moved = false, preventInline = false, token = 0, querying = false;
+
+  const isOpen = () => !list.hidden;
+  const caretAtEnd = () => input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+  // What the box shows while it is still the text the person typed.
+  const completion = () => (!moved && !preventInline && matches[0]?.isDefault ? matches[0].inlineAutocompletion || '' : '');
+
+  const hide = () => {
+    list.hidden = true;
+    list.replaceChildren();
+    input.removeAttribute('aria-activedescendant');
+    onCount(null);
+  };
+
+  // Forgets the query. The browser stops its providers when one was running.
+  const close = ({ restore = false } = {}) => {
+    token += 1;
+    // A row or ending that was only offered is not part of the draft.
+    const ending = completion();
+    const offered = moved || (ending && input.value === typed + ending && input.selectionStart === typed.length);
+    if (restore && offered) {
+      input.value = typed;
+      input.setSelectionRange(typed.length, typed.length);
+    }
+    const stop = querying;
+    querying = false;
+    matches = []; revision = null; answered = null; active = 0; moved = false;
+    hide();
+    if (stop) void Promise.resolve(bridge.queryOmnibox({ text: '', preventInline: true })).catch(() => {});
+  };
+
+  const mark = () => {
+    [...list.children].forEach((row, index) => row.setAttribute('aria-selected', String(index === active)));
+    const row = list.children[active];
+    if (moved && row) {
+      input.setAttribute('aria-activedescendant', row.id);
+      row.scrollIntoView({ block: 'nearest' });
+    } else input.removeAttribute('aria-activedescendant');
+  };
+
+  const render = () => {
+    if (!matches.length) { hide(); return; }
+    list.replaceChildren(...matches.map((match, index) => {
+      const row = root.createElement('li');
+      row.id = `composer-suggestion-${index}`;
+      row.className = 'suggestion';
+      row.dataset.kind = match.kind;
+      row.setAttribute('role', 'option');
+      const icon = root.createElement('span');
+      icon.className = 'suggestion-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      const src = match.kind === 'url' ? favicon(match.url) : null;
+      if (src) {
+        const img = root.createElement('img');
+        img.alt = ''; img.width = 16; img.height = 16;
+        img.addEventListener('error', () => img.remove());
+        img.src = src;
+        icon.append(img);
+      } else if (match.kind === 'search') icon.append(searchGlyph(root));
+      const title = root.createElement('span');
+      title.className = 'suggestion-title';
+      const detail = root.createElement('span');
+      detail.className = 'suggestion-detail';
+      const url = match.kind === 'url';
+      title.textContent = (url && match.description) || match.contents || match.fillIntoEdit;
+      detail.textContent = url ? (match.description ? match.contents : '') : match.description;
+      row.append(icon, title, detail);
+      // Keeps the caret in the box; the click still chooses the row.
+      row.addEventListener('mousedown', (event) => event.preventDefault());
+      row.addEventListener('click', () => { active = index; moved = true; onOpen(); });
+      return row;
+    }));
+    list.hidden = false;
+    mark();
+    onCount(matches.length);
+  };
+
+  // Shows the default match's ending, selected, so typing on replaces it.
+  const complete = (wasEnding) => {
+    if (root.activeElement !== input || moved) return;
+    const untouched = input.value === typed && caretAtEnd();
+    const showing = wasEnding && input.value === typed + wasEnding && input.selectionStart === typed.length;
+    if (!untouched && !showing) return;
+    const ending = completion();
+    if (ending === (showing ? wasEnding : '')) return;
+    input.value = typed + ending;
+    input.setSelectionRange(typed.length, typed.length + ending.length);
+  };
+
+  const accept = (result) => {
+    const wasEnding = completion();
+    const chosen = moved ? matches[active] : null;
+    matches = (Array.isArray(result?.matches) ? result.matches : []).slice(0, MAX_SUGGESTIONS);
+    revision = result?.revision;
+    answered = typed;
+    if (chosen) {
+      const index = matches.findIndex((match) => match.url === chosen.url && match.fillIntoEdit === chosen.fillIntoEdit);
+      if (index >= 0) active = index;
+      else {
+        // The chosen row is gone. Go back to the typed text, never to another row.
+        moved = false; active = 0;
+        input.value = typed;
+        input.setSelectionRange(typed.length, typed.length);
+      }
+    } else active = 0;
+    complete(wasEnding);
+    render();
+  };
+
+  const query = async () => {
+    const mine = ++token;
+    querying = true;
+    try {
+      let result = await bridge.queryOmnibox({ text: oneLine(typed), preventInline });
+      while (mine === token) {
+        accept(result);
+        if (result.done || typeof bridge.nextOmniboxResult !== 'function') { querying = false; return; }
+        result = await bridge.nextOmniboxResult(result.revision);
+      }
+    } catch {
+      if (mine === token) close();
+    }
+  };
+
+  const update = (event) => {
+    if (!available) return;
+    if (!isActive() || !input.value.trim() || input.value.length > MAX_ADDRESS_TEXT) { close(); return; }
+    typed = input.value;
+    moved = false;
+    matches = []; answered = null;
+    // Deleting, pasting or editing in the middle must not add text back.
+    const kind = event?.inputType ?? '';
+    preventInline = !(kind.startsWith('insert') && kind !== 'insertFromPaste' && kind !== 'insertFromDrop' && caretAtEnd()) || /[\r\n]/.test(typed);
+    void query();
+  };
+
+  input.addEventListener('input', (event) => { if (!event.isComposing) update(event); });
+  input.addEventListener('compositionend', () => update());
+
+  return {
+    available,
+    close,
+    // True when the key belonged to the suggestions.
+    key(key) {
+      if (!isOpen()) return false;
+      if (key === 'Escape') { close({ restore: true }); return true; }
+      const step = { ArrowDown: 1, ArrowUp: -1 }[key];
+      if (!step) return false;
+      active = (active + step + matches.length) % matches.length;
+      moved = true;
+      input.value = matches[active].fillIntoEdit;
+      input.setSelectionRange(input.value.length, input.value.length);
+      mark();
+      return true;
+    },
+    // Opens the chosen row, or what the browser decides the text means. Rejects
+    // when the browser could not open it, so the caller can still act on Enter.
+    async open() {
+      const text = oneLine(input.value.trim());
+      const request = { text };
+      const fresh = answered !== null && answered === typed && matches.length > 0;
+      const unchanged = fresh && matches[0].isDefault && input.value === typed + completion()
+        && completion() === (matches[0].inlineAutocompletion || '');
+      if (fresh && (moved || unchanged)) Object.assign(request, { revision, index: active });
+      token += 1;
+      querying = false;
+      hide();
+      try { await bridge.openOmnibox(request); } finally { matches = []; answered = null; moved = false; }
+    },
+  };
+}
+
 const storageGet = (key) => { try { return globalThis.localStorage?.getItem(key) ?? null; } catch { return null; } };
 const storageSet = (key, value) => { try { globalThis.localStorage?.setItem(key, value); } catch { /* per-viewer convenience only */ } };
 
-function applyExperimentLayout(root, { composer, glass, personality }) {
+function applyExperimentLayout(root, { composer, glass, glassOpacity, personality }) {
   const html = root.documentElement;
   if (composer) html.dataset.composer = 'on'; else delete html.dataset.composer;
   if (personality && personality !== 'off' && Object.hasOwn(PERSONALITIES, personality)) html.dataset.personality = personality;
   else delete html.dataset.personality;
   html.dataset.glass = glass;
-  root.getElementById('composer').hidden = !composer;
+  html.style.setProperty('--glass-opacity', Number.isInteger(glassOpacity) && glassOpacity >= 0 && glassOpacity <= 100
+    ? `${glassOpacity}%` : '66%');
 }
 
 export function startNewTabExperiments({ api = globalThis.chrome, root = document, win = globalThis } = {}) {
+  const composer = root.getElementById('composer');
   const box = root.getElementById('composer-form');
   const input = root.getElementById('composer-input');
   const modes = root.getElementById('composer-modes');
   const send = root.getElementById('composer-send');
   const status = root.getElementById('composer-status');
   const style = root.getElementById('composer-style');
+  const suggestionList = root.getElementById('composer-suggestions');
+  const suggestionCount = root.getElementById('composer-suggestion-count');
   const sitesList = root.getElementById('composer-sites');
   const chatsSection = root.getElementById('recent-chats');
   const chatsList = root.getElementById('recent-chats-list');
+  const chatsMore = root.getElementById('recent-chats-more');
+  const chatsClear = root.getElementById('recent-chats-clear');
   const canAsk = HAS_NATIVE_HELPER && typeof api?.tabs?.update === 'function' && typeof api?.runtime?.getURL === 'function';
   const query = (text) => win.matchMedia?.(text) ?? { matches: false, addEventListener() {}, removeEventListener() {} };
   const fullscreenQuery = query('(display-mode: fullscreen)');
   const transparencyQuery = query('(prefers-reduced-transparency: reduce)');
   const forcedQuery = query('(forced-colors: active)');
-  let experiments = null, sites = [], windowId = null, tabId = null, mode = 'search', started = false, disposed = false;
-  let windowFullscreen = false, chatsRequest = 0, openingChat = false, recoveredDraft = false;
+  let experiments = null, sites = [], windowId = null, tabId = null, mode = 'search', disposed = false;
+  let windowFullscreen = false, chatsRequest = 0, allChats = false, askPort = null, openingChat = false, recoveredDraft = false;
   const cleanups = [];
 
   let mirror = {};
   try { mirror = JSON.parse(storageGet(EXPERIMENT_MIRROR_KEY) || '{}') || {}; } catch { mirror = {}; }
   const layout = () => {
-    const on = experiments ?? { newTabComposer: mirror.composer === true, glass: mirror.glass === true, personality: mirror.personality };
+    const on = experiments ?? { newTabComposer: mirror.composer === true, glass: mirror.glass === true, glassOpacity: mirror.glassOpacity, personality: mirror.personality };
     applyExperimentLayout(root, {
       composer: on.newTabComposer,
       personality: on.personality,
+      glassOpacity: on.glassOpacity,
       glass: glassMode({ enabled: on.glass, fullscreen: fullscreenQuery.matches || windowFullscreen, reducedTransparency: transparencyQuery.matches || forcedQuery.matches }),
     });
   };
@@ -565,15 +774,47 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
 
   const say = (text, state = '') => { status.textContent = text; status.dataset.state = state; };
 
+  const suggestions = installAddressSuggestions({
+    api, root, input, list: suggestionList,
+    favicon: (url) => (safeUrl(url) ? faviconUrl(api, url) : null),
+    isActive: () => mode === 'search' && !openingChat,
+    onOpen: () => void submit(),
+    onCount: (count) => { suggestionCount.textContent = count ? `${count} ${count === 1 ? 'suggestion' : 'suggestions'}` : ''; },
+  });
+
   const placeThumb = () => {
     const checked = modes.querySelector('[aria-checked="true"]');
     if (!checked) return;
     modes.style.setProperty('--thumb-x', `${checked.offsetLeft - 3}px`);
     modes.style.setProperty('--thumb-w', `${checked.offsetWidth}px`);
   };
-  const setMode = (next, { remember = true } = {}) => {
-    mode = next === 'ask' && canAsk ? 'ask' : 'search';
+  // Selecting Ask starts the local helper, so the models are ready by the first
+  // Send. The worker ignores a hidden or closed page and ends an unused helper.
+  const releaseAsk = () => {
+    const port = askPort;
+    askPort = null;
+    try { port?.disconnect(); } catch { /* The worker already closed it. */ }
+  };
+  const prewarmAsk = () => {
+    if (openingChat) return;
+    if (mode !== 'ask' || root.hidden || disposed) { releaseAsk(); return; }
+    if (askPort) return;
+    try {
+      const port = api.runtime.connect({ name: 'breezer-ask' });
+      askPort = port;
+      port.onDisconnect?.addListener(() => { if (askPort === port) askPort = null; });
+      port.postMessage({ type: 'prewarm' });
+    } catch { askPort = null; }
+  };
+  const setMode = (next) => {
+    mode = next === 'ask' && canAsk && experiments?.newTabComposer ? 'ask' : 'search';
     box.dataset.mode = mode;
+    if (status.dataset.state === 'hint') say('');
+    if (mode === 'ask') suggestions.close({ restore: true });
+    for (const [name, value] of [['aria-autocomplete', 'both'], ['aria-controls', suggestionList.id]]) {
+      if (mode === 'search' && suggestions.available) input.setAttribute(name, value);
+      else input.removeAttribute(name);
+    }
     for (const button of modes.querySelectorAll('[role="radio"]')) {
       const checked = button.dataset.mode === mode;
       button.setAttribute('aria-checked', String(checked));
@@ -585,7 +826,7 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     send.setAttribute('aria-label', mode === 'ask' ? 'Ask Breezer AI' : 'Search');
     renderStyle();
     placeThumb();
-    if (remember) storageSet(MODE_KEY, mode);
+    prewarmAsk();
   };
   const renderStyle = () => {
     const preset = experiments?.personality && experiments.personality !== 'off' ? PERSONALITIES[experiments.personality] : null;
@@ -596,11 +837,12 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     }
   };
   const grow = () => {
-    input.style.height = 'auto';
-    input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
+    input.style.height = '';
+    if (input.value) input.style.height = `${Math.min(input.scrollHeight, 180)}px`;
   };
 
   const renderSites = () => {
+    root.getElementById('shortcut-feedback').hidden = Boolean(experiments?.newTabComposer && !experiments.newTabShortcuts);
     const show = experiments?.newTabComposer && experiments.newTabShortcuts && sites.length;
     sitesList.hidden = !show;
     if (!show) { sitesList.replaceChildren(); return; }
@@ -615,7 +857,7 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
         img.addEventListener('load', () => { link.replaceChildren(img); }, { once: true });
         img.src = src;
       }
-      item.append(link);
+      item.append(link, removeButton(site));
       return item;
     }));
   };
@@ -625,24 +867,34 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     const request = ++chatsRequest;
     if (!want) { chatsSection.hidden = true; chatsList.replaceChildren(); return; }
     let chats = [];
-    try { chats = await recentChats(api, windowId); } catch { chats = []; }
+    // One more than the short list shows whether there is anything to expand.
+    try { chats = await recentChats(api, windowId, allChats ? MAX_SAVED_CHATS * 2 : MAX_RECENT_CHATS + 1); } catch { chats = []; }
     if (disposed || request !== chatsRequest) return;
+    if (chatsMore) {
+      chatsMore.hidden = chats.length <= MAX_RECENT_CHATS;
+      chatsMore.textContent = allChats ? 'Show fewer' : 'Show all';
+      chatsMore.setAttribute('aria-expanded', String(allChats));
+    }
+    if (allChats) chatsList.dataset.expanded = 'true';
+    else { delete chatsList.dataset.expanded; chats = chats.slice(0, MAX_RECENT_CHATS); }
     chatsSection.hidden = !chats.length;
     const focusedChat = chatsList.contains(root.activeElement) ? root.activeElement.dataset.chat : null;
     chatsList.replaceChildren(...chats.map((chat) => {
       const item = el('li');
       const fullChat = Number.isInteger(chat.tabId);
-      const identity = fullChat ? `tab-${chat.tabId}` : `window-${chat.windowId}`;
+      const identity = fullChat ? `tab-${chat.tabId}` : chat.id ? `saved-${chat.id}` : `window-${chat.windowId}`;
       const button = el('button', 'recent-chat', { type: 'button', 'data-chat': identity });
       const title = el('span', 'recent-chat-title');
       title.textContent = chat.title;
       const preview = el('span', 'recent-chat-preview');
       preview.textContent = chat.preview || `${chat.messages} messages`;
       const where = el('span', 'recent-chat-where');
-      where.textContent = chat.current ? 'This window' : 'Other window';
+      where.textContent = chat.id ? chatDay(chat.lastActivity) : chat.current ? 'This window' : 'Other window';
       button.append(title, preview, where);
       button.addEventListener('click', async () => {
+        if (openingChat) return;
         try {
+          if (chat.id) { await openSavedChat(chat.id); return; }
           let targetWindow = chat.windowId;
           if (fullChat) {
             const tab = await api.tabs.get(chat.tabId);
@@ -669,8 +921,30 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     }
   };
 
+  const chatDay = (time) => {
+    const midnight = (value) => { const day = new Date(value); return new Date(day.getFullYear(), day.getMonth(), day.getDate()); };
+    const days = Math.round((midnight(Date.now()) - midnight(time)) / DAY_MS);
+    return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(time);
+  };
+  // Opens a saved chat here, as Ask does. An unsent question stays with this New
+  // Tab for Back and never goes into the chat being opened.
+  const openSavedChat = async (id) => {
+    if (!Number.isInteger(tabId) || !(await listChats(api)).some((chat) => chat.id === id)) throw new Error('That chat is no longer saved.');
+    if (openingChat) return;
+    openingChat = true;
+    try {
+      if (mode === 'ask' && input.value.trim()) win.sessionStorage.setItem(handoffKey(tabId), JSON.stringify({ prompt: input.value }));
+      win.sessionStorage.setItem(openChatKey(tabId), id);
+      await api.tabs.update(tabId, { url: api.runtime.getURL(FULL_CHAT_PATH) });
+    } catch (error) {
+      openingChat = false;
+      try { win.sessionStorage.removeItem(openChatKey(tabId)); } catch { /* Nothing was stored. */ }
+      throw error;
+    }
+  };
+
   const recoverAsk = () => {
-    if (!started || !canAsk || !Number.isInteger(tabId)) return;
+    if (!canAsk || !experiments?.newTabComposer || !Number.isInteger(tabId)) return;
     const key = handoffKey(tabId);
     try {
       const draft = JSON.parse(win.sessionStorage.getItem(key));
@@ -701,6 +975,7 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     send.disabled = true;
     say('Opening Breezer AI…');
     try {
+      win.sessionStorage.removeItem(openChatKey(tabId));
       win.sessionStorage.setItem(key, JSON.stringify({ prompt: text, createdAt: Date.now() }));
       input.value = '';
       grow();
@@ -725,30 +1000,54 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
       .catch(() => say('Search didn’t start. Try again.', 'error'));
   };
 
-  const submit = () => {
+  const submit = async () => {
     const text = input.value.trim();
     if (!text || openingChat) return;
     say('');
-    const address = mode === 'search' ? toAddress(text) : null;
-    if (address) { win.location.assign(address); return; }
-    if (mode === 'ask') ask(text.slice(0, 24000)); else search(text.slice(0, 2048));
+    if (mode === 'ask') { ask(text.slice(0, 24000)); return; }
+    if (suggestions.available) {
+      try { await suggestions.open(); return; } catch { /* The page can still open it below. */ }
+      if (disposed) return;
+    }
+    const address = toAddress(text);
+    if (address) win.location.assign(address); else search(text.slice(0, 2048));
   };
 
   const start = () => {
-    if (started) return;
-    started = true;
-    if (!canAsk) modes.hidden = true;
-    setMode(storageGet(MODE_KEY) === 'ask' ? 'ask' : 'search', { remember: false });
-    grow();
-    box.addEventListener('submit', (event) => { event.preventDefault(); submit(); });
+    box.addEventListener('submit', (event) => { event.preventDefault(); void submit(); });
+    // Tab in the box turns on Ask once. Escape, or a second Tab, gives the normal
+    // tab order back, and returning to the box turns the shortcut on again.
+    let tabAsks = true;
+    input.addEventListener('focus', () => { tabAsks = true; });
+    box.addEventListener('focusout', (event) => {
+      if (!box.contains(event.relatedTarget)) suggestions.close({ restore: true });
+    });
     input.addEventListener('keydown', (event) => {
-      if (event.key !== 'Enter' || event.isComposing || event.shiftKey) return;
-      event.preventDefault();
-      submit();
+      if (event.isComposing) return;
+      const plain = !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey;
+      if (plain && suggestions.key(event.key)) { event.preventDefault(); grow(); return; }
+      if (event.key === 'Tab') {
+        if (plain && tabAsks && mode === 'search' && canAsk && experiments?.newTabComposer && !openingChat) {
+          event.preventDefault();
+          setMode('ask');
+          grow();
+          say('Enter asks Breezer. Press Esc to search instead.', 'hint');
+        } else suggestions.close({ restore: true });
+      } else if (event.key === 'Escape' && plain) {
+        tabAsks = false;
+        if (mode !== 'ask' || openingChat) return;
+        event.preventDefault();
+        setMode('search');
+        say('Enter searches again.', 'hint');
+      } else if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        void submit();
+      }
     });
     input.addEventListener('input', () => {
       grow();
-      if (status.dataset.state === 'error') say('');
+      tabAsks = true;
+      if (['error', 'hint'].includes(status.dataset.state)) say('');
       if (recoveredDraft) {
         try {
           const key = handoffKey(tabId);
@@ -785,6 +1084,17 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
       session.addListener(onSession);
       cleanups.push(() => session.removeListener?.(onSession));
     }
+    const savedChats = localStorageChanges(api);
+    if (savedChats) {
+      const onSaved = (changes) => { if (changes?.[CHAT_INDEX_KEY]) void renderChats(); };
+      savedChats.addListener(onSaved);
+      cleanups.push(() => savedChats.removeListener?.(onSaved));
+    }
+    chatsMore?.addEventListener('click', () => { allChats = !allChats; void renderChats(); });
+    if (chatsClear) wireClearChats(chatsClear, api, {
+      onCleared: () => { say('Chats cleared.'); input.focus({ preventScroll: true }); void renderChats(); },
+      onError: () => say('Breezer AI couldn’t clear your chats. Try again.', 'error'),
+    });
     const isListed = (id) => chatsList.querySelector(`[data-chat="tab-${id}"]`);
     const onTabUpdated = (id, { url }) => {
       if (url && (isListed(id) || url === api.runtime.getURL(FULL_CHAT_PATH))) void renderChats();
@@ -806,11 +1116,12 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
 
   const apply = (next) => {
     experiments = next;
-    mirror = { composer: next.newTabComposer, glass: next.glass, personality: next.personality };
+    mirror = { composer: next.newTabComposer, glass: next.glass, glassOpacity: next.glassOpacity, personality: next.personality };
     storageSet(EXPERIMENT_MIRROR_KEY, JSON.stringify(mirror));
     layout();
-    if (next.newTabComposer) start();
-    if (started) { renderStyle(); placeThumb(); }
+    modes.hidden = !canAsk || !next.newTabComposer;
+    composer.setAttribute('aria-label', modes.hidden ? 'Web search' : 'Search or ask');
+    setMode(mode);
     renderSites();
     void renderChats();
   };
@@ -830,17 +1141,30 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
   win.addEventListener?.('resize', onLayoutChange);
   cleanups.push(() => win.removeEventListener?.('resize', onLayoutChange));
 
+  const focusSearch = () => {
+    if (disposed || root.hidden) return;
+    root.removeEventListener('visibilitychange', focusSearch);
+    if (root.activeElement === root.body) input.focus({ preventScroll: true });
+  };
   const onPageShow = (event) => {
-    if (!event.persisted) return;
+    if (!event.persisted) { focusSearch(); return; }
+    if (openingChat) setMode('search');
     openingChat = false;
     input.readOnly = false;
     send.disabled = false;
     say('');
     recoverAsk();
+    prewarmAsk();
     void renderChats();
   };
   win.addEventListener?.('pageshow', onPageShow);
   cleanups.push(() => win.removeEventListener?.('pageshow', onPageShow));
+  root.addEventListener('visibilitychange', prewarmAsk);
+  cleanups.push(() => root.removeEventListener('visibilitychange', prewarmAsk), releaseAsk);
+  root.addEventListener('visibilitychange', focusSearch);
+  cleanups.push(() => root.removeEventListener('visibilitychange', focusSearch));
+  start();
+  focusSearch();
   cleanups.push(watchExperiments(api, (next) => apply(next)));
   const ready = Promise.all([
     readExperiments(api),
@@ -848,7 +1172,8 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
   ]).then(([value]) => {
     if (disposed) return;
     apply(value);
-    if (value.newTabComposer) recoverAsk();
+    recoverAsk();
+    focusSearch();
     void checkWindow();
   });
 
@@ -886,7 +1211,7 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   const shortcuts = new ShortcutPreferences(api);
   const favicons = createFaviconCache(api);
   const status = root.getElementById('shortcut-status'), undo = root.getElementById('shortcut-undo'), reset = root.getElementById('sites-reset');
-  let allSites = null, visibleSites = null, paintedSites = null, siteRevision = 0, undoKey;
+  let allSites = null, visibleSites = null, paintedSites = null, siteRevision = 0, undoKey, undoUrl;
   const filterSites = async (reload = false) => {
     if (disposed) return;
     const revision = ++siteRevision;
@@ -902,12 +1227,16 @@ export function startNewTab({ api = globalThis.chrome, root = document, now = ()
   };
   installShortcutAdder({ api, root, preferences: shortcuts, update: updateSites });
   const disposeShortcuts = installShortcutActions({ root, remove: async site => {
-    try { undoKey = await shortcuts.hide(site.url); await updateSites(); status.textContent = 'Shortcut removed.'; undo.hidden = false; undo.focus(); }
+    try { undoKey = await shortcuts.hide(site.url); undoUrl = site.url; await updateSites(); status.textContent = 'Shortcut removed.'; undo.hidden = false; undo.focus(); }
     catch { status.textContent = 'Could not save shortcut preferences. Try again.'; }
   } });
   undo.addEventListener('click', async () => {
     if (!undoKey) return;
-    try { await shortcuts.restore(undoKey); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcut restored.'; }
+    try {
+      await shortcuts.restore(undoKey); await updateSites(); undoKey = null; undo.hidden = true; status.textContent = 'Shortcut restored.';
+      // Undo has gone, so the keyboard continues from the shortcut it brought back.
+      [...root.querySelectorAll('.site-link, .composer-site')].find(link => link.href === undoUrl && link.offsetParent)?.focus();
+    }
     catch { status.textContent = 'Could not restore the shortcut. Try again.'; }
   });
   reset.addEventListener('click', async () => {

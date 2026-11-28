@@ -10,10 +10,14 @@
 </head>
 <body>
   <div id="sidebar" class="sidebar" hidden>
-    <button id="sidebar-address" class="sidebar-address" aria-label="Open the address bar" type="button" hidden>
-      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4"/><path d="m10 10 3 3"/></svg>
-      <span>Search or type an address</span>
-    </button>
+    <div id="sidebar-address-row" class="sidebar-address-row" hidden>
+      <button id="sidebar-address" class="sidebar-address" aria-label="Open the address bar" type="button">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4"/><path d="m10 10 3 3"/></svg>
+        <span class="sidebar-address-hint">Search or type an address</span>
+        <span class="sidebar-address-url" hidden><span class="sidebar-address-site"><bdi></bdi></span><span class="sidebar-address-path"></span></span>
+      </button>
+      <button id="sidebar-extensions" class="icon-button" type="button" aria-label="Extensions" title="Extensions"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 5.2h2.6a1.7 1.7 0 1 1 3.2 0h2.4a.8.8 0 0 1 .8.8v2.3a1.7 1.7 0 1 1 0 3.2v1.7a.8.8 0 0 1-.8.8H3a.8.8 0 0 1-.8-.8v-2a1.6 1.6 0 1 0 0-3.1V6a.8.8 0 0 1 .8-.8Z"/></svg></button>
+    </div>
     <div id="favorites" class="favorites" role="toolbar" aria-label="Favorites"></div>
 
     <div id="space-pane" class="space-pane">
@@ -212,7 +216,7 @@
                   <div class="setting-label"><span id="folder-colors-label">Folder colors</span><small>Right-click a folder to choose its color.</small></div>
                   <div class="segmented" role="radiogroup" aria-labelledby="folder-colors-label" data-pref="folderColors" data-error="layout-error">
                     <button type="button" role="radio" data-value="off">Off</button>
-                    <button type="button" role="radio" data-value="icon">Icon only</button>
+                    <button type="button" role="radio" data-value="icon">Light tint</button>
                     <button type="button" role="radio" data-value="row">Whole row</button>
                   </div>
                 </div>
@@ -257,8 +261,8 @@
                   <button id="always-show-sidebar" class="switch" role="switch" aria-checked="false" aria-labelledby="always-show-sidebar-label" data-field="alwaysShowSidebar"><span aria-hidden="true"></span></button>
                 </div>
                 <div class="setting-row" data-search-terms="pin toolbar top bar visible">
-                  <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span><small id="sidebar-address-top-bar-note" hidden>Sidebar address search keeps the top bar on hover.</small></div>
-                  <button id="always-show-top-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="always-show-top-bar-label" aria-describedby="sidebar-address-top-bar-note" data-field="alwaysShowTopBar"><span aria-hidden="true"></span></button>
+                  <div class="setting-label"><span id="always-show-top-bar-label">Always show the top bar</span></div>
+                  <button id="always-show-top-bar" class="switch" role="switch" aria-checked="true" aria-labelledby="always-show-top-bar-label" data-field="alwaysShowTopBar"><span aria-hidden="true"></span></button>
                 </div>
               </div>
               <p id="frameless-error" class="field-error" role="alert" hidden></p>

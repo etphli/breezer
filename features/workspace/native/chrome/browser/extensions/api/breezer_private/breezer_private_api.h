@@ -172,6 +172,45 @@ class BreezerPrivateFocusLocationBarFunction final
   ResponseAction RunFunction() override;
 };
 
+class BreezerPrivateShowExtensionsMenuFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.showExtensionsMenu", UNKNOWN)
+
+ private:
+  ~BreezerPrivateShowExtensionsMenuFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateQueryOmniboxFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.queryOmnibox", UNKNOWN)
+
+ private:
+  ~BreezerPrivateQueryOmniboxFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
+class BreezerPrivateNextOmniboxResultFunction final
+    : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.nextOmniboxResult", UNKNOWN)
+
+ private:
+  ~BreezerPrivateNextOmniboxResultFunction() override = default;
+  ResponseAction RunFunction() override;
+  void OnResult(base::DictValue result);
+};
+
+class BreezerPrivateOpenOmniboxFunction final : public BreezerPrivateFunction {
+ public:
+  DECLARE_EXTENSION_FUNCTION("breezerPrivate.openOmnibox", UNKNOWN)
+
+ private:
+  ~BreezerPrivateOpenOmniboxFunction() override = default;
+  ResponseAction RunFunction() override;
+};
+
 class BreezerPrivateIsCurrentPdfFunction final : public BreezerPrivateFunction {
  public:
   DECLARE_EXTENSION_FUNCTION("breezerPrivate.isCurrentPdf", UNKNOWN)

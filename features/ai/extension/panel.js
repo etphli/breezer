@@ -9,7 +9,7 @@ import { detectBrowserTask } from './browser-task-intent.js';
 import { preparePastedImage } from './clipboard-image.js';
 import { themeReferenceImages } from './theme-references.js';
 import { PLATFORM } from './platform.js';
-import { FULL_CHAT_PATH, FULL_CHAT_PREFIX, HANDOFF_TTL_MS, handoffKey, startPersonalityLook } from './experiments.js';
+import { CHAT_ID_PREFIX, CHAT_INDEX_KEY, EXPERIMENTS_KEY, FULL_CHAT_PATH, FULL_CHAT_PREFIX, HANDOFF_TTL_MS, handoffKey, loadChat, normalizeExperiments, openChatKey, readChatEpoch, readExperiments, saveChat, startPersonalityLook, validChatId } from './experiments.js';
 
 const BROWSER_TASKS = {
   stats: { label: 'Browser stats', placeholder: 'Ask about your tabs or memory…', prompt: 'How many tabs are open, and how much memory are they using?', sharing: 'Tab titles and memory figures' },
@@ -79,6 +79,13 @@ const state = {
   port: null,
   sessionKey: 'breezer-conversation',
   windowId: null,
+  chatId: null,
+  chatIdKey: null,
+  chatEpoch: null,
+  openedChat: false,
+  keepChats: false,
+  seenEpoch: undefined,
+  chatSaveFailed: false,
 };
 const research = new ResearchSources({ api: chrome, root: document,
   onChange: () => { if (research.size) { state.browserTask = null; setControl(false); } updateControls(); },
@@ -715,7 +722,7 @@ function recentMessages(limit) {
 }
 
 function recentRequestMessages() {
-  return recentMessages(30).filter(message => !message.superseded && message !== state.retryMessage);
+  return recentMessages(30).filter(message => !message.localOnly && !message.superseded && message !== state.retryMessage);
 }
 
 // Retried files are included once, with their most recent message.
@@ -732,7 +739,30 @@ function requestHistory() {
   }).reverse();
 }
 
-function saveConversation(completedId) {
+// Full-page chats are saved so they can be reopened. Sidebar chats are saved only
+// while Recent conversations can list them. Private windows save nothing.
+function keepsChat() {
+  return Boolean(state.chatId) && state.keepChats && chrome.extension?.inIncognitoContext !== true;
+}
+
+function archiveConversation(messages) {
+  if (!messages.length || !keepsChat()) return;
+  saveChat(chrome, { id: state.chatId, epoch: state.chatEpoch, messages }).catch(() => {
+    if (state.chatSaveFailed) return;
+    state.chatSaveFailed = true;
+    notify('This chat couldn’t be saved for later.');
+  });
+}
+
+// Each New Tab question, New chat and sidebar conversation has its own identity.
+// The history entry remembers it, so Back, reload and a restored tab agree.
+function setChatId(id, opened = false) {
+  state.chatId = id;
+  state.openedChat = opened;
+  if (fullChat) globalThis.history?.replaceState({ breezerChat: id, ...(opened ? { opened: true } : {}) }, '');
+}
+
+function saveConversation(completedId, active = true) {
   const messages = recentMessages(60);
   let imageBytes = 0;
   for (let index = messages.length - 1; index >= 0; index--) {
@@ -743,8 +773,9 @@ function saveConversation(completedId) {
       messages[index] = message;
     }
   }
-  if (messages.length) messages.at(-1).lastActivity = Date.now();
-  return chrome.storage.session.set({ [state.sessionKey]: messages }).then(() => {
+  if (messages.length && active) messages.at(-1).lastActivity = Date.now();
+  archiveConversation(messages);
+  return chrome.storage.session.set({ [state.sessionKey]: messages, ...(state.chatId ? { [state.chatIdKey]: state.chatId } : {}) }).then(() => {
     if (completedId && state.port) post({ type: 'turn-saved', id: completedId });
   }).catch(() => {});
 }
@@ -836,6 +867,7 @@ function startWorkingStatus(run) {
 }
 
 function finish(label, keepControl = false, completedId) {
+  const active = Boolean(state.running);
   stopWorkingStatus();
   if (state.running) {
     state.running.renderer?.dispose();
@@ -859,7 +891,8 @@ function finish(label, keepControl = false, completedId) {
   if (!keepControl) setControl(false);
   $('activity').hidden = true;
   updateControls();
-  saveConversation(completedId);
+  // A dropped connection is not activity, so it must not extend the seven days.
+  saveConversation(completedId, active);
   refreshQueuedModel();
   // The stop button turns into a disabled send button; keep keyboard focus in the composer.
   if (document.activeElement === $('send') || document.activeElement === document.body) $('prompt').focus();
@@ -982,6 +1015,8 @@ async function send(automatic = false) {
   startWorkingStatus(state.running);
   updateControls();
   scrollToBottom();
+  // The question survives even if this page closes before the reply.
+  saveConversation();
   let sources, pdfView;
   if (research.size) {
     // Start before awaiting anything so native sees the user's send gesture.
@@ -1050,8 +1085,15 @@ function restoreTurn({ id, user, text, browserTask, terminal, themeImage, stats 
   } else {
     if (state.running) return;
     if (messageNodes.has(assistantId)) {
-      if (terminal) post({ type: 'turn-saved', id });
-      return;
+      const index = state.messages.findIndex(message => message.id === assistantId);
+      // The worker saved this reply after its page closed. Restore it in full.
+      if (!terminal || !state.messages[index]?.unread) {
+        if (terminal) post({ type: 'turn-saved', id });
+        return;
+      }
+      state.messages.splice(index, 1);
+      messageNodes.get(assistantId).closest('.message').remove();
+      messageNodes.delete(assistantId);
     }
     const message = { id: assistantId, role: 'assistant', text: '', citations: user.sourceMetadata, stats };
     if (!messageNodes.has(id)) {
@@ -1313,6 +1355,10 @@ document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventLi
 }));
 $('new-chat').addEventListener('click', () => {
   stop();
+  startOver();
+  $('prompt').focus();
+});
+function startOver() {
   research.clear();
   state.retryMessage = null;
   state.browserTask = null;
@@ -1329,11 +1375,20 @@ $('new-chat').addEventListener('click', () => {
   setControl(false);
   notify('');
   updateControls();
+  if (state.chatId) setChatId(crypto.randomUUID());
   saveConversation();
-  post({ type: 'clear-turn' });
+  post({ type: 'clear-turn', ...(state.chatId ? { conversation: state.chatId, epoch: state.chatEpoch } : {}) });
   if (!fullChat) post({ type: 'context' });
-  $('prompt').focus();
-});
+}
+// Chats were cleared in Settings or a New Tab. Nothing shown here may be saved again.
+function clearedChats(epoch) {
+  state.seenEpoch = epoch;
+  if (state.chatEpoch === null || state.chatEpoch === epoch) return;
+  stop();
+  state.chatEpoch = epoch;
+  startOver();
+  notify('Chats were cleared.');
+}
 $('model-button').addEventListener('click', (event) => setModelMenu($('model-menu').hidden, event.detail === 0));
 $('close-model-menu').addEventListener('click', dismissModelMenu);
 // Arrows move between search and the model list; typing on a model searches.
@@ -1463,6 +1518,9 @@ $('profile-form').addEventListener('submit', async (event) => {
 localStorageChanges(chrome).addListener((changes) => {
   const profile = changes.breezerProfile?.newValue;
   if (profile && typeof profile.name === 'string' && typeof profile.context === 'string') { state.profile = profile; applyProfile(); }
+  if (EXPERIMENTS_KEY in changes && !fullChat) state.keepChats = keepsSidebarChats(changes[EXPERIMENTS_KEY].newValue);
+  const epoch = changes[CHAT_INDEX_KEY]?.newValue?.epoch;
+  if (typeof epoch === 'string') clearedChats(epoch);
   if (MODEL_KEY in changes) {
     modelChangeObserved = true;
     const value = preferredModel(changes[MODEL_KEY].newValue);
@@ -1527,26 +1585,103 @@ function sendNewTabDraft() {
   else keepNewTabDraft();
 }
 
+const keepsSidebarChats = value => {
+  const { newTabComposer, newTabRecentChats } = normalizeExperiments(value);
+  return newTabComposer && newTabRecentChats;
+};
+
+// Decide which chat this history entry shows before anything else runs. An entry
+// with no identity is a new Ask, a saved chat opened from New Tab, or this tab's chat.
+function openChatEntry(tabId) {
+  const entry = globalThis.history?.state;
+  if (validChatId(entry?.breezerChat)) {
+    state.chatId = entry.breezerChat;
+    state.openedChat = entry.opened === true;
+    return 'entry';
+  }
+  let opened = null, asked = false;
+  try {
+    opened = sessionStorage.getItem(openChatKey(tabId));
+    sessionStorage.removeItem(openChatKey(tabId));
+    asked = sessionStorage.getItem(handoffKey(tabId)) !== null;
+  } catch { /* A new chat still works. */ }
+  if (validChatId(opened)) { setChatId(opened, true); return 'opened'; }
+  setChatId(crypto.randomUUID());
+  return asked ? 'asked' : 'tab';
+}
+
+// Two pages must never write one chat. A duplicated tab continues in its own copy.
+async function chatOpenElsewhere(tabId) {
+  const url = chrome.runtime.getURL?.(FULL_CHAT_PATH);
+  const tabs = await chrome.tabs.query?.({}) ?? [];
+  const keys = tabs.filter(tab => tab.id !== tabId && !tab.incognito && tab.url === url).map(tab => `${CHAT_ID_PREFIX}tab-${tab.id}`);
+  if (!keys.length) return false;
+  return Object.values(await chrome.storage.session.get(keys)).includes(state.chatId);
+}
+
+async function loadMessages(source, tabId) {
+  const usable = messages => messages.filter((item) => ['user', 'assistant'].includes(item?.role) && typeof item.text === 'string').slice(-60);
+  const session = (await chrome.storage.session.get(state.sessionKey))[state.sessionKey];
+  const bound = (await chrome.storage.session.get(state.chatIdKey))[state.chatIdKey];
+  const boundId = validChatId(bound) ? bound : null;
+  if (!fullChat) {
+    state.chatId = boundId ?? crypto.randomUUID();
+    return Array.isArray(session) ? usable(session) : [];
+  }
+  if (source === 'asked') return [];
+  if (source === 'tab' && boundId) setChatId(boundId);
+  let messages = null;
+  if (Array.isArray(session) && (source === 'tab' || boundId === state.chatId)) messages = usable(session);
+  else {
+    const saved = await loadChat(chrome, state.chatId);
+    if (saved) messages = usable(saved.messages).map(message => {
+      if (!message.themeProposal) return message;
+      try { return { ...message, themeProposal: normalizeThemeProposal(message.themeProposal) }; }
+      catch { const { themeProposal, ...rest } = message; return rest; }
+    });
+  }
+  if (!messages && state.openedChat) notify('That chat is no longer saved on this device.');
+  if (await chatOpenElsewhere(tabId).catch(() => false)) setChatId(crypto.randomUUID(), state.openedChat);
+  return messages ?? [];
+}
+
 async function initialize() {
   try {
     const currentTab = fullChat ? await chrome.tabs.getCurrent() : null;
+    let source = null;
     if (fullChat) {
       if (!Number.isInteger(currentTab?.id)) throw new Error('Open Breezer AI in a browser tab.');
-      restoreNewTabDraft(currentTab.id);
+      source = openChatEntry(currentTab.id);
+      if (source === 'asked') restoreNewTabDraft(currentTab.id);
     }
-    const [saved, currentWindow] = await Promise.all([
+    const [saved, currentWindow, experiments, epoch] = await Promise.all([
       chrome.storage.local.get(['breezerProfile', MODEL_KEY, 'breezerModelPreferences']),
       fullChat ? null : chrome.windows.getCurrent(),
+      fullChat ? null : readExperiments(chrome),
+      readChatEpoch(chrome).catch(() => ''),
     ]);
     if (saved.breezerProfile && typeof saved.breezerProfile.name === 'string' && typeof saved.breezerProfile.context === 'string') state.profile = saved.breezerProfile;
     if (!modelChangeObserved) state.preferredModel = preferredModel(saved[MODEL_KEY]);
     if (saved.breezerModelPreferences && typeof saved.breezerModelPreferences === 'object' && !Array.isArray(saved.breezerModelPreferences)) state.preferences = saved.breezerModelPreferences;
     state.windowId = fullChat ? currentTab.windowId : currentWindow.id;
     state.sessionKey = fullChat ? FULL_CHAT_PREFIX + currentTab.id : `breezer-conversation-${state.windowId}`;
-    const session = await chrome.storage.session.get(state.sessionKey);
-    if (Array.isArray(session[state.sessionKey])) {
-      state.messages = session[state.sessionKey].filter((item) => ['user', 'assistant'].includes(item.role) && typeof item.text === 'string').slice(-60);
+    state.chatIdKey = CHAT_ID_PREFIX + (fullChat ? `tab-${currentTab.id}` : `window-${state.windowId}`);
+    state.keepChats = fullChat ? currentTab.incognito !== true : currentWindow.incognito !== true && keepsSidebarChats(experiments);
+    const messages = await loadMessages(source, currentTab?.id);
+    // A clear that happened while this page was loading wins.
+    const cleared = state.seenEpoch !== undefined && state.seenEpoch !== epoch;
+    state.chatEpoch = state.seenEpoch ?? epoch;
+    if (cleared && messages.length) setChatId(crypto.randomUUID());
+    else {
+      state.messages = messages;
       state.messages.forEach(appendMessage);
+    }
+    if (state.messages.some(message => message.localOnly)) setDraftOpen(true);
+    if (fullChat) {
+      // A draft belongs to a chat that has not started, never to an older one.
+      if (source !== 'asked' && !state.openedChat && !state.messages.length) restoreNewTabDraft(currentTab.id);
+      // Other tabs need to know which chat this tab shows before its next message.
+      void chrome.storage.session.set({ [state.sessionKey]: state.messages, [state.chatIdKey]: state.chatId }).catch(() => {});
     }
     applyProfile();
     state.port = chrome.runtime.connect({ name: 'breezer-panel' });
@@ -1556,7 +1691,7 @@ async function initialize() {
       notify('The assistant disconnected. Reopen it with ⌘ K to reconnect.');
       finish();
     });
-    post({ type: 'init', windowId: state.windowId });
+    post({ type: 'init', windowId: state.windowId, conversation: state.chatId, epoch: state.chatEpoch });
     post({ type: 'visibility', visible: !document.hidden });
     if (!fullChat) post({ type: 'context' });
     updateControls();

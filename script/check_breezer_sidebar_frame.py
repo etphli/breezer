@@ -178,13 +178,14 @@ class Namespace:
 
 # A 1200x800 client area with a 40 DIP toolbar row. Helium's floating sidebar
 # is inset 8 DIP from the window edges and, below a pinned top bar, 5 DIP
-# (frame radius 8 minus base padding 3) from whatever is above it.
+# (frame radius 8 minus base padding 3) from whatever is above it. Breezer's
+# document is a drawer without those insets.
 TOOLBAR_ROW = 40
 FLOATING_PADDING = 8
 FLOATING_TOP_PADDING = 5
 
 
-def sidebar_geometry(layout, full_height, floating):
+def sidebar_geometry(layout, full_height, floating, document=True):
     """The sidebar's bounds and title bar band as the patched layout computes them."""
     block = layout.split("      int top_offset = vertical_tab_strip_animation.top_offset;\n", 1)[1]
     block = "int top_offset = vertical_tab_strip_animation.top_offset;\n" + block.split(
@@ -194,6 +195,16 @@ def sidebar_geometry(layout, full_height, floating):
     zen = Namespace(enabled=True, top_chrome_ratio=1.0,
                     vertical_tab_strip_padding=FLOATING_PADDING if floating else 0,
                     vertical_tab_strip_top_padding=FLOATING_TOP_PADDING if floating else 0)
+    drawer = layout.split("const bool breezer_drawer =", 1)[1].split("}\n", 1)[0]
+    require(" ".join(drawer.split(";", 1)[0].split()) ==
+            "zen.floating_vertical_tab_strip && "
+            "IsParentedTo(views().vertical_tab_strip_region_view, views().browser_view) && "
+            "views().vertical_tab_strip_region_view->HostsBreezerWorkspace()",
+            "Only an unpinned sidebar with the Breezer document is a drawer")
+    for field in ("vertical_tab_strip_padding", "vertical_tab_strip_top_padding"):
+        require(f"zen.{field} = 0;" in drawer, f"The drawer keeps Helium's {field}")
+        if floating and document:
+            setattr(zen, field, 0)
     names = run_cpp_statements(block, dict(
         vertical_tab_strip_animation=animation, zen=zen, ScaleExtent=scale_extent,
         breezer_full_height_sidebar=full_height,
@@ -209,18 +220,22 @@ def check_full_height_geometry(layout, region):
     """The shown full-height sidebar runs from the window top, under the controls."""
     for floating in (False, True):
         label = "floating (frameless)" if floating else "attached"
-        (_, y, _, height), band = sidebar_geometry(layout, True, floating)
-        require(y == 0, f"Full-height {label} sidebar starts {y} DIP below the window top")
-        require(height == 800 - (FLOATING_PADDING if floating else 0),
-                f"Full-height {label} sidebar has height {height}")
+        (x, y, _, height), band = sidebar_geometry(layout, True, floating)
+        require((x, y) == (0, 0), f"Full-height {label} sidebar starts at {x},{y}")
+        require(height == 800, f"Full-height {label} sidebar has height {height}")
         require(y + band == TOOLBAR_ROW,
                 f"Title bar band ends at {y + band}, not the toolbar row bottom {TOOLBAR_ROW}")
-    # A floating sidebar that does not run full height keeps Helium's placement
-    # below the top bar, and has no band.
-    (_, y, _, height), band = sidebar_geometry(layout, False, True)
-    require((y, height, band) == (TOOLBAR_ROW + FLOATING_TOP_PADDING,
-                                  800 - TOOLBAR_ROW - FLOATING_TOP_PADDING - FLOATING_PADDING, 0),
-            f"Floating sidebar below the top bar moved to y={y}, height={height}, band={band}")
+    # Below a revealed top bar the drawer fills the rest of the window, and has
+    # no band.
+    (x, y, _, height), band = sidebar_geometry(layout, False, True)
+    require((x, y, height, band) == (0, TOOLBAR_ROW, 800 - TOOLBAR_ROW, 0),
+            f"Drawer below the top bar is at x={x}, y={y}, height={height}, band={band}")
+    # Chromium's own tabs keep Helium's inset placement.
+    (x, y, _, height), band = sidebar_geometry(layout, False, True, document=False)
+    require((x, y, height, band) == (
+        FLOATING_PADDING, TOOLBAR_ROW + FLOATING_TOP_PADDING,
+        800 - TOOLBAR_ROW - FLOATING_TOP_PADDING - FLOATING_PADDING, 0),
+            f"Native floating tabs moved to x={x}, y={y}, height={height}, band={band}")
 
     # The native background and the document must agree on a square top
     # wherever the region runs from the window top.
@@ -229,9 +244,11 @@ def check_full_height_geometry(layout, region):
         ("sidebar document", region.split("gfx::RoundedCornersF BreezerWorkspaceCorners(", 1)[1]),
     )
     cases = (
-        ("full-height floating sidebar", "kDetached", True, True, False),
-        ("floating sidebar below the top bar", "kDetached", True, False, True),
-        ("floating sidebar, top bar hidden", "kDetached", False, False, True),
+        ("full-height drawer", "kAttachedLeading", True, True, False),
+        ("drawer below the top bar", "kAttachedLeading", True, False, False),
+        ("drawer, top bar hidden", "kAttachedLeading", False, False, True),
+        ("native floating tabs below the top bar", "kDetached", True, False, True),
+        ("native floating tabs, top bar hidden", "kDetached", False, False, True),
         ("autoHide reveal beside the toolbar", "kAttachedLeading", True, True, False),
         ("compact rail hover below the toolbar", "kAttachedLeading", True, False, False),
     )
@@ -283,8 +300,8 @@ def check_order(tree, ai_first):
     # the top bar is moved aside explicitly, in both top container passes.
     visible_edge = layout.split("        vertical_tab_strip_bounds = SlideBoundsFromSide(", 1)[1]
     visible_edge = visible_edge.split("      if (layout_data_->window_state", 1)[0]
-    require("if (breezer_full_height_sidebar) {\n        breezer_sidebar_edge =\n"
-            "            vertical_tab_strip_bounds.right()" in visible_edge,
+    require("if (breezer_full_height_sidebar) {\n"
+            "        breezer_sidebar_edge = vertical_tab_strip_bounds.right();" in visible_edge,
             "Visible sidebar width does not move the top bar aside")
     require(visible_edge.index("\n      }\n") <
             visible_edge.index("if (breezer_full_height_sidebar)"),
@@ -341,8 +358,36 @@ def check_order(tree, ai_first):
     layout_body = region.split("void VerticalTabStripRegionView::Layout(PassKey) {", 1)[1].split("\n}\n", 1)[0]
     require("UpdateResizeAreaVisibility();" in layout_body,
             "Resize edge is not refreshed when the document becomes available")
-    require("FloatingStyle::kDetached &&\n        HostsBreezerWorkspace()" in region,
-            "Detached sidebar resize rule missing")
+    require("!(HostsBreezerWorkspace() &&\n"
+            "        browser_view()->IsZenModeEnabledForLayout() &&\n"
+            "        !browser_view()->IsZenModeSideChromePinned())" in region,
+            "Unpinned sidebar resize rule missing")
+    require("if (breezer_drawer) {\n      floating_style = vertical_right_aligned" in layout,
+            "The drawer does not join the window edge")
+    check_top_chrome(tree)
+
+
+def check_top_chrome(tree):
+    """The sidebar address control leaves the saved top bar pin alone."""
+    browser_view = (tree / sidebar_frame.BROWSER_VIEW).read_text()
+    for signature in ("bool BrowserView::IsZenModeTopChromePinned() const {",
+                      "void BrowserView::ToggleZenModeTopChrome() {"):
+        body = browser_view.split(signature, 1)[1].split("\n}\n", 1)[0]
+        require("UsesBreezerSidebarAddress" not in body,
+                f"The sidebar address control overrides {signature}")
+    require("kSidebarAddressSearch" not in browser_view.split("bool UsesBreezerSidebarAddress(", 1)[0],
+            "The sidebar address control still changes the top bar")
+    reveal = browser_view.split("void BrowserView::RevealTopChromeForExtensionsMenu() {", 1)[1]
+    require("if (zen_mode_enabled_) {\n    RevealZenModeTopChromeImmediately();" in
+            reveal.split("\n}\n", 1)[0], "The extensions menu does not show a hidden top bar")
+    header = (tree / sidebar_frame.BROWSER_VIEW_HEADER).read_text()
+    require(header.count("void RevealTopChromeForExtensionsMenu();") == 1,
+            "BrowserView does not declare the extensions menu reveal")
+    toggle = (tree / sidebar_frame.EXTENSIONS_TOOLBAR).read_text().split(
+        "void ExtensionsToolbarDesktop::ToggleExtensionsMenu() {", 1)[1].split("\n}\n", 1)[0]
+    require(toggle.index("RevealTopChromeForExtensionsMenu()") <
+            toggle.index("GetExtensionsButton()->ToggleExtensionsMenu()"),
+            "The top bar must be shown before its extensions menu opens")
 
 
 def check_document():

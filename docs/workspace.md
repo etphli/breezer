@@ -14,7 +14,9 @@ On Windows, press Ctrl+T to open a tab, Ctrl+W to close it, or Alt+F to open the
 
 Click **New tab** or press Command T to create a page. Click a row to switch pages. Close a row with its close button or a middle click. Right-click a row for pin, folder, and move actions. Open **Move to space** to select another space or, for a live tab, move it into a new window. Double-click a saved tab, favorite, or folder to rename it. Drag rows to reorder them.
 
-Swipe horizontally with two fingers over the sidebar, scroll it with a horizontal wheel, or use the space icons at the bottom to switch spaces. Right-click the dock or press Shift+F10 on a focused space icon for **New space**. **Edit space** changes its name or icon. Choose **Open space in new window** to view the same saved tabs in a second window with its own live tab. Open **What’s new in Breezer** at the left of the dock for the update history. Control 1 through Control 4 selects the first four spaces on macOS. Favorites appear in every space. To toggle the sidebar, use the two-pane button in the browser toolbar. The **Space dock** experiment gives the icon row a tinted background.
+Swipe horizontally with two fingers over the sidebar, scroll it with a horizontal wheel, or use the space icons at the bottom to switch spaces. Each swipe moves one space. You can swipe again before the previous swipe stops coasting, and vertical scrolling never switches spaces. Right-click the dock or press Shift+F10 on a focused space icon for **New space**. **Edit space** changes its name or icon. Choose **Open space in new window** to view the same saved tabs in a second window with its own live tab. Open **What’s new in Breezer** at the left of the dock for the update history. Control 1 through Control 4 selects the first four spaces on macOS. Favorites appear in every space. To toggle the sidebar, use the two-pane button in the browser toolbar. The **Space dock** experiment places the icons in a tinted tray.
+
+The **Address search in the sidebar** experiment shows the selected page’s address above your favorites. Select it to open the address bar. The puzzle button beside it opens the browser’s extensions menu, or the extensions page if the toolbar’s Extensions button is turned off. Neither changes **Always show the top bar**: a hidden top bar appears while the address bar or extensions menu is open.
 
 With the custom sidebar, Command 1 through Command 8 on macOS (Control 1 through Control 8 on Windows/Linux) selects saved slots in sidebar order: favorites first, then the current space's pins, including entries inside closed folders. An unopened slot opens only that saved page; an open or discarded tab is reused in the same window. Favorites keep the same slots across spaces and restart, and dragging favorites changes that order. Repeating a shortcut while its page opens does not create more tabs. These are browser commands, so they also work while a web page or sidebar field has focus; ordinary number typing is unaffected.
 
@@ -34,9 +36,9 @@ The full-page settings screen provides:
 - System, light, or dark appearance.
 - Bookmark bar visibility and sidebar width.
 - Sidebar font size from 12 to 20 pixels.
-- Sidebar folder colors. Choose **Off**, **Icon only**, or **Whole row** under **Layout**. Colors are off by default.
+- Sidebar folder colors. Choose **Off**, **Light tint**, or **Whole row** under **Layout**. Light tint colors the icon and adds a trace of that color to the whole folder card. Colors are off by default.
 - Centered address bar, minimal URL, and loading progress.
-- Frameless mode, with separate switches to keep the sidebar and top bar visible.
+- Frameless mode, with separate switches to keep the sidebar and top bar visible. A sidebar that isn’t kept visible slides in as a drawer against the window edge. The top bar switch applies on every page, including New Tab.
 - Space names, colors, and order.
 - New-tab placement and close-button behavior.
 
@@ -46,7 +48,7 @@ With top tabs, right-click a tab and choose **Add tab to new group**. Right-clic
 
 Custom colours are local to the profile. They follow the group into another window, survive session ID relabeling on restore, and use the saved group's identity when it is reopened. Chromium's standard palette ID remains available to sync and other clients; the custom RGB value is not synced. Group text keeps Chromium's contrasting foreground selection for readability.
 
-Right-click or two-finger click a sidebar folder to pick a preset, enter a custom hex color, or reset its color. Picking a color while the display is **Off** switches it to **Icon only**. Choose **Whole row** in Layout to tint the folder panel. **Off** hides saved colors. A collapsed folder shows a few of its page icons and the total tab count. Saved tabs and folders appear below **Today** and ahead of ordinary unpinned tabs. Folder colors, space icons, and the folder color display mode are saved on this device.
+Right-click or two-finger click a sidebar folder to pick a preset, enter a custom hex color, or reset its color. Picking a color while the display is **Off** switches it to **Light tint**. Choose **Whole row** in Layout for a stronger tint on the folder’s row. **Off** hides saved colors. A collapsed folder shows a few of its page icons and the total tab count. Saved tabs and folders appear below **Today** and ahead of ordinary unpinned tabs. Folder colors, space icons, and the folder color display mode are saved on this device.
 
 Dragging a tab, favorite or saved page over a folder highlights its header and shows **Move into folder**. All but the outer four pixels of the header accept pages; those edges insert before or after the folder. Dropping into a closed folder opens it. Folder drags reorder folders at the root rather than nesting them. Escape or a canceled pointer capture leaves membership unchanged.
 

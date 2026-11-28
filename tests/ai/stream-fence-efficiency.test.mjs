@@ -19,7 +19,19 @@ const sourceWithoutWidgets = source
     "      const body = [];\n$1      code.textContent = body.join('\\n');\n",
   );
 
-const sourceWithoutTables = sourceWithoutWidgets
+// Markdown images become click-to-load cards in finished replies and plain
+// links elsewhere. Undo that layer too; imageLine goes with the table helpers.
+const sourceWithoutImages = sourceWithoutWidgets
+  .replace('    let columns, media;\n', '    let columns;\n')
+  .replace(`    } else if (renderWidget && widgets < 4 && (media = imageLine(line, renderWidget))) {
+      flush();
+      widgets++;
+      container.append(media);
+`, '')
+  .replace('|!\\[[^\\]\\n]*\\]\\(https?:\\/\\/[^\\s)]+\\)', '')
+  .replace("token.startsWith('!') ? token.slice(2, split).trim() || 'Image' : ", '');
+
+const sourceWithoutTables = sourceWithoutImages
   .replace('    let columns;\n', '')
   .replace(`    } else if (!paragraph.length && (columns = tableColumns(line, lines[index + 1]))) {
       flush();

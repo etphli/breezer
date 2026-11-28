@@ -834,6 +834,14 @@ def replacements():
                 "  registry->RegisterBooleanPref(\n"
                 "      breezer_workspace::prefs::kSidebarAddressSearch, false);\n",
             ),
+            (
+                "  registry->RegisterBooleanPref(\n"
+                "      breezer_workspace::prefs::kSidebarAddressSearch, false);\n",
+                "  registry->RegisterBooleanPref(\n"
+                "      breezer_workspace::prefs::kSidebarAddressSearch, false);\n"
+                "  registry->RegisterBooleanPref(\n"
+                "      breezer_workspace::prefs::kNewTabComposer, false);\n",
+            ),
         ],
         "chrome/browser/ui/BUILD.gn": [
             (

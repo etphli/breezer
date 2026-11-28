@@ -1,5 +1,6 @@
 import { localStorageChanges } from './storage-events.js';
 import { PLATFORM } from './platform.js';
+import { createSpaceSwipe, SWIPE_IDLE_MS } from './space-swipe.js';
 import {
   APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
@@ -101,7 +102,7 @@ export function callBridge(name, ...args) {
 export async function loadAppearance() {
   try {
     const raw = await callBridge('getAppearance');
-    return { appearance: normalizeAppearance(raw), sidebarAddressSearch: raw?.sidebarAddressSearch === true, available: true, error: '' };
+    return { appearance: normalizeAppearance(raw), available: true, error: '' };
   } catch (error) {
     return { appearance: { ...DEFAULT_APPEARANCE }, available: false, error: error instanceof BridgeUnavailable ? '' : errorText(error) };
   }
@@ -157,7 +158,7 @@ const state = {
   drag: null,
   suppressClick: false,
   closeFallback: null,
-  wheel: { at: -Infinity, axis: null, delta: 0, vertical: 0, switched: false },
+  swipe: null,
   spaceDock: false,
   drawn: false,
   instant: false,
@@ -531,34 +532,34 @@ function stepSpace(delta) {
   if (next) switchSpace(next.id);
 }
 
+let swipeSettle = 0;
+
+// Follows the fingers a little, so a swipe answers before it switches spaces.
+function followSwipe(offset) {
+  const pane = $('space-pane');
+  pane.classList.toggle('swiping', offset !== 0);
+  const translate = offset ? `${offset}px` : '';
+  if (pane.style.translate !== translate) pane.style.translate = translate;
+}
+
 function onSpaceWheel(event) {
   if (event.ctrlKey || event.metaKey || state.drag || state.renaming || !$('menu').hidden
       || event.target.closest('input, textarea')) return;
-  const gesture = state.wheel;
-  const now = performance.now();
-  if (now - gesture.at > 180) {
-    gesture.axis = null;
-    gesture.delta = 0;
-    gesture.vertical = 0;
-    gesture.switched = false;
-  }
-  gesture.at = now;
   const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? $('sidebar').clientWidth : 1;
-  const horizontal = (event.deltaX || (event.shiftKey ? event.deltaY : 0)) * unit;
-  const vertical = (!event.deltaX && event.shiftKey ? 0 : event.deltaY) * unit;
-  if (!gesture.axis) {
-    gesture.delta += horizontal;
-    gesture.vertical += vertical;
-    if (Math.max(Math.abs(gesture.delta), Math.abs(gesture.vertical)) < 6) return;
-    gesture.axis = Math.abs(gesture.delta) > Math.abs(gesture.vertical) * 1.35 ? 'x' : 'y';
-  } else if (gesture.axis === 'x' && !gesture.switched && Math.abs(horizontal) > Math.abs(vertical)) {
-    gesture.delta += horizontal;
+  const sideways = !event.deltaX && event.shiftKey;
+  state.swipe ??= createSpaceSwipe();
+  const { horizontal, step, offset } = state.swipe.feed(
+    (sideways ? event.deltaY : event.deltaX) * unit, sideways ? 0 : event.deltaY * unit, performance.now());
+  clearTimeout(swipeSettle);
+  // A canceled first event keeps the rest of the swipe from scrolling anything.
+  if (horizontal && event.cancelable) event.preventDefault();
+  if (step) {
+    followSwipe(0);
+    stepSpace(step);
+    return;
   }
-  if (gesture.axis !== 'x') return;
-  event.preventDefault();
-  if (gesture.switched || Math.abs(gesture.delta) < 42) return;
-  gesture.switched = true;
-  stepSpace(Math.sign(gesture.delta));
+  if (!reducedMotion.matches) followSwipe(offset);
+  if (offset) swipeSettle = setTimeout(() => followSwipe(0), SWIPE_IDLE_MS);
 }
 
 async function createSpace(name, glyph) {

@@ -82,6 +82,7 @@ struct Appearance {
   bool always_show_sidebar = false;
   bool always_show_top_bar = true;
   bool sidebar_address_search = false;
+  bool new_tab_composer = false;
 };
 
 // Fixed mapping only. Callers cannot supply preference names.
@@ -103,6 +104,8 @@ constexpr BooleanAppearancePref kBooleanAppearancePrefs[] = {
      &Appearance::always_show_top_bar},
     {"sidebarAddressSearch", breezer_workspace::prefs::kSidebarAddressSearch,
      &Appearance::sidebar_address_search},
+    {"newTabComposer", breezer_workspace::prefs::kNewTabComposer,
+     &Appearance::new_tab_composer},
 };
 
 const breezer_workspace::Theme* FindTheme(std::string_view name) {
