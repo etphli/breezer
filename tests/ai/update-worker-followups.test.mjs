@@ -5,7 +5,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { lstat, mkdir, mkdtemp, readdir, readFile, rm, symlink, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startUpdateWorker } from '../../features/ai/host/updater.mjs';
+import { readUpdateStatus, startUpdateWorker } from '../../features/ai/host/updater.mjs';
 
 const dmg = 'test disk image';
 const candidate = {
@@ -21,7 +21,7 @@ async function fixture(t, options = {}) {
   const parent = join(root, 'Applications');
   const app = join(parent, 'Breezer.app');
   const lock = join(parent, '.Breezer-update.lock');
-  const statusPath = join(parent, '.Breezer-update-status.json');
+  const successorStatus = join(parent, '.Breezer-update-status-00000000-0000-0000-0000-000000000000.json');
   const detachLog = join(root, 'detach.log');
   const staleMount = join(parent, '.breezer-update-OLD001', 'mount');
   await mkdir(app, { recursive: true });
@@ -31,8 +31,23 @@ async function fixture(t, options = {}) {
     import childProcess from 'node:child_process';
     import fs from 'node:fs/promises';
     import { syncBuiltinESMExports } from 'node:module';
-    import { join } from 'node:path';
-    const { candidate, dmg, lock, detachLog, staleMount, takeover, processStart } = ${JSON.stringify({ candidate, dmg, lock, detachLog, staleMount, ...options })};
+    import { basename, join } from 'node:path';
+    const { candidate, dmg, lock, detachLog, staleMount, takeover, processStart, successorStatus } = ${JSON.stringify({ candidate, dmg, lock, detachLog, staleMount, successorStatus, ...options })};
+    const successorId = '00000000-0000-0000-0000-000000000000';
+    const reclaim = async () => {
+      await fs.rm(lock, { recursive: true, force: true });
+      await fs.mkdir(lock);
+      await fs.writeFile(join(lock, 'owner-' + successorId + '.json'), JSON.stringify({ pid: process.ppid, startedAt: Date.now() }));
+    };
+    let reclaimed = false;
+    const realRename = fs.rename;
+    fs.rename = async (from, to) => {
+      // The successor publishes its progress between this worker's checks and its write.
+      if (takeover === 'race' && reclaimed && basename(to).startsWith('.Breezer-update-status')) {
+        await fs.writeFile(successorStatus, JSON.stringify({ phase: 'downloading', notice: 'Successor', worker: '.breezer-update-SUCCESSOR', acquiredAt: Date.now() }));
+      }
+      return realRename(from, to);
+    };
     let staleMounted = true;
     const realLstat = fs.lstat;
     fs.lstat = async (path, ...rest) => {
@@ -42,11 +57,9 @@ async function fixture(t, options = {}) {
     };
     fs.statfs = async () => ({ bavail: 1024 ** 2, bsize: 4096 });
     globalThis.fetch = async () => {
-      if (takeover) {
+      if (takeover === true || takeover === 'race') {
         // Another worker reclaims the lock while this one downloads.
-        await fs.rm(lock, { recursive: true, force: true });
-        await fs.mkdir(lock);
-        await fs.writeFile(join(lock, 'owner-00000000-0000-0000-0000-000000000000.json'), JSON.stringify({ pid: process.ppid, startedAt: Date.now() }));
+        await reclaim(); reclaimed = true;
       }
       const response = new Response(dmg);
       Object.defineProperty(response, 'url', { value: candidate.url });
@@ -76,7 +89,10 @@ async function fixture(t, options = {}) {
           case '/bin/ps':
             if (args.includes('lstart=')) return processStart === undefined ? '' : new Date(processStart).toString();
             return '';
-          case '/usr/bin/open': return '';
+          case '/usr/bin/open':
+            // Another worker reclaims the lock after the new app has launched.
+            if (takeover === 'after-launch' && await fs.readFile(join(args[0], 'version'), 'utf8') === 'new') await reclaim();
+            return '';
           default: throw new Error('Unexpected command: ' + command);
         }
       })().then(stdout => callback(null, { stdout }), callback);
@@ -84,8 +100,8 @@ async function fixture(t, options = {}) {
     syncBuiltinESMExports();
   `);
   return {
-    root, parent, app, lock, statusPath, detachLog, staleMount,
-    status: async () => JSON.parse(await readFile(statusPath, 'utf8')),
+    root, parent, app, lock, detachLog, staleMount,
+    status: () => readUpdateStatus(parent),
     async writeOwner(pid, startedAt) {
       await mkdir(lock);
       await writeFile(join(lock, `owner-${randomUUID()}.json`), JSON.stringify({ pid, startedAt }));
@@ -112,6 +128,21 @@ test('losing the lock mid-update still records a terminal failed phase', async t
   const status = await update.status();
   assert.equal(status.phase, 'failed');
   assert.equal(status.version, candidate.version);
+});
+
+test('a worker that lost its lock never overwrites its successor\'s status', async t => {
+  const update = await fixture(t, { takeover: 'race' });
+  await update.run();
+  const status = await update.status();
+  assert.equal(status.phase, 'downloading');
+  assert.equal(status.notice, 'Successor');
+});
+
+test('losing the lock after a successful replacement still reports installed', async t => {
+  const update = await fixture(t, { takeover: 'after-launch' });
+  await update.run();
+  assert.equal(await readFile(join(update.app, 'version'), 'utf8'), 'new');
+  assert.equal((await update.status()).phase, 'installed');
 });
 
 test('a live lock owner is kept even after the age limit, when its start time matches', async t => {
@@ -178,4 +209,19 @@ test('backup pruning keeps manual build_and_run.sh backups', async t => {
   assert.equal(entries.length, 2);
   assert.ok(entries.includes('Breezer-20261101-101010.app'));
   assert.ok(!entries.includes('Breezer-update-100.app'));
+});
+
+test('status follows the lock owner, then the worker that acquired the lock last', async t => {
+  const root = await mkdtemp(join(tmpdir(), 'breezer-update-status-'));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const [older, newer] = [randomUUID(), randomUUID()];
+  const record = (id, value) => writeFile(join(root, `.Breezer-update-status-${id}.json`), JSON.stringify(value));
+  await writeFile(join(root, '.Breezer-update-status.json'), JSON.stringify({ phase: 'downloading', notice: 'Legacy' }));
+  // The older worker lost the lock and wrote its failure after the newer worker finished.
+  await record(newer, { phase: 'installed', notice: 'New', acquiredAt: 2, updatedAt: 3 });
+  await record(older, { phase: 'failed', notice: 'Old', acquiredAt: 1, updatedAt: 4 });
+  assert.deepEqual(await readUpdateStatus(root), { phase: 'installed', notice: 'New', updatedAt: 3 });
+  await mkdir(join(root, '.Breezer-update.lock'));
+  await writeFile(join(root, '.Breezer-update.lock', `owner-${older}.json`), '{}');
+  assert.equal((await readUpdateStatus(root)).notice, 'Old');
 });

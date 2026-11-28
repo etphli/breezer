@@ -107,9 +107,9 @@ PYFRAME
 elif [[ -e "$BREEZER_STAGE/build/src/.breezer-frame-budget-prepared" || -L "$BREEZER_STAGE/build/src/.breezer-frame-budget-prepared" ||
         -e "$BREEZER_STAGE/build/src/.breezer-frame-budget-preparing" || -L "$BREEZER_STAGE/build/src/.breezer-frame-budget-preparing" ]]; then
   echo "Experimental frame-budget source requires BREEZER_FRAME_BUDGET_EXPERIMENT=1; preserve this copy and use a separate default build tree." >&2
-  exit 1
+  exit 3
 else
-  "$BREEZER_PYTHON" -B "$BREEZER_ROOT/script/apply_breezer_frame_budget.py" --guard-default "$BREEZER_STAGE/build/src"
+  "$BREEZER_PYTHON" -B "$BREEZER_ROOT/script/apply_breezer_frame_budget.py" --guard-default "$BREEZER_STAGE/build/src" || exit 3
 fi
 # END frame-budget preflight
 if [[ -n "${BREEZER_COMPILED_FILTERS:-}" ]]; then
@@ -127,7 +127,7 @@ PY
 fi
 if [[ -f "$BREEZER_STAGE/build/src/.breezer-filter-lists-prepared" && -z "${BREEZER_COMPILED_FILTERS:-}" ]]; then
   echo "This source tree contains the opt-in compiled-list experiment. Supply its BREEZER_COMPILED_FILTERS directory or use a separate build directory." >&2
-  exit 1
+  exit 3
 fi
 mkdir -p "$BREEZER_STAGE"
 _root_dir="$BREEZER_STAGE"

@@ -1,4 +1,4 @@
-import { readFile, mkdtemp, copyFile, writeFile, rm } from 'node:fs/promises';
+import { readFile, readdir, mkdtemp, copyFile, writeFile, rm } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -77,6 +77,31 @@ export async function startUpdateWorker(app, candidate, {
   }
 }
 
+// Status files written by update-worker.mjs, which must stay standalone.
+const statusName = /^\.Breezer-update-status-([a-f0-9-]+)\.json$/;
+const ownerName = /^owner-[a-f0-9-]+\.json$/;
+const statusFields = ['phase', 'notice', 'version', 'worker', 'updatedAt'];
+// The current lock owner's status; without one (or before it has written), the
+// status of the worker that most recently acquired the lock.
+export async function readUpdateStatus(parent) {
+  const records = [];
+  for (const name of await readdir(parent).catch(() => [])) {
+    const id = name.match(statusName)?.[1];
+    if (!id) continue;
+    try {
+      const record = JSON.parse(await readFile(join(parent, name), 'utf8'));
+      if (record && typeof record === 'object') records.push({ ...record, id });
+    } catch {}
+  }
+  const ownerIds = await readdir(join(parent, '.Breezer-update.lock'))
+    .then(entries => entries.filter(entry => ownerName.test(entry)).map(entry => entry.slice('owner-'.length, -'.json'.length)), () => []);
+  const latest = (a, b) => (Number(b.acquiredAt) || 0) - (Number(a.acquiredAt) || 0) || (Number(b.updatedAt) || 0) - (Number(a.updatedAt) || 0);
+  const current = records.find(record => ownerIds.includes(record.id)) ?? records.sort(latest)[0];
+  if (current) return Object.fromEntries(statusFields.filter(key => current[key] !== undefined).map(key => [key, current[key]]));
+  // Written by workers from earlier releases.
+  try { return JSON.parse(await readFile(join(parent, '.Breezer-update-status.json'), 'utf8')); } catch { return {}; }
+}
+
 export class UpdateController {
   constructor(send) { this.send = send; this.busy = false; this.candidate = null; }
   async receive(message) {
@@ -86,10 +111,7 @@ export class UpdateController {
     try {
       if (process.platform !== 'darwin' || process.arch !== 'arm64') throw new Error('In-app updates currently support Apple Silicon Macs.');
       if (message.type === 'update-status') {
-        let value = {};
-        if (APP) {
-          try { value = JSON.parse(await readFile(join(dirname(APP), '.Breezer-update-status.json'), 'utf8')); } catch {}
-        }
+        const value = APP ? await readUpdateStatus(dirname(APP)) : {};
         this.send({ type: 'update-result', id, ok: true, value }); return;
       }
       const current = JSON.parse(await readFile(join(HOST, 'build-identity.json'), 'utf8'));

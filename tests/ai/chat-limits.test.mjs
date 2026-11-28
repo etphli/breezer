@@ -151,6 +151,18 @@ test('saved conversations keep the newest images within a budget and report fail
   assert.deepEqual(JSON.parse(JSON.stringify(stored.map(m => m.text))), h.state.messages.map(m => m.text));
   assert.ok(h.state.messages[0].attachments[0].image, 'the live transcript is unchanged');
 
+  const themed = harness();
+  themed.state.messages = Array.from({ length: 8 }, (_, i) => ({ id: `t${i}`, role: 'assistant', text: `theme ${i}`,
+    themeProposal: { name: `Look ${i}`, theme: '#336699', colorMode: 'dark', html: '<p>art</p>', image: image(500_000) } }));
+  await themed.saveConversation();
+  const proposals = Object.values(themed.writes.at(-1))[0].map(m => m.themeProposal);
+  const themeBytes = proposals.reduce((sum, p) => sum + (p.image?.length || 0), 0);
+  assert.ok(themeBytes <= 2_500_000, `stored ${themeBytes} theme image bytes`);
+  assert.ok(proposals.at(-1).image, 'the newest theme image is kept');
+  assert.equal(proposals[0].image, undefined, 'the oldest theme image is dropped');
+  assert.deepEqual(JSON.parse(JSON.stringify(proposals[0])), { name: 'Look 0', theme: '#336699', colorMode: 'dark', html: '<p>art</p>' });
+  assert.ok(themed.state.messages[0].themeProposal.image, 'the live proposal is unchanged');
+
   const failing = harness({ set: () => Promise.reject(new Error('QUOTA_BYTES quota exceeded')) });
   failing.state.messages = [{ id: 'm', role: 'user', text: 'hello' }];
   await failing.saveConversation();

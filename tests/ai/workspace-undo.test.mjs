@@ -4,6 +4,7 @@ import * as S from '../../features/ai/extension/workspace-store.js';
 import { WorkspaceSync } from '../../features/ai/extension/workspace-sync.js';
 import { emptySyncModel, materializeWorkspace, serializeSyncModel } from '../../features/ai/extension/workspace-sync-model.js';
 import { harness } from './workspace-activation-harness.mjs';
+import { seed } from './workspace-browser-fixture.mjs';
 
 const settle = async () => { for (let i = 0; i < 24; i++) await Promise.resolve(); };
 const snapshotOf = (store, id) => {
@@ -55,7 +56,7 @@ test('undone unpin and favorite removal survive the next sync on every device', 
   assert.deepEqual(remote.favorites.map((node) => node.url), ['https://example.test/f']);
 });
 
-test('undone favorite removal respects the favorites limit and does not duplicate', () => {
+test('undone favorite removal respects the favorites limit', () => {
   const store = S.defaultStore();
   for (let i = 0; i < S.MAX_FAVORITES; i++) S.addFavorite(store, { url: `https://f${i}.test/`, title: `F${i}` });
   const snapshot = snapshotOf(store, store.favorites[0].id);
@@ -64,14 +65,6 @@ test('undone favorite removal respects the favorites limit and does not duplicat
   assert.throws(() => S.restoreRemovedEntry(store, snapshot), /Favorites hold up to 12/);
   assert.equal(store.favorites.length, S.MAX_FAVORITES);
   assert.equal(S.normalizeStore(structuredClone(store)).favorites.length, S.MAX_FAVORITES);
-
-  const again = S.defaultStore();
-  const fav = S.addFavorite(again, { url: 'https://same.test/', title: 'Same' });
-  const removed = snapshotOf(again, fav.id);
-  S.removeNode(again, fav.id);
-  S.addFavorite(again, { url: 'https://same.test/', title: 'Same' });
-  S.restoreRemovedEntry(again, removed);
-  assert.equal(again.favorites.length, 1);
 });
 
 test('undone unpin keeps the custom title and its position', () => {
@@ -103,7 +96,7 @@ test('sidebar undo of a favorite removal goes through the restore rules', async 
 });
 
 test('a favorite tab dragged into an open window keeps its saved-entry link', async () => {
-  const h = await harness();
+  const h = await harness(undefined, undefined, { boot: true });
   // The receiving window has never seen tab 8; its stored membership links v-cal.
   delete h.state.records[8];
   h.state.tabs.delete(8);
@@ -123,4 +116,41 @@ test('undo of Clear Today restores every closed tab, including repeated URLs', a
   await h.context.restoreClosed([{ url: 'https://dup.test/', index: 1 }, { url: 'https://dup.test/', index: 2 }, { url: 'https://dup.test/', index: 3 }], 'space-work');
   assert.deepEqual(restored, ['s1']);
   assert.deepEqual(created, ['https://dup.test/', 'https://dup.test/']);
+});
+
+test('undo of Clear Today reopens a tab whose session restore fails', async () => {
+  const h = await harness();
+  const created = [];
+  h.api.tabs.create = async (options) => { created.push(options.url); return { id: 100 + created.length, windowId: 7, index: 20, active: false, pinned: false, url: options.url }; };
+  h.api.sessions = {
+    getRecentlyClosed: async () => [{ tab: { url: 'https://dup.test/', sessionId: 's1' } }, { tab: { url: 'https://dup.test/', sessionId: 's2' } }],
+    restore: async () => { throw new Error('gone'); },
+  };
+  h.state.expect = [];
+  h.context.createTab = async ({ url }) => { created.push(url); };
+  await h.context.restoreClosed([{ url: 'https://dup.test/', index: 1 }, { url: 'https://dup.test/', index: 2 }], 'space-work');
+  assert.deepEqual(created, ['https://dup.test/', 'https://dup.test/']);
+  assert.deepEqual(h.state.expect, [], 'failed restores leave no stale expectation');
+});
+
+test('undone removal of one of two same-URL favorites restores it', () => {
+  const store = S.defaultStore();
+  S.addFavorite(store, { url: 'https://same.test/', title: 'Same', customTitle: 'Work' });
+  const home = S.addFavorite(store, { url: 'https://same.test/', title: 'Same', customTitle: 'Home' });
+  const snapshot = snapshotOf(store, home.id);
+  S.removeNode(store, home.id);
+  S.restoreRemovedEntry(store, snapshot);
+  assert.deepEqual(store.favorites.map((node) => node.customTitle), ['Work', 'Home']);
+});
+
+test('a tab detached before the membership flush hands its saved-entry link to the receiving window', async () => {
+  const persisted = structuredClone({ local: seed().local, session: seed().session });
+  const sender = await harness(undefined, undefined, { persisted, boot: true });
+  const receiver = await harness(undefined, undefined, { persisted, boot: true });
+  receiver.state.windowId = 9;
+  sender.setRecord(5, { e: 'v-chat' });
+  sender.onDetached(5, { oldWindowId: 7 });
+  receiver.onAttached(5, { newWindowId: 9 });
+  for (let i = 0; i < 10; i++) await settle();
+  assert.equal(receiver.state.records[5]?.e, 'v-chat');
 });

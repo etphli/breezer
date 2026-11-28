@@ -770,7 +770,15 @@ function saveConversation(completedId, active = true) {
   // a budget; older messages keep their text and text files.
   let imageBytes = 0;
   for (let index = messages.length - 1; index >= 0; index--) {
-    const { generatedImage, attachments } = messages[index];
+    const { generatedImage, attachments, themeProposal } = messages[index];
+    // A dropped theme image leaves the rest of the proposal, which still applies.
+    if (themeProposal?.image) {
+      imageBytes += themeProposal.image.length;
+      if (imageBytes > STORED_IMAGE_BUDGET) {
+        const { image, ...rest } = themeProposal;
+        messages[index] = { ...messages[index], themeProposal: rest };
+      }
+    }
     if (generatedImage) {
       imageBytes += generatedImage.length;
       if (imageBytes > STORED_IMAGE_BUDGET) {

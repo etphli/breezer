@@ -2,9 +2,9 @@ import { localStorageChanges } from './storage-events.js';
 import { PLATFORM } from './platform.js';
 import { createSpaceSwipe, SWIPE_IDLE_MS } from './space-swipe.js';
 import {
-  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, MEMBERS_KEY, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
+  APPEARANCE_REV_KEY, DEFAULT_APPEARANCE, MAX_FAVORITES, MAX_SPACES, SPACE_ICONS, STORE_KEY, TONES, TONE_NAMES,
   WorkspaceStore, addEntry, addFavorite, addFolder, addSpace, buildSidebarModel, displayTitle, findEntriesByUrl,
-  findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeMembers, normalizeStore, parseRoute,
+  findNode, hostLabel, isOpenableUrl, moveIndex, moveNode, normalizeAppearance, normalizeStore, parseRoute,
   normalizeFolderColor, removeNode, removeSpace, restoreRemovedEntry, renameNode, renameSpace, resolveSpaceId, setFolderColor, setFolderOpen,
   setPrefs, setSpaceIcon, setSpaceTone, spaceOfTab, visibleTabs, windowStateKey,
 } from './workspace-store.js';
@@ -472,11 +472,17 @@ async function restoreClosed(items, spaceId) {
       const recent = await api.sessions.getRecentlyClosed({ maxResults: 25 });
       for (const session of recent) {
         const tab = session.tab;
-        const at = tab ? restorable.findIndex((item) => item.url === tab.url) : -1;
-        if (at < 0) continue;
-        restorable.splice(at, 1);
-        state.expect.push({ url: tab.url, spaceId, entryId: '', pinned: false, at: Date.now() });
-        await api.sessions.restore(tab.sessionId);
+        if (!tab || !restorable.some((item) => item.url === tab.url)) continue;
+        const expectation = { url: tab.url, spaceId, entryId: '', pinned: false, at: Date.now() };
+        state.expect.push(expectation);
+        try {
+          await api.sessions.restore(tab.sessionId);
+        } catch {
+          // Leave the item for the fallback below, and no stale expectation.
+          state.expect = state.expect.filter((item) => item !== expectation);
+          continue;
+        }
+        restorable.splice(restorable.findIndex((item) => item.url === tab.url), 1);
       }
     } catch { /* Fall back to reopening the URLs below. */ }
   }
@@ -2074,7 +2080,8 @@ function onAttached(tabId, info) {
   ++pendingTabAttachments;
   state.peekKey = null;
   // A tab from another window keeps its saved-entry link from stored membership.
-  const stored = api.storage.local.get(MEMBERS_KEY).then((values) => normalizeMembers(values[MEMBERS_KEY]).tabs[tabId], () => null);
+  // The read waits behind the sending window's pending membership write.
+  const stored = Promise.resolve().then(() => workspace.readMembers()).then((members) => members.tabs[tabId], () => null);
   void Promise.all([api.tabs.get(tabId), stored]).then(([tab, member]) => {
     ++tabEventVersion;
     queryDrawDirty = true;
@@ -2091,7 +2098,9 @@ function onDetached(tabId, info) {
   queryDrawDirty = true;
   state.peekKey = null;
   state.tabs.delete(tabId);
-  // The receiving window rewrites the record; don't race it with a delete.
+  // Hand the latest membership to the receiving window, which reads it under
+  // the same lock. Then don't race its rewrite with a delete.
+  if (pending.set[tabId]) void flushRecords();
   dropRecord(tabId, false);
   void refreshTabs();
 }

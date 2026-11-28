@@ -13,6 +13,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 // The download can take 15 minutes, followed by several timed macOS commands.
 const lockMaxAge = 60 * 60_000;
 const ownerName = /^owner-[a-f0-9-]+\.json$/;
+// Each worker writes only its own status file, keyed by its lock owner id, so a
+// worker that lost the lock can never overwrite its successor's progress.
+// readUpdateStatus in updater.mjs selects the record to show.
+const statusName = /^\.Breezer-update-status-[a-f0-9-]+\.json$/;
+const legacyStatusName = '.Breezer-update-status.json';
 // Only prune rollback copies made by this worker; manual backups are the user's.
 const backupName = /^Breezer-update-\d+(?:-[a-f0-9-]+)?\.app$/;
 const stagingName = /^\.breezer-update-[A-Za-z0-9]+$/;
@@ -188,25 +193,18 @@ export async function installUpdate(work) {
   const { app, candidate } = JSON.parse(await readFile(join(work, 'request.json'), 'utf8'));
   if (![join(homedir(), 'Applications/Breezer.app'), '/Applications/Breezer.app'].includes(app) || resolve(work) !== work || dirname(work) !== dirname(app) || !basename(work).startsWith('.breezer-update-')) throw new Error('Updates require Breezer in Applications.');
   const parent = dirname(app), lock = join(parent, '.Breezer-update.lock');
-  let owner, acknowledged = false;
-  const statusPath = join(parent, '.Breezer-update-status.json');
+  let owner, acknowledged = false, acquiredAt, statusPath;
   const worker = basename(work);
   const requireLock = () => lstat(owner);
+  // Progress aborts the update once the lock is lost. A terminal phase is written
+  // regardless, or Settings keeps polling; it only ever touches this worker's file.
   const status = async (phase, notice, { locked = true } = {}) => {
     const temporary = join(work, 'status.json');
-    await writeFile(temporary, JSON.stringify({ phase, notice, version: candidate.version, worker, updatedAt: Date.now() }), { mode: 0o600 });
+    await writeFile(temporary, JSON.stringify({ phase, notice, version: candidate.version, worker, acquiredAt, updatedAt: Date.now() }), { mode: 0o600 });
     if (locked) await requireLock();
     await rename(temporary, statusPath);
   };
-  // A terminal phase must not depend on still owning the lock, or Settings keeps
-  // polling "downloading". Without the lock, replace only this worker's status.
-  const finalFailure = async (notice) => {
-    try { await status('failed', notice); return; } catch {}
-    try {
-      const current = JSON.parse(await readFile(statusPath, 'utf8'));
-      if (current?.worker === worker) await status('failed', notice, { locked: false });
-    } catch {}
-  };
+  const finalStatus = (phase, notice) => status(phase, notice, { locked: false }).catch(() => {});
   // Before acknowledgement the controller is still waiting; give it the real cause.
   const reportBlocked = (notice) => {
     if (acknowledged || !process.connected) return false;
@@ -215,7 +213,7 @@ export async function installUpdate(work) {
     return true;
   };
   const mount = join(work, 'mount'), staged = join(work, 'Breezer.app');
-  let mounted = false, detachAttempted = false;
+  let mounted = false, detachAttempted = false, installed = false;
   try {
     owner = await acquireLock(work, lock);
     if (!owner) {
@@ -223,7 +221,13 @@ export async function installUpdate(work) {
       if (!reportBlocked(notice)) throw new Error(notice);
       return;
     }
+    acquiredAt = Date.now();
+    statusPath = join(parent, `.Breezer-update-status-${basename(owner).slice('owner-'.length, -'.json'.length)}.json`);
     await status('downloading', 'Downloading the verified GitHub release…');
+    // Earlier workers' records are superseded by this one.
+    for (const name of await readdir(parent).catch(() => [])) {
+      if ((statusName.test(name) || name === legacyStatusName) && join(parent, name) !== statusPath) await rm(join(parent, name), { force: true }).catch(() => {});
+    }
     // A process spawning is not proof its script survived Gatekeeper/startup.
     if (process.connected) process.send({ type: 'update-worker-ready' });
     acknowledged = true;
@@ -257,16 +261,20 @@ export async function installUpdate(work) {
     const backup = join(backups, `Breezer-update-${Date.now()}-${randomUUID()}.app`);
     await requireLock();
     await replaceApp(staged, app, backup, path => verifyBundle(path, candidate.commit), path => run('/usr/bin/open', [path, '--args', '--restore-last-session']));
-    await requireLock();
-    for (const entry of obsolete) {
-      if (entry.isDirectory() && backupName.test(entry.name)) {
-        await rm(join(backups, entry.name), { recursive: true, force: true }).catch(() => {});
+    installed = true;
+    // The new app is running; pruning is best effort and never turns this into a failure.
+    try {
+      await requireLock();
+      for (const entry of obsolete) {
+        if (entry.isDirectory() && backupName.test(entry.name)) {
+          await rm(join(backups, entry.name), { recursive: true, force: true }).catch(() => {});
+        }
       }
-    }
-    await status('installed', `Updated to ${candidate.version}. The previous app is kept in .Breezer-backups for rollback.`);
+    } catch {}
+    await finalStatus('installed', `Updated to ${candidate.version}. The previous app is kept in .Breezer-backups for rollback.`);
   } catch (error) {
     const notice = `Update failed: ${error.message}`;
-    if (owner) await finalFailure(notice);
+    if (owner && !installed) await finalStatus('failed', notice);
     if (!reportBlocked(notice) && !owner) throw error;
   } finally {
     try {

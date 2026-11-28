@@ -6,7 +6,7 @@ import { access, copyFile, mkdir, mkdtemp, readdir, readFile, realpath, rm, writ
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { startUpdateWorker } from '../../features/ai/host/updater.mjs';
+import { readUpdateStatus, startUpdateWorker } from '../../features/ai/host/updater.mjs';
 
 const dmg = 'test disk image';
 const candidate = {
@@ -21,6 +21,7 @@ async function fixture(t, failure) {
   const parent = join(root, 'Applications');
   const app = join(parent, 'Breezer.app');
   const lock = join(parent, '.Breezer-update.lock');
+  // Written by workers from earlier releases; still read when no newer record exists.
   const statusPath = join(parent, '.Breezer-update-status.json');
   const backups = join(parent, '.Breezer-backups');
   const oldBackup = join(backups, 'Breezer-update-100.app');
@@ -91,7 +92,7 @@ async function fixture(t, failure) {
   `);
   return {
     parent, app, lock, statusPath, backups, oldBackup, detachLog, gate,
-    status: async () => JSON.parse(await readFile(statusPath, 'utf8')),
+    status: () => readUpdateStatus(parent),
     async writeOwner(pid, startedAt = Date.now()) {
       await mkdir(lock);
       await writeFile(join(lock, `owner-${randomUUID()}.json`), JSON.stringify({ pid, startedAt }));
@@ -199,13 +200,13 @@ test('status reads beside a packaged app and skips filesystem lookup from a deve
   const root = await mkdtemp(join(tmpdir(), 'breezer-status-path-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const realRoot = await realpath(root);
-  const source = new URL('../../features/ai/host/updater.mjs', import.meta.url);
   const packaged = join(root, 'Breezer.app', 'Contents', 'host');
   const development = join(root, 'checkout', 'host');
   for (const host of [packaged, development]) {
     await mkdir(host, { recursive: true });
-    await copyFile(source, join(host, 'updater.mjs'));
+    await copyFile(new URL('../../features/ai/host/updater.mjs', import.meta.url), join(host, 'updater.mjs'));
   }
+  await writeFile(join(root, `.Breezer-update-status-${randomUUID()}.json`), JSON.stringify({ phase: 'installed', notice: 'Done', acquiredAt: 1 }));
   const script = `
     import assert from 'node:assert/strict';
     import fs from 'node:fs/promises';
@@ -214,17 +215,15 @@ test('status reads beside a packaged app and skips filesystem lookup from a deve
     Object.defineProperty(process, 'arch', { value: 'arm64' });
     const modules = await Promise.all(${JSON.stringify([packaged, development].map(host => pathToFileURL(join(host, 'updater.mjs')).href))}.map(url => import(url)));
     const paths = [];
-    fs.readFile = async path => {
-      paths.push(path);
-      return JSON.stringify({ phase: 'installed' });
-    };
+    const realReaddir = fs.readdir;
+    fs.readdir = async (path, ...rest) => { paths.push(path); return realReaddir(path, ...rest); };
     syncBuiltinESMExports();
     const messages = [];
     for (const { UpdateController } of modules) {
       await new UpdateController(message => messages.push(message)).receive({ type: 'update-status' });
     }
-    assert.deepEqual(paths, [${JSON.stringify(join(realRoot, '.Breezer-update-status.json'))}]);
-    assert.deepEqual(messages.map(message => message.value), [{ phase: 'installed' }, {}]);
+    assert.deepEqual(paths, [${JSON.stringify(realRoot)}, ${JSON.stringify(join(realRoot, '.Breezer-update.lock'))}]);
+    assert.deepEqual(messages.map(message => message.value), [{ phase: 'installed', notice: 'Done' }, {}]);
   `;
   await new Promise((resolve, reject) => {
     execFile(process.execPath, ['--input-type=module', '-e', script], error => error ? reject(error) : resolve());

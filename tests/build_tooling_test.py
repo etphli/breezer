@@ -106,10 +106,12 @@ class CheckpointFingerprintTest(unittest.TestCase):
         self.assertIn("steps.compile.outputs.exit_code != '3'", save)
         self.assertIn("steps.compile.outputs.exit_code != ''", save)
         for message in ('Prepared-source marker is missing', 'Omnibox overlay inputs changed',
-                        'Signature-clone overlay changed', 'native overlay changed', 'Build inputs changed'):
+                        'Signature-clone overlay changed', 'native overlay changed', 'Build inputs changed',
+                        'Experimental frame-budget source requires', 'contains the opt-in compiled-list experiment'):
             with self.subTest(message=message):
                 after = SCRIPT.split(message, 1)[1]
                 self.assertRegex(after[:400], r'\n\s*exit 3\n')
+        self.assertRegex(SCRIPT, r'apply_breezer_frame_budget\.py" --guard-default "[^"\n]*" \|\| exit 3\n')
 
 
 class InstallHoldTest(Temporary):
@@ -191,9 +193,9 @@ class WindowsOverlayMarkerTest(Temporary):
     def test_changed_overlays_are_not_reapplied_to_a_built_tree(self):
         marker = self.root / 'src' / build_breezer.SOURCE_MARKER
         marker.parent.mkdir()
-        build_breezer.write_marker(marker, self.expected)
+        build_breezer.write_marker(marker, build_breezer.prepared_marker(self.expected))
         build_breezer.record_overlays(marker, self.expected, self.breezer())
-        self.assertEqual(json.loads(marker.read_text()), {**self.expected, **self.breezer()})
+        self.assertEqual(json.loads(marker.read_text()), {**build_breezer.prepared_marker(self.expected), **self.breezer()})
         # A new commit with identical overlay inputs re-applies idempotently.
         build_breezer.record_overlays(marker, self.expected, self.breezer(commit='b' * 40))
         recorded = marker.read_text()
@@ -202,6 +204,18 @@ class WindowsOverlayMarkerTest(Temporary):
         self.assertEqual(marker.read_text(), recorded)
         with self.assertRaisesRegex(ValueError, 'mismatched build inputs'):
             build_breezer.record_overlays(marker, {**self.expected, 'helium': 'x' * 40}, self.breezer())
+
+    def test_trees_prepared_before_overlay_tracking_are_refused(self):
+        marker = self.root / 'src' / build_breezer.SOURCE_MARKER
+        marker.parent.mkdir()
+        # Neither a never-built legacy tree nor one a transitional build recorded
+        # can show which overlays it already holds.
+        for legacy in (self.expected, {**self.expected, **self.breezer()}):
+            with self.subTest(legacy=legacy):
+                build_breezer.write_marker(marker, legacy)
+                with self.assertRaisesRegex(ValueError, 'older build script(.|\n)*run prepare again'):
+                    build_breezer.record_overlays(marker, self.expected, self.breezer())
+                self.assertEqual(json.loads(marker.read_text()), legacy)
 
     def test_package_refuses_a_build_from_another_commit(self):
         lock = build_breezer.load_lock()

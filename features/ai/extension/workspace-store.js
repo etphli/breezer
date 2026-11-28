@@ -413,12 +413,10 @@ export function addFavorite(store, { id, url, title, customTitle } = {}) {
 
 // Undo of an unpin or favorite removal. Sync treats a removed id as deleted
 // for good, so the entry returns under a fresh id that every device sees as a
-// new item. A favorite that was saved again meanwhile is not duplicated.
+// new item. Favorites may share a URL, so a same-URL favorite is no reason to skip it.
 export function restoreRemovedEntry(store, { node, favorite, spaceId, folderId = null, index }) {
   const entry = { url: node.url, title: node.title, customTitle: node.customTitle };
   if (!favorite) return addEntry(store, resolveSpaceId(store, spaceId), entry, { folderId, index });
-  const existing = store.favorites.find((item) => item.url === node.url);
-  if (existing) return existing;
   const restored = addFavorite(store, entry);
   moveNode(store, restored.id, { favorites: true, index });
   return restored;
@@ -680,6 +678,11 @@ export class WorkspaceStore {
       if (Object.keys(writes).length) await this.storage.local.set(writes);
       return result;
     });
+  }
+
+  // Reads membership after any write already queued by another window.
+  readMembers() {
+    return this.locks.request(LOCK_NAME, async () => (await this.read()).members);
   }
 
   update(fn) {

@@ -25,9 +25,11 @@ and a valid deep code signature before replacing the running app.
 
 The previous app stays in `.Breezer-backups`. Replacement errors restore it.
 The browser profile and credentials are never edited. Update status is saved
-beside the app in `.Breezer-update-status.json`. A directory lock prevents two
-updaters replacing the app concurrently. An interrupted worker may leave that
-lock and its staging directory; do not remove these while an updater is running.
+beside the app in one `.Breezer-update-status-<owner>.json` file per worker; the
+host reads the current lock owner's record. A directory lock records the worker's
+PID and start time and prevents two updaters replacing the app concurrently. A
+later worker reclaims the lock when that process is gone and removes leftover
+staging directories; do not remove these by hand while an updater is running.
 
 Trust comes from HTTPS and the fixed GitHub repository/release assets. The
 checksum does not independently authenticate a compromised GitHub account.

@@ -39,6 +39,10 @@ OVERLAY_FILES = (
     "features/passwords/native-ui/windows-import.patch",
 )
 OVERLAY_DIRECTORIES = ("features/ai/integration", "features/ai/windows")
+# Written by prepare. A tree without it predates overlay tracking, so nothing
+# shows which overlays it already holds.
+SOURCE_SCHEMA = ("breezer_source_schema", 2)
+SOURCE_OPTIONAL = (SOURCE_SCHEMA[0], "breezer_commit", "breezer_overlays")
 
 
 def run(*command, **kwargs):
@@ -80,9 +84,18 @@ def breezer_inputs():
     return {"breezer_commit": git(ROOT, "rev-parse", "HEAD"), "breezer_overlays": overlay_fingerprints()}
 
 
+def prepared_marker(expected):
+    return {**expected, SOURCE_SCHEMA[0]: SOURCE_SCHEMA[1]}
+
+
 def record_overlays(marker, expected, breezer):
     """Refuse to re-apply changed overlays to a tree that already holds older ones."""
-    data = read_marker(marker, expected, optional=tuple(breezer))
+    data = read_marker(marker, expected, optional=SOURCE_OPTIONAL)
+    if data.get(SOURCE_SCHEMA[0]) != SOURCE_SCHEMA[1]:
+        raise ValueError(
+            f"{marker.parent} was prepared by an older build script, so the Breezer overlays it already "
+            f"holds are unknown. Re-applying them could duplicate inserted source. "
+            f"Remove {marker.parent} and run prepare again, or use a separate --build-dir.")
     previous = data.get("breezer_overlays")
     if previous is not None and previous != breezer["breezer_overlays"]:
         changed = ", ".join(sorted(name for name in {*previous, *breezer["breezer_overlays"]}
@@ -92,7 +105,7 @@ def record_overlays(marker, expected, breezer):
             f"{data.get('breezer_commit', 'unknown')}. Re-applying them would duplicate inserted source. "
             f"Remove {marker.parent} and run prepare again, or use a separate --build-dir.")
     # Record before applying, so an interrupted apply is retried only with the same inputs.
-    write_marker(marker, {**expected, **breezer})
+    write_marker(marker, {**prepared_marker(expected), **breezer})
 
 
 @contextmanager
@@ -205,7 +218,7 @@ def prepare_sources(build_dir, core, platform, expected):
 
     source = build_dir / "src"
     if source.exists():
-        read_marker(source / SOURCE_MARKER, expected, optional=("breezer_commit", "breezer_overlays"))
+        read_marker(source / SOURCE_MARKER, expected, optional=SOURCE_OPTIONAL)
         print(f"Reusing prepared Windows sources in {source}", flush=True)
         return
 
@@ -232,7 +245,7 @@ def prepare_sources(build_dir, core, platform, expected):
     run(sys.executable, stage / "build/config/siso/configure_siso.py",
         "--rbe_instance=projects/rbe-chrome-untrusted/instances/default_instance",
         "--reapi_address=", "--reapi_instance=", "--reapi_backend_config_path=")
-    write_marker(stage / SOURCE_MARKER, expected)
+    write_marker(stage / SOURCE_MARKER, prepared_marker(expected))
     stage.rename(source)
     print(f"Prepared Windows sources in {source}", flush=True)
 
@@ -282,7 +295,7 @@ def require_x64_pe(path):
 def build_browser(build_dir, core, platform, expected, jobs, gen_only, *, use_ninja=False):
     source = build_dir / "src"
     breezer = breezer_inputs()
-    read_marker(source / SOURCE_MARKER, expected, optional=tuple(breezer))
+    read_marker(source / SOURCE_MARKER, expected, optional=SOURCE_OPTIONAL)
     output = source / "out/Default"
     output.mkdir(parents=True, exist_ok=True)
     (output / BUILD_MARKER).unlink(missing_ok=True)
