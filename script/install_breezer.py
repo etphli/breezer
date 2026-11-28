@@ -250,10 +250,11 @@ def update_hold_paths(root=ROOT):
     return paths if primary == paths[0] else paths + [primary]
 
 
-def check_update_hold(root=ROOT, environ=os.environ):
+def check_update_hold(root=None, environ=None):
+    environ = os.environ if environ is None else environ
     if environ.get("BREEZER_OVERRIDE_UPDATE_HOLD") == "1":
         return
-    for hold in update_hold_paths(root):
+    for hold in update_hold_paths(ROOT if root is None else root):
         if hold.exists() or hold.is_symlink():
             try:
                 data = json.loads(hold.read_text(encoding="utf-8"))
