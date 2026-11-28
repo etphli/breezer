@@ -111,6 +111,27 @@ class WindowsPackageTest(unittest.TestCase):
         self.assertIn("Missing or mismatched build inputs", result.stderr)
         self.assertFalse(self.artifacts.exists())
 
+    def test_refused_build_on_another_commit_keeps_the_previous_build_packageable(self):
+        lock = build_breezer.load_lock()
+        expected = build_breezer.prepared_inputs(lock)
+        current = build_breezer.breezer_inputs()
+        source_marker = self.stage / "src" / build_breezer.SOURCE_MARKER
+        build_breezer.write_marker(source_marker, {**build_breezer.prepared_marker(expected), **current})
+        recorded = source_marker.read_bytes()
+        built = (self.output / build_breezer.BUILD_MARKER).read_bytes()
+        other = {"breezer_commit": "b" * 40,
+                 "breezer_overlays": {**current["breezer_overlays"], "windows_overlay_files": "0" * 64}}
+        with patch.object(build_breezer, "breezer_inputs", return_value=other), \
+                patch.object(build_breezer, "visual_studio_environment", return_value={}), \
+                patch.object(build_breezer, "run") as run:
+            with self.assertRaisesRegex(ValueError, "overlay inputs changed"):
+                build_breezer.build_browser(self.stage, None, None, expected, None, False)
+        run.assert_not_called()
+        self.assertEqual(source_marker.read_bytes(), recorded)
+        self.assertEqual((self.output / build_breezer.BUILD_MARKER).read_bytes(), built)
+        result = self.package()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
 
 class WindowsOverlayTest(unittest.TestCase):
     def test_existing_installer_overlay_adds_payload_dependency_once(self):

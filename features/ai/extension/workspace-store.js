@@ -690,14 +690,24 @@ export class WorkspaceStore {
   }
 
   // Applies this window's membership changes without touching other windows' tabs.
-  patchMembers(set = {}, remove = []) {
+  // A record without an `e` key keeps the stored saved-entry link; `e: ''`
+  // removes it. `handoff` ids belong to a tab this window just sent elsewhere:
+  // an existing record gets only the link, so the receiver keeps its space.
+  patchMembers(set = {}, remove = [], handoff = []) {
     return this.locks.request(LOCK_NAME, async () => {
       const values = await this.storage.local.get([MEMBERS_KEY]);
       const members = normalizeMembers(values[MEMBERS_KEY]);
       const beforeMembers = JSON.stringify(members);
       const session = await this.sessionToken();
       rollSession(members, session);
-      for (const [id, record] of Object.entries(set)) members.tabs[id] = { ...record, k: session };
+      const handed = new Set(handoff.map(String));
+      for (const [id, record] of Object.entries(set)) {
+        const stored = members.tabs[id];
+        const next = handed.has(id) && stored ? { ...stored } : { ...record, k: session };
+        if (!('e' in record)) { if (stored?.e) next.e = stored.e; } else if (record.e) next.e = record.e;
+        else delete next.e;
+        members.tabs[id] = next;
+      }
       for (const id of remove) delete members.tabs[id];
       if (JSON.stringify(members) !== beforeMembers) await this.storage.local.set({ [MEMBERS_KEY]: members });
     });

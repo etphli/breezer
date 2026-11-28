@@ -46,7 +46,13 @@ async function fixture(t, options = {}) {
       if (takeover === 'race' && reclaimed && basename(to).startsWith('.Breezer-update-status')) {
         await fs.writeFile(successorStatus, JSON.stringify({ phase: 'downloading', notice: 'Successor', worker: '.breezer-update-SUCCESSOR', acquiredAt: Date.now() }));
       }
-      return realRename(from, to);
+      const result = await realRename(from, to);
+      // A successor takes over right after this worker's first status, before its cleanup.
+      if (takeover === 'before-cleanup' && !reclaimed && basename(to).startsWith('.Breezer-update-status')) {
+        reclaimed = true; await reclaim();
+        await fs.writeFile(successorStatus, JSON.stringify({ phase: 'downloading', notice: 'Successor', worker: '.breezer-update-SUCCESSOR', acquiredAt: Date.now() }));
+      }
+      return result;
     };
     let staleMounted = true;
     const realLstat = fs.lstat;
@@ -132,6 +138,14 @@ test('losing the lock mid-update still records a terminal failed phase', async t
 
 test('a worker that lost its lock never overwrites its successor\'s status', async t => {
   const update = await fixture(t, { takeover: 'race' });
+  await update.run();
+  const status = await update.status();
+  assert.equal(status.phase, 'downloading');
+  assert.equal(status.notice, 'Successor');
+});
+
+test('a stale worker\'s cleanup keeps a successor\'s newer status record', async t => {
+  const update = await fixture(t, { takeover: 'before-cleanup' });
   await update.run();
   const status = await update.status();
   assert.equal(status.phase, 'downloading');

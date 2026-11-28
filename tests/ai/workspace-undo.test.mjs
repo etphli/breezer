@@ -154,3 +154,77 @@ test('a tab detached before the membership flush hands its saved-entry link to t
   for (let i = 0; i < 10; i++) await settle();
   assert.equal(receiver.state.records[5]?.e, 'v-chat');
 });
+
+// Two sidebars over one storage area. Chrome delivers onDetached to the sending
+// window and onAttached to the receiving window in either order.
+async function twoSidebars() {
+  const persisted = structuredClone({ local: seed().local, session: seed().session });
+  const sidebars = [];
+  const storageSet = ({ area, values, commit }) => {
+    const changes = Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { newValue: structuredClone(value) }]));
+    commit();
+    if (area === 'local') for (const sidebar of sidebars) sidebar.emit('storage.local.onChanged', structuredClone(changes), 'local');
+    return Promise.resolve();
+  };
+  const sender = await harness(undefined, undefined, { persisted, boot: true, storageSet });
+  const receiver = await harness(undefined, undefined, { persisted, boot: true, storageSet });
+  receiver.state.windowId = 9;
+  receiver.state.activeSpaceId = 'space-personal';
+  sidebars.push(sender, receiver);
+  for (const sidebar of sidebars) sidebar.bindSidebar();
+  const run = async () => {
+    for (let i = 0; i < 10; i++) await settle();
+    for (const sidebar of sidebars) await sidebar.timers(150);
+    for (let i = 0; i < 10; i++) await settle();
+  };
+  return { persisted, sender, receiver, run, stored: (id) => persisted.local[S.MEMBERS_KEY].tabs[id] };
+}
+
+for (const order of ['attach-before-detach', 'attach-and-save-before-detach', 'detach-before-attach']) {
+  test(`a dragged favorite keeps its saved-entry link when Chrome delivers ${order}`, async () => {
+    const { sender, receiver, run, stored } = await twoSidebars();
+    sender.setRecord(5, { e: 'v-chat' });
+    if (order !== 'detach-before-attach') {
+      receiver.onAttached(5, { newWindowId: 9 });
+      for (let i = 0; i < 10; i++) await settle();
+      if (order === 'attach-and-save-before-detach') await receiver.timers(150);
+      sender.onDetached(5, { oldWindowId: 7 });
+    } else {
+      sender.onDetached(5, { oldWindowId: 7 });
+      receiver.onAttached(5, { newWindowId: 9 });
+    }
+    await run();
+    assert.equal(receiver.state.records[5]?.e, 'v-chat', 'the receiving window shows the saved row');
+    assert.equal(stored(5)?.e, 'v-chat', 'storage keeps the link');
+    assert.equal(stored(5)?.s, 'space-personal', 'the sender does not move the tab back to its space');
+    assert.equal(sender.state.records[5], undefined);
+  });
+}
+
+test('an explicit unlink still removes the stored saved-entry link', async () => {
+  const { sender, run, stored } = await twoSidebars();
+  assert.equal(stored(8)?.e, 'v-cal');
+  sender.setRecord(8, { e: '' });
+  sender.setRecord(8, {});
+  await run();
+  assert.equal(stored(8)?.e, undefined);
+  assert.equal(sender.state.records[8]?.e, undefined);
+});
+
+test('membership writes merge saved-entry links instead of clobbering them', async () => {
+  const saved = structuredClone(seed().local);
+  const area = (values) => ({ get: async (keys) => Object.fromEntries([keys].flat().filter((key) => key in values).map((key) => [key, structuredClone(values[key])])), set: async (patch) => Object.assign(values, structuredClone(patch)) });
+  const workspace = new S.WorkspaceStore({ storage: { local: area(saved), session: area({ [S.SESSION_KEY]: 'S1' }) }, locks: { request: async (_name, fn) => fn() } });
+  const tabs = () => saved[S.MEMBERS_KEY].tabs;
+  // The receiver's link-less write lands after the sender's handoff.
+  await workspace.patchMembers({ 5: { s: 'space-work', u: 'https://mail.example.com/inbox', e: 'v-chat' } }, [], [5]);
+  await workspace.patchMembers({ 5: { s: 'space-personal', u: 'https://mail.example.com/inbox' } });
+  assert.deepEqual([tabs()[5].s, tabs()[5].e], ['space-personal', 'v-chat']);
+  // The sender's handoff lands after the receiver's claim: only the link changes.
+  await workspace.patchMembers({ 4: { s: 'space-personal', u: 'https://x.test/' } });
+  await workspace.patchMembers({ 4: { s: 'space-work', u: 'https://old.test/', e: 'v-notes' } }, [], [4]);
+  assert.deepEqual([tabs()[4].s, tabs()[4].u, tabs()[4].e], ['space-personal', 'https://x.test/', 'v-notes']);
+  // An explicit unlink still removes the link.
+  await workspace.patchMembers({ 5: { s: 'space-personal', u: 'https://mail.example.com/inbox', e: '' } });
+  assert.equal('e' in tabs()[5], false);
+});

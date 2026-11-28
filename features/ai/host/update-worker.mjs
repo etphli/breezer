@@ -224,9 +224,13 @@ export async function installUpdate(work) {
     acquiredAt = Date.now();
     statusPath = join(parent, `.Breezer-update-status-${basename(owner).slice('owner-'.length, -'.json'.length)}.json`);
     await status('downloading', 'Downloading the verified GitHub release…');
-    // Earlier workers' records are superseded by this one.
+    // Records written before this worker took the lock are superseded. A newer
+    // record belongs to a successor and must survive if this worker is stale.
     for (const name of await readdir(parent).catch(() => [])) {
-      if ((statusName.test(name) || name === legacyStatusName) && join(parent, name) !== statusPath) await rm(join(parent, name), { force: true }).catch(() => {});
+      const path = join(parent, name);
+      if (!(statusName.test(name) || name === legacyStatusName) || path === statusPath) continue;
+      const info = await lstat(path).catch(() => null);
+      if (info && info.mtimeMs < acquiredAt) await rm(path, { force: true }).catch(() => {});
     }
     // A process spawning is not proof its script survived Gatekeeper/startup.
     if (process.connected) process.send({ type: 'update-worker-ready' });

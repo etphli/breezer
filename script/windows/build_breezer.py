@@ -298,10 +298,12 @@ def build_browser(build_dir, core, platform, expected, jobs, gen_only, *, use_ni
     read_marker(source / SOURCE_MARKER, expected, optional=SOURCE_OPTIONAL)
     output = source / "out/Default"
     output.mkdir(parents=True, exist_ok=True)
-    (output / BUILD_MARKER).unlink(missing_ok=True)
     env = visual_studio_environment()
 
+    # Refuse before touching the build marker, so a tree compiled from another
+    # commit stays packageable from that commit.
     record_overlays(source / SOURCE_MARKER, expected, breezer)
+    (output / BUILD_MARKER).unlink(missing_ok=True)
     run(sys.executable, ROOT / "script/windows/apply_breezer_windows.py", source, cwd=ROOT,
         env={**os.environ, "PYTHONUTF8": "1"})
 
