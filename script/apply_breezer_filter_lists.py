@@ -48,6 +48,7 @@ HOOK = '''    const trustedSource = this.isTrustedList(assetKey);
         return { assetKey, content: compiledContent };
     });
 '''.rstrip()
+IMPORT_ANCHOR = "import * as sfp from './static-filtering-parser.js';\n"
 GN_MARKER = '    # Breezer compiled-list experiment inputs.\n'
 
 
@@ -67,6 +68,13 @@ def unhook(text):
     if text.count(ANCHOR) != 1:
         raise ValueError('Pinned filter compiler seam changed')
     return text
+
+
+def hook(text):
+    baseline = unhook(text)
+    if baseline.count(IMPORT_ANCHOR) != 1:
+        raise ValueError('Pinned filter import anchor changed')
+    return baseline.replace(IMPORT_ANCHOR, IMPORT + IMPORT_ANCHOR, 1).replace(ANCHOR, HOOK, 1)
 
 
 def contract_for(tree):
@@ -97,6 +105,18 @@ def contract_for(tree):
 
 
 def prepare(tree, artifacts):
+    folder = tree / 'third_party/ublock'
+    storage = (folder / 'js/storage.js').read_text()
+    if (folder / 'js/breezer-startup-body.js').is_file():
+        # The native contract hashes these storage bytes literally, so staging must not change them.
+        try:
+            unchanged = hook(storage) == storage
+        except ValueError:
+            unchanged = False
+        if not unchanged:
+            raise ValueError('Startup-body source tree lacks the exact compiled-list storage hook; apply '
+                             'script/apply_breezer_filter_source_overlays.py to a fresh source copy, '
+                             'then regenerate the artifacts')
     contract = json.loads((artifacts / 'contract.json').read_text())
     if contract != contract_for(tree):
         raise ValueError('Compiled-list compiler/engine contract differs from this source tree; regenerate')
@@ -132,15 +152,10 @@ def prepare(tree, artifacts):
     files['js/breezer-compiled-filter-context.js'] = (FEATURE / 'compiled-filter-context.js').read_bytes()
     stamp = {'buildId': build_id, **{key: contract[key] for key in ['engineVersion', 'engineJavaScriptVersion']}}
     files['js/breezer-compiled-filter-build.js'] = ''.join(f'export const {key} = {json.dumps(value)};\n' for key, value in stamp.items()).encode()
-    folder = tree / 'third_party/ublock'
     existing = {path.relative_to(folder).as_posix() for path in (folder / 'assets/breezer-compiled').rglob('*') if path.is_file()}
     if existing - files.keys():
         raise ValueError('Unexpected compiled-list resources remain; preserve this tree and use a fresh source snapshot')
-    baseline = unhook((folder / 'js/storage.js').read_text())
-    import_anchor = "import * as sfp from './static-filtering-parser.js';\n"
-    if baseline.count(import_anchor) != 1:
-        raise ValueError('Pinned filter import anchor changed')
-    files['js/storage.js'] = baseline.replace(import_anchor, IMPORT + import_anchor, 1).replace(ANCHOR, HOOK, 1).encode()
+    files['js/storage.js'] = hook(storage).encode()
     gn = (folder / 'BUILD.gn').read_text()
     if GN_MARKER in gn:
         gn = re.sub(re.escape(GN_MARKER) + r'.*?    # End Breezer compiled-list inputs\.\n', '', gn, count=1, flags=re.S)

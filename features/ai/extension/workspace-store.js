@@ -43,7 +43,11 @@ const APPEARANCE_FIELDS = {
   sidebarWidth: (value) => Number.isInteger(value) && value >= SIDEBAR_WIDTH.min && value <= SIDEBAR_WIDTH.max,
 };
 
-const text = (value, max = 200) => (typeof value === 'string' ? value.slice(0, max) : '');
+// Never cut a surrogate pair in half: native JSON parsing rejects lone surrogates.
+const text = (value, max = 200) => {
+  if (typeof value !== 'string') return '';
+  return value.slice(0, max).replace(/[\ud800-\udbff]$/, '').toWellFormed();
+};
 const isTone = (value) => TONES.includes(value);
 
 // A folder color is a space tone name or a custom #rrggbb, stored lowercase.

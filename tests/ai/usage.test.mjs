@@ -240,3 +240,31 @@ test('subsecond alarms still sample intervening focus changes', async () => {
   await f.tick();
   assert.equal(f.data[USAGE_STATE].days['2026-10-30'], 60);
 });
+
+for (const [name, send] of Object.entries({
+  network: async () => { throw new TypeError('fetch failed'); },
+  503: async () => ({ ok: false, status: 503 }),
+  429: async () => ({ ok: false, status: 429 }),
+  409: async () => ({ ok: false, status: 409 }),
+})) {
+  test(`${name} failures wait 30 minutes before the next attempt`, async () => {
+    const f = fixture({ send });
+    await f.worker.settled();
+    assert.equal(f.sent.length, 1);
+    assert.equal(f.data[USAGE_STATE].sentAt, 0);
+    for (let i = 0; i < 29; i++) await f.tick();
+    assert.equal(f.sent.length, 1);
+    await f.tick();
+    assert.equal(f.sent.length, 2);
+  });
+}
+
+test('a failed attempt in a new month still reports immediately', async () => {
+  const f = fixture({ send: async () => ({ ok: false, status: 503 }), start: Date.parse('2026-10-31T23:58:00Z') });
+  await f.worker.settled();
+  await f.tick();
+  assert.equal(f.sent.length, 1);
+  await f.tick(2 * 60_000);
+  assert.equal(f.data[USAGE_STATE].month, '2026-11');
+  assert.equal(f.sent.length, 2);
+});

@@ -243,6 +243,13 @@ def check_numbered_tabs(tree, host):
                   'cancelable:true', 'ISOLATED_WORLD_ID_CHROME_INTERNAL',
                   'weak_factory_.GetWeakPtr(), index, gesture'):
         require(token in dispatch, f'Missing bounded native shortcut dispatch: {token}')
+    # A renderer that exits before replying drops the callback; the shortcut
+    # must still fall back to native selection, outside the frame's teardown.
+    require(re.search(r'mojo::WrapCallbackWithDefaultInvokeIfNotRun\(\s*'
+                      r'base::BindPostTaskToCurrentDefault\(\s*'
+                      r'base::BindOnce\(&BreezerWorkspaceView::OnNumberedTabResult,'
+                      r'[^;]*\)\),\s*base::Value\(\)\)', dispatch) is not None,
+            'A dropped numbered-tab reply must fall back to native selection')
     frame = host.split('BreezerWorkspaceView::GetSidebarFrame()', 1)[1].split(
         'void BreezerWorkspaceView::UpdateToolbarBackground()', 1)[0]
     for token in ('if (!is_available())', 'IsRenderFrameLive()', 'url.SchemeIs("chrome-extension")',
@@ -374,6 +381,21 @@ def check_peek(tree, added, idl, api):
     require("base::RetainedRef(this)" in research_timer and
             research_text.index("did_respond()") < research_text.index("timeout_.Stop();"),
             "Research reads must answer by timeout when the renderer drops the script callback, and respond once")
+    # Clipping must not split a surrogate pair into U+FFFD.
+    extractor = added[
+        "chrome/browser/extensions/api/breezer_private/research_text.h"
+    ].read_text()
+    require("/[\\uD800-\\uDBFF]/.test(text[limit - 1]) ? limit - 1 : limit" in extractor and
+            "cut(raw, 24001)" in extractor and "cut(value, 24000)" in extractor and
+            ".slice(0, 2400" not in extractor,
+            "Research text clipping can split a surrogate pair")
+    stats = added[
+        "chrome/browser/extensions/api/breezer_private/browser_stats_api.cc"
+    ].read_text()
+    require("(title[title_length - 1] & 0xFC00) == 0xD800" in stats and
+            "title.substr(0, title_length)" in stats and
+            "title.substr(0, kMaxTitleInputLength)" not in stats,
+            "Tab title clipping can split a surrogate pair")
 
 
 def check_omnibox(added, idl):

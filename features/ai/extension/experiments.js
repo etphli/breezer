@@ -188,8 +188,12 @@ export function applyPersonality(profile, experiments) {
 // for Restore. A theme the person applied themselves is never replaced.
 export const personalityThemeName = (id) => `Breezer ${PERSONALITIES[id]?.label ?? ''} personality`.replace(/\s+/g, ' ');
 
-const isPersonalityTheme = (record) => Boolean(record) && Object.entries(PERSONALITIES)
-  .some(([id, preset]) => preset.seed && record.name === personalityThemeName(id) && record.theme === preset.seed);
+// The record alone is not enough: picking a colour in Appearance settings keeps
+// the record, so the browser must still show the preset's seed (like activeLook).
+// theme is null only when the bridge could not be read.
+const isPersonalityTheme = (record, theme) => Boolean(record) && Object.entries(PERSONALITIES)
+  .some(([id, preset]) => preset.seed && record.name === personalityThemeName(id) && record.theme === preset.seed &&
+    (theme == null || (typeof theme === 'string' && theme.toLowerCase() === preset.seed)));
 
 const hasAppearanceBridge = (api) => typeof api?.breezerPrivate?.setAppearance === 'function' && typeof api?.breezerPrivate?.getAppearance === 'function';
 
@@ -198,8 +202,8 @@ export async function applyPersonalityLook(api, id) {
   const preset = PERSONALITIES[id];
   if (!preset) throw new Error('Choose a listed personality.');
   if (!hasAppearanceBridge(api)) return { colors: 'unavailable' };
-  const { applied } = await readThemeState({ api });
-  const ours = isPersonalityTheme(applied);
+  const [{ applied }, appearance] = await Promise.all([readThemeState({ api }), readAppearance(api)]);
+  const ours = isPersonalityTheme(applied, appearance?.theme);
   if (!preset.seed) {
     if (!ours) return { colors: 'unchanged' };
     await restorePreviousLook({ api });
@@ -690,15 +694,24 @@ export async function mountExperimentSettings({ container, api }) {
       input.disabled = Boolean(muted) || input.dataset.saving === 'true';
       input.closest('.setting-row').classList.toggle('muted-row', Boolean(muted));
     }
+    const shown = wantedPersonality ?? value.personality;
     for (const choice of choices.querySelectorAll('[role="radio"]')) {
-      const checked = choice.dataset.value === value.personality;
+      const checked = choice.dataset.value === shown;
       choice.setAttribute('aria-checked', String(checked));
       choice.tabIndex = checked ? 0 : -1;
     }
-    personalityHelp.textContent = PERSONALITIES[value.personality].description;
+    personalityHelp.textContent = PERSONALITIES[shown].description;
   };
 
-  const save = async (patch, input) => {
+  // Saves run one at a time, so a slow look or storage write cannot finish after
+  // a later choice and leave the older one stored.
+  let queue = Promise.resolve();
+  const enqueue = (task) => (queue = queue.then(task, task));
+  // The personality the person chose last but which is not saved yet.
+  let wantedPersonality = null;
+  let personalityQueued = false;
+
+  const saveNow = async (patch, input) => {
     error.hidden = true;
     if (input) input.dataset.saving = 'true';
     try {
@@ -721,10 +734,28 @@ export async function mountExperimentSettings({ container, api }) {
     }
   };
 
+  const save = (patch, input) => enqueue(() => saveNow(patch, input));
+
   for (const [flag, input] of inputs) input.addEventListener('change', () => void save({ [flag]: input.checked }, input));
   opacity.addEventListener('input', () => { opacityValue.textContent = `${opacity.value}%`; });
   opacity.addEventListener('change', () => void save({ glassOpacity: opacity.valueAsNumber }, opacity));
-  const choose = (id) => { if (id !== value.personality) void save({ personality: id }); };
+  // Quick choices coalesce: a queued save applies whichever preset is wanted when it runs.
+  const choose = (id) => {
+    if (id === (wantedPersonality ?? value.personality)) return;
+    wantedPersonality = id;
+    render();
+    if (personalityQueued) return;
+    personalityQueued = true;
+    void enqueue(async () => {
+      while (wantedPersonality !== null) {
+        const next = wantedPersonality;
+        if (next !== value.personality) await saveNow({ personality: next });
+        if (wantedPersonality === next) wantedPersonality = null;
+      }
+      personalityQueued = false;
+      render();
+    });
+  };
   choices.addEventListener('click', (event) => {
     const choice = event.target.closest('[role="radio"]');
     if (choice) choose(choice.dataset.value);

@@ -358,6 +358,9 @@ def check_order(tree, ai_first):
     layout_body = region.split("void VerticalTabStripRegionView::Layout(PassKey) {", 1)[1].split("\n}\n", 1)[0]
     require("UpdateResizeAreaVisibility();" in layout_body,
             "Resize edge is not refreshed when the document becomes available")
+    visibility = layout_body.split("workspace->SetVisible(", 1)[1].split(");", 1)[0]
+    require(" ".join(visibility.split()).startswith("workspace->is_available() && ("),
+            "Layout shows a closed or crashed document over the native tabs")
     require("!(HostsBreezerWorkspace() &&\n"
             "        browser_view()->IsZenModeEnabledForLayout() &&\n"
             "        !browser_view()->IsZenModeSideChromePinned())" in region,

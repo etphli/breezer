@@ -142,10 +142,16 @@ BreezerPrivateGetBrowserStatsFunction::RunFunction() {
       const std::u16string_view title =
           entry ? std::u16string_view(entry->GetTitle())
                 : std::u16string_view();
+      size_t title_length = std::min(title.size(), kMaxTitleInputLength);
+      // Do not cut between the halves of a surrogate pair, which would turn
+      // the last character into U+FFFD.
+      if (title_length < title.size() && title_length > 0 &&
+          (title[title_length - 1] & 0xFC00) == 0xD800) {
+        --title_length;
+      }
       base::DictValue tab;
       tab.Set("tabId", ExtensionTabUtil::GetTabId(contents));
-      tab.Set("title",
-              base::UTF16ToUTF8(title.substr(0, kMaxTitleInputLength)));
+      tab.Set("title", base::UTF16ToUTF8(title.substr(0, title_length)));
       tab.Set("rendererProcessIds", std::move(tab_renderer_ids));
       if (renderer_details_truncated) {
         tab.Set("rendererDetailsTruncated", true);

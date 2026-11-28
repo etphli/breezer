@@ -1177,6 +1177,15 @@ function receive(message) {
     if (fullChat && !reply.text && message.text) { stopWorkingStatus(); activityLabel('Writing…'); }
     reply.text += message.text || '';
     renderDelta();
+  } else if (message.type === 'replace' && state.running && typeof message.text === 'string' && Number.isInteger(message.remove) && message.remove >= 0) {
+    // Swap the streamed text of this step for the provider's final output, then redraw the reply.
+    const run = state.running;
+    const reply = run.message;
+    reply.text = reply.text.slice(0, Math.max(0, reply.text.length - message.remove)) + message.text;
+    run.renderer?.dispose();
+    run.renderer = null;
+    run.renderedLength = 0;
+    renderDelta();
   } else if (message.type === 'complete') {
     const run = state.running;
     if (!run) return;

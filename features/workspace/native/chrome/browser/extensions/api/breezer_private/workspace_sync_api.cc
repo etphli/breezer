@@ -20,15 +20,21 @@ base::DictValue ReadWorkspace(Profile* profile) {
   const bool configured = breezer_sync::IsConfigured(profile);
   auto* service = configured ? SyncServiceFactory::GetForProfile(profile) : nullptr;
   const bool enabled = configured && service && service->GetUserSettings()->GetSelectedTypes().Has(syncer::UserSelectableType::kPreferences);
+  // A joining profile's workspace preference was cleared at setup. Until the
+  // vault's value has downloaded it reads as empty, and publishing local
+  // defaults then could overwrite customisations made on other devices.
+  const bool ready = enabled && service->GetActiveDataTypes().Has(syncer::PREFERENCES) &&
+      !service->GetTypesWithPendingDownloadForInitialSync().Has(syncer::PREFERENCES);
   const auto health = breezer_sync::ReadStatus(profile);
   return base::DictValue()
       .Set("configured", configured)
       .Set("workspaceEnabled", enabled)
+      .Set("workspaceReady", ready)
       .Set("nativeError", health.FindBool("hasError").value_or(false))
       .Set("nativeMessage", health.FindString("errorMessage") ? *health.FindString("errorMessage") : std::string())
       .Set("providerId", configuration ? configuration->provider.id : std::string())
       .Set("vaultId", configuration ? configuration->vault_uuid : std::string())
-      .Set("model", enabled ? profile->GetPrefs()->GetString(breezer_sync::kWorkspacePref) : std::string());
+      .Set("model", ready ? profile->GetPrefs()->GetString(breezer_sync::kWorkspacePref) : std::string());
 }
 }  // namespace
 
@@ -63,6 +69,7 @@ BreezerPrivateExchangeWorkspaceSyncFunction::RunFunction() {
   auto state = ReadWorkspace(GetProfile());
   if (!state.FindBool("configured").value_or(false) ||
       !state.FindBool("workspaceEnabled").value_or(false) ||
+      !state.FindBool("workspaceReady").value_or(false) ||
       state.FindString("providerId") == nullptr || *state.FindString("providerId") != *provider ||
       state.FindString("vaultId") == nullptr || *state.FindString("vaultId") != *vault)
     return RespondNow(WithArguments(std::move(state)));

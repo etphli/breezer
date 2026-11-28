@@ -13,6 +13,7 @@
 #include "base/strings/strcat.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/task/bind_post_task.h"
 #include "base/task/sequenced_task_runner.h"
 #include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/extensions/extension_view_host.h"
@@ -31,6 +32,7 @@
 #include "extensions/browser/extension_host.h"
 #include "extensions/browser/unloaded_extension_reason.h"
 #include "extensions/common/extension.h"
+#include "mojo/public/cpp/bindings/callback_helpers.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
 #include "ui/color/color_provider.h"
 #include "ui/gfx/color_utils.h"
@@ -111,8 +113,14 @@ bool BreezerWorkspaceView::SelectNumberedTab(
           "!document.dispatchEvent(new CustomEvent('breezer-select-numbered-tab',"
           "{cancelable:true,detail:",
           base::NumberToString(index), "}))"})),
-      base::BindOnce(&BreezerWorkspaceView::OnNumberedTabResult,
-                     weak_factory_.GetWeakPtr(), index, gesture),
+      // A renderer that exits before replying drops the callback; keep the
+      // native selection then. Posting keeps that fallback out of the frame's
+      // teardown, and the weak pointer skips it once this view is gone.
+      mojo::WrapCallbackWithDefaultInvokeIfNotRun(
+          base::BindPostTaskToCurrentDefault(
+              base::BindOnce(&BreezerWorkspaceView::OnNumberedTabResult,
+                             weak_factory_.GetWeakPtr(), index, gesture)),
+          base::Value()),
       ISOLATED_WORLD_ID_CHROME_INTERNAL);
   return true;
 }

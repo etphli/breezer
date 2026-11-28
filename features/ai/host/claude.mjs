@@ -208,14 +208,16 @@ export class ClaudeProvider {
           if (!output && message.result) { try { output = JSON.parse(message.result); } catch {} }
           if (!output || typeof output.text !== 'string' || !Object.hasOwn(output, 'action')) { reject(new Error('Claude did not return a browser-assistant response.')); return; }
           if (output.text.startsWith(streamed)) { const delta = output.text.slice(streamed.length); if (delta) emit({ type: 'delta', text: delta }); }
-          else if (!streamed) emit({ type: 'delta', text: output.text });
+          // A retried StructuredOutput block can differ from what was streamed. Swap this round's text for the final output.
+          else emit({ type: 'replace', remove: streamed.length, text: output.text });
           if (output.action && output.text) emit({ type: 'delta', text: '\n\n' });
           resolve(output);
         }
       };
       const timer = setTimeout(() => { cleanup(); reject(new Error('Claude Code turn timed out.')); }, 5 * 60_000);
       rpc.on('message', onMessage); rpc.on('closed', onClose);
-      rpc.send({ type: 'user', message: { role: 'user', content }, parent_tool_use_id: null, session_id: '' });
+      try { rpc.send({ type: 'user', message: { role: 'user', content }, parent_tool_use_id: null, session_id: '' }); }
+      catch (error) { cleanup(); reject(error); }
     });
   }
 }

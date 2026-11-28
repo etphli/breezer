@@ -4,6 +4,7 @@ import { constants } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join, dirname, win32 } from 'node:path';
 import { EventEmitter } from 'node:events';
+import { StringDecoder } from 'node:string_decoder';
 
 const windows = process.platform === 'win32';
 const posixDirectories = [dirname(process.execPath), join(homedir(), '.local/bin'), join(homedir(), '.local/node/bin'), '/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', '/bin'];
@@ -128,13 +129,15 @@ export function runCli(binary, args, { timeout = 20_000, env = cliEnvironment(),
   return new Promise((resolve, reject) => {
     const child = spawnCli(spawnProcess, binary, args, cwd, env);
     let stdout = '', stderr = '';
+    // Decode across chunks so a multi-byte UTF-8 character split between reads stays intact.
+    const stdoutText = new StringDecoder('utf8'), stderrText = new StringDecoder('utf8');
     const stop = () => windows ? terminateWindows(child) : child.kill('SIGKILL');
     const timer = setTimeout(() => { stop(); reject(new Error('CLI discovery timed out.')); }, timeout);
-    child.stdout.on('data', (data) => { stdout += data; if (stdout.length > 16 * 1024 * 1024) stop(); });
-    child.stderr.on('data', (data) => { stderr = (stderr + data).slice(-4000); });
+    child.stdout.on('data', (data) => { stdout += stdoutText.write(data); if (stdout.length > 16 * 1024 * 1024) stop(); });
+    child.stderr.on('data', (data) => { stderr = (stderr + stderrText.write(data)).slice(-4000); });
     child.stdin.on('error', (error) => { if (error.code !== 'EPIPE') reject(error); });
     child.on('error', (error) => { clearTimeout(timer); reject(error); });
-    child.on('close', (code) => { clearTimeout(timer); resolve({ stdout, stderr, code }); });
+    child.on('close', (code) => { clearTimeout(timer); stdout += stdoutText.end(); stderr = (stderr + stderrText.end()).slice(-4000); resolve({ stdout, stderr, code }); });
     child.stdin.end();
   });
 }

@@ -8,6 +8,9 @@ inline constexpr char16_t kBreezerResearchText[] = uR"research((() => {
     .replace(/-----BEGIN[^\n]*PRIVATE KEY-----[\s\S]*/g, '[redacted key]')
     .replace(/\b(?:sk-[\w-]{12,}|gh[pousr]_[\w]{12,}|github_pat_[\w]{12,}|AKIA[A-Z0-9]{16}|eyJ[\w-]+\.[\w-]+\.[\w-]+)\b/g, '[redacted]')
     .replace(/\b(password|secret|token|api[_ -]?key|authorization)\s*[:=]\s*\S+/gi, '$1: [redacted]');
+  // Never cut between the halves of a surrogate pair.
+  const cut = (text, limit) => text.slice(0, text.length > limit &&
+    /[\uD800-\uDBFF]/.test(text[limit - 1]) ? limit - 1 : limit);
   const walker = document.createTreeWalker(document.body || document.documentElement, NodeFilter.SHOW_TEXT);
   const text = [];
   let length = 0, nodes = 0, truncated = false;
@@ -18,11 +21,11 @@ inline constexpr char16_t kBreezerResearchText[] = uR"research((() => {
     if (!parent.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) continue;
     const raw = walker.currentNode.textContent;
     if (raw.length > 24000) truncated = true;
-    const value = mask(raw.slice(0, 24001).replace(/\s+/g, ' ').trim());
+    const value = mask(cut(raw, 24001).replace(/\s+/g, ' ').trim());
     if (value) { text.push(value); length += value.length + 1; }
   }
   const value = text.join(' ');
-  const captured = value.slice(0, 24000);
+  const captured = cut(value, 24000);
   return { text: captured, truncated: truncated || value.length > 24000, capturedCharacters: captured.length };
 })())research";
 

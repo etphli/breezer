@@ -805,6 +805,9 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
   const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
   const controls = ['organato-connect', 'organato-disconnect', 'organato-key', ...Object.keys(mappings)];
   let next = 0, pending, timer, closed = false, port = null, connected = false;
+  // The values Organato last reported; a failed or timed-out change goes back to them.
+  let confirmed = null;
+  const show = values => { for (const [id, field] of Object.entries(mappings)) $(id).checked = values[field]; };
   const busy = value => {
     for (const id of controls) $(id).disabled = value;
     $('organato-disconnect').disabled = value || !connected;
@@ -812,6 +815,7 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
   };
   const finish = (text, error = false) => {
     clearTimeout(timer); pending = null; busy(false);
+    if (error && confirmed) show(confirmed);
     $('organato-status').dataset.state = error ? 'error' : '';
     if (text) $('organato-status').textContent = text;
   };
@@ -827,7 +831,8 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
       }
       if (!message.ok) { finish(message.error, true); return; }
       connected = message.value.connected === true;
-      for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
+      confirmed = message.value;
+      show(confirmed);
       finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show deadlines on your new tab.');
     });
     connection.onDisconnect.addListener(() => {

@@ -148,7 +148,16 @@ export function mountContextSettings({ container, api = globalThis.chrome, clien
   const clear = button('Clear activity', () => run(async () => { output.textContent = ''; await client.request('clear'); await refresh(); }), maintenanceActions, 'button danger');
   summaryGroup.append(maintenanceActions);
   const consent = check('Allow OpenAI summaries', 'consent', summaryGroup, 'OpenAI receives these site names and counts through Codex only when you choose Summarize.');
-  consent.addEventListener('change', () => run(async () => { output.textContent = ''; await client.request('consent', { consent: consent.checked }); await refresh(); }), { signal: events.signal });
+  consent.addEventListener('change', () => run(async () => {
+    output.textContent = '';
+    try { await client.request('consent', { consent: consent.checked }); }
+    catch (failure) {
+      // The stored choice did not change, so the switch shows it again.
+      if (!disposed && loadedState) consent.checked = loadedState.providerConsent;
+      throw failure;
+    }
+    await refresh();
+  }), { signal: events.signal });
   const summaryActions = el('div', '', 'setting-actions');
   summaryGroup.append(summaryActions);
   const summarize = button('Summarize with GPT-6 Luna', () => run(async () => {

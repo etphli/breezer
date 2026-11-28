@@ -73,6 +73,9 @@ export class WorkspaceSync {
     const nativeHealth = remote.nativeError ? { nativeError: true, nativeMessage: remote.nativeMessage || 'Native sync needs attention. Open native setup.' } : {};
     if (!remote.configured) return this.state({ phase: 'disabled', ...nativeHealth });
     if (!remote.workspaceEnabled) return this.state({ phase: 'workspaceOff', ...nativeHealth });
+    // Until the vault's preference has downloaded, the model reads as empty.
+    // Joining then would seed this profile's defaults against nothing.
+    if (remote.workspaceReady === false) return this.state({ phase: 'downloading', ...nativeHealth });
     if (typeof remote.providerId !== 'string' || !remote.providerId || typeof remote.vaultId !== 'string' || !remote.vaultId || typeof remote.model !== 'string') throw new Error('Native workspace sync state is invalid.');
     const values = await this.storage.local.get([STORE_KEY, SYNC_LOCAL_KEY]);
     const store = normalizeStore(values[STORE_KEY]);
@@ -88,17 +91,28 @@ export class WorkspaceSync {
         persistedLocal = serialized;
       }
     };
+    const defaults = projectWorkspace(defaultStore(), DEFAULT_APPEARANCE);
     if (!local || local.providerId !== remote.providerId || local.vaultId !== remote.vaultId) {
       // Joining another vault intentionally merges this profile's current saved
       // workspace, but never carries the previous vault's deletion records.
       // Existing remote values win over untouched first-run defaults. Saved
       // local customizations still become edits and merge by persistent ID.
-      const defaults = projectWorkspace(defaultStore(), DEFAULT_APPEARANCE);
-      const baseline = Object.fromEntries(Object.entries(defaults).filter(([key]) => key in current));
-      local = { version: 1, providerId: remote.providerId, vaultId: remote.vaultId, clientId: this.makeClientId(), model: decode(remote.model), baseline };
+      const model = decode(remote.model);
+      // A vault that already has data may have deleted the first-run space
+      // before this profile joined. An untouched default record absent from
+      // it is not published; one holding local pins is a real local edit.
+      // The skipped keys stay with the join until its first cycle completes,
+      // so a failed exchange cannot later publish them as new records.
+      const skip = Object.keys(model.records).length ? Object.keys(defaults).filter(key => /^(space|folder|entry)\//.test(key) && !(key in model.records)) : [];
+      const baseline = Object.fromEntries(Object.entries(defaults).filter(([key]) => key in current && !skip.includes(key)));
+      local = { version: 1, providerId: remote.providerId, vaultId: remote.vaultId, clientId: this.makeClientId(), model, baseline, ...(skip.length ? { skip } : {}) };
     }
     if (local.version !== 1 || !local.baseline || typeof local.baseline !== 'object') throw new Error('Local sync recovery data is invalid. Local data is preserved.');
-    local = { ...local, model: recordWorkspaceChanges(local.model, local.baseline, current, local.clientId), baseline: current };
+    // An untouched skipped default is left out; one that was edited or holds
+    // local pins is a real local change and is published.
+    const recorded = Array.isArray(local.skip) ? Object.fromEntries(Object.entries(current).filter(([key, value]) => !(local.skip.includes(key) &&
+      !(key in local.model.records) && same(value, defaults[key]) && !Object.values(current).some(other => other.parent === key)))) : current;
+    local = { ...local, model: recordWorkspaceChanges(local.model, local.baseline, recorded, local.clientId), baseline: recorded };
     // Capture before attempting transport. A crash, disconnect or provider
     // failure cannot erase edits that have not reached the remote preference.
     await capture();
@@ -109,26 +123,35 @@ export class WorkspaceSync {
       const model = serializeSyncModel(local.model);
       if (model !== remote.model) {
         const result = await this.bridge.exchange({ providerId: local.providerId, vaultId: local.vaultId, expectedModel: remote.model, model });
-        if (!result.configured || !result.workspaceEnabled || result.providerId !== local.providerId || result.vaultId !== local.vaultId) throw new Error('Sync was disconnected or changed vaults. Local data is preserved.');
+        if (!result.configured || !result.workspaceEnabled || result.workspaceReady === false || result.providerId !== local.providerId || result.vaultId !== local.vaultId) throw new Error('Sync was disconnected or changed vaults. Local data is preserved.');
         if (result.model !== model) {
           remote = result;
           continue;
         }
       }
       const patch = Object.fromEntries(Object.entries(applied.appearance).filter(([field, value]) => appearance[field] !== value));
-      let nextAppearance = appearance;
+      // The baseline is what this cycle read plus what it applied. Native's
+      // returned state can include user changes made since the read; those are
+      // left out so the next cycle records them instead of reverting them.
+      let applyAppearance = {};
+      let appearanceChanged = false;
       let appearanceError;
       if (Object.keys(patch).length) {
-        try { nextAppearance = normalizeAppearance(await this.bridge.setAppearance(patch)); }
-        catch (error) { appearanceError = error.message || 'Native appearance settings could not be changed.'; }
+        try {
+          appearanceChanged = !same(normalizeAppearance(await this.bridge.setAppearance(patch)), appearance);
+          applyAppearance = patch;
+        } catch (error) { appearanceError = error.message || 'Native appearance settings could not be changed.'; }
       }
       const changed = !same(projectWorkspace(store), projectWorkspace(applied.store));
       applied.store.rev = store.rev + (changed ? 1 : 0);
-      local.baseline = projectWorkspace(applied.store, nextAppearance);
+      local.baseline = projectWorkspace(applied.store, { ...appearance, ...applyAppearance });
+      delete local.skip;
       const writes = {};
       if (changed) writes[STORE_KEY] = applied.store;
+      // Announce only a real change: this worker also listens for the
+      // revision, so a refused change would otherwise schedule endless cycles.
+      if (appearanceChanged) writes[APPEARANCE_REV_KEY] = Date.now();
       await capture(writes);
-      if (Object.keys(patch).length) await this.storage.local.set({ [APPEARANCE_REV_KEY]: Date.now() });
       if (appearanceError) return this.state({ phase: 'appearanceBlocked', message: `Saved spaces were updated locally. Appearance remains unchanged: ${appearanceError}`, ...nativeHealth });
       return this.state({ phase: 'reconciled', vaultId: local.vaultId, ...nativeHealth });
     }

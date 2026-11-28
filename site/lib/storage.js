@@ -45,8 +45,14 @@ export async function allBlobs(prefix, maxBlobs = 20_000) {
 // Leave headroom under the 60-second function limit for listing and the GitHub request.
 export async function usageReports(now = new Date(), readBudgetMs = 40_000) {
   const started = performance.now();
-  const months = new Set([now.toISOString().slice(0, 7), new Date(now.getTime() - 29 * 86400_000).toISOString().slice(0, 7)]);
-  const listings = await Promise.all([...months].map(month => allBlobs(`usage/${month}/`)));
+  // List every UTC month from the 30-day window start through now; a short February can sit between them.
+  const months = [];
+  const start = new Date(now.getTime() - 29 * 86400_000);
+  for (let year = start.getUTCFullYear(), month = start.getUTCMonth();
+    year * 12 + month <= now.getUTCFullYear() * 12 + now.getUTCMonth(); month++) {
+    months.push(new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 7));
+  }
+  const listings = await Promise.all(months.map(month => allBlobs(`usage/${month}/`)));
   const blobs = listings.flatMap(listing => listing.blobs);
   const reports = [];
   let truncated = listings.some(listing => listing.truncated);

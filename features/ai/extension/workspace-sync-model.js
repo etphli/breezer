@@ -8,6 +8,12 @@ const clientPattern = /^[a-zA-Z0-9_-]{8,64}$/;
 const fields = new Set(['alive', 'name', 'tone', 'url', 'title', 'customTitle', 'parent', 'index', 'newTabPosition', 'closeButton', 'appearance']);
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const compare = (a, b) => a[0] - b[0] || (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0);
+// A restored or copied profile can reuse its client ID and clocks. Equal
+// registers then resolve by value so every device converges on the same one.
+const order = (a, b) => compare(a, b) || (JSON.stringify(a[2]) < JSON.stringify(b[2]) ? -1 : JSON.stringify(a[2]) > JSON.stringify(b[2]) ? 1 : 0);
+// Native JSON parsing rejects lone surrogates; stores written by earlier builds
+// may hold them, so every projected string is made well-formed.
+const wellFormed = value => value.toWellFormed();
 
 export function emptySyncModel() { return { version: SYNC_MODEL_VERSION, records: {} }; }
 
@@ -19,15 +25,15 @@ export function projectWorkspace(rawStore, rawAppearance) {
   const node = (value, parent, index) => {
     const key = `${value.kind === 'folder' ? 'folder' : 'entry'}/${value.id}`;
     if (value.kind === 'folder') {
-      entities[key] = { alive: true, name: value.name, parent, index };
+      entities[key] = { alive: true, name: wellFormed(value.name), parent, index };
       value.children.forEach((child, at) => node(child, key, at));
     } else {
-      entities[key] = { alive: true, url: value.url, title: value.title, customTitle: value.customTitle || '', parent, index };
+      entities[key] = { alive: true, url: wellFormed(value.url), title: wellFormed(value.title), customTitle: wellFormed(value.customTitle || ''), parent, index };
     }
   };
   store.spaces.forEach((space, index) => {
     const key = `space/${space.id}`;
-    entities[key] = { alive: true, name: space.name, tone: space.tone, index };
+    entities[key] = { alive: true, name: wellFormed(space.name), tone: space.tone, index };
     space.pinned.forEach((item, at) => node(item, key, at));
   });
   store.favorites.forEach((item, at) => node(item, 'favorites', at));
@@ -104,8 +110,7 @@ export function mergeSyncModels(left, right) {
     for (const [field, value] of Object.entries(incoming)) {
       const old = record[field];
       if (field === 'alive' && old?.[2] === false && value[2] !== false) continue;
-      if (!old || field === 'alive' && value[2] === false && old[2] !== false || compare(value, old) > 0) record[field] = structuredClone(value);
-      else if (compare(value, old) === 0 && !equal(value, old)) throw new Error('Conflicting workspace clock. Local data is preserved.');
+      if (!old || field === 'alive' && value[2] === false && old[2] !== false || order(value, old) > 0) record[field] = structuredClone(value);
     }
   }
   return validateSyncModel(result);
@@ -115,7 +120,10 @@ export function recordWorkspaceChanges(model, before, after, client) {
   validateSyncModel(model);
   if (!clientPattern.test(client)) throw new Error('Invalid sync client identity.');
   const result = structuredClone(model);
-  let clock = 0;
+  // Clock 1 is reserved for values seeded unchanged from the baseline, such as
+  // a joining profile's untouched defaults. Every real edit starts at clock 2,
+  // so a seeded default can never beat a value another device actually chose.
+  let clock = 1;
   for (const record of Object.values(model.records)) {
     for (const register of Object.values(record)) clock = Math.max(clock, register[0]);
   }
@@ -126,7 +134,11 @@ export function recordWorkspaceChanges(model, before, after, client) {
   for (const [key, values] of Object.entries(after)) {
     if (result.records[key]?.alive?.[2] === false) continue;
     for (const [field, value] of Object.entries(values)) {
-      if (!result.records[key]?.[field] || !before[key] || !equal(before[key][field], value)) write(key, field, value);
+      const untouched = before[key] && equal(before[key][field], value);
+      if (!result.records[key]?.[field]) {
+        if (untouched) (result.records[key] ||= {})[field] = [1, client, value];
+        else write(key, field, value);
+      } else if (!untouched) write(key, field, value);
     }
   }
   for (const key of Object.keys(before)) {
