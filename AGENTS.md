@@ -1,5 +1,9 @@
 # Breezer agent guide
 
+## Schedule updates
+
+When asked to put work in the next update, schedule it in the [Breezer update queue](docs/update-queue.md) and report its ID and target. Read the queue when planning, verifying or closing a release after 1.3.7.
+
 ## Update pages and releases
 
 When editing release notes, illustrations, the update-page template, versioning or first-run opening, read [docs/whats-new.md](docs/whats-new.md). It maps the code and tests and links the reusable template. Follow [RELEASE_POLICY.md](RELEASE_POLICY.md) for publication.
