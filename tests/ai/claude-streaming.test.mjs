@@ -35,7 +35,7 @@ async function compare(blocks, output, final = { structured_output: output }) {
     if (output.text.startsWith(streamed)) {
       const delta = output.text.slice(streamed.length);
       if (delta) expected.push({ type: 'delta', text: delta });
-    } else if (!streamed) expected.push({ type: 'delta', text: output.text });
+    } else expected.push({ type: 'replace', remove: streamed.length, text: output.text });
     if (output.action && output.text) expected.push({ type: 'delta', text: '\n\n' });
     round.finish(final);
     assert.deepEqual(await round.done, output);

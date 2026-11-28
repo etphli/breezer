@@ -21,8 +21,9 @@ import tempfile
 
 import apply_breezer_ai as ai
 
+# Reviewed Chromium version; prepare() rejects a different upstream checkout.
 VERSION = '156.0.8078.47'
-CACHE = ai.ROOT / 'build/ai-check/pristine'
+CACHE = ai.ROOT / 'build/ai-check' / VERSION / 'pristine'
 
 
 def sha(path):
@@ -81,7 +82,16 @@ def upstream_series():
                 yield patches / line
 
 
+def check_upstream_version():
+    lock = json.loads((ai.ROOT / 'upstream.lock.json').read_text())
+    upstream = (ai.ROOT / lock['helium']['path'] / 'chromium_version.txt').read_text().strip()
+    if upstream != VERSION:
+        raise ValueError(f'Upstream Chromium is {upstream}, but the AI overlay fixture is reviewed for '
+                         f'{VERSION}; re-review the overlay and update VERSION')
+
+
 def prepare(tree, offline=False, wanted_paths=None):
+    check_upstream_version()
     wanted = set(ai.PATCHED_FILES if wanted_paths is None else wanted_paths)
     new_files = set()
     sections = []

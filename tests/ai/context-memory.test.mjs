@@ -23,7 +23,8 @@ const tab = (url = 'https://docs.example.org/page?token=secret#password') => ({ 
 const permitted = { isPermitted: () => true };
 async function setup() {
   assert.equal(typeof ContextMemory, 'function', 'Opt-in local context storage is missing');
-  let now = Date.UTC(2026, 9, 29, 12);
+  // Local noon: activity days are local calendar days.
+  let now = new Date(2026, 9, 29, 12).getTime();
   const local = storage();
   const memory = new ContextMemory(local, { now: () => now });
   return { memory, local, advance(ms) { now += ms; }, now: () => now };

@@ -119,3 +119,47 @@ test('dashboard stops reading reports at its time budget and marks the result pa
   assert.ok(reads > 0 && reads < 240, `read ${reads} reports`);
   assert.equal(result.reports.length, reads);
 });
+
+test('dashboard lists every month in the 30-day window, including a skipped February', async t => {
+  const { usageReports } = await import('../lib/storage.js');
+  const agent = new MockAgent();
+  agent.disableNetConnect();
+  const dispatcher = getGlobalDispatcher();
+  const originalEnv = process.env;
+  process.env = { ...originalEnv, BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_fixture_test', VERCEL_BLOB_API_URL: 'https://blob-api.test' };
+  setGlobalDispatcher(agent);
+  t.after(async () => { setGlobalDispatcher(dispatcher); process.env = originalEnv; await agent.close(); });
+  const prefixes = [];
+  agent.get('https://blob-api.test').intercept({ path: /^\/\?/ }).reply(200, ({ path }) => {
+    const prefix = new URL(path, 'https://blob-api.test').searchParams.get('prefix');
+    prefixes.push(prefix);
+    return { blobs: prefix === 'usage/2027-02/' ? [{ pathname: 'usage/2027-02/feb.json' }] : [], hasMore: false };
+  }).persist();
+  agent.get('https://fixture.private.blob.vercel-storage.com').intercept({ path: /^\/usage\// })
+    .reply(200, { month: '2027-02', id: 'feb', days: { '2027-02-28': 60 } }).persist();
+  // 2027-03-01 minus 29 days is 2027-01-31, so the window spans January, February and March.
+  const result = await usageReports(new Date('2027-03-01T12:00:00Z'));
+  assert.deepEqual(prefixes.sort(), ['usage/2027-01/', 'usage/2027-02/', 'usage/2027-03/']);
+  assert.deepEqual(result.reports.map(report => report.id), ['feb']);
+});
+
+test('dashboard reads the current month first when its read budget runs out', async t => {
+  const { usageReports } = await import('../lib/storage.js');
+  const agent = new MockAgent();
+  agent.disableNetConnect();
+  const dispatcher = getGlobalDispatcher();
+  const originalEnv = process.env;
+  process.env = { ...originalEnv, BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_fixture_test', VERCEL_BLOB_API_URL: 'https://blob-api.test' };
+  setGlobalDispatcher(agent);
+  t.after(async () => { setGlobalDispatcher(dispatcher); process.env = originalEnv; await agent.close(); });
+  agent.get('https://blob-api.test').intercept({ path: /^\/\?/ }).reply(200, ({ path }) => {
+    const month = new URL(path, 'https://blob-api.test').searchParams.get('prefix').slice(6, 13);
+    return { blobs: Array.from({ length: 12 }, (_, i) => ({ pathname: `usage/${month}/${i}.json` })), hasMore: false };
+  }).persist();
+  const reads = [];
+  agent.get('https://fixture.private.blob.vercel-storage.com').intercept({ path: /^\/usage\// })
+    .reply(200, ({ path }) => { reads.push(path.slice(7, 14)); return { month: path.slice(7, 14), id: path, days: {} }; }).persist();
+  await usageReports(new Date('2027-03-20T12:00:00Z'));
+  // Reads run in batches of 12 until the time budget ends, so the first batch must be this month.
+  assert.deepEqual([...new Set(reads.slice(0, 12))], ['2027-03']);
+});

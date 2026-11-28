@@ -8,7 +8,7 @@ export function advanceUsage(previous, now, active, uuid = () => crypto.randomUU
   const day = new Date(now).toISOString().slice(0, 10);
   const month = day.slice(0, 7);
   const state = previous?.month === month ? structuredClone(previous)
-    : { month, id: uuid(), days: {}, sampledAt: now, active: false, sentAt: 0 };
+    : { month, id: uuid(), days: {}, sampledAt: now, active: false, sentAt: 0, attemptedAt: 0 };
   const elapsed = (now - state.sampledAt) / 1000;
   if (active) {
     state.days[day] ??= 0;
@@ -40,8 +40,12 @@ export function installUsage(api, { now = Date.now, send = fetch } = {}) {
     if (!await enabled()) return;
     // An inactive timestamp cannot contribute to the next active interval.
     if (previous?.month === state.month && previous.active === false && !active) return;
+    // Failed attempts count toward the 30-minute gap so outages and rate limits are not retried every minute.
+    const last = Math.max(state.sentAt || 0, state.attemptedAt || 0);
+    const due = active && Object.keys(state.days).length > 0 && !(last && now() - last < 30 * 60_000);
+    if (due) state.attemptedAt = now();
     await api.storage.local.set({ [USAGE_STATE]: state });
-    if (!active || !Object.keys(state.days).length || (state.sentAt && now() - state.sentAt < 30 * 60_000)) return;
+    if (!due) return;
     request = new AbortController();
     const timer = setTimeout(() => request?.abort(), 10_000);
     try {

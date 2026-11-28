@@ -69,6 +69,7 @@ export function mountSyncSettings({ container, api }) {
         : value?.nativeError ? value.nativeMessage
         : ['disabled', 'workspaceOff'].includes(value?.phase) ? 'Saved workspace sync is off. Open Sync settings to review password sync and your connection.'
           : value?.phase === 'reconciled' ? 'Saved workspace changes are queued. Open Sync settings to check the connection and download status.'
+          : value?.phase === 'downloading' ? 'Downloading your saved workspace from the vault. Local changes wait until the download finishes.'
             : 'Sync is optional. Open Sync settings to review this profile\'s connection.';
     void renderRecovery(value);
   };

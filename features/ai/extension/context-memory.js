@@ -7,7 +7,16 @@ const HOUR = 60 * 60_000;
 const MAX_SITES = 20;
 const sensitive = /(?:auth|login|log-in|signin|sign-in|sso|oauth|password|secret|token|account|mail|bank|payment|checkout|wallet|health|medical|patient|therapy|adult|porn)/i;
 const empty = () => ({ version: 1, enabled: false, providerConsent: false, sites: [], buckets: [], lastSummary: null });
-const dayNumber = now => Math.floor(now / DAY);
+// Days are local calendar days, numbered like the UTC day with the same date, so
+// a 23- or 25-hour day around a clock change is still one day. Slots stay
+// absolute half hours since the epoch.
+const dayNumber = now => { const d = new Date(now); return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY); };
+// The slots a local day overlaps: the one holding its midnight through the one before the next.
+const daySlots = (day) => {
+  const date = new Date(day * DAY), start = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  const end = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1);
+  return [Math.floor(start / SLOT), Math.floor((end - 1) / SLOT)];
+};
 
 export function safeSite(value) {
   if (typeof value !== 'string' || value.length > 253) return null;
@@ -33,16 +42,30 @@ function normalize(value, now) {
   if (!state.sites.length) return state;
   state.enabled = true;
   state.providerConsent = value.providerConsent === true;
-  const today = dayNumber(now), seen = new Set();
+  const today = dayNumber(now), seen = new Map();
   for (const bucket of Array.isArray(value.buckets) ? value.buckets.slice(0, MAX_SITES * RETENTION_DAYS) : []) {
-    if (!state.sites.includes(bucket?.site) || !Number.isInteger(bucket.day) || bucket.day > today || bucket.day <= today - RETENTION_DAYS
+    if (!state.sites.includes(bucket?.site) || !Number.isInteger(bucket.day)
         || !Number.isInteger(bucket.observations) || bucket.observations < 1 || bucket.observations > 48
-        || !Number.isInteger(bucket.lastSlot) || bucket.lastSlot < bucket.day * 48 || bucket.lastSlot >= (bucket.day + 1) * 48
-        || bucket.lastSlot > Math.floor(now / SLOT)) continue;
-    const key = `${bucket.site}:${bucket.day}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    state.buckets.push({ site: bucket.site, day: bucket.day, observations: bucket.observations, lastSlot: bucket.lastSlot });
+        || !Number.isInteger(bucket.lastSlot) || bucket.lastSlot > Math.floor(now / SLOT)) continue;
+    // Earlier builds counted UTC days. A bucket whose last sample lies outside its
+    // local day moves to the local day of that sample instead of being dropped.
+    let day = bucket.day;
+    const [first, last] = daySlots(day);
+    if (bucket.lastSlot < first || bucket.lastSlot > last) {
+      if (bucket.lastSlot < (day - 1) * 48 || bucket.lastSlot >= (day + 2) * 48) continue;
+      day = dayNumber(bucket.lastSlot * SLOT);
+    }
+    if (day > today || day <= today - RETENTION_DAYS) continue;
+    const key = `${bucket.site}:${day}`;
+    const merged = seen.get(key);
+    if (merged) {
+      merged.observations = Math.min(48, merged.observations + bucket.observations);
+      merged.lastSlot = Math.max(merged.lastSlot, bucket.lastSlot);
+      continue;
+    }
+    const row = { site: bucket.site, day, observations: bucket.observations, lastSlot: bucket.lastSlot };
+    seen.set(key, row);
+    state.buckets.push(row);
   }
   const last = value.lastSummary;
   if (last && Number.isFinite(last.at) && last.at <= now && last.at > now - RETENTION_DAYS * DAY

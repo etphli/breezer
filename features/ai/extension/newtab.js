@@ -354,6 +354,15 @@ const monthDay = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'sh
 const clock = new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' });
 const longDate = new Intl.DateTimeFormat(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
 
+// When a saved chat was last used. Chats are kept for seven days, so from six
+// days back a weekday alone could mean this week's day; those show the date.
+export function chatDay(time, now = Date.now()) {
+  const days = daysUntil(new Date(now), new Date(time));
+  if (days <= 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return days < 6 ? new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(time) : monthDay.format(time);
+}
+
 function itemRow(item, now, list) {
   const days = item.due ? daysUntil(item.due, now) : null;
   const row = el('li', 'item', { 'data-urgency': urgency(days) });
@@ -531,7 +540,10 @@ export function toAddress(input) {
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const MAX_SUGGESTIONS = 8;
-const MAX_ADDRESS_TEXT = 8000;
+// The browser refuses omnibox text over 8192 UTF-8 bytes (kMaxInputBytes in
+// omnibox_api.cc), so the length is measured the same way.
+const MAX_ADDRESS_BYTES = 8192;
+export const fitsAddressText = (text) => new TextEncoder().encode(text).length <= MAX_ADDRESS_BYTES;
 
 const oneLine = (value) => value.replace(/[\r\n]+/g, ' ');
 
@@ -676,7 +688,7 @@ export function installAddressSuggestions({ api, root, input, list, favicon = ()
 
   const update = (event) => {
     if (!available) return;
-    if (!isActive() || !input.value.trim() || input.value.length > MAX_ADDRESS_TEXT) { close(); return; }
+    if (!isActive() || !input.value.trim() || !fitsAddressText(oneLine(input.value))) { close(); return; }
     typed = input.value;
     moved = false;
     matches = []; answered = null;
@@ -921,11 +933,6 @@ export function startNewTabExperiments({ api = globalThis.chrome, root = documen
     }
   };
 
-  const chatDay = (time) => {
-    const midnight = (value) => { const day = new Date(value); return new Date(day.getFullYear(), day.getMonth(), day.getDate()); };
-    const days = Math.round((midnight(Date.now()) - midnight(time)) / DAY_MS);
-    return days <= 0 ? 'Today' : days === 1 ? 'Yesterday' : new Intl.DateTimeFormat(undefined, { weekday: 'long' }).format(time);
-  };
   // Opens a saved chat here, as Ask does. An unsent question stays with this New
   // Tab for Back and never goes into the chat being opened.
   const openSavedChat = async (id) => {

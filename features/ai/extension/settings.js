@@ -801,17 +801,25 @@ async function mountDashboardPreference(api) {
   window.addEventListener('pagehide', () => events?.removeListener(onChanged), { once: true });
 }
 
-export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
+export function mountOrganato(api, { timeoutMs = 85000, retryMs = 5000 } = {}) {
   const mappings = { 'dashboard-enabled': 'dashboardEnabled', 'organato-enabled': 'enabled', 'organato-ai': 'allowAI' };
   const controls = ['organato-connect', 'organato-disconnect', 'organato-key', ...Object.keys(mappings)];
-  let next = 0, pending, timer, closed = false, port = null, connected = false;
+  let next = 0, pending, timer, retry, closed = false, port = null, connected = false;
+  // The values Organato last reported; a failed or timed-out change goes back to them.
+  let confirmed = null;
+  const show = values => { for (const [id, field] of Object.entries(mappings)) $(id).checked = values[field]; };
+  // The switches stay off until Organato first reports, so a change never
+  // supersedes that read or falls back to the page's placeholder values.
   const busy = value => {
-    for (const id of controls) $(id).disabled = value;
+    for (const id of controls) $(id).disabled = value || (id in mappings && !confirmed);
     $('organato-disconnect').disabled = value || !connected;
     $('organato-disconnect').hidden = !connected;
   };
   const finish = (text, error = false) => {
     clearTimeout(timer); pending = null; busy(false);
+    if (error && confirmed) show(confirmed);
+    // Until a first read succeeds the switches stay off; keep asking.
+    if (error && !confirmed && !closed) { clearTimeout(retry); retry = setTimeout(() => request('view'), retryMs); retry?.unref?.(); }
     $('organato-status').dataset.state = error ? 'error' : '';
     if (text) $('organato-status').textContent = text;
   };
@@ -827,7 +835,9 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
       }
       if (!message.ok) { finish(message.error, true); return; }
       connected = message.value.connected === true;
-      for (const [id, field] of Object.entries(mappings)) $(id).checked = message.value[field];
+      confirmed = message.value;
+      clearTimeout(retry);
+      show(confirmed);
       finish(message.value.connected ? 'Organato connected.' : 'Connect Organato to show deadlines on your new tab.');
     });
     connection.onDisconnect.addListener(() => {
@@ -858,7 +868,7 @@ export function mountOrganato(api, { timeoutMs = 85000 } = {}) {
     $('organato-status').textContent = 'Connecting to Organato…'; request('configure', { key });
   });
   $('organato-disconnect').addEventListener('click', () => request('configure', { disconnect: true }));
-  const dispose = () => { closed = true; clearTimeout(timer); port?.disconnect(); port = null; };
+  const dispose = () => { closed = true; clearTimeout(timer); clearTimeout(retry); port?.disconnect(); port = null; };
   window.addEventListener('pagehide', dispose, { once: true });
   request('view');
   return { dispose };

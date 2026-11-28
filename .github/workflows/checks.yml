@@ -58,16 +58,19 @@ jobs:
           python script/check_breezer_preparation.py
           python -B tests/ai/overlay_fetch_test.py
           python -B tests/memory_package_test.py
+          python -B tests/ai/overlay_version_test.py
       - name: Test AI browser controls and CLI protocol
         # tests/sync/setup-browser.test.mjs needs Playwright and runs in browser-tests.
         run: >-
           node --test tests/*.test.mjs tests/ai/*.test.mjs
           tests/sync/lifetime.test.mjs tests/sync/provider-lifecycle.test.mjs tests/sync/provider.test.mjs
           tests/sync/reconcile.test.mjs tests/sync/size-guard.test.mjs tests/sync/workspace-model.test.mjs
+          tests/sync/workspace-sync-regressions.test.mjs
       - name: Verify filter source overlays
         run: |
           python -B tests/filter-source-overlays/fixtures/main-port-20261115/prepare.py --check
           python -B tests/filter_source_overlays_test.py
+          python -B tests/apply_breezer_filter_lists_test.py
           node --test tests/filter-source-overlays/tokens-contract.test.mjs tests/filter-source-overlays/toolbar-behavior.test.mjs tests/filter-source-overlays/toolbar-reduction.test.mjs tests/filter-source-overlays/cache-keys.test.mjs tests/filter-source-overlays/css-parser.test.mjs
           node tests/filter-source-overlays/headers.test.mjs
       - name: Verify native AI source integration

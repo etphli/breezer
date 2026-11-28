@@ -645,6 +645,10 @@ export function installBackground(api) {
       } else if (message.type === 'delta' && typeof message.text === 'string') {
         if (!run.control) run.text += message.text;
         if (run.reader) post(run.reader.port, message);
+      } else if (message.type === 'replace' && typeof message.text === 'string' && Number.isInteger(message.remove) && message.remove >= 0) {
+        // The provider's final output differs from the text it streamed for this step.
+        if (!run.control) run.text = run.text.slice(0, Math.max(0, run.text.length - message.remove)) + message.text;
+        if (run.reader) post(run.reader.port, message);
       } else if (message.type === 'complete' || message.type === 'error') {
         let terminal = message;
         if (message.generatedImage !== undefined && (run.browserTask !== 'image' || !validGeneratedImage(message.generatedImage))) {

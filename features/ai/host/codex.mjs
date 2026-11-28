@@ -346,11 +346,21 @@ export class CodexProvider {
       scope.check();
       rpc = await this.start(isolation, [], scope);
       scope.own(rpc);
+      // Each agent message item is a separate paragraph, e.g. a preamble before a tool call.
+      let messageItem, emitted = false;
       const done = new Promise((resolve, reject) => {
         onClosed = reject;
         onMessage = (message) => {
           if (signal.aborted || rpc.closed) return;
-          if (message.method === 'item/agentMessage/delta') emit({ type: 'delta', text: message.params.delta });
+          if (message.method === 'item/agentMessage/delta') {
+            const { itemId, delta } = message.params;
+            if (itemId !== undefined && itemId !== messageItem) {
+              if (emitted) emit({ type: 'delta', text: '\n\n' });
+              messageItem = itemId;
+            }
+            if (delta) emitted = true;
+            emit({ type: 'delta', text: delta });
+          }
           if (message.method === 'turn/completed') {
             const turn = message.params.turn;
             if (turn.status === 'completed') resolve();
