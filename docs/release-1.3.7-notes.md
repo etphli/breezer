@@ -2,6 +2,10 @@
 
 These notes collect fixes for the next patch after 1.3.6. Nothing here is published yet. When the 1.3.7 release is prepared, append an illustrated `patch-137` section to `features/ai/extension/whats-new.html` after the 1.3.6 section, following [whats-new.md](whats-new.md). Patches keep the 1.3.0 seen-version key and do not open another tab.
 
+## New Tab
+
+- Search suggestions stay visible and clickable when they overlap the Organato section.
+
 ## Breezer AI
 
 - When the model sends a browser action with bad arguments, such as an address without `https://`, Claude now sees the error and can try again. The chat no longer ends with "Invalid URL".

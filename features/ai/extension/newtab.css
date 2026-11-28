@@ -93,6 +93,11 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round
 .settings-link svg { width: 17px; height: 17px; }
 .settings-link:hover { color: var(--ink); background: var(--hover); }
 
+/* Keep page content above backgrounds and the artwork veil. */
+:root:where([data-artwork="on"], [data-composer="on"], [data-look]) :is(.sky, .sheet) { position: relative; z-index: 1; }
+:root:where([data-artwork="on"]) :is(.sky, .sheet) { z-index: 2; }
+:root:where([data-artwork="on"], [data-composer="on"], [data-look]) .settings-link { z-index: 4; }
+
 /* ---------------------------------------------------------------------- sky */
 
 .sky {
@@ -469,8 +474,6 @@ a.item-title:hover { text-decoration-color: currentColor; }
   pointer-events: none;
   background: linear-gradient(to bottom, color-mix(in srgb, var(--canvas) 62%, transparent), color-mix(in srgb, var(--canvas) 34%, transparent) 42%, color-mix(in srgb, var(--canvas) 18%, transparent));
 }
-:root[data-artwork="on"] :is(.sky, .sheet) { position: relative; z-index: 2; }
-:root[data-artwork="on"] .settings-link { z-index: 3; }
 :root[data-artwork="on"] .today { text-shadow: 0 1px 14px color-mix(in srgb, var(--canvas) 80%, transparent); }
 :root[data-artwork="on"] .site:not(.placeholder) .site-name { padding-inline: 4px; border-radius: 4px; background: var(--raised); }
 :root[data-artwork="on"] .site-add .site-icon { background: var(--raised); }
@@ -516,9 +519,6 @@ a.item-title:hover { text-decoration-color: currentColor; }
   -webkit-mask-image: radial-gradient(ellipse 95% 66% at 38% 100%, #000 25%, transparent 78%);
   mask-image: radial-gradient(ellipse 95% 66% at 38% 100%, #000 25%, transparent 78%);
 }
-:root[data-composer="on"] :is(.sky, .sheet) { position: relative; z-index: 1; }
-:root[data-composer="on"] .settings-link { z-index: 3; }
-
 :root[data-composer="on"] .sky {
   min-height: 0;
   padding-top: clamp(72px, 31vh, 320px);
@@ -684,9 +684,9 @@ a.item-title:hover { text-decoration-color: currentColor; }
 .composer-status[data-state="error"] { color: var(--danger); }
 .composer-status:empty { visibility: hidden; }
 
-/* Address-bar suggestions open over the page, so nothing below moves. */
+/* Raise the header above the Organato sheet while suggestions are open. */
 .composer-box { position: relative; }
-.sky:has(.composer-suggestions:not([hidden])) { position: relative; z-index: 2; }
+.sky:has(.composer-suggestions:not([hidden])) { position: relative; z-index: 3; }
 .composer-suggestions {
   position: absolute;
   top: calc(100% + 8px);
@@ -1016,9 +1016,6 @@ a.item-title:hover { text-decoration-color: currentColor; }
   -webkit-backdrop-filter: blur(6px) saturate(1.1);
   backdrop-filter: blur(6px) saturate(1.1);
 }
-:root[data-look] :is(.sky, .sheet) { position: relative; z-index: 1; }
-:root[data-look] .settings-link { z-index: 3; }
-
 /* The art: body::before holds far lights, body::after the field. Both replace
    the experimental Home's isobars while a look is on. */
 :root[data-look]:not([data-artwork="on"]) body::before,
